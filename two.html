@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>物質特性分類實驗</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 React 和 ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- 引入 Babel 用於解析 JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        /* 設定字體 */
+        body {
+            font-family: "KaiTi", "DFKai-SB", "BiauKai", "標楷體", serif;
+        }
+        /* 防止選取文字干擾拖曳 */
+        .no-select {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(-25%) translateX(-50%); animation-timing-function: cubic-bezier(0.8,0,1,1); }
+            50% { transform: translateY(0) translateX(-50%); animation-timing-function: cubic-bezier(0,0,0.2,1); }
+        }
+        .animate-bounce-custom {
+            animation: bounce 1s infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen no-select">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- Icons (SVG) ---
+        const IconRotateCcw = ({ size = 20 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12"/><path d="M3 3v9h9"/></svg>
+        );
+        const IconCheckCircle2 = ({ size = 28 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+        );
+        const IconHelpCircle = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+        );
+
+        // --- 資料來源 ---
+        const SOURCE_DATA = [
+            {
+                id: 'q1',
+                data: { color: '白色', solubility: '能', reaction: '偏藍綠色', name: '小蘇打粉' },
+                description: '小蘇打粉水溶液呈弱鹼性，使紫色高麗菜汁變藍綠色。'
+            },
+            {
+                id: 'q2',
+                data: { color: '黃色', solubility: '能', reaction: '紫色', name: '砂糖' },
+                description: '砂糖水溶液呈中性，不會改變紫色高麗菜汁的顏色。'
+            },
+            {
+                id: 'q3',
+                data: { color: '米白色', solubility: '不能', reaction: '不易溶於水，無法辨認', name: '麵粉' },
+                description: '麵粉不溶於水，無法進行酸鹼測試。'
+            },
+            {
+                id: 'q4',
+                data: { color: '白色', solubility: '能', reaction: '偏紅色', name: '檸檬酸' },
+                description: '檸檬酸水溶液呈酸性，使紫色高麗菜汁變紅色。'
+            },
+            {
+                id: 'q5',
+                data: { color: '白色', solubility: '能', reaction: '紫色', name: '食鹽' },
+                description: '食鹽水溶液呈中性，顏色維持紫色。'
+            }
+        ];
+
+        const DISTRACTOR_POOL = {
+            color: ['黃色', '米白色', '透明', '黑色'],
+            solubility: ['能', '不能'],
+            reaction: ['紫色', '偏紅色', '偏藍綠色', '無色', '深藍色'],
+            name: ['太白粉', '味精', '白糖', '石膏粉', '洗衣粉']
+        };
+
+        const COLUMNS = [
+            { key: 'color', label: '材料顏色', width: 'w-[20%]' },
+            { key: 'solubility', label: '能不能\n完全溶於水', width: 'w-[20%]' },
+            { key: 'reaction', label: '紫色高麗菜汁加入\n水溶液後的顏色', width: 'w-[30%]' },
+            { key: 'name', label: '材料名稱', width: 'w-[20%]' },
+        ];
+
+        function App() {
+            const [questions, setQuestions] = useState([]); 
+            const [options, setOptions] = useState([]); 
+            const [placements, setPlacements] = useState({}); 
+            const [isChecked, setIsChecked] = useState(false);
+            const [selectedSource, setSelectedSource] = useState(null); 
+            
+            useEffect(() => {
+                resetGame();
+            }, []);
+
+            const resetGame = () => {
+                let newQuestions = [];
+                let isUnique = false;
+                let attempts = 0;
+
+                while (!isUnique && attempts < 100) {
+                    attempts++;
+                    const shuffled = [...SOURCE_DATA].sort(() => Math.random() - 0.5);
+                    const candidates = shuffled.map(q => {
+                        const keys = ['color', 'solubility', 'reaction', 'name'];
+                        const randomKey = keys[Math.floor(Math.random() * keys.length)];
+                        return { 
+                            ...q, 
+                            blankKey: randomKey,
+                            answerValue: q.data[randomKey]
+                        };
+                    });
+
+                    const answers = candidates.map(c => c.answerValue);
+                    const uniqueAnswers = new Set(answers);
+                    
+                    if (uniqueAnswers.size === answers.length) {
+                        isUnique = true;
+                        newQuestions = candidates;
+                    }
+                }
+
+                let generatedOptions = newQuestions.map((q, index) => ({
+                    id: String.fromCharCode(65 + index),
+                    value: q.data[q.blankKey],
+                    isDistractor: false
+                }));
+
+                const typeCounts = { color: 0, solubility: 0, reaction: 0, name: 0 };
+                newQuestions.forEach(q => {
+                    typeCounts[q.blankKey]++;
+                });
+
+                let nextOptionIdChar = 65 + 5; 
+
+                Object.keys(typeCounts).forEach(key => {
+                    if (typeCounts[key] === 1) {
+                        const correctQ = newQuestions.find(q => q.blankKey === key);
+                        const correctValue = correctQ.data[key];
+                        const candidates = DISTRACTOR_POOL[key].filter(v => v !== correctValue);
+                        const distractorValue = candidates[Math.floor(Math.random() * candidates.length)];
+
+                        if (distractorValue) {
+                            generatedOptions.push({
+                                id: String.fromCharCode(nextOptionIdChar++),
+                                value: distractorValue,
+                                isDistractor: true
+                            });
+                        }
+                    }
+                });
+
+                const shuffledOptions = [...generatedOptions].sort(() => Math.random() - 0.5);
+
+                setQuestions(newQuestions);
+                setOptions(shuffledOptions);
+                setPlacements({});
+                setIsChecked(false);
+                setSelectedSource(null);
+            };
+
+            // 音效
+            const playDropSound = () => {
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioContext) return;
+                    const ctx = new AudioContext();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.1);
+                } catch (e) { console.error(e); }
+            };
+
+            const playWinSound = () => {
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioContext) return;
+                    const ctx = new AudioContext();
+                    const notes = [
+                        { freq: 523.25, time: 0 },
+                        { freq: 659.25, time: 0.08 },
+                        { freq: 783.99, time: 0.16 },
+                        { freq: 1046.50, time: 0.24 },
+                        { freq: 1318.51, time: 0.32 },
+                        { freq: 1046.50, time: 0.48 }
+                    ];
+                    notes.forEach(({ freq, time }) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.value = freq;
+                        const startTime = ctx.currentTime + time;
+                        const duration = 0.2;
+                        gain.gain.setValueAtTime(0, startTime);
+                        gain.gain.linearRampToValueAtTime(0.2, startTime + 0.02);
+                        gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(startTime);
+                        osc.stop(startTime + duration);
+                    });
+                } catch (e) { console.error(e); }
+            };
+
+            const handleDragStart = (e, optionId) => {
+                e.dataTransfer.setData("optionId", optionId);
+                e.dataTransfer.effectAllowed = "copyMove";
+            };
+
+            const handleDragOver = (e) => e.preventDefault(); 
+
+            const handleDrop = (e, questionId) => {
+                e.preventDefault();
+                const optionId = e.dataTransfer.getData("optionId");
+                if (optionId) placeItem(questionId, optionId);
+            };
+
+            const placeItem = (questionId, optionId) => {
+                const newPlacements = { ...placements };
+                Object.keys(newPlacements).forEach(key => {
+                    if (newPlacements[key] === optionId) delete newPlacements[key];
+                });
+                if (newPlacements[questionId] !== optionId) playDropSound();
+                newPlacements[questionId] = optionId;
+                setPlacements(newPlacements);
+                setSelectedSource(null); 
+                setIsChecked(false); 
+            };
+
+            const handleOptionClick = (optionId) => {
+                if (isChecked) return; 
+                setSelectedSource(selectedSource === optionId ? null : optionId);
+            };
+
+            const handleSlotClick = (questionId) => {
+                if (isChecked) return;
+                if (selectedSource) {
+                    placeItem(questionId, selectedSource);
+                } else if (placements[questionId]) {
+                    const newPlacements = { ...placements };
+                    delete newPlacements[questionId];
+                    setPlacements(newPlacements);
+                }
+            };
+
+            const isOptionPlaced = (optionId) => Object.values(placements).includes(optionId);
+            
+            const isCorrect = (question, placedOptionId) => {
+                if (!placedOptionId) return false;
+                const option = options.find(o => o.id === placedOptionId);
+                if (!option) return false;
+                return option.value === question.data[question.blankKey];
+            };
+
+            const checkAnswers = () => {
+                setIsChecked(true);
+                setSelectedSource(null);
+                const allCorrect = questions.every(q => isCorrect(q, placements[q.id]));
+                if (allCorrect) playWinSound();
+            };
+
+            return (
+                <div className="p-2 md:p-8">
+                    <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+                        
+                        {/* Header */}
+                        <div className="bg-[#4aa5a5] p-5 text-white flex justify-between items-center shadow-md flex-wrap gap-2">
+                            <h1 className="text-2xl md:text-3xl font-bold tracking-wider">物質特性分類實驗 - 進階挑戰</h1>
+                            <div className="flex gap-2 font-sans">
+                                <button 
+                                    onClick={resetGame}
+                                    className="flex items-center gap-1 bg-white/20 hover:bg-white/30 px-4 py-2 rounded-full text-base transition"
+                                >
+                                    <IconRotateCcw size={20} /> 重新出題
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="p-4 md:p-8">
+                            
+                            {/* 說明區 */}
+                            <div className="mb-8 text-slate-700 text-lg bg-slate-100 p-4 rounded-lg border border-slate-200 flex items-start gap-3">
+                                <div className="w-6 h-6 text-[#4aa5a5] shrink-0 mt-1"><IconHelpCircle className="w-6 h-6"/></div>
+                                <div className="flex-1">
+                                    <p>
+                                        請將上方的 <span className="font-bold text-[#4aa5a5]">選項卡片</span> 填入下方表格對應的 <span className="font-bold text-red-500 border-b-2 border-red-300">空白虛線框</span> 中。
+                                    </p>
+                                    <p className="text-base text-slate-500 font-sans mt-1">
+                                        (注意：題目包含 <span className="text-red-600 font-bold">混淆選項</span>，請小心選擇！選項可能會多於空格。)
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Options Area */}
+                            <div className="flex flex-wrap justify-center gap-4 md:gap-6 mb-10 min-h-[100px] p-4 bg-slate-50/50 rounded-xl border border-slate-100">
+                                {options.map((opt) => {
+                                    const placed = isOptionPlaced(opt.id);
+                                    const isSelected = selectedSource === opt.id;
+                                    const textSizeClass = opt.value.length > 4 ? 'text-lg' : 'text-2xl';
+                                    
+                                    return (
+                                        <div
+                                            key={opt.id}
+                                            draggable={!isChecked && !placed}
+                                            onDragStart={(e) => handleDragStart(e, opt.id)}
+                                            onClick={() => !placed && handleOptionClick(opt.id)}
+                                            className={`
+                                                relative group transition-all duration-200
+                                                ${placed ? 'opacity-40 cursor-not-allowed grayscale scale-95' : 'cursor-grab active:cursor-grabbing hover:-translate-y-1'}
+                                                ${isSelected ? 'scale-110 z-10' : ''}
+                                            `}
+                                        >
+                                            <div className={`
+                                                flex items-center gap-3 px-5 py-3 rounded-full border-2 shadow-md
+                                                ${isSelected ? 'bg-[#f0f9f9] border-[#4aa5a5] ring-4 ring-[#4aa5a5]/30' : 'bg-white border-[#4aa5a5]'}
+                                                ${isChecked && !placed && opt.isDistractor ? 'opacity-50' : ''} 
+                                            `}>
+                                                <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-300 text-slate-500 font-sans font-bold flex items-center justify-center text-lg">
+                                                    {opt.id}
+                                                </div>
+                                                <span className={`${textSizeClass} font-bold text-gray-800 tracking-widest whitespace-nowrap`}>
+                                                    {opt.value}
+                                                </span>
+                                            </div>
+                                            
+                                            {isSelected && (
+                                                <div className="absolute -bottom-10 left-1/2 text-sm bg-slate-800 text-white px-3 py-1 rounded whitespace-nowrap animate-bounce-custom font-sans z-20">
+                                                    點擊空白格放入
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Table Area */}
+                            <div className="overflow-x-auto rounded-lg border-2 border-[#81c7c7]">
+                                <table className="w-full min-w-[900px] border-collapse table-fixed">
+                                    <thead>
+                                        <tr className="bg-white text-gray-800 text-xl md:text-2xl h-16">
+                                            <th className="w-[10%] border-r border-b border-[#81c7c7] p-2 font-bold relative">
+                                                <span className="text-base text-gray-400 absolute top-2 left-2">編號</span>
+                                            </th>
+                                            {COLUMNS.map(col => (
+                                                <th key={col.key} className={`${col.width} border-r border-b border-[#81c7c7] p-2 text-center font-bold leading-tight`}>
+                                                    {col.label.split('\n').map((line, i) => <React.Fragment key={i}>{line}<br/></React.Fragment>)}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {questions.map((q, index) => {
+                                            const currentPlacedId = placements[q.id];
+                                            const currentOption = options.find(o => o.id === currentPlacedId);
+                                            const correct = isCorrect(q, currentPlacedId);
+                                            
+                                            let cellStatusStyle = "bg-white";
+                                            let borderStyle = "border-2 border-dashed border-red-300";
+                                            
+                                            if (isChecked) {
+                                                if (correct) {
+                                                    cellStatusStyle = "bg-green-50";
+                                                    borderStyle = "border-2 border-green-500 bg-white";
+                                                } else {
+                                                    cellStatusStyle = "bg-red-50";
+                                                    borderStyle = "border-2 border-red-500 bg-red-50";
+                                                }
+                                            } else if (currentPlacedId) {
+                                                borderStyle = "border-2 border-[#4aa5a5] bg-white shadow-inner";
+                                            } else if (selectedSource) {
+                                                borderStyle = "border-2 border-dashed border-[#4aa5a5] bg-[#f0f9f9] animate-pulse";
+                                            }
+
+                                            return (
+                                                <tr key={q.id} className="hover:bg-slate-50 transition-colors">
+                                                    <td className="border-r border-b border-[#81c7c7] p-4 text-center text-3xl font-bold text-gray-600 font-sans">
+                                                        {index + 1}
+                                                    </td>
+
+                                                    {COLUMNS.map(col => {
+                                                        const isBlank = q.blankKey === col.key;
+                                                        const cellContent = q.data[col.key];
+
+                                                        if (isBlank) {
+                                                            return (
+                                                                <td 
+                                                                    key={col.key}
+                                                                    className={`border-r border-b border-[#81c7c7] p-2 text-center relative transition-all duration-300 ${cellStatusStyle}`}
+                                                                    onDragOver={handleDragOver}
+                                                                    onDrop={(e) => handleDrop(e, q.id)}
+                                                                    onClick={() => handleSlotClick(q.id)}
+                                                                >
+                                                                    <div className={`
+                                                                        w-full min-h-[4.5rem] rounded-lg flex flex-col items-center justify-center cursor-pointer mx-auto p-1
+                                                                        ${borderStyle}
+                                                                    `}>
+                                                                        {currentOption ? (
+                                                                            <span className={`text-xl md:text-2xl font-bold break-words ${isChecked && !correct ? 'text-red-500 line-through decoration-4' : 'text-red-600'}`}>
+                                                                                {currentOption.value}
+                                                                            </span>
+                                                                        ) : (
+                                                                            <span className="text-gray-300 text-sm md:text-lg pointer-events-none font-sans">
+                                                                                {selectedSource ? "點擊放入" : "拖曳至此"}
+                                                                            </span>
+                                                                        )}
+                                                                        
+                                                                        {isChecked && !correct && (
+                                                                            <div className="mt-1 text-green-600 font-bold text-lg">
+                                                                                <span className="text-xs bg-green-100 px-1 rounded mr-1">正解</span>
+                                                                                {cellContent}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                </td>
+                                                            );
+                                                        }
+
+                                                        return (
+                                                            <td key={col.key} className="border-r border-b border-[#81c7c7] p-3 text-center text-2xl font-medium text-gray-800 relative group/cell">
+                                                                {cellContent}
+                                                                {isChecked && (
+                                                                    <div className="hidden group-hover/cell:block absolute z-20 bottom-full left-1/2 -translate-x-1/2 w-64 p-3 bg-slate-800 text-white text-base rounded shadow-lg mb-2 font-sans text-left leading-normal pointer-events-none">
+                                                                    {q.description}
+                                                                    </div>
+                                                                )}
+                                                            </td>
+                                                        );
+                                                    })}
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Action Bar */}
+                            <div className="mt-10 flex justify-center">
+                                {!isChecked ? (
+                                    <button
+                                        onClick={checkAnswers}
+                                        disabled={Object.keys(placements).length < 5}
+                                        className={`
+                                            flex items-center gap-2 px-10 py-4 rounded-full text-2xl font-bold shadow-lg transition-all font-sans
+                                            ${Object.keys(placements).length < 5 
+                                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                                                : 'bg-[#4aa5a5] text-white hover:bg-[#3d8b8b] hover:scale-105 active:scale-95'}
+                                        `}
+                                    >
+                                        <IconCheckCircle2 size={28} /> 檢查答案
+                                    </button>
+                                ) : (
+                                    <div className="text-center">
+                                        <p className="text-3xl font-bold text-gray-700 mb-6 font-sans">
+                                            {questions.every(q => isCorrect(q, placements[q.id])) 
+                                                ? "🎉 恭喜！全對！" 
+                                                : "💪 再試一次吧！"}
+                                        </p>
+                                        <button
+                                            onClick={resetGame}
+                                            className="px-8 py-3 bg-slate-600 text-white text-xl rounded-full hover:bg-slate-700 transition font-sans"
+                                        >
+                                            重新開始
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
