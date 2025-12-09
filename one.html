@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>物質特性辨識實驗 - 互動學習單</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 React 和 ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- 引入 Babel 用於解析 JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        /* 防止拖曳時的預設樣式干擾 */
+        body { -webkit-user-select: none; user-select: none; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback } = React;
+
+        // --- Icon Components (用 SVG 取代 Lucide 依賴以確保獨立執行) ---
+        const Move = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="19 9 22 12 19 15"/><polyline points="9 19 12 22 15 19"/><line x1="2" x2="22" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="22"/></svg>
+        );
+        const CheckCircle = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        );
+        const Shuffle = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l14.2-12.6c.8-1 1.9-1.7 3.2-1.7H22"/><path d="M2 6h1.4c1.3 0 2.5.6 3.3 1.7l14.2 12.6c.8 1 1.9 1.7 3.2 1.7H22"/></svg>
+        );
+
+        // --- 初始資料 ---
+        const INITIAL_OPTIONS = [
+            { id: 'A', label: '食鹽', color: 'bg-teal-50 border-teal-200' },
+            { id: 'B', label: '麵粉', color: 'bg-teal-50 border-teal-200' },
+            { id: 'C', label: '砂糖', color: 'bg-teal-50 border-teal-200' },
+            { id: 'D', label: '檸檬酸', color: 'bg-teal-50 border-teal-200' },
+            { id: 'E', label: '小蘇打粉', color: 'bg-teal-50 border-teal-200' },
+        ];
+
+        const INITIAL_TABLE_DATA = [
+            { id: 'q1', color: '白色', soluble: '能', reaction: '偏藍綠色', correctAnswer: 'E' },
+            { id: 'q2', color: '黃色', soluble: '能', reaction: '紫色', correctAnswer: 'C' },
+            { id: 'q3', color: '米白色', soluble: '不能', reaction: '不易溶於水，無法辨認', correctAnswer: 'B' },
+            { id: 'q4', color: '白色', soluble: '能', reaction: '偏紅色', correctAnswer: 'D' },
+            { id: 'q5', color: '白色', soluble: '能', reaction: '紫色', correctAnswer: 'A' },
+        ];
+
+        // --- 主程式 App ---
+        const App = () => {
+            const [questions, setQuestions] = useState(INITIAL_TABLE_DATA);
+            const [placements, setPlacements] = useState({});
+            const [checkResult, setCheckResult] = useState(null);
+            const [draggedItemId, setDraggedItemId] = useState(null);
+
+            // 音效處理
+            const playSound = useCallback((type) => {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                
+                const ctx = new AudioContext();
+                const now = ctx.currentTime;
+
+                const createOscillator = (freq, type = 'sine', startTime, duration, vol = 0.1) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, startTime);
+                    gain.gain.setValueAtTime(0, startTime);
+                    gain.gain.linearRampToValueAtTime(vol, startTime + 0.01);
+                    gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(startTime);
+                    osc.stop(startTime + duration);
+                };
+
+                if (type === 'drop') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.frequency.setValueAtTime(600, now);
+                    osc.frequency.exponentialRampToValueAtTime(100, now + 0.15);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.15);
+                } 
+                else if (type === 'success') {
+                    const notes = [523.25, 659.25, 783.99, 1046.50];
+                    notes.forEach((freq, i) => {
+                        createOscillator(freq, 'triangle', now + i * 0.08, 0.4, 0.15);
+                    });
+                    createOscillator(1567.98, 'sine', now + 0.3, 0.6, 0.05);
+                } 
+                else if (type === 'error') {
+                    createOscillator(300, 'sawtooth', now, 0.2, 0.1);
+                    createOscillator(200, 'sawtooth', now + 0.15, 0.3, 0.1);
+                }
+            }, []);
+
+            const shuffleArray = (array) => {
+                const newArray = [...array];
+                for (let i = newArray.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+                }
+                return newArray;
+            };
+
+            const handleDragStart = (e, optionId) => {
+                setDraggedItemId(optionId);
+                e.dataTransfer.setData('text/plain', optionId);
+                e.dataTransfer.effectAllowed = 'move';
+            };
+
+            const handleDragOver = (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            };
+
+            const handleDrop = (e, rowId) => {
+                e.preventDefault();
+                const optionId = e.dataTransfer.getData('text/plain');
+                if (optionId) {
+                    setPlacements((prev) => ({ ...prev, [rowId]: optionId }));
+                    setCheckResult(null);
+                    playSound('drop');
+                }
+                setDraggedItemId(null);
+            };
+
+            const handleRemove = (rowId) => {
+                setPlacements((prev) => {
+                    const newPlacements = { ...prev };
+                    delete newPlacements[rowId];
+                    return newPlacements;
+                });
+                setCheckResult(null);
+            };
+
+            const handleCheck = () => {
+                let isAllCorrect = true;
+                let hasEmpty = false;
+                if (Object.keys(placements).length < questions.length) hasEmpty = true;
+                questions.forEach((row) => {
+                    if (placements[row.id] !== row.correctAnswer) isAllCorrect = false;
+                });
+
+                if (hasEmpty && isAllCorrect) {
+                    alert("請完成所有題目後再檢查！");
+                    return;
+                }
+                if (isAllCorrect) {
+                    playSound('success');
+                    setCheckResult('correct');
+                } else {
+                    playSound('error');
+                    setCheckResult('incorrect');
+                }
+            };
+
+            const handleReset = () => {
+                setPlacements({});
+                setCheckResult(null);
+                setQuestions(shuffleArray(INITIAL_TABLE_DATA));
+            };
+
+            const isPlaced = (optionId) => Object.values(placements).includes(optionId);
+
+            return (
+                <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-800">
+                    <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+                        {/* Header */}
+                        <div className="bg-teal-600 p-6 text-white flex flex-col md:flex-row justify-between items-center">
+                            <div>
+                                <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-2">物質特性辨識實驗</h1>
+                                <p className="text-teal-100 flex items-center gap-2">
+                                    <Move className="w-4 h-4" /> 請將上方的材料拖曳至下方對應的表格中
+                                </p>
+                            </div>
+                            <div className="flex gap-3 mt-4 md:mt-0">
+                                <button onClick={handleCheck} className="flex items-center gap-2 px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-teal-900 font-bold rounded-lg transition-colors shadow-sm">
+                                    <CheckCircle className="w-5 h-5" /> 檢查答案
+                                </button>
+                                <button onClick={handleReset} className="flex items-center gap-2 px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg transition-colors border border-teal-500 hover:border-teal-400">
+                                    <Shuffle className="w-4 h-4" /> 重置題目
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Options */}
+                        <div className="p-6 bg-teal-50 border-b border-teal-100">
+                            <div className="flex flex-wrap justify-center gap-4 md:gap-8">
+                                {INITIAL_OPTIONS.map((option) => (
+                                    <div
+                                        key={option.id}
+                                        draggable
+                                        onDragStart={(e) => handleDragStart(e, option.id)}
+                                        className={`relative group cursor-grab active:cursor-grabbing select-none flex items-center gap-3 px-6 py-3 rounded-full border-2 shadow-sm transition-all transform hover:-translate-y-1 ${isPlaced(option.id) ? 'opacity-50 grayscale border-slate-200 bg-slate-100' : 'bg-white border-teal-300 hover:shadow-md hover:border-teal-400'}`}
+                                    >
+                                        <span className="flex items-center justify-center w-8 h-8 rounded-full bg-teal-100 text-teal-700 font-bold text-lg">{option.id}</span>
+                                        <span className="text-lg font-medium text-slate-700">{option.label}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Status Message */}
+                        {checkResult && (
+                            <div className={`text-center py-3 font-bold text-lg ${checkResult === 'correct' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                {checkResult === 'correct' ? '🎉 恭喜！全部答對了！' : '❌ 還有錯誤，請再檢查一下特性喔！'}
+                            </div>
+                        )}
+
+                        {/* Table */}
+                        <div className="p-4 md:p-8 overflow-x-auto">
+                            <table className="w-full min-w-[800px] border-collapse text-center">
+                                <thead>
+                                    <tr>
+                                        <th className="w-24 p-0 border border-teal-200 bg-teal-50 relative h-24">
+                                            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="0" y1="0" x2="100" y2="100" stroke="#99f6e4" strokeWidth="1" /></svg>
+                                            <div className="absolute top-2 right-2 text-teal-800 font-bold text-sm">特性</div>
+                                            <div className="absolute bottom-2 left-2 text-teal-800 font-bold text-sm">編號</div>
+                                        </th>
+                                        <th className="border border-teal-200 bg-teal-50 p-4 text-teal-900 font-bold text-lg w-1/5">材料顏色</th>
+                                        <th className="border border-teal-200 bg-teal-50 p-4 text-teal-900 font-bold text-lg w-1/5">能不能完全<br/>溶於水</th>
+                                        <th className="border border-teal-200 bg-teal-50 p-4 text-teal-900 font-bold text-lg w-2/5">紫色高麗菜汁加入<br/>水溶液後的顏色</th>
+                                        <th className="border border-teal-200 bg-teal-50 p-4 text-teal-900 font-bold text-lg w-1/5">材料名稱</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {questions.map((row, index) => {
+                                        const placedOptionId = placements[row.id];
+                                        const placedOption = INITIAL_OPTIONS.find(o => o.id === placedOptionId);
+                                        const isWrong = checkResult === 'incorrect' && placedOptionId && placedOptionId !== row.correctAnswer;
+                                        const isCorrect = checkResult === 'correct' || (checkResult === 'incorrect' && placedOptionId === row.correctAnswer);
+
+                                        return (
+                                            <tr key={row.id} className="hover:bg-slate-50 transition-colors">
+                                                <td className="border border-teal-200 p-6 text-2xl font-bold text-teal-700 bg-white">{index + 1}</td>
+                                                <td className="border border-teal-200 p-4 text-lg text-slate-700">{row.color}</td>
+                                                <td className="border border-teal-200 p-4 text-lg text-slate-700">{row.soluble}</td>
+                                                <td className="border border-teal-200 p-4 text-lg text-slate-700">{row.reaction}</td>
+                                                <td 
+                                                    className={`border border-teal-200 p-2 relative transition-all duration-300 ${!placedOption ? 'bg-slate-50' : 'bg-white'}`}
+                                                    onDragOver={handleDragOver}
+                                                    onDrop={(e) => handleDrop(e, row.id)}
+                                                >
+                                                    {placedOption ? (
+                                                        <div onClick={() => handleRemove(row.id)} className={`cursor-pointer mx-auto w-full max-w-[160px] py-3 rounded-lg border-2 shadow-sm flex items-center justify-center gap-2 group ${isWrong ? 'border-red-400 bg-red-50' : isCorrect ? 'border-green-400 bg-green-50' : 'border-teal-400 bg-white'}`}>
+                                                            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${isWrong ? 'bg-red-200 text-red-700' : isCorrect ? 'bg-green-200 text-green-700' : 'bg-teal-100 text-teal-700'}`}>{placedOption.id}</span>
+                                                            <span className="font-bold text-slate-700">{placedOption.label}</span>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="w-full h-16 border-2 border-dashed border-red-200 rounded-lg flex items-center justify-center text-red-200 text-sm font-medium"><span className="hidden md:inline">拖曳至此</span></div>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
