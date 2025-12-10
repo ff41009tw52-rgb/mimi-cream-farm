@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>酸鹼滴定實驗：高麗菜汁與蝶豆花</title>
+    <style>
+        body {
+            font-family: '微軟正黑體', sans-serif;
+            background-color: #444444; /* 改為灰色背景 */
+            color: #fff;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            margin-top: 20px;
+            color: #d4a3ff;
+            text-shadow: 0 0 10px rgba(212, 163, 255, 0.5);
+            font-size: 1.8rem;
+            transition: color 0.5s;
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 25px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        /* 控制區 */
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .toggle-btn {
+            padding: 8px 16px;
+            border: 2px solid transparent;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            opacity: 0.6;
+        }
+
+        .toggle-btn.active {
+            opacity: 1;
+            transform: scale(1.1);
+            border-color: #fff;
+            box-shadow: 0 0 15px rgba(255,255,255,0.3);
+        }
+
+        #btn-cabbage {
+            background-color: #8A2BE2;
+            color: white;
+        }
+
+        #btn-butterfly {
+            background-color: #2980b9; /* 蝶豆花藍 */
+            color: white;
+        }
+
+        /* 實驗區域 */
+        .lab-area {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* --- 滴管樣式 --- */
+        .dropper-bottle {
+            width: 14px;
+            height: 110px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 0;
+            position: absolute;
+            top: 65%; 
+            left: 50%;
+            transform: translate(-50%, -50%);
+            cursor: grab;
+            z-index: 100;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            transition: transform 0.1s, opacity 0.2s;
+            overflow: visible;
+        }
+
+        .dropper-bottle:active {
+            cursor: grabbing;
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+
+        .dropper-cap {
+            position: absolute;
+            top: -22px; 
+            width: 24px;
+            height: 28px;
+            background: #d63031;
+            border-radius: 50% 50% 20% 20%;
+            box-shadow: inset -2px -2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .dropper-tip {
+            position: absolute;
+            bottom: -15px; 
+            width: 6px;
+            height: 15px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+        }
+
+        .bottle-liquid {
+            width: 100%;
+            height: 75%;
+            background: #8A2BE2; /* 預設紫色 */
+            opacity: 0.8;
+            position: relative;
+            transition: background-color 0.5s;
+        }
+        
+        .bottle-label-text {
+             position: absolute;
+             left: 25px;
+             top: 50%;
+             transform: translateY(-50%);
+             color: #d4a3ff;
+             font-size: 14px;
+             font-weight: bold;
+             text-shadow: 1px 1px 2px black;
+             white-space: nowrap;
+             pointer-events: none;
+             background: rgba(0,0,0,0.6);
+             padding: 2px 6px;
+             border-radius: 4px;
+             transition: color 0.5s;
+        }
+        
+        .dropper-bottle.dragging {
+            position: fixed;
+            pointer-events: none;
+            transition: none;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            z-index: 1000;
+        }
+
+        /* 下方：燒杯區 */
+        .beakers-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+            padding-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .beaker-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100px;
+        }
+
+        .beaker {
+            width: 70px;
+            height: 100px;
+            border-left: 3px solid rgba(255,255,255,0.4);
+            border-right: 3px solid rgba(255,255,255,0.4);
+            border-bottom: 3px solid rgba(255,255,255,0.6);
+            border-radius: 0 0 10px 10px;
+            position: relative;
+            background: linear-gradient(to right, rgba(255,255,255,0.05), rgba(255,255,255,0) 30%, rgba(255,255,255,0.05));
+            overflow: visible;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .beaker::before {
+            content: "";
+            position: absolute;
+            left: 5px;
+            top: 20px;
+            width: 10px;
+            height: 1px;
+            background: rgba(255,255,255,0.3);
+            box-shadow: 0 10px 0 rgba(255,255,255,0.3), 0 20px 0 rgba(255,255,255,0.3);
+        }
+
+        .beaker.highlight {
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        .beaker-liquid {
+            position: absolute;
+            bottom: 3px;
+            left: 3px;
+            right: 3px;
+            height: 40%;
+            background-color: rgba(200, 220, 255, 0.15);
+            border-radius: 0 0 5px 5px;
+            transition: background-color 1s ease, height 0.3s;
+        }
+
+        .beaker-liquid::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+        }
+
+        .beaker-label {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 14px;
+            color: #ddd;
+            background: rgba(0,0,0,0.3);
+            padding: 4px 8px;
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        .result-tag {
+            margin-top: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: all 0.5s;
+            height: 20px;
+            text-shadow: 0 1px 2px black;
+        }
+        
+        .result-tag.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .drop {
+            position: absolute;
+            width: 8px;
+            height: 12px;
+            background: #8A2BE2; /* 動態修改 */
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        .reset-btn {
+            padding: 12px 30px;
+            background: #4ade80;
+            color: #064e3b;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #166534;
+            transition: transform 0.1s;
+            margin-bottom: 20px;
+        }
+
+        .reset-btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1 id="title-text">酸鹼滴定實驗</h1>
+    
+    <div class="controls">
+        <button id="btn-cabbage" class="toggle-btn active" onclick="setIndicator('cabbage')">🟣 紫色高麗菜汁</button>
+        <button id="btn-butterfly" class="toggle-btn" onclick="setIndicator('butterfly')">🔵 蝶豆花汁液</button>
+    </div>
+
+    <div class="instructions">請拖曳滴管，滴入下方燒杯中觀察顏色變化。</div>
+
+    <div class="lab-area">
+        <div class="dropper-bottle" id="dropperBottle">
+            <div class="dropper-cap"></div>
+            <div class="bottle-liquid" id="bottleLiquid"></div>
+            <div class="dropper-tip"></div>
+            <div class="bottle-label-text" id="bottleLabel">紫色高麗菜汁</div>
+        </div>
+
+        <div class="beakers-container" id="beakersContainer">
+            <!-- JS 生成 -->
+        </div>
+    </div>
+
+    <button class="reset-btn" onclick="initLab()">重新實驗 (Reset)</button>
+
+    <script>
+        // 定義兩種指示劑的反應資料
+        const indicators = {
+            cabbage: {
+                name: '紫色高麗菜汁',
+                baseColor: '#8A2BE2', // 原色(紫)
+                textColor: '#d4a3ff',
+                reactions: {
+                    acid: { color: '#ff4d6d', text: '變紅色 (酸性)' },
+                    strong_acid: { color: '#ff0000', text: '變鮮紅色 (強酸)' },
+                    base: { color: '#00b894', text: '變藍綠色 (鹼性)' },
+                    neutral: { color: '#a29bfe', text: '維持紫色 (中性)' }
+                }
+            },
+            butterfly: {
+                name: '蝶豆花汁液',
+                baseColor: '#2980b9', // 原色(藍)
+                textColor: '#85c1e9',
+                reactions: {
+                    acid: { color: '#8e44ad', text: '變紫色 (酸性)' }, // 蝶豆花遇酸變紫
+                    strong_acid: { color: '#9b59b6', text: '變紫紅色 (強酸)' },
+                    base: { color: '#27ae60', text: '變綠色 (鹼性)' }, // 蝶豆花遇鹼變綠
+                    neutral: { color: '#3498db', text: '維持藍色 (中性)' }
+                }
+            }
+        };
+
+        // 定義溶液性質
+        const solutions = [
+            { name: '醋', id: 'vinegar', type: 'acid', originalColor: 'rgba(255, 245, 230, 0.2)' },
+            { name: '小蘇打水', id: 'soda', type: 'base', originalColor: 'rgba(255, 255, 255, 0.15)' },
+            { name: '食鹽水', id: 'salt', type: 'neutral', originalColor: 'rgba(255, 255, 255, 0.15)' },
+            { name: '檸檬酸', id: 'lemon', type: 'strong_acid', originalColor: 'rgba(255, 255, 255, 0.15)' },
+            { name: '糖水', id: 'sugar', type: 'neutral', originalColor: 'rgba(255, 240, 200, 0.1)' }
+        ];
+
+        let currentIndicatorKey = 'cabbage';
+        let currentIndicator = indicators.cabbage;
+
+        const container = document.getElementById('beakersContainer');
+        const bottle = document.getElementById('dropperBottle');
+        const bottleLiquid = document.getElementById('bottleLiquid');
+        const bottleLabel = document.getElementById('bottleLabel');
+        const titleText = document.getElementById('title-text');
+        
+        let isDragging = false;
+        let startX, startY;
+        let dragClone = null;
+
+        function setIndicator(key) {
+            currentIndicatorKey = key;
+            currentIndicator = indicators[key];
+
+            // 更新按鈕狀態
+            document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(key === 'cabbage' ? 'btn-cabbage' : 'btn-butterfly').classList.add('active');
+
+            // 更新滴管外觀
+            bottleLiquid.style.backgroundColor = currentIndicator.baseColor;
+            bottleLabel.innerText = currentIndicator.name;
+            bottleLabel.style.color = currentIndicator.textColor;
+            titleText.style.color = currentIndicator.textColor;
+
+            // 重置實驗
+            initLab();
+        }
+
+        function initLab() {
+            container.innerHTML = '';
+            
+            // 隨機打亂順序
+            const shuffledSolutions = [...solutions].sort(() => Math.random() - 0.5);
+            
+            // 生成燒杯
+            shuffledSolutions.forEach((sol) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'beaker-wrapper';
+
+                const beaker = document.createElement('div');
+                beaker.className = 'beaker';
+                beaker.dataset.id = sol.id;
+                beaker.dataset.type = sol.type; // 存儲酸鹼類型
+                beaker.dataset.filled = 'false';
+
+                const liquid = document.createElement('div');
+                liquid.className = 'beaker-liquid';
+                liquid.style.backgroundColor = sol.originalColor;
+                beaker.appendChild(liquid);
+
+                const label = document.createElement('div');
+                label.className = 'beaker-label';
+                label.innerText = sol.name;
+
+                const result = document.createElement('div');
+                result.className = 'result-tag';
+                // 初始不顯示文字
+                wrapper.appendChild(beaker);
+                wrapper.appendChild(label);
+                wrapper.appendChild(result);
+                container.appendChild(wrapper);
+            });
+
+            // 重置瓶子位置
+            bottle.style.transform = 'translate(-50%, -50%)';
+            bottle.style.opacity = '1';
+        }
+
+        // --- 拖曳邏輯 ---
+        bottle.addEventListener('mousedown', startDrag);
+        bottle.addEventListener('touchstart', startDrag, {passive: false});
+
+        function startDrag(e) {
+            e.preventDefault();
+            isDragging = true;
+            
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            dragClone = bottle.cloneNode(true);
+            dragClone.classList.add('dragging');
+            
+            // 確保 Clone 的顏色正確
+            dragClone.querySelector('.bottle-liquid').style.backgroundColor = currentIndicator.baseColor;
+            dragClone.querySelector('.bottle-label-text').innerText = currentIndicator.name;
+            dragClone.querySelector('.bottle-label-text').style.color = currentIndicator.textColor;
+
+            document.body.appendChild(dragClone);
+            
+            bottle.style.opacity = '0.3';
+
+            moveClone(clientX, clientY);
+
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', endDrag);
+            document.addEventListener('touchmove', onMove, {passive: false});
+            document.addEventListener('touchend', endDrag);
+        }
+
+        function onMove(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            moveClone(clientX, clientY);
+            checkHover(clientX, clientY);
+        }
+
+        function moveClone(x, y) {
+            if(dragClone) {
+                dragClone.style.left = x + 'px';
+                dragClone.style.top = y + 'px';
+            }
+        }
+
+        function checkHover(x, y) {
+            dragClone.style.display = 'none';
+            const elemBelow = document.elementFromPoint(x, y);
+            dragClone.style.display = 'flex';
+
+            document.querySelectorAll('.beaker').forEach(b => b.classList.remove('highlight'));
+
+            if (!elemBelow) return;
+            const beaker = elemBelow.closest('.beaker');
+            
+            if (beaker && beaker.dataset.filled === 'false') {
+                beaker.classList.add('highlight');
+            }
+        }
+
+        function endDrag(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            const rect = dragClone.getBoundingClientRect();
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + rect.height;
+
+            dragClone.style.display = 'none';
+            const elemBelow = document.elementFromPoint(x, y + 10); 
+            
+            const beaker = elemBelow ? elemBelow.closest('.beaker') : null;
+
+            if (beaker && beaker.dataset.filled === 'false') {
+                performTitration(beaker, x, y + 15);
+            }
+
+            dragClone.remove();
+            dragClone = null;
+            bottle.style.opacity = '1';
+            
+            document.querySelectorAll('.beaker').forEach(b => b.classList.remove('highlight'));
+            
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', endDrag);
+            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('touchend', endDrag);
+        }
+
+        function performTitration(beaker, startX, startY) {
+            const type = beaker.dataset.type;
+            const reactionData = currentIndicator.reactions[type]; // 根據類型與當前指示劑獲取結果
+            
+            beaker.dataset.filled = 'true';
+
+            const beakerRect = beaker.getBoundingClientRect();
+            const beakerCenterX = beakerRect.left + beakerRect.width / 2;
+            const targetY = beakerRect.bottom - 40; 
+
+            // 生成水滴
+            const drop = document.createElement('div');
+            drop.className = 'drop';
+            drop.style.backgroundColor = currentIndicator.baseColor; // 水滴顏色跟隨滴管
+            drop.style.left = (beakerCenterX - 4) + 'px'; 
+            drop.style.top = startY + 'px'; 
+            
+            document.body.appendChild(drop);
+
+            const animation = drop.animate([
+                { transform: 'translateY(0) scale(1)', opacity: 1 },
+                { transform: `translateY(${targetY - startY}px) scale(0.5)`, opacity: 0.5 }
+            ], {
+                duration: 500,
+                easing: 'cubic-bezier(0.45, 0, 0.55, 1)'
+            });
+
+            animation.onfinish = () => {
+                drop.remove();
+                
+                // 變色
+                const liquid = beaker.querySelector('.beaker-liquid');
+                liquid.style.backgroundColor = reactionData.color;
+                liquid.style.height = '50%'; 
+                
+                // 顯示結果
+                const wrapper = beaker.parentElement;
+                const resultTag = wrapper.querySelector('.result-tag');
+                resultTag.innerText = reactionData.text;
+                resultTag.style.color = reactionData.color;
+                resultTag.classList.add('show');
+            };
+        }
+
+        // 初始化
+        setIndicator('cabbage'); // 預設高麗菜
+
+    </script>
+</body>
+</html>
