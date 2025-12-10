@@ -24,6 +24,8 @@
             padding: 0;
             background-image: radial-gradient(#FFAD60 1px, transparent 1px);
             background-size: 20px 20px;
+            /* 為了避免左下角圖片擋住 footer，增加一點底部內距 */
+            padding-bottom: 20px;
         }
 
         /* 頂部招牌 */
@@ -34,6 +36,8 @@
             text-align: center;
             border-bottom: 8px solid var(--farm-green);
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            position: relative; /* 讓內容定位有參考點 */
+            z-index: 100;
         }
 
         header h1 {
@@ -44,115 +48,114 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 15px; /* 貓咪跟文字的距離 */
-            flex-wrap: wrap; /* 手機版如果太擠會自動換行 */
+            gap: 15px;
+            flex-wrap: wrap;
         }
 
-        /* 副標題小字 (原本的歡迎詞) */
+        /* 副標題小字 */
         header .subtitle {
             margin-top: 15px;
             font-size: 1.1rem;
             opacity: 0.95;
             font-weight: bold;
             letter-spacing: 1px;
-            background-color: rgba(255, 255, 255, 0.2); /* 半透明白色背景 */
+            background-color: rgba(255, 255, 255, 0.2);
             display: inline-block;
             padding: 8px 20px;
             border-radius: 50px;
         }
 
-        /* 橘貓樣式 */
-        .cat-orange {
-            color: #FFD700;
-            filter: drop-shadow(2px 2px 0 #d35400);
-        }
-
-        /* 布偶貓樣式 (無蝴蝶結版) */
-        .cat-ragdoll {
-            color: var(--ragdoll-cream); 
-            /* 加深一點陰影，讓淺色貓在橘色背景上更立體，模擬布偶貓的蓬鬆感 */
-            filter: drop-shadow(2px 2px 0 #8D6E63); 
-        }
+        /* 橘貓與布偶貓 icon */
+        .cat-orange { color: #FFD700; filter: drop-shadow(2px 2px 0 #d35400); }
+        .cat-ragdoll { color: var(--ragdoll-cream); filter: drop-shadow(2px 2px 0 #8D6E63); }
 
         .container {
             max-width: 1100px;
-            margin: 30px auto; /* 調整了間距 */
+            margin: 30px auto;
             padding: 0 20px;
         }
 
-        /* --- 新增：圖片區塊樣式 --- */
-        
-        /* 提案一：迎賓大圖區塊 */
-        .welcome-section {
-            text-align: center;
-            margin: 30px auto 20px; /* 上距30, 下距20 */
-            padding: 0 20px;
-            max-width: 800px; /* 限制最大寬度以免圖片太巨大 */
-        }
-        
-        .welcome-img {
-            width: 100%;
+        /* --- 新增：角落貼紙圖片樣式 (電腦版) --- */
+        .corner-sticker {
+            position: fixed; /* 固定在視窗上，不隨卷軸移動 */
+            z-index: 999;    /* 確保在最上層 */
+            border: 4px solid white;
+            border-radius: 15px;
+            box-shadow: 3px 3px 10px rgba(0,0,0,0.2);
+            transition: transform 0.3s, opacity 0.3s;
+            width: 160px;    /* 適當大小：160px */
             height: auto;
-            border-radius: 20px; /* 圓角 */
-            border: 5px solid white; /* 白邊框，像拍立得 */
-            box-shadow: 5px 5px 15px rgba(93, 64, 55, 0.2); /* 陰影增加立體感 */
-            transform: rotate(-2deg); /* 稍微傾斜一點點，比較活潑 */
-            transition: transform 0.3s;
-        }
-        .welcome-img:hover {
-             transform: rotate(0deg) scale(1.02); /* 滑鼠移過去轉正並放大一點點 */
         }
 
-        /* 額外加入：農場主人圓形頭像區 */
+        /* 左上角：迎賓貓 */
+        .sticker-top-left {
+            top: 20px;
+            left: 20px;
+            transform: rotate(-5deg); /* 俏皮傾斜 */
+        }
+
+        /* 左下角：睡覺貓 */
+        .sticker-bottom-left {
+            bottom: 20px;
+            left: 20px;
+            transform: rotate(3deg);
+        }
+
+        /* 滑鼠移過去的效果 */
+        .corner-sticker:hover {
+            transform: scale(1.1) rotate(0deg); /* 放大並轉正 */
+            opacity: 0.8; /* 稍微變透明，以免擋住字 */
+        }
+
+        /* --- 手機版 RWD 調整 --- */
+        /* 當螢幕小於 1000px (平板/手機) 時，取消角落固定，改為上下置中顯示 */
+        @media (max-width: 1000px) {
+            .corner-sticker {
+                position: static; /* 取消固定定位 */
+                display: block;
+                margin: 20px auto; /* 上下置中 */
+                width: 250px;      /* 手機上可以稍微大一點看比較清楚 */
+                transform: none;   /* 取消旋轉 */
+                box-shadow: 5px 5px 15px rgba(93, 64, 55, 0.1);
+            }
+            
+            /* 調整順序用的容器 */
+            .mobile-img-container {
+                text-align: center;
+                width: 100%;
+            }
+        }
+
+        /* --- 農場主人圓形頭像區 --- */
         .owners-section {
             display: flex;
             justify-content: center;
             gap: 30px;
-            margin-bottom: 40px;
+            margin: 40px 0;
             flex-wrap: wrap;
         }
 
-        .owner-avatar {
-            text-align: center;
-        }
+        .owner-avatar { text-align: center; }
 
         .owner-img-box {
             width: 120px;
             height: 120px;
-            border-radius: 50%; /* 變圓形 */
+            border-radius: 50%;
             overflow: hidden;
             border: 4px solid var(--mimi-orange);
             box-shadow: 3px 3px 10px rgba(0,0,0,0.1);
-            margin: 0 auto 10px; /* 置中並與下方文字保持距離 */
+            margin: 0 auto 10px;
         }
 
         .owner-img-box img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* 確保圖片填滿圓形且不變形 */
+            object-fit: cover;
         }
 
         .owner-name {
             font-weight: bold;
             color: var(--soil-brown);
-        }
-
-        /* 提案三：頁尾療癒圖區塊 */
-        .footer-img-container {
-            text-align: center;
-            margin: 50px auto 0; /* 上方距離拉大 */
-            padding: 0 20px;
-            max-width: 600px;
-        }
-
-        .footer-img {
-            width: 100%;
-            border-radius: 30px 30px 0 0; /* 上方圓角，下方平的接footer */
-            border: 4px solid var(--ragdoll-cream);
-            border-bottom: none; /* 下方不要邊框 */
-            box-shadow: 0 -5px 15px rgba(93, 64, 55, 0.1);
-            display: block; /* 消除圖片下方空隙 */
-            opacity: 0.9; /* 稍微透明一點點，感覺更柔和 */
         }
 
         /* --- 農場田地網格 --- */
@@ -206,7 +209,7 @@
         .open-btn i { margin-left: 8px; }
 
         footer {
-            margin-top: 0; /* 改為0，緊接在圖片下方 */
+            margin-top: 40px;
             text-align: center; padding: 30px;
             background-color: var(--soil-brown); color: var(--cream-bg); font-weight: bold;
         }
@@ -226,24 +229,30 @@
         </div>
     </header>
 
-    <!-- 新增：提案一 迎賓大圖區塊 -->
-    <div class="welcome-section">
-        <!-- 請確保檔名為 welcome-cats.jpg -->
-        <img src="welcome-cats.JPG" alt="橘咪咪與白奶油歡迎您" class="welcome-img">
+    <!-- 
+      圖片區塊：
+      在電腦上，這些圖片會飛到角落 (Fixed)。
+      在手機上，這些圖片會變回一般區塊 (Static) 顯示在開頭與結尾。
+    -->
+
+    <!-- 左上角：迎賓大圖 -->
+    <div class="mobile-img-container">
+        <!-- 檔名更新為 welcome-cats.JPG -->
+        <img src="welcome-cats.JPG" alt="橘咪咪與白奶油歡迎您" class="corner-sticker sticker-top-left">
     </div>
 
-    <!-- 新增：農場主人介紹 (使用另外兩張獨照) -->
+    <!-- 農場主人介紹 (維持原樣) -->
     <div class="owners-section">
         <div class="owner-avatar">
             <div class="owner-img-box">
-                <!-- 請確保檔名為 mimi-solo.jpg -->
+                <!-- 獨照統一使用大寫 JPG -->
                 <img src="mimi-solo.JPG" alt="橘咪咪園長">
             </div>
             <div class="owner-name"><i class="fas fa-paw cat-orange"></i> 橘咪咪園長</div>
         </div>
         <div class="owner-avatar">
             <div class="owner-img-box">
-                <!-- 請確保檔名為 cream-solo.jpg -->
+                <!-- 獨照統一使用大寫 JPG -->
                 <img src="cream-solo.JPG" alt="白奶油園長">
             </div>
             <div class="owner-name"><i class="fas fa-paw cat-ragdoll"></i> 白奶油園長</div>
@@ -300,10 +309,10 @@
         </div>
     </div>
 
-    <!-- 新增：提案三 頁尾療癒圖區塊 -->
-    <div class="footer-img-container">
-        <!-- 請確保檔名為 sleepy-cats.jpg -->
-        <img src="sleepy-cats.JPG" alt="學習累了休息一下" class="footer-img">
+    <!-- 左下角：頁尾療癒圖 -->
+    <div class="mobile-img-container">
+        <!-- 檔名更新為 c04sleepy-cats.JPG -->
+        <img src="sleepy-cats.JPG" alt="學習累了休息一下" class="corner-sticker sticker-bottom-left">
     </div>
 
     <footer>
@@ -312,4 +321,3 @@
 
 </body>
 </html>
-
