@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>空氣壓縮實驗：波以耳定律挑戰</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --success-color: #2ecc71;
+            --warning-color: #e67e22;
+            --danger-color: #e74c3c;
+            --text-color: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', "Microsoft JhengHei", sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 主容器：左右佈局 */
+        .main-container {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 900px;
+            height: 90vh;
+            gap: 60px;
+            transform: translateY(-20px);
+        }
+
+        /* --- 左側：任務提示與控制區 --- */
+        .left-panel {
+            width: 240px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--text-color);
+            margin: 0 0 5px 0;
+            text-align: left;
+        }
+
+        .mission-box {
+            background: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            border-left: 6px solid var(--primary-color);
+            transition: all 0.3s ease;
+            min-height: 100px;
+        }
+
+        .mission-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-color);
+            margin-bottom: 10px;
+        }
+
+        .mission-sub {
+            font-size: 1rem;
+            color: #7f8c8d;
+            line-height: 1.5;
+        }
+
+        /* 重置按鈕 */
+        .reset-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            box-shadow: 0 4px 0 #2980b9;
+            transition: all 0.2s;
+            text-align: center;
+            width: 100%;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .reset-btn:hover {
+            background: #2980b9;
+        }
+
+        .reset-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #2980b9;
+        }
+
+        /* --- 右側：實驗區域 --- */
+        .stage {
+            position: relative;
+            width: 200px;
+            height: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 20px;
+        }
+
+        /* 針筒容器 */
+        .syringe-container {
+            position: relative;
+            width: 100px;
+            height: 420px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 針筒外殼 */
+        .barrel {
+            position: absolute;
+            bottom: 70px;
+            width: 80px;
+            height: 250px;
+            border: 4px solid rgba(80, 80, 80, 0.6);
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.6), 8px 0 15px rgba(0,0,0,0.15);
+            z-index: 2;
+            overflow: visible;
+            pointer-events: none;
+        }
+
+        /* 針頭 (Nozzle) */
+        .nozzle {
+            position: absolute;
+            bottom: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 14px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.5);
+            border: 4px solid rgba(80, 80, 80, 0.6);
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            z-index: 1;
+        }
+
+        /* 刻度線 */
+        .markings {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 35px;
+            border-left: 1px solid #999;
+        }
+        .mark {
+            position: absolute;
+            right: 0;
+            height: 1px;
+            background: #666;
+            width: 8px;
+        }
+        .mark.major {
+            width: 16px;
+            background: #444;
+        }
+        .mark-label {
+            position: absolute;
+            right: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #555;
+            transform: translateY(-50%);
+            font-family: Arial, sans-serif;
+        }
+
+        /* 活塞桿 */
+        .plunger-group {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            cursor: grab;
+            z-index: 3;
+            touch-action: none;
+        }
+        .plunger-group:active {
+            cursor: grabbing;
+        }
+
+        .rod {
+            width: 18px;
+            height: 320px;
+            background: linear-gradient(90deg, #e0e0e0 0%, #ffffff 50%, #bdbdbd 100%);
+            margin: 0 auto;
+            border: 1px solid #999;
+        }
+        
+        .handle {
+            width: 64px;
+            height: 16px;
+            background: #2c3e50;
+            border-radius: 4px;
+            margin: 0 auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .rubber-head {
+            width: 72px;
+            height: 25px;
+            background: #2d3436;
+            border-radius: 2px;
+            margin: 0 auto;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        /* 橡皮擦 */
+        .eraser-prop {
+            position: absolute;
+            bottom: -40px; 
+            width: 80px;
+            height: 40px;
+            background: #fdfdfd;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #555;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 5;
+            box-shadow: 3px 3px 8px rgba(0,0,0,0.15);
+            font-weight: bold;
+            transform-origin: center bottom;
+            transform: scale(1.3); 
+        }
+
+        .eraser-prop::after {
+            content: '';
+            position: absolute;
+            top: 4px; left: 4px; right: 4px; bottom: 4px;
+            border: 1px dashed #ddd;
+            border-radius: 2px;
+        }
+
+        .eraser-prop:hover {
+            background: #fafafa;
+        }
+
+        .eraser-prop.active {
+            bottom: -6px; 
+            border-color: #999;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        
+        .eraser-hint {
+            position: absolute;
+            bottom: -22px;
+            width: 100%;
+            text-align: center;
+            font-size: 10px;
+            color: #95a5a6;
+            white-space: nowrap;
+        }
+
+        /* 粒子畫布 */
+        #particleCanvas {
+            position: absolute;
+            bottom: 74px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 72px;
+            height: 242px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* 目標指示線 */
+        .target-line {
+            position: absolute;
+            left: -25px;
+            width: 130px;
+            height: 2px;
+            background-color: var(--danger-color);
+            z-index: 0;
+            display: none;
+            pointer-events: none;
+        }
+        .target-label {
+            position: absolute;
+            left: -50px;
+            top: -10px;
+            background: var(--danger-color);
+            color: white;
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 4px;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .main-container {
+                flex-direction: column;
+                transform: translateY(0);
+                gap: 20px;
+            }
+            .left-panel {
+                width: 90%;
+            }
+            .stage {
+                height: 450px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- 左側面板：任務與按鈕 -->
+        <div class="left-panel">
+            <h1>空氣壓縮實驗室</h1>
+            <div class="mission-box" id="missionBox">
+                <div class="mission-text" id="missionTitle">步驟 1/4</div>
+                <div class="mission-sub" id="missionDesc">請將活塞向上拉，吸取空氣至 20ml 處。</div>
+            </div>
+            <!-- 重置按鈕 -->
+            <button class="reset-btn" onclick="resetGame()">實驗重置</button>
+        </div>
+
+        <!-- 右側實驗台 -->
+        <div class="stage">
+            <div class="syringe-container">
+                <!-- 活塞組 -->
+                <div class="plunger-group" id="plunger">
+                    <div class="handle"></div>
+                    <div class="rod"></div>
+                    <div class="rubber-head"></div>
+                </div>
+
+                <!-- 針筒本體 -->
+                <div class="barrel" id="barrel">
+                    <div class="markings" id="markings"></div>
+                    <!-- 針頭 -->
+                    <div class="nozzle"></div>
+                </div>
+
+                <!-- 空氣粒子畫布 -->
+                <canvas id="particleCanvas" width="72" height="242"></canvas>
+
+                <!-- 目標指示線 -->
+                <div class="target-line" id="targetLine">
+                    <div class="target-label">20ml</div>
+                </div>
+
+                <!-- 橡皮擦實體 -->
+                <div class="eraser-prop" id="eraserProp" onclick="toggleEraser()">
+                    橡皮擦
+                    <div class="eraser-hint" id="eraserHint">點擊使用</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const plunger = document.getElementById('plunger');
+        const eraserProp = document.getElementById('eraserProp');
+        const eraserHint = document.getElementById('eraserHint');
+        const missionTitle = document.getElementById('missionTitle');
+        const missionDesc = document.getElementById('missionDesc');
+        const missionBox = document.getElementById('missionBox');
+        const targetLine = document.getElementById('targetLine');
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        const resetBtn = document.querySelector('.reset-btn');
+
+        const BARREL_INNER_HEIGHT = 242; 
+        const MAX_VOL = 30; 
+        
+        const PLUNGER_BOTTOM_TOP_OFFSET = -15;  
+        const PLUNGER_TOP_TOP_OFFSET = -257;    
+        const TRAVEL_DIST = PLUNGER_BOTTOM_TOP_OFFSET - PLUNGER_TOP_TOP_OFFSET;
+
+        let currentVol = 0;
+        let isDragging = false;
+        let isBlocked = false;
+        let step = 1; 
+        let startY = 0;
+        let startTop = 0;
+        let particles = [];
+        let animationFrame;
+
+        function init() {
+            createMarkings();
+            createParticles(6);
+            updatePlungerPos(0); 
+            renderParticles();
+            setMission(1);
+        }
+
+        function createMarkings() {
+            const markings = document.getElementById('markings');
+            markings.innerHTML = ''; 
+            for(let i=0; i<=MAX_VOL; i+=2) {
+                let percent = 100 - (i / MAX_VOL * 100);
+                let mark = document.createElement('div');
+                mark.className = `mark ${i%10===0 ? 'major' : ''}`;
+                mark.style.top = `${percent}%`;
+                if(i%10===0) {
+                    let label = document.createElement('div');
+                    label.className = 'mark-label';
+                    label.innerText = i;
+                    label.style.top = `${percent}%`;
+                    markings.appendChild(label);
+                }
+                markings.appendChild(mark);
+            }
+        }
+
+        class Particle {
+            constructor() {
+                // 初始隨機分佈
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                
+                // 基礎速度 (布朗運動)
+                // 給定一個隨機方向和基礎速率
+                let angle = Math.random() * Math.PI * 2;
+                let speed = 2 + Math.random(); // 2 ~ 3
+                this.vx = Math.cos(angle) * speed; 
+                this.vy = Math.sin(angle) * speed;
+                
+                this.color = `rgba(52, 152, 219, 0.6)`;
+            }
+
+            update(headY, pressure) {
+                // 1. 布朗運動擾動 (Brownian motion jitter)
+                this.vx += (Math.random() - 0.5) * 0.3;
+                this.vy += (Math.random() - 0.5) * 0.3;
+
+                // 2. 壓力加速 (Pressure effect)
+                let currentSpeed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                let targetSpeed = 2 + (pressure * 6); 
+                
+                if(currentSpeed < targetSpeed) {
+                    this.vx *= 1.05;
+                    this.vy *= 1.05;
+                } else if (currentSpeed > targetSpeed + 2) {
+                    this.vx *= 0.95;
+                    this.vy *= 0.95;
+                }
+
+                // 3. 最小速度保證
+                if(Math.abs(this.vx) < 0.5) this.vx = (this.vx < 0 ? -1 : 1);
+                if(Math.abs(this.vy) < 0.5) this.vy = (this.vy < 0 ? -1 : 1);
+
+                // 更新位置
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // 4. 邊界處理
+                if(this.x < 0) { this.x = 0; this.vx *= -1; }
+                if(this.x > canvas.width) { this.x = canvas.width; this.vx *= -1; }
+                
+                if(this.y > canvas.height) { 
+                    this.y = canvas.height; 
+                    this.vy *= -1; 
+                }
+                
+                if(this.y < headY) {
+                    this.y = headY;
+                    this.vy = Math.abs(this.vy); 
+                }
+
+                if(pressure > 0.4) {
+                    this.color = `rgba(231, 76, 60, ${0.6 + pressure/2})`; 
+                } else {
+                    this.color = `rgba(52, 152, 219, 0.6)`;
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 3, 0, Math.PI*2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        function createParticles(num) {
+            particles = [];
+            for(let i=0; i<num; i++) particles.push(new Particle());
+        }
+
+        function renderParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            let headY = (1 - currentVol / MAX_VOL) * canvas.height;
+            let pressure = 0;
+            if (isBlocked && currentVol < 20) {
+                pressure = (20 - currentVol) / 20;
+            }
+
+            if(!isBlocked && currentVol > 5 && particles.length < 5) {
+                particles.push(new Particle());
+            }
+
+            particles.forEach(p => {
+                p.update(headY, pressure);
+                p.draw();
+            });
+
+            animationFrame = requestAnimationFrame(renderParticles);
+        }
+
+        function setMission(s) {
+            step = s;
+            missionBox.style.borderLeftColor = '';
+            targetLine.style.display = 'none';
+
+            if(s === 1) {
+                missionTitle.innerText = "步驟 1：吸入空氣";
+                missionDesc.innerText = "將活塞「向上拉」至 20ml 處，然後放手。";
+                showTargetLine(20);
+            } 
+            else if (s === 2) {
+                missionTitle.innerText = "步驟 2：堵住出口";
+                missionDesc.innerText = "點擊下方的「橡皮擦」，讓它移動過來堵住針頭。";
+                missionBox.style.borderLeftColor = varColor('warning');
+                eraserHint.innerText = "點擊堵住";
+            }
+            else if (s === 3) {
+                missionTitle.innerText = "步驟 3：用力壓縮";
+                missionDesc.innerText = "用力將活塞「向下壓」！觀察活塞是否能壓到底？";
+                missionBox.style.borderLeftColor = varColor('danger');
+                eraserHint.innerText = "";
+            }
+            else if (s === 4) {
+                missionTitle.innerText = "步驟 4：放開雙手";
+                missionDesc.innerText = "放手，觀察活塞回彈情形。";
+                missionBox.style.borderLeftColor = varColor('success');
+            }
+            else if (s === 5) {
+                missionTitle.innerText = "實驗成功！";
+                // 修改處：使用 innerHTML 來支援紅色粗體，並刪除「具有彈性」的描述
+                missionDesc.innerHTML = "空氣彈回 20ml 了！證明<span style='color: #e74c3c; font-weight: bold; font-size: 1.1rem;'>空氣可以被壓縮</span>。";
+                missionBox.style.background = "#d4edda";
+                resetBtn.style.display = "block"; 
+                showTargetLine(20);
+            }
+        }
+
+        function showTargetLine(ml) {
+            targetLine.style.display = 'block';
+            let pxFromBottom = (ml / MAX_VOL) * 242 + 74;
+            targetLine.style.bottom = pxFromBottom + 'px';
+            targetLine.querySelector('.target-label').innerText = ml + 'ml';
+        }
+
+        function varColor(name) {
+            if(name==='warning') return '#e67e22';
+            if(name==='danger') return '#e74c3c';
+            if(name==='success') return '#2ecc71';
+            return '#3498db';
+        }
+
+        function toggleEraser() {
+            if(step !== 2) {
+                if(step === 1) alert("請先完成吸氣步驟！");
+                else if(step > 2) alert("實驗中請勿移開！");
+                return;
+            }
+            isBlocked = !isBlocked;
+            if(isBlocked) {
+                eraserProp.classList.add('active');
+                setMission(3);
+            }
+        }
+
+        function updatePlungerPos(vol) {
+            vol = Math.max(0, Math.min(vol, MAX_VOL));
+            currentVol = vol;
+
+            let topPx = PLUNGER_BOTTOM_TOP_OFFSET - (vol / MAX_VOL * TRAVEL_DIST);
+            plunger.style.top = topPx + 'px';
+
+            if(!isBlocked && step === 1) {
+                let targetParticles = Math.floor(vol * 1.5) + 6;
+                if(particles.length < targetParticles) {
+                    for(let k=0; k < Math.min(2, targetParticles - particles.length); k++) {
+                        let p = new Particle();
+                        let headY = (1 - currentVol / MAX_VOL) * canvas.height;
+                        p.y = headY + 5 + Math.random() * 20; 
+                        p.x = Math.random() * canvas.width;
+                        p.vx = (Math.random()-0.5) * 2;
+                        p.vy = Math.random() * 2; 
+                        particles.push(p);
+                    }
+                } else if (particles.length > targetParticles) {
+                    particles.splice(0, particles.length - targetParticles);
+                }
+            }
+        }
+
+        plunger.addEventListener('mousedown', startDrag);
+        plunger.addEventListener('touchstart', startDrag, {passive: false});
+
+        function startDrag(e) {
+            if(step === 4 || step === 5) return;
+
+            isDragging = true;
+            let clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            startY = clientY;
+            startTop = parseFloat(plunger.style.top || PLUNGER_BOTTOM_TOP_OFFSET);
+
+            document.addEventListener('mousemove', onDrag);
+            document.addEventListener('mouseup', endDrag);
+            document.addEventListener('touchmove', onDrag, {passive: false});
+            document.addEventListener('touchend', endDrag);
+        }
+
+        function onDrag(e) {
+            if(!isDragging) return;
+            e.preventDefault();
+
+            let clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            let deltaY = clientY - startY;
+            let newTop = startTop + deltaY;
+
+            let newVol = ((PLUNGER_BOTTOM_TOP_OFFSET - newTop) / TRAVEL_DIST) * MAX_VOL;
+
+            if(isBlocked) {
+                if(newVol > 20) newVol = 20 + (newVol-20)*0.1; 
+                if(newVol < 5) {
+                    newVol = 5 - (5 - newVol) * 0.1;
+                    if(newVol < 4.5) newVol = 4.5;
+                }
+                if(step === 3 && newVol < 8) {
+                    setMission(4);
+                }
+            }
+
+            updatePlungerPos(newVol);
+        }
+
+        function endDrag() {
+            isDragging = false;
+            document.removeEventListener('mousemove', onDrag);
+            document.removeEventListener('mouseup', endDrag);
+            document.removeEventListener('touchmove', onDrag);
+            document.removeEventListener('touchend', endDrag);
+
+            if(step === 1) {
+                if(Math.abs(currentVol - 20) < 3) {
+                    updatePlungerPos(20); 
+                    setMission(2);
+                }
+            }
+
+            if(isBlocked) bounceBack();
+        }
+
+        function bounceBack() {
+            let target = 20;
+            function animate() {
+                if(isDragging) return;
+                let diff = target - currentVol;
+                
+                if(Math.abs(diff) > 0.1) {
+                    updatePlungerPos(currentVol + diff * 0.15);
+                    requestAnimationFrame(animate);
+                } else {
+                    updatePlungerPos(target);
+                    if(step === 4) setMission(5);
+                }
+            }
+            animate();
+        }
+
+        function resetGame() {
+            isBlocked = false;
+            eraserProp.classList.remove('active');
+            eraserHint.innerText = "點擊使用";
+            resetBtn.style.display = "none";
+            missionBox.style.background = "#fff"; 
+            
+            createParticles(6);
+            updatePlungerPos(0);
+            setMission(1);
+
+            if(!animationFrame) renderParticles();
+        }
+
+        init();
+
+    </script>
+</body>
+</html>
