@@ -26,7 +26,7 @@
             background-size: 20px 20px;
         }
 
-        /* 頂部招牌 */
+        /* 頂部招牌 - 設定 relative 讓左上角圖片可以定位 */
         header {
             background-color: var(--mimi-orange);
             color: white;
@@ -34,6 +34,8 @@
             text-align: center;
             border-bottom: 8px solid var(--farm-green);
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            position: relative; 
+            overflow: hidden; 
         }
 
         header h1 {
@@ -44,115 +46,102 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 15px; /* 貓咪跟文字的距離 */
-            flex-wrap: wrap; /* 手機版如果太擠會自動換行 */
+            gap: 15px;
+            flex-wrap: wrap;
+            position: relative; 
+            z-index: 2;
         }
 
-        /* 副標題小字 (原本的歡迎詞) */
+        /* 副標題小字 */
         header .subtitle {
             margin-top: 15px;
             font-size: 1.1rem;
             opacity: 0.95;
             font-weight: bold;
             letter-spacing: 1px;
-            background-color: rgba(255, 255, 255, 0.2); /* 半透明白色背景 */
+            background-color: rgba(255, 255, 255, 0.2);
             display: inline-block;
             padding: 8px 20px;
             border-radius: 50px;
+            position: relative;
+            z-index: 2;
         }
 
-        /* 橘貓樣式 */
-        .cat-orange {
-            color: #FFD700;
-            filter: drop-shadow(2px 2px 0 #d35400);
+        /* --- 裝飾圖片統一樣式 (Corner Stickers) --- */
+        .deco-img {
+            border: 4px solid white;
+            box-shadow: 3px 3px 10px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+            object-fit: cover;
+        }
+        .deco-img:hover {
+            transform: scale(1.05) rotate(0deg) !important; /* 滑鼠移過去稍微放大並轉正 */
         }
 
-        /* 布偶貓樣式 (無蝴蝶結版) */
-        .cat-ragdoll {
-            color: var(--ragdoll-cream); 
-            /* 加深一點陰影，讓淺色貓在橘色背景上更立體，模擬布偶貓的蓬鬆感 */
-            filter: drop-shadow(2px 2px 0 #8D6E63); 
+        /* 左上角：迎賓貓 (合照) */
+        .header-cat {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%) rotate(-5deg); /* 垂直置中並稍微傾斜 */
+            width: 140px; /* ★這裡控制大小，140px 剛剛好 */
+            height: auto;
+            border-radius: 15px;
+            z-index: 1; 
         }
+
+        /* 左下角：頁尾貓 (睡覺) */
+        .footer-cat {
+            position: absolute;
+            left: 20px;
+            bottom: -15px;  /* 稍微超出底部邊緣 */
+            width: 120px;   /* 稍微小一點 */
+            height: auto;
+            border-radius: 15px 15px 15px 0; 
+            transform: rotate(3deg);
+            z-index: 1;
+        }
+
+        /* 橘貓與布偶貓 icon */
+        .cat-orange { color: #FFD700; filter: drop-shadow(2px 2px 0 #d35400); }
+        .cat-ragdoll { color: var(--ragdoll-cream); filter: drop-shadow(2px 2px 0 #8D6E63); }
 
         .container {
             max-width: 1100px;
-            margin: 30px auto; /* 調整了間距 */
+            margin: 30px auto;
             padding: 0 20px;
         }
 
-        /* --- 新增：圖片區塊樣式 --- */
-        
-        /* 提案一：迎賓大圖區塊 */
-        .welcome-section {
-            text-align: center;
-            margin: 30px auto 20px; /* 上距30, 下距20 */
-            padding: 0 20px;
-            max-width: 800px; /* 限制最大寬度以免圖片太巨大 */
-        }
-        
-        .welcome-img {
-            width: 100%;
-            height: auto;
-            border-radius: 20px; /* 圓角 */
-            border: 5px solid white; /* 白邊框，像拍立得 */
-            box-shadow: 5px 5px 15px rgba(93, 64, 55, 0.2); /* 陰影增加立體感 */
-            transform: rotate(-2deg); /* 稍微傾斜一點點，比較活潑 */
-            transition: transform 0.3s;
-        }
-        .welcome-img:hover {
-             transform: rotate(0deg) scale(1.02); /* 滑鼠移過去轉正並放大一點點 */
-        }
-
-        /* 額外加入：農場主人圓形頭像區 */
+        /* --- 農場主人圓形頭像區 --- */
         .owners-section {
             display: flex;
             justify-content: center;
             gap: 30px;
-            margin-bottom: 40px;
+            margin: 40px 0;
             flex-wrap: wrap;
         }
 
-        .owner-avatar {
-            text-align: center;
-        }
+        .owner-avatar { text-align: center; }
 
         .owner-img-box {
             width: 120px;
             height: 120px;
-            border-radius: 50%; /* 變圓形 */
+            border-radius: 50%;
             overflow: hidden;
             border: 4px solid var(--mimi-orange);
             box-shadow: 3px 3px 10px rgba(0,0,0,0.1);
-            margin: 0 auto 10px; /* 置中並與下方文字保持距離 */
+            margin: 0 auto 10px;
         }
 
         .owner-img-box img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* 確保圖片填滿圓形且不變形 */
+            object-fit: cover;
         }
 
         .owner-name {
             font-weight: bold;
             color: var(--soil-brown);
-        }
-
-        /* 提案三：頁尾療癒圖區塊 */
-        .footer-img-container {
-            text-align: center;
-            margin: 50px auto 0; /* 上方距離拉大 */
-            padding: 0 20px;
-            max-width: 600px;
-        }
-
-        .footer-img {
-            width: 100%;
-            border-radius: 30px 30px 0 0; /* 上方圓角，下方平的接footer */
-            border: 4px solid var(--ragdoll-cream);
-            border-bottom: none; /* 下方不要邊框 */
-            box-shadow: 0 -5px 15px rgba(93, 64, 55, 0.1);
-            display: block; /* 消除圖片下方空隙 */
-            opacity: 0.9; /* 稍微透明一點點，感覺更柔和 */
         }
 
         /* --- 農場田地網格 --- */
@@ -205,16 +194,53 @@
         .open-btn:hover { background-color: #5da035; }
         .open-btn i { margin-left: 8px; }
 
+        /* 頁尾樣式 - 設定 relative 讓左下角圖片可以定位 */
         footer {
-            margin-top: 0; /* 改為0，緊接在圖片下方 */
-            text-align: center; padding: 30px;
-            background-color: var(--soil-brown); color: var(--cream-bg); font-weight: bold;
+            margin-top: 40px;
+            text-align: center; 
+            padding: 40px 20px; 
+            background-color: var(--soil-brown); 
+            color: var(--cream-bg); 
+            font-weight: bold;
+            position: relative;
+            /* 移除了 overflow: hidden 以免切到貓咪 */
+        }
+        
+        footer p {
+            position: relative;
+            z-index: 2; /* 文字在圖片上面 */
+        }
+
+        /* --- 手機版 RWD 調整 --- */
+        /* 當螢幕小於 900px 時，把角落圖片變成置中顯示，以免擋住文字 */
+        @media (max-width: 900px) {
+            .header-cat, .footer-cat {
+                position: static; 
+                display: block;
+                margin: 10px auto; 
+                transform: none;   
+            }
+            
+            header {
+                padding-top: 1rem;
+            }
+
+            footer {
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
         }
     </style>
 </head>
 <body>
 
     <header>
+        <!-- 左上角圖片：放在 Header 裡面 -->
+        <img src="welcome-cats.JPG" alt="歡迎光臨" class="deco-img header-cat">
+
         <h1>
             <i class="fas fa-cat cat-orange"></i> 
             橘咪咪與白奶油的科學農場 
@@ -226,24 +252,16 @@
         </div>
     </header>
 
-    <!-- 新增：提案一 迎賓大圖區塊 -->
-    <div class="welcome-section">
-        <!-- 請確保檔名為 welcome-cats.JPG -->
-        <img src="welcome-cats.JPG" alt="橘咪咪與白奶油歡迎您" class="welcome-img">
-    </div>
-
-    <!-- 新增：農場主人介紹 (使用另外兩張獨照) -->
+    <!-- 農場主人介紹 -->
     <div class="owners-section">
         <div class="owner-avatar">
             <div class="owner-img-box">
-                <!-- 請確保檔名為 mimi-solo.JPG -->
                 <img src="mimi-solo.JPG" alt="橘咪咪園長">
             </div>
             <div class="owner-name"><i class="fas fa-paw cat-orange"></i> 橘咪咪園長</div>
         </div>
         <div class="owner-avatar">
             <div class="owner-img-box">
-                <!-- 請確保檔名為 cream-solo.JPG -->
                 <img src="cream-solo.JPG" alt="白奶油園長">
             </div>
             <div class="owner-name"><i class="fas fa-paw cat-ragdoll"></i> 白奶油園長</div>
@@ -251,7 +269,6 @@
     </div>
 
     <div class="container">
-        <!-- 這裡就是農場田地，所有的卡片都在這個 farm-grid 裡面 -->
         <div class="farm-grid">
             
             <div class="science-card">
@@ -298,32 +315,26 @@
                 </a>
             </div>
 
-            <!-- ★★★ 新增的第 5 塊土地 (卡片)：鹽巴沙子分離 ★★★ -->
+            <!-- 第 5 塊土地：鹽巴沙子分離 -->
             <div class="science-card">
-                <!-- 圖示：使用過濾漏斗 (fa-filter) -->
                 <div class="card-icon-header"><i class="fas fa-filter"></i></div>
                 <div class="card-body">
                     <h3>🧂 鹽巴沙子分離術</h3>
                     <p class="desc">糟糕！橘咪咪把鹽巴混進沙坑了。快運用「溶解、過濾、結晶」的科學方法，幫白奶油把乾淨的鹽巴變回來！</p>
                 </div>
-                <!-- 這裡連結到 5.html -->
                 <a href="5.html" target="_blank" class="open-btn">
                     開始遊戲 <i class="fas fa-play"></i>
                 </a>
             </div>
-            <!-- ★★★ 新增結束 ★★★ -->
 
         </div>
     </div>
 
-    <!-- 新增：提案三 頁尾療癒圖區塊 -->
-    <div class="footer-img-container">
-        <!-- 請確保檔名為 sleepy-cats.JPG -->
-        <img src="sleepy-cats.JPG" alt="學習累了休息一下" class="footer-img">
-    </div>
-
     <footer>
-        <p>Created with ❤️ by 兩隻科學貓咪：橘咪咪與白奶油的主人
+        <!-- 左下角圖片：放在 Footer 裡面 -->
+        <img src="sleepy-cats.JPG" alt="休息一下" class="deco-img footer-cat">
+
+        <p>Created with ❤️ by 兩隻科學貓咪：橘咪咪與白奶油的主人</p>
     </footer>
 
 </body>
