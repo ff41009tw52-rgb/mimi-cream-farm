@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>橘咪咪與白奶油的實驗室 V12</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #2c3e50;
+            font-family: 'Microsoft JhengHei', 'Heiti TC', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        #game-container {
+            position: relative;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #34495e;
+            cursor: none; /* 隱藏鼠標，讓貓咪直接跟隨 */
+            max-width: 100%;
+            max-height: 100vh;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        /* UI 層 */
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .hud-top {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 30px;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            border: 2px solid rgba(255,255,255,0.3);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .mission-container {
+            position: absolute;
+            top: 80px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        #current-mission {
+            background-color: #fff;
+            color: #333;
+            padding: 12px 40px;
+            border-radius: 50px;
+            font-size: 26px;
+            font-weight: 900;
+            border: 6px solid #f1c40f;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: center;
+        }
+
+        .mission-label {
+            display: block;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 4px;
+            font-weight: normal;
+        }
+
+        .overlay-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(44, 62, 80, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 10;
+            pointer-events: auto;
+            backdrop-filter: blur(3px); 
+            transition: opacity 0.3s;
+            cursor: default;
+        }
+
+        .overlay-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        h1 {
+            color: #f1c40f;
+            font-size: 42px;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 0px #e67e22;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        p {
+            font-size: 20px;
+            line-height: 1.6;
+            text-align: center;
+            max-width: 85%;
+            color: #ecf0f1;
+            margin: 10px 0;
+        }
+
+        .legend {
+            background: rgba(0, 0, 0, 0.3); 
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: left;
+            font-size: 18px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .legend div { margin: 10px 0; display: flex; align-items: center; }
+        .dot { width: 16px; height: 16px; border-radius: 50%; display: inline-block; margin-right: 12px; border: 2px solid rgba(255,255,255,0.5); }
+
+        button {
+            padding: 15px 50px;
+            font-size: 28px;
+            background: linear-gradient(to bottom, #f1c40f, #f39c12);
+            color: #2c3e50;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #d35400;
+            transition: transform 0.1s;
+            margin-top: 30px;
+        }
+
+        button:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #d35400;
+        }
+
+        .floating-text {
+            position: absolute;
+            font-weight: bold;
+            font-size: 28px;
+            pointer-events: none;
+            animation: floatUp 0.8s forwards;
+            text-shadow: 2px 2px 0 #000;
+            z-index: 5;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-50px) scale(1.2); opacity: 0; }
+        }
+
+        /* V12 更新：移除陰影，字體 48px */
+        #result-title { 
+            font-size: 48px; 
+            margin-bottom: 20px; 
+            font-weight: bold;
+            text-shadow: none; /* 移除陰影 */
+        }
+        
+        #result-msg { 
+            font-size: 20px; 
+            color: #bdc3c7; 
+            text-align: left; 
+            background: rgba(0,0,0,0.5);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.15);
+            width: 80%;
+            line-height: 1.8;
+        }
+        #final-score { font-size: 72px; font-weight: 800; color: #f1c40f; margin: 15px 0; text-shadow: 0 0 15px rgba(241, 196, 15, 0.6); }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <canvas id="gameCanvas" width="600" height="800"></canvas>
+    
+    <div id="ui-layer">
+        <div class="hud-top">
+            <div class="stat-box" id="score-display">🏆 分數: 0 / 200</div>
+            <div class="stat-box" id="lives-display">❤️ 生命: 3</div>
+        </div>
+        <div class="mission-container">
+            <div id="current-mission">
+                <span class="mission-label">白奶油博士的指令</span>
+                <span id="mission-text">準備開始...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 開始畫面 -->
+    <div id="start-screen" class="overlay-screen">
+        <h1>🐱 橘咪咪與白奶油的實驗室</h1>
+        <p>請用滑鼠或手指控制橘咪咪，<br>接住白奶油博士指定的藥品！</p>
+        
+        <div class="legend">
+            <div><span class="dot" style="background:#2ecc71"></span> 檸檬酸 / <span class="dot" style="background:#e74c3c"></span> 醋 = <b style="color:#ff9999">酸性</b></div>
+            <div><span class="dot" style="background:#3498db"></span> 小蘇打 = <b style="color:#99ccff">鹼性</b></div>
+            <div><span class="dot" style="background:#f1c40f"></span> 砂糖 / <span class="dot" style="background:#ecf0f1"></span> 食鹽 = <b style="color:#ffffcc">中性</b></div>
+        </div>
+        <p style="color: #f1c40f; font-weight: bold; font-size: 22px;">目標：200分 完美通關！</p>
+
+        <button onclick="game.start()">開始整理</button>
+    </div>
+
+    <!-- 結算畫面 -->
+    <div id="result-screen" class="overlay-screen hidden">
+        <h1 id="result-title">標題</h1>
+        <div id="result-msg">訊息</div>
+        <div style="margin-top: 15px; font-size: 20px; color: #fff;">本次得分</div>
+        <div id="final-score">0</div>
+        <button onclick="game.start()">再玩一次</button>
+    </div>
+</div>
+
+<script>
+/**
+ * 遊戲邏輯核心 V12
+ */
+const game = {
+    canvas: document.getElementById('gameCanvas'),
+    ctx: document.getElementById('gameCanvas').getContext('2d'),
+    state: {
+        score: 0,
+        lives: 3,
+        isPlaying: false,
+        frameCount: 0,
+        items: [],
+        currentMission: null,
+        missionItemsCollected: 0, 
+        currentMissionTarget: 2, 
+        targetScore: 200
+    },
+    config: {
+        width: 600,
+        height: 800,
+        playerSpeed: 9 
+    },
+    itemTypes: [
+        { name: "檸檬酸水", type: "acid", color: "#2ecc71", shape: "conical", labelColor: "#27ae60" },
+        { name: "醋", type: "acid", color: "#e74c3c", shape: "round", labelColor: "#c0392b" },
+        { name: "小蘇打水", type: "base", color: "#3498db", shape: "tube", labelColor: "#2980b9" },
+        { name: "小蘇打水", type: "base", color: "#3498db", shape: "tube", labelColor: "#2980b9" }, 
+        { name: "砂糖水", type: "neutral", color: "#f1c40f", shape: "jar", labelColor: "#d35400" },
+        { name: "食鹽水", type: "neutral", color: "#ecf0f1", shape: "cup", labelColor: "#7f8c8d" }
+    ],
+    missions: [
+        { type: "acid", text: "收集：酸性溶液", color: "#ffcdd2", borderColor: "#e74c3c" },
+        { type: "base", text: "收集：鹼性溶液", color: "#bbdefb", borderColor: "#3498db" },
+        { type: "neutral", text: "收集：中性溶液", color: "#fff9c4", borderColor: "#f1c40f" }
+    ],
+    player: { x: 0, y: 0, width: 100, height: 90, dx: 0 },
+
+    init: function() {
+        this.resize();
+        this.player.x = this.canvas.width / 2 - this.player.width / 2;
+        this.player.y = this.canvas.height - 130;
+        
+        window.addEventListener('keydown', e => this.handleKeyInput(e, true));
+        window.addEventListener('keyup', e => this.handleKeyInput(e, false));
+        this.canvas.addEventListener('touchmove', e => this.handleMove(e), {passive: false});
+        this.canvas.addEventListener('mousemove', e => this.handleMove(e));
+        
+        requestAnimationFrame(() => this.loop());
+    },
+
+    start: function() {
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('result-screen').classList.add('hidden');
+        
+        this.state.score = 0;
+        this.state.lives = 3;
+        this.state.items = [];
+        this.state.frameCount = 0;
+        this.state.isPlaying = true;
+        this.state.missionItemsCollected = 0;
+        
+        this.changeMission(); 
+        this.updateUI();
+    },
+
+    resize: function() {
+        let scale = Math.min(window.innerWidth / 600, window.innerHeight / 800);
+        if(scale > 1) scale = 1;
+    },
+
+    handleKeyInput: function(e, isDown) {
+        if (!this.state.isPlaying) return;
+        if (e.key === 'ArrowRight') this.player.dx = isDown ? this.config.playerSpeed : 0;
+        if (e.key === 'ArrowLeft') this.player.dx = isDown ? -this.config.playerSpeed : 0;
+    },
+
+    handleMove: function(e) {
+        if (!this.state.isPlaying) return;
+        e.preventDefault();
+        
+        const rect = this.canvas.getBoundingClientRect();
+        let clientX = (e.type === 'touchmove') ? e.touches[0].clientX : e.clientX;
+
+        const scaleX = this.canvas.width / rect.width;
+        const relativeX = (clientX - rect.left) * scaleX;
+        
+        this.player.x = relativeX - this.player.width / 2;
+
+        if (this.player.x < 0) this.player.x = 0;
+        if (this.player.x + this.player.width > this.canvas.width) this.player.x = this.canvas.width - this.player.width;
+    },
+
+    changeMission: function() {
+        let newMission;
+        do {
+            newMission = this.missions[Math.floor(Math.random() * this.missions.length)];
+        } while (this.state.currentMission && newMission.type === this.state.currentMission.type);
+
+        this.state.currentMission = newMission;
+        this.state.missionItemsCollected = 0;
+        this.state.currentMissionTarget = Math.floor(Math.random() * 2) + 2; 
+
+        const missionEl = document.getElementById('current-mission');
+        const textEl = document.getElementById('mission-text');
+        
+        textEl.textContent = newMission.text;
+        missionEl.style.backgroundColor = newMission.color;
+        missionEl.style.borderColor = newMission.borderColor;
+        
+        missionEl.style.transform = "scale(1.15)";
+        setTimeout(() => missionEl.style.transform = "scale(1)", 250);
+    },
+
+    spawnItem: function() {
+        const typeData = this.itemTypes[Math.floor(Math.random() * this.itemTypes.length)];
+        const speedVar = Math.random() * 2.0 + 1.5; 
+        
+        let x = 0;
+        let safe = false;
+        let attempts = 0;
+        
+        while(!safe && attempts < 10) {
+            x = Math.random() * (this.canvas.width - 70) + 10;
+            safe = true;
+            for(let item of this.state.items) {
+                if(item.y < 150 && Math.abs(item.x - x) < 100) { 
+                    safe = false;
+                    break;
+                }
+            }
+            attempts++;
+        }
+        
+        this.state.items.push({
+            x: x,
+            y: -80,
+            width: 50, 
+            height: 60,
+            data: typeData,
+            speed: speedVar,
+            rot: 0,
+            rotSpeed: (Math.random() - 0.5) * 0.08
+        });
+    },
+
+    update: function() {
+        if (!this.state.isPlaying) return;
+        
+        this.state.frameCount++;
+
+        if (this.player.dx !== 0) {
+            this.player.x += this.player.dx;
+            if (this.player.x < 0) this.player.x = 0;
+            if (this.player.x + this.player.width > this.canvas.width) this.player.x = this.canvas.width - this.player.width;
+        }
+
+        let spawnRate = 60;
+        if (this.state.score > 50) spawnRate = 50;
+        if (this.state.score > 120) spawnRate = 45; 
+        
+        if (this.state.frameCount % spawnRate === 0 && this.state.items.length < 4) {
+            this.spawnItem();
+        }
+
+        for (let i = 0; i < this.state.items.length; i++) {
+            let item = this.state.items[i];
+            item.y += item.speed;
+            item.rot += item.rotSpeed;
+
+            if (this.checkCollision(this.player, item)) {
+                this.handleCollection(item);
+                this.state.items.splice(i, 1);
+                i--;
+                continue;
+            }
+
+            if (item.y > this.canvas.height) {
+                this.state.items.splice(i, 1);
+                i--;
+            }
+        }
+    },
+
+    checkCollision: function(player, item) {
+        const hitboxPadding = 15;
+        return (item.x + hitboxPadding < player.x + player.width &&
+                item.x + item.width - hitboxPadding > player.x &&
+                item.y + item.height > player.y + 50 && 
+                item.y < player.y + player.height);
+    },
+
+    handleCollection: function(item) {
+        const isCorrect = item.data.type === this.state.currentMission.type;
+        
+        if (isCorrect) {
+            this.state.score += 10;
+            this.state.missionItemsCollected++;
+            this.showFloatingText("+10", "#2ecc71", this.player.x);
+            
+            if (this.state.score >= this.state.targetScore) {
+                this.showResult(true, "pass");
+                return;
+            }
+
+            if (this.state.missionItemsCollected >= this.state.currentMissionTarget) {
+                 this.changeMission();
+            }
+
+        } else {
+            this.state.lives--;
+            this.showFloatingText("-1 ❤️", "#e74c3c", this.player.x);
+            this.canvas.style.transform = "translateX(5px)";
+            setTimeout(() => this.canvas.style.transform = "translateX(0)", 50);
+
+            if (this.state.lives <= 0) {
+                this.showResult(false, "fail");
+            }
+        }
+        this.updateUI();
+    },
+
+    showResult: function(isWin, type) {
+        this.state.isPlaying = false;
+        
+        const titleEl = document.getElementById('result-title');
+        const msgEl = document.getElementById('result-msg');
+        const scoreEl = document.getElementById('final-score');
+        const screen = document.getElementById('result-screen');
+        
+        scoreEl.textContent = this.state.score;
+        screen.classList.remove('hidden');
+
+        if (this.state.score >= 200) {
+            titleEl.textContent = "🎉 完美實驗！";
+            titleEl.style.color = "#2ecc71";
+            msgEl.innerHTML = `
+                <span style="color:#f1c40f">白奶油博士：</span>「完美同步！各項數值都達到了理論巔峰，這是一次教科書級別的實驗！」<br><br>
+                <span style="color:#e67e22">橘咪咪：</span>「檢測不到任何誤差！您簡直就是精密的代名詞！」
+            `;
+        } else if (this.state.score >= 100) {
+            titleEl.textContent = "數據穩定";
+            titleEl.style.color = "#3498db";
+            msgEl.innerHTML = `
+                <span style="color:#f1c40f">白奶油博士：</span>「樣本採集成功。雖然有些微雜訊，但整體表現相當優異。」<br><br>
+                <span style="color:#e67e22">橘咪咪：</span>「數據正在上傳中～做得好！下次我們一定能捕捉到那最後的 1%！」
+            `;
+        } else {
+            titleEl.textContent = "需要校正";
+            titleEl.style.color = "#e74c3c";
+            msgEl.innerHTML = `
+                <span style="color:#e67e22">橘咪咪：</span>「嗚嗚……系統發出警報了，數據好像不太對勁……」<br><br>
+                <span style="color:#f1c40f">白奶油博士：</span>「冷靜點，變數控制失誤常有的事。讓我們重新校準儀器，再來一次。」
+            `;
+        }
+    },
+
+    updateUI: function() {
+        document.getElementById('score-display').textContent = `🏆 分數: ${this.state.score} / ${this.state.targetScore}`;
+        let hearts = "";
+        for(let i=0; i<this.state.lives; i++) hearts += "❤️";
+        document.getElementById('lives-display').textContent = `生命: ${hearts}`;
+    },
+
+    showFloatingText: function(text, color, x) {
+        const div = document.createElement('div');
+        div.className = 'floating-text';
+        div.textContent = text;
+        div.style.color = color;
+        div.style.left = (this.canvas.getBoundingClientRect().left + x + 25) + 'px';
+        div.style.top = (this.canvas.getBoundingClientRect().top + this.player.y) + 'px';
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 1000);
+    },
+
+    drawBackground: function() {
+        const ctx = this.ctx;
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+
+        // 1. 牆壁
+        ctx.fillStyle = "#dfe6e9"; 
+        ctx.fillRect(0, 0, w, h);
+        
+        // 磁磚線
+        ctx.strokeStyle = "#b2bec3";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for(let i=0; i<h; i+=50) {
+            ctx.moveTo(0, i); ctx.lineTo(w, i);
+        }
+        for(let j=0; j<w; j+=50) {
+            ctx.moveTo(j, 0); ctx.lineTo(j, h);
+        }
+        ctx.stroke();
+
+        // 2. 實驗室層架
+        ctx.fillStyle = "#636e72";
+        ctx.fillRect(50, 200, w-100, 10);
+        ctx.fillRect(50, 400, w-100, 10);
+
+        // 3. 背景中的裝飾藥瓶
+        this.drawDecoBottle(80, 160, "#a29bfe");
+        this.drawDecoBottle(130, 150, "#81ecec");
+        this.drawDecoBottle(450, 160, "#fab1a0");
+        this.drawDecoBottle(500, 360, "#ffeaa7");
+        this.drawDecoBottle(100, 360, "#55efc4");
+
+        // V12: 畫出白奶油博士 (布偶貓版)
+        this.drawWhiteButter(520, 340);
+
+        // 4. 地板/桌面
+        ctx.fillStyle = "#2d3436";
+        ctx.fillRect(0, h-80, w, 80);
+        ctx.fillStyle = "#353b48"; // 桌面邊緣
+        ctx.fillRect(0, h-90, w, 10);
+    },
+
+    // V12: 白奶油博士 (布偶貓版)
+    drawWhiteButter: function(x, y) {
+        const ctx = this.ctx;
+        ctx.save();
+        
+        // --- 蓬鬆的大尾巴 (畫在身體後面) ---
+        ctx.beginPath();
+        ctx.strokeStyle = "#eee"; // 淺灰白
+        ctx.lineWidth = 15;
+        ctx.lineCap = "round";
+        ctx.moveTo(x + 15, y + 25);
+        ctx.bezierCurveTo(x + 40, y + 25, x + 40, y - 20, x + 20, y - 30);
+        ctx.stroke();
+        // 尾巴細節 (毛)
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 10;
+        ctx.stroke();
+
+        // --- 身體 (坐姿，梯形圓角) ---
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.moveTo(x - 15, y - 10); // 頸部左
+        ctx.lineTo(x + 15, y - 10); // 頸部右
+        ctx.quadraticCurveTo(x + 25, y + 30, x + 20, y + 35); // 右側身
+        ctx.lineTo(x - 20, y + 35); // 底部
+        ctx.quadraticCurveTo(x - 25, y + 30, x - 15, y - 10); // 左側身
+        ctx.fill();
+        
+        // 後腿線條 (做出蹲坐感)
+        ctx.fillStyle = "#f0f0f0"; // 稍微深一點的白
+        ctx.beginPath();
+        ctx.ellipse(x - 15, y + 28, 8, 12, -0.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(x + 15, y + 28, 8, 12, 0.3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // --- 頭部 (橢圓偏扁，臉頰蓬鬆) ---
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.ellipse(x, y - 15, 24, 20, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // --- 耳朵 (布偶貓耳朵，中等大小，耳尖圓潤，稍微分開) ---
+        ctx.fillStyle = "#ffffff"; 
+        ctx.beginPath();
+        // 左耳
+        ctx.moveTo(x - 18, y - 25);
+        ctx.quadraticCurveTo(x - 25, y - 45, x - 8, y - 32);
+        // 右耳
+        ctx.moveTo(x + 18, y - 25);
+        ctx.quadraticCurveTo(x + 25, y - 45, x + 8, y - 32);
+        ctx.fill();
+
+        // 耳朵內部 (淺粉/灰，布偶貓特徵)
+        ctx.fillStyle = "#ffeaea";
+        ctx.beginPath();
+        // 左耳內
+        ctx.moveTo(x - 16, y - 28);
+        ctx.quadraticCurveTo(x - 22, y - 40, x - 10, y - 32);
+        // 右耳內
+        ctx.moveTo(x + 16, y - 28);
+        ctx.quadraticCurveTo(x + 22, y - 40, x + 10, y - 32);
+        ctx.fill();
+
+        // --- 臉部五官 ---
+        
+        // 眼睛 (湛藍色大眼)
+        ctx.fillStyle = "#3498db"; // 藍色
+        ctx.beginPath();
+        ctx.ellipse(x - 8, y - 18, 4, 5, 0, 0, Math.PI * 2);
+        ctx.ellipse(x + 8, y - 18, 4, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // 眼神光
+        ctx.fillStyle = "white";
+        ctx.beginPath();
+        ctx.arc(x - 9, y - 20, 1.5, 0, Math.PI*2);
+        ctx.arc(x + 7, y - 20, 1.5, 0, Math.PI*2);
+        ctx.fill();
+
+        // 鼻子 (粉紅色倒三角)
+        ctx.fillStyle = "pink";
+        ctx.beginPath();
+        ctx.moveTo(x - 3, y - 13);
+        ctx.lineTo(x + 3, y - 13);
+        ctx.lineTo(x, y - 9);
+        ctx.fill();
+
+        // 嘴巴
+        ctx.strokeStyle = "#999";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, y - 9); ctx.lineTo(x - 3, y - 6);
+        ctx.moveTo(x, y - 9); ctx.lineTo(x + 3, y - 6);
+        ctx.stroke();
+
+        // 眼鏡 (博士特徵，稍微畫大一點框住眼睛)
+        ctx.strokeStyle = "#2980b9";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(x - 8, y - 17, 7, 0, Math.PI * 2); // 左框
+        ctx.arc(x + 8, y - 17, 7, 0, Math.PI * 2); // 右框
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x - 1, y - 17); ctx.lineTo(x + 1, y - 17); // 中樑
+        ctx.stroke();
+
+        // 實驗衣領結 (維持藍色)
+        ctx.fillStyle = "#3498db";
+        ctx.beginPath();
+        ctx.moveTo(x, y + 5);
+        ctx.lineTo(x - 6, y + 12);
+        ctx.lineTo(x + 6, y + 12);
+        ctx.fill();
+
+        ctx.restore();
+    },
+
+    drawDecoBottle: function(x, y, color) {
+        this.ctx.fillStyle = color;
+        this.ctx.globalAlpha = 0.5;
+        this.ctx.beginPath();
+        this.ctx.rect(x, y, 30, 40);
+        this.ctx.rect(x+10, y-10, 10, 10);
+        this.ctx.fill();
+        this.ctx.globalAlpha = 1.0;
+    },
+
+    draw: function() {
+        this.drawBackground();
+        this.drawPlayer();
+        this.state.items.forEach(item => {
+            this.drawItem(item);
+        });
+    },
+
+    drawPlayer: function() {
+        const x = this.player.x;
+        const y = this.player.y;
+        const w = this.player.width;
+        
+        this.ctx.save();
+        
+        // --- 橘咪咪 ---
+
+        // 1. 身體
+        this.ctx.fillStyle = "#e67e22";
+        this.ctx.beginPath();
+        this.ctx.ellipse(x + w/2, y + 50, w/2 - 5, 30, 0, 0, Math.PI*2);
+        this.ctx.fill();
+
+        // 2. 貓耳朵
+        this.ctx.beginPath();
+        this.ctx.moveTo(x + 5, y + 20);
+        this.ctx.lineTo(x - 5, y - 5);  
+        this.ctx.lineTo(x + 30, y + 10); 
+        this.ctx.moveTo(x + w - 5, y + 20);
+        this.ctx.lineTo(x + w + 5, y - 5); 
+        this.ctx.lineTo(x + w - 30, y + 10); 
+        this.ctx.fill();
+
+        // 3. 貓臉
+        this.ctx.beginPath();
+        this.ctx.arc(x + w/2, y + 35, 40, 0, Math.PI*2);
+        this.ctx.fill();
+
+        // 4. 眼睛
+        this.ctx.fillStyle = "white";
+        this.ctx.beginPath();
+        this.ctx.ellipse(x + 30, y + 30, 12, 15, 0, 0, Math.PI*2); 
+        this.ctx.ellipse(x + w - 30, y + 30, 12, 15, 0, 0, Math.PI*2); 
+        this.ctx.fill();
+        
+        this.ctx.fillStyle = "#333";
+        this.ctx.beginPath();
+        this.ctx.arc(x + 30, y + 30, 7, 0, Math.PI*2);
+        this.ctx.arc(x + w - 30, y + 30, 7, 0, Math.PI*2);
+        this.ctx.fill();
+
+        this.ctx.fillStyle = "white";
+        this.ctx.beginPath();
+        this.ctx.arc(x + 33, y + 27, 3, 0, Math.PI*2);
+        this.ctx.arc(x + w - 27, y + 27, 3, 0, Math.PI*2);
+        this.ctx.fill();
+
+        // 5. 嘴巴 & 鼻子
+        this.ctx.strokeStyle = "#333";
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.ctx.arc(x + w/2 - 5, y + 45, 5, 0.2, Math.PI);
+        this.ctx.arc(x + w/2 + 5, y + 45, 5, 0, Math.PI - 0.2);
+        this.ctx.stroke();
+        
+        this.ctx.fillStyle = "pink";
+        this.ctx.beginPath();
+        this.ctx.arc(x + w/2, y + 40, 4, 0, Math.PI*2);
+        this.ctx.fill();
+
+        // 6. 鬍鬚
+        this.ctx.strokeStyle = "white";
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.ctx.moveTo(x + 15, y + 38); this.ctx.lineTo(x - 10, y + 32);
+        this.ctx.moveTo(x + 15, y + 44); this.ctx.lineTo(x - 10, y + 44);
+        this.ctx.moveTo(x + w - 15, y + 38); this.ctx.lineTo(x + w + 10, y + 32);
+        this.ctx.moveTo(x + w - 15, y + 44); this.ctx.lineTo(x + w + 10, y + 44);
+        this.ctx.stroke();
+
+        // 7. 推車
+        this.ctx.fillStyle = "#a1887f"; 
+        this.ctx.fillRect(x - 5, y + 65, w + 10, 30);
+        this.ctx.strokeStyle = "#5d4037";
+        this.ctx.lineWidth = 3;
+        this.ctx.strokeRect(x - 5, y + 65, w + 10, 30);
+        
+        // 8. 貓掌
+        this.ctx.fillStyle = "white"; 
+        this.ctx.beginPath();
+        this.ctx.ellipse(x + 20, y + 65, 10, 8, 0, 0, Math.PI*2);
+        this.ctx.ellipse(x + w - 20, y + 65, 10, 8, 0, 0, Math.PI*2);
+        this.ctx.fill();
+        this.ctx.strokeStyle = "#ddd";
+        this.ctx.lineWidth = 1;
+        this.ctx.beginPath();
+        this.ctx.moveTo(x + 20, y + 60); this.ctx.lineTo(x + 20, y + 68);
+        this.ctx.moveTo(x + w - 20, y + 60); this.ctx.lineTo(x + w - 20, y + 68);
+        this.ctx.stroke();
+
+        // 9. 輪子
+        this.ctx.fillStyle = "#2c3e50";
+        this.ctx.beginPath();
+        this.ctx.arc(x + 15, y + 95, 9, 0, Math.PI*2);
+        this.ctx.arc(x + w - 15, y + 95, 9, 0, Math.PI*2);
+        this.ctx.fill();
+
+        this.ctx.restore();
+    },
+
+    drawItem: function(item) {
+        const x = item.x;
+        const y = item.y;
+        const w = item.width;
+        const h = item.height;
+        
+        this.ctx.save();
+        this.ctx.translate(x + w/2, y + h/2);
+        this.ctx.rotate(item.rot);
+        this.ctx.translate(-(x + w/2), -(y + h/2));
+
+        this.ctx.fillStyle = item.data.color;
+        this.ctx.strokeStyle = "rgba(255,255,255,0.8)";
+        this.ctx.lineWidth = 2;
+
+        this.ctx.beginPath();
+        
+        switch(item.data.shape) {
+            case "conical":
+                this.ctx.moveTo(x + w/2 - 6, y);
+                this.ctx.lineTo(x + w/2 + 6, y);
+                this.ctx.lineTo(x + w/2 + 6, y + 18);
+                this.ctx.lineTo(x + w, y + h);
+                this.ctx.lineTo(x, y + h);
+                this.ctx.lineTo(x + w/2 - 6, y + 18);
+                break;
+            case "round":
+                this.ctx.rect(x + w/2 - 7, y, 14, 22);
+                this.ctx.arc(x + w/2, y + h - 18, 23, 0, Math.PI*2);
+                break;
+            case "tube":
+                this.ctx.roundRect(x + 12, y, 24, h, 12);
+                break;
+            case "jar":
+                this.ctx.rect(x + 6, y, w - 12, h);
+                this.ctx.rect(x + 4, y - 6, w - 8, 6);
+                break;
+            case "cup":
+                this.ctx.moveTo(x, y);
+                this.ctx.lineTo(x + w, y);
+                this.ctx.lineTo(x + w - 6, y + h);
+                this.ctx.lineTo(x + 6, y + h);
+                break;
+        }
+        
+        this.ctx.fill();
+        this.ctx.stroke();
+
+        this.ctx.fillStyle = "rgba(255,255,255,0.3)";
+        this.ctx.beginPath();
+        this.ctx.arc(x + w/2, y + h/2, 6, 0, Math.PI*2);
+        this.ctx.fill();
+
+        this.ctx.restore();
+
+        // 標籤
+        this.ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+        this.ctx.shadowColor = "rgba(0,0,0,0.3)";
+        this.ctx.shadowBlur = 4;
+        this.ctx.roundRect(item.x - 25, item.y - 30, item.width + 50, 26, 6);
+        this.ctx.fill();
+        this.ctx.shadowBlur = 0;
+        
+        this.ctx.fillStyle = "black";
+        this.ctx.font = "bold 16px Arial";
+        this.ctx.textAlign = "center";
+        this.ctx.fillText(item.data.name, item.x + item.width/2, item.y - 10);
+    },
+
+    loop: function() {
+        this.update();
+        this.draw();
+        requestAnimationFrame(() => this.loop());
+    }
+};
+
+game.init();
+
+</script>
+</body>
+</html>
