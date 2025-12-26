@@ -2,32 +2,40 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Q版電路小實驗</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Q版電路小實驗 (手機觸控版)</title>
     
-    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- 引入 React 和 ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     
-    <!-- 引入 Babel 用於解析 JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; background-color: #fffbeb; }
+        body { 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            background-color: #fffbeb; 
+            /* 防止手機上拖曳時畫面捲動，這行很重要！ */
+            touch-action: none; 
+        }
         /* 防止選取文字 */
         .no-select { user-select: none; -webkit-user-select: none; }
     </style>
 </head>
 <body>
+    <a href="index.html" style="position: fixed; top: 15px; left: 15px; z-index: 9999; background: #FF8C42; color: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: bold; box-shadow: 2px 2px 10px rgba(0,0,0,0.2); font-family: sans-serif; border: 2px solid white;">
+        🐾 回農場
+    </a>
+
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- 簡易圖示元件 (替代 lucide-react) ---
+        // --- 簡易圖示元件 ---
         const IconBase = ({ children, color = "currentColor", size = 24, ...props }) => (
             <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
                 {children}
@@ -43,14 +51,11 @@
         const EyeOff = (props) => <IconBase {...props}><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></IconBase>;
         const RotateCw = (props) => <IconBase {...props}><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></IconBase>;
 
-        // --- 元件定義 ---
-
         const COMPONENT_TYPES = {
             BATTERY: 'battery',
             BULB: 'bulb'
         };
 
-        // 初始位置
         const INITIAL_COMPONENTS = [
             { id: 'bulb-1', type: COMPONENT_TYPES.BULB, x: 400, y: 150, rotation: 0 },
             { id: 'bat-1', type: COMPONENT_TYPES.BATTERY, x: 250, y: 350, rotation: 0 },
@@ -60,7 +65,6 @@
             const [components, setComponents] = useState(INITIAL_COMPONENTS);
             const [wires, setWires] = useState([]);
             
-            // 狀態管理
             const [isDrawing, setIsDrawing] = useState(false);
             const [currentWireStart, setCurrentWireStart] = useState(null);
             
@@ -75,54 +79,43 @@
             const [brightness, setBrightness] = useState(0); 
             const [errorMsg, setErrorMsg] = useState('');
 
-            // 控制顯示輔助點的狀態
             const [showControls, setShowControls] = useState(true);
-            
-            // 電源開關狀態
             const [isSwitchOn, setIsSwitchOn] = useState(false);
 
             const canvasRef = useRef(null);
 
-            // --- 核心數學：取得旋轉後的接點座標 ---
             const getConnectionPoint = (comp, pointType) => {
                 if (!comp) return { x: 0, y: 0 };
                 
-                // 定義元件尺寸與相對接點位置 (未旋轉前)
                 let width, height, localX, localY;
 
                 if (comp.type === COMPONENT_TYPES.BATTERY) {
-                width = 140; height = 60;
-                if (pointType === 'pos') { localX = 10; localY = 40; } // 正極
-                else if (pointType === 'neg') { localX = 130; localY = 40; } // 負極
+                    width = 140; height = 60;
+                    if (pointType === 'pos') { localX = 10; localY = 40; } 
+                    else if (pointType === 'neg') { localX = 130; localY = 40; } 
                 } else if (comp.type === COMPONENT_TYPES.BULB) {
-                width = 80; height = 140;
-                if (pointType === 'thread') { localX = 20; localY = 100; } // 螺紋
-                else if (pointType === 'tip') { localX = 40; localY = 125; } // 底部
+                    width = 80; height = 140;
+                    if (pointType === 'thread') { localX = 20; localY = 100; } 
+                    else if (pointType === 'tip') { localX = 40; localY = 125; } 
                 }
 
                 if (localX === undefined) return { x: 0, y: 0 };
 
-                // 計算中心點
                 const cx = comp.x + width / 2;
                 const cy = comp.y + height / 2;
-
-                // 計算相對於中心的座標
                 const relX = (comp.x + localX) - cx;
                 const relY = (comp.y + localY) - cy;
 
-                // 旋轉變換矩陣
                 const rad = (comp.rotation * Math.PI) / 180;
                 const rotatedX = relX * Math.cos(rad) - relY * Math.sin(rad);
                 const rotatedY = relX * Math.sin(rad) + relY * Math.cos(rad);
 
-                // 轉回絕對座標
                 return {
-                x: cx + rotatedX,
-                y: cy + rotatedY
+                    x: cx + rotatedX,
+                    y: cy + rotatedY
                 };
             };
 
-            // --- 輔助函數：計算電線幾何 ---
             const getWireGeometry = (startPos, endPos, controlOffset) => {
                 const midX = (startPos.x + endPos.x) / 2;
                 const midY = (startPos.y + endPos.y) / 2;
@@ -131,80 +124,106 @@
                 return { cpX, cpY, midX, midY };
             };
 
-            // --- 事件處理 ---
+            // --- 整合滑鼠與觸控的座標取得函式 ---
+            const getClientCoords = (e) => {
+                if (e.touches && e.touches.length > 0) {
+                    return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                } else if (e.changedTouches && e.changedTouches.length > 0) {
+                    // 用於 touchend
+                    return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+                }
+                return { x: e.clientX, y: e.clientY };
+            };
 
             const handleMouseMove = (e) => {
                 if (!canvasRef.current) return;
                 
+                // 支援觸控與滑鼠
+                const coords = getClientCoords(e);
+                
                 const containerRect = canvasRef.current.getBoundingClientRect();
-                const x = e.clientX - containerRect.left;
-                const y = e.clientY - containerRect.top;
+                const x = coords.x - containerRect.left;
+                const y = coords.y - containerRect.top;
                 setMousePos({ x, y });
 
-                // A. 拖曳元件
                 if (draggingCompId) {
-                setComponents(prev => prev.map(c => {
-                    if (c.id === draggingCompId) {
-                    return { ...c, x: x - dragOffset.x, y: y - dragOffset.y };
-                    }
-                    return c;
-                }));
+                    setComponents(prev => prev.map(c => {
+                        if (c.id === draggingCompId) {
+                            return { ...c, x: x - dragOffset.x, y: y - dragOffset.y };
+                        }
+                        return c;
+                    }));
                 }
                 
-                // B. 旋轉元件
                 if (rotatingCompId) {
-                setComponents(prev => prev.map(c => {
-                    if (c.id === rotatingCompId) {
-                    let width = c.type === COMPONENT_TYPES.BATTERY ? 140 : 80;
-                    let height = c.type === COMPONENT_TYPES.BATTERY ? 60 : 140;
-                    const cx = c.x + width / 2;
-                    const cy = c.y + height / 2;
-                    
-                    const angleRad = Math.atan2(y - cy, x - cx);
-                    let angleDeg = angleRad * (180 / Math.PI);
-                    angleDeg += 90; 
+                    setComponents(prev => prev.map(c => {
+                        if (c.id === rotatingCompId) {
+                            let width = c.type === COMPONENT_TYPES.BATTERY ? 140 : 80;
+                            let height = c.type === COMPONENT_TYPES.BATTERY ? 60 : 140;
+                            const cx = c.x + width / 2;
+                            const cy = c.y + height / 2;
+                            
+                            const angleRad = Math.atan2(y - cy, x - cx);
+                            let angleDeg = angleRad * (180 / Math.PI);
+                            angleDeg += 90; 
 
-                    return { ...c, rotation: angleDeg };
-                    }
-                    return c;
-                }));
+                            return { ...c, rotation: angleDeg };
+                        }
+                        return c;
+                    }));
                 }
 
-                // C. 拖曳電線控制點
                 if (draggingWireId) {
-                setWires(prev => prev.map(w => {
-                    if (w.id === draggingWireId) {
-                    const startComp = components.find(c => c.id === w.start.compId);
-                    const endComp = components.find(c => c.id === w.end.compId);
-                    if (!startComp || !endComp) return w;
+                    setWires(prev => prev.map(w => {
+                        if (w.id === draggingWireId) {
+                            const startComp = components.find(c => c.id === w.start.compId);
+                            const endComp = components.find(c => c.id === w.end.compId);
+                            if (!startComp || !endComp) return w;
 
-                    const startPos = getConnectionPoint(startComp, w.start.pointType);
-                    const endPos = getConnectionPoint(endComp, w.end.pointType);
-                    
-                    const midX = (startPos.x + endPos.x) / 2;
-                    const midY = (startPos.y + endPos.y) / 2;
+                            const startPos = getConnectionPoint(startComp, w.start.pointType);
+                            const endPos = getConnectionPoint(endComp, w.end.pointType);
+                            
+                            const midX = (startPos.x + endPos.x) / 2;
+                            const midY = (startPos.y + endPos.y) / 2;
 
-                    return {
-                        ...w,
-                        controlOffset: {
-                        x: x - midX,
-                        y: y - midY
+                            return {
+                                ...w,
+                                controlOffset: {
+                                    x: x - midX,
+                                    y: y - midY
+                                }
+                            };
                         }
-                    };
-                    }
-                    return w;
-                }));
+                        return w;
+                    }));
                 }
             };
 
-            const handleGlobalMouseUp = () => {
+            const handleGlobalMouseUp = (e) => {
+                // 手機版：放開手指時，偵測是否落在接點上 (Auto Snap)
+                if (isDrawing && e && e.changedTouches && e.changedTouches.length > 0) {
+                    const touch = e.changedTouches[0];
+                    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                    
+                    if (target) {
+                        // 尋找是否有帶有接點資料的 div
+                        const nodeDiv = target.closest('[data-point-type]');
+                        if (nodeDiv) {
+                            const compId = nodeDiv.getAttribute('data-comp-id');
+                            const pointType = nodeDiv.getAttribute('data-point-type');
+                            // 觸發連線邏輯
+                            handleNodeMouseUp(e, compId, pointType);
+                        }
+                    }
+                }
+
                 setDraggingCompId(null);
                 setDraggingWireId(null);
                 setRotatingCompId(null);
                 
                 if (isDrawing) {
-                setIsDrawing(false);
-                setCurrentWireStart(null);
+                    setIsDrawing(false);
+                    setCurrentWireStart(null);
                 }
             };
 
@@ -214,10 +233,12 @@
                 if (isSwitchOn) togglePower();
 
                 if (!canvasRef.current) return;
+                
+                const coords = getClientCoords(e);
                 const comp = components.find(c => c.id === id);
                 const containerRect = canvasRef.current.getBoundingClientRect();
-                const offsetX = e.clientX - containerRect.left - comp.x;
-                const offsetY = e.clientY - containerRect.top - comp.y;
+                const offsetX = coords.x - containerRect.left - comp.x;
+                const offsetY = coords.y - containerRect.top - comp.y;
 
                 setDraggingCompId(id);
                 setDragOffset({ x: offsetX, y: offsetY });
@@ -231,7 +252,8 @@
 
             const handleNodeMouseDown = (e, compId, pointType) => {
                 e.stopPropagation();
-                e.preventDefault();
+                // 這裡不使用 preventDefault 以免影響點擊，但在 touchStart 時可能需要
+                // e.preventDefault(); 
                 if (!showControls) return;
                 if (isSwitchOn) togglePower();
 
@@ -244,26 +266,26 @@
             const handleNodeMouseUp = (e, compId, pointType) => {
                 e.stopPropagation();
                 if (isDrawing && currentWireStart) {
-                if (currentWireStart.compId === compId && currentWireStart.pointType === pointType) {
+                    if (currentWireStart.compId === compId && currentWireStart.pointType === pointType) {
+                        setIsDrawing(false);
+                        setCurrentWireStart(null);
+                        return;
+                    }
+                    const exists = wires.some(w => 
+                        (w.start.compId === currentWireStart.compId && w.start.pointType === currentWireStart.pointType && w.end.compId === compId && w.end.pointType === pointType) ||
+                        (w.end.compId === currentWireStart.compId && w.end.pointType === currentWireStart.pointType && w.start.compId === compId && w.start.pointType === pointType)
+                    );
+
+                    if (!exists) {
+                        setWires([...wires, {
+                            id: `wire-${Date.now()}`,
+                            start: currentWireStart,
+                            end: { compId, pointType },
+                            controlOffset: { x: 0, y: 50 } 
+                        }]);
+                    }
                     setIsDrawing(false);
                     setCurrentWireStart(null);
-                    return;
-                }
-                const exists = wires.some(w => 
-                    (w.start.compId === currentWireStart.compId && w.start.pointType === currentWireStart.pointType && w.end.compId === compId && w.end.pointType === pointType) ||
-                    (w.end.compId === currentWireStart.compId && w.end.pointType === currentWireStart.pointType && w.start.compId === compId && w.start.pointType === pointType)
-                );
-
-                if (!exists) {
-                    setWires([...wires, {
-                    id: `wire-${Date.now()}`,
-                    start: currentWireStart,
-                    end: { compId, pointType },
-                    controlOffset: { x: 0, y: 50 } 
-                    }]);
-                }
-                setIsDrawing(false);
-                setCurrentWireStart(null);
                 }
             };
 
@@ -277,8 +299,8 @@
             const addBattery = () => {
                 if (isSwitchOn) togglePower();
                 if (components.filter(c => c.type === COMPONENT_TYPES.BATTERY).length >= 5) {
-                setErrorMsg('最多只能使用五顆電池喔！');
-                return;
+                    setErrorMsg('最多只能使用五顆電池喔！');
+                    return;
                 }
                 setComponents([...components, { id: `bat-${Date.now()}`, type: COMPONENT_TYPES.BATTERY, x: 100, y: 350, rotation: 0 }]);
                 setLitBulbIds(new Set());
@@ -287,8 +309,8 @@
             const addBulb = () => {
                 if (isSwitchOn) togglePower();
                 if (components.filter(c => c.type === COMPONENT_TYPES.BULB).length >= 5) {
-                setErrorMsg('最多只能使用五顆燈泡喔！');
-                return;
+                    setErrorMsg('最多只能使用五顆燈泡喔！');
+                    return;
                 }
                 const offset = components.filter(c => c.type === COMPONENT_TYPES.BULB).length * 60; 
                 setComponents([...components, { id: `bulb-${Date.now()}`, type: COMPONENT_TYPES.BULB, x: 150 + offset, y: 150 + (offset % 100), rotation: 0 }]);
@@ -315,13 +337,13 @@
 
             const togglePower = () => {
                 if (isSwitchOn) {
-                setIsSwitchOn(false);
-                setLitBulbIds(new Set());
-                setBrightness(0);
-                setErrorMsg('');
+                    setIsSwitchOn(false);
+                    setLitBulbIds(new Set());
+                    setBrightness(0);
+                    setErrorMsg('');
                 } else {
-                setIsSwitchOn(true);
-                runSimulation();
+                    setIsSwitchOn(true);
+                    runSimulation();
                 }
             };
 
@@ -344,10 +366,10 @@
                 });
 
                 wires.forEach(w => {
-                const u = `${w.start.compId}:${w.start.pointType}`;
-                const v = `${w.end.compId}:${w.end.pointType}`;
-                if (adj[u]) adj[u].push(v);
-                if (adj[v]) adj[v].push(u);
+                    const u = `${w.start.compId}:${w.start.pointType}`;
+                    const v = `${w.end.compId}:${w.end.pointType}`;
+                    if (adj[u]) adj[u].push(v);
+                    if (adj[v]) adj[v].push(u);
                 });
 
                 const batteries = components.filter(c => c.type === COMPONENT_TYPES.BATTERY);
@@ -362,42 +384,31 @@
 
                 const findPath = (current, targetNegNodes, pathVisited, pathBulbs) => {
                     pathVisited.add(current);
-
-                    if (targetNegNodes.has(current)) {
-                        return true;
-                    }
+                    if (targetNegNodes.has(current)) return true;
 
                     const [compId, pointType] = current.split(':');
                     const comp = components.find(c => c.id === compId);
 
                     let nextNodes = [];
-
                     if (adj[current]) {
                         adj[current].forEach(neighbor => {
-                            if (!pathVisited.has(neighbor)) {
-                                nextNodes.push(neighbor);
-                            }
+                            if (!pathVisited.has(neighbor)) nextNodes.push(neighbor);
                         });
                     }
 
                     if (comp && comp.type === COMPONENT_TYPES.BULB) {
                         const otherPoint = pointType === 'tip' ? 'thread' : 'tip';
                         const internalNode = `${compId}:${otherPoint}`;
-                        if (!pathVisited.has(internalNode)) {
-                            nextNodes.push(internalNode);
-                        }
+                        if (!pathVisited.has(internalNode)) nextNodes.push(internalNode);
                     }
                     
                     if (comp && comp.type === COMPONENT_TYPES.BATTERY && pointType === 'neg') {
                         const posNode = `${compId}:pos`;
-                        if (!pathVisited.has(posNode)) {
-                            nextNodes.push(posNode);
-                        }
+                        if (!pathVisited.has(posNode)) nextNodes.push(posNode);
                     }
 
                     for (const nextNode of nextNodes) {
                         const newPathBulbs = new Set(pathBulbs);
-                        
                         const [nextId, nextType] = nextNode.split(':');
                         const nextComp = components.find(c => c.id === nextId);
                         
@@ -410,7 +421,6 @@
                             return true;
                         }
                     }
-
                     return false;
                 };
 
@@ -436,167 +446,178 @@
             };
 
             return (
-                <div className="flex flex-col items-center min-h-screen bg-amber-50 font-sans no-select overflow-hidden"
+                <div 
+                    className="flex flex-col items-center min-h-screen bg-amber-50 font-sans no-select overflow-hidden"
                     onMouseMove={handleMouseMove}
                     onMouseUp={handleGlobalMouseUp}
+                    onTouchMove={handleMouseMove}    // 手指移動 = 滑鼠移動
+                    onTouchEnd={handleGlobalMouseUp} // 手指放開 = 判斷是否連線
                 >
-                <div className="w-full bg-white shadow-md p-4 flex justify-between items-center z-10 gap-4 flex-wrap">
-                    <h1 className="text-2xl font-bold text-slate-700 flex items-center gap-2 mr-auto">
-                    <Zap className="text-yellow-500 fill-yellow-500" />
-                    Q版電路小實驗
-                    </h1>
-                    
-                    <div className="flex gap-2">
-                    <button 
-                        onClick={() => setShowControls(!showControls)}
-                        className={`flex items-center gap-1 px-4 py-2 rounded-full transition font-bold ${showControls ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : 'bg-gray-200 text-gray-500 hover:bg-gray-300'}`}
-                    >
-                        {showControls ? <Eye size={18} /> : <EyeOff size={18} />}
-                        <span className="hidden sm:inline">{showControls ? "隱藏輔助" : "顯示輔助"}</span>
-                    </button>
-
-                    <button onClick={addBattery} className="flex items-center gap-1 px-4 py-2 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition font-bold"><Plus size={18} /> 電池</button>
-                    <button onClick={addBulb} className="flex items-center gap-1 px-4 py-2 bg-yellow-100 text-yellow-700 rounded-full hover:bg-yellow-200 transition font-bold"><Lightbulb size={18} /> 燈泡</button>
-                    <button onClick={resetBoard} className="flex items-center gap-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition font-bold"><RotateCcw size={18} /> 重置</button>
-                    
-                    <button 
-                        onClick={togglePower} 
-                        className={`flex items-center gap-1 px-6 py-2 text-white rounded-full transition shadow-lg transform active:scale-95 font-bold text-lg min-w-[140px] justify-center
-                        ${isSwitchOn ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}
-                        `}
-                    >
-                        <Power size={20} /> 
-                        {isSwitchOn ? "關閉電源" : "開啟電源"}
-                    </button>
-                    </div>
-                </div>
-
-                <div className={`mt-4 px-6 py-2 rounded-lg text-lg font-bold transition-all duration-300 ${
-                    litBulbIds.size > 0 ? 'bg-yellow-100 text-yellow-800 border-2 border-yellow-400' : 
-                    errorMsg ? (isSwitchOn ? 'bg-orange-100 text-orange-800' : 'bg-slate-200 text-slate-700') : 'bg-transparent text-transparent'
-                }`}>
-                    {errorMsg || "準備就緒，請連接電路並開啟電源"}
-                </div> 
-
-                <div className="relative w-full flex-grow cursor-crosshair overflow-hidden" ref={canvasRef}>
-                    
-                    <div className="absolute inset-0 pointer-events-none opacity-10" style={{ backgroundImage: 'radial-gradient(#94a3b8 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
-
-                    <div className="absolute bottom-4 left-4 text-slate-400 pointer-events-none z-0">
-                    {showControls ? (
-                        <>
-                        <p>💡 拖曳元件移動位置</p>
-                        <p>🔌 按住接點並拖曳來拉電線</p>
-                        <p>↻ 使用上方紫色圓點旋轉元件</p>
-                        </>
-                    ) : (
-                        <p>📷 觀賞模式</p>
-                    )}
-                    </div>
-
-                    <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
-                    {wires.map(wire => {
-                        const startComp = components.find(c => c.id === wire.start.compId);
-                        const endComp = components.find(c => c.id === wire.end.compId);
-                        if (!startComp || !endComp) return null;
+                    <div className="w-full bg-white shadow-md p-4 flex justify-between items-center z-10 gap-4 flex-wrap mt-14">
+                        <h1 className="text-2xl font-bold text-slate-700 flex items-center gap-2 mr-auto">
+                            <Zap className="text-yellow-500 fill-yellow-500" />
+                            Q版電路小實驗
+                        </h1>
                         
-                        const startPos = getConnectionPoint(startComp, wire.start.pointType);
-                        const endPos = getConnectionPoint(endComp, wire.end.pointType);
-                        const { cpX, cpY } = getWireGeometry(startPos, endPos, wire.controlOffset);
-
-                        return (
-                        <g key={wire.id}>
-                            <path d={`M ${startPos.x} ${startPos.y} Q ${cpX} ${cpY} ${endPos.x} ${endPos.y}`} stroke="#475569" strokeWidth="8" fill="none" strokeLinecap="round" />
-                            <path d={`M ${startPos.x} ${startPos.y} Q ${cpX} ${cpY} ${endPos.x} ${endPos.y}`} stroke="#000000" strokeWidth="4" fill="none" strokeLinecap="round" />
-                        </g>
-                        );
-                    })}
-                    {isDrawing && currentWireStart && (() => {
-                        const startComp = components.find(c => c.id === currentWireStart.compId);
-                        const startPos = getConnectionPoint(startComp, currentWireStart.pointType);
-                        const midX = (startPos.x + mousePos.x) / 2;
-                        const midY = (startPos.y + mousePos.y) / 2;
-                        return (
-                        <g>
-                            <path d={`M ${startPos.x} ${startPos.y} Q ${midX} ${midY + 50} ${mousePos.x} ${mousePos.y}`} stroke="#000000" strokeWidth="4" fill="none" strokeLinecap="round" />
-                            <path d={`M ${startPos.x} ${startPos.y} Q ${midX} ${midY + 50} ${mousePos.x} ${mousePos.y}`} stroke="#fbbf24" strokeWidth="8" fill="none" strokeLinecap="round" opacity="0.3" />
-                            <circle cx={mousePos.x} cy={mousePos.y} r="6" fill="#000000" />
-                        </g>
-                        )
-                    })()}
-                    </svg>
-
-                    {showControls && wires.map(wire => {
-                        const startComp = components.find(c => c.id === wire.start.compId);
-                        const endComp = components.find(c => c.id === wire.end.compId);
-                        if (!startComp || !endComp) return null;
-                        const startPos = getConnectionPoint(startComp, wire.start.pointType);
-                        const endPos = getConnectionPoint(endComp, wire.end.pointType);
-                        const { cpX, cpY } = getWireGeometry(startPos, endPos, wire.controlOffset);
-                        const midCurveX = 0.25 * startPos.x + 0.5 * cpX + 0.25 * endPos.x;
-                        const midCurveY = 0.25 * startPos.y + 0.5 * cpY + 0.25 * endPos.y;
-
-                        return (
-                        <React.Fragment key={`controls-${wire.id}`}>
-                            <div className="absolute w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-md cursor-move hover:scale-125 transition-transform z-30 pointer-events-auto" style={{ left: cpX - 8, top: cpY - 8 }} onMouseDown={(e) => handleWireControlMouseDown(e, wire.id)} title="調整形狀"></div>
-                            <div className="absolute w-5 h-5 bg-red-100 hover:bg-red-500 hover:text-white text-red-500 rounded-full flex items-center justify-center cursor-pointer shadow-md border border-red-200 transition-colors z-30 pointer-events-auto" style={{ left: midCurveX - 10, top: midCurveY - 10 }} onClick={(e) => { e.stopPropagation(); removeWire(wire.id); }} title="移除電線"><span className="text-xs font-bold leading-none mb-[1px]">×</span></div>
-                        </React.Fragment>
-                        );
-                    })}
-
-                    {components.map(comp => (
-                    <div
-                        key={comp.id}
-                        className="absolute z-20"
-                        style={{ 
-                        left: comp.x, 
-                        top: comp.y, 
-                        width: comp.type === COMPONENT_TYPES.BATTERY ? 140 : 80,
-                        height: comp.type === COMPONENT_TYPES.BATTERY ? 60 : 140,
-                        transform: `rotate(${comp.rotation}deg)`,
-                        }}
-                    >
-                        {showControls && (
-                            <div 
-                            className="absolute left-1/2 -top-8 -ml-3 w-6 h-6 bg-purple-500 rounded-full border-2 border-white shadow-md cursor-grab active:cursor-grabbing hover:scale-110 flex items-center justify-center z-50 pointer-events-auto"
-                            onMouseDown={(e) => handleRotateMouseDown(e, comp.id)}
-                            title="旋轉元件"
+                        <div className="flex gap-2">
+                            <button 
+                                onClick={() => setShowControls(!showControls)}
+                                className={`flex items-center gap-1 px-4 py-2 rounded-full transition font-bold ${showControls ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : 'bg-gray-200 text-gray-500 hover:bg-gray-300'}`}
                             >
-                            <RotateCw size={14} className="text-white" />
-                            </div>
-                        )}
+                                {showControls ? <Eye size={18} /> : <EyeOff size={18} />}
+                                <span className="hidden sm:inline">{showControls ? "隱藏輔助" : "顯示輔助"}</span>
+                            </button>
 
-                        <div 
-                        className="w-full h-full cursor-grab active:cursor-grabbing"
-                        onMouseDown={(e) => handleMouseDownComp(e, comp.id)}
-                        >
-                            {comp.type === COMPONENT_TYPES.BATTERY && (
-                            <BatteryComponent 
-                                id={comp.id} 
-                                onNodeMouseDown={handleNodeMouseDown} 
-                                onNodeMouseUp={handleNodeMouseUp}
-                                isDrawing={isDrawing} 
-                                currentStart={currentWireStart}
-                                showControls={showControls}
-                            />
-                            )}
-                            {comp.type === COMPONENT_TYPES.BULB && (
-                            <BulbComponent 
-                                id={comp.id} 
-                                onNodeMouseDown={handleNodeMouseDown} 
-                                onNodeMouseUp={handleNodeMouseUp}
-                                isLit={litBulbIds.has(comp.id)}
-                                brightness={brightness}
-                                isDrawing={isDrawing}
-                                currentStart={currentWireStart}
-                                showControls={showControls}
-                            />
-                            )}
+                            <button onClick={addBattery} className="flex items-center gap-1 px-4 py-2 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition font-bold"><Plus size={18} /> 電池</button>
+                            <button onClick={addBulb} className="flex items-center gap-1 px-4 py-2 bg-yellow-100 text-yellow-700 rounded-full hover:bg-yellow-200 transition font-bold"><Lightbulb size={18} /> 燈泡</button>
+                            <button onClick={resetBoard} className="flex items-center gap-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition font-bold"><RotateCcw size={18} /> 重置</button>
+                            
+                            <button 
+                                onClick={togglePower} 
+                                className={`flex items-center gap-1 px-6 py-2 text-white rounded-full transition shadow-lg transform active:scale-95 font-bold text-lg min-w-[140px] justify-center
+                                ${isSwitchOn ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}
+                                `}
+                            >
+                                <Power size={20} /> 
+                                {isSwitchOn ? "關閉電源" : "開啟電源"}
+                            </button>
                         </div>
                     </div>
-                    ))}
 
-                </div>
+                    <div className={`mt-4 px-6 py-2 rounded-lg text-lg font-bold transition-all duration-300 ${
+                        litBulbIds.size > 0 ? 'bg-yellow-100 text-yellow-800 border-2 border-yellow-400' : 
+                        errorMsg ? (isSwitchOn ? 'bg-orange-100 text-orange-800' : 'bg-slate-200 text-slate-700') : 'bg-transparent text-transparent'
+                    }`}>
+                        {errorMsg || "準備就緒，請連接電路並開啟電源"}
+                    </div> 
+
+                    <div className="relative w-full flex-grow cursor-crosshair overflow-hidden" ref={canvasRef}>
+                        
+                        <div className="absolute inset-0 pointer-events-none opacity-10" style={{ backgroundImage: 'radial-gradient(#94a3b8 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+
+                        <div className="absolute bottom-4 left-4 text-slate-400 pointer-events-none z-0">
+                        {showControls ? (
+                            <>
+                            <p>💡 拖曳元件移動位置</p>
+                            <p>🔌 按住接點並拖曳來拉電線</p>
+                            <p>↻ 使用上方紫色圓點旋轉元件</p>
+                            </>
+                        ) : (
+                            <p>📷 觀賞模式</p>
+                        )}
+                        </div>
+
+                        <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
+                        {wires.map(wire => {
+                            const startComp = components.find(c => c.id === wire.start.compId);
+                            const endComp = components.find(c => c.id === wire.end.compId);
+                            if (!startComp || !endComp) return null;
+                            
+                            const startPos = getConnectionPoint(startComp, wire.start.pointType);
+                            const endPos = getConnectionPoint(endComp, wire.end.pointType);
+                            const { cpX, cpY } = getWireGeometry(startPos, endPos, wire.controlOffset);
+
+                            return (
+                            <g key={wire.id}>
+                                <path d={`M ${startPos.x} ${startPos.y} Q ${cpX} ${cpY} ${endPos.x} ${endPos.y}`} stroke="#475569" strokeWidth="8" fill="none" strokeLinecap="round" />
+                                <path d={`M ${startPos.x} ${startPos.y} Q ${cpX} ${cpY} ${endPos.x} ${endPos.y}`} stroke="#000000" strokeWidth="4" fill="none" strokeLinecap="round" />
+                            </g>
+                            );
+                        })}
+                        {isDrawing && currentWireStart && (() => {
+                            const startComp = components.find(c => c.id === currentWireStart.compId);
+                            const startPos = getConnectionPoint(startComp, currentWireStart.pointType);
+                            const midX = (startPos.x + mousePos.x) / 2;
+                            const midY = (startPos.y + mousePos.y) / 2;
+                            return (
+                            <g>
+                                <path d={`M ${startPos.x} ${startPos.y} Q ${midX} ${midY + 50} ${mousePos.x} ${mousePos.y}`} stroke="#000000" strokeWidth="4" fill="none" strokeLinecap="round" />
+                                <path d={`M ${startPos.x} ${startPos.y} Q ${midX} ${midY + 50} ${mousePos.x} ${mousePos.y}`} stroke="#fbbf24" strokeWidth="8" fill="none" strokeLinecap="round" opacity="0.3" />
+                                <circle cx={mousePos.x} cy={mousePos.y} r="6" fill="#000000" />
+                            </g>
+                            )
+                        })()}
+                        </svg>
+
+                        {showControls && wires.map(wire => {
+                            const startComp = components.find(c => c.id === wire.start.compId);
+                            const endComp = components.find(c => c.id === wire.end.compId);
+                            if (!startComp || !endComp) return null;
+                            const startPos = getConnectionPoint(startComp, wire.start.pointType);
+                            const endPos = getConnectionPoint(endComp, wire.end.pointType);
+                            const { cpX, cpY } = getWireGeometry(startPos, endPos, wire.controlOffset);
+                            const midCurveX = 0.25 * startPos.x + 0.5 * cpX + 0.25 * endPos.x;
+                            const midCurveY = 0.25 * startPos.y + 0.5 * cpY + 0.25 * endPos.y;
+
+                            return (
+                            <React.Fragment key={`controls-${wire.id}`}>
+                                <div 
+                                    className="absolute w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-md cursor-move hover:scale-125 transition-transform z-30 pointer-events-auto" 
+                                    style={{ left: cpX - 8, top: cpY - 8 }} 
+                                    onMouseDown={(e) => handleWireControlMouseDown(e, wire.id)} 
+                                    onTouchStart={(e) => handleWireControlMouseDown(e, wire.id)}
+                                    title="調整形狀"
+                                ></div>
+                                <div className="absolute w-5 h-5 bg-red-100 hover:bg-red-500 hover:text-white text-red-500 rounded-full flex items-center justify-center cursor-pointer shadow-md border border-red-200 transition-colors z-30 pointer-events-auto" style={{ left: midCurveX - 10, top: midCurveY - 10 }} onClick={(e) => { e.stopPropagation(); removeWire(wire.id); }} title="移除電線"><span className="text-xs font-bold leading-none mb-[1px]">×</span></div>
+                            </React.Fragment>
+                            );
+                        })}
+
+                        {components.map(comp => (
+                        <div
+                            key={comp.id}
+                            className="absolute z-20"
+                            style={{ 
+                            left: comp.x, 
+                            top: comp.y, 
+                            width: comp.type === COMPONENT_TYPES.BATTERY ? 140 : 80,
+                            height: comp.type === COMPONENT_TYPES.BATTERY ? 60 : 140,
+                            transform: `rotate(${comp.rotation}deg)`,
+                            }}
+                        >
+                            {showControls && (
+                                <div 
+                                className="absolute left-1/2 -top-8 -ml-3 w-6 h-6 bg-purple-500 rounded-full border-2 border-white shadow-md cursor-grab active:cursor-grabbing hover:scale-110 flex items-center justify-center z-50 pointer-events-auto"
+                                onMouseDown={(e) => handleRotateMouseDown(e, comp.id)}
+                                onTouchStart={(e) => handleRotateMouseDown(e, comp.id)}
+                                title="旋轉元件"
+                                >
+                                <RotateCw size={14} className="text-white" />
+                                </div>
+                            )}
+
+                            <div 
+                                className="w-full h-full cursor-grab active:cursor-grabbing"
+                                onMouseDown={(e) => handleMouseDownComp(e, comp.id)}
+                                onTouchStart={(e) => handleMouseDownComp(e, comp.id)}
+                            >
+                                {comp.type === COMPONENT_TYPES.BATTERY && (
+                                <BatteryComponent 
+                                    id={comp.id} 
+                                    onNodeMouseDown={handleNodeMouseDown} 
+                                    onNodeMouseUp={handleNodeMouseUp}
+                                    isDrawing={isDrawing} 
+                                    currentStart={currentWireStart}
+                                    showControls={showControls}
+                                />
+                                )}
+                                {comp.type === COMPONENT_TYPES.BULB && (
+                                <BulbComponent 
+                                    id={comp.id} 
+                                    onNodeMouseDown={handleNodeMouseDown} 
+                                    onNodeMouseUp={handleNodeMouseUp}
+                                    isLit={litBulbIds.has(comp.id)}
+                                    brightness={brightness}
+                                    isDrawing={isDrawing}
+                                    currentStart={currentWireStart}
+                                    showControls={showControls}
+                                />
+                                )}
+                            </div>
+                        </div>
+                        ))}
+
+                    </div>
                 </div>
             );
         }
@@ -617,8 +638,22 @@
                 
                 {showControls && (
                     <>
-                    <div className={`absolute left-0 top-[20px] w-6 h-6 rounded-full border-2 border-white shadow-sm z-30 cursor-pointer transition-transform hover:scale-125 ${canConnect ? 'bg-yellow-400 scale-125 animate-pulse' : 'bg-red-500 hover:bg-red-400'}`} onMouseDown={(e) => onNodeMouseDown(e, id, 'pos')} onMouseUp={(e) => onNodeMouseUp(e, id, 'pos')} title="正極 (+)"></div>
-                    <div className={`absolute right-0 top-[20px] w-6 h-6 rounded-full border-2 border-white shadow-sm z-30 cursor-pointer transition-transform hover:scale-125 ${canConnect ? 'bg-yellow-400 scale-125 animate-pulse' : 'bg-blue-500 hover:bg-blue-400'}`} onMouseDown={(e) => onNodeMouseDown(e, id, 'neg')} onMouseUp={(e) => onNodeMouseUp(e, id, 'neg')} title="負極 (-)"></div>
+                    <div 
+                        data-comp-id={id} data-point-type="pos"
+                        className={`absolute left-0 top-[20px] w-6 h-6 rounded-full border-2 border-white shadow-sm z-30 cursor-pointer transition-transform hover:scale-125 ${canConnect ? 'bg-yellow-400 scale-125 animate-pulse' : 'bg-red-500 hover:bg-red-400'}`} 
+                        onMouseDown={(e) => onNodeMouseDown(e, id, 'pos')} 
+                        onTouchStart={(e) => onNodeMouseDown(e, id, 'pos')}
+                        onMouseUp={(e) => onNodeMouseUp(e, id, 'pos')} 
+                        title="正極 (+)"
+                    ></div>
+                    <div 
+                        data-comp-id={id} data-point-type="neg"
+                        className={`absolute right-0 top-[20px] w-6 h-6 rounded-full border-2 border-white shadow-sm z-30 cursor-pointer transition-transform hover:scale-125 ${canConnect ? 'bg-yellow-400 scale-125 animate-pulse' : 'bg-blue-500 hover:bg-blue-400'}`} 
+                        onMouseDown={(e) => onNodeMouseDown(e, id, 'neg')} 
+                        onTouchStart={(e) => onNodeMouseDown(e, id, 'neg')}
+                        onMouseUp={(e) => onNodeMouseUp(e, id, 'neg')} 
+                        title="負極 (-)"
+                    ></div>
                     </>
                 )}
                 </div>
@@ -642,10 +677,28 @@
                     <div className="w-full h-[1px] bg-gray-500 mt-2 transform -rotate-6"></div>
                     <div className="w-full h-[1px] bg-gray-500 mt-2 transform -rotate-6"></div>
                     <div className="w-full h-[1px] bg-gray-500 mt-2 transform -rotate-6"></div>
-                    {showControls && <div className={`absolute -left-3 top-3 w-5 h-5 rounded-full border-2 border-white shadow-sm cursor-pointer hover:scale-125 transition-transform ${canConnect ? 'bg-yellow-400 scale-125 animate-pulse' : 'bg-green-500 hover:bg-green-400'}`} onMouseDown={(e) => onNodeMouseDown(e, id, 'thread')} onMouseUp={(e) => onNodeMouseUp(e, id, 'thread')} title="螺紋接點"></div>}
+                    {showControls && (
+                        <div 
+                            data-comp-id={id} data-point-type="thread"
+                            className={`absolute -left-3 top-3 w-5 h-5 rounded-full border-2 border-white shadow-sm cursor-pointer hover:scale-125 transition-transform ${canConnect ? 'bg-yellow-400 scale-125 animate-pulse' : 'bg-green-500 hover:bg-green-400'}`} 
+                            onMouseDown={(e) => onNodeMouseDown(e, id, 'thread')} 
+                            onTouchStart={(e) => onNodeMouseDown(e, id, 'thread')}
+                            onMouseUp={(e) => onNodeMouseUp(e, id, 'thread')} 
+                            title="螺紋接點"
+                        ></div>
+                    )}
                 </div>
                 <div className="w-8 h-4 bg-black rounded-b-lg relative z-20 flex justify-center">
-                    {showControls && <div className={`absolute -bottom-2 w-5 h-5 rounded-full border-2 border-white shadow-sm cursor-pointer hover:scale-125 transition-transform ${canConnect ? 'bg-yellow-400 scale-125 animate-pulse' : 'bg-green-500 hover:bg-green-400'}`} onMouseDown={(e) => onNodeMouseDown(e, id, 'tip')} onMouseUp={(e) => onNodeMouseUp(e, id, 'tip')} title="底部接點"></div>}
+                    {showControls && (
+                        <div 
+                            data-comp-id={id} data-point-type="tip"
+                            className={`absolute -bottom-2 w-5 h-5 rounded-full border-2 border-white shadow-sm cursor-pointer hover:scale-125 transition-transform ${canConnect ? 'bg-yellow-400 scale-125 animate-pulse' : 'bg-green-500 hover:bg-green-400'}`} 
+                            onMouseDown={(e) => onNodeMouseDown(e, id, 'tip')} 
+                            onTouchStart={(e) => onNodeMouseDown(e, id, 'tip')}
+                            onMouseUp={(e) => onNodeMouseUp(e, id, 'tip')} 
+                            title="底部接點"
+                        ></div>
+                    )}
                 </div>
                 </div>
             );
