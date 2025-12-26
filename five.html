@@ -3,683 +3,311 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>沙子與食鹽分離實驗 V7 (水平堆積版)</title>
+    <title>橘咪咪與白奶油的科學農場 - 鹽巴沙子分離術</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #f8f9fa; font-family: "Noto Sans TC", sans-serif; }
-        canvas { display: block; }
-        
-        #ui-container {
+        :root {
+            --primary-color: #FF9F43; /* 橘咪咪的橘色 */
+            --secondary-color: #54a0ff; /* 科學實驗的藍色 */
+            --cream-color: #fdfdfd; /* 白奶油的白色 */
+            --bg-color: #FFEAA7; /* 農場背景色 */
+            --text-color: #2d3436;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            user-select: none; /* 防止選取文字 */
+        }
+
+        /* --- 頂部導航與標題 --- */
+        header {
+            background-color: var(--primary-color);
+            padding: 10px 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 100;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        /* 修改處：回首頁按鈕移至右上角 */
+        .home-btn {
+            position: absolute;
+            top: 50%;
+            right: 20px; /* 改為靠右 */
+            transform: translateY(-50%);
+            background-color: white;
+            color: var(--primary-color);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .home-btn:hover {
+            transform: translateY(-50%) scale(1.05);
+            background-color: #fff5e6;
+        }
+
+        /* --- 遊戲主區域 --- */
+        #game-container {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: radial-gradient(#fff 10%, transparent 11%), radial-gradient(#fff 10%, transparent 11%);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            opacity: 0.9;
+        }
+
+        /* --- 步驟指示器 --- */
+        .step-indicator {
             position: absolute;
             top: 20px;
-            left: 20px;
-            width: 320px;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            border: 1px solid #eee;
-            transition: all 0.3s ease;
-        }
-
-        h1 { margin: 0 0 15px 0; font-size: 1.4rem; color: #333; display: flex; align-items: center; }
-        h1 span { margin-right: 10px; font-size: 1.6rem; }
-
-        .step-indicator {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-        .step-dot {
-            width: 10px; height: 10px; background: #ddd; border-radius: 50%;
-            transition: background 0.3s;
-        }
-        .step-dot.active { background: #007bff; transform: scale(1.2); }
-
-        .instruction-box {
-            min-height: 60px;
-            margin-bottom: 20px;
-        }
-        .step-title { color: #007bff; font-weight: bold; font-size: 1.1rem; margin-bottom: 5px; display: block; }
-        .step-desc { color: #666; font-size: 0.95rem; line-height: 1.5; }
-
-        .controls { display: flex; flex-direction: column; gap: 10px; }
-        
-        button {
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: white;
-            border: none;
-            padding: 14px;
-            font-size: 16px;
-            border-radius: 8px;
-            cursor: pointer;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 15px;
+            border: 2px solid var(--primary-color);
+            font-size: 1.2rem;
             font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0,123,255,0.2);
-            transition: transform 0.1s, box-shadow 0.1s;
+            color: var(--text-color);
+            z-index: 10;
+            text-align: center;
+            min-width: 300px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        button:hover { transform: translateY(-1px); box-shadow: 0 6px 8px rgba(0,123,255,0.3); }
-        button:active { transform: translateY(1px); box-shadow: 0 2px 4px rgba(0,123,255,0.2); }
-        button:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; transform: none; }
 
-        .legend { margin-top: 20px; font-size: 0.85rem; color: #555; background: #f1f3f5; padding: 10px; border-radius: 8px; }
-        .legend-row { display: flex; align-items: center; margin-bottom: 6px; }
-        .legend-row:last-child { margin-bottom: 0; }
-        .dot { width: 12px; height: 12px; margin-right: 8px; display: inline-block; border-radius: 50%; }
+        /* --- 實驗桌 --- */
+        .lab-table {
+            width: 800px;
+            height: 500px;
+            background-color: #dfe6e9;
+            border-radius: 20px;
+            border-bottom: 10px solid #b2bec3;
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 20px;
+        }
 
-    </style>
-</head>
-<body>
-<a href="index.html" style="position: fixed; top: 15px; left: 15px; z-index: 9999; background: #FF8C42; color: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: bold; box-shadow: 2px 2px 10px rgba(0,0,0,0.2); font-family: sans-serif; border: 2px solid white;">
-  🐾 回農場
-</a>
-    <div id="ui-container">
-        <h1><span>⚗️</span>分離實驗模擬</h1>
+        /* --- 道具通用樣式 --- */
+        .item {
+            position: absolute;
+            cursor: grab;
+            transition: transform 0.1s;
+            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2));
+            user-select: none;
+        }
+
+        .item:active {
+            cursor: grabbing;
+            transform: scale(1.05);
+        }
+
+        /* --- 具體道具 --- */
+        /* 1. 混和物 (沙子+鹽巴) */
+        #mixture-pile {
+            bottom: 30px;
+            left: 50px;
+            width: 100px;
+            height: 60px;
+            background: conic-gradient(at 50% 100%, #e0e0e0 0deg, #a4b0be 40deg, #f1f2f6 80deg, #747d8c 120deg, #e0e0e0 160deg);
+            border-radius: 50% 50% 10px 10px;
+            clip-path: polygon(10% 100%, 90% 100%, 80% 0%, 20% 0%); /* 堆狀 */
+            z-index: 5;
+        }
         
-        <div class="step-indicator" id="dots">
-            <div class="step-dot active"></div>
-            <div class="step-dot"></div>
-            <div class="step-dot"></div>
-            <div class="step-dot"></div>
-        </div>
+        /* 燒杯 */
+        .beaker {
+            width: 120px;
+            height: 160px;
+            background: rgba(223, 249, 251, 0.4); /* 玻璃質感 */
+            border: 2px solid rgba(199, 236, 238, 0.8);
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            position: absolute;
+            z-index: 2;
+            overflow: hidden; /* 液體在裡面 */
+        }
 
-        <div class="instruction-box">
-            <span id="s-title" class="step-title">步驟 1：觀察混合物</span>
-            <div id="s-desc" class="step-desc">燒杯中裝有大量的沙子（深色）與食鹽（白色）混合物，約佔杯子 1/3。</div>
-        </div>
+        .beaker::before {
+            content: ''; /* 刻度 */
+            position: absolute;
+            left: 10px;
+            top: 20px;
+            width: 10px;
+            height: 100px;
+            background: repeating-linear-gradient(to bottom, #bdc3c7 0, #bdc3c7 2px, transparent 2px, transparent 20px);
+        }
 
-        <div class="controls">
-            <button id="main-btn">開始實驗：加水</button>
-            <button id="reset-btn" style="background: #6c757d; display: none;">重新開始</button>
-        </div>
+        #beaker-mix {
+            bottom: 30px;
+            left: 200px;
+        }
 
-        <div class="legend">
-            <div class="legend-row"><span class="dot" style="background:#5D4037;"></span>沙子 (不溶)</div>
-            <div class="legend-row"><span class="dot" style="background:#fff; border:1px solid #ccc;"></span>食鹽 (可溶)</div>
-            <div class="legend-row"><span class="dot" style="background:#81D4FA;"></span>水 / 食鹽水</div>
-        </div>
-    </div>
+        #beaker-filter-receiver {
+            bottom: 30px;
+            left: 450px;
+            display: none;
+        }
 
-    <canvas id="canvas"></canvas>
+        /* 水瓶 */
+        #water-bottle {
+            bottom: 30px;
+            left: 650px;
+            width: 80px;
+            height: 140px;
+            background: #74b9ff;
+            border-radius: 20px 20px 5px 5px;
+            z-index: 6;
+        }
 
-    <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        let width, height;
+        #water-bottle::after {
+            content: '水';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+        }
 
-        // --- 全局狀態 ---
-        let step = 0; 
-        let animFrame;
-        let autoStepTimer = null; // 用於管理自動跳轉的計時器
+        /* 漏斗與濾紙 */
+        #funnel-setup {
+            position: absolute;
+            bottom: 180px; /* 放在燒杯上方 */
+            left: 460px;
+            width: 100px;
+            height: 120px;
+            display: none;
+            z-index: 3;
+            pointer-events: none; /* 固定位置，不可拖動 */
+        }
+
+        .funnel-glass {
+            width: 0;
+            height: 0;
+            border-left: 50px solid transparent;
+            border-right: 50px solid transparent;
+            border-top: 80px solid rgba(223, 249, 251, 0.6);
+            position: absolute;
+            top: 0;
+        }
         
-        // --- 物理物件參數 ---
-        const SAND_COLOR = '#5D4037';
-        const SALT_COLOR = '#FFFFFF';
-        const WATER_COLOR = 'rgba(129, 212, 250, 0.6)';
-        const WATER_STROKE = 'rgba(79, 195, 247, 0.8)';
+        .funnel-tube {
+            width: 10px;
+            height: 60px;
+            background: rgba(223, 249, 251, 0.6);
+            position: absolute;
+            top: 78px;
+            left: 45px;
+        }
+
+        .filter-paper {
+            width: 0;
+            height: 0;
+            border-left: 40px solid transparent;
+            border-right: 40px solid transparent;
+            border-top: 60px solid #fff;
+            position: absolute;
+            top: 5px;
+            left: 10px;
+            opacity: 0.9;
+        }
+
+        /* 酒精燈與三腳架 */
+        #heating-setup {
+            position: absolute;
+            bottom: 30px;
+            left: 350px;
+            width: 140px;
+            height: 150px;
+            display: none;
+        }
+
+        .tripod {
+            width: 120px;
+            height: 80px;
+            border-top: 5px solid #636e72;
+            position: absolute;
+            top: 50px;
+            left: 10px;
+        }
+        .tripod-leg {
+            width: 5px;
+            height: 80px;
+            background: #636e72;
+            position: absolute;
+            top: 0;
+        }
+        .leg-l { left: 10px; transform: rotate(10deg); }
+        .leg-r { right: 10px; transform: rotate(-10deg); }
+
+        .alcohol-lamp {
+            width: 60px;
+            height: 40px;
+            background: #dfe6e9;
+            border: 2px solid #b2bec3;
+            border-radius: 50% 50% 10px 10px;
+            position: absolute;
+            bottom: 0;
+            left: 40px;
+        }
         
-        let beakerA = {
-            x: 0, y: 0, w: 150, h: 200, 
-            angle: 0,
-            waterLevel: 0, 
-            maxWaterLevel: 85,
-            particles: []
-        };
-
-        let jug = {
-            x: 0, y: 0, angle: 0, visible: false, flow: false
-        };
-
-        let rod = {
-            x: 0, y: 0, angle: 0, visible: false, moving: false
-        };
-
-        let filterSetup = {
-            x: 0, y: 0, visible: false,
-            beakerBWaterLevel: 0,
-            trappedSand: [],
-            sieveRadius: 60,
-            currentPileLevel: 60, // 用於追蹤沙子堆積的高度 (從半徑60開始遞減)
-            beakerBSize: { w: 140, h: 160 }
-        };
-
-        const titleEl = document.getElementById('s-title');
-        const descEl = document.getElementById('s-desc');
-        const mainBtn = document.getElementById('main-btn');
-        const resetBtn = document.getElementById('reset-btn');
-        const dots = document.querySelectorAll('.step-dot');
-
-        function init() {
-            resize();
-            window.addEventListener('resize', resize);
-            resetExperiment();
-            loop();
+        .flame {
+            width: 20px;
+            height: 30px;
+            background: radial-gradient(#fffa65, #ff7675);
+            border-radius: 50% 50% 20px 20px;
+            position: absolute;
+            top: -25px;
+            left: 20px;
+            animation: flicker 0.5s infinite alternate;
+            display: none; /* 點火後顯示 */
         }
 
-        function resize() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-            if (step === 0) resetPositions();
+        @keyframes flicker {
+            0% { transform: scale(1); opacity: 0.9; }
+            100% { transform: scale(1.1); opacity: 1; }
         }
 
-        function resetPositions() {
-            beakerA.x = width * 0.45; 
-            beakerA.y = height * 0.7;
-            filterSetup.x = width * 0.8;
-            filterSetup.y = height * 0.7;
+        /* 蒸發皿 */
+        #evap-dish {
+            width: 100px;
+            height: 40px;
+            background: #fff;
+            border-radius: 10px 10px 50% 50%;
+            border: 2px solid #bdc3c7;
+            position: absolute;
+            bottom: 115px; /* 架在三腳架上 */
+            left: 370px;
+            display: none;
+            overflow: hidden;
+            z-index: 4;
         }
 
-        function resetExperiment() {
-            // 清除任何掛起的計時器
-            if (autoStepTimer) {
-                clearTimeout(autoStepTimer);
-                autoStepTimer = null;
-            }
-
-            step = 0;
-            // 確保按鈕狀態重置
-            mainBtn.disabled = false;
-            updateUI(0);
-            resetPositions();
-            
-            beakerA.angle = 0;
-            beakerA.waterLevel = 0;
-            beakerA.particles = [];
-            
-            jug.visible = false;
-            jug.angle = 0;
-            rod.visible = false;
-            
-            filterSetup.visible = false;
-            filterSetup.beakerBWaterLevel = 0;
-            filterSetup.trappedSand = [];
-            filterSetup.currentPileLevel = filterSetup.sieveRadius - 2; // 重置堆積高度起始點
-
-            const fillHeight = beakerA.h / 3; 
-            const bottomY = beakerA.h / 2;
-
-            for(let i=0; i<300; i++) {
-                beakerA.particles.push({
-                    type: 'sand',
-                    x: (Math.random() - 0.5) * (beakerA.w - 30),
-                    y: bottomY - 5 - Math.random() * fillHeight, 
-                    r: 2.5 + Math.random() * 1.5,
-                    vx: 0, vy: 0,
-                    alpha: 1
-                });
-            }
-            for(let i=0; i<250; i++) {
-                beakerA.particles.push({
-                    type: 'salt',
-                    x: (Math.random() - 0.5) * (beakerA.w - 30),
-                    y: bottomY - 5 - Math.random() * fillHeight,
-                    r: 2.5,
-                    vx: 0, vy: 0,
-                    alpha: 1
-                });
-            }
-        }
-
-        function getSpoutPos(beaker) {
-            const dx = -beaker.w / 2 - 15; 
-            const dy = -beaker.h / 2;
-            const cos = Math.cos(beaker.angle);
-            const sin = Math.sin(beaker.angle);
-            return {
-                x: beaker.x + dx * cos - dy * sin,
-                y: beaker.y + dx * sin + dy * cos
-            };
-        }
-
-        function drawBeaker(ctx, b, isSource) {
-            ctx.save();
-            ctx.translate(b.x, b.y);
-            ctx.rotate(b.angle);
-
-            const w = b.w;
-            const h = b.h;
-
-            ctx.fillStyle = 'rgba(255,255,255,0.15)';
-            ctx.fillRect(-w/2, -h/2, w, h);
-
-            if (b.waterLevel > 0) {
-                ctx.save();
-                ctx.beginPath();
-                ctx.rect(-w/2 + 2, -h/2, w-4, h-2);
-                ctx.clip();
-                
-                ctx.rotate(-b.angle); 
-                let waterHeight = (b.waterLevel / 100) * h;
-                ctx.rotate(b.angle); 
-                
-                ctx.fillStyle = WATER_COLOR;
-                
-                if (Math.abs(b.angle) > 0.1) {
-                    ctx.beginPath();
-                    ctx.moveTo(-w/2, h/2);
-                    ctx.lineTo(w/2, h/2);
-                    ctx.lineTo(w/2, h/2 - waterHeight * 0.3); 
-                    ctx.lineTo(-w/2, -h/2 + (h - waterHeight*1.8)); 
-                    ctx.fill();
-                } else {
-                    let topY = (h/2) - waterHeight;
-                    ctx.fillRect(-w/2, topY, w, waterHeight);
-                    
-                    ctx.beginPath();
-                    ctx.moveTo(-w/2, topY);
-                    ctx.lineTo(w/2, topY);
-                    ctx.strokeStyle = WATER_STROKE;
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                }
-                ctx.restore();
-            }
-
-            if (isSource) {
-                b.particles.forEach(p => {
-                    if (p.alpha <= 0) return; 
-                    
-                    if (step === 2 && b.waterLevel > 20) {
-                        p.x += (Math.random() - 0.5) * 6; 
-                        p.y += (Math.random() - 0.5) * 6;
-                        if(p.x < -w/2 + 10) p.x = -w/2 + 10;
-                        if(p.x > w/2 - 10) p.x = w/2 - 10;
-                        if(p.y > h/2 - 5) p.y = h/2 - 5;
-                        if(p.y < -h/2 + 50) p.y = -h/2 + 50;
-                    }
-                    
-                    if (step === 4 && b.angle < -0.5) {
-                        p.x -= 4; 
-                        p.y -= 2; 
-                    }
-
-                    ctx.fillStyle = p.type === 'sand' ? SAND_COLOR : `rgba(255,255,255,${p.alpha})`;
-                    ctx.beginPath();
-                    if (p.type === 'salt') {
-                        ctx.rect(p.x - p.r, p.y - p.r, p.r*2, p.r*2);
-                    } else {
-                        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                    }
-                    ctx.fill();
-                });
-            }
-
-            ctx.strokeStyle = '#889'; 
-            ctx.lineWidth = 4;
-            ctx.lineJoin = 'round';
-            ctx.beginPath();
-            ctx.moveTo(-w/2, -h/2);
-            ctx.lineTo(-w/2, h/2 - 15);
-            ctx.quadraticCurveTo(-w/2, h/2, -w/2 + 15, h/2);
-            ctx.lineTo(w/2 - 15, h/2);
-            ctx.quadraticCurveTo(w/2, h/2, w/2, h/2 - 15);
-            ctx.lineTo(w/2, -h/2);
-            
-            if(isSource) {
-               ctx.moveTo(-w/2, -h/2 + 20);
-               ctx.lineTo(-w/2 - 15, -h/2 - 5); 
-            }
-            
-            ctx.stroke();
-
-            ctx.fillStyle = '#889';
-            ctx.fillRect(-w/2 + 5, 0, 15, 3);
-            ctx.fillRect(-w/2 + 5, 40, 20, 3);
-            ctx.fillRect(-w/2 + 5, -40, 15, 3);
-
-            ctx.restore();
-        }
-
-        function drawJug(ctx) {
-            if (!jug.visible) return;
-            ctx.save();
-            ctx.translate(jug.x, jug.y);
-            ctx.rotate(jug.angle); 
-
-            ctx.fillStyle = '#e3f2fd';
-            ctx.strokeStyle = '#90caf9';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(-40, -50);
-            ctx.lineTo(-40, 50);
-            ctx.lineTo(40, 50);
-            ctx.lineTo(40, -50);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(40, -30);
-            ctx.quadraticCurveTo(60, -20, 40, 30);
-            ctx.stroke();
-
-            if (jug.flow) {
-                ctx.rotate(-jug.angle); 
-                
-                const absoluteBeakerBottomY = beakerA.y + beakerA.h / 2;
-                const absoluteWaterSurfaceY = absoluteBeakerBottomY - (beakerA.waterLevel / 100 * beakerA.h);
-                
-                const streamStartY = 10; 
-                const streamLength = absoluteWaterSurfaceY - jug.y - streamStartY;
-                const visibleLength = Math.max(0, streamLength);
-
-                ctx.fillStyle = WATER_COLOR;
-                ctx.beginPath();
-                ctx.moveTo(-55, streamStartY); 
-                ctx.lineTo(-40, streamStartY);
-                ctx.lineTo(-40, streamStartY + visibleLength); 
-                ctx.lineTo(-55, streamStartY + visibleLength);
-                ctx.fill();
-            }
-            ctx.restore();
-        }
-
-        function drawRod(ctx) {
-            if (!rod.visible) return;
-            ctx.save();
-            ctx.translate(rod.x, rod.y);
-            if (rod.moving) {
-                let offset = Math.sin(Date.now() / 100) * 30;
-                ctx.translate(offset, 0);
-            }
-            ctx.rotate(0.2); 
-            ctx.fillStyle = 'rgba(255,255,255,0.6)';
-            ctx.strokeStyle = '#ccc';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.rect(-4, -120, 8, 260); 
-            ctx.fill();
-            ctx.stroke();
-            ctx.restore();
-        }
-
-        function drawFilterSetup(ctx) {
-            if (!filterSetup.visible) return;
-            
-            const fx = filterSetup.x;
-            const fy = filterSetup.y;
-            const r = filterSetup.sieveRadius;
-
-            ctx.save();
-            ctx.translate(fx, fy);
-
-            // 1. 篩網
-            ctx.save();
-            ctx.translate(0, -filterSetup.beakerBSize.h + 40); 
-            
-            ctx.fillStyle = '#ddd';
-            ctx.fillRect(r - 10, -5, 70, 12);
-            
-            ctx.beginPath();
-            ctx.arc(0, 0, r, 0, Math.PI, false);
-            ctx.strokeStyle = '#666';
-            ctx.lineWidth = 5;
-            ctx.stroke();
-            ctx.fillStyle = 'rgba(230,230,230,0.3)';
-            ctx.fill();
-            
-            ctx.beginPath();
-            ctx.strokeStyle = '#999';
-            ctx.lineWidth = 1.5;
-            ctx.clip(); 
-            for(let i = -r; i <= r; i+=10) {
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, r);
-                ctx.moveTo(-r, Math.abs(i)); 
-                ctx.lineTo(r, Math.abs(i));
-            }
-            ctx.stroke();
-            ctx.restore(); 
-            
-            // 2. 畫攔截的沙子 (水平堆積)
-            ctx.save();
-            ctx.translate(0, -filterSetup.beakerBSize.h + 40); 
-            
-            filterSetup.trappedSand.forEach(p => {
-                ctx.fillStyle = SAND_COLOR;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); 
-                ctx.fill();
-            });
-            ctx.restore();
-
-            // 3. 下方燒杯 B
-            let bObj = { 
-                x:0, y:0, 
-                w: filterSetup.beakerBSize.w, 
-                h: filterSetup.beakerBSize.h, 
-                angle:0, 
-                waterLevel: filterSetup.beakerBWaterLevel 
-            };
-            drawBeaker(ctx, bObj, false);
-
-            ctx.restore();
-        }
-
-        function loop() {
-            animFrame = requestAnimationFrame(loop);
-            
-            ctx.clearRect(0, 0, width, height);
-
-            ctx.fillStyle = '#eef';
-            ctx.fillRect(0, height * 0.7 + 100, width, height);
-            ctx.strokeStyle = '#ccc';
-            ctx.beginPath();
-            ctx.moveTo(0, height * 0.7 + 100);
-            ctx.lineTo(width, height * 0.7 + 100);
-            ctx.stroke();
-
-            update();
-
-            if (step >= 3) {
-                drawFilterSetup(ctx);
-            }
-
-            drawBeaker(ctx, beakerA, true);
-
-            if (step === 1) drawJug(ctx);
-            if (step === 2) drawRod(ctx);
-
-            if (step === 4 && beakerA.angle < -0.5) {
-                drawPouringStream(ctx);
-            }
-        }
-
-        function drawPouringStream(ctx) {
-            const spout = getSpoutPos(beakerA);
-            const sieveY = filterSetup.y - filterSetup.beakerBSize.h + 40;
-            const sieveCenterX = filterSetup.x;
-            const sieveCenterY = sieveY + 20;
-
-            ctx.strokeStyle = WATER_COLOR;
-            ctx.lineWidth = 6;
-            ctx.lineCap = 'round';
-            ctx.beginPath();
-            ctx.moveTo(spout.x, spout.y);
-            
-            const cpX = (spout.x + sieveCenterX) / 2;
-            const cpY = (spout.y + sieveCenterY) / 2 + 30;
-            
-            ctx.quadraticCurveTo(cpX, cpY, sieveCenterX, sieveCenterY);
-            ctx.stroke();
-
-            if (Math.random() > 0.5) {
-                ctx.beginPath();
-                ctx.strokeStyle = WATER_COLOR;
-                ctx.lineWidth = 3;
-                ctx.moveTo(filterSetup.x, sieveY + 60); 
-                ctx.lineTo(filterSetup.x, sieveY + 120); 
-                ctx.setLineDash([8, 8]);
-                ctx.stroke();
-                ctx.setLineDash([]);
-            }
-        }
-
-        function update() {
-            if (step === 1) { 
-                jug.visible = true;
-                jug.x = beakerA.x + 50; 
-                jug.y = beakerA.y - 200; 
-                
-                if (jug.angle > -0.8) {
-                    jug.angle -= 0.05;
-                } else {
-                    jug.flow = true;
-                    if (beakerA.waterLevel < beakerA.maxWaterLevel) {
-                        beakerA.waterLevel += 0.5;
-                    } else {
-                        jug.flow = false;
-                        if (jug.angle < 0) jug.angle += 0.1;
-                    }
-                }
-            } else {
-                jug.visible = false;
-            }
-
-            if (step === 2) { 
-                rod.visible = true;
-                rod.x = beakerA.x;
-                rod.y = beakerA.y - 70; 
-                rod.moving = true;
-                beakerA.particles.forEach(p => {
-                    if (p.type === 'salt' && p.alpha > 0) {
-                        p.alpha -= 0.005;
-                    }
-                });
-            } else {
-                rod.visible = false;
-            }
-
-            if (step === 3) { 
-                const centerTargetX = width * 0.5;
-                const centerTargetY = height * 0.75;
-                
-                filterSetup.x += (centerTargetX - filterSetup.x) * 0.05;
-                filterSetup.y += (centerTargetY - filterSetup.y) * 0.05;
-                
-                const beakerDestX = centerTargetX + 120;
-                const beakerDestY = centerTargetY - 200;
-                
-                beakerA.x += (beakerDestX - beakerA.x) * 0.05;
-                beakerA.y += (beakerDestY - beakerA.y) * 0.05;
-                
-                filterSetup.visible = true;
-            }
-
-            if (step === 4) { 
-                if (beakerA.angle > -2.0) {
-                    beakerA.angle -= 0.02;
-                }
-
-                if (beakerA.angle < -0.5) {
-                    if (beakerA.waterLevel > 0) beakerA.waterLevel -= 0.3;
-                    if (filterSetup.beakerBWaterLevel < 50) filterSetup.beakerBWaterLevel += 0.2;
-
-                    beakerA.particles.forEach((p, index) => {
-                        if (p.type === 'sand' && !p.filtered) {
-                            if (Math.random() < 0.1) { 
-                                p.filtered = true; 
-                                p.alpha = 0; 
-                                
-                                // --- 沙子堆積核心邏輯 (V7 水平堆積優化) ---
-                                const r = filterSetup.sieveRadius;
-                                
-                                // 1. 當前填滿高度 (從底部逐漸往上)
-                                let currentH = filterSetup.currentPileLevel;
-                                
-                                // 2. 計算該高度下的篩網寬度 (半弦長)
-                                // x^2 + y^2 = r^2 => max_x = sqrt(r^2 - y^2)
-                                // 這裡 y 是 currentH (從圓心往下為正)
-                                let maxWidthAtH = Math.sqrt(r*r - currentH*currentH);
-                                
-                                // 3. 在該層寬度內隨機分佈
-                                let finalX = (Math.random() - 0.5) * 2 * maxWidthAtH;
-                                
-                                // 4. 加上一點點隨機擾動讓表面不要像切豆腐一樣平，有點沙子的質感
-                                let finalY = currentH + (Math.random() - 0.5) * 3;
-                                
-                                // 5. 儲存粒子
-                                filterSetup.trappedSand.push({
-                                    x: finalX,
-                                    y: finalY, 
-                                    r: p.r
-                                });
-
-                                // 6. 提升高度 (每次堆積一點點)
-                                // 總沙子約300顆，假設全部濾出，要填滿約30px高度
-                                // 30 / 300 = 0.1
-                                filterSetup.currentPileLevel -= 0.15;
-                                
-                                // 限制最高堆積高度，不要溢出
-                                if(filterSetup.currentPileLevel < 20) filterSetup.currentPileLevel = 20;
-                            }
-                        }
-                    });
-                }
-            }
-        }
-
-        const stepsData = [
-            { t: "步驟 1：觀察混合物", d: "燒杯中有大量的沙子（棕色）與食鹽（白色）混合物，約佔杯身 1/3。", btn: "加入清水" },
-            { t: "步驟 2：加水溶解", d: "水柱準確注入燒杯中，準備溶解食鹽。", btn: "開始攪拌" },
-            { t: "步驟 3：攪拌加速溶解", d: "玻璃棒深入底部攪拌。食鹽溶解消失，沙子沉澱。", btn: "準備篩網" },
-            { t: "步驟 4：準備過濾", d: "裝置移至中央。準備過濾。", btn: "倒入混合液" },
-            { t: "步驟 5：過濾分離", d: "沙子平整地堆積在篩網上，食鹽水濾出。", btn: "完成實驗" },
-            { t: "實驗完成", d: "實驗成功！篩網上留下了所有的沙子。", btn: "重新開始" }
-        ];
-
-        function updateUI(s) {
-            const data = stepsData[s];
-            titleEl.textContent = data.t;
-            descEl.textContent = data.d;
-            
-            if (s === 5) {
-                mainBtn.style.display = 'none';
-                resetBtn.style.display = 'block';
-            } else {
-                mainBtn.textContent = data.btn;
-                mainBtn.style.display = 'block';
-                resetBtn.style.display = 'none';
-            }
-
-            dots.forEach((d, i) => {
-                if(i < 4) { 
-                    d.className = i === Math.min(s, 3) ? 'step-dot active' : 'step-dot';
-                }
-            });
-        }
-
-        mainBtn.addEventListener('click', () => {
-            if (step < 5) {
-                step++;
-                updateUI(step);
-                
-                if (step === 1 || step === 2) { 
-                    mainBtn.disabled = true;
-                    // 使用計時器變數以便重置時清除
-                    autoStepTimer = setTimeout(() => { 
-                        mainBtn.disabled = false; 
-                        autoStepTimer = null;
-                    }, 3000);
-                }
-                if (step === 4) { 
-                    mainBtn.disabled = true;
-                    autoStepTimer = setTimeout(() => { 
-                        step = 5; 
-                        updateUI(5); 
-                        autoStepTimer = null;
-                    }, 8000); 
-                }
-            }
-        });
-
-        resetBtn.addEventListener('click', () => {
-            resetExperiment();
-        });
-
-        init();
-
-    </script>
-</body>
-
-</html>
+        /* --- 物質狀態 (水、沙、鹽) --- */
+        .substance-layer {
+            position: absolute;
