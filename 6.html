@@ -102,24 +102,12 @@
             font-weight: bold;
         }
 
-        /* 圖片佔位區 */
-        .img-placeholder {
-            width: 100%;
-            height: 250px;
-            background-color: #eee;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #aaa;
-            font-size: 1.2em;
-        }
-        
-        /* 若您有圖片，請將 img 標籤解開並放入 src */
+        /* 圖片樣式設定 */
         .char-img {
             width: 100%;
             height: 250px;
             object-fit: cover;
-            display: none; /* 暫時隱藏，有圖時請改為 block */
+            display: block; /* 已開啟顯示 */
         }
 
         /* 文字內容區 */
@@ -188,7 +176,9 @@
             
             <article class="char-card mimi-theme">
                 <div class="mimi-header">橘咪咪 (Mimi)</div>
-                <div class="img-placeholder">橘咪咪的照片</div>
+                <!-- 橘咪咪的圖片 -->
+                <img src="Christmasmimi.jpg" alt="橘咪咪的照片" class="char-img">
+                
                 <div class="card-body">
                     <div class="tags">
                         <span class="tag mimi-tag">#小橘貓</span>
@@ -205,7 +195,9 @@
 
             <article class="char-card cream-theme">
                 <div class="cream-header">白奶油 (Cream)</div>
-                <div class="img-placeholder">白奶油的照片</div>
+                <!-- 白奶油的圖片 -->
+                <img src="Christmascream.jpg" alt="白奶油的照片" class="char-img">
+
                 <div class="card-body">
                     <div class="tags">
                         <span class="tag cream-tag">#火焰色布偶</span>
