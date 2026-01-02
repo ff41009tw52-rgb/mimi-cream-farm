@@ -3,16 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>沙子與食鹽分離實驗</title>
+    <title>橘咪咪與白奶油的沙鹽分離實驗室</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
+
         body { margin: 0; overflow: hidden; background-color: #f8f9fa; font-family: "Noto Sans TC", sans-serif; }
         canvas { display: block; }
         
+        /* --- 原有 UI 樣式保留並微調 --- */
         #ui-container {
             position: absolute;
             top: 20px;
             left: 20px;
-            width: 320px;
+            width: 300px;
             background: rgba(255, 255, 255, 0.95);
             padding: 20px;
             border-radius: 16px;
@@ -22,8 +25,8 @@
             z-index: 10;
         }
 
-        h1 { margin: 0 0 15px 0; font-size: 1.4rem; color: #333; display: flex; align-items: center; }
-        h1 span { margin-right: 10px; font-size: 1.6rem; }
+        h1 { margin: 0 0 15px 0; font-size: 1.3rem; color: #333; display: flex; align-items: center; }
+        h1 span { margin-right: 10px; font-size: 1.5rem; }
 
         .step-indicator {
             display: flex;
@@ -33,40 +36,136 @@
             border-bottom: 1px solid #eee;
         }
         .step-dot {
-            width: 10px; height: 10px; background: #ddd; border-radius: 50%;
+            width: 8px; height: 8px; background: #ddd; border-radius: 50%;
             transition: background 0.3s;
         }
-        .step-dot.active { background: #007bff; transform: scale(1.2); }
+        .step-dot.active { background: #ff9800; transform: scale(1.3); } /* 改為橘色系 */
 
-        .instruction-box {
-            min-height: 60px;
-            margin-bottom: 20px;
-        }
-        .step-title { color: #007bff; font-weight: bold; font-size: 1.1rem; margin-bottom: 5px; display: block; }
-        .step-desc { color: #666; font-size: 0.95rem; line-height: 1.5; }
+        .instruction-box { min-height: 50px; margin-bottom: 15px; }
+        .step-title { color: #ff6f00; font-weight: bold; font-size: 1.1rem; margin-bottom: 5px; display: block; }
+        .step-desc { color: #666; font-size: 0.9rem; line-height: 1.5; }
 
         .controls { display: flex; flex-direction: column; gap: 10px; }
         
         button {
-            background: linear-gradient(135deg, #007bff, #0056b3);
+            background: linear-gradient(135deg, #ff9800, #f57c00); /* 橘色按鈕 */
             color: white;
             border: none;
-            padding: 14px;
+            padding: 12px;
             font-size: 16px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0,123,255,0.2);
+            box-shadow: 0 4px 6px rgba(255, 152, 0, 0.2);
             transition: transform 0.1s, box-shadow 0.1s;
         }
-        button:hover { transform: translateY(-1px); box-shadow: 0 6px 8px rgba(0,123,255,0.3); }
-        button:active { transform: translateY(1px); box-shadow: 0 2px 4px rgba(0,123,255,0.2); }
+        button:hover { transform: translateY(-1px); box-shadow: 0 6px 8px rgba(255, 152, 0, 0.3); }
+        button:active { transform: translateY(1px); box-shadow: 0 2px 4px rgba(255, 152, 0, 0.2); }
         button:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; transform: none; }
 
-        .legend { margin-top: 20px; font-size: 0.85rem; color: #555; background: #f1f3f5; padding: 10px; border-radius: 8px; }
+        .legend { margin-top: 15px; font-size: 0.8rem; color: #555; background: #fff3e0; padding: 10px; border-radius: 8px; }
         .legend-row { display: flex; align-items: center; margin-bottom: 6px; }
         .legend-row:last-child { margin-bottom: 0; }
-        .dot { width: 12px; height: 12px; margin-right: 8px; display: inline-block; border-radius: 50%; }
+        .dot { width: 10px; height: 10px; margin-right: 8px; display: inline-block; border-radius: 50%; }
+
+        /* --- 新增：角色對話區塊 --- */
+        #dialogue-area {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 800px;
+            height: 120px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 20;
+            pointer-events: none; /* 讓點擊穿透到 Canvas */
+        }
+
+        .cat-container {
+            width: 100px;
+            height: 100px;
+            position: relative;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: auto;
+        }
+
+        /* 貓咪頭像圓框 */
+        .cat-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            position: absolute;
+            bottom: 0;
+            left: 10px;
+            background-color: #eee;
+            /* 圖片控制關鍵屬性 */
+            object-fit: cover; /* 確保圖片填滿圓形且不變形 */
+            display: block;
+        }
+
+        /* 說話時的效果 */
+        .cat-container.speaking { transform: scale(1.15) translateY(-10px); z-index: 2; }
+        .cat-container.speaking .cat-avatar { border-color: #ffd700; box-shadow: 0 0 15px #ffd700; }
+
+        /* 橘咪咪樣式 */
+        .mimi .cat-avatar { background-color: #FFE0B2; } 
+        /* 白奶油樣式 */
+        .cream .cat-avatar { background-color: #F5F5F5; }
+
+        /* 對話框氣泡 */
+        .bubble-box {
+            background: white;
+            border-radius: 20px;
+            padding: 15px 25px;
+            margin: 0 15px 20px 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            flex: 1;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            border: 2px solid #FFCC80;
+            pointer-events: auto;
+        }
+        
+        /* 說話者名字標籤 */
+        .speaker-tag {
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .tag-mimi { background: #EF6C00; }
+        .tag-cream { background: #9E9E9E; }
+
+        .dialogue-text {
+            color: #333;
+            font-size: 1.05rem;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+
+        /* 手機版適配 */
+        @media (max-width: 600px) {
+            #ui-container { width: calc(100% - 40px); top: 10px; left: 20px; padding: 15px; }
+            #dialogue-area { width: 100%; bottom: 0; padding: 10px; box-sizing: border-box; background: rgba(255,255,255,0.8); backdrop-filter: blur(5px); height: auto; align-items: center; }
+            .cat-container { width: 60px; height: 60px; }
+            .cat-avatar { width: 50px; height: 50px; left: 5px; }
+            .bubble-box { margin: 0 10px; min-height: 60px; padding: 10px 15px; font-size: 0.9rem; }
+            .cat-container.speaking { transform: scale(1.1); }
+        }
 
     </style>
 </head>
@@ -96,6 +195,27 @@
             <div class="legend-row"><span class="dot" style="background:#5D4037;"></span>沙子 (不溶)</div>
             <div class="legend-row"><span class="dot" style="background:#fff; border:1px solid #ccc;"></span>食鹽 (可溶)</div>
             <div class="legend-row"><span class="dot" style="background:#81D4FA;"></span>水 / 食鹽水</div>
+        </div>
+    </div>
+
+    <!-- 角色對話區 -->
+    <div id="dialogue-area">
+        <!-- 橘咪咪 -->
+        <div class="cat-container mimi" id="mimi-container">
+            <img class="cat-avatar" src="Christmasmimi.jpg" alt="橘咪咪">
+        </div>
+
+        <!-- 對話氣泡 -->
+        <div class="bubble-box">
+            <span class="speaker-tag tag-mimi" id="speaker-name">橘咪咪</span>
+            <div class="dialogue-text" id="dialogue-content">
+                哇！這杯子裡裝的是黑糖和糖粉嗎？看起來好好吃喔！🤤
+            </div>
+        </div>
+
+        <!-- 白奶油 -->
+        <div class="cat-container cream" id="cream-container">
+            <img class="cat-avatar" src="Christmascream.jpg" alt="白奶油">
         </div>
     </div>
 
@@ -148,6 +268,64 @@
         const resetBtn = document.getElementById('reset-btn');
         const dots = document.querySelectorAll('.step-dot');
 
+        // --- 角色對話控制元素 ---
+        const mimiContainer = document.getElementById('mimi-container');
+        const creamContainer = document.getElementById('cream-container');
+        const speakerNameEl = document.getElementById('speaker-name');
+        const dialogueContentEl = document.getElementById('dialogue-content');
+
+        // --- 角色對話資料 ---
+        const dialogues = [
+            { // Step 0
+                speaker: 'mimi',
+                name: '橘咪咪',
+                text: '這杯子裡黑黑白白的是什麼？是黑糖粉和白糖粉嗎？能不能讓我舔一口？🤤'
+            },
+            { // Step 1 (加水)
+                speaker: 'cream',
+                name: '白奶油',
+                text: '不行！那是沙子和食鹽！橘咪咪你這貪吃鬼。現在我們要加水，利用「溶解」來分開它們。🧐'
+            },
+            { // Step 2 (攪拌)
+                speaker: 'mimi',
+                name: '橘咪咪',
+                text: '喔喔！攪拌起來了！好像在煮湯喔～轉吧轉吧！食鹽怎麼都不見了？🙀'
+            },
+            { // Step 3 (準備過濾)
+                speaker: 'cream',
+                name: '白奶油',
+                text: '食鹽溶解在水裡變成食鹽水啦，笨蛋。但是沙子不溶於水，所以我們用這個「濾紙」把它們攔截下來！😤'
+            },
+            { // Step 4 (過濾中)
+                speaker: 'mimi',
+                name: '橘咪咪',
+                text: '哇！水流下去了，可是沙子卡住了！這就像我偷吃飼料被鏟屎官抓到一樣嗎？🙀'
+            },
+            { // Step 5 (完成)
+                speaker: 'cream',
+                name: '白奶油',
+                text: '...比喻很爛。看！濾紙上留下的固體是沙子，流下去的液體是食鹽水。這就是過濾法！✨'
+            }
+        ];
+
+        function setDialogue(stepIndex) {
+            const data = dialogues[stepIndex] || dialogues[0];
+            
+            // 更新文字
+            speakerNameEl.textContent = data.name;
+            speakerNameEl.className = 'speaker-tag ' + (data.speaker === 'mimi' ? 'tag-mimi' : 'tag-cream');
+            dialogueContentEl.textContent = data.text;
+
+            // 更新頭像狀態
+            if (data.speaker === 'mimi') {
+                mimiContainer.classList.add('speaking');
+                creamContainer.classList.remove('speaking');
+            } else {
+                creamContainer.classList.add('speaking');
+                mimiContainer.classList.remove('speaking');
+            }
+        }
+
         function init() {
             resize();
             window.addEventListener('resize', resize);
@@ -163,9 +341,9 @@
 
         function resetPositions() {
             beakerA.x = width * 0.45; 
-            beakerA.y = height * 0.7;
+            beakerA.y = height * 0.65; //稍微往上提一點，避開對話框
             filterSetup.x = width * 0.8;
-            filterSetup.y = height * 0.7;
+            filterSetup.y = height * 0.65;
         }
 
         function resetExperiment() {
@@ -433,7 +611,6 @@
                 
                 let shouldPourSand = filterSetup.beakerBWaterLevel < MAX_BOTTOM_LEVEL - 5;
 
-                // V40/41/42 修正：保留高沙量 (0.9)
                 if (sandLeft && Math.random() < 0.9 && shouldPourSand) {
                     let count = Math.floor(Math.random() * 3) + 2; 
                     for(let i=0; i<count; i++) {
@@ -481,7 +658,6 @@
                             
                             let idx = Math.floor(relativeX);
                             if (idx >= 10 && idx < filterSetup.pileHeights.length - 10) { 
-                                // V42 修正：堆積速度調降至 3.0
                                 filterSetup.pileHeights[idx] += 3.0; 
                             }
                             filterSetup.fallingParticles.splice(i, 1);
@@ -625,10 +801,10 @@
 
             if (step === 3) { 
                 filterSetup.x += (width * 0.5 - filterSetup.x) * 0.05;
-                filterSetup.y += (height * 0.75 - filterSetup.y) * 0.05;
+                filterSetup.y += (height * 0.65 - filterSetup.y) * 0.05; // 同步調整高度
                 
                 const targetBeakerX = filterSetup.x + 105; 
-                const targetBeakerY = (height * 0.75 - 350); 
+                const targetBeakerY = (height * 0.65 - 350); // 同步調整高度
                 
                 beakerA.x += (targetBeakerX - beakerA.x) * 0.05;
                 beakerA.y += (targetBeakerY - beakerA.y) * 0.05;
@@ -674,8 +850,11 @@
         function loop() {
             animFrame = requestAnimationFrame(loop);
             ctx.clearRect(0, 0, width, height);
-            ctx.fillStyle = '#eef'; ctx.fillRect(0, height * 0.7 + 100, width, height);
-            ctx.strokeStyle = '#ccc'; ctx.beginPath(); ctx.moveTo(0, height * 0.7 + 100); ctx.lineTo(width, height * 0.7 + 100); ctx.stroke();
+            
+            // 繪製背景桌子
+            ctx.fillStyle = '#eef'; ctx.fillRect(0, height * 0.65 + 100, width, height);
+            ctx.strokeStyle = '#ccc'; ctx.beginPath(); ctx.moveTo(0, height * 0.65 + 100); ctx.lineTo(width, height * 0.65 + 100); ctx.stroke();
+            
             update();
             if (step >= 3) drawFilterSetup(ctx);
             drawBeaker(ctx, beakerA, true); 
@@ -698,6 +877,9 @@
             if (s === 5) { mainBtn.style.display = 'none'; resetBtn.style.display = 'block'; }
             else { mainBtn.textContent = data.btn; mainBtn.style.display = 'block'; resetBtn.style.display = 'none'; }
             dots.forEach((d, i) => { if(i < 4) d.className = i === Math.min(s, 3) ? 'step-dot active' : 'step-dot'; });
+            
+            // 更新角色對話
+            setDialogue(s);
         }
 
         mainBtn.addEventListener('click', () => {
