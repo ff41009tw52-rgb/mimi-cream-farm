@@ -228,6 +228,33 @@
             z-index: 2; /* 文字在圖片上面 */
         }
 
+        /* ★★★ 新增：右下角懸浮回報按鈕樣式 ★★★ */
+        .feedback-float-btn {
+            /* ★ 重點：使用 fixed 讓它固定在視窗右下角，不隨捲軸移動 */
+            position: fixed; 
+            bottom: 30px;
+            right: 30px;
+            background-color: var(--mimi-orange);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); /* 陰影讓它浮起來 */
+            z-index: 9999; /* 確保在最上層，不會被其他內容蓋住 */
+            border: 3px solid white; /* 貼紙風格白邊 */
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feedback-float-btn:hover {
+            transform: scale(1.1) translateY(-5px); /* 滑鼠移過去稍微變大並上浮 */
+            background-color: #FF7043;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+
         /* --- 手機版 RWD 調整 --- */
         /* 當螢幕小於 900px 時，把角落圖片變成置中顯示，以免擋住文字 */
         @media (max-width: 900px) {
@@ -248,6 +275,14 @@
                 flex-direction: column;
                 align-items: center;
                 gap: 15px;
+            }
+
+            /* 手機版按鈕稍微縮小 */
+            .feedback-float-btn {
+                padding: 12px 20px;
+                font-size: 0.95rem;
+                bottom: 20px;
+                right: 20px;
             }
         }
     </style>
@@ -388,6 +423,11 @@
 
         <p>Created with ❤️ by 兩隻科學貓咪：橘咪咪與白奶油的主人</p>
     </footer>
+
+    <!-- ★★★ 這裡新增了回報問題按鈕 ★★★ -->
+    <a href="feedback.html" class="feedback-float-btn" title="有問題請找我們">
+        <i class="fas fa-comment-dots"></i> 回報問題
+    </a>
 
 </body>
 </html>
