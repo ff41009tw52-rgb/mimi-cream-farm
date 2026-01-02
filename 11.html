@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>橘咪咪與白奶油的信箱 - 問題回報</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* --- 沿用農場配色 --- */
+        :root {
+            --mimi-orange: #FF8C42;
+            --ragdoll-cream: #EFEBE9;
+            --mimi-light: #FFAD60;
+            --cream-bg: #FFF9E6;
+            --farm-green: #76B947;
+            --soil-brown: #5D4037;
+            --error-red: #E74C3C;
+        }
+
+        body {
+            font-family: "微軟正黑體", "Microsoft JhengHei", sans-serif;
+            background-color: var(--cream-bg);
+            color: var(--soil-brown);
+            margin: 0;
+            padding: 0;
+            background-image: radial-gradient(#FFAD60 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* 頂部 Header */
+        header {
+            background-color: var(--mimi-orange);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 6px solid var(--farm-green);
+            position: relative;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: white;
+            color: var(--mimi-orange);
+            padding: 8px 15px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        .back-btn:hover {
+            background-color: var(--ragdoll-cream);
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        /* 主要容器 */
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* 表單卡片 */
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            border: 4px solid var(--mimi-light);
+            box-shadow: 8px 8px 0px rgba(93, 64, 55, 0.1);
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-intro {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px dashed #eee;
+            padding-bottom: 15px;
+        }
+
+        .form-intro h2 {
+            color: var(--farm-green);
+            margin-bottom: 10px;
+        }
+
+        .form-intro p {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* 表單元素樣式 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--soil-brown);
+        }
+        
+        label i {
+            margin-right: 5px;
+            color: var(--mimi-orange);
+        }
+
+        input[type="text"],
+        input[type="email"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            box-sizing: border-box; /* 確保 padding 不會撐開寬度 */
+            font-family: inherit;
+            transition: border-color 0.3s;
+            background-color: #FAFAFA;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--mimi-orange);
+            background-color: #FFF;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* 送出按鈕 */
+        .submit-btn {
+            width: 100%;
+            background-color: var(--farm-green);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .submit-btn:hover {
+            background-color: #5da035;
+        }
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 裝飾插圖 */
+        .cat-decoration {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #888;
+        }
+        
+        .cat-decoration i {
+            color: var(--mimi-orange);
+            font-size: 1.2rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-5px);}
+            60% {transform: translateY(-3px);}
+        }
+
+        /* RWD */
+        @media (max-width: 600px) {
+            .back-btn {
+                position: static;
+                display: inline-block;
+                margin-bottom: 10px;
+                transform: none;
+            }
+            .back-btn:hover {
+                transform: none;
+            }
+            header {
+                text-align: left;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> 回農場首頁</a>
+        <h1><i class="fas fa-envelope-open-text"></i> 橘咪咪與白奶油的信箱</h1>
+    </header>
+
+    <div class="container">
+        <div class="form-card">
+            <div class="form-intro">
+                <h2>遇到困難了嗎？</h2>
+                <p>
+                    別擔心！無論是網頁怪怪的、連結打不開，<br>
+                    還是你有超棒的科學新發現想分享，<br>
+                    都歡迎寫信告訴我們，橘咪咪園長和白奶油園長會盡快處理喔！
+                </p>
+            </div>
+
+            <!-- 
+                 FormSubmit 設定：
+                 1. action: 你的信箱
+                 2. _subject: 信件標題
+                 3. _next: 送出後跳轉的頁面 (這裡設定跳回首頁或您可以自訂感謝頁面，若不設定會顯示 FormSubmit 預設感謝頁)
+                 4. _captcha: 是否開啟機器人驗證 (false 為關閉，方便學生操作)
+            -->
+            <form action="https://formsubmit.co/ff41009tw52@gmail.com" method="POST">
+                
+                <!-- 隱藏設定欄位 -->
+                <input type="hidden" name="_subject" value="【科學農場回報】有學生寄信來囉！">
+                <input type="hidden" name="_captcha" value="false">
+                <!-- 如果想送出後停留在感謝頁，可以移除下面這行，或者改成你的感謝頁面網址 -->
+                <input type="hidden" name="_autoresponse" value="收到你的信囉！橘咪咪與白奶油感謝你的回報。">
+
+                <div class="form-group">
+                    <label for="name"><i class="fas fa-user-circle"></i> 你的名字 (或暱稱)</label>
+                    <input type="text" id="name" name="姓名" placeholder="例如：三年二班 小明" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="category"><i class="fas fa-list-ul"></i> 想告訴我們什麼？</label>
+                    <select id="category" name="分類" required>
+                        <option value="" disabled selected>請選擇一項...</option>
+                        <option value="網頁壞掉了">🐛 網頁壞掉了 (Bug 回報)</option>
+                        <option value="內容看不懂">❓ 內容看不懂 (提問)</option>
+                        <option value="我有新點子">💡 我有新點子 (建議)</option>
+                        <option value="其他">💬 其他</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="contact"><i class="fas fa-reply"></i> 你的 Email (選填)</label>
+                    <input type="email" id="contact" name="聯絡信箱" placeholder="如果你希望園長回信給你，請填寫 Email">
+                </div>
+
+                <div class="form-group">
+                    <label for="message"><i class="fas fa-pen"></i> 詳細內容</label>
+                    <textarea id="message" name="訊息內容" placeholder="請詳細描述你遇到的問題，或是你想說的話..." required></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-paper-plane"></i> 發送給園長
+                </button>
+            </form>
+
+            <div class="cat-decoration">
+                <i class="fas fa-paw"></i> 白奶油與橘咪咪正在期待你的來信...
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
