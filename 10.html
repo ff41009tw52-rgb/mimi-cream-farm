@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>關於老師 - 橘咪咪與白奶油的科學農場</title>
+    <style>
+        /* --- 全域設定 --- */
+        :root {
+            --bg-color: #FFF8E1;      /* 農場米黃色背景 */
+            --primary-green: #558B2F; /* 自然老師綠 */
+            --accent-red: #D32F2F;    /* 草莓紅 */
+            --board-color: #263238;   /* 黑板深灰 */
+            --text-color: #4E342E;    /* 深咖啡文字 */
+            --card-bg: #FFFFFF;
+        }
+
+        body {
+            font-family: "微軟正黑體", "Microsoft JhengHei", "Segoe UI", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.7;
+            background-image: radial-gradient(#E0E0E0 1px, transparent 1px);
+            background-size: 20px 20px; /* 筆記本方格紙背景效果 */
+        }
+
+        /* --- 頂部導覽 --- */
+        header {
+            background-color: var(--primary-green);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* 裝飾性葉子 */
+        header::after {
+            content: "🌿";
+            font-size: 5rem;
+            position: absolute;
+            bottom: -20px;
+            right: 10px;
+            opacity: 0.2;
+            transform: rotate(-20deg);
+        }
+
+        /* --- 主要內容區器 --- */
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* --- 老師的個人檔案卡片 --- */
+        .profile-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 4px solid white;
+            position: relative;
+        }
+
+        /* 黑板風格標題區 */
+        .blackboard-section {
+            background-color: var(--board-color);
+            color: #ECEFF1; /* 粉筆白 */
+            padding: 30px;
+            text-align: center;
+            border-bottom: 8px solid #8D6E63; /* 木頭邊框感 */
+            position: relative;
+        }
+
+        .blackboard-section h2 {
+            font-family: "Comic Sans MS", "微軟正黑體", cursive;
+            font-size: 2rem;
+            margin: 0;
+            display: inline-block;
+            border-bottom: 2px dashed rgba(255,255,255,0.5);
+            padding-bottom: 10px;
+        }
+
+        .chalk-doodle {
+            position: absolute;
+            opacity: 0.8;
+            font-size: 1.5rem;
+        }
+        .doodle-1 { top: 20px; left: 20px; transform: rotate(-15deg); }
+        .doodle-2 { bottom: 20px; right: 20px; transform: rotate(15deg); }
+
+        /* 內容佈局 (Flexbox) */
+        .card-content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 40px;
+            gap: 40px;
+        }
+
+        /* 左側：照片區 */
+        .photo-column {
+            flex: 1;
+            min-width: 280px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .photo-frame {
+            width: 100%;
+            height: 300px; /* 固定高度 */
+            background-color: #f0f0f0;
+            border: 10px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            transform: rotate(-2deg); /* 拍立得風格傾斜 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.3s;
+        }
+
+        .photo-frame:hover {
+            transform: rotate(0deg) scale(1.02);
+        }
+
+        .photo-placeholder {
+            color: #999;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        
+        /* 實際圖片 CSS (請在 img 標籤填入 src) */
+        .profile-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-caption {
+            margin-top: 15px;
+            font-family: "楷體", "KaiTi", serif;
+            color: #666;
+            background-color: #FFF3E0;
+            padding: 5px 15px;
+            transform: rotate(-1deg);
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* 右側：文字介紹區 */
+        .info-column {
+            flex: 1.5;
+            min-width: 300px;
+        }
+
+        /* 標籤雲 */
+        .tags-container {
+            margin-bottom: 20px;
+        }
+        .tag {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            transition: transform 0.2s;
+        }
+        .tag:hover { transform: translateY(-2px); }
+        .tag-nature { background-color: #E8F5E9; color: #2E7D32; border: 1px solid #C8E6C9; }
+        .tag-joke { background-color: #E3F2FD; color: #1565C0; border: 1px solid #BBDEFB; }
+        .tag-food { background-color: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; }
+        .tag-math { background-color: #F3E5F5; color: #7B1FA2; border: 1px solid #E1BEE7; }
+
+        .intro-text {
+            text-align: justify;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        /* 特色區塊：冷笑話與數學 */
+        .feature-box {
+            background-color: #F9FBE7; /* 淺草綠底 */
+            border-left: 5px solid var(--primary-green);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .box-title {
+            font-weight: bold;
+            color: var(--primary-green);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+        .box-title::before { margin-right: 8px; font-size: 1.3rem; }
+
+        /* 冷笑話互動區 */
+        .joke-container {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px dashed #ccc;
+            margin-bottom: 20px;
+        }
+        .joke-question {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .joke-answer {
+            color: transparent;
+            text-shadow: 0 0 8px rgba(0,0,0,0.5); /* 模糊效果 */
+            cursor: pointer;
+            transition: all 0.3s;
+            user-select: none;
+            background-color: #eee;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .joke-answer:hover {
+            text-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+        .joke-answer.revealed {
+            color: #D32F2F; /* 答案顯示紅色 */
+            text-shadow: none;
+            background-color: transparent;
+            font-weight: bold;
+        }
+
+        /* 數學金字塔 */
+        .math-pyramid {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #4527A0;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            white-space: pre; /* 保留排版 */
+            overflow-x: auto;
+            border: 1px dashed #ccc;
+        }
+
+        /* 底部按鈕 */
+        .footer-nav {
+            text-align: center;
+            margin-top: 50px;
+            margin-bottom: 30px;
+        }
+        .btn-home {
+            background-color: var(--primary-green);
+            color: white;
+            text-decoration: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            box-shadow: 0 5px #33691E;
+            transition: all 0.1s;
+            display: inline-block;
+        }
+        .btn-home:active {
+            box-shadow: 0 2px #33691E;
+            transform: translateY(3px);
+        }
+
+        /* RWD 調整 */
+        @media (max-width: 768px) {
+            .card-content {
+                flex-direction: column;
+                padding: 20px;
+            }
+            .photo-frame {
+                height: 250px;
+            }
+            .blackboard-section h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🔬 橘咪咪與白奶油的科學農場</h1>
+    </header>
+
+    <div class="container">
+        
+        <article class="profile-card">
+            
+            <!-- 黑板頭部 -->
+            <div class="blackboard-section">
+                <span class="chalk-doodle doodle-1">E=mc²</span>
+                <span class="chalk-doodle doodle-2">🍓 + 🐱 = ❤️</span>
+                <h2>自然老師的觀察日記</h2>
+            </div>
+
+            <div class="card-content">
+                <!-- 左側：照片 -->
+                <div class="photo-column">
+                    <div class="photo-frame">
+                        <!-- 已加入照片 GUANWEI.jpg -->
+                        <img src="GUANWEI.jpg" alt="老師的照片" class="profile-img">
+                        <!-- 已隱藏預設文字 -->
+                        <div class="photo-placeholder" style="display:none;">
+                            📷 在這裡放<br>老師帥氣的照片
+                        </div>
+                    </div>
+                    <div class="photo-caption">
+                        ❝ 為了保護草莓而戰的每一天 ❞
+                    </div>
+                </div>
+
+                <!-- 右側：介紹與特色 -->
+                <div class="info-column">
+                    <div class="tags-container">
+                        <span class="tag tag-nature">#自然觀察家 🌿</span>
+                        <span class="tag tag-joke">#冷笑話製造機 ❄️</span>
+                        <span class="tag tag-food">#草莓愛好者 🍓</span>
+                        <span class="tag tag-math">#數學怪人 📐</span>
+                    </div>
+
+                    <p class="intro-text">
+                        嗨，我是農場裡的冠瑋老師！
+                        <br><br>
+                        平時除了帶大家認識大自然的奧妙，我最大的興趣就是鑽研那些<strong>奇妙的數學規律</strong>，還有講一些只有自己會笑的冷笑話。
+                        <br><br>
+                        在農場裡，你經常會看到我手裡拿著<strong>草莓</strong>，被<strong>橘咪咪</strong>和<strong>白奶油</strong>追著跑。雖然橘咪咪很挑食，但他唯獨對我的草莓情有獨鍾；而白奶油雖然看起來優雅，但每次我想安靜算數學時，他總會「不小心」把我的筆撥到地上。
+                    </p>
+
+                    <!-- 互動特色區塊 -->
+                    <div class="feature-box">
+                        <!-- 冷笑話 -->
+                        <div class="box-title" style="color: #0277BD;">:: 老師的「本日極凍」冷笑話 ::</div>
+                        <div class="joke-container">
+                            <div class="joke-question">Q: 甚麼動物最適合當警察？</div>
+                            <div class="joke-answer" onclick="this.classList.toggle('revealed')">
+                                A: 貓熊，因為警察會說：
+                                            「你們被『團團』包圍了。」<br>
+                                <span style="font-size:0.8rem; color:#888; font-weight:normal;">(點擊我看答案)</span>
+                            </div>
+                        </div>
+
+                        <!-- 數學知識 -->
+                        <div class="box-title" style="color: #7B1FA2;">:: 療癒的數學時間 ::</div>
+                        <div class="math-pyramid">
+許多植物的生長結構都藏著費式數列1，1，2，3，5，8，13，21，34，55。
+從多肉植物的卷絹的「3，5」、仙人掌的「8，13」，到向日葵的「34，55」，
+都是數列中的相鄰兩數。相鄰兩數在數列越大時，
+比值(或兩數相除)會越趨近所謂黃金分割比例1.618 。
+植物結構以此比例角度向外生長，能夠最有效率地填充空間，
+看似神秘的植物數學密碼，其實是生物演化自然而然的最佳選擇。
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </article>
+
+        <!-- 頁尾導覽 -->
+        <div class="footer-nav">
+            <a href="index.html" class="btn-home">⬅ 回到農場首頁</a>
+        </div>
+
+    </div>
+
+    <script>
+        // 簡單的腳本：確保圖片載入失敗時顯示預設文字
+        document.addEventListener("DOMContentLoaded", function() {
+            const img = document.querySelector('.profile-img');
+            // 如果圖片無法載入 (例如檔案不存在)，顯示替代文字
+            img.onerror = function() {
+                img.style.display = 'none';
+                document.querySelector('.photo-placeholder').style.display = 'flex';
+            };
+        });
+    </script>
+</body>
+</html>
