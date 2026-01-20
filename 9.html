@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>橘咪咪與白奶油的實驗室 V12</title>
+    <title>橘咪咪與白奶油的實驗室 V13</title>
     <style>
         body {
             margin: 0;
@@ -215,7 +215,7 @@
     
     <div id="ui-layer">
         <div class="hud-top">
-            <div class="stat-box" id="score-display">🏆 分數: 0 / 200</div>
+            <div class="stat-box" id="score-display">🏆 分數: 0 / 100</div>
             <div class="stat-box" id="lives-display">❤️ 生命: 3</div>
         </div>
         <div class="mission-container">
@@ -236,7 +236,7 @@
             <div><span class="dot" style="background:#3498db"></span> 小蘇打 = <b style="color:#99ccff">鹼性</b></div>
             <div><span class="dot" style="background:#f1c40f"></span> 砂糖 / <span class="dot" style="background:#ecf0f1"></span> 食鹽 = <b style="color:#ffffcc">中性</b></div>
         </div>
-        <p style="color: #f1c40f; font-weight: bold; font-size: 22px;">目標：200分 完美通關！</p>
+        <p style="color: #f1c40f; font-weight: bold; font-size: 22px;">目標：100分 完美通關！</p>
 
         <button onclick="game.start()">開始整理</button>
     </div>
@@ -253,7 +253,7 @@
 
 <script>
 /**
- * 遊戲邏輯核心 V12
+ * 遊戲邏輯核心 V13
  */
 const game = {
     canvas: document.getElementById('gameCanvas'),
@@ -267,7 +267,7 @@ const game = {
         currentMission: null,
         missionItemsCollected: 0, 
         currentMissionTarget: 2, 
-        targetScore: 200
+        targetScore: 100 // 修改：目標分數改為 100
     },
     config: {
         width: 600,
@@ -408,9 +408,10 @@ const game = {
             if (this.player.x + this.player.width > this.canvas.width) this.player.x = this.canvas.width - this.player.width;
         }
 
+        // 調整難度曲線，因為滿分變成100，所以稍微提早一點點加速
         let spawnRate = 60;
-        if (this.state.score > 50) spawnRate = 50;
-        if (this.state.score > 120) spawnRate = 45; 
+        if (this.state.score > 20) spawnRate = 50; 
+        if (this.state.score > 60) spawnRate = 45; 
         
         if (this.state.frameCount % spawnRate === 0 && this.state.items.length < 4) {
             this.spawnItem();
@@ -484,21 +485,22 @@ const game = {
         scoreEl.textContent = this.state.score;
         screen.classList.remove('hidden');
 
-        if (this.state.score >= 200) {
+        // 修改：更新評價分數區間
+        if (this.state.score >= 100) { // 100分 (滿分)
             titleEl.textContent = "🎉 完美實驗！";
             titleEl.style.color = "#2ecc71";
             msgEl.innerHTML = `
                 <span style="color:#f1c40f">白奶油博士：</span>「完美同步！各項數值都達到了理論巔峰，這是一次教科書級別的實驗！」<br><br>
                 <span style="color:#e67e22">橘咪咪：</span>「檢測不到任何誤差！您簡直就是精密的代名詞！」
             `;
-        } else if (this.state.score >= 100) {
+        } else if (this.state.score >= 50) { // 50 ~ 99分
             titleEl.textContent = "數據穩定";
             titleEl.style.color = "#3498db";
             msgEl.innerHTML = `
                 <span style="color:#f1c40f">白奶油博士：</span>「樣本採集成功。雖然有些微雜訊，但整體表現相當優異。」<br><br>
                 <span style="color:#e67e22">橘咪咪：</span>「數據正在上傳中～做得好！下次我們一定能捕捉到那最後的 1%！」
             `;
-        } else {
+        } else { // 0 ~ 49分
             titleEl.textContent = "需要校正";
             titleEl.style.color = "#e74c3c";
             msgEl.innerHTML = `
