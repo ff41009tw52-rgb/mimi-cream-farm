@@ -3,454 +3,649 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>蔬菜分類大挑戰 - 橘咪咪與白奶油(聖誕版)</title>
-    
-    <!-- 1. 引入 React 和 ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    
-    <!-- 2. 引入 Babel (讓瀏覽器看懂 JSX) -->
+    <title>播種小達人 - 國小自然課互動遊戲</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
-    <!-- 3. 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
     <style>
-        /* 補充動畫樣式 */
-        @keyframes conveyor {
-            from { transform: translateX(0); }
-            to { transform: translateX(-50%); }
-        }
-        .animate-conveyor {
-            animation: conveyor 2s linear infinite;
-        }
-        .animate-bounce-gentle {
-            animation: bounce-gentle 2s infinite;
-        }
-        @keyframes bounce-gentle {
-            0%, 100% { transform: translateY(0) scale(1.0); }
-            50% { transform: translateY(-5px) scale(1.0); }
-        }
-        .animate-fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        /* 自定義字型 */
+        @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700&display=swap');
         body {
-            font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+            font-family: 'Zen Maru Gothic', sans-serif;
+            background-color: #f0fdf4;
+            user-select: none;
+            cursor: default;
+        }
+        .soil-texture {
+            background-color: #5D4037;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23795548' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+        .seed-glow {
+            box-shadow: 0 0 5px 2px rgba(255, 255, 255, 0.8);
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+        /* Custom Cursors */
+        .cursor-hand {
+            cursor: grab;
+        }
+        .cursor-hand:active {
+            cursor: grabbing;
+        }
+        /* Hand Animation */
+        @keyframes pat {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.9) rotate(-5deg); }
+            100% { transform: scale(1); }
+        }
+        .pat-animation {
+            animation: pat 0.2s ease-in-out;
+        }
+        
+        /* New Soil Covering Effect */
+        .soil-cover-container {
+            filter: blur(8px) contrast(1.2); /* Blend the soil particles together */
+        }
+        .soil-particle {
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
         }
     </style>
 </head>
-<body class="bg-gradient-to-b from-green-50 to-blue-100 overflow-hidden">
-    
+<body>
     <div id="root"></div>
 
     <script type="text/babel">
-        // --- 內建圖示元件 (取代 lucide-react) ---
-        // 為了讓單一檔案運作，我們手動定義這些 SVG 圖示
-        const IconBase = ({ d, size = 24, className = "", ...props }) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
-                {d}
+        const { useState, useEffect, useRef } = React;
+
+        // --- Internal Icon Components (No external dependencies) ---
+        const Icon = ({ path, className, size = 24 }) => (
+            <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width={size} 
+                height={size} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className={className}
+            >
+                {path}
             </svg>
         );
 
-        // 修正：多個路徑元素必須用 Fragment (<>...</>) 包裹
-        const Play = (props) => <IconBase d={<polygon points="5 3 19 12 5 21 5 3" />} {...props} />;
-        const RotateCcw = (props) => <IconBase d={<><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></>} {...props} />;
-        const BookOpen = (props) => <IconBase d={<><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></>} {...props} />;
-        const Star = (props) => <IconBase d={<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />} {...props} />;
-        const CheckCircle = (props) => <IconBase d={<><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></>} {...props} />;
-        const XCircle = (props) => <IconBase d={<><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></>} {...props} />;
-        const Info = (props) => <IconBase d={<><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></>} {...props} />;
-        const ChevronRight = (props) => <IconBase d={<polyline points="9 18 15 12 9 6" />} {...props} />;
-        
-        // --- 遊戲邏輯與資料 (完全移植自原版) ---
-        const { useState, useEffect, useRef } = React;
+        const Shovel = (props) => (
+            <Icon {...props} path={<><path d="M2 22v-5l5-5 5 5-5 5z"/><path d="M9.5 14.5L16 8"/><path d="M17 2l5 5-.5.5a3.53 3.53 0 0 1-5 0s0 0 0 0L17 2z"/></>} />
+        );
+        const CloudRain = (props) => (
+            <Icon {...props} path={<><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M8 19v2"/><path d="M8 13v2"/><path d="M16 19v2"/><path d="M16 13v2"/><path d="M12 21v2"/><path d="M12 15v2"/></>} />
+        );
+        const Hand = (props) => (
+            <Icon {...props} path={<><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></>} />
+        );
+        const CheckCircle = (props) => (
+            <Icon {...props} path={<><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></>} />
+        );
+        const RefreshCcw = (props) => (
+            <Icon {...props} path={<><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></>} />
+        );
+        const ArrowRight = (props) => (
+            <Icon {...props} path={<><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></>} />
+        );
+        const Sprout = (props) => (
+             <Icon {...props} path={<><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></>} />
+        );
+        const Home = (props) => (
+            <Icon {...props} path={<><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></>} />
+        );
+        const Plus = (props) => (
+             <Icon {...props} path={<><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></>} />
+        );
 
-        const VEGETABLE_DATA = [
-            { id: 'v1', name: '蘿蔔', category: '根', icon: '🥕', hint: '雖然長得粗粗的，但它是根喔！' },
-            { id: 'v2', name: '馬鈴薯', category: '莖', icon: '🥔', hint: '小心！它長在土裡，但它是「塊莖」！' },
-            { id: 'v3', name: '竹筍', category: '莖', icon: '🎍', hint: '它是從地下莖長出來的嫩莖。' },
-            { id: 'v4', name: '小白菜', category: '葉', icon: '🥬', hint: '我們吃它綠綠的葉子。' },
-            { id: 'v5', name: '菠菜', category: '葉', icon: '🍃', hint: '大力水手愛吃的葉子！' },
-            { id: 'v6', name: '花椰菜', category: '花', icon: '🥦', hint: '一朵朵白白綠綠的，其實是花喔。' },
-            { id: 'v7', name: '金針花', category: '花', icon: '🏵️', hint: '名字裡就有「花」字了！' },
-            { id: 'v8', name: '番茄', category: '果實', icon: '🍅', hint: '花謝了之後長出來的果實。' },
-            { id: 'v9', name: '南瓜', category: '果實', icon: '🎃', hint: '大大的果實，裡面有種子。' },
-            { id: 'v10', name: '秋葵', category: '果實', icon: '🌟', hint: '切開像星星一樣的果實。' },
-            { id: 'v11', name: '絲瓜', category: '果實', icon: '🥒', hint: '長長的瓜，是果實喔。' },
-        ];
-
-        const CATEGORIES = [
-            { id: '根', color: 'bg-amber-600', textColor: 'text-amber-100', icon: '🥕' },
-            { id: '莖', color: 'bg-yellow-600', textColor: 'text-yellow-100', icon: '🎍' },
-            { id: '葉', color: 'bg-green-600', textColor: 'text-green-100', icon: '🍃' },
-            { id: '花', color: 'bg-pink-500', textColor: 'text-pink-100', icon: '🌸' },
-            { id: '果實', color: 'bg-red-500', textColor: 'text-red-100', icon: '🍎' },
-        ];
-
-        // --- 角色元件 (已更新為使用圖片) ---
-        const Mascot = ({ type, emotion = 'happy', size = 'md', className = '' }) => {
-            const isMimi = type === 'mimi';
-            // 根據類型選擇對應的圖片路徑
-            const imgSrc = isMimi ? 'Christmasmimi.jpg' : 'Christmascream.jpg';
-            const sizePx = size === 'lg' ? 96 : size === 'md' ? 64 : 40;
-            
-            return (
-                <div className={`flex flex-col items-center ${className} transform transition-all duration-300`}>
-                <div className={`relative ${emotion === 'excited' ? 'animate-bounce' : ''}`}>
-                    {/* 使用 img 標籤取代原本的 SVG Cat 元件 */}
-                    <img 
-                        src={imgSrc} 
-                        alt={isMimi ? '橘咪咪' : '白奶油'}
-                        width={sizePx}
-                        height={sizePx}
-                        className="drop-shadow-sm object-contain"
-                    />
-                    {emotion === 'excited' && <div className="absolute -top-2 -right-2 text-xl">✨</div>}
-                    {emotion === 'sad' && <div className="absolute -top-2 -right-2 text-xl">💧</div>}
-                </div>
-                <span className={`font-bold mt-1 text-sm ${isMimi ? 'text-orange-700' : 'text-stone-600'} bg-white/80 px-2 py-0.5 rounded-full shadow-sm`}>
-                    {isMimi ? '橘咪咪' : '白奶油'}
-                </span>
-                </div>
-            );
+        // --- Game Constants & Helpers ---
+        const GAME_STAGES = {
+            MENU: 'menu',
+            TUTORIAL: 'tutorial',
+            PLANTING: 'planting',
+            COVERING: 'covering',
+            WATERING: 'watering',
+            SUCCESS: 'success'
         };
 
-        const shuffleArray = (array) => {
-            const newArray = [...array];
-            for (let i = newArray.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+        const VEGGIES = {
+            BOKCHOY: {
+                id: 'bokchoy',
+                name: '小白菜',
+                method: '撒播',
+                desc: '種子要均勻撒在土壤上',
+                icon: '🥬',
+                seedColor: 'bg-yellow-200',
+                targetSeeds: 20
+            },
+            TOMATO: {
+                id: 'tomato',
+                name: '番茄',
+                method: '點播',
+                desc: '挖洞後，每個洞放入 2~3 顆種子',
+                icon: '🍅',
+                seedColor: 'bg-yellow-100',
+                targetHoles: 4
             }
-            return newArray;
         };
 
-        // --- 主元件 ---
-        function VegetableGame() {
-            const [gameState, setGameState] = useState('menu'); 
-            const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-            const [score, setScore] = useState(0);
-            const [gameQueue, setGameQueue] = useState([]);
-            const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
+        // Grid size for Bok Choy cover
+        const GRID_ROWS = 12;
+        const GRID_COLS = 12;
+
+        const App = () => {
+            const [stage, setStage] = useState(GAME_STAGES.MENU);
+            const [selectedVeggie, setSelectedVeggie] = useState(null);
+            const [message, setMessage] = useState("");
             
-            const startGame = () => {
-                const queue = shuffleArray([...VEGETABLE_DATA]); 
-                setGameQueue(queue);
-                setCurrentQuestionIndex(0);
-                setScore(0);
-                setGameState('playing');
+            // Bok Choy State
+            const [scatterSeeds, setScatterSeeds] = useState([]);
+            const [coverGrid, setCoverGrid] = useState([]); // Array of booleans for coverage
+
+            // Tomato State
+            // state: 'flat' -> 'dug' -> 'seeded' -> 'covered'
+            const [tomatoHoles, setTomatoHoles] = useState([
+                { id: 1, x: 25, y: 30, state: 'flat', seeds: 0 },
+                { id: 2, x: 75, y: 30, state: 'flat', seeds: 0 },
+                { id: 3, x: 25, y: 70, state: 'flat', seeds: 0 },
+                { id: 4, x: 75, y: 70, state: 'flat', seeds: 0 },
+            ]);
+            const [activeTool, setActiveTool] = useState('hand'); 
+
+            // Watering State
+            const [waterLevel, setWaterLevel] = useState(0);
+            const [isWatering, setIsWatering] = useState(false);
+            const waterInterval = useRef(null);
+
+            // Interaction State
+            const [isPatting, setIsPatting] = useState(false);
+
+            // --- Handlers ---
+
+            const resetGame = () => {
+                setStage(GAME_STAGES.MENU);
+                setScatterSeeds([]);
+                setCoverGrid(Array(GRID_ROWS * GRID_COLS).fill(false));
+                setTomatoHoles(tomatoHoles.map(h => ({ ...h, state: 'flat', seeds: 0 })));
+                setWaterLevel(0);
+                setMessage("");
+                setActiveTool('hand');
             };
 
-            const handleAnswer = (category) => {
-                const currentItem = gameQueue[currentQuestionIndex];
-                const isCorrect = currentItem.category === category;
+            const startGame = (veggieKey) => {
+                setSelectedVeggie(VEGGIES[veggieKey]);
+                // Initialize Bok Choy grid
+                setCoverGrid(Array(GRID_ROWS * GRID_COLS).fill(false)); 
+                setStage(GAME_STAGES.TUTORIAL);
+            };
+
+            // Bok Choy Logic
+            const handleScatterClick = (e) => {
+                if (stage !== GAME_STAGES.PLANTING || selectedVeggie.id !== 'bokchoy') return;
                 
-                setLastAnswerCorrect(isCorrect);
-                if (isCorrect) {
-                setScore(s => s + 10);
-                }
+                const rect = e.target.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
                 
-                setGameState('feedback');
+                const isTooClose = scatterSeeds.some(s => Math.hypot(s.x - x, s.y - y) < 20);
                 
-                setTimeout(() => {
-                if (currentQuestionIndex < gameQueue.length - 1) {
-                    setCurrentQuestionIndex(prev => prev + 1);
-                    setGameState('playing');
+                if (isTooClose) {
+                    setMessage("太擠了！分開一點喔！");
+                    setTimeout(() => setMessage(""), 1000);
                 } else {
-                    setGameState('gameover');
+                    const newSeed = { x, y, id: Date.now() };
+                    setScatterSeeds([...scatterSeeds, newSeed]);
+                    if (scatterSeeds.length + 1 >= VEGGIES.BOKCHOY.targetSeeds) {
+                        setMessage("太棒了！種子撒得很均勻！下一步準備覆土！");
+                    } else {
+                        setMessage(`目前有 ${scatterSeeds.length + 1} 顆種子，繼續撒！`);
+                    }
                 }
-                }, 2500); 
             };
 
-            // 1. 選單畫面
-            const MenuView = () => (
-                <div className="flex flex-col items-center justify-center h-full space-y-6 animate-fade-in text-center p-4 relative z-10">
-                <div className="bg-white/90 backdrop-blur-md p-8 rounded-3xl shadow-2xl border-4 border-green-500 max-w-lg w-full relative">
-                    <div className="absolute -top-16 -left-4 transform -rotate-12">
-                    <Mascot type="mimi" size="lg" emotion="excited" />
-                    </div>
-                    <div className="absolute -top-16 -right-4 transform rotate-12">
-                    <Mascot type="butter" size="lg" emotion="happy" />
-                    </div>
-
-                    <h1 className="text-4xl md:text-5xl font-bold text-green-700 mb-2 mt-4 tracking-wider">
-                    蔬菜分類大挑戰
-                    </h1>
-                    <p className="text-lg text-green-600 mb-8 font-medium bg-green-50 p-2 rounded-lg">
-                    跟著橘咪咪和白奶油，<br/>一起認識蔬菜的部位吧！
-                    </p>
+            const handleBokChoyCoverHover = (index) => {
+                if (stage !== GAME_STAGES.COVERING || selectedVeggie.id !== 'bokchoy') return;
+                
+                if (!coverGrid[index]) {
+                    const newGrid = [...coverGrid];
+                    // Cover the hovered cell
+                    newGrid[index] = true;
                     
-                    <div className="flex flex-col gap-4">
-                    <button 
-                        onClick={() => setGameState('learning')}
-                        className="flex items-center justify-center gap-3 bg-blue-500 hover:bg-blue-600 text-white text-2xl font-bold py-4 px-8 rounded-full shadow-lg transform transition hover:scale-105 active:scale-95 w-full group"
-                    >
-                        <BookOpen size={28} className="group-hover:animate-bounce" />
-                        去預習教室找白奶油
-                    </button>
+                    // Also cover neighbors to make it feel more like a brush
+                    const neighbors = [index-1, index+1, index-GRID_COLS, index+GRID_COLS];
+                    neighbors.forEach(n => {
+                        if (n >= 0 && n < newGrid.length) newGrid[n] = true;
+                    });
+
+                    setCoverGrid(newGrid);
                     
-                    <button 
-                        onClick={startGame}
-                        className="flex items-center justify-center gap-3 bg-green-500 hover:bg-green-600 text-white text-2xl font-bold py-4 px-8 rounded-full shadow-lg transform transition hover:scale-105 active:scale-95 w-full group"
+                    // Check progress
+                    const coveredCount = newGrid.filter(Boolean).length;
+                    const total = newGrid.length;
+                    if (coveredCount / total > 0.85) {
+                        setMessage("覆土完成！準備澆水！");
+                        setTimeout(() => setStage(GAME_STAGES.WATERING), 1500);
+                    }
+                }
+            };
+
+            // Tomato Logic
+            const handleHoleClick = (holeId) => {
+                if (selectedVeggie.id !== 'tomato') return;
+
+                // Planting Phase
+                if (stage === GAME_STAGES.PLANTING) {
+                    setTomatoHoles(prev => prev.map(hole => {
+                        if (hole.id !== holeId) return hole;
+
+                        // Step 1: Digging
+                        if (activeTool === 'shovel') {
+                            if (hole.state === 'flat') return { ...hole, state: 'dug' };
+                            return hole;
+                        }
+
+                        // Step 2: Seeding
+                        if (activeTool === 'seedbag') {
+                            if (hole.state !== 'dug') {
+                                setMessage("要先挖洞才能放種子喔！");
+                                return hole;
+                            }
+                            
+                            // Strict limit at 3
+                            if (hole.seeds >= 3) {
+                                setMessage("只要 2~3 顆就夠了喔！");
+                                return hole; // Do not add more
+                            }
+                            
+                            return { ...hole, seeds: hole.seeds + 1 };
+                        }
+                        return hole;
+                    }));
+                }
+                
+                // Covering Phase
+                if (stage === GAME_STAGES.COVERING) {
+                    setTomatoHoles(prev => {
+                        const newHoles = prev.map(hole => {
+                            if (hole.id === holeId && hole.state === 'dug' && hole.seeds > 0) {
+                                return { ...hole, state: 'covered' };
+                            }
+                            return hole;
+                        });
+                        
+                        // Check if all covered
+                        const allCovered = newHoles.every(h => h.state === 'covered');
+                        if (allCovered) {
+                            setMessage("都蓋好了！準備澆水！");
+                            setTimeout(() => setStage(GAME_STAGES.WATERING), 1500);
+                        }
+                        
+                        return newHoles;
+                    });
+                    setIsPatting(true);
+                    setTimeout(() => setIsPatting(false), 200);
+                }
+            };
+
+            // Watering Logic
+            const startWatering = () => {
+                if (stage !== GAME_STAGES.WATERING) return;
+                setIsWatering(true);
+                waterInterval.current = setInterval(() => {
+                    setWaterLevel(prev => {
+                        if (prev >= 100) return 100;
+                        return prev + 1.5;
+                    });
+                }, 50);
+            };
+
+            const stopWatering = () => {
+                setIsWatering(false);
+                clearInterval(waterInterval.current);
+                
+                if (waterLevel > 40 && waterLevel < 80) {
+                    setStage(GAME_STAGES.SUCCESS);
+                } else if (waterLevel >= 80) {
+                    setMessage("淹水啦！下次小心一點！");
+                    setTimeout(() => {
+                        setWaterLevel(0);
+                        setMessage("");
+                    }, 1500);
+                } else {
+                    setMessage("水還不夠喔，土壤要溼潤才行！");
+                }
+            };
+
+            // Transition Check
+            const checkPlantingComplete = () => {
+                if (selectedVeggie.id === 'bokchoy') {
+                    if (scatterSeeds.length >= VEGGIES.BOKCHOY.targetSeeds) {
+                        setStage(GAME_STAGES.COVERING);
+                        setMessage("現在請用手，輕輕把土撥到種子上！");
+                    } else {
+                        setMessage("種子還不夠多喔！");
+                    }
+                } else {
+                    // Tomato
+                    const allDug = tomatoHoles.every(h => h.state !== 'flat');
+                    const allSeeded = tomatoHoles.every(h => h.seeds >= 2 && h.seeds <= 3);
+                    if (allDug && allSeeded) {
+                        setStage(GAME_STAGES.COVERING);
+                        setActiveTool('hand'); // Force tool to hand
+                        setMessage("太好了！現在用手把洞口填平吧！");
+                    } else {
+                        setMessage("請檢查：每個洞都要有 2~3 顆種子！");
+                    }
+                }
+            };
+
+            // --- Render Components ---
+
+            const renderMainMenu = () => (
+                <div className="flex flex-col items-center justify-center h-full space-y-8 p-4 relative">
+                    {/* Back Button on Menu as well */}
+                     <a 
+                        href="https://ff41009tw52-rgb.github.io/mimi-cream-farm/"
+                        className="absolute top-4 left-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl font-bold shadow-lg flex items-center gap-2 decoration-none transition-all hover:scale-105 z-50"
                     >
-                        <Play size={28} className="group-hover:animate-pulse" />
-                        和橘咪咪一起玩遊戲
-                    </button>
-                    </div>
-                </div>
-                <p className="text-green-800 font-bold opacity-70">三年級自然科數位教材</p>
-                </div>
-            );
+                        <Home size={20} /> 回農場
+                    </a>
 
-            // 2. 預習教室
-            const LearningView = () => (
-                <div className="flex flex-col h-full overflow-hidden bg-white/95 rounded-xl max-w-4xl mx-auto w-full shadow-2xl my-4 relative">
-                <div className="bg-blue-500 p-4 text-white flex justify-between items-center shadow-md shrink-0 z-20">
-                    <h2 className="text-2xl font-bold flex items-center gap-2">
-                    <BookOpen /> 預習教室
-                    </h2>
-                    <button 
-                    onClick={startGame}
-                    className="bg-green-400 hover:bg-green-500 text-white font-bold py-2 px-6 rounded-full shadow transition flex items-center gap-2 animate-pulse"
-                    >
-                    我準備好了！ <ChevronRight />
-                    </button>
-                </div>
-
-                <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-blue-50 relative">
-                    <div className="flex items-start gap-4 mb-2">
-                    <Mascot type="mimi" size="md" className="shrink-0" />
-                    <div className="bg-white p-4 rounded-r-2xl rounded-bl-2xl shadow-md border-l-4 border-orange-400 text-gray-700">
-                        <p className="font-bold text-lg mb-1">橘咪咪說：</p>
-                        嗨！我是橘咪咪。記住喔，像<span className="text-orange-600 font-bold">蘿蔔</span>和<span className="text-yellow-600 font-bold">馬鈴薯</span>都長在土裡，但是它們的部位不一樣喔！
-                    </div>
-                    </div>
-
-                    {CATEGORIES.slice(0, 3).map(cat => (
-                    <CategorySection key={cat.id} cat={cat} />
-                    ))}
-
-                    <div className="flex items-start gap-4 mb-2 flex-row-reverse">
-                    <Mascot type="butter" size="md" className="shrink-0" />
-                    <div className="bg-white p-4 rounded-l-2xl rounded-br-2xl shadow-md border-r-4 border-stone-400 text-gray-700 text-right">
-                        <p className="font-bold text-lg mb-1">白奶油說：</p>
-                        我是白奶油～有些蔬菜是<span className="text-pink-500 font-bold">花</span>或<span className="text-red-500 font-bold">果實</span>，通常長在地面上，顏色很漂亮呢！
-                    </div>
-                    </div>
-
-                    {CATEGORIES.slice(3).map(cat => (
-                    <CategorySection key={cat.id} cat={cat} />
-                    ))}
-                </div>
-                </div>
-            );
-
-            const CategorySection = ({ cat }) => {
-                const items = VEGETABLE_DATA.filter(v => v.category === cat.id);
-                return (
-                <div className="bg-white rounded-2xl p-4 shadow-sm border border-blue-100 flex flex-col md:flex-row gap-4 items-start md:items-center transform transition hover:scale-[1.01]">
-                    <div className={`${cat.color} ${cat.textColor} w-20 h-20 rounded-2xl flex flex-col items-center justify-center shrink-0 shadow-inner`}>
-                    <span className="text-3xl mb-1">{cat.icon}</span>
-                    <span className="text-xl font-bold">{cat.id}</span>
-                    </div>
-                    <div className="flex-1 w-full">
-                    <div className="flex flex-wrap gap-3">
-                        {items.map(item => (
-                        <div key={item.id} className="flex flex-col items-center bg-gray-50 p-2 rounded-xl border border-gray-200 min-w-[70px]">
-                            <span className="text-3xl mb-1 drop-shadow-sm">{item.icon}</span>
-                            <span className="font-bold text-gray-700 text-sm">{item.name}</span>
-                            {(item.name === '馬鈴薯' || item.name === '蘿蔔') && (
-                            <span className="text-[10px] bg-red-100 text-red-600 px-1 rounded mt-1 font-bold animate-pulse">
-                                注意!
-                            </span>
-                            )}
-                        </div>
+                    <h1 className="text-4xl font-bold text-green-800 tracking-wider">播種小達人</h1>
+                    <p className="text-xl text-gray-600">請選擇你要種植的蔬菜</p>
+                    <div className="grid grid-cols-2 gap-8 w-full max-w-2xl">
+                        {Object.keys(VEGGIES).map(key => (
+                            <button 
+                                key={key}
+                                onClick={() => startGame(key)}
+                                className="group relative bg-white p-8 rounded-3xl shadow-xl border-4 border-transparent hover:border-green-400 transition-all transform hover:-translate-y-2"
+                            >
+                                <div className="text-8xl mb-4 floating">{VEGGIES[key].icon}</div>
+                                <h2 className="text-3xl font-bold text-gray-800">{VEGGIES[key].name}</h2>
+                                <span className="inline-block mt-2 px-4 py-1 bg-green-100 text-green-700 rounded-full text-lg">
+                                    {VEGGIES[key].method}
+                                </span>
+                            </button>
                         ))}
                     </div>
-                    <div className="mt-2 text-sm text-gray-500">
-                        {cat.id === '根' && '蘿蔔是根，會吸收水分。'}
-                        {cat.id === '莖' && '馬鈴薯是塊莖，竹筍是嫩莖。'}
-                        {cat.id === '葉' && '大多數綠色蔬菜都是葉子。'}
-                        {cat.id === '花' && '花椰菜和金針花都是花。'}
-                        {cat.id === '果實' && '番茄、南瓜裡面有種子，是果實。'}
-                    </div>
-                    </div>
                 </div>
-                );
-            };
+            );
 
-            // 3. 遊戲進行畫面
-            const GameView = () => {
-                const currentItem = gameQueue[currentQuestionIndex];
+            const renderTutorial = () => (
+                <div className="flex flex-col items-center justify-center h-full p-8 text-center bg-white/90 rounded-xl max-w-2xl mx-auto mt-20 shadow-2xl relative">
+                     <a 
+                        href="https://ff41009tw52-rgb.github.io/mimi-cream-farm/"
+                        className="absolute top-4 left-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl font-bold shadow-lg flex items-center gap-2 decoration-none transition-all hover:scale-105 z-50"
+                    >
+                        <Home size={20} /> 回農場
+                    </a>
 
-                return (
-                <div className="flex flex-col h-full w-full max-w-4xl mx-auto py-2 px-2">
-                    <div className="flex justify-between items-end bg-white/60 p-2 rounded-xl shadow-sm mb-2 mx-2">
-                    <div className="flex items-center gap-2 transform translate-y-2">
-                        <Mascot type="mimi" size="sm" emotion="excited" />
-                        <div className="hidden md:block bg-white text-xs px-2 py-1 rounded-lg shadow border border-orange-200 text-orange-600 mb-4">
-                        加油加油！
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col items-center">
-                        <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-md border-2 border-yellow-400">
-                        <Star className="text-yellow-500 fill-yellow-500 w-6 h-6" />
-                        <span className="text-2xl font-black text-yellow-600">{score}</span>
-                        </div>
-                        <span className="text-xs text-gray-500 font-bold mt-1">第 {currentQuestionIndex + 1} / {gameQueue.length} 題</span>
-                    </div>
-
-                    <div className="flex items-center gap-2 transform translate-y-2">
-                        <div className="hidden md:block bg-white text-xs px-2 py-1 rounded-lg shadow border border-stone-200 text-stone-600 mb-4">
-                        要看仔細喔~
-                        </div>
-                        <Mascot type="butter" size="sm" emotion="neutral" />
-                    </div>
-                    </div>
-
-                    <div className="flex-1 relative flex flex-col items-center justify-center min-h-[250px]">
-                    <div className="absolute top-1/2 left-0 w-full h-24 bg-gray-200 border-y-4 border-gray-300 transform -translate-y-1/2 overflow-hidden opacity-60">
-                        <div className="w-[200%] h-full flex items-center animate-conveyor">
-                            {Array.from({length: 20}).map((_, i) => (
-                            <div key={i} className="w-4 h-full bg-gray-300/50 mx-8 transform -skew-x-12"></div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="z-10 bg-white p-6 md:p-8 rounded-full shadow-2xl border-8 border-white animate-bounce-gentle flex flex-col items-center transform scale-110 md:scale-125 hover:scale-130 transition cursor-pointer">
-                        <span className="text-7xl md:text-8xl filter drop-shadow-md">{currentItem.icon}</span>
-                        <span className="text-2xl md:text-3xl font-bold text-gray-800 mt-2 bg-white/90 px-4 py-1 rounded-full shadow-sm">{currentItem.name}</span>
-                    </div>
-                    </div>
-
-                    <div className="grid grid-cols-5 gap-2 p-2 pb-6">
-                    {CATEGORIES.map(cat => (
-                        <button
-                        key={cat.id}
-                        onClick={() => handleAnswer(cat.id)}
-                        className={`${cat.color} hover:brightness-110 active:scale-95 transition-all transform rounded-xl py-2 px-1 flex flex-col items-center justify-between h-28 md:h-32 shadow-lg border-b-4 border-black/10 group relative overflow-hidden`}
-                        >
-                        <div className="absolute top-0 left-0 w-full h-1 bg-white/30"></div>
-                        <div className="bg-white/20 w-full flex-1 rounded-lg mb-1 border-2 border-white/30 border-dashed flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                            <span className="text-xl opacity-60 group-hover:opacity-100 transition-opacity">⬇️</span>
-                        </div>
-                        <span className={`${cat.textColor} font-bold text-lg md:text-2xl drop-shadow-sm`}>{cat.id}</span>
-                        </button>
-                    ))}
-                    </div>
-                </div>
-                );
-            };
-
-            // 4. 回饋畫面
-            const FeedbackOverlay = () => {
-                const currentItem = gameQueue[currentQuestionIndex];
-                
-                return (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-                    <div className={`bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl text-center transform scale-100 md:scale-110 border-8 ${lastAnswerCorrect ? 'border-green-400' : 'border-red-400'} relative`}>
-                    
-                    <div className="absolute -top-12 left-1/2 transform -translate-x-1/2">
-                        {lastAnswerCorrect ? (
-                        <Mascot type="mimi" size="lg" emotion="excited" />
-                        ) : (
-                        <Mascot type="butter" size="lg" emotion="sad" />
-                        )}
-                    </div>
-
-                    <div className="mt-8 mb-4">
-                        <h2 className={`text-4xl font-bold mb-2 ${lastAnswerCorrect ? 'text-green-600' : 'text-red-500'}`}>
-                        {lastAnswerCorrect ? '答對了！' : '哎呀，猜錯了'}
-                        </h2>
-                        <div className="text-sm text-gray-400 font-bold">
-                        {lastAnswerCorrect ? '橘咪咪為你歡呼！' : '白奶油說：沒關係，學起來就好！'}
-                        </div>
-                    </div>
-
-                    <div className="bg-gray-50 rounded-2xl p-6 mb-6 border-2 border-gray-100">
-                        <div className="text-6xl mb-4 animate-bounce-gentle inline-block">{currentItem.icon}</div>
-                        <p className="text-2xl text-gray-700 font-bold mb-2">
-                        {currentItem.name} 是 <span className={`text-3xl mx-1 px-2 py-1 rounded ${lastAnswerCorrect ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'} underline decoration-wavy`}>{currentItem.category}</span>
+                    <h2 className="text-3xl font-bold text-green-700 mb-6">任務說明：{selectedVeggie.name}</h2>
+                    <div className="bg-yellow-50 p-6 rounded-xl border-2 border-yellow-200 mb-8">
+                        <p className="text-2xl text-gray-700 leading-relaxed font-bold">
+                            {selectedVeggie.desc}
                         </p>
-                        <div className="flex items-start justify-center gap-2 mt-4 text-left bg-white p-3 rounded-xl shadow-sm">
-                        <Info size={20} className="text-blue-400 shrink-0 mt-0.5" />
-                        <p className="text-gray-600 font-medium">{currentItem.hint}</p>
-                        </div>
                     </div>
-                    </div>
+                    <button 
+                        onClick={() => setStage(GAME_STAGES.PLANTING)}
+                        className="bg-green-500 hover:bg-green-600 text-white text-2xl font-bold py-4 px-12 rounded-full shadow-lg transition-transform active:scale-95 flex items-center gap-3"
+                    >
+                        開始播種 <Hand size={28} />
+                    </button>
                 </div>
-                );
-            };
+            );
 
-            // 5. 遊戲結束畫面
-            const GameOverView = () => {
-                let comment = "再接再厲！";
-                if (score >= 100) comment = "太厲害了！";
-                else if (score >= 80) comment = "很棒喔！";
+            const renderGameArea = () => {
+                const isBokchoy = selectedVeggie.id === 'bokchoy';
+                
+                // Instructions based on stage
+                let instruction = "";
+                if (stage === GAME_STAGES.PLANTING) {
+                    instruction = isBokchoy ? "點擊土壤撒種子 (目標: 20顆以上)" : "先用鏟子挖洞，再放 2~3 顆種子";
+                } else if (stage === GAME_STAGES.COVERING) {
+                    instruction = isBokchoy ? "【互動】在畫面上滑動，將一層薄土蓋在種子上" : "【互動】點擊每一個洞口，把土撥回去填平";
+                } else if (stage === GAME_STAGES.WATERING) {
+                    instruction = "長按澆水按鈕，直到土壤溼潤";
+                }
 
                 return (
-                <div className="flex flex-col items-center justify-center h-full text-center p-4 animate-fade-in relative z-10">
-                    <div className="bg-white p-8 md:p-12 rounded-3xl shadow-2xl max-w-lg w-full border-4 border-yellow-400 relative overflow-visible">
-                    
-                    <div className="absolute -top-10 left-4">
-                        <Mascot type="mimi" size="md" emotion="excited" />
-                    </div>
-                    <div className="absolute -top-10 right-4">
-                        <Mascot type="butter" size="md" emotion="happy" />
-                    </div>
-
-                    <h2 className="text-4xl font-bold text-gray-800 mb-2 mt-4">遊戲結束</h2>
-                    <p className="text-gray-500 font-bold mb-6">本次成績</p>
-                    
-                    <div className="flex justify-center items-end gap-2 mb-8 bg-yellow-50 py-4 rounded-2xl">
-                        <span className="text-8xl font-black text-yellow-500 drop-shadow-sm">{score}</span>
-                        <span className="text-2xl text-gray-400 font-bold mb-4">分</span>
-                    </div>
-
-                    <h3 className="text-2xl font-bold text-green-600 mb-8">{comment}</h3>
-
-                    <div className="flex flex-col gap-3">
-                        <button 
-                        onClick={startGame}
-                        className="flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition active:scale-95 text-xl"
+                    <div className="flex flex-col h-full max-w-4xl mx-auto p-4 relative">
+                        {/* Back Button (Always Visible) */}
+                        <a 
+                            href="https://ff41009tw52-rgb.github.io/mimi-cream-farm/"
+                            className="absolute top-2 left-2 md:top-6 md:left-6 z-50 bg-green-600 hover:bg-green-700 text-white px-3 py-2 md:px-4 md:py-2 rounded-xl font-bold shadow-lg flex items-center gap-2 decoration-none transition-all hover:scale-105"
                         >
-                        <RotateCcw /> 再玩一次
-                        </button>
-                        <button 
-                        onClick={() => setGameState('menu')}
-                        className="text-gray-400 hover:text-gray-600 font-bold py-2 underline"
+                            <Home size={20} /> <span className="hidden md:inline">回農場</span>
+                        </a>
+
+                        {/* Header Info */}
+                        <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-md mb-4 z-10 ml-12 md:ml-32">
+                            <div className="flex items-center gap-3">
+                                <span className="text-4xl">{selectedVeggie.icon}</span>
+                                <div>
+                                    <h3 className="text-xl font-bold text-gray-800">{selectedVeggie.name} ({selectedVeggie.method})</h3>
+                                    <p className="text-green-600 font-bold text-sm md:text-base animate-pulse">{instruction}</p>
+                                </div>
+                            </div>
+                            
+                            {/* Tomato Tools (Only visible in Planting) */}
+                            {!isBokchoy && stage === GAME_STAGES.PLANTING && (
+                                <div className="flex gap-2 bg-gray-100 p-1 rounded-lg">
+                                    <button 
+                                        onClick={() => setActiveTool('shovel')}
+                                        className={`p-3 rounded-lg flex items-center gap-2 ${activeTool === 'shovel' ? 'bg-blue-500 text-white shadow-md' : 'text-gray-500 hover:bg-gray-200'}`}
+                                    >
+                                        <Shovel size={20} /> 鏟子
+                                    </button>
+                                    <button 
+                                        onClick={() => setActiveTool('seedbag')}
+                                        className={`p-3 rounded-lg flex items-center gap-2 ${activeTool === 'seedbag' ? 'bg-yellow-500 text-white shadow-md' : 'text-gray-500 hover:bg-gray-200'}`}
+                                    >
+                                        <span className="text-lg">🌰</span> 種子
+                                    </button>
+                                </div>
+                            )}
+
+                             {/* Hand Tool Indicator for Covering */}
+                             {stage === GAME_STAGES.COVERING && (
+                                <div className="bg-amber-100 px-4 py-2 rounded-lg text-amber-800 font-bold flex items-center gap-2">
+                                    <Hand size={20} /> 使用雙手覆土
+                                </div>
+                            )}
+
+                            {/* Proceed Button (Only in Planting Stage) */}
+                            {stage === GAME_STAGES.PLANTING && (
+                                <button 
+                                    onClick={checkPlantingComplete}
+                                    className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-bold shadow-lg flex items-center gap-2"
+                                >
+                                    完成 <ArrowRight size={20} />
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Message Toast */}
+                        {message && (
+                            <div className="absolute top-28 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-2 rounded-full shadow-xl font-bold z-50 animate-pulse whitespace-nowrap">
+                                {message}
+                            </div>
+                        )}
+
+                        {/* SOIL AREA */}
+                        <div className={`relative flex-grow soil-texture rounded-xl shadow-inner border-4 border-amber-800 overflow-hidden 
+                                        ${stage === GAME_STAGES.COVERING ? 'cursor-hand' : 'cursor-crosshair'}`}
+                             onClick={isBokchoy ? handleScatterClick : undefined}
                         >
-                        回主畫面
-                        </button>
+                            {/* --- Bok Choy Interaction Layer --- */}
+                            
+                            {/* 1. Seeds Layer (Visible under soil) */}
+                            {isBokchoy && scatterSeeds.map(seed => (
+                                <div 
+                                    key={seed.id}
+                                    className="absolute w-3 h-3 bg-yellow-200 rounded-full seed-glow transition-all"
+                                    style={{ left: seed.x, top: seed.y, transform: 'translate(-50%, -50%)' }}
+                                ></div>
+                            ))}
+
+                            {/* 2. Soil Covering Layer (Natural Blur Effect) */}
+                            {isBokchoy && stage === GAME_STAGES.COVERING && (
+                                <div className="absolute inset-0 grid grid-cols-12 grid-rows-12 soil-cover-container pointer-events-none">
+                                    {coverGrid.map((covered, idx) => (
+                                        <div 
+                                            key={idx}
+                                            // Make the "particle" larger than the grid cell to overlap
+                                            className={`soil-particle transition-opacity duration-700 w-[150%] h-[150%] -translate-x-1/4 -translate-y-1/4 rounded-full ${covered ? 'bg-amber-900 opacity-90' : 'bg-transparent opacity-0'}`}
+                                        ></div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Invisible Touch/Hover Grid for Bok Choy (On top to capture events) */}
+                            {isBokchoy && stage === GAME_STAGES.COVERING && (
+                                <div className="absolute inset-0 grid grid-cols-12 grid-rows-12 z-20">
+                                    {coverGrid.map((_, idx) => (
+                                        <div 
+                                            key={idx}
+                                            onMouseEnter={() => handleBokChoyCoverHover(idx)}
+                                            onTouchMove={(e) => {
+                                                const touch = e.touches[0];
+                                                const el = document.elementFromPoint(touch.clientX, touch.clientY);
+                                                if (el && el.dataset.idx) handleBokChoyCoverHover(parseInt(el.dataset.idx));
+                                            }}
+                                            data-idx={idx}
+                                            className="bg-transparent"
+                                        ></div>
+                                    ))}
+                                </div>
+                            )}
+
+                             {/* --- Tomato Interaction Layer --- */}
+                            
+                            {!isBokchoy && tomatoHoles.map(hole => (
+                                <div 
+                                    key={hole.id}
+                                    onClick={() => handleHoleClick(hole.id)}
+                                    className={`absolute w-32 h-32 rounded-full border-4 transition-all duration-500 flex items-center justify-center flex-wrap gap-1 p-4
+                                        ${hole.state === 'flat' ? 'border-dashed border-white/50 bg-black/10 hover:bg-black/20' : ''}
+                                        /* Deep dark brown with inset shadow for depth */
+                                        ${hole.state === 'dug' || hole.state === 'seeded' ? 'border-amber-900/50 bg-[#2d1b15] shadow-[inset_0_8px_16px_rgba(0,0,0,0.8)] scale-95' : ''}
+                                        ${hole.state === 'covered' ? 'border-transparent bg-amber-800 scale-105 shadow-lg' : ''}
+                                    `}
+                                    style={{ left: `${hole.x}%`, top: `${hole.y}%`, transform: 'translate(-50%, -50%)' }}
+                                >
+                                    {/* NEW: Explicit Dig Indicator */}
+                                    {hole.state === 'flat' && stage === GAME_STAGES.PLANTING && (
+                                        <div className="flex flex-col items-center justify-center animate-pulse pointer-events-none">
+                                            <Plus size={48} className="text-white drop-shadow-lg mb-1" strokeWidth={4} />
+                                            <div className="text-white font-bold bg-black/30 px-2 py-0.5 rounded-full text-sm backdrop-blur-sm">挖這裡</div>
+                                        </div>
+                                    )}
+                                    
+                                    {/* Seeds inside hole (Visible only if not covered) */}
+                                    {hole.state !== 'covered' && Array.from({ length: hole.seeds }).map((_, i) => (
+                                        <div key={i} className="w-4 h-4 bg-yellow-200 rounded-full seed-glow"></div>
+                                    ))}
+                                    
+                                    {/* Covered Mound Visual */}
+                                    {hole.state === 'covered' && (
+                                        <div className="text-amber-900/50 font-bold select-none">已覆土</div>
+                                    )}
+
+                                    {/* Helper text for count */}
+                                    {(hole.state === 'dug' || hole.state === 'seeded') && stage === GAME_STAGES.PLANTING && (
+                                        <div className="absolute -bottom-8 bg-white/80 px-2 rounded text-sm font-bold pointer-events-none">
+                                            {hole.seeds} 顆
+                                        </div>
+                                    )}
+                                    
+                                    {/* Prompt to cover */}
+                                    {stage === GAME_STAGES.COVERING && hole.state !== 'covered' && (
+                                        <div className="absolute -top-10 animate-bounce text-amber-100 text-3xl drop-shadow-md pointer-events-none">
+                                            👇
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+
+
+                            {/* Watering UI Overlay (Fades in soil color naturally) */}
+                            {stage === GAME_STAGES.WATERING && (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center z-30 pointer-events-none">
+                                    {/* Darken soil globally for watering stage */}
+                                    <div className="absolute inset-0 bg-amber-900/80 -z-10 transition-opacity duration-1000"></div>
+                                    
+                                    <div className="bg-white/90 p-6 rounded-2xl shadow-2xl text-center pointer-events-auto">
+                                        <h3 className="text-2xl font-bold text-blue-600 mb-4">澆水時間！</h3>
+                                        <p className="mb-4 text-gray-600">長按按鈕，讓水充滿綠色區域！</p>
+                                        
+                                        {/* Water Meter */}
+                                        <div className="w-64 h-8 bg-gray-200 rounded-full overflow-hidden border-2 border-gray-400 relative mb-4">
+                                            <div className="absolute top-0 bottom-0 left-[40%] right-[20%] bg-green-200/50 border-l-2 border-r-2 border-green-500 z-0"></div>
+                                            <div 
+                                                className={`h-full transition-all duration-100 z-10 ${waterLevel > 80 ? 'bg-red-500' : 'bg-blue-500'}`}
+                                                style={{ width: `${waterLevel}%` }}
+                                            ></div>
+                                        </div>
+
+                                        <button 
+                                            onMouseDown={startWatering}
+                                            onMouseUp={stopWatering}
+                                            onMouseLeave={stopWatering}
+                                            onTouchStart={(e) => {e.preventDefault(); startWatering()}}
+                                            onTouchEnd={(e) => {e.preventDefault(); stopWatering()}}
+                                            className="bg-blue-500 active:bg-blue-700 text-white p-6 rounded-full shadow-lg transform transition-transform active:scale-95"
+                                        >
+                                            <CloudRain size={48} />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                             {/* Success UI Overlay */}
+                             {stage === GAME_STAGES.SUCCESS && (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center z-40 bg-black/50">
+                                    <div className="bg-white p-8 rounded-3xl shadow-2xl text-center transform scale-110">
+                                        <div className="text-6xl mb-4 animate-bounce">🌱</div>
+                                        <h2 className="text-4xl font-bold text-green-600 mb-2">大成功！</h2>
+                                        <p className="text-xl text-gray-600 mb-6">你已經學會{selectedVeggie.method}了！</p>
+                                        <div className="flex justify-center gap-4">
+                                            <button 
+                                                onClick={resetGame}
+                                                className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2"
+                                            >
+                                                <RefreshCcw size={20} /> 再玩一次
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                    </div>
-                </div>
                 );
             };
 
             return (
-                <div className="w-full h-screen relative">
-                    {/* 背景浮水印 */}
-                    <div className="absolute top-10 left-10 text-6xl opacity-5 rotate-12 pointer-events-none">🥬</div>
-                    <div className="absolute bottom-20 right-10 text-8xl opacity-5 -rotate-12 pointer-events-none">🥕</div>
-                    
-                    {gameState === 'menu' && <MenuView />}
-                    {gameState === 'learning' && <LearningView />}
-                    {(gameState === 'playing' || gameState === 'feedback') && <GameView />}
-                    {gameState === 'feedback' && <FeedbackOverlay />}
-                    {gameState === 'gameover' && <GameOverView />}
+                <div className="h-screen w-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-green-50">
+                    {stage === GAME_STAGES.MENU && renderMainMenu()}
+                    {stage === GAME_STAGES.TUTORIAL && renderTutorial()}
+                    {(stage === GAME_STAGES.PLANTING || stage === GAME_STAGES.COVERING || stage === GAME_STAGES.WATERING || stage === GAME_STAGES.SUCCESS) && renderGameArea()}
                 </div>
             );
-        }
+        };
 
-        // --- 啟動 React ---
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<VegetableGame />);
+        root.render(<App />);
     </script>
 </body>
 </html>
