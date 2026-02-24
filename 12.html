@@ -748,11 +748,11 @@
                 <h1 className="text-3xl md:text-4xl font-black text-center mb-6 text-emerald-700">🌾 四季農莊：島嶼物語</h1>
                 
                 <div className="space-y-4 text-slate-700 font-bold text-sm bg-emerald-50 p-4 md:p-6 rounded-3xl mb-6 border-2 border-emerald-100 max-h-[40vh] overflow-y-auto hide-scrollbar">
-                  <p className="text-sm md:text-base text-emerald-800">歡迎來到台灣專屬的農業經營模擬器！在這裡，你將體驗為期 365 天的農夫生活：</p>
+                  <p className="text-sm md:text-base text-emerald-800">歡迎來到臺灣專屬農業經營模擬器！在這裡你將體驗為期 365 天的農夫生活：</p>
                   <ul className="space-y-3 mt-4 text-xs md:text-sm">
                     <li className="flex items-start gap-2"><span className="text-xl">🌦️</span> <span><strong className="text-blue-700">四季變化與天氣</strong>：春雨、梅雨、秋颱、冬旱。雨天免澆水，但要提防颱風摧毀心血！</span></li>
-                    <li className="flex items-start gap-2"><span className="text-xl">🥭</span> <span><strong className="text-green-700">台灣在地蔬果</strong>：種植大甲芋頭、愛文芒果等 12 種在地作物，體驗真實生長週期。</span></li>
-                    <li className="flex items-start gap-2"><span className="text-xl">🏫</span> <span><strong className="text-amber-700">小鎮特殊委託</strong>：接取偏鄉小學委託，學習市場「供需法則」賺取 3 倍利潤。</span></li>
+                    <li className="flex items-start gap-2"><span className="text-xl">🥭</span> <span><strong className="text-green-700">台灣在地蔬果</strong>：種植芋頭、芒果等 12 種在地作物，體驗種田樂趣。</span></li>
+                    <li className="flex items-start gap-2"><span className="text-xl">🏫</span> <span><strong className="text-amber-700">小鎮特殊委託</strong>：接取偏鄉小學委託，幫助需要的人並獲取獎勵。</span></li>
                     <li className="flex items-start gap-2"><span className="text-xl">🛡️</span> <span><strong className="text-purple-700">防災與生態管理</strong>：架設防蟲紗網與防風網，學習農業風險管理。</span></li>
                   </ul>
                 </div>
@@ -1299,7 +1299,7 @@
                           <FertilizerBag type="fruit" />
                           <div>
                             <div className="font-black text-sm md:text-lg">鉀肥 (瓜果用)</div>
-                            <div className="text-[8px] md:text-[10px] text-slate-400 mt-1 font-bold">加速草莓、芒果等<br/>庫存: {inventory.fert_fruit}</div>
+                            <div className="text-[8px] md:text-[10px] text-slate-400 mt-1 font-bold">加速芭樂、芒果(草莓也適用)等<br/>庫存: {inventory.fert_fruit}</div>
                           </div>
                         </div>
                         <button onClick={() => buyItem('fert_fruit', 300)} className="bg-purple-100 text-purple-700 px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl font-black text-xs md:text-sm hover:bg-purple-500 hover:text-white transition-all active:scale-95">
@@ -1489,3 +1489,4 @@
   </script>
 </body>
 </html>
+
