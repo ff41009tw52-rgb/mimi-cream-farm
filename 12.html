@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>四季農莊：島嶼物語</title>
+  
+  <!-- 引入 Tailwind CSS 用於切版與樣式 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- 引入 React 與 ReactDOM -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  
+  <!-- 引入 Babel 用於在瀏覽器端即時編譯 JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-slate-900">
+  
+  <!-- 遊戲主要掛載點 -->
+  <div id="root"></div>
+
+  <!-- 遊戲邏輯腳本 -->
+  <script type="text/babel">
+    const { useState, useEffect, useCallback, useRef } = React;
+
+    // --- 音效引擎 (Web Audio API) ---
+    const useAudio = () => {
+      const audioCtx = useRef(null);
+
+      const initAudio = () => {
+        if (!audioCtx.current) {
+          audioCtx.current = new (window.AudioContext || window.webkitAudioContext)();
+        }
+      };
+
+      const playEffect = (type) => {
+        initAudio();
+        const now = audioCtx.current.currentTime;
+        
+        if (type === 'water') {
+          const osc = audioCtx.current.createOscillator();
+          const gain = audioCtx.current.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(800, now);
+          osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+          osc.connect(gain);
+          gain.connect(audioCtx.current.destination);
+          osc.start();
+          osc.stop(now + 0.1);
+        } else if (type === 'weed') {
+          const bufferSize = audioCtx.current.sampleRate * 0.1;
+          const buffer = audioCtx.current.createBuffer(1, bufferSize, audioCtx.current.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+          const noise = audioCtx.current.createBufferSource();
+          noise.buffer = buffer;
+          const filter = audioCtx.current.createBiquadFilter();
+          filter.type = 'highpass';
+          filter.frequency.value = 1000;
+          const gain = audioCtx.current.createGain();
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+          noise.connect(filter);
+          filter.connect(gain);
+          gain.connect(audioCtx.current.destination);
+          noise.start();
+        } else if (type === 'coin') {
+          const osc = audioCtx.current.createOscillator();
+          const gain = audioCtx.current.createGain();
+          osc.frequency.setValueAtTime(1200, now);
+          osc.frequency.exponentialRampToValueAtTime(1500, now + 0.1);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+          osc.connect(gain);
+          gain.connect(audioCtx.current.destination);
+          osc.start();
+          osc.stop(now + 0.2);
+        }
+      };
+
+      return { playEffect };
+    };
+
+    // --- 自定義 UI 元件：專屬肥料袋 ---
+    const FertilizerBag = ({ type }) => {
+      const config = {
+        leaf: { bg: 'bg-green-500', top: 'bg-green-600', text: '葉菜', tie: 'bg-amber-800' },
+        root: { bg: 'bg-yellow-600', top: 'bg-yellow-700', text: '根莖', tie: 'bg-amber-900' },
+        fruit: { bg: 'bg-purple-500', top: 'bg-purple-600', text: '瓜果', tie: 'bg-purple-900' }
+      }[type];
+
+      return (
+        <div className="flex flex-col items-center justify-end w-9 h-10 drop-shadow-md transition-transform">
+          {/* 袋口 */}
+          <div className={`w-5 h-2 ${config.top} rounded-t-sm`}></div>
+          {/* 綁繩 */}
+          <div className={`w-6 h-1.5 ${config.tie} rounded-full z-10 -my-[2px] shadow-sm`}></div>
+          {/* 袋身 */}
+          <div className={`w-8 h-7 ${config.bg} rounded-b-xl rounded-t-sm flex items-center justify-center shadow-[inset_0_-3px_4px_rgba(0,0,0,0.3)] pb-0.5`}>
+            <span className="text-[9px] font-black text-white/95 leading-none tracking-tighter drop-shadow-sm">{config.text}</span>
+          </div>
+        </div>
+      );
+    };
+
+    // --- 自定義 UI 元件：專屬種子袋 (包含傳說級外觀) ---
+    const SeedBag = ({ crop }) => {
+      const isSpecial = crop.price === 0;
+      return (
+        <div className={`flex flex-col items-center justify-end w-9 h-10 drop-shadow-md transition-transform relative ${isSpecial ? 'animate-pulse scale-110' : ''}`}>
+          {/* 袋口 */}
+          <div className={`w-5 h-2 ${isSpecial ? 'bg-yellow-300' : 'bg-amber-700'} rounded-t-sm`}></div>
+          {/* 綁繩 */}
+          <div className={`w-6 h-1.5 ${isSpecial ? 'bg-red-500' : 'bg-amber-900'} rounded-full z-10 -my-[2px] shadow-sm`}></div>
+          {/* 袋身 */}
+          <div className={`w-8 h-7 ${isSpecial ? 'bg-gradient-to-br from-yellow-300 via-yellow-500 to-orange-500 border border-yellow-200' : 'bg-amber-600'} rounded-b-xl rounded-t-sm flex items-center justify-center shadow-[inset_0_-3px_4px_rgba(0,0,0,0.3)] pb-0.5 overflow-hidden relative`}>
+            {/* 傳說種子專屬發光動態 */}
+            {isSpecial && <div className="absolute inset-0 bg-white/40 animate-ping rounded-b-xl"></div>}
+            <span className="text-[12px] leading-none drop-shadow-md z-10">{crop.icon}</span>
+          </div>
+          {/* 傳說種子專屬星星粒子 */}
+          {isSpecial && <span className="absolute -top-1 -right-2 text-[12px] animate-bounce drop-shadow-lg">✨</span>}
+        </div>
+      );
+    };
+
+    // --- 作物數據設定 (擴充詳細教育介紹與作物屬性 type) ---
+    const CROPS = {
+      SPRING: [
+        { id: 'sweetpotatoleaf', name: '地瓜葉', type: 'leaf', price: 100, days: 3, value: 540, icon: '🌿', desc: '【環境】喜高溫多濕，對土壤適應性極強。\n【種植】多以扦插繁殖，生長迅速，需保持土壤濕潤，不需過度施肥即可旺盛生長。' },
+        { id: 'bokchoy', name: '青江菜', type: 'leaf', price: 500, days: 4, value: 1800, icon: '🥬', desc: '【環境】喜冷涼氣候，日照需充足。\n【種植】種子直播，因根系較淺需勤澆水保持濕潤。極易受十字花科害蟲（如菜蟲）啃食，需注重防蟲。' },
+        { id: 'guava', name: '芭樂', type: 'fruit', price: 1000, days: 8, value: 4800, icon: '🍐', desc: '【環境】需全日照，喜好排水良好的砂質壤土。\n【種植】需定時修剪枝條以促進開花結果，適度施用磷鉀肥可大幅提升果實甜度與脆度。' },
+      ],
+      SUMMER: [
+        { id: 'waterspinach', name: '空心菜', type: 'leaf', price: 250, days: 3, value: 1080, icon: '🥬', desc: '【環境】極度喜高溫與潮濕，耐澇性強。\n【種植】播種或扦插皆可，莖部中空能適應積水環境。只要水分充足，夏天生長速度極快，可多次採收。' },
+        { id: 'loofah', name: '絲瓜', type: 'fruit', price: 800, days: 6, value: 3600, icon: '🥒', desc: '【環境】喜高溫多濕，不耐寒，需搭設棚架。\n【種植】攀藤生長，開花後需人工或仰賴昆蟲授粉。必須在果實鮮嫩時採收，過熟則會纖維化變成菜瓜布。' },
+        { id: 'mango', name: '芒果', type: 'fruit', price: 1500, days: 12, value: 8400, icon: '🥭', desc: '【環境】熱帶果樹，喜高溫乾燥，需充足日照。\n【種植】開花期極忌連續降雨會導致落花。果實發育期需套袋，以防止東方果實蠅等蟲害與烈日曬傷。' },
+      ],
+      AUTUMN: [
+        { id: 'waterbamboo', name: '筊白筍', type: 'root', price: 400, days: 5, value: 1800, icon: '🎋', desc: '【環境】需生長於水溫穩定、活水流動的淺水田中。\n【種植】實為菰草受「黑穗菌」共生感染後膨大的幼嫩莖部。水質與水位控制是決定肉質鮮嫩的絕對關鍵。' },
+        { id: 'taro', name: '芋頭', type: 'root', price: 1200, days: 9, value: 6000, icon: '🥔', desc: '【環境】喜高溫多濕，栽培分為水芋與旱芋兩種。\n【種植】生長期極長，需深厚且保水力強的土壤。屬於重肥作物，生長期間需大量養分才能讓地下球莖肥大。' },
+        { id: 'pomelo', name: '文旦', type: 'fruit', price: 2500, days: 15, value: 15000, icon: '🍋', desc: '【環境】喜高溫與日照，需排水良好的山坡地。\n【種植】果樹需多年栽培。果實採收後不宜馬上食用，需放置通風處數日進行「辭水」，讓果肉變軟且甜度提升。' },
+      ],
+      WINTER: [
+        { id: 'whiteradish', name: '蘿蔔', type: 'root', price: 600, days: 4, value: 2640, icon: '🥕', desc: '【環境】喜冷涼氣候，忌高溫多濕。\n【種植】屬根莖類，種子必須「直播」於深厚、鬆軟且無碎石的土壤中，若移植或遇硬土會導致根部變形分岔。' },
+        { id: 'cabbage', name: '高麗菜', type: 'leaf', price: 1800, days: 7, value: 9600, icon: '🥬', desc: '【環境】極喜冷涼，高山地區日夜溫差大最為適宜。\n【種植】結球期需要大量水分與養分，溫差越大則口感越清脆甘甜。需注意田間排水，避免根部腐爛。' },
+        { id: 'strawberry', name: '草莓', type: 'fruit', price: 4000, days: 14, value: 24000, icon: '🍓', desc: '【環境】極度嬌貴，喜冷涼氣候與充足日照，怕雨水。\n【種植】根系淺怕積水，極易染病蟲害。現代多採用高架覆膜種植，除保持通風外，也能避免果實接觸土壤而腐爛。' },
+      ],
+      // 新增：隱藏的特殊作物類別 (商店不販售，四季各一種)
+      SPECIAL: [
+        { id: 'golden_peach', name: '黃金仙桃', type: 'fruit', price: 0, days: 10, value: 25000, icon: '🍑', desc: '【環境】春季限定的傳說果實，散發出神聖的微光。\n【種植】相傳是天庭掉落的種子，對水分要求極高，成功收成後價值連城，是鎮長夢寐以求的極品。' },
+        { id: 'crystal_melon', name: '水晶寶石西瓜', type: 'fruit', price: 0, days: 12, value: 28000, icon: '🍉', desc: '【環境】夏季限定，果肉如紅寶石般晶瑩剔透。\n【種植】極度需要充足水分與烈日曝曬，在極端高溫下反而能凝結出絕佳的脆度與甜味。' },
+        { id: 'giant_pumpkin', name: '巨無霸南瓜', type: 'fruit', price: 0, days: 15, value: 36000, icon: '🎃', desc: '【環境】秋季限定的變異品種，體積異常巨大。\n【種植】種下後會瞬間霸佔整塊農田吸收所有養分。在田地中緩慢膨脹的過程極具視覺震撼力！' },
+        { id: 'white_strawberry', name: '初雪白草莓', type: 'fruit', price: 0, days: 14, value: 32000, icon: '🍓', desc: '【環境】冬季限定，對溫度極度敏感的嬌貴品種。\n【種植】需要在嚴寒中小心呵護，果實純白如初雪，香氣馥郁，是高級拍賣會上千金難求的珍寶。' }
+      ]
+    };
+
+    // --- 農田解鎖價格設定 ---
+    const PLOT_PRICES = [0, 5000, 15000, 30000];
+
+    // --- 台灣季節降雨機率 ---
+    const getRainProbability = (season) => {
+      switch(season) {
+        case 'SPRING': return 0.35; 
+        case 'SUMMER': return 0.45; 
+        case 'AUTUMN': return 0.25; 
+        case 'WINTER': return 0.20; 
+        default: return 0.2;
+      }
+    };
+
+    const App = () => {
+      const { playEffect } = useAudio();
+      
+      const [isGameStarted, setIsGameStarted] = useState(false);
+      const [farmName, setFarmName] = useState('');
+
+      const [day, setDay] = useState(1);
+      const [weather, setWeather] = useState('sunny'); 
+      const [gold, setGold] = useState(100); 
+      
+      const [inventory, setInventory] = useState({ 
+        nets: 0, 
+        windbreaks: 0, 
+        fert_leaf: 0, 
+        fert_root: 0, 
+        fert_fruit: 0, 
+        scissors: 10, 
+        chili: 10, 
+        seeds: {} 
+      }); 
+      const [gallery, setGallery] = useState({}); 
+      
+      const [selectedTool, setSelectedTool] = useState('water');
+      const [selectedSeed, setSelectedSeed] = useState(null);
+      
+      const [showShop, setShowShop] = useState(false); 
+      
+      const [schoolQuest, setSchoolQuest] = useState(null); 
+      const [eventModal, setEventModal] = useState(null); 
+      
+      const [plots, setPlots] = useState(Array(4).fill(null).map((_, i) => ({
+        id: i,
+        isUnlocked: i === 0, 
+        isNetted: false,
+        isWindbreaked: false, 
+        slots: Array(12).fill(null).map((_, j) => ({
+          id: j,
+          crop: null,
+          growth: 0,
+          isWatered: false,
+          isFertilized: false, 
+          hasBug: false,
+          hasWeed: false,
+          perfectGrowth: true
+        }))
+      })));
+      
+      const [activePlot, setActivePlot] = useState(null);
+      const [message, setMessage] = useState("歡迎來到 四季農莊！請先點擊「商店」購買種子！");
+      const [showModal, setShowModal] = useState(null);
+      
+      // 新增：系統存檔狀態追蹤
+      const [saveExists, setSaveExists] = useState(false);
+
+      useEffect(() => {
+        // 元件掛載時檢查是否有本機存檔
+        const saved = localStorage.getItem('farm_tycoon_save');
+        if (saved) {
+          setSaveExists(true);
+        }
+      }, []);
+
+      // 儲存進度功能
+      const handleSave = () => {
+        try {
+          const stateToSave = {
+            isGameStarted, farmName, day, weather, gold, inventory, gallery, plots, schoolQuest
+          };
+          localStorage.setItem('farm_tycoon_save', JSON.stringify(stateToSave));
+          setMessage("💾 遊戲進度已成功儲存於瀏覽器中！");
+          setSaveExists(true);
+          playEffect('coin');
+          setShowModal(null);
+        } catch (e) {
+          setMessage("❌ 存檔失敗，請確認瀏覽器是否開啟了無痕模式或阻擋了 Cookie。");
+        }
+      };
+
+      // 讀取進度功能
+      const handleLoad = () => {
+        try {
+          const saved = localStorage.getItem('farm_tycoon_save');
+          if (saved) {
+            const state = JSON.parse(saved);
+            setIsGameStarted(state.isGameStarted);
+            setFarmName(state.farmName);
+            setDay(state.day);
+            setWeather(state.weather);
+            setGold(state.gold);
+            setInventory(state.inventory);
+            setGallery(state.gallery || {});
+            setPlots(state.plots);
+            setSchoolQuest(state.schoolQuest);
+            
+            setMessage("📂 遊戲進度讀取成功！歡迎回來，農夫！");
+            setShowModal(null);
+            setEventModal(null);
+            setActivePlot(null);
+            playEffect('water');
+          }
+        } catch (e) {
+          setMessage("❌ 讀檔失敗，存檔資料可能已損毀。");
+        }
+      };
+
+      const season = day <= 90 ? 'SPRING' : day <= 180 ? 'SUMMER' : day <= 270 ? 'AUTUMN' : 'WINTER';
+      const seasonName = { SPRING: '春', SUMMER: '夏', AUTUMN: '秋', WINTER: '冬' }[season];
+      const seasonColor = { SPRING: 'bg-green-100', SUMMER: 'bg-yellow-100', AUTUMN: 'bg-orange-100', WINTER: 'bg-blue-100' }[season];
+
+      const processNextDay = () => {
+        if (day >= 365) {
+          setShowModal('result');
+          return;
+        }
+        
+        let hasDeadCrops = false;
+        let typhoonDamageCount = 0;
+        
+        const nextDayNum = day + 1;
+        const nextSeason = nextDayNum <= 90 ? 'SPRING' : nextDayNum <= 180 ? 'SUMMER' : nextDayNum <= 270 ? 'AUTUMN' : 'WINTER';
+        
+        const isTyphoonNext = (nextSeason === 'SUMMER' || nextSeason === 'AUTUMN') && Math.random() < 0.08;
+        const isRainingNext = Math.random() < getRainProbability(nextSeason);
+        const nextWeatherType = isTyphoonNext ? 'typhoon' : (isRainingNext ? 'rainy' : 'sunny');
+
+        setPlots(prev => prev.map(plot => {
+          const updatedSlots = plot.slots.map(slot => {
+            if (!slot.crop) return slot;
+            
+            const isMature = slot.growth >= slot.crop.days;
+            
+            if (weather === 'typhoon' && !plot.isWindbreaked && !isMature) {
+              if (Math.random() < 0.5) { 
+                typhoonDamageCount++;
+                return { id: slot.id, crop: null, growth: 0, isWatered: false, isFertilized: false, hasBug: false, hasWeed: false, perfectGrowth: true };
+              }
+            }
+
+            if (slot.hasBug || slot.hasWeed) {
+              hasDeadCrops = true;
+              return { id: slot.id, crop: null, growth: 0, isWatered: false, isFertilized: false, hasBug: false, hasWeed: false, perfectGrowth: true };
+            }
+
+            let newGrowth = slot.growth;
+            let stillPerfect = slot.perfectGrowth;
+            let bug = slot.hasBug;
+            let weed = slot.hasWeed;
+
+            if (!isMature) {
+              if (!plot.isNetted && !bug && Math.random() < 0.15) { bug = true; stillPerfect = false; }
+              if (!weed && Math.random() < 0.2) { weed = true; stillPerfect = false; }
+            }
+
+            if (slot.isWatered || weather === 'typhoon') {
+              newGrowth += 1;
+            } 
+            
+            if (!slot.isWatered && weather !== 'typhoon' || bug || weed) {
+              stillPerfect = false;
+            }
+
+            return { 
+              ...slot, 
+              growth: newGrowth, 
+              isWatered: (nextWeatherType === 'rainy' || nextWeatherType === 'typhoon') ? true : false, 
+              isFertilized: false, 
+              hasBug: bug, 
+              hasWeed: weed, 
+              perfectGrowth: stillPerfect 
+            };
+          });
+
+          const hasMatureCrop = updatedSlots.some(s => s.crop && s.growth >= s.crop.days);
+
+          return {
+            ...plot,
+            isNetted: hasMatureCrop ? false : plot.isNetted,
+            slots: updatedSlots
+          };
+        }));
+        
+        let newQuest = null;
+        if (schoolQuest) {
+          setSchoolQuest(prev => (prev && prev.daysLeft > 1) ? { ...prev, daysLeft: prev.daysLeft - 1 } : null);
+        } else {
+          if (Math.random() < 0.15) { 
+            const seasonCrops = CROPS[nextSeason];
+            const randomCrop = seasonCrops[Math.floor(Math.random() * seasonCrops.length)];
+            newQuest = { crop: randomCrop, required: 12, daysLeft: 5 };
+            setSchoolQuest(newQuest);
+          }
+        }
+
+        setDay(nextDayNum);
+        setWeather(nextWeatherType);
+        setShowModal(null);
+        
+        if (nextDayNum === 20) {
+          setEventModal({ type: 'irrigation_upgrade' });
+        } else if (isTyphoonNext) {
+          setEventModal({ type: 'typhoon_warning' });
+        } else if (newQuest) {
+          setEventModal({ type: 'school_quest', data: newQuest });
+        }
+
+        if (typhoonDamageCount > 0) {
+          setMessage(`😭 災情回報：昨晚的颱風摧毀了你 ${typhoonDamageCount} 株缺乏保護的作物！`);
+          playEffect('weed');
+        } else if (hasDeadCrops) {
+          setMessage("警告：有作物因為未處理蟲害或雜草而枯死了！");
+          playEffect('weed');
+        } else {
+          if (nextWeatherType === 'typhoon') {
+            setMessage(`第 ${nextDayNum} 天颱風來襲 🌀！外面狂風暴雨，農田自動澆滿水了。`);
+          } else if (nextWeatherType === 'rainy') {
+            setMessage(`第 ${nextDayNum} 天早安！今天下雨了 🌧️，田地都已經自動吸滿水份囉！`);
+          } else {
+            setMessage(`第 ${nextDayNum} 天早安！晴空萬里 ☀️，別忘了幫作物澆水喔。`);
+          }
+        }
+        
+        if (nextDayNum % 100 === 0 && nextDayNum <= 300) setShowModal('contest');
+      };
+
+      const handleSlotClick = (plotId, slotId) => {
+        setPlots(prev => {
+          const newPlots = JSON.parse(JSON.stringify(prev));
+          const targetPlot = newPlots[plotId];
+          const targetSlot = targetPlot.slots[slotId];
+
+          if (!targetPlot.isUnlocked) return prev; 
+          
+          // 判定是否為巨無霸南瓜 (如果是，所有操作將以整塊農田為單位)
+          const isGiantPumpkin = targetPlot.slots[0]?.crop?.id === 'giant_pumpkin';
+
+          if (selectedTool === 'water') {
+            let wateredAny = false;
+            // 巨無霸南瓜吸水力強，點擊必定幫全區澆水
+            if (day >= 20 || isGiantPumpkin) {
+              targetPlot.slots.forEach(s => {
+                if (s.crop && !s.isWatered) {
+                  s.isWatered = true;
+                  wateredAny = true;
+                }
+              });
+
+              if (!wateredAny) {
+                setMessage(weather === 'rainy' ? "今天是雨天，不需要人工澆水喔！" : "此區塊目前沒有需要澆水的作物！");
+                return prev; 
+              }
+              playEffect('water');
+              setMessage(`💦 灑水完成！第 ${plotId + 1} 區的作物皆已吸滿水分！`);
+            } else {
+              if (targetSlot.crop && !targetSlot.isWatered) {
+                targetSlot.isWatered = true;
+                wateredAny = true;
+              }
+              if (!wateredAny) {
+                setMessage(weather === 'rainy' ? "今天是雨天，不需要人工澆水喔！" : "這格沒有需要澆水的作物！");
+                return prev; 
+              }
+              playEffect('water');
+              setMessage(`💧 已為該格作物澆水！(撐到第 20 天將解鎖全區灑水科技)`);
+            }
+          } 
+          
+          else if (selectedTool === 'weed') {
+            if (isGiantPumpkin) {
+              const hasAnyWeed = targetPlot.slots.some(s => s.hasWeed);
+              if (!hasAnyWeed) return prev;
+              if (inventory.scissors <= 0) {
+                setMessage("除草剪刀已完全損壞，請至商店購買新的剪刀！");
+                return prev;
+              }
+              targetPlot.slots.forEach(s => s.hasWeed = false);
+              setInventory(inv => ({ ...inv, scissors: inv.scissors - 1 }));
+              playEffect('weed');
+              setMessage(`✨ 割除巨無霸南瓜周圍的雜草成功！(剪刀剩餘 ${inventory.scissors - 1} 次)`);
+            } else {
+              if (!targetSlot.hasWeed) return prev; 
+              if (inventory.scissors <= 0) {
+                setMessage("除草剪刀已完全損壞，請至商店購買新的剪刀！");
+                return prev;
+              }
+              targetSlot.hasWeed = false;
+              setInventory(inv => ({ ...inv, scissors: inv.scissors - 1 }));
+              playEffect('weed');
+              setMessage(`✨ 割除雜草成功！(剪刀剩餘 ${inventory.scissors - 1} 次)`);
+            }
+          } 
+          
+          else if (selectedTool === 'chili') {
+            if (isGiantPumpkin) {
+              const hasAnyBug = targetPlot.slots.some(s => s.hasBug);
+              if (!hasAnyBug) return prev;
+              if (inventory.chili <= 0) {
+                setMessage("辣椒水已耗盡，請至商店購買補充包！");
+                return prev;
+              }
+              targetPlot.slots.forEach(s => s.hasBug = false);
+              setInventory(inv => ({ ...inv, chili: inv.chili - 1 }));
+              playEffect('water'); 
+              setMessage(`✨ 成功驅除巨無霸南瓜上的害蟲！(剩餘 ${inventory.chili - 1} 次)`);
+            } else {
+              if (!targetSlot.hasBug) return prev; 
+              if (inventory.chili <= 0) {
+                setMessage("辣椒水已耗盡，請至商店購買補充包！");
+                return prev;
+              }
+              targetSlot.hasBug = false;
+              setInventory(inv => ({ ...inv, chili: inv.chili - 1 }));
+              playEffect('water'); 
+              setMessage(`✨ 噴灑辣椒水驅蟲成功！(剩餘 ${inventory.chili - 1} 次)`);
+            }
+          } 
+          
+          else if (selectedTool.startsWith('fert_')) {
+            const fertType = selectedTool.split('_')[1]; 
+            const fertNames = { leaf: '氮肥', root: '磷肥', fruit: '鉀肥' };
+            const fertName = fertNames[fertType];
+
+            if (inventory[selectedTool] <= 0) {
+              setMessage(`${fertName}庫存不足，請去商店購買！`);
+              return prev;
+            }
+
+            let fertilizedAny = false;
+            let alreadyFertilizedAny = false;
+            let wrongTypeAny = false;
+            
+            targetPlot.slots.forEach(s => {
+              if (s.crop && s.growth < s.crop.days) {
+                if (s.crop.type === fertType) {
+                  if (!s.isFertilized) {
+                    s.growth += 1;
+                    s.isFertilized = true; 
+                    fertilizedAny = true;
+                  } else {
+                    alreadyFertilizedAny = true; 
+                  }
+                } else {
+                  wrongTypeAny = true;
+                }
+              }
+            });
+
+            if (!fertilizedAny) {
+              if (alreadyFertilizedAny) {
+                setMessage(`此區塊對應的作物今天都已經施過肥了，太肥會死掉，請明天再來！`);
+              } else if (wrongTypeAny) {
+                setMessage(`此區塊沒有適合施打【${fertName}】的作物類型！請確認作物屬性。`);
+              } else {
+                setMessage("此區塊目前沒有生長中的作物可以施肥！");
+              }
+              return prev;
+            }
+            
+            let netBrokeMsg = "";
+            const hasMature = targetPlot.slots.some(s => s.crop && s.growth >= s.crop.days);
+            if (hasMature && targetPlot.isNetted) {
+              targetPlot.isNetted = false;
+              netBrokeMsg = " (作物成熟撐破了防蟲網！)";
+            }
+
+            setInventory(inv => ({ ...inv, [selectedTool]: Math.max(0, inv[selectedTool] - 1) }));
+            playEffect('water'); 
+            setMessage(`✨ 施打${fertName}成功！第 ${plotId + 1} 區對應屬性的作物生長進度縮短了 1 天。${netBrokeMsg}`);
+          }
+
+          else if (selectedTool === 'seed' && selectedSeed) {
+            const isOccupied = targetPlot.slots.some(s => s.crop !== null);
+            if (isOccupied) {
+              setMessage("防呆警告：此區塊尚有植物，請先收成完畢再重新種植！");
+              return prev;
+            }
+            
+            if (!selectedSeed?.id || (inventory.seeds[selectedSeed.id] || 0) <= 0) {
+              setMessage("種子庫存不足！請先去商店購買。");
+              return prev;
+            }
+            
+            setInventory(inv => ({
+              ...inv,
+              seeds: { ...inv.seeds, [selectedSeed.id]: Math.max(0, inv.seeds[selectedSeed.id] - 1) }
+            }));
+            
+            targetPlot.slots = targetPlot.slots.map(s => ({
+              ...s,
+              crop: selectedSeed,
+              growth: 0,
+              perfectGrowth: true,
+              isWatered: weather === 'rainy' ? true : false, 
+              isFertilized: false, 
+              hasBug: false,
+              hasWeed: false
+            }));
+            
+            setMessage(`消耗了 1 包 [${selectedSeed.name || '未知'}種子]，在第 ${plotId + 1} 區種滿了！`);
+            playEffect('water');
+            
+            if (inventory.seeds[selectedSeed.id] <= 1) {
+              setSelectedTool('water');
+              setSelectedSeed(null);
+            }
+          } 
+          
+          else if (selectedTool === 'harvest') {
+            if (isGiantPumpkin) {
+              if (targetPlot.slots[0].growth < targetPlot.slots[0].crop.days) return prev;
+              const harvestedCrop = { ...targetPlot.slots[0].crop };
+              let totalEarn = 0;
+              let allPerfect = true;
+              
+              targetPlot.slots.forEach(s => {
+                totalEarn += s.crop.value / 12;
+                if (!s.perfectGrowth) allPerfect = false;
+              });
+
+              setGallery(prevG => ({
+                ...prevG,
+                [harvestedCrop.id]: { unlocked: true, perfect: prevG[harvestedCrop.id]?.perfect || allPerfect }
+              }));
+
+              setGold(g => g + Math.floor(totalEarn));
+              
+              targetPlot.slots.forEach(s => { 
+                s.crop = null; s.growth = 0; s.hasBug = false; s.hasWeed = false; s.isFertilized = false; s.perfectGrowth = true; 
+              });
+              playEffect('coin');
+              setMessage(`🎃 史詩級大豐收！收割了巨無霸南瓜，一口氣獲得 $${Math.floor(totalEarn).toLocaleString()}！`);
+            } else {
+              if (!targetSlot.crop || targetSlot.growth < targetSlot.crop.days) return prev; 
+              
+              const harvestedCrop = { ...targetSlot.crop };
+              const isPerfect = targetSlot.perfectGrowth;
+              let earn = harvestedCrop.value / 12; 
+              
+              setGallery(prevG => ({
+                ...prevG,
+                [harvestedCrop.id]: {
+                  unlocked: true,
+                  perfect: prevG[harvestedCrop.id]?.perfect || isPerfect 
+                }
+              }));
+              
+              // 委託獎勵升級邏輯：發放當季專屬的傳說種子
+              if (schoolQuest && harvestedCrop.id === schoolQuest?.crop?.id) {
+                earn *= 3; 
+                if (schoolQuest.required <= 1) {
+                  setSchoolQuest(null); 
+                  
+                  // 依據當前季節發放對應的傳說級種子
+                  const seasonRewardMap = { SPRING: 'golden_peach', SUMMER: 'crystal_melon', AUTUMN: 'giant_pumpkin', WINTER: 'white_strawberry' };
+                  const rewardId = seasonRewardMap[season];
+                  const rewardCrop = CROPS.SPECIAL.find(c => c.id === rewardId);
+                  
+                  setInventory(inv => ({
+                    ...inv,
+                    seeds: { ...inv.seeds, [rewardId]: (inv.seeds[rewardId] || 0) + 1 }
+                  }));
+                  setMessage(`🎉 委託完美達成！校長非常滿意，除高額報酬外，特別贈送稀有道具：【${rewardCrop.name}種子】x1！`);
+                } else {
+                  setSchoolQuest(sq => ({ ...sq, required: sq.required - 1 }));
+                  setMessage(`🏫 委託進度更新：還差 ${schoolQuest.required - 1} 個 ${schoolQuest.crop.name}！`);
+                }
+              }
+
+              setGold(g => g + Math.floor(earn));
+              
+              targetSlot.crop = null;
+              targetSlot.growth = 0;
+              targetSlot.hasBug = false;
+              targetSlot.hasWeed = false;
+              targetSlot.isFertilized = false; 
+              targetSlot.perfectGrowth = true;
+              
+              playEffect('coin');
+            }
+          }
+
+          return newPlots;
+        });
+      };
+
+      const buyItem = (type, cost) => {
+        if (gold >= cost) {
+          setGold(g => g - cost);
+          if (type === 'net') {
+            setInventory(i => ({ ...i, nets: i.nets + 1 }));
+            setMessage("購買防蟲紗網成功！可在農田管理頁面部署。");
+          } else if (type === 'fert_leaf') {
+            setInventory(i => ({ ...i, fert_leaf: i.fert_leaf + 1 }));
+            setMessage("購買氮肥成功！可加速「葉菜類」生長。");
+          } else if (type === 'fert_root') {
+            setInventory(i => ({ ...i, fert_root: i.fert_root + 1 }));
+            setMessage("購買磷肥成功！可加速「根莖類」生長。");
+          } else if (type === 'fert_fruit') {
+            setInventory(i => ({ ...i, fert_fruit: i.fert_fruit + 1 }));
+            setMessage("購買鉀肥成功！可加速「瓜果類」生長。");
+          } else if (type === 'windbreak') {
+            setInventory(i => ({ ...i, windbreaks: i.windbreaks + 1 }));
+            setMessage("購買防風網成功！能抵禦強烈颱風。");
+          } else if (type === 'scissors') {
+            setInventory(i => ({ ...i, scissors: i.scissors + 10 }));
+            setMessage("購買除草剪刀成功！獲得 10 次除草耐用度。");
+          } else if (type === 'chili') {
+            setInventory(i => ({ ...i, chili: i.chili + 10 }));
+            setMessage("購買辣椒水成功！獲得 10 次驅蟲噴灑量。");
+          }
+        } else {
+          setMessage("餘額不足，無法購買這項物品。");
+        }
+      };
+
+      const buyPlot = (plotId, price) => {
+        if (gold >= price) {
+          setGold(g => g - price);
+          setPlots(prev => prev.map(p => p.id === plotId ? { ...p, isUnlocked: true } : p));
+          setMessage(`🎉 成功解鎖 第 ${plotId + 1} 區農田！農莊規模擴大了！`);
+          playEffect('coin');
+        } else {
+          setMessage(`資金不足！解鎖 第 ${plotId + 1} 區需要 $${price.toLocaleString()}。`);
+        }
+      };
+
+      const applyNet = (plotId) => {
+        const hasMature = plots[plotId].slots.some(s => s.crop && s.growth >= s.crop.days);
+        if (hasMature) {
+          setMessage("此區塊已有作物成熟，空間不足以架設防蟲網！");
+          return;
+        }
+
+        if (inventory.nets > 0 && !plots[plotId].isNetted) {
+          setPlots(prev => prev.map(p => p.id === plotId ? { ...p, isNetted: true } : p));
+          setInventory(inv => ({ ...inv, nets: Math.max(0, inv.nets - 1) }));
+          setMessage(`第 ${plotId + 1} 區已經罩上防蟲紗網，蟲子飛不進來了！`);
+        }
+      };
+
+      const applyWindbreak = (plotId) => {
+        if (inventory.windbreaks > 0 && !plots[plotId].isWindbreaked) {
+          setPlots(prev => prev.map(p => p.id === plotId ? { ...p, isWindbreaked: true } : p));
+          setInventory(inv => ({ ...inv, windbreaks: Math.max(0, inv.windbreaks - 1) }));
+          setMessage(`第 ${plotId + 1} 區已經架設防風網，能抵禦強風侵襲！`);
+        }
+      };
+
+      return (
+        <div className={`min-h-screen p-2 md:p-4 font-sans text-slate-800 ${seasonColor} transition-colors duration-1000 select-none relative overflow-x-hidden`}>
+          
+          {/* 注入下雨動畫的 CSS */}
+          <style>{`
+            @keyframes rainFall {
+              0% { transform: translateY(-100%); opacity: 0; }
+              20% { opacity: 1; }
+              80% { opacity: 1; }
+              100% { transform: translateY(300%); opacity: 0; }
+            }
+            .animate-rain {
+              animation: rainFall 0.8s linear infinite;
+            }
+            .rain-delay-1 { animation-delay: 0.2s; }
+            .rain-delay-2 { animation-delay: 0.5s; }
+            .rain-delay-3 { animation-delay: 0.7s; }
+            
+            .hide-scrollbar::-webkit-scrollbar { display: none; }
+            .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+          `}</style>
+
+          {/* --- 新手教學與命名開場畫面 --- */}
+          {!isGameStarted && (
+            <div className="fixed inset-0 bg-slate-900/95 backdrop-blur-md flex items-center justify-center p-4 z-[100] overflow-y-auto hide-scrollbar">
+              <div className="bg-white p-6 md:p-8 rounded-[2.5rem] max-w-2xl w-full shadow-2xl animate-in zoom-in duration-500 my-auto">
+                <h1 className="text-3xl md:text-4xl font-black text-center mb-6 text-emerald-700">🌾 四季農莊：島嶼物語</h1>
+                
+                <div className="space-y-4 text-slate-700 font-bold text-sm bg-emerald-50 p-4 md:p-6 rounded-3xl mb-6 border-2 border-emerald-100 max-h-[40vh] overflow-y-auto hide-scrollbar">
+                  <p className="text-sm md:text-base text-emerald-800">歡迎來到台灣專屬的農業經營模擬器！在這裡，你將體驗為期 365 天的農夫生活：</p>
+                  <ul className="space-y-3 mt-4 text-xs md:text-sm">
+                    <li className="flex items-start gap-2"><span className="text-xl">🌦️</span> <span><strong className="text-blue-700">四季變化與天氣</strong>：春雨、梅雨、秋颱、冬旱。雨天免澆水，但要提防颱風摧毀心血！</span></li>
+                    <li className="flex items-start gap-2"><span className="text-xl">🥭</span> <span><strong className="text-green-700">台灣在地蔬果</strong>：種植大甲芋頭、愛文芒果等 12 種在地作物，體驗真實生長週期。</span></li>
+                    <li className="flex items-start gap-2"><span className="text-xl">🏫</span> <span><strong className="text-amber-700">小鎮特殊委託</strong>：接取偏鄉小學委託，學習市場「供需法則」賺取 3 倍利潤。</span></li>
+                    <li className="flex items-start gap-2"><span className="text-xl">🛡️</span> <span><strong className="text-purple-700">防災與生態管理</strong>：架設防蟲紗網與防風網，學習農業風險管理。</span></li>
+                  </ul>
+                </div>
+
+                <div className="mb-6">
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3 text-center">
+                    請為你的農莊取個響亮的名字 (最多 8 個字)
+                  </label>
+                  <input
+                    type="text"
+                    maxLength={8}
+                    placeholder="例如：奶油咪咪農莊"
+                    value={farmName}
+                    onChange={(e) => setFarmName(e.target.value)}
+                    className="w-full text-xl md:text-2xl font-black text-center text-slate-800 p-3 md:p-4 rounded-2xl border-4 border-slate-200 focus:border-emerald-500 focus:outline-none transition-colors"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-3 md:gap-4">
+                  <button
+                    onClick={() => {
+                      if (!farmName.trim()) setFarmName('開心農莊');
+                      setIsGameStarted(true);
+                    }}
+                    className="w-full bg-emerald-600 text-white py-4 md:py-5 rounded-2xl font-black text-lg md:text-xl tracking-widest hover:bg-emerald-700 active:scale-95 transition-all shadow-lg hover:shadow-emerald-600/50"
+                  >
+                    開始新經營！
+                  </button>
+                  
+                  {/* 開局讀取進度按鈕 */}
+                  {saveExists && (
+                    <button
+                      onClick={handleLoad}
+                      className="w-full bg-indigo-100 text-indigo-700 py-3 md:py-4 rounded-2xl font-black text-lg md:text-xl tracking-widest hover:bg-indigo-200 active:scale-95 transition-all shadow-md"
+                    >
+                      📂 繼續上次的進度
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* RWD 頂部資訊欄 */}
+          <div className="max-w-4xl mx-auto bg-white/80 backdrop-blur rounded-3xl p-4 md:p-6 shadow-xl mb-4 md:mb-6 flex flex-col md:flex-row gap-4 justify-between items-center border border-white/50">
+            
+            <div className="flex gap-4 items-center w-full md:w-auto justify-between md:justify-start">
+              <div className="bg-slate-800 text-white p-2 md:p-3 rounded-2xl text-center min-w-[70px] md:min-w-[80px]">
+                <div className="text-[9px] md:text-[10px] uppercase opacity-60">天數</div>
+                <div className="text-lg md:text-xl font-black">{day}</div>
+              </div>
+              <div>
+                <div className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-tighter">當前季節</div>
+                <div className="text-xl md:text-2xl font-black flex items-center gap-2">
+                  {seasonName}季 
+                  <span className="text-2xl md:text-3xl" title={weather === 'typhoon' ? '狂風暴雨' : weather === 'rainy' ? '今日雨天免澆水' : '晴天'}>
+                    {weather === 'typhoon' ? '🌀' : weather === 'rainy' ? '🌧️' : '☀️'}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 w-full md:w-auto">
+              <div className="bg-emerald-600/10 px-3 md:px-6 py-1.5 md:py-2 rounded-xl md:rounded-2xl border-2 border-emerald-600/20">
+                <div className="text-[8px] md:text-[10px] font-bold text-emerald-800 uppercase text-center">農莊名稱</div>
+                <div className="text-sm md:text-xl font-black text-emerald-700">{farmName || '農莊'}</div>
+              </div>
+
+              <div className="bg-yellow-400/20 px-3 md:px-6 py-1.5 md:py-2 rounded-xl md:rounded-2xl border-2 border-yellow-400/50">
+                <div className="text-[8px] md:text-[10px] font-bold text-yellow-700 uppercase text-center">資金餘額</div>
+                <div className="text-lg md:text-3xl font-mono font-black text-yellow-600">${gold.toLocaleString()}</div>
+              </div>
+
+              <button 
+                onClick={() => setShowShop(true)}
+                className="bg-gradient-to-r from-green-400 to-emerald-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-xl font-black hover:shadow-xl active:scale-95 transition-all flex items-center gap-1 md:gap-2 shadow-md"
+              >
+                <span className="text-base md:text-lg">🛒</span> <span className="text-xs md:text-base">商店</span>
+              </button>
+              
+              <button onClick={() => setShowModal('sleep')} className="bg-slate-800 text-white px-3 md:px-6 py-2 md:py-3 rounded-xl font-bold hover:bg-slate-700 active:scale-95 transition-all shadow-md flex items-center gap-1 md:gap-2">
+                🌙 <span className="text-xs md:text-base">睡覺 ➔</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
+            
+            {/* 左側：委託面板與農具清單 */}
+            <div className="md:col-span-1 flex flex-col h-auto md:h-[450px] gap-4">
+              
+              {schoolQuest && (
+                <div className="bg-yellow-100/90 border-2 border-yellow-400 p-3 md:p-4 rounded-3xl shrink-0 shadow-sm animate-in fade-in slide-in-from-top-4">
+                  <div className="text-[10px] md:text-xs font-black text-yellow-800 flex items-center gap-1 mb-1 md:mb-2">
+                    🏫 偏鄉小學急需食材！
+                  </div>
+                  <div className="text-xs md:text-sm font-bold text-slate-700">
+                    需要 <span className="text-red-600 font-black text-base md:text-lg">{schoolQuest.required}</span> 個 {schoolQuest?.crop?.icon}{schoolQuest?.crop?.name}
+                  </div>
+                  <div className="text-[9px] md:text-[10px] mt-1 md:mt-2 font-bold text-slate-500 bg-white/50 px-2 py-1 rounded-lg inline-block">
+                    剩餘時間: {schoolQuest.daysLeft} 天 ｜ 收成 3 倍價
+                  </div>
+                </div>
+              )}
+
+              <div className="bg-white/70 p-3 md:p-4 rounded-3xl shadow-sm border border-white flex flex-col flex-1 overflow-hidden min-h-[180px] md:min-h-0">
+                <h3 className="text-[10px] font-black mb-2 md:mb-3 text-slate-400 uppercase tracking-widest shrink-0">農具與庫存清單</h3>
+                <div className="grid grid-cols-4 md:grid-cols-2 gap-2 overflow-y-auto pr-1 md:pr-2 hide-scrollbar flex-1 content-start">
+                  {[
+                    { id: 'water', label: day >= 20 ? '全區灑水' : '單格澆水', icon: '💧' },
+                    { id: 'harvest', label: '收割', icon: '🧺' },
+                    { id: 'chili', label: '辣椒水', icon: '🌶️', count: inventory.chili },
+                    { id: 'weed', label: '除草剪刀', icon: '✂️', count: inventory.scissors },
+                    { id: 'fert_leaf', label: '氮肥', icon: <FertilizerBag type="leaf" />, count: inventory.fert_leaf },
+                    { id: 'fert_root', label: '磷肥', icon: <FertilizerBag type="root" />, count: inventory.fert_root },
+                    { id: 'fert_fruit', label: '鉀肥(瓜果)', icon: <FertilizerBag type="fruit" />, count: inventory.fert_fruit },
+                    ...Object.keys(inventory.seeds || {})
+                      .filter(id => inventory.seeds[id] > 0)
+                      .map(id => {
+                        // 同時搜尋一般作物與特殊作物
+                        const crop = Object.values(CROPS).flat().find(c => c?.id === id);
+                        if (!crop) return null;
+                        return {
+                          id: `seed_${id}`,
+                          type: 'seed',
+                          cropData: crop,
+                          label: `${crop.name}`, 
+                          icon: <SeedBag crop={crop} />,
+                          count: inventory.seeds[id]
+                        };
+                      })
+                      .filter(Boolean)
+                  ].map(tool => {
+                    if (!tool) return null;
+                    const isSelected = tool.type === 'seed' 
+                      ? (selectedTool === 'seed' && selectedSeed?.id === tool.cropData?.id)
+                      : selectedTool === tool.id;
+
+                    return (
+                      <button
+                        key={tool.id}
+                        onClick={() => {
+                          if (tool.type === 'seed') {
+                            setSelectedTool('seed');
+                            setSelectedSeed(tool.cropData);
+                          } else {
+                            setSelectedTool(tool.id);
+                            setSelectedSeed(null); 
+                          }
+                        }}
+                        className={`p-2 md:p-3 rounded-xl md:rounded-2xl border-2 transition-all flex flex-col items-center justify-center group relative ${isSelected ? 'border-blue-500 bg-white shadow-md scale-105 z-10' : 'border-transparent bg-white/40 hover:bg-white'}`}
+                      >
+                        <span className="text-xl md:text-2xl group-active:scale-125 transition-transform flex items-center justify-center h-10 w-10">{tool.icon}</span>
+                        <span className="text-[8px] md:text-[10px] font-black mt-1 uppercase text-center w-full truncate">{tool.label}</span>
+                        {tool.count !== undefined && (
+                          <span className={`absolute -top-1 -right-1 md:-top-2 md:-right-2 text-[8px] md:text-[10px] font-bold text-white px-1.5 md:px-2 py-0.5 rounded-full shadow-sm ${tool.count > 0 ? 'bg-blue-500' : 'bg-slate-400'}`}>
+                            {tool.count}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* 農田主畫面 */}
+            <div className="md:col-span-3">
+              {activePlot === null ? (
+                <div className="grid grid-cols-2 gap-3 md:gap-4 h-[350px] md:h-[450px]">
+                  {plots.map(plot => {
+                    if (!plot) return null;
+                    
+                    if (!plot.isUnlocked) {
+                      const price = PLOT_PRICES[plot.id];
+                      return (
+                        <div 
+                          key={plot.id}
+                          onClick={() => buyPlot(plot.id, price)}
+                          className="bg-slate-200/60 border-4 border-dashed border-slate-400 rounded-[1.5rem] md:rounded-[2rem] flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all shadow-inner group"
+                        >
+                          <div className="text-4xl md:text-5xl mb-2 opacity-40 group-hover:scale-110 transition-transform">🔒</div>
+                          <div className="text-[10px] md:text-sm font-black text-slate-500 uppercase tracking-widest">第 {plot.id + 1} 區 (未開放)</div>
+                          <div className="mt-3 bg-blue-100 text-blue-700 px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-black text-[10px] md:text-sm border-2 border-blue-200 transition-colors group-hover:bg-blue-600 group-hover:text-white">
+                            解鎖 $ {price.toLocaleString()}
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    const plantedCount = plot.slots.filter(s => s?.crop).length;
+                    const matureCount = plot.slots.filter(s => s?.crop && s.growth >= s.crop.days).length;
+                    const wateredCount = plot.slots.filter(s => s?.crop && s.isWatered).length;
+                    const unhandledAlert = plot.slots.some(s => s?.hasBug || s?.hasWeed);
+                    
+                    const borderColor = unhandledAlert ? 'border-red-500' : (weather === 'rainy' ? 'border-blue-400 shadow-[0_0_15px_rgba(96,165,250,0.5)]' : 'border-white');
+                    const isGiantPumpkin = plot.slots[0]?.crop?.id === 'giant_pumpkin';
+
+                    return (
+                      <div 
+                        key={plot.id}
+                        onClick={() => setActivePlot(plot.id)}
+                        className={`bg-amber-900/10 border-4 ${borderColor} rounded-[1.5rem] md:rounded-[2rem] relative overflow-hidden cursor-pointer hover:border-amber-500 transition-all flex flex-col items-center justify-center group shadow-inner`}
+                      >
+                        {weather === 'rainy' && (
+                          <div className="absolute inset-0 pointer-events-none overflow-hidden bg-blue-500/10 flex justify-evenly opacity-50 z-10">
+                            <div className="w-[1px] md:w-[2px] h-8 md:h-12 bg-blue-300 animate-rain"></div>
+                            <div className="w-[1px] md:w-[2px] h-6 md:h-8 bg-blue-300 animate-rain rain-delay-1 mt-4"></div>
+                            <div className="w-[1px] md:w-[2px] h-10 md:h-16 bg-blue-300 animate-rain rain-delay-2 mt-8"></div>
+                            <div className="w-[1px] md:w-[2px] h-8 md:h-10 bg-blue-300 animate-rain rain-delay-3 mt-2"></div>
+                          </div>
+                        )}
+
+                        <div className="absolute top-2 left-2 md:top-4 md:left-4 text-[8px] md:text-[10px] font-black bg-amber-900/20 px-2 py-1 md:px-3 md:py-1 rounded-full uppercase z-20">第 {plot.id + 1} 區</div>
+                        {plot.isNetted && <div className="absolute inset-0 bg-blue-400/10 border-2 border-dashed border-blue-400/50 rounded-[1.3rem] md:rounded-[1.8rem] pointer-events-none z-20"></div>}
+                        {plot.isWindbreaked && <div className="absolute inset-0 border-4 border-emerald-600/60 rounded-[1.3rem] md:rounded-[1.8rem] pointer-events-none z-20"></div>}
+                        
+                        <div className={`text-4xl md:text-5xl group-hover:scale-110 transition-transform z-20 ${isGiantPumpkin && matureCount === plantedCount ? 'animate-pulse' : ''}`}>
+                          {plantedCount > 0 ? (
+                            isGiantPumpkin ? '🎃' : (matureCount === plantedCount ? '✨' : '🌿')
+                          ) : '🕳️'}
+                        </div>
+                        <div className="mt-2 md:mt-4 flex flex-col items-center gap-1 z-20">
+                          <div className="text-[8px] md:text-[10px] font-black uppercase text-amber-900/60 bg-white/40 px-2 py-0.5 rounded-full">
+                            {plantedCount > 0 ? (isGiantPumpkin ? '巨型作物生長中' : `${plantedCount}/12 正在生長`) : '空置農田'}
+                          </div>
+                          {plantedCount > 0 && (
+                            <div className={`text-[8px] md:text-[10px] font-black px-1.5 py-0.5 md:px-2 md:py-1 rounded ${wateredCount < plantedCount ? 'bg-amber-200 text-amber-700' : 'bg-blue-100 text-blue-600'}`}>
+                              💧 澆水: {wateredCount}/{plantedCount}
+                            </div>
+                          )}
+                          {unhandledAlert && (
+                            <div className="text-[8px] md:text-[10px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 md:px-2 md:py-0.5 rounded animate-pulse shadow-sm">
+                              ⚠️ 發現蟲草
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="bg-white/80 p-4 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] shadow-2xl border border-white animate-in zoom-in duration-300 relative overflow-hidden flex flex-col h-full md:h-[450px]">
+                  
+                  {weather === 'rainy' && (
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden bg-blue-500/5 flex justify-evenly opacity-40 z-0">
+                      <div className="w-[1px] md:w-[2px] h-12 md:h-20 bg-blue-400 animate-rain"></div>
+                      <div className="w-[1px] md:w-[2px] h-10 md:h-16 bg-blue-400 animate-rain rain-delay-1 mt-10"></div>
+                      <div className="w-[1px] md:w-[2px] h-16 md:h-24 bg-blue-400 animate-rain rain-delay-2 mt-20"></div>
+                      <div className="w-[1px] md:w-[2px] h-8 md:h-12 bg-blue-400 animate-rain rain-delay-3 mt-5"></div>
+                      <div className="w-[1px] md:w-[2px] h-12 md:h-18 bg-blue-400 animate-rain rain-delay-1 mt-30"></div>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6 gap-3 relative z-10 shrink-0">
+                    <button onClick={() => setActivePlot(null)} className="bg-slate-100 hover:bg-slate-200 px-3 md:px-4 py-1.5 md:py-2 rounded-xl text-[10px] md:text-xs font-black transition-colors shrink-0">❮ 返回全景</button>
+                    <div className="flex items-center gap-2 flex-wrap justify-start sm:justify-end w-full sm:w-auto">
+                      <span className="font-black text-slate-400 uppercase text-[10px] md:text-xs tracking-widest mr-1 md:mr-2">第 {activePlot + 1} 區管理中</span>
+                      
+                      {inventory.nets > 0 && !plots[activePlot].isNetted && (
+                        <button onClick={() => applyNet(activePlot)} className="bg-blue-600 text-white text-[9px] md:text-[10px] px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl font-black hover:bg-blue-700 transition-all">部署防蟲網</button>
+                      )}
+                      {plots[activePlot].isNetted && <span className="bg-blue-100 text-blue-600 text-[9px] md:text-[10px] px-2 py-1.5 md:px-2 md:py-2 rounded-lg md:rounded-xl font-black">防蟲中 🕸️</span>}
+                      
+                      {inventory.windbreaks > 0 && !plots[activePlot].isWindbreaked && (
+                        <button onClick={() => applyWindbreak(activePlot)} className="bg-emerald-600 text-white text-[9px] md:text-[10px] px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl font-black hover:bg-emerald-700 transition-all">架設防風網</button>
+                      )}
+                      {plots[activePlot].isWindbreaked && <span className="bg-emerald-100 text-emerald-700 text-[9px] md:text-[10px] px-2 py-1.5 md:px-2 md:py-2 rounded-lg md:rounded-xl font-black">防風中 🛡️</span>}
+                    </div>
+                  </div>
+
+                  {/* 動態渲染：判斷是否為巨無霸南瓜 */}
+                  {plots[activePlot].slots[0]?.crop?.id === 'giant_pumpkin' ? (
+                    <div className="flex-1 w-full relative z-10 flex flex-col">
+                      <div
+                        onClick={() => handleSlotClick(activePlot, 0)}
+                        className={`flex-1 w-full rounded-xl md:rounded-[2rem] border-4 flex flex-col items-center justify-center relative transition-all active:scale-[0.98] cursor-pointer overflow-hidden ${
+                          plots[activePlot].slots[0].isWatered 
+                            ? 'bg-amber-800 border-amber-950 shadow-[inset_0_10px_30px_rgba(0,0,0,0.6)]' 
+                            : 'bg-amber-100 border-amber-300'
+                        }`}
+                      >
+                        {/* 已施肥視覺標記 */}
+                        {plots[activePlot].slots[0].isFertilized && (
+                          <div className="absolute top-3 left-3 md:top-6 md:left-6 bg-purple-100 border-2 border-purple-300 text-purple-700 text-xs md:text-sm px-3 py-1.5 rounded-lg shadow-sm font-black z-20 flex items-center gap-1 animate-in zoom-in">
+                            <span className="text-lg md:text-xl">🧪</span><span>已施打神級肥料</span>
+                          </div>
+                        )}
+
+                        {/* 聚合蟲害/雜草警報 */}
+                        {(plots[activePlot].slots.some(s => s.hasBug || s.hasWeed)) && (
+                          <div className="absolute top-3 right-3 md:top-6 md:right-6 flex flex-col gap-2 z-20 bg-white/30 p-2 rounded-2xl backdrop-blur-sm">
+                            {plots[activePlot].slots.some(s => s.hasBug) && <span className="animate-bounce text-3xl md:text-5xl drop-shadow-md">🐛</span>}
+                            {plots[activePlot].slots.some(s => s.hasWeed) && <span className="animate-pulse text-3xl md:text-5xl drop-shadow-md">🌿</span>}
+                          </div>
+                        )}
+
+                        {/* 巨無霸南瓜本體 (動態放大) */}
+                        <span 
+                          className={`transition-all duration-1000 z-10 ${plots[activePlot].slots[0].growth >= plots[activePlot].slots[0].crop.days ? 'drop-shadow-[0_20px_30px_rgba(0,0,0,0.5)] animate-pulse' : 'opacity-90 drop-shadow-lg'}`}
+                          style={{
+                            fontSize: `${4 + (plots[activePlot].slots[0].growth / plots[activePlot].slots[0].crop.days) * 12}rem`,
+                            lineHeight: 1
+                          }}
+                        >
+                          🎃
+                        </span>
+
+                        {/* 大型進度條 */}
+                        <div className="absolute bottom-6 md:bottom-10 w-3/4 h-3 md:h-4 bg-slate-900/50 rounded-full overflow-hidden border-2 border-slate-900/60 z-20 backdrop-blur-sm">
+                          <div className="h-full bg-gradient-to-r from-green-400 to-emerald-500 transition-all shadow-[inset_0_2px_4px_rgba(255,255,255,0.4)]" style={{ width: `${Math.min(100, (plots[activePlot].slots[0].growth / plots[activePlot].slots[0].crop.days) * 100)}%` }} />
+                        </div>
+                        
+                        {!plots[activePlot].slots[0].isWatered && (
+                          <div className="absolute bottom-2 md:bottom-4 text-xs md:text-sm font-black text-amber-300 uppercase tracking-widest z-20 animate-pulse bg-slate-900/50 px-3 py-1 rounded-full">
+                            極度缺水，請立即灌溉
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    /* 常規 12 格渲染 */
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 md:gap-4 relative z-10 flex-1 content-start overflow-y-auto pr-1 custom-scrollbar">
+                      {plots[activePlot].slots.map(slot => (
+                        <div 
+                          key={slot.id}
+                          onClick={() => handleSlotClick(activePlot, slot.id)}
+                          className={`aspect-square rounded-xl md:rounded-[1.5rem] border-2 md:border-4 flex flex-col items-center justify-center relative transition-all active:scale-95 cursor-pointer ${
+                            slot.isWatered 
+                              ? 'bg-amber-800 border-amber-950 shadow-[inset_0_5px_10px_rgba(0,0,0,0.5)] md:shadow-[inset_0_10px_20px_rgba(0,0,0,0.5)]' 
+                              : 'bg-amber-100 border-amber-300'
+                          }`}
+                        >
+                          {slot.isFertilized && (
+                            <div className="absolute top-1 left-1 md:top-2 md:left-2 bg-purple-100 border border-purple-300 text-purple-700 text-[8px] md:text-[10px] px-1 rounded shadow-sm font-black z-20 flex items-center gap-0.5 animate-in zoom-in">
+                              <span>🧪</span><span className="hidden md:inline">已施肥</span>
+                            </div>
+                          )}
+
+                          {slot.crop ? (
+                            <>
+                              <span className={`text-2xl md:text-4xl transition-all ${slot.growth >= slot.crop.days ? 'scale-110 drop-shadow-md' : 'scale-50 opacity-40'}`}>
+                                {slot.growth >= slot.crop.days ? slot.crop.icon : '🌱'}
+                              </span>
+                              <div className="absolute bottom-1 md:bottom-2 w-6 md:w-10 h-1 md:h-1 bg-slate-200/50 rounded-full overflow-hidden">
+                                <div className="h-full bg-green-400 transition-all" style={{ width: `${Math.min(100, (slot.growth / slot.crop.days) * 100)}%` }} />
+                              </div>
+                            </>
+                          ) : (
+                            <span className={`${slot.isWatered ? 'text-amber-600/60' : 'text-amber-400/80'} text-[8px] md:text-[9px] font-black uppercase tracking-tighter`}>可種植</span>
+                          )}
+                          
+                          {(!slot.crop || slot.growth < slot.crop.days) && (
+                            <div className="absolute top-1 right-1 md:top-2 md:right-2 flex flex-col gap-0.5 md:gap-1">
+                              {slot.hasBug && <span className="animate-bounce text-[10px] md:text-sm">🐛</span>}
+                              {slot.hasWeed && <span className="animate-pulse text-[10px] md:text-sm">🌿</span>}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="max-w-4xl mx-auto mt-4 md:mt-6 bg-slate-800 text-white px-4 py-3 md:px-6 md:py-4 rounded-xl md:rounded-2xl shadow-2xl flex items-center gap-3 md:gap-4 animate-in slide-in-from-bottom duration-500">
+            <div className="text-xl md:text-2xl shrink-0">💡</div>
+            <div className="text-[10px] md:text-xs font-bold leading-relaxed whitespace-pre-line">{String(message)}</div>
+          </div>
+
+          {/* --- 彈窗模組 RWD --- */}
+          {eventModal?.type === 'irrigation_upgrade' && (
+            <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-50">
+              <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-md w-full shadow-2xl animate-in zoom-in duration-300 max-h-[85vh] overflow-y-auto hide-scrollbar">
+                <div className="text-5xl md:text-6xl mb-4 text-center">🚜</div>
+                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-emerald-700">科技升級：自動灌溉系統！</h2>
+                <div className="bg-emerald-50 p-4 rounded-xl md:rounded-2xl mb-6 mt-4 border border-emerald-200">
+                  <h3 className="text-[10px] md:text-xs font-black text-emerald-600 mb-2">📢 農委會補助通知</h3>
+                  <p className="text-slate-600 text-[10px] md:text-xs leading-relaxed font-bold">
+                    恭喜你度過了初期的艱辛！鑒於你對地方農業的穩定貢獻，政府特別提撥了一筆專案補助，為你的農莊全面安裝了「自動化灌溉系統」。
+                  </p>
+                  <p className="text-slate-800 text-[10px] md:text-xs leading-relaxed font-black mt-2">
+                    即日起，你的灑水器已升級為 <span className="bg-emerald-200 px-1 rounded">全區灑水</span>！只需點擊一次，就能瞬間為整塊農田（12格）澆滿水，大幅減輕你的作業負擔！
+                  </p>
+                </div>
+                <button onClick={() => setEventModal(null)} className="w-full bg-emerald-500 text-white py-3 md:py-4 rounded-xl font-black text-sm md:text-base hover:bg-emerald-600 transition-colors">
+                  太棒了，收下補助！
+                </button>
+              </div>
+            </div>
+          )}
+
+          {eventModal?.type === 'typhoon_warning' && (
+            <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-50">
+              <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-md w-full shadow-2xl animate-in zoom-in duration-300 max-h-[85vh] overflow-y-auto hide-scrollbar">
+                <div className="text-5xl md:text-6xl mb-4 text-center">🌀</div>
+                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-blue-900">氣象局：強烈颱風警報！</h2>
+                <div className="bg-blue-50 p-4 rounded-xl md:rounded-2xl mb-6 mt-4">
+                  <h3 className="text-[10px] md:text-xs font-black text-blue-600 mb-2">🎓 農業防災小知識</h3>
+                  <p className="text-slate-600 text-[10px] md:text-xs leading-relaxed font-bold">
+                    台灣夏秋兩季常受颱風侵襲。為了防止農作物被強風暴雨摧毀，農民會提早架設重型「防風網」。
+                  </p>
+                  <p className="text-red-600 text-[10px] md:text-xs leading-relaxed font-black mt-2">
+                    警告：明天將有颱風！田裡「尚未成熟」且「沒有架設防風網」的作物，將有 50% 的機率被摧毀！請評估是否花費高昂成本購買防風網保護心血。
+                  </p>
+                </div>
+                <button onClick={() => setEventModal(null)} className="w-full bg-blue-600 text-white py-3 md:py-4 rounded-xl font-black text-sm md:text-base hover:bg-blue-700 transition-colors">
+                  我知道了，馬上去準備！
+                </button>
+              </div>
+            </div>
+          )}
+
+          {eventModal?.type === 'school_quest' && (
+            <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-50">
+              <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-md w-full shadow-2xl animate-in zoom-in duration-300 max-h-[85vh] overflow-y-auto hide-scrollbar">
+                <div className="text-5xl md:text-6xl mb-4 text-center">🏫</div>
+                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-yellow-700">偏鄉小學的營養午餐委託</h2>
+                <div className="bg-yellow-50 p-4 rounded-xl md:rounded-2xl mb-6 mt-4 border border-yellow-200">
+                  <h3 className="text-[10px] md:text-xs font-black text-yellow-600 mb-2">🎓 經濟學小知識：供需法則</h3>
+                  <p className="text-slate-600 text-[10px] md:text-xs leading-relaxed font-bold">
+                    當市場上極度需要某樣商品，但供給有限時，價格就會上漲！
+                  </p>
+                  <p className="text-slate-800 text-[10px] md:text-xs leading-relaxed font-black mt-2">
+                    附近的偏鄉小學本週營養午餐急缺 <span className="text-red-600 text-sm md:text-base">{eventModal.data?.crop?.icon} {eventModal.data?.crop?.name}</span>！
+                    如果你能在 {eventModal.data?.daysLeft} 天內收成並供應給他們，校長願意以 <span className="bg-yellow-200 px-1 rounded">3 倍</span> 的高價收購！
+                  </p>
+                </div>
+                <button onClick={() => setEventModal(null)} className="w-full bg-yellow-500 text-white py-3 md:py-4 rounded-xl font-black text-sm md:text-base hover:bg-yellow-600 transition-colors">
+                  接下委託！
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 商店彈窗 */}
+          {showShop && (
+            <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-2 md:p-4 z-50">
+              <div className="bg-white p-5 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-2xl w-full shadow-2xl animate-in zoom-in duration-200 max-h-[90vh] flex flex-col">
+                <div className="flex justify-between items-center mb-4 md:mb-6 border-b pb-3 md:pb-4 shrink-0">
+                  <h2 className="text-xl md:text-2xl font-black">🛒 村莊雜貨店</h2>
+                  <div className="flex items-center gap-2 md:gap-3">
+                    <button 
+                      onClick={() => { setShowShop(false); setShowModal('gallery'); }} 
+                      className="bg-indigo-50 text-indigo-700 border-2 border-indigo-100 px-2 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl font-black text-[10px] md:text-sm hover:bg-indigo-100 transition-colors flex items-center gap-1 md:gap-2 active:scale-95"
+                    >
+                      <span className="hidden sm:inline">📖 收集圖鑑</span>
+                      <span className="sm:hidden">📖 圖鑑</span>
+                      <span className="text-[8px] md:text-[9px] bg-indigo-200 px-1 md:px-1.5 py-0.5 rounded text-indigo-800">非賣品</span>
+                    </button>
+                    <button onClick={() => setShowShop(false)} className="bg-slate-100 p-1.5 md:p-2 rounded-full hover:bg-slate-200 transition-colors">❌</button>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 overflow-y-auto custom-scrollbar flex-1 pr-1 md:pr-2">
+                  <div>
+                    <h3 className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-3 md:mb-4 sticky top-0 bg-white/90 py-1 z-10">🌱 當季種子包</h3>
+                    <div className="space-y-2 md:space-y-3">
+                      {CROPS[season].map(crop => (
+                        <button
+                          key={crop?.id}
+                          onClick={() => { 
+                            if (gold >= crop.price) {
+                              setGold(g => g - crop.price);
+                              setInventory(inv => ({
+                                ...inv,
+                                seeds: {
+                                  ...inv.seeds,
+                                  [crop.id]: (inv.seeds[crop.id] || 0) + 1
+                                }
+                              }));
+                              setMessage(`購買了 [${crop.name}種子]！請至左側農具清單裝備。`);
+                            } else {
+                              setMessage("餘額不足，無法購買這批種子！");
+                            }
+                          }}
+                          className="w-full p-3 md:p-4 rounded-xl md:rounded-2xl border-2 border-slate-100 hover:border-green-400 hover:bg-green-50 transition-all flex justify-between items-center group"
+                        >
+                          <div>
+                            <div className="font-black text-base md:text-lg text-left">{crop.icon} {crop.name}</div>
+                            <div className="text-[9px] md:text-[10px] text-slate-400 mt-1 font-bold">生長 {crop.days} 天 ｜ 收成 ${crop.value}</div>
+                          </div>
+                          <div className="bg-green-100 text-green-700 px-2 py-1 md:px-3 md:py-1 rounded-lg md:rounded-xl font-black text-xs md:text-sm group-hover:bg-green-500 group-hover:text-white transition-colors">
+                            $ {crop.price}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-3 md:mb-4 sticky top-0 bg-white/90 py-1 z-10">🛠️ 農用耗材</h3>
+                    <div className="space-y-2 md:space-y-3">
+                      <div className="p-3 md:p-4 rounded-xl md:rounded-2xl border-2 border-slate-100 flex justify-between items-center">
+                        <div>
+                          <div className="font-black text-sm md:text-lg flex items-center gap-1 md:gap-2">✂️ 除草剪刀</div>
+                          <div className="text-[8px] md:text-[10px] text-slate-400 mt-1 font-bold">除草 10 次後損壞<br/>剩餘次數: {inventory.scissors}</div>
+                        </div>
+                        <button onClick={() => buyItem('scissors', 100)} className="bg-orange-100 text-orange-700 px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl font-black text-xs md:text-sm hover:bg-orange-500 hover:text-white transition-all active:scale-95">
+                          $ 100
+                        </button>
+                      </div>
+                      
+                      <div className="p-3 md:p-4 rounded-xl md:rounded-2xl border-2 border-slate-100 flex justify-between items-center">
+                        <div>
+                          <div className="font-black text-sm md:text-lg flex items-center gap-1 md:gap-2">🌶️ 辣椒水</div>
+                          <div className="text-[8px] md:text-[10px] text-slate-400 mt-1 font-bold">驅蟲 10 次後耗盡<br/>剩餘次數: {inventory.chili}</div>
+                        </div>
+                        <button onClick={() => buyItem('chili', 100)} className="bg-red-100 text-red-700 px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl font-black text-xs md:text-sm hover:bg-red-500 hover:text-white transition-all active:scale-95">
+                          $ 100
+                        </button>
+                      </div>
+
+                      <div className="p-3 md:p-4 rounded-xl md:rounded-2xl border-2 border-slate-100 flex justify-between items-center">
+                        <div className="flex items-center gap-2 md:gap-3">
+                          <FertilizerBag type="leaf" />
+                          <div>
+                            <div className="font-black text-sm md:text-lg">氮肥 (葉菜用)</div>
+                            <div className="text-[8px] md:text-[10px] text-slate-400 mt-1 font-bold">加速地瓜葉、高麗菜等<br/>庫存: {inventory.fert_leaf}</div>
+                          </div>
+                        </div>
+                        <button onClick={() => buyItem('fert_leaf', 80)} className="bg-green-100 text-green-700 px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl font-black text-xs md:text-sm hover:bg-green-500 hover:text-white transition-all active:scale-95">
+                          $ 80
+                        </button>
+                      </div>
+
+                      <div className="p-3 md:p-4 rounded-xl md:rounded-2xl border-2 border-slate-100 flex justify-between items-center">
+                        <div className="flex items-center gap-2 md:gap-3">
+                          <FertilizerBag type="root" />
+                          <div>
+                            <div className="font-black text-sm md:text-lg">磷肥 (根莖用)</div>
+                            <div className="text-[8px] md:text-[10px] text-slate-400 mt-1 font-bold">加速蘿蔔、芋頭等<br/>庫存: {inventory.fert_root}</div>
+                          </div>
+                        </div>
+                        <button onClick={() => buyItem('fert_root', 120)} className="bg-yellow-100 text-yellow-700 px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl font-black text-xs md:text-sm hover:bg-yellow-500 hover:text-white transition-all active:scale-95">
+                          $ 120
+                        </button>
+                      </div>
+
+                      <div className="p-3 md:p-4 rounded-xl md:rounded-2xl border-2 border-slate-100 flex justify-between items-center">
+                        <div className="flex items-center gap-2 md:gap-3">
+                          <FertilizerBag type="fruit" />
+                          <div>
+                            <div className="font-black text-sm md:text-lg">鉀肥 (瓜果用)</div>
+                            <div className="text-[8px] md:text-[10px] text-slate-400 mt-1 font-bold">加速草莓、芒果等<br/>庫存: {inventory.fert_fruit}</div>
+                          </div>
+                        </div>
+                        <button onClick={() => buyItem('fert_fruit', 300)} className="bg-purple-100 text-purple-700 px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl font-black text-xs md:text-sm hover:bg-purple-500 hover:text-white transition-all active:scale-95">
+                          $ 300
+                        </button>
+                      </div>
+
+                      <div className="p-3 md:p-4 rounded-xl md:rounded-2xl border-2 border-slate-100 flex justify-between items-center">
+                        <div>
+                          <div className="font-black text-sm md:text-lg flex items-center gap-1 md:gap-2">🕸️ 防蟲紗網</div>
+                          <div className="text-[8px] md:text-[10px] text-slate-400 mt-1 font-bold">保護單一區塊<br/>庫存: {inventory.nets}</div>
+                        </div>
+                        <button onClick={() => buyItem('net', 100)} className="bg-blue-100 text-blue-700 px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl font-black text-xs md:text-sm hover:bg-blue-500 hover:text-white transition-all active:scale-95">
+                          $ 100
+                        </button>
+                      </div>
+                      
+                      <div className="p-3 md:p-4 rounded-xl md:rounded-2xl border-2 border-slate-100 flex justify-between items-center">
+                        <div>
+                          <div className="font-black text-sm md:text-lg flex items-center gap-1 md:gap-2">🛡️ 防風網</div>
+                          <div className="text-[8px] md:text-[10px] text-slate-400 mt-1 font-bold">保護單一區塊<br/>庫存: {inventory.windbreaks}</div>
+                        </div>
+                        <button onClick={() => buyItem('windbreak', 1000)} className="bg-emerald-100 text-emerald-700 px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl font-black text-xs md:text-sm hover:bg-emerald-500 hover:text-white transition-all active:scale-95">
+                          $ 1000
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 圖鑑系統 Modal */}
+          {showModal === 'gallery' && (
+            <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-2 md:p-4 z-50">
+              <div className="bg-white p-5 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-4xl w-full shadow-2xl animate-in zoom-in duration-300 max-h-[95vh] flex flex-col">
+                <div className="flex justify-between items-center mb-4 md:mb-6 border-b pb-3 md:pb-4 shrink-0">
+                  <h2 className="text-xl md:text-2xl font-black text-indigo-900 flex items-center gap-1 md:gap-2">📖 台灣蔬果農業圖鑑</h2>
+                  <button onClick={() => setShowModal(null)} className="bg-slate-100 p-1.5 md:p-2 rounded-full hover:bg-slate-200 transition-colors">❌</button>
+                </div>
+                
+                <div className="overflow-y-auto custom-scrollbar flex-1 pr-2 md:pr-4">
+                  <p className="text-[10px] md:text-xs font-bold text-slate-500 mb-4 md:mb-6">
+                    收集所有四季作物吧！如果在未受蟲害且水分充足的「完美狀態」下收成，還能獲得額外的完美勳章喔！
+                  </p>
+                  
+                  <div className="space-y-6 md:space-y-8">
+                    {Object.entries(CROPS).map(([seasonKey, cropList]) => {
+                      const sName = { SPRING: '春季', SUMMER: '夏季', AUTUMN: '秋季', WINTER: '冬季', SPECIAL: '傳說隱藏' }[seasonKey];
+                      const sColor = { SPRING: 'text-green-600', SUMMER: 'text-yellow-600', AUTUMN: 'text-orange-600', WINTER: 'text-blue-600', SPECIAL: 'text-purple-600' }[seasonKey];
+                      const sBorder = { SPRING: 'border-green-200', SUMMER: 'border-yellow-200', AUTUMN: 'border-orange-200', WINTER: 'border-blue-200', SPECIAL: 'border-purple-300' }[seasonKey];
+                      const sBg = { SPRING: 'bg-green-50/30', SUMMER: 'bg-yellow-50/30', AUTUMN: 'bg-orange-50/30', WINTER: 'bg-blue-50/30', SPECIAL: 'bg-gradient-to-br from-purple-50 to-pink-50' }[seasonKey];
+                      
+                      return (
+                        <div key={seasonKey}>
+                          <h3 className={`text-base md:text-lg font-black mb-3 md:mb-4 border-b-2 inline-block pb-1 ${sColor}`}>
+                            {seasonKey === 'SPECIAL' ? '✨ ' : ''}{sName}作物
+                          </h3>
+                          
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
+                            {cropList.map(crop => {
+                              const record = gallery[crop?.id];
+                              const isUnlocked = !!record?.unlocked;
+                              const isPerfect = !!record?.perfect;
+
+                              return (
+                                <div key={crop?.id} className={`p-4 md:p-5 rounded-xl md:rounded-2xl border-2 flex items-start gap-4 md:gap-5 relative transition-all ${isUnlocked ? `${sBorder} ${sBg}` : 'border-slate-100 bg-slate-50 grayscale opacity-60'}`}>
+                                  
+                                  <div className={`text-5xl md:text-6xl shrink-0 drop-shadow-sm mt-1 ${seasonKey === 'SPECIAL' && isUnlocked ? 'animate-pulse' : ''}`}>
+                                    {isUnlocked ? crop.icon : '❓'}
+                                  </div>
+                                  
+                                  <div className="flex-1 min-w-0">
+                                    <div className={`font-black text-base md:text-lg ${seasonKey === 'SPECIAL' && isUnlocked ? 'text-purple-800' : 'text-slate-700'}`}>
+                                      {isUnlocked ? crop.name : '未知作物'}
+                                    </div>
+                                    
+                                    {isUnlocked ? (
+                                      <>
+                                        <div className="text-[10px] md:text-[11px] text-indigo-700 font-black mt-1.5 bg-indigo-100/50 inline-block px-2 py-0.5 rounded border border-indigo-200">
+                                          ⏳ 總生長期：{crop.days} 天 ｜ {crop.type === 'leaf' ? '🌿 葉菜類' : crop.type === 'root' ? '🥔 根莖類' : '🍎 瓜果類'}
+                                        </div>
+                                        <div className="text-[10px] md:text-[11px] text-slate-600 mt-2 leading-relaxed whitespace-pre-line font-medium">
+                                          {crop.desc}
+                                        </div>
+                                      </>
+                                    ) : (
+                                      <div className="text-[10px] md:text-xs font-bold text-slate-400 mt-1 md:mt-2 uppercase tracking-widest">未解鎖</div>
+                                    )}
+                                  </div>
+                                  
+                                  {isPerfect && (
+                                    <div className="absolute -top-2 -right-2 bg-yellow-400 border-2 border-white w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center shadow-md animate-bounce text-[10px] md:text-[12px]" title="完美收成勳章">
+                                      ✨
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 睡覺與存檔確認彈窗 */}
+          {showModal === 'sleep' && (
+            <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+              <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-sm w-full text-center shadow-2xl animate-in zoom-in duration-200">
+                <div className="text-5xl md:text-6xl mb-3 md:mb-4">🌙</div>
+                <h2 className="text-xl md:text-2xl font-black mb-3 md:mb-4">準備休息了嗎？</h2>
+                <p className="text-slate-500 mb-5 md:mb-6 font-bold text-[10px] md:text-xs leading-relaxed">
+                  請確認所有作物都已澆水，並且<span className="text-red-500">沒有未處理的蟲害或雜草</span>，否則作物在夜晚會直接枯死喔！
+                </p>
+                <div className="flex gap-3 md:gap-4">
+                  <button onClick={() => setShowModal(null)} className="flex-1 bg-slate-100 text-slate-600 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-sm md:text-base hover:bg-slate-200 transition-colors">
+                    再巡一下
+                  </button>
+                  <button onClick={processNextDay} className="flex-1 bg-slate-800 text-white py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-sm md:text-base hover:bg-slate-700 transition-colors">
+                    確定睡覺
+                  </button>
+                </div>
+                
+                {/* 新增：系統存檔與讀檔功能區塊 */}
+                <div className="flex flex-col gap-3 md:gap-4 w-full mt-6 pt-6 border-t border-slate-100">
+                  <div className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-1">系統存檔 (支援手機/平板瀏覽器)</div>
+                  <div className="flex gap-3 md:gap-4">
+                    <button onClick={handleSave} className="flex-1 bg-blue-100 text-blue-700 py-3 rounded-xl font-black text-sm hover:bg-blue-200 transition-colors active:scale-95 shadow-sm">
+                      💾 儲存進度
+                    </button>
+                    {saveExists && (
+                      <button onClick={handleLoad} className="flex-1 bg-indigo-100 text-indigo-700 py-3 rounded-xl font-black text-sm hover:bg-indigo-200 transition-colors active:scale-95 shadow-sm">
+                        📂 讀取進度
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 結算彈窗 */}
+          {showModal === 'contest' && (
+            <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-50">
+              <div className="bg-white p-8 md:p-10 rounded-[2.5rem] md:rounded-[3rem] max-w-sm w-full text-center shadow-2xl animate-in zoom-in">
+                <div className="text-6xl md:text-7xl mb-4 md:mb-6">🥇</div>
+                <h2 className="text-2xl md:text-3xl font-black mb-2 uppercase">季度大賽</h2>
+                <p className="text-slate-400 text-[10px] md:text-xs mb-6 md:mb-8 font-bold">你在第 {day} 天的表現非常驚人，評審團給予了高度評價！</p>
+                <div className="bg-slate-100 p-4 md:p-6 rounded-2xl md:rounded-3xl mb-6 md:mb-8">
+                  <div className="text-[9px] md:text-[10px] font-black text-slate-400 mb-1 uppercase">季度獎金</div>
+                  <div className="text-3xl md:text-4xl font-black text-yellow-600">${Math.floor(gold * 0.2).toLocaleString()}</div>
+                </div>
+                <button onClick={() => { setGold(g => g + Math.floor(g * 0.2)); setShowModal(null); playEffect('coin'); }} className="w-full bg-slate-800 text-white py-4 md:py-5 rounded-xl md:rounded-2xl font-black uppercase tracking-widest hover:bg-slate-700 transition-all">領取獎勵</button>
+              </div>
+            </div>
+          )}
+
+          {/* 遊戲結束結果 */}
+          {showModal === 'result' && (
+            <div className="fixed inset-0 bg-slate-900/95 backdrop-blur-xl flex items-center justify-center p-4 z-50">
+              <div className="bg-white p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] max-w-lg w-full text-center shadow-2xl overflow-y-auto max-h-[90vh] hide-scrollbar">
+                <div className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-3 md:mb-4">365天經營結算</div>
+                <h1 className="text-4xl md:text-5xl font-black mb-6 md:mb-8 italic">農莊年度結算</h1>
+                <div className="grid grid-cols-2 gap-3 md:gap-4 mb-8 md:mb-10">
+                  <div className="bg-slate-50 p-6 md:p-8 rounded-2xl md:rounded-3xl border border-slate-100">
+                    <div className="text-[9px] md:text-[10px] font-black text-slate-400 mb-1 md:mb-2 uppercase">總資產</div>
+                    <div className="text-xl md:text-3xl font-black font-mono text-slate-800">${gold.toLocaleString()}</div>
+                  </div>
+                  <div className="bg-blue-600 p-6 md:p-8 rounded-2xl md:rounded-3xl text-white shadow-xl shadow-blue-200">
+                    <div className="text-[9px] md:text-[10px] font-black opacity-60 mb-1 md:mb-2 uppercase">最終評級</div>
+                    <div className="text-5xl md:text-6xl font-black">{gold > 1000000 ? 'S' : gold > 500000 ? 'A' : gold > 100000 ? 'B' : 'C'}</div>
+                  </div>
+                </div>
+                <button onClick={() => {
+                  localStorage.removeItem('farm_tycoon_save'); // 結束時清除存檔
+                  window.location.reload();
+                }} className="w-full bg-slate-800 text-white py-5 md:py-6 rounded-2xl md:rounded-3xl font-black text-sm md:text-base uppercase tracking-widest hover:bg-slate-700 active:scale-95 transition-all">刪除存檔並開啟下一個循環</button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
