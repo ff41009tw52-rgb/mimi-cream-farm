@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>橘咪咪與白奶油的實驗室 V14</title>
+    <title>橘咪咪與白奶油的實驗室 V15</title>
     <style>
         body {
             margin: 0;
@@ -238,6 +238,7 @@
         </div>
     </div>
 
+    <!-- 開始畫面 -->
     <div id="start-screen" class="overlay-screen">
         <h1>🐱 橘咪咪與白奶油的實驗室</h1>
         <p>請用滑鼠或手指控制橘咪咪，<br>接住白奶油博士指定的藥品！</p>
@@ -255,6 +256,7 @@
         </div>
     </div>
 
+    <!-- 結算畫面 -->
     <div id="result-screen" class="overlay-screen hidden">
         <h1 id="result-title">標題</h1>
         <div id="result-msg">訊息</div>
@@ -266,11 +268,13 @@
 
 <script>
 /**
- * 遊戲邏輯核心 V14 - 回首頁重置功能
+ * 遊戲邏輯核心 V15 - 新增 Web Audio API 音效系統
  */
 const game = {
     canvas: document.getElementById('gameCanvas'),
     ctx: document.getElementById('gameCanvas').getContext('2d'),
+    // 音效 Context
+    audioCtx: null,
     state: {
         score: 0,
         lives: 3,
@@ -315,7 +319,79 @@ const game = {
         requestAnimationFrame(() => this.loop());
     },
 
+    // 啟動音效系統 (必須在使用者點擊按鈕後執行)
+    initAudio: function() {
+        if (!this.audioCtx) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            this.audioCtx = new AudioContext();
+        }
+        if (this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume();
+        }
+    },
+
+    // 播放成功音效 (更長、更大聲的升階旋律)
+    playSuccessSound: function() {
+        if (!this.audioCtx) return;
+        const osc = this.audioCtx.createOscillator();
+        const gainNode = this.audioCtx.createGain();
+        
+        osc.type = 'triangle'; // 三角波，帶有復古 8-bit 遊戲感
+        osc.connect(gainNode);
+        gainNode.connect(this.audioCtx.destination);
+        
+        const now = this.audioCtx.currentTime;
+        
+        // 音量控制：提升至 0.7 (原本 0.3)，並拉長尾音至 0.5 秒
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(0.7, now + 0.05);
+        gainNode.gain.setValueAtTime(0.7, now + 0.3);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+        
+        // 頻率控制：連續上揚的琶音旋律 (C5 -> E5 -> G5 -> C6)
+        osc.frequency.setValueAtTime(523.25, now);       // Do
+        osc.frequency.setValueAtTime(659.25, now + 0.1); // Mi
+        osc.frequency.setValueAtTime(783.99, now + 0.2); // Sol
+        osc.frequency.setValueAtTime(1046.50, now + 0.3);// 高音 Do
+        
+        osc.start(now);
+        osc.stop(now + 0.5);
+    },
+
+    // 播放失敗音效 (更長、更大聲的下降旋律)
+    playFailSound: function() {
+        if (!this.audioCtx) return;
+        const osc = this.audioCtx.createOscillator();
+        const gainNode = this.audioCtx.createGain();
+        
+        osc.type = 'sawtooth'; // 鋸齒波，適合失敗或警告的沉重聲音
+        osc.connect(gainNode);
+        gainNode.connect(this.audioCtx.destination);
+        
+        const now = this.audioCtx.currentTime;
+        
+        // 音量控制：提升至 0.6 (原本 0.3)，並拉長至 0.7 秒
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(0.6, now + 0.05);
+        gainNode.gain.setValueAtTime(0.6, now + 0.4);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.7);
+        
+        // 頻率控制：經典的 Womp-Womp-Womp 下降音
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.exponentialRampToValueAtTime(280, now + 0.2); // 第一個下降
+        osc.frequency.setValueAtTime(250, now + 0.2);               // 變調
+        osc.frequency.exponentialRampToValueAtTime(230, now + 0.4); // 第二個下降
+        osc.frequency.setValueAtTime(200, now + 0.4);               // 變調
+        osc.frequency.exponentialRampToValueAtTime(150, now + 0.7); // 最終下降結尾
+        
+        osc.start(now);
+        osc.stop(now + 0.7);
+    },
+
     start: function(targetScore) {
+        // 初始化音效 (因為這是由按鈕點擊觸發的，符合瀏覽器政策)
+        this.initAudio();
+
         document.getElementById('start-screen').classList.add('hidden');
         document.getElementById('result-screen').classList.add('hidden');
         
@@ -338,31 +414,24 @@ const game = {
         this.start(this.state.targetScore);
     },
 
-    // 新增：回到標題畫面（重置遊戲）
     toTitleScreen: function() {
-        // 1. 停止遊戲循環邏輯
         this.state.isPlaying = false;
         
-        // 2. 清空遊戲狀態
         this.state.items = [];
         this.state.score = 0;
         this.state.lives = 3;
         
-        // 3. 恢復玩家位置 (可選)
         this.player.x = this.canvas.width / 2 - this.player.width / 2;
 
-        // 4. UI 切換
         document.getElementById('result-screen').classList.add('hidden');
         document.getElementById('start-screen').classList.remove('hidden');
         
-        // 5. 重置任務欄文字
         const missionEl = document.getElementById('current-mission');
         const textEl = document.getElementById('mission-text');
         textEl.textContent = "準備開始...";
         missionEl.style.backgroundColor = "#fff";
         missionEl.style.borderColor = "#f1c40f";
 
-        // 6. 更新 UI 顯示 (讓分數歸零)
         this.updateUI();
     },
 
@@ -497,6 +566,9 @@ const game = {
         const isCorrect = item.data.type === this.state.currentMission.type;
         
         if (isCorrect) {
+            // 觸發成功音效
+            this.playSuccessSound();
+
             this.state.score += 10;
             this.state.missionItemsCollected++;
             this.showFloatingText("+10", "#2ecc71", this.player.x);
@@ -511,6 +583,9 @@ const game = {
             }
 
         } else {
+            // 觸發失敗音效
+            this.playFailSound();
+
             this.state.lives--;
             this.showFloatingText("-1 ❤️", "#e74c3c", this.player.x);
             this.canvas.style.transform = "translateX(5px)";
