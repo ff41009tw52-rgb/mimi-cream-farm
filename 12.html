@@ -63,7 +63,6 @@
           const osc = audioCtx.current.createOscillator();
           const gain = audioCtx.current.createGain();
           osc.frequency.setValueAtTime(1200, now);
-          // 調長變頻時間與播放時間，並增加音量
           osc.frequency.exponentialRampToValueAtTime(1500, now + 0.3);
           gain.gain.setValueAtTime(0.5, now); 
           gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
@@ -168,6 +167,35 @@
       }
     };
 
+    // --- 飛行作物動畫元件 ---
+    const FlyingCropComponent = ({ data, onRemove }) => {
+      const [active, setActive] = useState(false);
+      useEffect(() => {
+        const raf = requestAnimationFrame(() => {
+            requestAnimationFrame(() => setActive(true));
+        });
+        // 0.5秒後動畫結束，移除 DOM
+        const timer = setTimeout(() => onRemove(data.id), 500);
+        return () => { cancelAnimationFrame(raf); clearTimeout(timer); };
+      }, [data, onRemove]);
+
+      return (
+        <div 
+            className="fixed z-[9999] pointer-events-none drop-shadow-2xl flex items-center justify-center"
+            style={{
+                left: active ? data.endX : data.startX,
+                top: active ? data.endY : data.startY,
+                transform: `translate(-50%, -50%) scale(${active ? 0.3 : 1.2})`,
+                opacity: active ? 0.2 : 1,
+                transition: 'all 0.5s cubic-bezier(0.25, 1, 0.5, 1)',
+                fontSize: '4rem'
+            }}
+        >
+            {data.icon}
+        </div>
+      );
+    };
+
     const App = () => {
       const { playEffect } = useAudio();
       
@@ -203,7 +231,7 @@
       const [eventQueue, setEventQueue] = useState([]);
       const currentEvent = eventQueue[0]; 
       
-      const [dragInfo, setDragInfo] = useState(null);
+      const [flyingCrops, setFlyingCrops] = useState([]);
       const dropZoneRef = useRef(null);
       
       const closeEventModal = () => {
@@ -230,62 +258,40 @@
         if (saved) setSaveExists(true);
       }, []);
 
-      useEffect(() => {
-        if (dragInfo) {
-          document.body.style.touchAction = 'none';
-          document.body.style.overflow = 'hidden';
-        } else {
-          document.body.style.touchAction = '';
-          document.body.style.overflow = '';
-        }
-      }, [dragInfo]);
+      const removeFlyingCrop = useCallback((id) => {
+        setFlyingCrops(prev => prev.filter(c => c.id !== id));
+      }, []);
 
-      // 拖曳收成系統
-      useEffect(() => {
-        const handleMove = (e) => {
-          if (dragInfo) {
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            setDragInfo(prev => ({ ...prev, x: clientX, y: clientY }));
-          }
-        };
+      // --- 點擊收成與飛行觸發邏輯 ---
+      const handleHarvestClick = (e, plotId, slotId, crop, isGiant) => {
+        e.stopPropagation(); // 避免觸發底層的其他點擊事件
+        
+        // 取得點擊作物的起始座標
+        const rect = e.currentTarget.getBoundingClientRect();
+        const startX = rect.left + rect.width / 2;
+        const startY = rect.top + rect.height / 2;
 
-        const handleUp = (e) => {
-          if (dragInfo) {
-            const clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
-            const clientY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
-            
-            if (dropZoneRef.current) {
-              const rect = dropZoneRef.current.getBoundingClientRect();
-              if (clientX >= rect.left && clientX <= rect.right &&
-                  clientY >= rect.top && clientY <= rect.bottom) {
-                  handleHarvestDrop(dragInfo);
-              } else {
-                  setMessage("提示：請將成熟作物拖曳至左側的【📥 收成箱】放開即可收成！");
-              }
-            }
-            setDragInfo(null);
-          }
-        };
-
-        if (dragInfo) {
-          window.addEventListener('mousemove', handleMove);
-          window.addEventListener('mouseup', handleUp);
-          window.addEventListener('touchmove', handleMove, { passive: false });
-          window.addEventListener('touchend', handleUp);
+        // 取得收成箱的目標座標
+        let endX = window.innerWidth / 2;
+        let endY = 0;
+        if (dropZoneRef.current) {
+            const boxRect = dropZoneRef.current.getBoundingClientRect();
+            endX = boxRect.left + boxRect.width / 2;
+            endY = boxRect.top + boxRect.height / 2;
         }
 
-        return () => {
-          window.removeEventListener('mousemove', handleMove);
-          window.removeEventListener('mouseup', handleUp);
-          window.removeEventListener('touchmove', handleMove);
-          window.removeEventListener('touchend', handleUp);
-        };
-      }, [dragInfo]);
+        // 推入飛行陣列觸發動畫
+        const newId = Date.now() + Math.random();
+        setFlyingCrops(prev => [...prev, { id: newId, icon: crop.icon, startX, startY, endX, endY }]);
 
-      const handleHarvestDrop = (dragged) => {
-        const { plotId, slotId, crop, isGiant } = dragged;
+        // 延遲播放金幣聲音，讓作物「飛到箱子」時才響
+        setTimeout(() => playEffect('coin'), 400);
 
+        // 立即處理後台收成邏輯
+        processHarvest(plotId, slotId, crop, isGiant);
+      };
+
+      const processHarvest = (plotId, slotId, crop, isGiant) => {
         const newPlots = JSON.parse(JSON.stringify(plots));
         const targetPlot = newPlots[plotId];
         
@@ -313,7 +319,6 @@
           crops: { ...inv.crops, [crop.id]: (inv.crops?.[crop.id] || 0) + 1 }
         }));
 
-        playEffect('coin');
         setMessage(`✨ 收成了 ${crop.name}！已存入倉庫，請至商店變現。`);
 
         // 當畫面上的成熟作物全部被清空時，才觸發第一次收成獎勵與進階教學
@@ -555,18 +560,6 @@
         }
         
         if (nextDayNum % 100 === 0 && nextDayNum <= 300) setShowModal('contest');
-      };
-
-      const handleSlotPointerDown = (e, plotId, slotId, slot) => {
-        const isMature = slot.crop && slot.growth >= slot.crop.days;
-        if (isMature) {
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            const isGiant = plotId !== null && slot.crop.id === 'giant_pumpkin';
-            setDragInfo({ plotId, slotId, crop: slot.crop, x: clientX, y: clientY, isGiant });
-        } else {
-            handleSlotClick(plotId, slotId);
-        }
       };
 
       const handleSlotClick = (plotId, slotId) => {
@@ -874,7 +867,7 @@
       };
 
       return (
-        <div className={`min-h-screen p-2 md:p-4 font-sans text-slate-800 ${seasonColor} transition-colors duration-1000 select-none relative overflow-x-hidden pb-24 touch-none`}>
+        <div className={`min-h-screen p-2 md:p-4 font-sans text-slate-800 ${seasonColor} transition-colors duration-1000 select-none relative overflow-x-hidden pb-24`}>
           
           <style>{`
             @keyframes rainFall {
@@ -892,35 +885,28 @@
             .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
           `}</style>
 
-          {/* 幽靈拖曳圖標 */}
-          {dragInfo && (
-              <div 
-                  className="fixed pointer-events-none z-[9999] text-5xl md:text-7xl drop-shadow-2xl transition-transform"
-                  style={{ 
-                      left: dragInfo.x, 
-                      top: dragInfo.y, 
-                      transform: 'translate(-50%, -50%) scale(1.1)' 
-                  }}
-              >
-                  {dragInfo.crop.icon}
-              </div>
-          )}
+          {/* 飛行作物動畫層 */}
+          {flyingCrops.map(fc => (
+            <FlyingCropComponent key={fc.id} data={fc} onRemove={removeFlyingCrop} />
+          ))}
 
-          {/* --- 新手教學：步驟浮動提示框 (強制執行不顯示關閉按鈕) --- */}
-          {tutorialStep > 1 && (
-            <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-6 py-4 rounded-2xl shadow-2xl z-[80] animate-bounce border-4 border-blue-400 max-w-md w-[90%] text-center">
-              <div className="font-black text-lg mb-2 text-yellow-300">
-                {tutorialStep >= 7 ? `🎓 進階任務 (${tutorialStep - 6}/3)` : `🎓 新手任務 (${tutorialStep - 1}/5)`}
-              </div>
-              <div className="text-sm font-bold leading-relaxed">
-                {tutorialStep === 2 && "第一步：請點擊右上角的「🛒 商店」，購買一包【地瓜葉】種子！"}
-                {tutorialStep === 3 && "第二步：太棒了！現在請在左側「農具清單」中，點選裝備剛剛購買的【地瓜葉】。"}
-                {tutorialStep === 4 && "第三步：請點擊右側的「第 1 區」農田，進入該區塊，並點擊任何一塊空地將種子種下！"}
-                {tutorialStep === 5 && <span>第四步：植物必須<span className="text-yellow-300 font-black text-lg mx-1">【每天】</span>澆水！請裝備左側的「💧 單格澆水」，將<span className="underline">所有剛種下的植物</span>都點擊澆滿水分。</span>}
-                {tutorialStep === 6 && "最後一步：完美！確認植物【都有澆水】後，點擊右上角的「🌙 睡覺 ➔」進入下一天！等待它們成熟吧。"}
-                {tutorialStep === 7 && "第一步：剛收成的作物都在倉庫裡！請點擊右上角「🛒 商店」，切換到「賣出農產」將其賣掉變現吧！"}
-                {tutorialStep === 8 && "第二步：鎮長送了肥料！請確保田裡有種植「地瓜葉」，然後裝備左側的【🧪 氮肥(葉菜)】對它點擊施肥加速生長！"}
-                {tutorialStep === 9 && "最後一步：鎮長還送了防蟲網！請點擊進入農田區塊，點選上方的「部署防蟲網」，保護農田免受蟲害！(別忘了也要幫植物澆水喔！)"}
+          {/* --- 新手教學：步驟浮動提示框 (強制隱藏於彈窗開啟時) --- */}
+          {tutorialStep > 1 && !currentEvent && !showModal && !showShop && !showQuestModal && (
+            <div className="fixed bottom-10 md:bottom-8 left-0 right-0 z-[40] flex justify-center pointer-events-none px-4">
+              <div className="bg-blue-600 text-white px-4 py-3 md:px-6 md:py-4 rounded-2xl shadow-2xl animate-bounce border-4 border-blue-400 max-w-md w-full text-center pointer-events-none">
+                <div className="font-black text-base md:text-lg mb-1 md:mb-2 text-yellow-300">
+                  {tutorialStep >= 7 ? `🎓 進階任務 (${tutorialStep - 6}/3)` : `🎓 新手任務 (${tutorialStep - 1}/5)`}
+                </div>
+                <div className="text-[11px] md:text-sm font-bold leading-relaxed">
+                  {tutorialStep === 2 && "第一步：請點擊右上角的「🛒 商店」，購買一包【地瓜葉】種子！"}
+                  {tutorialStep === 3 && "第二步：太棒了！現在請在左側「農具清單」中，點選裝備剛剛購買的【地瓜葉】。"}
+                  {tutorialStep === 4 && "第三步：請點擊右側的「第 1 區」農田，進入該區塊，並點擊任何一塊空地將種子種下！"}
+                  {tutorialStep === 5 && <span>第四步：植物必須<span className="text-yellow-300 font-black text-base md:text-lg mx-1">【每天】</span>澆水！請裝備左側的「💧 單格澆水」，將<span className="underline">所有剛種下的植物</span>都點擊澆滿水分。</span>}
+                  {tutorialStep === 6 && "最後一步：完美！確認植物【都有澆水】後，點擊右上角的「🌙 睡覺 ➔」進入下一天！等待它們成熟吧。"}
+                  {tutorialStep === 7 && "第一步：剛收成的作物都在倉庫裡！請點擊右上角「🛒 商店」，切換到「賣出農產」將其賣掉變現吧！"}
+                  {tutorialStep === 8 && "第二步：政府送了肥料！請確保田裡有種植「地瓜葉」，然後裝備左側的【🧪 氮肥(葉菜)】對它點擊施肥加速生長！"}
+                  {tutorialStep === 9 && "最後一步：政府還送了防蟲網！請點擊進入農田區塊，點選上方的「部署防蟲網」，保護農田免受蟲害！(別忘了也要幫植物澆水喔！)"}
+                </div>
               </div>
             </div>
           )}
@@ -936,7 +922,7 @@
                   <ul className="space-y-3 mt-4 text-xs md:text-sm">
                     <li className="flex items-start gap-2"><span className="text-xl">🌦️</span> <span><strong className="text-blue-700">四季變化與天氣</strong>：春雨、梅雨、秋颱、冬旱。雨天免澆水，但要提防颱風摧毀心血！</span></li>
                     <li className="flex items-start gap-2"><span className="text-xl">🥭</span> <span><strong className="text-green-700">台灣在地蔬果</strong>：種植大甲芋頭、愛文芒果等 12 種在地作物，體驗真實生長週期。</span></li>
-                    <li className="flex items-start gap-2"><span className="text-xl">🏫</span> <span><strong className="text-amber-700">小鎮特殊委託</strong>：接取偏鄉小學委託，學習市場「供需法則」賺取 3 倍利潤。</span></li>
+                    <li className="flex items-start gap-2"><span className="text-xl">🏫</span> <span><strong className="text-amber-700">小鎮特殊委託</strong>：接取校長的委託，學習市場「供需法則」賺取 3 倍利潤。</span></li>
                     <li className="flex items-start gap-2"><span className="text-xl">🛡️</span> <span><strong className="text-purple-700">防災與生態管理</strong>：架設防蟲紗網與防風網，學習農業風險管理。</span></li>
                   </ul>
                 </div>
@@ -1068,15 +1054,17 @@
             {/* 左側：收成箱與農具清單 */}
             <div className="md:col-span-1 flex flex-col h-auto md:h-[450px] gap-4 relative z-40">
               
-              <div 
-                  ref={dropZoneRef}
-                  className={`bg-white/80 border-4 border-dashed rounded-[1.5rem] md:rounded-[2rem] p-2 md:p-3 flex flex-col items-center justify-center min-h-[90px] md:min-h-[110px] transition-all duration-300 ${dragInfo ? 'border-amber-500 bg-amber-50 scale-[1.02] shadow-[0_0_20px_rgba(245,158,11,0.4)] animate-pulse' : 'border-slate-300 shadow-sm'}`}
-              >
-                  <div className="text-3xl md:text-4xl mb-1">📥</div>
-                  <div className="font-black text-slate-700 text-sm md:text-base">收成箱</div>
-                  <div className={`text-[9px] md:text-[10px] font-bold mt-1 px-2 py-0.5 rounded-full ${dragInfo ? 'bg-amber-200 text-amber-800' : 'bg-slate-100 text-slate-500'}`}>
-                      {dragInfo ? '釋放手指以收成' : '拖曳成熟作物至此'}
-                  </div>
+              <div className="relative min-h-[90px] md:min-h-[110px]">
+                <div 
+                    ref={dropZoneRef}
+                    className={`absolute inset-0 bg-white/80 border-4 border-dashed rounded-[1.5rem] md:rounded-[2rem] p-2 md:p-3 flex flex-col items-center justify-center border-slate-300 shadow-sm transition-all duration-300`}
+                >
+                    <div className="text-3xl md:text-4xl mb-1">📥</div>
+                    <div className="font-black text-slate-700 text-sm md:text-base">收成箱</div>
+                    <div className="font-bold mt-1 px-3 py-1 rounded-full text-[9px] md:text-[10px] bg-slate-100 text-slate-500">
+                        點擊作物自動收成
+                    </div>
+                </div>
               </div>
 
               <div className={`bg-white/80 p-3 md:p-4 rounded-[2rem] shadow-sm border flex flex-col flex-1 overflow-hidden min-h-[180px] md:min-h-0 ${tutorialStep === 3 || tutorialStep === 5 ? 'border-4 border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.5)]' : 'border-white'}`}>
@@ -1251,7 +1239,13 @@
                   {plots[activePlot].slots[0]?.crop?.id === 'giant_pumpkin' ? (
                     <div className="flex-1 w-full relative z-10 flex flex-col">
                       <div
-                        onPointerDown={(e) => handleSlotPointerDown(e, activePlot, 0, plots[activePlot].slots[0])}
+                        onClick={(e) => {
+                           if (plots[activePlot].slots[0].crop && plots[activePlot].slots[0].growth >= plots[activePlot].slots[0].crop.days) {
+                              handleHarvestClick(e, activePlot, 0, plots[activePlot].slots[0].crop, true);
+                           } else {
+                              handleSlotClick(activePlot, 0);
+                           }
+                        }}
                         className={`flex-1 w-full rounded-xl md:rounded-[2rem] border-4 flex flex-col items-center justify-center relative transition-all active:scale-[0.98] cursor-pointer overflow-hidden ${
                           plots[activePlot].slots[0].isWatered 
                             ? 'bg-amber-800 border-amber-950 shadow-[inset_0_10px_30px_rgba(0,0,0,0.6)]' 
@@ -1297,7 +1291,13 @@
                       {plots[activePlot].slots.map(slot => (
                         <div 
                           key={slot.id}
-                          onPointerDown={(e) => handleSlotPointerDown(e, activePlot, slot.id, slot)}
+                          onClick={(e) => {
+                             if (slot.crop && slot.growth >= slot.crop.days) {
+                                 handleHarvestClick(e, activePlot, slot.id, slot.crop, false);
+                             } else {
+                                 handleSlotClick(activePlot, slot.id);
+                             }
+                          }}
                           className={`aspect-square rounded-xl md:rounded-[1.5rem] border-2 md:border-4 flex flex-col items-center justify-center relative transition-all active:scale-95 cursor-pointer ${
                             slot.isWatered 
                               ? 'bg-amber-800 border-amber-950 shadow-[inset_0_5px_10px_rgba(0,0,0,0.5)] md:shadow-[inset_0_10px_20px_rgba(0,0,0,0.5)]' 
@@ -1451,8 +1451,8 @@
                   </p>
                   <p className="text-slate-800 text-[10px] md:text-xs leading-relaxed font-black mt-3 bg-yellow-200 p-3 rounded-xl border border-yellow-300">
                     1. 找到成熟發光的作物。<br/>
-                    2. 用手指（或滑鼠）<span className="text-red-600">【按住並拖曳】</span>該作物。<br/>
-                    3. 將作物拉到左側面板的<span className="text-red-600">【📥 收成箱】</span>放開，即可存入庫存！<br/>
+                    2. <span className="text-red-600">【直接點擊】</span>該作物。<br/>
+                    3. 作物就會自動飛進左側面板的<span className="text-red-600">【📥 收成箱】</span>存入庫存！<br/>
                     4. 進入右上角「🛒 商店」的販賣區，把它們賣掉換錢吧！
                   </p>
                 </div>
@@ -1493,7 +1493,7 @@
                 <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-purple-900">獲得傳說種子！</h2>
                 <div className="bg-purple-50 p-4 rounded-xl md:rounded-2xl mb-6 mt-4">
                   <p className="text-slate-700 text-[10px] md:text-xs leading-relaxed font-bold">
-                    太厲害了！你完成了偏鄉小學的委託！為了表達感謝，校長送給了你一顆極其稀有的<span className="text-purple-600 font-black">【{currentEvent.crop?.name} 種子】</span>！
+                    太厲害了！你完成了校長的委託！為了表達感謝，校長送給了你一顆極其稀有的<span className="text-purple-600 font-black">【{currentEvent.crop?.name} 種子】</span>！
                   </p>
                   <p className="text-slate-500 text-[10px] md:text-xs leading-relaxed font-bold mt-4 bg-purple-100 p-2 rounded">
                     💡 傳說種子無法在商店購買，把它種在田裡耐心照顧，成熟後販賣可以獲得極大筆利潤喔！
@@ -1585,7 +1585,7 @@
                   </p>
                   {currentEvent.isFirst && (
                     <p className="text-emerald-700 text-[10px] md:text-xs leading-relaxed font-black mt-3 bg-emerald-100 p-2 rounded-lg border border-emerald-200">
-                      🎁 政府緊急發配了防颱物資：【防風網】x1 已存入你的庫存！
+                      🎁 政府與農委會緊急發配了防颱物資：【防風網】x1 已存入你的庫存！
                     </p>
                   )}
                   <p className="text-slate-800 text-[10px] md:text-xs leading-relaxed font-black mt-3 bg-blue-100 p-3 rounded-xl border border-blue-200 shadow-inner">
@@ -1635,7 +1635,7 @@
                 <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-emerald-700">科技升級：自動灌溉系統！</h2>
                 <div className="bg-emerald-50 p-4 rounded-xl md:rounded-2xl mb-6 mt-4 border border-emerald-200">
                   <p className="text-slate-600 text-[10px] md:text-xs leading-relaxed font-bold">
-                    恭喜你度過了初期的艱辛！鑒於你對地方農業的穩定貢獻，政府特別提撥了一筆專案補助，為你的農莊全面安裝了「自動化灌溉系統」。
+                    恭喜你度過了初期的艱辛！鑒於你對地方農業的穩定貢獻，政府與農委會特別提撥了一筆專案補助，為你的農莊全面安裝了「自動化灌溉系統」。
                   </p>
                   <p className="text-slate-800 text-[10px] md:text-xs leading-relaxed font-black mt-2">
                     即日起，你的灑水器已升級為 <span className="bg-emerald-200 px-1 rounded">全區灑水</span>！只需點擊一次，就能瞬間為整塊農田（8格）澆滿水！
