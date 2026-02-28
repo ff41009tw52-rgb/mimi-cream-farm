@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>闇影詩章機率分析計算機</title>
+    
+    <!-- 引入 Tailwind CSS 進行樣式渲染 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 引入 React 與 ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    
+    <!-- 引入 Babel 使得瀏覽器可以直接解析 JSX 語法 -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        /* 隱藏滾動條但保留滾動功能 */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        body { background-color: #020617; } /* 預設底色防閃爍 */
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        // 獨立部署版：將 Lucide 圖示轉換為內聯 SVG，確保無依賴運行
+        const Icon = ({ name, className }) => {
+            const icons = {
+                Calculator: <><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></>,
+                Zap: <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>,
+                Layers: <><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 12 12 17 22 12"/><polyline points="2 17 12 22 22 17"/></>,
+                Hand: <><path d="M18 11V6a2 2 0 0 0-4 0v4"/><path d="M14 10V4a2 2 0 0 0-4 0v6"/><path d="M10 10.5V2.5a2 2 0 0 0-4 0v9.864a2 2 0 0 0 .151.765l1.666 4.165A2 2 0 0 0 9.673 19H14a2 2 0 0 0 1.957-1.583L18.5 10.5a2 2 0 0 0-3.95-1.127z"/></>,
+                RefreshCw: <><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></>,
+                Info: <><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></>,
+                Trophy: <><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></>,
+                AlertCircle: <><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></>,
+                BarChart2: <><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></>,
+                XCircle: <><circle cx="12" cy="12" r="10"/><line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/></>,
+                CheckCircle2: <><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></>,
+                ChevronDown: <path d="m6 9 6 6 6-6"/>,
+                ChevronUp: <path d="m18 15-6-6-6 6"/>,
+                Sigma: <path d="M18 7V4H6l6 8-6 8h12v-3"/>,
+                ShieldCheck: <><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></>
+            };
+            return (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                    {icons[name]}
+                </svg>
+            );
+        };
+
+        const InputGroup = ({ label, icon, value, setValue, max, subLabel }) => (
+          <div className="bg-slate-800/80 rounded-xl p-4 shadow-sm border border-slate-700 flex items-center gap-4">
+             <div className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center border border-slate-700">
+               {icon}
+             </div>
+             <div className="flex-1">
+               <div className="flex justify-between mb-1">
+                 <span className="text-sm font-semibold text-slate-300">{label}</span>
+               </div>
+               <input 
+                  type="range" 
+                  min={subLabel === 'Key' ? 0 : 1} 
+                  max={max} 
+                  value={value || 0} 
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setValue(v === '' ? '' : parseInt(v));
+                  }}
+                  className={`w-full h-1.5 bg-slate-600 rounded-lg appearance-none cursor-pointer ${
+                    subLabel === 'Key' ? 'accent-yellow-500' : subLabel === 'Draw' ? 'accent-purple-500' : 'accent-cyan-500'
+                  }`}
+                />
+             </div>
+             <input 
+                type="number" 
+                value={value}
+                onChange={(e) => {
+                   const v = e.target.value;
+                   if(v === '') setValue('');
+                   else {
+                     const num = parseInt(v);
+                     if(!isNaN(num) && num <= max) setValue(num);
+                   }
+                }}
+                className={`w-14 bg-slate-900 border border-slate-600 rounded-lg py-2 px-1 text-center text-white outline-none font-mono focus:ring-1 ${
+                   subLabel === 'Key' ? 'focus:border-yellow-500 focus:ring-yellow-500' : subLabel === 'Draw' ? 'focus:border-purple-500 focus:ring-purple-500' : 'focus:border-cyan-500 focus:ring-cyan-500'
+                }`}
+              />
+          </div>
+        );
+
+        const ShadowverseCalc = () => {
+          const [activeTab, setActiveTab] = useState('advanced');
+
+          const [deckSize, setDeckSize] = useState(40);
+          const [drawCount, setDrawCount] = useState(3);
+          const [keyCardCount, setKeyCardCount] = useState(3);
+          const [probability, setProbability] = useState(0);
+          const [probAll, setProbAll] = useState(0);
+
+          const [advDraw, setAdvDraw] = useState(5);
+          const [advWant, setAdvWant] = useState(3);   
+          const [advAvoid, setAdvAvoid] = useState(2); 
+          const [allowedB, setAllowedB] = useState(1); 
+          
+          const [inspectDeck, setInspectDeck] = useState(12); 
+          const [bestDeckInfo, setBestDeckInfo] = useState({ deck: 0, prob: 0 });
+          const [chartData, setChartData] = useState([]);
+
+          const combinations = (n, k) => {
+            if (k < 0 || k > n) return 0;
+            if (k === 0 || k === n) return 1;
+            if (k > n / 2) k = n - k;
+            let res = 1;
+            for (let i = 1; i <= k; i++) res = res * (n - i + 1) / i;
+            return res;
+          };
+
+          // 基礎計算
+          useEffect(() => {
+            const dSize = parseInt(deckSize) || 0;
+            const dCount = parseInt(drawCount) || 0;
+            const kCount = parseInt(keyCardCount) || 0;
+
+            if (dSize <= 0 || dCount > dSize || kCount > dSize) {
+              setProbability(0);
+              setProbAll(0);
+              return;
+            }
+            
+            const totalWays = combinations(dSize, dCount);
+            if (totalWays === 0) return;
+
+            const waysNone = combinations(dSize - kCount, dCount);
+            const pNone = waysNone / totalWays;
+            setProbability(((1 - pNone) * 100).toFixed(2));
+
+            if (dCount < kCount) {
+              setProbAll("0.00");
+            } else {
+              const waysAll = combinations(kCount, kCount) * combinations(dSize - kCount, dCount - kCount);
+              const pAll = waysAll / totalWays;
+              setProbAll((pAll * 100).toFixed(2));
+            }
+          }, [deckSize, drawCount, keyCardCount]);
+
+          // 進階計算
+          useEffect(() => {
+            const draw = parseInt(advDraw) || 0;
+            const want = parseInt(advWant) || 0;
+            const avoid = parseInt(advAvoid) || 0;
+            const allow = parseInt(allowedB); 
+
+            if (draw <= 0 || want <= 0) return;
+
+            const data = [];
+            let maxProb = -1;
+            let bestD = 0;
+            const startLoop = Math.max(draw, want + avoid); 
+            
+            for (let N = startLoop; N <= 60; N++) {
+              const totalWays = combinations(N, draw);
+              let favorableWays = 0;
+
+              for (let b = 0; b <= allow; b++) {
+                const waysToPickB = combinations(avoid, b);
+                const remainingSlots = draw - b;
+                const nonBPool = N - avoid;
+                
+                const waysFillRest = combinations(nonBPool, remainingSlots);
+                const waysFillRestNoA = combinations(N - avoid - want, remainingSlots);
+                const waysFillRestWithA = waysFillRest - waysFillRestNoA;
+                
+                if (waysFillRestWithA > 0) {
+                  favorableWays += (waysToPickB * waysFillRestWithA);
+                }
+              }
+
+              const finalProb = totalWays > 0 ? favorableWays / totalWays : 0;
+              if (finalProb > maxProb) { maxProb = finalProb; bestD = N; }
+
+              data.push({ deckSize: N, prob: (finalProb * 100).toFixed(2), rawProb: finalProb });
+            }
+
+            setChartData(data);
+            setBestDeckInfo({ deck: bestD, prob: (maxProb * 100).toFixed(2) });
+            if(inspectDeck < startLoop) setInspectDeck(bestD);
+          }, [advDraw, advWant, advAvoid, allowedB]);
+
+          const inspectionDetails = useMemo(() => {
+            const N = parseInt(inspectDeck);
+            const draw = parseInt(advDraw);
+            const want = parseInt(advWant);
+            const avoid = parseInt(advAvoid);
+            const allow = parseInt(allowedB);
+
+            const totalWays = combinations(N, draw);
+            const details = [];
+            let totalFavorable = 0;
+
+            for (let b = 0; b <= allow; b++) {
+                if (b > avoid) continue;
+                const waysToPickB = combinations(avoid, b);
+                const remainingSlots = draw - b;
+                const nonBPool = N - avoid;
+                const waysFillRest = combinations(nonBPool, remainingSlots);
+                const waysFillRestNoA = combinations(N - avoid - want, remainingSlots);
+                const waysFillRestWithA = waysFillRest - waysFillRestNoA;
+                
+                const scenarioWays = waysToPickB * waysFillRestWithA;
+                totalFavorable += scenarioWays;
+                
+                if (scenarioWays > 0) {
+                    details.push({ bCount: b, prob: (scenarioWays / totalWays * 100).toFixed(2) });
+                }
+            }
+            return { totalProb: totalWays > 0 ? (totalFavorable / totalWays * 100).toFixed(2) : 0, scenarios: details };
+          }, [inspectDeck, advDraw, advWant, advAvoid, allowedB]);
+
+          const handleInputChange = (setter, value, max) => {
+            if (value === '') setter('');
+            else { const v = parseInt(value); if (!isNaN(v)) setter(Math.min(v, max)); }
+          };
+
+          return (
+            <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500 selection:text-white pb-10">
+              <div className="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-20 shadow-xl">
+                <div className="max-w-md mx-auto flex items-center justify-center gap-3">
+                  <Icon name="Calculator" className="text-cyan-400 w-6 h-6" />
+                  <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
+                    闇影詩章機率分析
+                  </h1>
+                </div>
+              </div>
+
+              <div className="max-w-md mx-auto mt-4 px-4 flex gap-2">
+                <button onClick={() => setActiveTab('basic')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'basic' ? 'bg-slate-800 text-cyan-400 border border-slate-700 shadow-lg' : 'bg-transparent text-slate-500 hover:bg-slate-900'}`}>
+                  基礎計算
+                </button>
+                <button onClick={() => setActiveTab('advanced')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'advanced' ? 'bg-slate-800 text-purple-400 border border-slate-700 shadow-lg' : 'bg-transparent text-slate-500 hover:bg-slate-900'}`}>
+                  進階優化 (A且非全B)
+                </button>
+              </div>
+
+              <div className="max-w-md mx-auto p-4 mt-2">
+                {activeTab === 'basic' && (
+                  <div className="space-y-6">
+                     <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700 text-sm text-slate-400 flex gap-2 items-start">
+                      <Icon name="Info" className="w-5 h-5 text-cyan-500 shrink-0" />
+                      計算基礎的「神抽」機率：從剩餘牌堆中，抽中至少一張關鍵卡的機會。
+                     </div>
+                    <div className="space-y-4">
+                      <InputGroup label="牌組剩餘張數" icon={<Icon name="Layers" className="w-4 h-4 text-cyan-400" />} value={deckSize} setValue={setDeckSize} max={100} subLabel="Deck" />
+                      <InputGroup label="關鍵卡張數" icon={<Icon name="Zap" className="w-4 h-4 text-yellow-400" />} value={keyCardCount} setValue={setKeyCardCount} max={20} subLabel="Key" />
+                      <InputGroup label="抽卡數量" icon={<Icon name="Hand" className="w-4 h-4 text-purple-400" />} value={drawCount} setValue={setDrawCount} max={20} subLabel="Draw" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 text-center">
+                        <div className="text-slate-500 text-xs mb-1">至少一張</div>
+                        <div className="text-3xl font-bold text-cyan-400">{probability}%</div>
+                      </div>
+                      <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 text-center">
+                        <div className="text-slate-500 text-xs mb-1">全部上手</div>
+                        <div className={`text-3xl font-bold ${parseFloat(probAll)>0?'text-yellow-400':'text-slate-600'}`}>{probAll}%</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <div className="bg-slate-800/50 p-3 rounded-xl border border-slate-700 text-xs text-slate-400 leading-relaxed">
+                       條件：抽 <span className="text-purple-300 font-bold">{advDraw}</span> 張牌。<br/>
+                       成功定義：抽到<span className="text-cyan-300 font-bold mx-1">至少一張 A</span> 
+                       且 <span className="text-red-300 font-bold">B 不超過 {allowedB} 張</span>。
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-slate-800 p-2 rounded-xl border border-slate-700">
+                        <label className="text-[10px] text-slate-400 block mb-1 flex items-center gap-1"><Icon name="CheckCircle2" className="w-3 h-3 text-cyan-400"/> 想抽 A</label>
+                        <input type="number" value={advWant} onChange={(e) => handleInputChange(setAdvWant, e.target.value, 20)} className="w-full bg-slate-900 border border-slate-600 rounded p-1 text-center text-white font-mono" />
+                      </div>
+                      <div className="bg-slate-800 p-2 rounded-xl border border-slate-700">
+                         <label className="text-[10px] text-slate-400 block mb-1 flex items-center gap-1"><Icon name="XCircle" className="w-3 h-3 text-red-400"/> B 卡總數</label>
+                        <input type="number" value={advAvoid} onChange={(e) => {
+                            handleInputChange(setAdvAvoid, e.target.value, 20);
+                            if(parseInt(e.target.value) <= allowedB) setAllowedB(Math.max(0, parseInt(e.target.value)-1));
+                        }} className="w-full bg-slate-900 border border-slate-600 rounded p-1 text-center text-white font-mono" />
+                      </div>
+                       <div className="bg-slate-800 p-2 rounded-xl border border-slate-700">
+                         <label className="text-[10px] text-slate-400 block mb-1 flex items-center gap-1"><Icon name="ShieldCheck" className="w-3 h-3 text-green-400"/> B 容許上限</label>
+                         <div className="flex items-center gap-2">
+                            <button onClick={() => setAllowedB(Math.max(0, allowedB-1))} className="p-1 bg-slate-700 rounded text-xs hover:bg-slate-600">-</button>
+                            <span className="font-mono text-white text-lg w-6 text-center">{allowedB}</span>
+                            <button onClick={() => setAllowedB(Math.min(advAvoid, allowedB+1))} className="p-1 bg-slate-700 rounded text-xs hover:bg-slate-600">+</button>
+                         </div>
+                      </div>
+                       <div className="bg-slate-800 p-2 rounded-xl border border-slate-700">
+                         <label className="text-[10px] text-slate-400 block mb-1 flex items-center gap-1"><Icon name="Hand" className="w-3 h-3 text-purple-400"/> 抽幾張</label>
+                        <input type="number" value={advDraw} onChange={(e) => handleInputChange(setAdvDraw, e.target.value, 10)} className="w-full bg-slate-900 border border-slate-600 rounded p-1 text-center text-white font-mono" />
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-purple-900/60 to-slate-900 border border-purple-500/30 p-4 rounded-xl flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-purple-500/20 p-2 rounded-full"><Icon name="Trophy" className="w-6 h-6 text-purple-400" /></div>
+                        <div>
+                          <div className="text-purple-200 text-xs font-bold">最佳牌堆剩餘量</div>
+                          <div className="text-2xl font-black text-white font-mono">{bestDeckInfo.deck} 張</div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-slate-400 text-xs">最高機率</div>
+                        <div className="text-2xl font-black text-purple-400 font-mono">{bestDeckInfo.prob}%</div>
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-900/50 rounded-xl p-4 border border-slate-800">
+                      <h3 className="text-xs text-slate-500 mb-4 flex items-center justify-between"><span>機率分佈趨勢</span></h3>
+                      <div className="flex items-end h-32 gap-[2px]">
+                        {chartData.filter(d => d.deckSize <= 45).map((d) => {
+                          const isBest = d.deckSize === bestDeckInfo.deck;
+                          const isSelected = d.deckSize === inspectDeck;
+                          return (
+                            <div key={d.deckSize} onClick={() => setInspectDeck(d.deckSize)} className="flex-1 flex flex-col items-center group cursor-pointer relative">
+                              <div className={`w-full rounded-t-sm transition-all duration-300 relative ${isBest ? 'bg-purple-500' : isSelected ? 'bg-cyan-500' : 'bg-slate-700 hover:bg-slate-600'}`} style={{ height: `${Math.max(d.rawProb * 100, 5)}%` }}>
+                                 {isBest && <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-purple-400 rounded-full"></div>}
+                              </div>
+                              {(d.deckSize % 5 === 0 || isBest) && <div className={`text-[8px] mt-1 absolute top-full ${isBest ? 'text-purple-400 font-bold' : 'text-slate-600'}`}>{d.deckSize}</div>}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-800 rounded-xl p-4 border border-slate-700 space-y-3">
+                      <div className="flex items-center justify-between border-b border-slate-700 pb-2">
+                        <div className="flex items-center gap-2">
+                          <Icon name="Sigma" className="w-4 h-4 text-cyan-400" />
+                          <span className="font-bold text-slate-200">詳細驗算</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-slate-400">牌堆張數:</span>
+                          <div className="flex items-center bg-slate-900 rounded-lg px-2">
+                            <button onClick={() => setInspectDeck(d => Math.max(advWant+advAvoid, d-1))} className="p-1 hover:text-cyan-400"><Icon name="ChevronDown" className="w-3 h-3"/></button>
+                            <span className="font-mono text-white px-2">{inspectDeck}</span>
+                            <button onClick={() => setInspectDeck(d => Math.min(60, d+1))} className="p-1 hover:text-cyan-400"><Icon name="ChevronUp" className="w-3 h-3"/></button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2 text-xs font-mono">
+                        {inspectionDetails.scenarios.map((scenario) => (
+                            <div key={scenario.bCount} className="flex justify-between items-center text-slate-400">
+                              <span>• 抽到 {scenario.bCount} 張 B 且有 A</span>
+                              <span>{scenario.prob}%</span>
+                            </div>
+                        ))}
+                        <div className="border-t border-slate-700 pt-2 flex justify-between items-center text-white font-bold">
+                          <span>總機率 (加總)</span>
+                          <span className="text-cyan-400">{inspectionDetails.totalProb}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<ShadowverseCalc />);
+    </script>
+</body>
+</html>
