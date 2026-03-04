@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>電路接線小遊戲 - 最終完美版</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 800px; 
+        }
+
+        .screen { display: none; }
+        .screen.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        h1 { color: #333; }
+        .result-box { font-size: 24px; font-weight: bold; color: #d9534f; margin: 20px 0; min-height: 36px; }
+
+        button {
+            background-color: #5cb85c; color: white; border: none; padding: 15px 30px;
+            font-size: 18px; border-radius: 8px; cursor: pointer; transition: background-color 0.3s; margin: 10px;
+        }
+        button:hover { background-color: #4cae4c; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        /* --- 實作區塊設定 --- */
+        .workspace {
+            border: 2px solid #aaa;
+            height: 500px; 
+            margin-top: 20px;
+            background-color: #fcfcfcf2;
+            background-image: radial-gradient(#e0e0e0 1px, transparent 1px); 
+            background-size: 20px 20px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly; 
+            align-items: center;
+        }
+
+        .workspace.hidden-nodes .node {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #circuit-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2; 
+            pointer-events: none; 
+        }
+
+        .component-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            gap: 120px; 
+        }
+
+        .component {
+            position: relative;
+            user-select: none;
+        }
+
+        .component svg {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* --- 接點 (Nodes) 設定 --- */
+        .node {
+            position: absolute;
+            width: 20px; 
+            height: 20px; 
+            border-radius: 50%;
+            border: 3px solid white; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            cursor: pointer;
+            z-index: 10; 
+            transition: all 0.2s;
+            transform: translate(-50%, -50%); 
+        }
+
+        .node:hover {
+            transform: translate(-50%, -50%) scale(1.3);
+        }
+
+        .node.selected {
+            box-shadow: 0 0 12px 4px #f1c40f; 
+            transform: translate(-50%, -50%) scale(1.4);
+        }
+
+        /* --- 精準定位接點 (本次修改：電池接點外移) --- */
+        /* 正極從 13% 改為 7%，更靠近左側邊緣 */
+        .node-bat-pos { background-color: #e74c3c; left: -1%; top: 50%; }
+        /* 負極從 87% 改為 93%，更靠近右側邊緣 */
+        .node-bat-neg { background-color: #3498db; left: 92%; top: 50%; }
+        
+        /* 燈泡維持原樣 */
+        .node-bulb-side { background-color: #2ecc71; left: 25%; top: 72%; }
+        .node-bulb-bottom { background-color: #2ecc71; left: 50%; top: 90%; }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="draw-screen" class="screen active">
+            <h1>⚡ 電路接線挑戰賽 ⚡</h1>
+            <p>點擊下方按鈕抽取你的挑戰題目！</p>
+            <div class="result-box" id="draw-result">等待抽籤...</div>
+            <button id="draw-btn" onclick="drawTask()">🎲 開始抽籤</button>
+        </div>
+
+        <div id="game-screen" class="screen">
+            <h1>實作實驗室</h1>
+            <h2 id="current-task" style="color: #d9534f;">你的任務是：</h2>
+            <p>點擊元件上的<b>紅、藍、綠接點</b>進行連線。</p>
+
+            <div class="workspace" id="workspace"></div>
+
+            <button onclick="finishDrawing()" style="background-color: #f0ad4e;">✅ 完成</button>
+            <button onclick="clearConnections()" style="background-color: #d9534f;">🗑️ 清除連線</button>
+            <button onclick="reDraw()" style="background-color: #555;">🔄 重新抽籤</button>
+        </div>
+    </div>
+
+    <script>
+        const tasks = ['電池串聯', '電池並聯', '燈泡串聯', '燈泡並聯'];
+        let currentTask = '';
+        let canvas, ctx;
+        let selectedNode = null; 
+        let connections = []; 
+
+        function drawTask() {
+            const resultBox = document.getElementById('draw-result');
+            const drawBtn = document.getElementById('draw-btn');
+            
+            let count = 0;
+            drawBtn.disabled = true;
+            
+            const interval = setInterval(() => {
+                const randomTask = tasks[Math.floor(Math.random() * tasks.length)];
+                resultBox.innerText = randomTask;
+                count++;
+                
+                if (count > 10) {
+                    clearInterval(interval);
+                    currentTask = tasks[Math.floor(Math.random() * tasks.length)];
+                    resultBox.innerText = `🎉 抽中：【 ${currentTask} 】 🎉`;
+                    
+                    setTimeout(() => {
+                        startGame();
+                        drawBtn.disabled = false; 
+                    }, 1500);
+                }
+            }, 100);
+        }
+
+        function startGame() {
+            document.getElementById('draw-screen').classList.remove('active');
+            document.getElementById('game-screen').classList.add('active');
+            document.getElementById('current-task').innerText = `你的任務是：【 ${currentTask} 】`;
+
+            const workspace = document.getElementById('workspace');
+            workspace.classList.remove('hidden-nodes'); 
+            workspace.innerHTML = '<canvas id="circuit-canvas"></canvas>'; 
+
+            if (currentTask === '電池並聯') {
+                const row1 = document.createElement('div'); row1.className = 'component-row';
+                const row2 = document.createElement('div'); row2.className = 'component-row';
+                const row3 = document.createElement('div'); row3.className = 'component-row';
+
+                row1.appendChild(createComponent('bulb', 0));
+                row2.appendChild(createComponent('battery', 0));
+                row3.appendChild(createComponent('battery', 1));
+
+                workspace.appendChild(row1);
+                workspace.appendChild(row2);
+                workspace.appendChild(row3);
+            } else {
+                const upperRow = document.createElement('div'); upperRow.className = 'component-row';
+                const lowerRow = document.createElement('div'); lowerRow.className = 'component-row';
+
+                let batteryCount = 0;
+                let bulbCount = 0;
+
+                if (currentTask === '燈泡串聯' || currentTask === '燈泡並聯') {
+                    batteryCount = 1; bulbCount = 2;
+                } else if (currentTask === '電池串聯') {
+                    batteryCount = 2; bulbCount = 1;
+                }
+
+                for (let i = 0; i < bulbCount; i++) {
+                    upperRow.appendChild(createComponent('bulb', i));
+                }
+                for (let i = 0; i < batteryCount; i++) {
+                    lowerRow.appendChild(createComponent('battery', i));
+                }
+
+                workspace.appendChild(upperRow);
+                workspace.appendChild(lowerRow);
+            }
+
+            initCanvas();
+        }
+
+        function createComponent(type, index) {
+            const div = document.createElement('div');
+            div.className = `component ${type}`;
+            div.id = `${type}-${index}`; 
+
+            if (type === 'battery') {
+                div.innerHTML = `
+                    <svg viewBox="0 0 150 70" width="220" height="103">
+                        <path d="M 15 20 L 5 20 C 2 20 0 22 0 25 L 0 45 C 0 48 2 50 5 50 L 15 50" fill="#95a5a6"/>
+                        <rect x="15" y="5" width="120" height="60" rx="6" fill="#f39c12" stroke="#2c3e50" stroke-width="3"/>
+                        <rect x="15" y="5" width="22" height="60" rx="6" fill="#34495e"/>
+                        <rect x="113" y="5" width="22" height="60" rx="6" fill="#34495e"/>
+                        <rect x="65" y="27" width="3" height="16" fill="#d35400" rx="1.5"/>
+                        <rect x="73" y="27" width="3" height="16" fill="#d35400" rx="1.5"/>
+                        <rect x="81" y="27" width="3" height="16" fill="#d35400" rx="1.5"/>
+                        <text x="26" y="43" fill="white" font-family="Arial" font-size="28" font-weight="bold">+</text>
+                        <text x="120" y="41" fill="white" font-family="Arial" font-size="32" font-weight="bold">-</text>
+                    </svg>
+                    <div class="node node-bat-pos" data-parent="${div.id}" data-type="positive" title="正極"></div>
+                    <div class="node node-bat-neg" data-parent="${div.id}" data-type="negative" title="負極"></div>
+                `;
+            } else if (type === 'bulb') {
+                div.innerHTML = `
+                    <svg viewBox="0 0 80 120" width="120" height="180">
+                        <circle cx="40" cy="40" r="35" fill="#f4f6f7" stroke="#bdc3c7" stroke-width="3"/>
+                        <path d="M 32 70 L 32 45 L 48 45 L 48 70" fill="none" stroke="#bdc3c7" stroke-width="2"/>
+                        <path d="M 32 45 Q 40 30 48 45" fill="none" stroke="#7f8c8d" stroke-width="3"/>
+                        <rect x="25" y="70" width="30" height="32" fill="#d5dbdb" stroke="#7f8c8d" stroke-width="3"/>
+                        <line x1="25" y1="80" x2="55" y2="84" stroke="#7f8c8d" stroke-width="2"/>
+                        <line x1="25" y1="92" x2="55" y2="96" stroke="#7f8c8d" stroke-width="2"/>
+                        <path d="M 28 102 L 52 102 C 52 112 45 116 40 116 C 35 116 28 112 28 102 Z" fill="#111"/>
+                    </svg>
+                    <div class="node node-bulb-side" data-parent="${div.id}" data-type="side" title="側邊接點"></div>
+                    <div class="node node-bulb-bottom" data-parent="${div.id}" data-type="bottom" title="底部接點"></div>
+                `;
+            }
+
+            const nodes = div.querySelectorAll('.node');
+            nodes.forEach(node => {
+                node.addEventListener('click', handleNodeClick);
+            });
+
+            return div;
+        }
+
+        function initCanvas() {
+            canvas = document.getElementById('circuit-canvas');
+            ctx = canvas.getContext('2d');
+            const workspace = document.getElementById('workspace');
+            canvas.width = workspace.clientWidth;
+            canvas.height = workspace.clientHeight;
+            
+            connections = [];
+            selectedNode = null;
+            drawAllConnections(); 
+        }
+
+        function handleNodeClick(e) {
+            const clickedNode = e.target;
+
+            if (selectedNode === clickedNode) {
+                clearSelection();
+                return;
+            }
+
+            if (selectedNode === null) {
+                selectedNode = clickedNode;
+                selectedNode.classList.add('selected');
+            } else {
+                if (selectedNode.dataset.parent === clickedNode.dataset.parent) {
+                    alert('不能短路！請連到另一個元件上。');
+                    clearSelection();
+                    return;
+                }
+
+                connections.push({ from: selectedNode, to: clickedNode });
+                drawAllConnections();
+                clearSelection();
+            }
+        }
+
+        function clearSelection() {
+            if (selectedNode) {
+                selectedNode.classList.remove('selected');
+            }
+            selectedNode = null;
+        }
+
+        function drawAllConnections() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.lineCap = 'round';    
+            ctx.lineJoin = 'round';
+
+            const workspaceRect = document.getElementById('workspace').getBoundingClientRect();
+
+            connections.forEach(conn => {
+                const startCenter = getCenter(conn.from, workspaceRect);
+                const endCenter = getCenter(conn.to, workspaceRect);
+                const dx = endCenter.x - startCenter.x;
+                const dy = endCenter.y - startCenter.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const force = Math.max(80, distance * 0.4); 
+
+                const cp1 = getControlPoint(conn.from, startCenter, force);
+                const cp2 = getControlPoint(conn.to, endCenter, force);
+
+                ctx.beginPath();
+                ctx.moveTo(startCenter.x, startCenter.y);
+                ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, endCenter.x, endCenter.y);
+                ctx.strokeStyle = '#1a1a24'; 
+                ctx.lineWidth = 12; 
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(startCenter.x, startCenter.y);
+                ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, endCenter.x, endCenter.y);
+                ctx.strokeStyle = '#4a5568'; 
+                ctx.lineWidth = 6; 
+                ctx.stroke();
+            });
+        }
+
+        function getControlPoint(nodeElement, center, force) {
+            const type = nodeElement.dataset.type;
+            
+            if (type === 'positive') {
+                return { x: center.x - force, y: center.y + force * 0.5 };
+            } else if (type === 'negative') {
+                return { x: center.x + force, y: center.y + force * 0.5 };
+            } else if (type === 'side') {
+                return { x: center.x - force * 0.8, y: center.y + force * 0.5 };
+            } else if (type === 'bottom') {
+                return { x: center.x, y: center.y + force };
+            }
+            return center; 
+        }
+
+        function getCenter(element, workspaceRect) {
+            const rect = element.getBoundingClientRect();
+            return {
+                x: rect.left + rect.width / 2 - workspaceRect.left,
+                y: rect.top + rect.height / 2 - workspaceRect.top
+            };
+        }
+
+        function clearConnections() {
+            document.getElementById('workspace').classList.remove('hidden-nodes');
+            connections = [];
+            clearSelection();
+            drawAllConnections();
+        }
+
+        function finishDrawing() {
+            document.getElementById('workspace').classList.add('hidden-nodes');
+        }
+
+        function reDraw() {
+            document.getElementById('game-screen').classList.remove('active');
+            document.getElementById('draw-screen').classList.add('active');
+            document.getElementById('draw-result').innerText = "等待抽籤...";
+            drawTask(); 
+        }
+        
+        window.addEventListener('resize', () => {
+            if(document.getElementById('game-screen').classList.contains('active')){
+                 initCanvas();
+                 drawAllConnections();
+            }
+        });
+    </script>
+</body>
+</html>
