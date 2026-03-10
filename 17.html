@@ -5,30 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>生態池小達人 - 水生植物找新家</title>
     
-    <!-- 引入 Tailwind CSS (負責美觀的設計) -->
+    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- 引入 React (負責遊戲邏輯) -->
+    <!-- 引入 React -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     
-    <!-- 引入 Babel (讓瀏覽器能看得懂 React 程式碼) -->
+    <!-- 引入 Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
     <style>
-        /* 避免圖片被拖曳時出現半透明鬼影 */
         img { -webkit-user-drag: none; }
     </style>
 </head>
 <body>
-    <!-- 遊戲會在這裡顯示 -->
     <div id="root"></div>
 
-    <!-- 遊戲主程式 (使用 Babel 轉換) -->
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // 🎵 網頁內建合成音效系統
         const playSound = (type) => {
           try {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -83,11 +79,11 @@
           }
         };
 
-        // 🌿 植物資料庫
+        // 🌿 植物資料庫 (已精確對應老師的真實檔名)
         const plantsData = [
           { 
             id: 'nuphar', name: '台灣萍蓬草', enName: 'Yellow water lily', 
-            imageFileName: 'Yellow water lily.jpg', 
+            imageFileName: 'Yellow water lily.jpg', // 對應老師上傳的檔名
             fallbackImage: 'https://placehold.co/150x150/fef08a/854d0e?text=台灣萍蓬草', 
             type: '浮葉植物', 
             desc: '我的根緊緊抓著水底泥土，葉子平平漂浮在水面上曬太陽。', 
@@ -96,7 +92,7 @@
           },
           { 
             id: 'egeria', name: '水蘊草', enName: 'Brazilian waterweed',
-            imageFileName: 'Brazilian waterweed.jpg',
+            imageFileName: 'Brazilian waterweed.jpg', // 對應老師上傳的檔名
             fallbackImage: 'https://placehold.co/150x150/ccfbf1/115e59?text=水蘊草', 
             type: '沉水植物', 
             desc: '我整株都生活在水面下，是小魚小蝦最喜歡的捉迷藏地點。', 
@@ -105,7 +101,7 @@
           },
           { 
             id: 'lemna', name: '浮萍', enName: 'Duckweed',
-            imageFileName: 'Duckweed.jpg',
+            imageFileName: 'Duckweed.jpg', // 對應老師上傳的檔名
             fallbackImage: 'https://placehold.co/150x150/dcfce7/166534?text=浮萍', 
             type: '漂浮植物', 
             desc: '我沒有固定的根，整株在水面上四處漂浮旅行！', 
@@ -114,7 +110,7 @@
           },
           { 
             id: 'polygonum', name: '紅辣蓼', enName: 'Smooth knotweed',
-            imageFileName: 'Smooth knotweed.jpg',
+            imageFileName: 'Smooth knotweed.jpg', // 對應老師上傳的檔名
             fallbackImage: 'https://placehold.co/150x150/fee2e2/991b1b?text=紅辣蓼', 
             type: '挺水植物', 
             desc: '我長在岸邊淺水處，根在泥土裡，莖葉直挺挺伸出水面。', 
@@ -147,7 +143,6 @@
             }
           }, [placedPlants, successModalPlant, isVictory]);
 
-          // 拖曳與點擊邏輯
           const handleDragStart = (e, plant) => {
             if (placedPlants[plant.targetZone]) return;
             setDraggedPlant(plant);
@@ -210,6 +205,7 @@
             setMessage('請選擇下方的植物，把它「拖曳」或「點擊」放入生態池正確的位置。');
           };
 
+          // 錯誤處理：如果圖片沒讀到，顯示預設佔位圖
           const handleImageError = (e, fallbackSrc) => {
             e.target.src = fallbackSrc;
           };
@@ -411,7 +407,6 @@
                 )}
               </div>
 
-              {/* 成功解鎖視窗 */}
               {successModalPlant && (
                 <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 animate-in fade-in duration-300">
                   <div className={`bg-white rounded-3xl w-full max-w-lg p-6 md:p-8 shadow-2xl border-4 ${successModalPlant.borderColor} transform transition-all`}>
@@ -457,10 +452,8 @@
           );
         }
 
-        // 啟動 React 應用程式 (React 18 寫法)
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
 </body>
-
 </html>
