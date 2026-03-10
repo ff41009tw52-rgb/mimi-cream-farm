@@ -109,7 +109,7 @@
           const [selectedPlant, setSelectedPlant] = useState(null);
           const [draggedPlant, setDraggedPlant] = useState(null);
           const [placedPlants, setPlacedPlants] = useState({});
-          const [message, setMessage] = useState('請選擇下方的植物，把它「拖曳」或「點擊」放入生態池正確的位置。');
+          const [message, setMessage] = useState('請選擇下方的植物，把它「拖曳」或「點擊」放入正確的位置。');
           const [isVictory, setIsVictory] = useState(false);
 
           useEffect(() => {
@@ -168,7 +168,7 @@
           const handleReset = () => {
             setPlacedPlants({}); setSelectedPlant(null); setDraggedPlant(null);
             setIsVictory(false); setIsIntro(true);
-            setMessage('請選擇下方的植物，把它「拖曳」或「點擊」放入生態池正確的位置。');
+            setMessage('請選擇下方的植物，把它「拖曳」或「點擊」放入正確的位置。');
           };
           const handleImageError = (e, fallbackSrc) => { e.target.src = fallbackSrc; };
 
@@ -317,4 +317,5 @@
         root.render(<App />);
     </script>
 </body>
+
 </html>
