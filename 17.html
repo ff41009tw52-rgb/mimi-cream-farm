@@ -8,7 +8,26 @@
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <style>img { -webkit-user-drag: none; }</style>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0-rc.2/default.css">
+    <script src="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0-rc.2/index.min.js"></script>
+    
+    <style>
+        img { -webkit-user-drag: none; }
+        /* 隱藏 Polyfill 預設的提示視窗，讓體驗更貼近原生 */
+        .dnd-poly-drag-image { opacity: 0.8 !important; }
+    </style>
+    
+    <script>
+        // 初始化平板拖曳支援
+        window.onload = function() {
+            MobileDragDrop.polyfill({
+                // holdToDrag: 100 // 如果需要，可以設定長按幾毫秒才開始拖曳，避免和滑動頁面衝突
+            });
+            // 防止拖曳物件時，螢幕跟著捲動
+            window.addEventListener('touchmove', function() {}, {passive: false});
+        };
+    </script>
 </head>
 <body>
     <div id="root"></div>
@@ -182,7 +201,6 @@
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     {plantsData.map((plant) => (
                       <div key={plant.id} className={`flex items-start gap-4 p-5 rounded-2xl border-2 ${plant.borderColor} ${plant.bgColor} transition hover:shadow-md`}>
-                        {/* 已經移除 /images/ 路徑，直接讀取同層級圖片 */}
                         <img 
                           src={`./${plant.imageFileName}`} 
                           onError={(e) => handleImageError(e, plant.fallbackImage)}
@@ -258,7 +276,6 @@
                             <span className="text-white/90 font-bold text-sm bg-black/40 px-2 py-1 rounded-md mb-2">{zone.name}</span>
                             {placedPlant && (
                               <div className="flex flex-col items-center transform transition duration-500 hover:scale-105">
-                                {/* 已經移除 /images/ 路徑 */}
                                 <img src={`./${placedPlant.imageFileName}`} onError={(e) => handleImageError(e, placedPlant.fallbackImage)} alt={placedPlant.name} className="w-16 h-16 md:w-20 md:h-20 object-cover rounded-full border-2 border-white shadow-[0_4px_10px_rgba(0,0,0,0.3)] bg-white" draggable="false" />
                                 <div className="flex flex-col items-center mt-2"><span className="bg-white text-gray-800 px-2 py-0.5 rounded-full text-xs font-bold shadow-md">{placedPlant.name}</span></div>
                               </div>
@@ -273,10 +290,15 @@
                         const isSelected = selectedPlant?.id === plant.id;
                         return (
                           <div
-                            key={plant.id} onClick={() => handleSelectPlant(plant)} draggable={!isPlaced} onDragStart={(e) => handleDragStart(e, plant)} onDragEnd={handleDragEnd}
+                            key={plant.id} 
+                            onClick={() => handleSelectPlant(plant)} 
+                            draggable={!isPlaced} 
+                            onDragStart={(e) => handleDragStart(e, plant)} 
+                            onDragEnd={handleDragEnd}
+                            // 這裡加上 touchAction: 'none' 防止在平板上按住植物時被瀏覽器當成滑動畫面
+                            style={{ touchAction: isPlaced ? 'auto' : 'none' }}
                             className={`flex flex-col items-center p-3 rounded-2xl border-4 transition-all duration-200 select-none ${isPlaced ? 'opacity-40 grayscale cursor-not-allowed bg-gray-100 border-gray-300' : isSelected ? `${plant.bgColor} ${plant.borderColor} scale-105 shadow-lg` : `bg-white border-gray-200 hover:border-teal-300 hover:shadow-md cursor-grab active:cursor-grabbing`}`}
                           >
-                            {/* 已經移除 /images/ 路徑 */}
                             <img src={`./${plant.imageFileName}`} onError={(e) => handleImageError(e, plant.fallbackImage)} alt={plant.name} className="w-16 h-16 md:w-20 md:h-20 object-cover rounded-lg shadow-sm mb-2 pointer-events-none bg-white border border-gray-100" />
                             <div className="font-bold text-gray-800 text-sm md:text-base text-center">{plant.name}</div>
                             <div className="text-xs text-gray-500 text-center italic">{plant.enName}</div>
@@ -299,7 +321,6 @@
                       <span className="inline-block mt-2 bg-white text-gray-800 px-3 py-1 rounded-full text-sm font-bold border-2 shadow-sm">屬性：{successModalPlant.type}</span>
                     </div>
                     <div className={`flex flex-col items-center p-6 rounded-2xl mb-6 ${successModalPlant.bgColor}`}>
-                      {/* 已經移除 /images/ 路徑 */}
                       <img src={`./${successModalPlant.imageFileName}`} onError={(e) => handleImageError(e, successModalPlant.fallbackImage)} alt={successModalPlant.name} className="w-32 h-32 md:w-40 md:h-40 object-cover rounded-full border-4 border-white shadow-lg mb-6 bg-white" />
                       <p className="text-gray-800 text-lg leading-relaxed font-medium text-justify">{successModalPlant.detailedDesc}</p>
                     </div>
@@ -317,7 +338,4 @@
         root.render(<App />);
     </script>
 </body>
-
 </html>
-
-
