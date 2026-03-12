@@ -9,19 +9,23 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
-        /* 徹底封殺所有平板的預設行為（選取、長按選單、放大鏡、滾動） */
+        /* 徹底封殺所有平板的預設行為（選取、長按選單、放大鏡、下拉整理） */
         body { 
             overscroll-behavior-y: none; 
-            touch-action: none; /* 遊戲全螢幕禁止預設滑動 */
+            touch-action: none;
             -webkit-user-select: none;
             user-select: none;
             -webkit-touch-callout: none;
         }
+        /* 讓圖片與文字不干擾手指觸控的判定 */
         img { 
             -webkit-user-drag: none; 
-            pointer-events: none; /* 讓圖片不干擾拖曳事件的判定 */
+            pointer-events: none; 
         }
-        /* 啟用 GPU 硬體加速，讓拖曳如絲般滑順 */
+        .no-pointer-events {
+            pointer-events: none;
+        }
+        /* 啟用 GPU 硬體加速 */
         .ghost-element {
             will-change: transform;
         }
@@ -128,9 +132,7 @@
           const [message, setMessage] = useState('請選擇下方的植物，把它「拖曳」或「點擊」放入正確的位置。');
           const [isVictory, setIsVictory] = useState(false);
           
-          // 移除 X, Y 狀態，只記錄「目前拖曳誰」
           const [draggedPlant, setDraggedPlant] = useState(null);
-          // 使用 useRef 直接控制 DOM，避開 React 重新渲染
           const ghostRef = useRef(null);
 
           useEffect(() => {
@@ -141,21 +143,22 @@
             }
           }, [placedPlants, successModalPlant, isVictory]);
 
-          // --- 終極效能拖曳核心 ---
+          // --- 終極零延遲拖曳核心 ---
           const startCustomDrag = (e, plant) => {
             if (placedPlants[plant.targetZone]) return;
-            if (e.cancelable) e.preventDefault();
             
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            // PointerEvents 直接提供 clientX 和 clientY，不需再判斷 touch 或 mouse
+            const clientX = e.clientX;
+            const clientY = e.clientY;
             
             setDraggedPlant(plant);
             setSelectedPlant(null);
             setMessage(`正在搬運「${plant.name}」...`);
 
-            // 確保卡片一出現就定位在手指的地方
+            // 直接將預先藏好的卡片瞬間顯示在手指下方，完全 0 延遲
             requestAnimationFrame(() => {
               if (ghostRef.current) {
+                ghostRef.current.style.display = 'flex';
                 ghostRef.current.style.transform = `translate(${clientX}px, ${clientY}px) translate(-50%, -50%)`;
                 ghostRef.current.style.opacity = '1';
               }
@@ -167,253 +170,22 @@
 
             const handleMove = (e) => {
               if (e.cancelable) e.preventDefault();
-              const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-              const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+              const clientX = e.clientX;
+              const clientY = e.clientY;
               
-              // 關鍵：不呼叫 setState，直接操作 style.transform！
               if (ghostRef.current) {
                 ghostRef.current.style.transform = `translate(${clientX}px, ${clientY}px) translate(-50%, -50%)`;
               }
             };
 
             const handleUp = (e) => {
-              const clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
-              const clientY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+              const clientX = e.clientX;
+              const clientY = e.clientY;
               
-              // 隱藏卡片以利偵測下方水池
               if (ghostRef.current) ghostRef.current.style.display = 'none';
               
               const elUnderCursor = document.elementFromPoint(clientX, clientY);
               const zoneEl = elUnderCursor ? elUnderCursor.closest('[data-zone]') : null;
               
               if (zoneEl) {
-                const zoneId = zoneEl.getAttribute('data-zone');
-                processPlantPlacement(draggedPlant, zoneId);
-              } else {
-                playSound('error');
-                setMessage(`❌ 請把植物種在水池裡面喔！`);
-              }
-              setDraggedPlant(null); // 拖曳結束
-            };
-
-            window.addEventListener('touchmove', handleMove, { passive: false });
-            window.addEventListener('touchend', handleUp);
-            window.addEventListener('mousemove', handleMove);
-            window.addEventListener('mouseup', handleUp);
-
-            return () => {
-              window.removeEventListener('touchmove', handleMove);
-              window.removeEventListener('touchend', handleUp);
-              window.removeEventListener('mousemove', handleMove);
-              window.removeEventListener('mouseup', handleUp);
-            };
-          }, [draggedPlant]); 
-          // ------------------------
-
-          const handleSelectPlant = (plant) => {
-            if (placedPlants[plant.targetZone]) {
-              setMessage(`「${plant.name}」已經種好囉！`); return;
-            }
-            setSelectedPlant(plant);
-            setMessage(`你選了「${plant.name}」！請點擊上面生態池中適合它的位置。`);
-          };
-
-          const handleZoneClick = (zoneId) => {
-            if (!selectedPlant) return;
-            processPlantPlacement(selectedPlant, zoneId);
-            setSelectedPlant(null);
-          };
-
-          const processPlantPlacement = (plant, zoneId) => {
-            if (plant.targetZone === zoneId) {
-              playSound('success');
-              setPlacedPlants(prev => ({ ...prev, [zoneId]: plant }));
-              setSuccessModalPlant(plant);
-              setMessage(`✅ 答對了！`);
-            } else {
-              playSound('error');
-              setMessage(`❌ 哎呀！「${plant.name}」不是長在這裡喔，請再試試看！`);
-            }
-          };
-
-          const closeSuccessModal = () => {
-            setSuccessModalPlant(null);
-            if (Object.keys(placedPlants).length < plantsData.length) {
-              setMessage('請繼續幫其他植物找新家！');
-            }
-          };
-
-          const handleReset = () => {
-            setPlacedPlants({}); setSelectedPlant(null); setDraggedPlant(null);
-            setIsVictory(false); setIsIntro(true);
-            setMessage('請選擇下方的植物，把它「拖曳」或「點擊」放入正確的位置。');
-          };
-          const handleImageError = (e, fallbackSrc) => { e.target.src = fallbackSrc; };
-
-          if (isIntro) {
-            return (
-              <div className="min-h-screen bg-sky-50 font-sans text-gray-800 p-4 md:p-8 flex items-center justify-center">
-                <div className="bg-white rounded-3xl w-full max-w-4xl p-6 md:p-10 shadow-2xl border-4 border-teal-600">
-                  <h1 className="text-3xl md:text-4xl font-bold text-teal-700 mb-4 text-center">🐸 水生植物到新家</h1>
-                  <p className="text-lg text-gray-700 mb-6 text-center leading-relaxed">學校的生態池剛種植了四種新的水生植物！<br/>他們要適應校園新環境，讓我們一起來認識它們吧：</p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    {plantsData.map((plant) => (
-                      <div key={plant.id} className={`flex items-start gap-4 p-5 rounded-2xl border-2 ${plant.borderColor} ${plant.bgColor} transition hover:shadow-md`}>
-                        <img 
-                          src={`./${plant.imageFileName}`} 
-                          onError={(e) => handleImageError(e, plant.fallbackImage)}
-                          alt={plant.name} 
-                          className="w-20 h-20 md:w-24 md:h-24 object-cover rounded-xl shadow-sm border-2 border-white shrink-0 bg-white"
-                        />
-                        <div>
-                          <h3 className={`font-bold text-xl flex flex-col md:flex-row md:items-center gap-1 md:gap-2 ${plant.textColor}`}>
-                            <span>{plant.name}</span><span className="text-sm font-normal opacity-80 italic">({plant.enName})</span>
-                          </h3>
-                          <span className="inline-block mt-1 mb-2 bg-white text-teal-800 text-xs px-2 py-0.5 rounded-full border border-teal-200 font-bold">{plant.type}</span>
-                          <p className="text-sm text-gray-700 leading-relaxed">{plant.desc}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <button 
-                    onClick={() => {
-                      const AudioContext = window.AudioContext || window.webkitAudioContext;
-                      if (AudioContext) { const ctx = new AudioContext(); ctx.resume(); }
-                      setIsIntro(false);
-                    }}
-                    className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 rounded-2xl text-xl shadow-lg transition transform hover:scale-[1.01]"
-                  >
-                    我認識它們了，開始挑戰！ 🚀
-                  </button>
-                </div>
-              </div>
-            );
-          }
-
-          return (
-            <div className="min-h-screen bg-sky-50 font-sans text-gray-800 p-4 md:p-8 flex flex-col items-center">
-              <div className="w-full max-w-4xl flex justify-between items-center mb-6">
-                <h1 className="text-2xl md:text-4xl font-bold text-teal-700 flex items-center gap-2">🐸 生態池植物找新家</h1>
-                <button onClick={() => setIsIntro(true)} className="bg-sky-200 hover:bg-sky-300 text-sky-800 font-bold py-2 px-4 rounded-full shadow-sm transition text-sm flex items-center gap-1">🔍 重新看圖鑑</button>
-              </div>
-              <div className={`w-full max-w-4xl p-4 rounded-xl mb-6 text-center font-bold text-lg shadow-sm transition-colors duration-300 ${isVictory ? 'bg-green-200 text-green-800 border-2 border-green-400' : 'bg-white text-teal-700 border-2 border-teal-200'}`}>
-                {message}
-              </div>
-
-              <div className="w-full max-w-4xl bg-white rounded-3xl p-6 shadow-xl border-4 border-teal-600 relative overflow-hidden">
-                {isVictory ? (
-                   <div className="flex flex-col items-center p-8 animate-in zoom-in duration-500 bg-gradient-to-br from-yellow-50 to-green-50 rounded-2xl border-4 border-yellow-300 shadow-inner">
-                     <div className="text-7xl mb-4 animate-bounce">🏆</div>
-                     <h2 className="text-3xl md:text-4xl font-extrabold text-teal-800 mb-6 text-center">太厲害了！你獲得了「生態小達人」稱號！</h2>
-                     <div className="bg-white p-6 rounded-2xl shadow-md w-full max-w-2xl border border-teal-100 mb-8">
-                        <p className="text-lg text-gray-700 leading-relaxed mb-4 text-justify">謝謝你幫學校生態池的植物們找到了最棒的家！經過這次的挑戰，我們一起學習了水生植物的四大家族：</p>
-                        <ul className="space-y-3 text-gray-700 font-medium">
-                          <li className="flex items-center gap-2"><span className="text-xl">🌼</span> <span><span className="font-bold text-yellow-700">浮葉植物（台灣萍蓬草）：</span>根在泥中，葉子漂浮水面曬太陽。</span></li>
-                          <li className="flex items-center gap-2"><span className="text-xl">🌿</span> <span><span className="font-bold text-teal-700">沉水植物（水蘊草）：</span>全株在水中，能產生氧氣淨化水質。</span></li>
-                          <li className="flex items-center gap-2"><span className="text-xl">☘️</span> <span><span className="font-bold text-green-700">漂浮植物（浮萍）：</span>沒有固定的根，像小船一樣隨波逐流。</span></li>
-                          <li className="flex items-center gap-2"><span className="text-xl">🌾</span> <span><span className="font-bold text-red-700">挺水植物（紅辣蓼）：</span>長在岸邊，莖葉直挺挺地伸出水面呼吸。</span></li>
-                        </ul>
-                        <p className="text-lg text-teal-700 font-bold mt-6 text-center bg-teal-50 py-3 rounded-lg border border-teal-100">下次下課時，去生態池看看它們真實的樣子吧！🔍</p>
-                     </div>
-                     <button onClick={handleReset} className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 px-10 rounded-full shadow-lg text-xl transition transform hover:scale-105 animate-pulse">🔄 換下一位同學挑戰</button>
-                   </div>
-                ) : (
-                  <>
-                    <div className="relative w-full h-80 md:h-96 rounded-2xl overflow-hidden border-2 border-sky-200 mb-8 bg-gradient-to-b from-sky-200 via-blue-400 to-blue-800">
-                      <div className="absolute top-0 left-0 w-1/3 h-full bg-amber-700/80" style={{ clipPath: 'polygon(0 0, 40% 0, 100% 100%, 0% 100%)' }}></div>
-                      <div className="absolute bottom-0 left-0 w-full h-8 bg-amber-900"></div>
-                      {pondZones.map((zone) => {
-                        const placedPlant = placedPlants[zone.id];
-                        const isHighlight = draggedPlant && !placedPlant; 
-                        return (
-                          <div 
-                            key={zone.id} 
-                            data-zone={zone.id}
-                            onClick={() => handleZoneClick(zone.id)} 
-                            className={`absolute ${zone.position} ${zone.width} ${zone.height} ${zone.bg} border-2 border-dashed rounded-xl cursor-pointer transition flex flex-col items-center justify-center ${isHighlight ? 'border-yellow-300 bg-white/40 shadow-[0_0_15px_rgba(253,224,71,0.5)]' : 'border-white/50 hover:bg-white/30'}`}
-                          >
-                            <span className="text-white/90 font-bold text-sm bg-black/40 px-2 py-1 rounded-md mb-2">{zone.name}</span>
-                            {placedPlant && (
-                              <div className="flex flex-col items-center transform transition duration-500 hover:scale-105">
-                                <img src={`./${placedPlant.imageFileName}`} onError={(e) => handleImageError(e, placedPlant.fallbackImage)} alt={placedPlant.name} className="w-16 h-16 md:w-20 md:h-20 object-cover rounded-full border-2 border-white shadow-[0_4px_10px_rgba(0,0,0,0.3)] bg-white" draggable="false" />
-                                <div className="flex flex-col items-center mt-2"><span className="bg-white text-gray-800 px-2 py-0.5 rounded-full text-xs font-bold shadow-md">{placedPlant.name}</span></div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {plantsData.map((plant) => {
-                        const isPlaced = placedPlants[plant.targetZone];
-                        const isSelected = selectedPlant?.id === plant.id;
-                        return (
-                          <div
-                            key={plant.id} 
-                            onClick={() => handleSelectPlant(plant)} 
-                            onTouchStart={(e) => startCustomDrag(e, plant)} 
-                            onMouseDown={(e) => startCustomDrag(e, plant)}
-                            className={`flex flex-col items-center p-3 rounded-2xl border-4 transition-all duration-200 select-none ${isPlaced ? 'opacity-40 grayscale cursor-not-allowed bg-gray-100 border-gray-300' : isSelected ? `${plant.bgColor} ${plant.borderColor} scale-105 shadow-lg` : `bg-white border-gray-200 hover:border-teal-300 hover:shadow-md cursor-grab active:cursor-grabbing`}`}
-                          >
-                            <img src={`./${plant.imageFileName}`} onError={(e) => handleImageError(e, plant.fallbackImage)} alt={plant.name} className="w-16 h-16 md:w-20 md:h-20 object-cover rounded-lg shadow-sm mb-2 bg-white border border-gray-100" />
-                            <div className="font-bold text-gray-800 text-sm md:text-base text-center">{plant.name}</div>
-                            <div className="text-xs text-gray-500 text-center italic">{plant.enName}</div>
-                            <div className="text-xs text-teal-600 mt-1 font-bold bg-teal-50 px-2 py-0.5 rounded-md w-full text-center">{isPlaced ? '已種植' : '拖曳或點選'}</div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* 獨立渲染的浮動卡片，掛載 ref 直接控制 */}
-              {draggedPlant && (
-                <div 
-                  ref={ghostRef}
-                  style={{ 
-                    position: 'fixed', 
-                    top: 0, 
-                    left: 0,
-                    opacity: 0, /* 一開始先透明，等下一個影格抓到座標才顯示 */
-                    pointerEvents: 'none',
-                    zIndex: 9999
-                  }}
-                  className={`ghost-element flex flex-col items-center p-3 rounded-2xl border-4 shadow-2xl scale-110 bg-white/90 ${draggedPlant.borderColor}`}
-                >
-                  <img src={`./${draggedPlant.imageFileName}`} onError={(e) => handleImageError(e, draggedPlant.fallbackImage)} alt={draggedPlant.name} className="w-20 h-20 object-cover rounded-lg shadow-sm mb-2" />
-                  <div className="font-bold text-gray-800 text-base text-center">{draggedPlant.name}</div>
-                </div>
-              )}
-
-              {successModalPlant && (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 animate-in fade-in duration-300">
-                  <div className={`bg-white rounded-3xl w-full max-w-lg p-6 md:p-8 shadow-2xl border-4 ${successModalPlant.borderColor} transform transition-all`}>
-                    <div className="text-center mb-6">
-                      <span className="text-5xl inline-block mb-2">✨</span>
-                      <h2 className={`text-2xl md:text-3xl font-bold ${successModalPlant.textColor}`}>成功解鎖：{successModalPlant.name}</h2>
-                      <p className="text-gray-500 italic mt-1">{successModalPlant.enName}</p>
-                      <span className="inline-block mt-2 bg-white text-gray-800 px-3 py-1 rounded-full text-sm font-bold border-2 shadow-sm">屬性：{successModalPlant.type}</span>
-                    </div>
-                    <div className={`flex flex-col items-center p-6 rounded-2xl mb-6 ${successModalPlant.bgColor}`}>
-                      <img src={`./${successModalPlant.imageFileName}`} onError={(e) => handleImageError(e, successModalPlant.fallbackImage)} alt={successModalPlant.name} className="w-32 h-32 md:w-40 md:h-40 object-cover rounded-full border-4 border-white shadow-lg mb-6 bg-white" />
-                      <p className="text-gray-800 text-lg leading-relaxed font-medium text-justify">{successModalPlant.detailedDesc}</p>
-                    </div>
-                    <button onClick={closeSuccessModal} className={`w-full text-white font-bold py-4 rounded-xl text-xl shadow-md transition transform hover:scale-[1.02] ${successModalPlant.id === 'nuphar' ? 'bg-yellow-500 hover:bg-yellow-600' : successModalPlant.id === 'egeria' ? 'bg-teal-500 hover:bg-teal-600' : successModalPlant.id === 'lemna' ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'}`}>
-                      {Object.keys(placedPlants).length === plantsData.length ? '太棒了！去看我的過關證書 📜' : '學到了！繼續幫下一個植物找家'}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        }
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
-</body>
-</html>
+                const zoneId = zoneEl.getAttribute('
