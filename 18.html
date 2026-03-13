@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>槓桿與輪軸互動對對碰</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .perspective {
+            perspective: 1000px;
+        }
+        .flip-card-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            width: 100%;
+            height: 100%;
+        }
+        .flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        .flip-card-front, .flip-card-back {
+            backface-visibility: hidden;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .flip-card-back {
+            transform: rotateY(180deg);
+        }
+        @keyframes success-pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .matched {
+            animation: success-pulse 0.5s ease-in-out;
+            opacity: 0.5;
+        }
+        /* 縮小圖片容器尺寸 */
+        .svg-container {
+            width: 60%;
+            height: 50px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans text-slate-900">
+
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <!-- 標題與資訊欄 -->
+    <header class="text-center mb-10">
+        <h1 class="text-5xl font-black text-indigo-800 mb-6 tracking-tighter">⚙️ 槓桿輪軸對對碰</h1>
+        <div class="inline-block bg-indigo-600 text-white px-8 py-3 rounded-full text-2xl font-bold mb-8 shadow-lg" id="level-indicator">
+            第一關：基礎槓桿
+        </div>
+        
+        <div class="flex justify-center gap-6 md:gap-16 text-2xl font-black bg-white p-8 rounded-3xl shadow-xl border-2 border-indigo-50">
+            <div class="text-indigo-600">步數：<span id="moves" class="text-4xl">0</span></div>
+            <div class="text-emerald-600">配對：<span id="matches" class="text-4xl">0</span> / 6</div>
+            <div class="text-amber-600">時間：<span id="timer" class="text-4xl">0</span>s</div>
+        </div>
+    </header>
+
+    <!-- 遊戲區域 (3x4 網格) -->
+    <div id="game-grid" class="grid grid-cols-3 md:grid-cols-4 gap-4 md:gap-6 max-w-3xl mx-auto perspective">
+        <!-- 由 JS 動態生成 -->
+    </div>
+
+    <!-- 控制按鈕 -->
+    <div class="text-center mt-12 space-x-4">
+        <button onclick="resetGame()" class="bg-slate-600 hover:bg-slate-700 text-white px-10 py-4 rounded-full text-2xl font-bold transition active:scale-95 shadow-xl">
+            重新開始
+        </button>
+    </div>
+
+    <!-- 結算彈窗 -->
+    <div id="win-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-[40px] p-12 max-w-lg w-full text-center shadow-2xl border-8 border-indigo-100">
+            <h2 class="text-5xl font-black text-indigo-700 mb-8" id="modal-title">🎉 太棒了！</h2>
+            <p id="final-stats" class="text-3xl text-slate-600 mb-10 font-bold"></p>
+            <button id="next-btn" onclick="nextLevel()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-6 rounded-3xl text-3xl font-black transition mb-6 shadow-lg active:scale-95">
+                下一關卡
+            </button>
+            <button onclick="resetGame()" class="w-full text-slate-400 text-xl py-2 hover:underline font-bold">
+                重玩本關
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const resistanceSVG = `<svg viewBox="0 0 100 60" class="w-full h-full"><line x1="10" y1="25" x2="90" y2="45" stroke="#334155" stroke-width="5" stroke-linecap="round" /><polygon points="60,37 54,50 66,50" fill="#64748b" /><rect x="70" y="28" width="16" height="16" fill="#8b5cf6" transform="rotate(14, 78, 36)" /><path d="M78,5 L78,22 M73,14 L78,22 L83,14" fill="none" stroke="#ef4444" stroke-width="3" /></svg>`;
+    const axleSVG = `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="40" fill="#ef4444" stroke="#dc2626" stroke-width="3" /><circle cx="50" cy="50" r="15" fill="#b91c1c" stroke="#991b1b" stroke-width="2" /><circle cx="50" cy="50" r="5" fill="#1e293b" /><path d="M35,50 Q40,40 50,40 Q60,40 65,50" fill="none" stroke="#f8fafc" stroke-width="3" stroke-dasharray="3" /></svg>`;
+    const steeringWheelSVG = `<svg viewBox="0 0 100 60" class="w-full h-full"><circle cx="50" cy="30" r="22" fill="none" stroke="#334155" stroke-width="4" /><circle cx="50" cy="30" r="5" fill="#334155" /><line x1="50" y1="34" x2="50" y2="52" stroke="#334155" stroke-width="4" /><line x1="28" y1="30" x2="46" y2="30" stroke="#334155" stroke-width="4" /><line x1="54" y1="30" x2="72" y2="30" stroke="#334155" stroke-width="4" /></svg>`;
+
+    const allData = {
+        level1: [
+            { id: 1, name: '定滑輪', icon: '🎡', desc: '改變施力方向', color: 'bg-blue-50', textCol: 'bg-blue-600' },
+            { id: 2, name: '動滑輪', icon: '🏗️', desc: '省力但費時', color: 'bg-orange-50', textCol: 'bg-orange-600' },
+            { id: 3, name: '支點', icon: '📍', desc: '轉動不動點', color: 'bg-red-50', textCol: 'bg-red-600' },
+            { id: 4, name: '施力點', icon: '💪', desc: '手施加力量處', color: 'bg-green-50', textCol: 'bg-green-600' },
+            { id: 5, name: '抗力點', customSVG: resistanceSVG, desc: '承受重量處', color: 'bg-purple-50', textCol: 'bg-purple-600' },
+            { id: 6, name: '省力槓桿', icon: '✂️', desc: '施力臂較長', color: 'bg-yellow-50', textCol: 'bg-yellow-600' }
+        ],
+        level2: [
+            { id: 3, name: '支點', icon: '📍', desc: '旋轉中心點', color: 'bg-red-50', textCol: 'bg-red-600' },
+            { id: 9, name: '輪軸', customSVG: axleSVG, desc: '同軸轉動結構', color: 'bg-rose-50', textCol: 'bg-rose-600' },
+            { id: 10, name: '施力在輪', customSVG: steeringWheelSVG, desc: '省力但費時', color: 'bg-emerald-50', textCol: 'bg-emerald-600' },
+            { id: 11, name: '施力在軸', icon: '🚁', desc: '費力但省時', color: 'bg-amber-50', textCol: 'bg-amber-600' },
+            { id: 13, name: '施力臂', icon: '📏', desc: '支點到施力點', color: 'bg-blue-50', textCol: 'bg-blue-600' },
+            { id: 14, name: '抗力臂', icon: '📐', desc: '支點到抗力點', color: 'bg-teal-50', textCol: 'bg-teal-600' }
+        ]
+    };
+
+    let currentLevel = 1;
+    let flippedCards = [];
+    let matchedCount = 0;
+    let moves = 0;
+    let seconds = 0;
+    let timerInterval;
+    let isLocked = false;
+
+    function prepareCards() {
+        const activeData = currentLevel === 1 ? allData.level1 : allData.level2;
+        const deck = [];
+        activeData.forEach(pair => {
+            // 圖卡 (縮小圖片，僅顯示原理說明，不再顯示名詞)
+            deck.push({
+                id: pair.id,
+                type: 'image',
+                content: `
+                    <div class="flex flex-col items-center justify-center w-full h-full text-center">
+                        ${pair.customSVG ? `<div class="svg-container">${pair.customSVG}</div>` : `<span class="text-4xl mb-2">${pair.icon}</span>`}
+                        <div class="text-xl md:text-2xl text-slate-600 font-bold leading-tight px-1">${pair.desc}</div>
+                    </div>
+                `,
+                bgColor: pair.color
+            });
+            // 字卡 (極大化名詞)
+            deck.push({
+                id: pair.id,
+                type: 'text',
+                content: `<div class="font-black text-4xl md:text-5xl text-white tracking-widest leading-none text-center px-2">${pair.name}</div>`,
+                bgColor: pair.textCol
+            });
+        });
+        return deck.sort(() => Math.random() - 0.5);
+    }
+
+    function initLevel() {
+        const shuffledDeck = prepareCards();
+        const gameGrid = document.getElementById('game-grid');
+        gameGrid.innerHTML = '';
+        document.getElementById('level-indicator').textContent = currentLevel === 1 ? '第一關：基礎槓桿' : '第二關：輪軸與臂長';
+
+        shuffledDeck.forEach(data => {
+            const card = document.createElement('div');
+            card.className = 'aspect-square relative cursor-pointer flip-card';
+            card.dataset.id = data.id;
+            
+            card.innerHTML = `
+                <div class="flip-card-inner border-4 border-white rounded-[32px] shadow-lg">
+                    <div class="flip-card-front bg-indigo-400 rounded-[28px] text-white text-6xl font-black">
+                        ?
+                    </div>
+                    <div class="flip-card-back ${data.bgColor} rounded-[28px] p-3 border-4 border-slate-100 overflow-hidden">
+                        ${data.content}
+                    </div>
+                </div>
+            `;
+            card.addEventListener('click', () => flipCard(card));
+            gameGrid.appendChild(card);
+        });
+        startTimer();
+    }
+
+    function flipCard(card) {
+        if (isLocked || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+        card.classList.add('flipped');
+        flippedCards.push(card);
+        if (flippedCards.length === 2) checkMatch();
+    }
+
+    function checkMatch() {
+        isLocked = true;
+        moves++;
+        document.getElementById('moves').textContent = moves;
+        const [card1, card2] = flippedCards;
+        if (card1.dataset.id === card2.dataset.id) {
+            matchedCount++;
+            document.getElementById('matches').textContent = matchedCount;
+            card1.classList.add('matched');
+            card2.classList.add('matched');
+            resetFlipped();
+            if (matchedCount === 6) endGame();
+        } else {
+            // 將停留時間延長至 1.2 秒 (1200ms)
+            setTimeout(() => {
+                card1.classList.remove('flipped');
+                card2.classList.remove('flipped');
+                resetFlipped();
+            }, 1200);
+        }
+    }
+
+    function resetFlipped() {
+        flippedCards = [];
+        isLocked = false;
+    }
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        seconds = 0;
+        document.getElementById('timer').textContent = seconds;
+        timerInterval = setInterval(() => {
+            seconds++;
+            document.getElementById('timer').textContent = seconds;
+        }, 1000);
+    }
+
+    function endGame() {
+        clearInterval(timerInterval);
+        const nextBtn = document.getElementById('next-btn');
+        if (currentLevel === 2) {
+            document.getElementById('modal-title').textContent = '🏆 全關卡破完！';
+            nextBtn.textContent = '回第一關挑戰';
+            nextBtn.onclick = () => { currentLevel = 1; resetGame(); };
+        } else {
+            document.getElementById('modal-title').textContent = '🎉 挑戰成功！';
+            nextBtn.textContent = '前往第二關';
+            nextBtn.onclick = nextLevel;
+        }
+        document.getElementById('final-stats').innerHTML = `${seconds} 秒內完成<br><span class="text-indigo-500">${moves} 次嘗試</span>`;
+        document.getElementById('win-modal').classList.remove('hidden');
+    }
+
+    function nextLevel() {
+        currentLevel = 2;
+        resetGame();
+    }
+
+    function resetGame() {
+        document.getElementById('win-modal').classList.add('hidden');
+        moves = 0;
+        matchedCount = 0;
+        document.getElementById('moves').textContent = '0';
+        document.getElementById('matches').textContent = '0';
+        initLevel();
+    }
+
+    window.onload = initLevel;
+</script>
+
+</body>
+</html>
