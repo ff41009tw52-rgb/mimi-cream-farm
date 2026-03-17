@@ -26,7 +26,7 @@
             background-size: 20px 20px;
         }
 
-        /* 頂部招牌 - 設定 relative 讓左上角圖片可以定位 */
+        /* 頂部招牌 */
         header {
             background-color: var(--mimi-orange);
             color: white;
@@ -67,7 +67,7 @@
             z-index: 2;
         }
 
-        /* --- 裝飾圖片統一樣式 (Corner Stickers) --- */
+        /* --- 裝飾圖片統一樣式 --- */
         .deco-img {
             border: 4px solid white;
             box-shadow: 3px 3px 10px rgba(0,0,0,0.2);
@@ -75,27 +75,27 @@
             object-fit: cover;
         }
         .deco-img:hover {
-            transform: scale(1.05) rotate(0deg) !important; /* 滑鼠移過去稍微放大並轉正 */
+            transform: scale(1.05) rotate(0deg) !important;
         }
 
-        /* 左上角：迎賓貓 (合照) */
+        /* 左上角：迎賓貓 */
         .header-cat {
             position: absolute;
             left: 20px;
             top: 50%;
-            transform: translateY(-50%) rotate(-5deg); /* 垂直置中並稍微傾斜 */
-            width: 140px; /* ★這裡控制大小，140px 剛剛好 */
+            transform: translateY(-50%) rotate(-5deg);
+            width: 140px; 
             height: auto;
             border-radius: 15px;
             z-index: 1; 
         }
 
-        /* 左下角：頁尾貓 (睡覺) */
+        /* 左下角：頁尾貓 */
         .footer-cat {
             position: absolute;
             left: 20px;
-            bottom: -15px;  /* 稍微超出底部邊緣 */
-            width: 120px;   /* 稍微小一點 */
+            bottom: -15px; 
+            width: 120px; 
             height: auto;
             border-radius: 15px 15px 15px 0; 
             transform: rotate(3deg);
@@ -121,18 +121,14 @@
             flex-wrap: wrap;
         }
 
-        .owner-avatar { 
-            text-align: center; 
-        }
+        .owner-avatar { text-align: center; }
 
-        /* ★ 新增：頭像連結樣式 */
         .owner-link {
             display: block;
-            text-decoration: none; /* 移除超連結底線 */
+            text-decoration: none;
             cursor: pointer;
         }
 
-        /* 修改：讓頭像有 hover 動畫，提示可點擊 */
         .owner-img-box {
             width: 120px;
             height: 120px;
@@ -141,13 +137,12 @@
             border: 4px solid var(--mimi-orange);
             box-shadow: 3px 3px 10px rgba(0,0,0,0.1);
             margin: 0 auto 10px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease; /* 增加過渡效果 */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        /* 當滑鼠移到連結上時，內部的圖片框放大 */
         .owner-link:hover .owner-img-box {
-            transform: scale(1.1); /* 放大 1.1 倍 */
-            box-shadow: 0 0 15px var(--mimi-orange); /* 增加發光效果 */
+            transform: scale(1.1);
+            box-shadow: 0 0 15px var(--mimi-orange);
         }
 
         .owner-img-box img {
@@ -159,6 +154,39 @@
         .owner-name {
             font-weight: bold;
             color: var(--soil-brown);
+        }
+
+        /* --- ★ 新增：年級分類篩選按鈕區 ★ --- */
+        .filter-nav {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 0 auto 30px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background-color: white;
+            border: 3px solid var(--farm-green);
+            color: var(--farm-green);
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(118, 185, 71, 0.2);
+        }
+
+        .filter-btn.active {
+            background-color: var(--farm-green);
+            color: white;
+            box-shadow: 0 4px 10px rgba(118, 185, 71, 0.4);
         }
 
         /* --- 農場田地網格 --- */
@@ -176,10 +204,15 @@
             overflow: hidden;
             border: 4px solid var(--mimi-light);
             box-shadow: 8px 8px 0px rgba(93, 64, 55, 0.1);
-            transition: transform 0.3s, border-color 0.3s;
+            transition: transform 0.3s, border-color 0.3s, opacity 0.3s;
             display: flex;
             flex-direction: column;
             height: 100%;
+        }
+
+        /* ★ 新增：隱藏卡片的類別 */
+        .science-card.hidden {
+            display: none;
         }
 
         .science-card:hover {
@@ -196,6 +229,21 @@
             font-size: 4.5rem;
             color: var(--mimi-orange);
             border-bottom: 3px dashed var(--mimi-light);
+            position: relative;
+        }
+
+        /* ★ 新增：年級標籤樣式 (顯示在卡片左上角) */
+        .grade-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: var(--mimi-orange);
+            color: white;
+            font-size: 0.85rem;
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 12px;
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
         }
 
         .card-body { padding: 1.5rem; flex-grow: 1; }
@@ -211,7 +259,7 @@
         .open-btn:hover { background-color: #5da035; }
         .open-btn i { margin-left: 8px; }
 
-        /* 頁尾樣式 - 設定 relative 讓左下角圖片可以定位 */
+        /* 頁尾樣式 */
         footer {
             margin-top: 40px;
             text-align: center; 
@@ -220,17 +268,15 @@
             color: var(--cream-bg); 
             font-weight: bold;
             position: relative;
-            /* 移除了 overflow: hidden 以免切到貓咪 */
         }
         
         footer p {
             position: relative;
-            z-index: 2; /* 文字在圖片上面 */
+            z-index: 2;
         }
 
-        /* ★★★ 新增：右下角懸浮回報按鈕樣式 ★★★ */
+        /* 懸浮回報按鈕樣式 */
         .feedback-float-btn {
-            /* ★ 重點：使用 fixed 讓它固定在視窗右下角，不隨捲軸移動 */
             position: fixed; 
             bottom: 30px;
             right: 30px;
@@ -240,9 +286,9 @@
             border-radius: 50px;
             text-decoration: none;
             font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); /* 陰影讓它浮起來 */
-            z-index: 9999; /* 確保在最上層，不會被其他內容蓋住 */
-            border: 3px solid white; /* 貼紙風格白邊 */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 9999;
+            border: 3px solid white;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
@@ -250,13 +296,12 @@
         }
 
         .feedback-float-btn:hover {
-            transform: scale(1.1) translateY(-5px); /* 滑鼠移過去稍微變大並上浮 */
+            transform: scale(1.1) translateY(-5px);
             background-color: #FF7043;
             box-shadow: 0 6px 20px rgba(0,0,0,0.4);
         }
 
         /* --- 手機版 RWD 調整 --- */
-        /* 當螢幕小於 900px 時，把角落圖片變成置中顯示，以免擋住文字 */
         @media (max-width: 900px) {
             .header-cat, .footer-cat {
                 position: static; 
@@ -277,12 +322,16 @@
                 gap: 15px;
             }
 
-            /* 手機版按鈕稍微縮小 */
             .feedback-float-btn {
                 padding: 12px 20px;
                 font-size: 0.95rem;
                 bottom: 20px;
                 right: 20px;
+            }
+
+            .filter-btn {
+                font-size: 1rem;
+                padding: 8px 18px;
             }
         }
     </style>
@@ -290,7 +339,7 @@
 <body>
 
     <header>
-        <img src="welcome-cats.JPG" alt="歡迎光臨" class="deco-img header-cat">
+        <img src="welcome-cats.JPG" alt="歡迎光臨" class="deco-img header-cat" onerror="this.style.display='none'">
 
         <h1>
             <i class="fas fa-cat cat-orange"></i> 
@@ -307,7 +356,7 @@
         <div class="owner-avatar">
             <a href="6.html" class="owner-link" title="點擊查看橘咪咪的介紹">
                 <div class="owner-img-box">
-                    <img src="mimi-solo.JPG" alt="橘咪咪園長">
+                    <img src="mimi-solo.JPG" alt="橘咪咪園長" onerror="this.src='https://via.placeholder.com/120x120?text=🐱'">
                 </div>
             </a>
             <div class="owner-name"><i class="fas fa-paw cat-orange"></i> 橘咪咪園長</div>
@@ -315,7 +364,7 @@
         <div class="owner-avatar">
             <a href="6.html" class="owner-link" title="點擊查看白奶油的介紹">
                 <div class="owner-img-box">
-                    <img src="cream-solo.JPG" alt="白奶油園長">
+                    <img src="cream-solo.JPG" alt="白奶油園長" onerror="this.src='https://via.placeholder.com/120x120?text=🐾'">
                 </div>
             </a>
             <div class="owner-name"><i class="fas fa-paw cat-ragdoll"></i> 白奶油園長</div>
@@ -323,10 +372,24 @@
     </div>
 
     <div class="container">
-        <div class="farm-grid">
+        
+        <!-- ★ 新增：過濾導覽列 ★ -->
+        <div class="filter-nav">
+            <button class="filter-btn active" data-filter="all">全部遊戲</button>
+            <button class="filter-btn" data-filter="3">三年級</button>
+            <button class="filter-btn" data-filter="4">四年級</button>
+            <button class="filter-btn" data-filter="5">五年級</button>
+            <button class="filter-btn" data-filter="6">六年級</button>
+        </div>
+
+        <div class="farm-grid" id="game-grid">
             
-            <div class="science-card">
-                <div class="card-icon-header"><i class="fas fa-flask"></i></div>
+            <!-- 酸鹼滴定：三年級、五年級 -->
+            <div class="science-card" data-grades="3,5">
+                <div class="card-icon-header">
+                    <span class="grade-badge">三、五年級</span>
+                    <i class="fas fa-flask"></i>
+                </div>
                 <div class="card-body">
                     <h3>🧪 酸鹼滴定</h3>
                     <p class="desc">就像農場土壤需要酸鹼平衡一樣，讓我們來學習如何知道溶液的酸鹼！</p>
@@ -336,8 +399,12 @@
                 </a>
             </div>
 
-            <div class="science-card">
-                <div class="card-icon-header"><i class="fas fa-boxes"></i></div>
+            <!-- 特性分類 (基礎)：三年級 -->
+            <div class="science-card" data-grades="3">
+                <div class="card-icon-header">
+                    <span class="grade-badge">三年級</span>
+                    <i class="fas fa-boxes"></i>
+                </div>
                 <div class="card-body">
                     <h3>📦 特性分類 (基礎)</h3>
                     <p class="desc">橘咪咪把農具分類整理好了！這份簡報將帶你認識物質的基本特性與分類方法。</p>
@@ -347,8 +414,12 @@
                 </a>
             </div>
 
-            <div class="science-card">
-                <div class="card-icon-header"><i class="fas fa-microscope"></i></div>
+            <!-- 特性分類 (進階)：三年級 -->
+            <div class="science-card" data-grades="3">
+                <div class="card-icon-header">
+                    <span class="grade-badge">三年級</span>
+                    <i class="fas fa-microscope"></i>
+                </div>
                 <div class="card-body">
                     <h3>🚀 特性分類 (進階)</h3>
                     <p class="desc">白奶油發現了更深奧的分類學問！適合已經了解基礎概念的小小科學家挑戰。</p>
@@ -358,8 +429,11 @@
                 </a>
             </div>
 
-            <div class="science-card">
-                <div class="card-icon-header"><i class="fas fa-bolt"></i></div>
+            <!-- 電流磁效應：未指定年級 (設定預設顯示於全部) -->
+            <div class="science-card" data-grades="">
+                <div class="card-icon-header">
+                    <i class="fas fa-bolt"></i>
+                </div>
                 <div class="card-body">
                     <h3>⚡ 電流磁效應</h3>
                     <p class="desc">不可思議的電與磁！與橘咪咪一起來探索電流如何產生磁場</p>
@@ -369,8 +443,12 @@
                 </a>
             </div>
 
-            <div class="science-card">
-                <div class="card-icon-header"><i class="fas fa-filter"></i></div>
+            <!-- 鹽巴沙子分離術：三年級 -->
+            <div class="science-card" data-grades="3">
+                <div class="card-icon-header">
+                    <span class="grade-badge">三年級</span>
+                    <i class="fas fa-filter"></i>
+                </div>
                 <div class="card-body">
                     <h3>🧂 鹽巴沙子分離術</h3>
                     <p class="desc">糟糕！橘咪咪把鹽巴混進沙坑了。快運用「溶解、過濾、結晶」的科學方法，幫白奶油把乾淨的鹽巴變回來！</p>
@@ -380,8 +458,12 @@
                 </a>
             </div>
 
-            <div class="science-card">
-                <div class="card-icon-header"><i class="fas fa-syringe"></i></div>
+            <!-- 空氣壓縮大挑戰：三年級 -->
+            <div class="science-card" data-grades="3">
+                <div class="card-icon-header">
+                    <span class="grade-badge">三年級</span>
+                    <i class="fas fa-syringe"></i>
+                </div>
                 <div class="card-body">
                     <h3>💉 空氣壓縮大挑戰</h3>
                     <p class="desc">白奶油發現針筒裡的空氣像是裝了彈簧！用力壓下去它還會彈回來。快來試試看壓縮針筒，看你能把空氣壓得多扁呢？</p>
@@ -391,8 +473,12 @@
                 </a>
             </div>
 
-            <div class="science-card">
-                <div class="card-icon-header"><i class="fas fa-lightbulb"></i></div>
+            <!-- 奇妙的電路實驗：四年級 -->
+            <div class="science-card" data-grades="4">
+                <div class="card-icon-header">
+                    <span class="grade-badge">四年級</span>
+                    <i class="fas fa-lightbulb"></i>
+                </div>
                 <div class="card-body">
                     <h3>🔌 奇妙的電路實驗</h3>
                     <p class="desc">天黑了，橘咪咪在農場倉庫找到了一些電池跟電線，她想知道怎麼做才能讓燈泡發光？一起來動手接通電路吧！</p>
@@ -400,19 +486,14 @@
                 <a href="8.html" target="_blank" class="open-btn">
                     前往閱讀筆記 <i class="fas fa-external-link-alt"></i>
                 </a>
-            </div>  <div class="science-card">
-                <div class="card-icon-header"><i class="fas fa-lightbulb"></i></div>
-                <div class="card-body">
-                    <h3>🔌 電路接線挑戰賽 -家長日</h3>
-                    <p class="desc">歡迎來到民安的家長日，橘咪咪在農場倉庫找到了一些電池跟電線，她想知道怎麼做才能讓燈泡發光？一起來動手接通電路吧！</p>
-                </div>
-                <a href="16.html" target="_blank" class="open-btn">
-                    前往閱讀筆記 <i class="fas fa-external-link-alt"></i>
-                </a>
             </div>
 
-            <div class="science-card">
-                <div class="card-icon-header"><i class="fas fa-hand-holding-water"></i></div>
+            <!-- 酸鹼接接樂：三年級、五年級 -->
+            <div class="science-card" data-grades="3,5">
+                <div class="card-icon-header">
+                    <span class="grade-badge">三、五年級</span>
+                    <i class="fas fa-hand-holding-water"></i>
+                </div>
                 <div class="card-body">
                     <h3>🎮 酸鹼接接樂</h3>
                     <p class="desc">反應力大考驗！請依照白奶油的指令，移動橘咪咪接住正確的溶液。小心別接到錯的喔！</p>
@@ -422,8 +503,12 @@
                 </a>
             </div>
             
-            <div class="science-card">
-                <div class="card-icon-header"><i class="fas fa-hand-holding-water"></i></div>
+            <!-- 酸鹼接接樂-家長日：三年級、五年級 -->
+            <div class="science-card" data-grades="3,5">
+                <div class="card-icon-header">
+                    <span class="grade-badge">三、五年級</span>
+                    <i class="fas fa-hand-holding-water"></i>
+                </div>
                 <div class="card-body">
                     <h3>🎮 酸鹼接接樂-家長日</h3>
                     <p class="desc">歡迎各位家長蒞臨民安國小，孩子即將參與反應力大考驗！請依照白奶油的指令，移動橘咪咪接住正確的溶液。小心別接到錯的喔！</p>
@@ -433,8 +518,12 @@
                 </a>
             </div>
             
-            <div class="science-card">
-                <div class="card-icon-header"><i class="fas fa-carrot"></i></div>
+            <!-- 蔬菜身世之謎：三年級 -->
+            <div class="science-card" data-grades="3">
+                <div class="card-icon-header">
+                    <span class="grade-badge">三年級</span>
+                    <i class="fas fa-carrot"></i>
+                </div>
                 <div class="card-body">
                     <h3>🥕 蔬菜身世之謎</h3>
                     <p class="desc">橘咪咪在收成時把蔬菜全搞混了！哪些是根莖類？哪些是葉菜類？快來玩分類遊戲，幫白奶油整理出正確的晚餐食材！</p>
@@ -444,8 +533,12 @@
                 </a>
             </div>
             
-            <div class="science-card">
-                <div class="card-icon-header"><i class="fas fa-map-marked-alt"></i></div>
+            <!-- 四季農莊：島嶼物語：三年級 -->
+            <div class="science-card" data-grades="3">
+                <div class="card-icon-header">
+                    <span class="grade-badge">三年級</span>
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
                 <div class="card-body">
                     <h3>🏝️ 四季農莊：島嶼物語</h3>
                     <p class="desc">橘咪咪和白奶油發現了一個神祕島嶼！這裡的四季變化對植物有什麼影響？快跟著他們一起探索不同季節最適合種植的作物吧！</p>
@@ -455,9 +548,12 @@
                 </a>
             </div>
 
-            <!-- ★ 新增的 14.html 播種小達人卡片 ★ -->
-            <div class="science-card">
-                <div class="card-icon-header"><i class="fas fa-seedling"></i></div>
+            <!-- 播種小達人：三年級 -->
+            <div class="science-card" data-grades="3">
+                <div class="card-icon-header">
+                    <span class="grade-badge">三年級</span>
+                    <i class="fas fa-seedling"></i>
+                </div>
                 <div class="card-body">
                     <h3>🌱 播種小達人</h3>
                     <p class="desc">來挑戰種植小白菜與番茄吧！學習「撒播」與「點播」的技巧，並用正確的方式幫幼苗覆土與澆水，成為優秀的小農夫！</p>
@@ -467,8 +563,12 @@
                 </a>
             </div>
             
-            <div class="science-card">
-                <div class="card-icon-header"><i class="fas fa-balance-scale"></i></div>
+            <!-- 槓桿與輪軸對對碰(昀)：六年級 -->
+            <div class="science-card" data-grades="6">
+                <div class="card-icon-header">
+                    <span class="grade-badge">六年級</span>
+                    <i class="fas fa-balance-scale"></i>
+                </div>
                 <div class="card-body">
                     <h3>⚖️ 槓桿與輪軸對對碰(昀)</h3>
                     <p class="desc">農場裡的省力小祕密！橘咪咪發現只要找對支點，就能輕鬆搬起巨大的南瓜。快來跟白奶油挑戰對對碰，找出生活中的槓桿與輪軸吧！</p>
@@ -478,11 +578,56 @@
                 </a>
             </div>
 
+            <!-- 電路接線挑戰賽(澔)：四年級 -->
+            <div class="science-card" data-grades="4">
+                <div class="card-icon-header">
+                    <span class="grade-badge">四年級</span>
+                    <i class="fas fa-plug"></i>
+                </div>
+                <div class="card-body">
+                    <h3>🔌 電路接線挑戰賽(澔)</h3>
+                    <p class="desc">橘咪咪的燈泡又不亮了！快跟著澔哥一起挑戰更複雜的電路接線，找出讓所有燈泡發光的正確接法吧！</p>
+                </div>
+                <a href="16.html" target="_blank" class="open-btn">
+                    開始體驗 <i class="fas fa-external-link-alt"></i>
+                </a>
+            </div>
+
+            <!-- 水生植物到新家：四年級 -->
+            <div class="science-card" data-grades="4">
+                <div class="card-icon-header">
+                    <span class="grade-badge">四年級</span>
+                    <i class="fas fa-water"></i>
+                </div>
+                <div class="card-body">
+                    <h3>💧 水生植物到新家</h3>
+                    <p class="desc">農場裡新建了一個生態池，請幫白奶油把水生植物們搬到適合它們的新家，一起認識漂浮、沉水與挺水植物！</p>
+                </div>
+                <a href="17.html" target="_blank" class="open-btn">
+                    開始體驗 <i class="fas fa-external-link-alt"></i>
+                </a>
+            </div>
+
+            <!-- 槓桿與輪軸對對碰2(昀)：六年級 -->
+            <div class="science-card" data-grades="6">
+                <div class="card-icon-header">
+                    <span class="grade-badge">六年級</span>
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <div class="card-body">
+                    <h3>⚙️ 槓桿與輪軸對對碰2(昀)</h3>
+                    <p class="desc">昀帶來了全新的力學進階挑戰！這次有更多不一樣的農場工具，快來測試你的力學知識，看看能不能全部配對成功！</p>
+                </div>
+                <a href="18.html" target="_blank" class="open-btn">
+                    開始體驗 <i class="fas fa-external-link-alt"></i>
+                </a>
+            </div>
+
         </div>
     </div>
 
     <footer>
-        <img src="sleepy-cats.JPG" alt="休息一下" class="deco-img footer-cat">
+        <img src="sleepy-cats.JPG" alt="休息一下" class="deco-img footer-cat" onerror="this.style.display='none'">
         <p>Created with ❤️ by 兩隻科學貓咪：橘咪咪與白奶油的主人</p>
     </footer>
 
@@ -490,5 +635,47 @@
         <i class="fas fa-comment-dots"></i> 回報問題
     </a>
 
+    <!-- ★ 新增：篩選邏輯 JavaScript ★ -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const cards = document.querySelectorAll('.science-card');
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // 1. 移除所有按鈕的 active 狀態，並為當前點擊的按鈕加上 active
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    // 2. 取得要篩選的年級 (例如 '3', '4', 'all')
+                    const filterValue = btn.getAttribute('data-filter');
+
+                    // 3. 遍歷所有卡片進行顯示/隱藏切換
+                    cards.forEach(card => {
+                        if (filterValue === 'all') {
+                            // 若點選「全部」，則顯示所有卡片
+                            card.classList.remove('hidden');
+                        } else {
+                            // 取得卡片的 data-grades 屬性 (例如 "3,5")
+                            const gradesStr = card.getAttribute('data-grades');
+                            
+                            if (gradesStr) {
+                                // 將字串切成陣列進行比對
+                                const gradesArray = gradesStr.split(',');
+                                if (gradesArray.includes(filterValue)) {
+                                    card.classList.remove('hidden');
+                                } else {
+                                    card.classList.add('hidden');
+                                }
+                            } else {
+                                // 若該卡片沒有設定任何年級，在特定年級分類下就隱藏
+                                card.classList.add('hidden');
+                            }
+                        }
+                    });
+                });
+            });
+        });
+    </script>
 </body>
 </html>
