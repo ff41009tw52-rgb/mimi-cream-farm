@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>尋找北極星 - 互動操作版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; touch-action: none; overscroll-behavior: none; }
+        svg { user-select: none; -webkit-user-select: none; touch-action: none; }
+        .star-target { cursor: grab; }
+        .star-target:active { cursor: grabbing; }
+        
+        @keyframes pulse-glow {
+            0%, 100% { filter: drop-shadow(0 0 5px rgba(250, 204, 21, 0.5)); transform: scale(1); }
+            50% { filter: drop-shadow(0 0 15px rgba(250, 204, 21, 1)); transform: scale(1.2); }
+        }
+        .anim-target { animation: pulse-glow 1.5s infinite; transform-origin: center; transform-box: fill-box; }
+        .anim-draw { stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: drawLine 1.5s ease-out forwards; }
+        @keyframes drawLine { to { stroke-dashoffset: 0; } }
+    </style>
+</head>
+<body class="bg-slate-900 h-screen w-screen flex flex-col items-center justify-center p-2 md:p-6 text-white overflow-hidden">
+
+    <div class="max-w-4xl w-full h-full max-h-[800px] bg-slate-800 rounded-3xl shadow-2xl overflow-hidden border-4 border-slate-700 flex flex-col relative">
+        
+        <!-- UI 標題與訊息 -->
+        <div class="bg-gradient-to-r from-blue-900 to-indigo-900 p-4 md:p-6 text-center border-b-4 border-indigo-500 z-10 shrink-0">
+            <h1 class="text-2xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500 drop-shadow-md mb-2 md:mb-4">
+                🌟 尋找北極星 🌟
+            </h1>
+            <div class="bg-white/10 rounded-2xl p-3 md:p-4 min-h-[70px] flex items-center justify-center border border-white/20 backdrop-blur-sm transition-all duration-300" id="messageBox">
+                <p id="messageText" class="text-base md:text-xl font-bold text-blue-50 leading-relaxed">
+                    歡迎來到星空探險！請選擇你要挑戰的季節。
+                </p>
+            </div>
+        </div>
+
+        <!-- 遊戲互動區 (SVG 容器) -->
+        <div class="relative w-full flex-grow bg-gradient-to-b from-gray-900 via-blue-950 to-black overflow-hidden" id="gameContainer">
+            
+            <!-- 主選單 -->
+            <div id="menuScreen" class="absolute inset-0 flex flex-col items-center justify-center p-6 space-y-6 z-20">
+                <button onclick="startGame('bigDipper')" class="w-full max-w-sm py-4 px-6 bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-400 hover:to-teal-400 rounded-2xl text-2xl font-bold shadow-[0_0_20px_rgba(20,184,166,0.5)] transform transition hover:scale-105 active:scale-95 border-b-4 border-green-700">
+                    🌸 春夏：北斗七星
+                </button>
+                <button onclick="startGame('cassiopeia')" class="w-full max-w-sm py-4 px-6 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 rounded-2xl text-2xl font-bold shadow-[0_0_20px_rgba(236,72,153,0.5)] transform transition hover:scale-105 active:scale-95 border-b-4 border-purple-700">
+                    🍁 秋冬：仙后座
+                </button>
+            </div>
+
+            <!-- 過關畫面 -->
+            <div id="successScreen" class="absolute inset-0 flex flex-col items-center justify-center p-6 bg-black/80 backdrop-blur-md z-50 hidden">
+                <div class="text-7xl mb-6 animate-bounce">🏆</div>
+                <h2 class="text-4xl md:text-5xl font-black text-yellow-400 mb-8 drop-shadow-[0_0_15px_rgba(250,204,21,0.8)] text-center">任務大成功！</h2>
+                <button onclick="showMenu()" class="py-3 px-8 bg-blue-500 hover:bg-blue-400 rounded-full text-xl font-bold shadow-lg transition transform hover:scale-105">
+                    返回主選單
+                </button>
+            </div>
+
+            <!-- SVG 畫布 -->
+            <svg id="gameSvg" viewBox="0 0 800 600" class="w-full h-full hidden absolute inset-0 z-0">
+                <defs>
+                    <filter id="glow"><feGaussianBlur stdDeviation="3" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    <filter id="glow-strong"><feGaussianBlur stdDeviation="5" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                </defs>
+                
+                <!-- 背景星星將由 JS 生成 -->
+                <g id="bgStars"></g>
+                
+                <!-- 已完成的靜態線段 -->
+                <g id="staticLines"></g>
+                
+                <!-- 拖曳中的動態線段與倍數提示 -->
+                <g id="dynamicLayer"></g>
+                
+                <!-- 星座點位 -->
+                <g id="starNodes"></g>
+            </svg>
+
+            <!-- 提示與返回按鈕 -->
+            <div id="controlsLayer" class="absolute bottom-4 left-0 right-0 px-4 flex justify-between items-end pointer-events-none hidden z-10">
+                <div class="text-slate-400 text-xs md:text-sm bg-black/40 px-3 py-1 rounded-full backdrop-blur-sm">
+                    💡 提示：按住發光的星星，將線條「拖曳」到目標位置！
+                </div>
+                <button onclick="showMenu()" class="pointer-events-auto bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg backdrop-blur-md border border-white/30 text-sm font-medium transition active:scale-95">
+                    返回選單
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 遊戲資料與座標設定 ---
+        const BD_STARS = {
+            1: { x: 520, y: 140, label: "1" },
+            2: { x: 600, y: 80, label: "2" },
+            3: { x: 650, y: 140 },
+            4: { x: 590, y: 210 },
+            5: { x: 620, y: 290 },
+            6: { x: 640, y: 360 },
+            7: { x: 690, y: 420 },
+            polaris: { x: 120, y: 440, label: "北極星" }
+        };
+
+        const CAS_STARS = {
+            1: { x: 600, y: 100, label: "1" },
+            2: { x: 650, y: 110, label: "2" },
+            3: { x: 625, y: 150, label: "3" },
+            4: { x: 660, y: 190, label: "4" },
+            5: { x: 610, y: 225, label: "5" },
+            A: { x: 747, y: 129, label: "交點 A" },
+            polaris: { x: 15, y: 255, label: "北極星" }
+        };
+
+        // --- 狀態管理 ---
+        let currentMode = null; // 'bigDipper' or 'cassiopeia'
+        let currentStep = 0;
+        let isDragging = false;
+        let dragStartNode = null;
+        let dragEndTarget = null;
+        let baseVectorLen = 0; // 用於計算5倍距離的基準長度
+
+        // --- DOM 元素 ---
+        const svg = document.getElementById('gameSvg');
+        const bgStars = document.getElementById('bgStars');
+        const staticLines = document.getElementById('staticLines');
+        const dynamicLayer = document.getElementById('dynamicLayer');
+        const starNodes = document.getElementById('starNodes');
+        const msgText = document.getElementById('messageText');
+        const msgBox = document.getElementById('messageBox');
+
+        // 初始化背景星星
+        for (let i = 0; i < 60; i++) {
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', Math.random() * 800);
+            circle.setAttribute('cy', Math.random() * 600);
+            circle.setAttribute('r', Math.random() * 1.5);
+            circle.setAttribute('fill', 'white');
+            circle.setAttribute('opacity', Math.random() * 0.5 + 0.1);
+            bgStars.appendChild(circle);
+        }
+
+        // --- 核心邏輯 ---
+        function updateMessage(text, highlight = false) {
+            msgText.innerHTML = text;
+            if(highlight) {
+                msgBox.classList.add('border-yellow-400', 'bg-yellow-400/20');
+                setTimeout(() => msgBox.classList.remove('border-yellow-400', 'bg-yellow-400/20'), 500);
+            }
+        }
+
+        function showMenu() {
+            document.getElementById('menuScreen').classList.remove('hidden');
+            document.getElementById('successScreen').classList.add('hidden');
+            svg.classList.add('hidden');
+            document.getElementById('controlsLayer').classList.add('hidden');
+            updateMessage("歡迎來到星空探險！請選擇你要挑戰的季節。");
+            currentMode = null;
+        }
+
+        function startGame(mode) {
+            currentMode = mode;
+            currentStep = 0;
+            document.getElementById('menuScreen').classList.add('hidden');
+            svg.classList.remove('hidden');
+            document.getElementById('controlsLayer').classList.remove('hidden');
+            
+            staticLines.innerHTML = '';
+            dynamicLayer.innerHTML = '';
+            starNodes.innerHTML = '';
+
+            if (mode === 'bigDipper') {
+                drawBaseConstellation(BD_STARS, [[1,4],[4,3],[3,2],[4,5],[5,6],[6,7]]);
+                setupLevelStep();
+            } else {
+                drawBaseConstellation(CAS_STARS, [[1,2],[2,3],[3,4],[4,5]]);
+                setupLevelStep();
+            }
+        }
+
+        function drawBaseConstellation(starsObj, lines) {
+            lines.forEach(([p1, p2]) => {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', starsObj[p1].x); line.setAttribute('y1', starsObj[p1].y);
+                line.setAttribute('x2', starsObj[p2].x); line.setAttribute('y2', starsObj[p2].y);
+                line.setAttribute('stroke', 'rgba(255,255,255,0.2)');
+                line.setAttribute('stroke-width', '2');
+                line.setAttribute('stroke-dasharray', '5,5');
+                staticLines.appendChild(line);
+            });
+        }
+
+        // 設定每個步驟的互動目標
+        function setupLevelStep() {
+            starNodes.innerHTML = ''; // 清空重新渲染星星
+            let starsData = currentMode === 'bigDipper' ? BD_STARS : CAS_STARS;
+
+            // 繪製所有基礎星星與北極星
+            Object.entries(starsData).forEach(([key, data]) => {
+                if(key === 'A' && currentStep < 2 && currentMode === 'cassiopeia') return; // 交點A晚點顯示
+                
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                
+                // 隱形判定區
+                const hit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                hit.setAttribute('cx', data.x); hit.setAttribute('cy', data.y);
+                hit.setAttribute('r', key === 'polaris' ? 50 : 35);
+                hit.setAttribute('fill', 'transparent');
+                
+                // 視覺星體
+                const star = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                star.setAttribute('cx', data.x); star.setAttribute('cy', data.y);
+                let r = 5; let fill = 'white'; let filter = 'url(#glow)';
+                
+                if(key === 'polaris') { r = 7; fill = '#60a5fa'; filter = 'url(#glow-strong)'; }
+                if(key === 'A') { r = 6; fill = '#f472b6'; }
+                
+                star.setAttribute('r', r);
+                star.setAttribute('fill', fill);
+                star.setAttribute('filter', filter);
+
+                // 文字標籤
+                if(data.label) {
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', key === 'polaris' ? data.x - 30 : data.x + 15);
+                    text.setAttribute('y', key === 'polaris' ? data.y - 15 : data.y + 5);
+                    text.setAttribute('fill', key === 'polaris' ? '#93c5fd' : 'white');
+                    text.setAttribute('font-size', key === 'polaris' ? '20' : '18');
+                    text.setAttribute('font-weight', 'bold');
+                    text.textContent = data.label;
+                    g.appendChild(text);
+                }
+
+                g.appendChild(hit);
+                g.appendChild(star);
+                starNodes.appendChild(g);
+
+                // 設定當前步驟的起點與終點，加入動畫與事件
+                if (currentMode === 'bigDipper') {
+                    if (currentStep === 0 && key === '2') makeDraggable(g, star, starsData['2'], starsData['1'], "第 2 顆", "第 1 顆");
+                    if (currentStep === 1 && key === '1') makeDraggable(g, star, starsData['1'], starsData['polaris'], "第 1 顆", "北極星", true);
+                } else if (currentMode === 'cassiopeia') {
+                    if (currentStep === 0 && key === '1') makeDraggable(g, star, starsData['1'], starsData['2'], "第 1 顆", "第 2 顆", false, true); // 畫延長線
+                    if (currentStep === 1 && key === '5') makeDraggable(g, star, starsData['5'], starsData['4'], "第 5 顆", "第 4 顆", false, true); // 畫延長線
+                    if (currentStep === 2 && key === 'A') makeDraggable(g, star, starsData['A'], starsData['3'], "交點 A", "第 3 顆");
+                    if (currentStep === 3 && key === '3') makeDraggable(g, star, starsData['3'], starsData['polaris'], "第 3 顆", "北極星", true);
+                }
+            });
+
+            // 更新文字引導
+            if (currentMode === 'bigDipper') {
+                if(currentStep === 0) updateMessage("勺口在哪裡？請按住發光的 <span class='text-yellow-400'>第 2 顆星</span>，將線段「拖曳」連至第 1 顆星！");
+                if(currentStep === 1) {
+                    updateMessage("太棒了！現在按住 <span class='text-yellow-400'>第 1 顆星</span>，往北極星方向拉出線段。<br><span class='text-sm text-green-300'>觀察看看，大約拉出幾倍的距離會遇到北極星呢？</span>", true);
+                    baseVectorLen = Math.hypot(BD_STARS['1'].x - BD_STARS['2'].x, BD_STARS['1'].y - BD_STARS['2'].y);
+                }
+            } else {
+                if(currentStep === 0) updateMessage("按住 <span class='text-yellow-400'>第 1 顆星</span>，將線段往第 2 顆星方向「拖曳」畫出延長線。");
+                if(currentStep === 1) updateMessage("接著，按住 <span class='text-yellow-400'>第 5 顆星</span>，往第 4 顆星方向拖曳畫出另一條延長線，找出交點！", true);
+                if(currentStep === 2) updateMessage("交點 A 出現了！請按住 <span class='text-pink-400'>交點 A</span>，將線條連至中間的 <span class='text-yellow-400'>第 3 顆星</span>。");
+                if(currentStep === 3) {
+                    updateMessage("最後一步！按住 <span class='text-yellow-400'>第 3 顆星</span>，往北極星方向拉出線段。<br><span class='text-sm text-green-300'>拉動看看，感受 5 倍距離的尋星法則！</span>", true);
+                    baseVectorLen = Math.hypot(CAS_STARS['3'].x - CAS_STARS['A'].x, CAS_STARS['3'].y - CAS_STARS['A'].y);
+                }
+            }
+        }
+
+        // 使節點具備拖曳畫線功能
+        function makeDraggable(groupElement, starElement, startData, endData, startName, endName, isFiveTimes = false, isExtension = false) {
+            starElement.classList.add('anim-target');
+            starElement.setAttribute('r', '8');
+            starElement.setAttribute('fill', '#facc15');
+            groupElement.classList.add('star-target');
+            
+            // 使用原生 SVG 動畫製作光圈，避免 CSS transform 導致基準點偏移的 bug
+            const aura = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            aura.setAttribute('cx', startData.x); 
+            aura.setAttribute('cy', startData.y);
+            aura.setAttribute('r', '8'); 
+            aura.setAttribute('fill', 'none');
+            aura.setAttribute('stroke', '#facc15'); 
+            aura.setAttribute('stroke-width', '2');
+            
+            // 動畫：半徑擴散
+            const animR = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+            animR.setAttribute('attributeName', 'r');
+            animR.setAttribute('values', '8; 35');
+            animR.setAttribute('dur', '1.5s');
+            animR.setAttribute('repeatCount', 'indefinite');
+            
+            // 動畫：透明度漸隱
+            const animOp = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+            animOp.setAttribute('attributeName', 'opacity');
+            animOp.setAttribute('values', '1; 0');
+            animOp.setAttribute('dur', '1.5s');
+            animOp.setAttribute('repeatCount', 'indefinite');
+            
+            aura.appendChild(animR);
+            aura.appendChild(animOp);
+            
+            groupElement.insertBefore(aura, groupElement.firstChild);
+
+            groupElement.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                isDragging = true;
+                dragStartNode = startData;
+                dragEndTarget = endData;
+                groupElement.releasePointerCapture(e.pointerId);
+            });
+        }
+
+        // 轉換座標
+        function getMousePos(e) {
+            const CTM = svg.getScreenCTM();
+            return {
+                x: (e.clientX - CTM.e) / CTM.a,
+                y: (e.clientY - CTM.f) / CTM.d
+            };
+        }
+
+        // 拖曳事件監聽
+        svg.addEventListener('pointermove', (e) => {
+            if (!isDragging || !dragStartNode) return;
+            e.preventDefault();
+            
+            const mousePos = getMousePos(e);
+            dynamicLayer.innerHTML = ''; // 清除舊的動態線
+
+            // 繪製動態主線
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', dragStartNode.x); line.setAttribute('y1', dragStartNode.y);
+            line.setAttribute('x2', mousePos.x); line.setAttribute('y2', mousePos.y);
+            
+            const isFiveTimesStep = (currentMode === 'bigDipper' && currentStep === 1) || (currentMode === 'cassiopeia' && currentStep === 3);
+            const isExtendStep = (currentMode === 'cassiopeia' && (currentStep === 0 || currentStep === 1));
+
+            if (isFiveTimesStep) {
+                line.setAttribute('stroke', '#facc15');
+                line.setAttribute('stroke-width', '4');
+                line.setAttribute('stroke-dasharray', '10,10');
+                
+                // 動態計算 5 倍距離刻度
+                const currentDist = Math.hypot(mousePos.x - dragStartNode.x, mousePos.y - dragStartNode.y);
+                const currentMultiples = Math.floor(currentDist / baseVectorLen);
+                
+                const vecX = (mousePos.x - dragStartNode.x) / currentDist;
+                const vecY = (mousePos.y - dragStartNode.y) / currentDist;
+
+                // 最多畫 5 個刻度
+                const maxMarks = Math.min(currentMultiples, 5);
+                for(let i=1; i<=maxMarks; i++) {
+                    const markX = dragStartNode.x + vecX * baseVectorLen * i;
+                    const markY = dragStartNode.y + vecY * baseVectorLen * i;
+                    
+                    const mark = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    // 十字標記
+                    mark.innerHTML = `
+                        <line x1="${markX-6}" y1="${markY-6}" x2="${markX+6}" y2="${markY+6}" stroke="#22d3ee" stroke-width="3"/>
+                        <line x1="${markX+6}" y1="${markY-6}" x2="${markX-6}" y2="${markY+6}" stroke="#22d3ee" stroke-width="3"/>
+                        <text x="${markX+12}" y="${markY+5}" fill="#67e8f9" font-size="16" font-weight="bold">${i}倍</text>
+                    `;
+                    dynamicLayer.appendChild(mark);
+                }
+
+            } else if (isExtendStep) {
+                line.setAttribute('stroke', '#f9a8d4');
+                line.setAttribute('stroke-width', '3');
+                line.setAttribute('stroke-dasharray', '8,8');
+            } else {
+                line.setAttribute('stroke', '#facc15');
+                line.setAttribute('stroke-width', '4');
+            }
+            dynamicLayer.insertBefore(line, dynamicLayer.firstChild);
+        });
+
+        svg.addEventListener('pointerup', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            const mousePos = getMousePos(e);
+            // 判定是否抵達目標點 (給予 60px 的容錯範圍，讓小孩好操作)
+            const distToTarget = Math.hypot(mousePos.x - dragEndTarget.x, mousePos.y - dragEndTarget.y);
+            
+            dynamicLayer.innerHTML = ''; // 清空動態層
+
+            if (distToTarget < 60) {
+                // 成功連接！畫到靜態層
+                drawLineToStatic(dragStartNode, dragEndTarget, currentStep);
+                currentStep++;
+                
+                if((currentMode === 'bigDipper' && currentStep === 2) || (currentMode === 'cassiopeia' && currentStep === 4)) {
+                    // 過關：保留畫面方便老師講解，不跳出成功遮罩
+                    updateMessage("⭐ 完美！你成功運用方法找到北極星了！ (講解完畢可點擊右下角返回) ⭐", true);
+                    // 已移除自動跳出 successScreen 的邏輯
+                } else {
+                    setupLevelStep(); // 進入下一步
+                }
+            }
+            
+            dragStartNode = null;
+            dragEndTarget = null;
+        });
+
+        // 取消拖曳
+        svg.addEventListener('pointerleave', () => {
+            if(isDragging) {
+                isDragging = false;
+                dynamicLayer.innerHTML = '';
+            }
+        });
+
+        // 將成功的線段畫入背景
+        function drawLineToStatic(start, end, stepInfo) {
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            const isFiveTimesStep = (currentMode === 'bigDipper' && stepInfo === 1) || (currentMode === 'cassiopeia' && stepInfo === 3);
+            const isExtendStep = (currentMode === 'cassiopeia' && (stepInfo === 0 || stepInfo === 1));
+
+            if(isFiveTimesStep) {
+                line.setAttribute('x1', start.x); line.setAttribute('y1', start.y);
+                line.setAttribute('x2', end.x); line.setAttribute('y2', end.y);
+                line.setAttribute('stroke', '#facc15');
+                line.setAttribute('stroke-width', '3');
+                line.setAttribute('stroke-dasharray', '10,10');
+                line.classList.add('anim-draw');
+                staticLines.appendChild(line);
+
+                // 畫出最終的 5 倍刻度
+                const vecX = (end.x - start.x) / 5;
+                const vecY = (end.y - start.y) / 5;
+                for(let i=1; i<=5; i++) {
+                    const markX = start.x + vecX * i;
+                    const markY = start.y + vecY * i;
+                    const mark = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    mark.innerHTML = `
+                        <line x1="${markX-5}" y1="${markY-5}" x2="${markX+5}" y2="${markY+5}" stroke="white" stroke-width="2"/>
+                        <line x1="${markX+5}" y1="${markY-5}" x2="${markX-5}" y2="${markY+5}" stroke="white" stroke-width="2"/>
+                        <text x="${markX+10}" y="${markY}" fill="white" font-size="14">${i}倍</text>
+                    `;
+                    staticLines.appendChild(mark);
+                }
+            } 
+            else if (isExtendStep) {
+                // 仙后座的輔助延長線 (畫到交點A)
+                line.setAttribute('x1', start.x); line.setAttribute('y1', start.y);
+                line.setAttribute('x2', CAS_STARS.A.x); line.setAttribute('y2', CAS_STARS.A.y);
+                line.setAttribute('stroke', '#f9a8d4');
+                line.setAttribute('stroke-width', '3');
+                line.setAttribute('stroke-dasharray', '8,8');
+                line.classList.add('anim-draw');
+                staticLines.appendChild(line);
+            }
+            else {
+                // 一般實線
+                line.setAttribute('x1', start.x); line.setAttribute('y1', start.y);
+                line.setAttribute('x2', end.x); line.setAttribute('y2', end.y);
+                line.setAttribute('stroke', '#facc15');
+                line.setAttribute('stroke-width', '4');
+                line.classList.add('anim-draw');
+                staticLines.appendChild(line);
+            }
+        }
+    </script>
+</body>
+</html>
