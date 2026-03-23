@@ -210,7 +210,8 @@
       const [flags, setFlags] = useState({ 
         seenRain: false, seenTyphoon: false, seenQuest: false, seenBug: false, 
         seenWeed: false, seenDay2Water: false, seenHarvest: false,
-        seenAfterHarvest: false, seenQuestReward: false, seenForgotWater: false
+        seenAfterHarvest: false, seenQuestReward: false, seenForgotWater: false,
+        tutSell: false, tutFert: false, tutNet: false
       });
 
       const [inventory, setInventory] = useState({ 
@@ -346,6 +347,15 @@
         if (tutorialStep === 6 && day > 1) setTutorialStep(0);
       }, [tutorialStep, inventory.seeds, selectedTool, selectedSeed, plots, day]);
 
+      // 新增：進階任務檢查 (自由順序完成)
+      useEffect(() => {
+        if (tutorialStep >= 7 && flags.tutSell && flags.tutFert && flags.tutNet) {
+          setTutorialStep(0);
+          setMessage("🎉 恭喜完成所有進階教學！現在你可以自由經營你的農莊了！");
+          playEffect('coin');
+        }
+      }, [tutorialStep, flags.tutSell, flags.tutFert, flags.tutNet, playEffect]);
+
       const handleSave = () => {
         try {
           const stateToSave = {
@@ -375,7 +385,7 @@
             setGallery(state.gallery || {});
             setPlots(state.plots);
             setSchoolQuest(state.schoolQuest);
-            setFlags(state.flags || { seenRain: false, seenTyphoon: false, seenQuest: false, seenBug: false, seenWeed: false, seenDay2Water: false, seenHarvest: false, seenAfterHarvest: false, seenQuestReward: false, seenForgotWater: false });
+            setFlags(state.flags || { seenRain: false, seenTyphoon: false, seenQuest: false, seenBug: false, seenWeed: false, seenDay2Water: false, seenHarvest: false, seenAfterHarvest: false, seenQuestReward: false, seenForgotWater: false, tutSell: false, tutFert: false, tutNet: false });
             setTutorialStep(state.tutorialStep || 0);
             
             setMessage("📂 遊戲進度讀取成功！歡迎回來！");
@@ -704,8 +714,10 @@
             playEffect('water'); 
             setMessage(`✨ 施打${fertName}成功！第 ${plotId + 1} 區對應屬性的作物生長進度縮短了 1 天。${netBrokeMsg}`);
             
-            // 進階肥料教學完成檢查
-            if (tutorialStep === 8) setTutorialStep(9);
+            // 進階肥料教學完成檢查 (不限順序)
+            if (tutorialStep >= 7 && !flags.tutFert) {
+              setFlags(prev => ({ ...prev, tutFert: true }));
+            }
           }
 
           else if (selectedTool === 'seed' && selectedSeed) {
@@ -789,8 +801,10 @@
         playEffect('coin');
         setMessage(`販賣了 ${amount} 份作物，獲得 $${totalEarn.toLocaleString()}！`);
 
-        // 檢查販賣任務
-        if (tutorialStep === 7) setTutorialStep(8);
+        // 檢查販賣任務 (不限順序)
+        if (tutorialStep >= 7 && !flags.tutSell) {
+          setFlags(prev => ({ ...prev, tutSell: true }));
+        }
       };
 
       const buyPlot = (plotId, price) => {
@@ -816,8 +830,10 @@
           setInventory(inv => ({ ...inv, nets: Math.max(0, inv.nets - 1) }));
           setMessage(`第 ${plotId + 1} 區已經罩上防蟲紗網，蟲子飛不進來了！`);
           
-          // 進階防蟲網教學完成檢查
-          if (tutorialStep === 9) setTutorialStep(0);
+          // 進階防蟲網教學完成檢查 (不限順序)
+          if (tutorialStep >= 7 && !flags.tutNet) {
+            setFlags(prev => ({ ...prev, tutNet: true }));
+          }
         }
       };
 
@@ -892,20 +908,31 @@
 
           {/* --- 新手教學：步驟浮動提示框 (強制隱藏於彈窗開啟時) --- */}
           {tutorialStep > 1 && !currentEvent && !showModal && !showShop && !showQuestModal && (
-            <div className="fixed bottom-10 md:bottom-8 left-0 right-0 z-[40] flex justify-center pointer-events-none px-4">
-              <div className="bg-blue-600 text-white px-4 py-3 md:px-6 md:py-4 rounded-2xl shadow-2xl animate-bounce border-4 border-blue-400 max-w-md w-full text-center pointer-events-none">
-                <div className="font-black text-base md:text-lg mb-1 md:mb-2 text-yellow-300">
-                  {tutorialStep >= 7 ? `🎓 進階任務 (${tutorialStep - 6}/3)` : `🎓 新手任務 (${tutorialStep - 1}/5)`}
+            <div className="fixed bottom-8 md:bottom-6 left-0 right-0 z-[40] flex justify-center pointer-events-none px-4">
+              <div className="bg-blue-600 text-white px-3 py-2 md:px-4 md:py-3 rounded-2xl shadow-2xl animate-bounce border-2 border-blue-400 max-w-sm w-full text-center pointer-events-none">
+                <div className="font-black text-sm md:text-base mb-1 text-yellow-300">
+                  {tutorialStep >= 7 ? `🎓 進階任務 (自由順序)` : `🎓 新手任務 (${tutorialStep - 1}/5)`}
                 </div>
-                <div className="text-[11px] md:text-sm font-bold leading-relaxed">
+                <div className="text-[10px] md:text-xs font-bold leading-relaxed">
                   {tutorialStep === 2 && "第一步：請點擊右上角的「🛒 商店」，購買一包【地瓜葉】種子！"}
                   {tutorialStep === 3 && "第二步：太棒了！現在請在左側「農具清單」中，點選裝備剛剛購買的【地瓜葉】。"}
                   {tutorialStep === 4 && "第三步：請點擊右側的「第 1 區」農田，進入該區塊，並點擊任何一塊空地將種子種下！"}
-                  {tutorialStep === 5 && <span>第四步：植物必須<span className="text-yellow-300 font-black text-base md:text-lg mx-1">【每天】</span>澆水！請裝備左側的「💧 單格澆水」，將<span className="underline">所有剛種下的植物</span>都點擊澆滿水分。</span>}
+                  {tutorialStep === 5 && <span>第四步：植物必須<span className="text-yellow-300 font-black text-sm md:text-sm mx-1">【每天】</span>澆水！請裝備左側的「💧 單格澆水」，將<span className="underline">所有剛種下的植物</span>都點擊澆滿水分。</span>}
                   {tutorialStep === 6 && "最後一步：完美！確認植物【都有澆水】後，點擊右上角的「🌙 睡覺 ➔」進入下一天！等待它們成熟吧。"}
-                  {tutorialStep === 7 && "第一步：剛收成的作物都在倉庫裡！請點擊右上角「🛒 商店」，切換到「賣出農產」將其賣掉變現吧！"}
-                  {tutorialStep === 8 && "第二步：政府送了肥料！請確保田裡有種植「地瓜葉」，然後裝備左側的【🧪 氮肥(葉菜)】對它點擊施肥加速生長！"}
-                  {tutorialStep === 9 && "最後一步：政府還送了防蟲網！請點擊進入農田區塊，點選上方的「部署防蟲網」，保護農田免受蟲害！(別忘了也要幫植物澆水喔！)"}
+                  {tutorialStep >= 7 && (
+                    <div className="flex flex-col gap-1.5 text-left bg-blue-700/50 p-2 rounded-xl mt-1.5">
+                      <p className="text-yellow-100">請完成以下三項進階農務（不限順序）：</p>
+                      <label className={`flex items-start gap-1.5 ${flags.tutSell ? 'opacity-50 line-through text-yellow-300' : ''}`}>
+                        <span>{flags.tutSell ? '✅' : '🔲'}</span> <span>去「🛒 商店」賣出剛收成的作物。</span>
+                      </label>
+                      <label className={`flex items-start gap-1.5 ${flags.tutFert ? 'opacity-50 line-through text-yellow-300' : ''}`}>
+                        <span>{flags.tutFert ? '✅' : '🔲'}</span> <span>裝備【🧪 氮肥(葉菜)】並對地瓜葉施肥。</span>
+                      </label>
+                      <label className={`flex items-start gap-1.5 ${flags.tutNet ? 'opacity-50 line-through text-yellow-300' : ''}`}>
+                        <span>{flags.tutNet ? '✅' : '🔲'}</span> <span>點擊進入農田區塊，部署【防蟲網】。</span>
+                      </label>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1028,7 +1055,7 @@
 
               <button 
                 onClick={() => setShowShop(true)}
-                className={`bg-gradient-to-r from-green-400 to-emerald-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-xl font-black hover:shadow-xl active:scale-95 transition-all flex items-center gap-1 md:gap-2 shadow-md ${tutorialStep === 2 || tutorialStep === 7 ? 'ring-4 ring-blue-500 animate-pulse' : ''}`}
+                className={`bg-gradient-to-r from-green-400 to-emerald-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-xl font-black hover:shadow-xl active:scale-95 transition-all flex items-center gap-1 md:gap-2 shadow-md ${tutorialStep === 2 || (tutorialStep >= 7 && !flags.tutSell) ? 'ring-4 ring-blue-500 animate-pulse' : ''}`}
               >
                 <span className="text-base md:text-lg">🛒</span> <span className="text-xs md:text-base">商店</span>
               </button>
@@ -1100,7 +1127,7 @@
 
                     const isHighlight = (tutorialStep === 3 && tool.type === 'seed' && tool.cropData.id === 'sweetpotatoleaf') || 
                                         (tutorialStep === 5 && tool.id === 'water') ||
-                                        (tutorialStep === 8 && tool.id === 'fert_leaf');
+                                        (tutorialStep >= 7 && !flags.tutFert && tool.id === 'fert_leaf');
 
                     return (
                       <button
@@ -1225,7 +1252,7 @@
                       <span className="font-black text-slate-400 uppercase text-[10px] md:text-xs tracking-widest mr-1 md:mr-2">第 {activePlot + 1} 區管理中</span>
                       
                       {inventory.nets > 0 && !plots[activePlot].isNetted && (
-                        <button onClick={() => applyNet(activePlot)} className={`bg-blue-600 text-white text-[9px] md:text-[10px] px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl font-black hover:bg-blue-700 transition-all ${tutorialStep === 9 ? 'ring-4 ring-yellow-400 animate-pulse' : ''}`}>部署防蟲網</button>
+                        <button onClick={() => applyNet(activePlot)} className={`bg-blue-600 text-white text-[9px] md:text-[10px] px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl font-black hover:bg-blue-700 transition-all ${(tutorialStep >= 7 && !flags.tutNet) ? 'ring-4 ring-yellow-400 animate-pulse' : ''}`}>部署防蟲網</button>
                       )}
                       {plots[activePlot].isNetted && <span className="bg-blue-100 text-blue-600 text-[9px] md:text-[10px] px-2 py-1.5 md:px-2 md:py-2 rounded-lg md:rounded-xl font-black">防蟲中 🕸️</span>}
                       
@@ -1701,7 +1728,7 @@
 
                 <div className="flex gap-2 md:gap-4 mb-4 shrink-0">
                   <button onClick={() => setShopTab('buy')} className={`flex-1 py-2 md:py-3 rounded-xl font-black transition-colors ${shopTab === 'buy' ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>買入物資</button>
-                  <button onClick={() => setShopTab('sell')} className={`flex-1 py-2 md:py-3 rounded-xl font-black transition-colors ${shopTab === 'sell' ? 'bg-yellow-500 text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'} ${tutorialStep === 7 && shopTab !== 'sell' ? 'ring-4 ring-yellow-400 animate-pulse' : ''}`}>賣出農產</button>
+                  <button onClick={() => setShopTab('sell')} className={`flex-1 py-2 md:py-3 rounded-xl font-black transition-colors ${shopTab === 'sell' ? 'bg-yellow-500 text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'} ${(tutorialStep >= 7 && !flags.tutSell) && shopTab !== 'sell' ? 'ring-4 ring-yellow-400 animate-pulse' : ''}`}>賣出農產</button>
                 </div>
                 
                 {shopTab === 'buy' && (
