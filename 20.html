@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>橘咪咪與白奶油的科學農場 - 植物向光性實驗</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Noto+Sans+TC:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Nunito', 'Noto Sans TC', sans-serif;
+            background-color: #f0fdf4;
+            overflow-x: hidden;
+        }
+
+        /* 盆栽與植物生長動畫 */
+        .stem-path {
+            transition: stroke-dashoffset 2s ease-in-out;
+        }
+        
+        /* 葉子群組現在在 SVG 內部，直接套用 transform 動畫 */
+        .leaf-group {
+            transition: transform 2s ease-in-out;
+        }
+        
+        /* 水滴動畫 */
+        @keyframes drop {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(50px) scale(0.5); opacity: 0; }
+        }
+        .water-drop {
+            animation: drop 1s forwards;
+        }
+
+        /* 對話框尖角 */
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 20px;
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: #ffffff transparent transparent transparent;
+            display: block;
+            width: 0;
+        }
+        .speech-bubble-right::after {
+            left: auto;
+            right: 20px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative">
+
+    <!-- 左上角回農場首頁按鈕 -->
+    <a href="index.html" class="absolute top-4 left-4 z-50 bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded-full shadow-lg transition transform hover:scale-105 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+        </svg>
+        回農場
+    </a>
+
+    <!-- 遊戲標題區 -->
+    <header class="text-center py-6 bg-green-600 text-white shadow-md relative z-10">
+        <h1 class="text-2xl md:text-4xl font-bold tracking-wider">🌿 植物向光性實驗室 ☀️</h1>
+        <p class="mt-2 text-green-100 text-sm md:text-base">三年級/四年級 自然科學</p>
+    </header>
+
+    <!-- 遊戲主要互動區 -->
+    <main class="flex-grow flex flex-col items-center justify-center p-4 relative z-10">
+        
+        <!-- 實驗場景 -->
+        <div class="bg-blue-50 w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden relative border-4 border-blue-200 aspect-[4/3] md:aspect-[16/9] flex flex-col justify-end pb-10">
+            <!-- 太陽 (固定在右上方) -->
+            <div class="absolute top-4 right-8 text-6xl animate-pulse">☀️</div>
+            <!-- 窗外風景示意 -->
+            <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: repeating-linear-gradient(0deg, transparent, transparent 19px, #ccc 20px); background-size: 100% 20px;"></div>
+
+            <!-- 盆栽放置區 -->
+            <div class="flex justify-around items-end w-full px-4 md:px-12 relative z-20">
+                
+                <!-- 盆栽 A -->
+                <div id="zoneA" class="flex flex-col items-center relative opacity-50 transition-opacity duration-500">
+                    <div class="absolute -top-12 bg-white px-3 py-1 rounded-full font-bold text-green-700 shadow border-2 border-green-200 z-40">A 盆栽</div>
+                    
+                    <!-- 植物 A (直直生長，加高生長空間) -->
+                    <div class="relative w-24 h-40 md:w-32 md:h-48 z-10 -mb-2">
+                        <!-- 將葉子放入 SVG 內，確保座標同步不分離 -->
+                        <svg class="absolute bottom-0 w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="xMidYMax meet">
+                            <!-- 直立莖 (長得較矮) -->
+                            <path id="stemA" class="stem-path" d="M 50 100 Q 50 60 50 20" stroke="#15803d" stroke-width="4" fill="transparent" stroke-linecap="round"/>
+                            <!-- 葉子群組 (起點為 0,0 方便直接平移) -->
+                            <g id="leafA" class="leaf-group" style="transform: translate(50px, 100px) scale(0);">
+                               <path d="M 0 0 C -15 0, -25 -15, -20 -35 C -10 -40, 0 -20, 0 0" fill="#4ade80" />
+                               <path d="M 0 0 C 15 0, 25 -15, 20 -35 C 10 -40, 0 -20, 0 0" fill="#22c55e" />
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- 盆子 -->
+                    <div class="w-20 h-16 md:w-24 md:h-20 bg-red-700 rounded-b-xl relative z-20 border-t-8 border-red-800 flex items-center justify-center shadow-lg">
+                        <span class="bg-white text-xs font-bold px-2 rounded">A</span>
+                    </div>
+                </div>
+
+                <!-- 盆栽 B -->
+                <div id="zoneB" class="flex flex-col items-center relative opacity-50 transition-opacity duration-500">
+                    <div class="absolute -top-12 bg-white px-3 py-1 rounded-full font-bold text-green-700 shadow border-2 border-green-200 z-40">B 盆栽</div>
+                    
+                    <!-- 紙箱 (加高並重新定位開口位置) -->
+                    <div id="boxB" class="absolute bottom-0 w-36 h-48 md:w-44 md:h-56 bg-yellow-700 border-4 border-yellow-800 z-30 hidden rounded-t-lg shadow-xl transition-opacity duration-1000">
+                        <!-- 紙箱開口 (調高位置並稍微加大高度，讓植物完美從中間穿出) -->
+                        <div class="absolute right-[-4px] top-[25%] md:top-[25%] w-6 h-20 md:h-24 bg-blue-50 border-y-2 border-l-2 border-yellow-900 rounded-l-sm"></div>
+                        <div class="absolute top-2 left-2 text-yellow-900 font-bold opacity-50 text-xs">實驗紙箱</div>
+                    </div>
+
+                    <!-- 植物 B (向光彎曲，加高生長空間) -->
+                    <div class="relative w-24 h-40 md:w-32 md:h-48 z-10 -mb-2">
+                        <!-- 將葉子放入 SVG 內，確保座標同步不分離 -->
+                        <svg class="absolute bottom-0 w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="xMidYMax meet">
+                            <!-- 曲線朝右方開口彎曲，高度變矮且平緩 -->
+                            <path id="stemB" class="stem-path" d="M 50 100 Q 50 50 115 35" stroke="#15803d" stroke-width="4" fill="transparent" stroke-linecap="round"/>
+                            <!-- 葉子群組 -->
+                            <g id="leafB" class="leaf-group" style="transform: translate(50px, 100px) scale(0);">
+                               <path d="M 0 0 C -15 0, -25 -15, -20 -35 C -10 -40, 0 -20, 0 0" fill="#4ade80" />
+                               <path d="M 0 0 C 15 0, 25 -15, 20 -35 C 10 -40, 0 -20, 0 0" fill="#22c55e" />
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- 盆子 -->
+                    <div class="w-20 h-16 md:w-24 md:h-20 bg-red-700 rounded-b-xl relative z-20 border-t-8 border-red-800 flex items-center justify-center shadow-lg">
+                        <span class="bg-white text-xs font-bold px-2 rounded">B</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 桌子 -->
+            <div class="absolute bottom-0 w-full h-10 bg-orange-200 border-t-4 border-orange-300 z-10"></div>
+        </div>
+
+        <!-- 操作按鈕區 -->
+        <div class="mt-6 flex gap-4 h-16 items-center">
+            <button id="actionBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition hover:scale-105 text-lg animate-bounce" onclick="nextStep()">
+                開始實驗
+            </button>
+            <button id="waterBtn" class="hidden bg-blue-400 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition hover:scale-105 text-lg flex items-center gap-2" onclick="waterPlants()">
+                <span>💧</span> 澆水 (<span id="waterCountText">0</span>/3)
+            </button>
+        </div>
+
+    </main>
+
+    <!-- 貓咪解說區 (固定在底部) -->
+    <footer class="w-full bg-white p-4 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.1)] relative z-20">
+        <div class="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-end md:items-center gap-4">
+            <!-- 橘咪咪 -->
+            <div class="flex items-end gap-4 w-full md:w-1/2">
+                <img src="Christmasmimi.jpg" alt="橘咪咪" class="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-orange-300 object-cover shadow-md" onerror="this.src='https://placehold.co/100x100/ffa500/ffffff?text=Mimi'">
+                <div class="bg-white border-2 border-orange-200 p-3 rounded-2xl rounded-bl-none shadow-sm speech-bubble relative flex-grow">
+                    <p id="mimiText" class="text-gray-700 font-medium text-sm md:text-base">喵～歡迎來到科學農場！你觀察過窗臺上的植物嗎？它們好像都會彎彎的！今天我們來做個實驗吧！</p>
+                </div>
+            </div>
+
+            <!-- 白奶油 -->
+            <div class="flex items-end gap-4 w-full md:w-1/2 flex-row-reverse md:flex-row">
+                <img src="Christmascream.jpg" alt="白奶油" class="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-gray-300 object-cover shadow-md" onerror="this.src='https://placehold.co/100x100/dddddd/555555?text=Cream'">
+                <div class="bg-white border-2 border-gray-200 p-3 rounded-2xl rounded-br-none md:rounded-br-2xl md:rounded-bl-none shadow-sm speech-bubble speech-bubble-right md:speech-bubble relative flex-grow text-right md:text-left">
+                    <p id="creamText" class="text-gray-700 font-medium text-sm md:text-base">哼，本喵才不想曬太陽呢。聽說植物需要陽光，我們來看看是不是真的。先點擊「開始實驗」吧！</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 遊戲邏輯腳本 -->
+    <script>
+        let currentStep = 0;
+        let waterCount = 0;
+
+        const ui = {
+            mimiText: document.getElementById('mimiText'),
+            creamText: document.getElementById('creamText'),
+            actionBtn: document.getElementById('actionBtn'),
+            waterBtn: document.getElementById('waterBtn'),
+            zoneA: document.getElementById('zoneA'),
+            zoneB: document.getElementById('zoneB'),
+            boxB: document.getElementById('boxB'),
+            waterCountText: document.getElementById('waterCountText')
+        };
+
+        // --- 真實植物生長路徑計算邏輯 ---
+        function initPlants() {
+            ['stemA', 'stemB'].forEach(id => {
+                const stem = document.getElementById(id);
+                if(stem) {
+                    const len = stem.getTotalLength();
+                    stem.style.strokeDasharray = len;
+                    stem.style.strokeDashoffset = len;
+                }
+            });
+            updatePlant('stemA', 'leafA', 0);
+            updatePlant('stemB', 'leafB', 0);
+        }
+
+        function updatePlant(stemId, leafId, progress) {
+            const stem = document.getElementById(stemId);
+            const leaf = document.getElementById(leafId);
+            if (!stem || !leaf) return;
+
+            const totalLen = stem.getTotalLength();
+
+            // 0進度 = 10%長度 (剛發芽)，1進度 = 100%長度 (完全長大)
+            const currentProgress = 0.1 + (progress * 0.9);
+            const drawLen = totalLen * currentProgress;
+            stem.style.strokeDashoffset = totalLen - drawLen;
+
+            // 取得當前莖生長頂點的座標
+            const pt = stem.getPointAtLength(drawLen);
+
+            // 計算彎曲的角度，讓葉子順著莖生長的方向旋轉
+            let angle = 0;
+            if (drawLen > 1) {
+                const ptPrev = stem.getPointAtLength(drawLen - 1);
+                angle = Math.atan2(pt.y - ptPrev.y, pt.x - ptPrev.x) * (180 / Math.PI);
+                angle += 90; // 調整角度讓葉子預設朝上
+            }
+
+            // 根據生長進度放大葉子，使用 SVG 內部的 transform 來完美貼合！
+            const scale = 0.4 + (progress * 0.6);
+            leaf.style.transform = `translate(${pt.x}px, ${pt.y}px) rotate(${angle}deg) scale(${scale})`;
+        }
+
+        window.addEventListener('DOMContentLoaded', initPlants);
+        // ------------------------------------
+
+        const stepsData = [
+            {
+                mimi: "首先，我們準備了兩盆剛發芽的蔬菜，標示為 A 和 B。請幫忙把它們放到陽光下！",
+                cream: "別弄髒我的肉球，你自己點擊「放盆栽」把它們擺好！",
+                btnText: "🌱 放盆栽",
+                action: () => {
+                    ui.zoneA.classList.remove('opacity-50');
+                    ui.zoneB.classList.remove('opacity-50');
+                }
+            },
+            {
+                mimi: "接著，我們要設計「實驗變因」。請把 B 盆栽蓋上一個旁邊有開口的紙箱。A 盆栽保持原樣，當作對照組喔！",
+                cream: "快點把紙箱蓋上去啦，本喵想看它在暗暗的箱子裡會變成怎樣！",
+                btnText: "📦 蓋紙箱",
+                action: () => {
+                    ui.boxB.classList.remove('hidden');
+                    ui.boxB.animate([
+                        { transform: 'translateY(-50px)', opacity: 0 },
+                        { transform: 'translateY(0)', opacity: 1 }
+                    ], { duration: 500, fill: 'forwards' });
+                }
+            },
+            {
+                mimi: "實驗過程要注意！每天都要幫兩盆植物澆一樣多的水，而且紙箱的方向不能改變喔！",
+                cream: "要澆水就快點，連續澆三天，不要讓植物渴死了！",
+                btnText: "", 
+                action: () => {
+                    ui.actionBtn.classList.add('hidden');
+                    ui.waterBtn.classList.remove('hidden');
+                }
+            },
+            {
+                mimi: "三天過去了！時間到！我們把 B 的紙箱拿開吧！看看發生了什麼事？",
+                cream: "終於結束了！快點打開箱子，本喵要看結果！",
+                btnText: "✨ 打開紙箱",
+                action: () => {
+                    ui.actionBtn.classList.remove('hidden');
+                    ui.waterBtn.classList.add('hidden');
+                }
+            },
+            {
+                mimi: "哇！A 盆栽直直往上長，但 B 盆栽怎麼彎腰朝著洞口生長了？",
+                cream: "廢話！因為 B 旁邊的紙箱只有洞口有光，植物為了生存行光合作用，就會往光的方向長！這就叫「向光性」，懂了嗎？",
+                btnText: "🔄 再玩一次",
+                action: () => {
+                    ui.boxB.style.opacity = '0';
+                    setTimeout(() => ui.boxB.classList.add('hidden'), 500);
+                }
+            }
+        ];
+
+        function nextStep() {
+            if (currentStep >= stepsData.length) {
+                resetGame();
+                return;
+            }
+
+            const step = stepsData[currentStep];
+            
+            ui.mimiText.innerHTML = step.mimi;
+            ui.creamText.innerHTML = step.cream;
+            
+            if (step.action) step.action();
+            
+            if (step.btnText === "") {
+                ui.actionBtn.classList.add('hidden');
+            } else {
+                ui.actionBtn.classList.remove('hidden');
+                ui.actionBtn.innerHTML = step.btnText;
+                ui.actionBtn.classList.remove('animate-bounce');
+            }
+
+            currentStep++;
+        }
+
+        function waterPlants() {
+            if (waterCount >= 3) return;
+            
+            waterCount++;
+            ui.waterCountText.innerText = waterCount;
+
+            createWaterDrop(ui.zoneA);
+            createWaterDrop(ui.zoneB);
+
+            // 改變植物大小與角度
+            const progress = waterCount / 3;
+            updatePlant('stemA', 'leafA', progress);
+            updatePlant('stemB', 'leafB', progress);
+
+            if (waterCount === 3) {
+                ui.waterBtn.disabled = true;
+                ui.waterBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                setTimeout(() => {
+                    nextStep();
+                }, 1000);
+            } else {
+                ui.mimiText.innerHTML = `第 ${waterCount} 天澆水完成！植物有在吸收水分長大喔！`;
+                ui.creamText.innerHTML = waterCount === 2 ? "還差一天，快點啦！" : "咕嚕咕嚕... 喝飽了沒？";
+            }
+        }
+
+        function createWaterDrop(parentZone) {
+            const drop = document.createElement('div');
+            drop.innerText = '💧';
+            drop.className = 'absolute top-[-20px] text-2xl water-drop z-40 pointer-events-none';
+            drop.style.left = `calc(50% + ${Math.random() * 20 - 10}px)`;
+            parentZone.appendChild(drop);
+            
+            setTimeout(() => {
+                if(parentZone.contains(drop)) parentZone.removeChild(drop);
+            }, 1000);
+        }
+
+        function resetGame() {
+            currentStep = 0;
+            waterCount = 0;
+            ui.waterCountText.innerText = '0';
+            
+            ui.zoneA.classList.add('opacity-50');
+            ui.zoneB.classList.add('opacity-50');
+            
+            updatePlant('stemA', 'leafA', 0);
+            updatePlant('stemB', 'leafB', 0);
+            
+            ui.boxB.classList.add('hidden');
+            ui.boxB.style.opacity = '1';
+            
+            ui.waterBtn.disabled = false;
+            ui.waterBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            ui.waterBtn.classList.add('hidden');
+            
+            ui.mimiText.innerHTML = "喵～歡迎來到科學農場！你觀察過窗臺上的植物嗎？它們好像都會彎彎的！今天我們來做個實驗吧！";
+            ui.creamText.innerHTML = "哼，本喵才不想曬太陽呢。聽說植物需要陽光，我們來看看是不是真的。先點擊「開始實驗」吧！";
+            
+            ui.actionBtn.innerHTML = "開始實驗";
+            ui.actionBtn.classList.add('animate-bounce');
+        }
+    </script>
+</body>
+</html>
