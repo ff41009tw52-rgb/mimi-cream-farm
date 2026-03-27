@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>橘咪咪與白奶油的科學農場 - 小水滴結冰記(精準定位版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f0fdf4; /* 配合課本的淺綠色調 */
+            touch-action: manipulation;
+            overflow-x: hidden;
+        }
+        
+        /* 固定比例實驗桌，防跑位核心 */
+        .stage-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 400px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        .stage-core {
+            position: relative;
+            width: 400px; /* 拓寬舞台，避免重疊 */
+            height: 380px;
+        }
+
+        /* 燒杯 (固定在底部中央) */
+        .beaker {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 20px;
+            width: 180px;
+            height: 220px;
+            border: 4px solid rgba(156, 163, 175, 0.8);
+            border-top: none;
+            border-radius: 0 0 15px 15px;
+            background: rgba(255, 255, 255, 0.5);
+            overflow: hidden;
+            box-shadow: inset 0 -10px 20px rgba(0,0,0,0.05);
+            opacity: 0; /* 初期隱藏 */
+            transition: opacity 0.5s ease;
+            z-index: 10;
+        }
+        
+        /* 冰塊與鹽巴層 (在燒杯內) */
+        .ice-layer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 0%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="50" font-size="35">🧊</text></svg>') repeat;
+            background-size: 35px 35px;
+            transition: height 1s ease;
+            opacity: 0.85;
+            z-index: 30; /* 覆蓋在水袋上，營造包覆感 */
+        }
+        .salt-layer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 0%;
+            background-image: radial-gradient(white 20%, transparent 20%), radial-gradient(white 20%, transparent 20%);
+            background-color: rgba(255,255,255,0.4);
+            background-size: 16px 16px;
+            background-position: 0 0, 8px 8px;
+            transition: height 1s ease;
+            z-index: 31;
+        }
+
+        /* 夾鏈袋與溫度計群組 (一起移動，不跑位) */
+        .bag-group {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%) scale(1.2); /* 初期放大 */
+            bottom: 80px;
+            width: 90px;
+            height: 130px;
+            z-index: 20;
+            transition: all 1s ease;
+        }
+        
+        /* 夾鏈袋真實視覺 */
+        .ziplock-visual {
+            position: absolute;
+            inset: 0;
+            border: 1px solid #333; /* 換上細黑線邊框讓輪廓更明顯 */
+            border-radius: 2px 2px 12px 12px; /* 頂部較平 */
+            background: rgba(219, 234, 254, 0.25);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(255,255,255,0.8), 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        /* 夾鏈袋上方特色封條 */
+        .zip-flap {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 16px;
+            background: rgba(255, 255, 255, 0.5);
+            z-index: 5;
+        }
+        .zip-track-red {
+            position: absolute;
+            top: 16px; left: 0; width: 100%; height: 3px;
+            background-color: #ef4444; /* 紅色夾鏈條 */
+            z-index: 5;
+        }
+        .zip-track-blue {
+            position: absolute;
+            top: 20px; left: 0; width: 100%; height: 2px;
+            background-color: #3b82f6; /* 藍色夾鏈條 */
+            z-index: 5;
+        }
+
+        /* 袋內的水 */
+        .water-inside {
+            width: 100%;
+            height: 0%;
+            background: rgba(59, 130, 246, 0.4);
+            transition: height 1s ease, background-color 2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 1;
+        }
+        .ice-state {
+            background: rgba(224, 242, 254, 0.95) !important;
+            border-top: 2px solid white;
+        }
+
+        /* 溫度計 (相對於夾鏈袋) */
+        .thermo-container {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 40px; /* 初始高度 */
+            display: none; /* 初期隱藏 */
+            flex-direction: column;
+            align-items: center;
+            z-index: 25;
+            transition: bottom 0.2s ease;
+        }
+        .thermometer {
+            width: 16px;
+            height: 220px;
+            background: rgba(255,255,255,0.95);
+            border: 2px solid #555;
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        }
+        .thermo-bulb {
+            width: 24px;
+            height: 24px;
+            background: #ef4444;
+            border-radius: 50%;
+            position: absolute;
+            bottom: -8px;
+            left: -6px;
+            border: 2px solid #555;
+            z-index: 2;
+        }
+        .thermo-fluid {
+            width: 6px;
+            background: #ef4444;
+            position: absolute;
+            bottom: 12px;
+            left: 3px;
+            border-radius: 3px;
+            transition: height 1s linear;
+        }
+        /* 刻度標示 */
+        .thermo-marks {
+            position: absolute;
+            left: 18px;
+            height: 100%;
+            width: 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 15px 0 25px 0;
+            font-size: 10px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        /* 視線水平儀 (相對於舞台核心) */
+        .eye-level-guide {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            border-top: 2px dashed #f59e0b;
+            left: 0;
+            bottom: 200px;
+            z-index: 50;
+            display: none;
+            align-items: center;
+            pointer-events: none;
+            transition: bottom 0.1s ease;
+        }
+        .eye-icon {
+            font-size: 24px;
+            background: white;
+            border-radius: 50%;
+            padding: 2px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+            position: absolute;
+            left: 10px;
+            top: -15px;
+        }
+        .eye-text {
+            position: absolute;
+            left: 45px;
+            top: -10px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #d97706;
+            background: white;
+            padding: 0 4px;
+            border-radius: 4px;
+        }
+
+        /* 自訂滑桿 UI */
+        .slider-box {
+            background: #fdf6e3;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #fde047;
+            margin-bottom: 10px;
+        }
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #f97316;
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #d1d5db;
+            border-radius: 4px;
+        }
+
+        .frost-effect {
+            box-shadow: inset 0 0 40px rgba(255,255,255,0.95);
+            border-color: #bae6fd;
+        }
+    </style>
+</head>
+<body class="p-2 md:p-6 flex flex-col items-center">
+
+    <a href="index.html" class="fixed top-4 left-4 z-50 bg-green-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-green-700 transition text-sm font-bold flex items-center">
+        🏠 回農場
+    </a>
+
+    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-green-200 mt-12 md:mt-2">
+        
+        <!-- Header -->
+        <div class="bg-green-50 p-3 md:p-4 flex items-center justify-between border-b-2 border-green-200">
+            <div class="flex items-center space-x-4">
+                <img src="Christmasmimi.jpg" alt="橘咪咪" class="w-14 h-14 md:w-16 md:h-16 rounded-full border-2 border-orange-300 shadow-sm" onerror="this.src='https://placehold.co/100x100?text=Mimi'">
+                <div>
+                    <h1 class="text-xl md:text-2xl font-black text-green-900 tracking-wide">小水滴結冰記</h1>
+                    <span class="bg-green-200 text-green-800 text-xs px-2 py-1 rounded font-bold">三年級/四年級</span>
+                    <span class="bg-blue-200 text-blue-800 text-xs px-2 py-1 rounded font-bold ml-1">溫度與凝固</span>
+                </div>
+            </div>
+            <img src="Christmascream.jpg" alt="白奶油" class="w-14 h-14 md:w-16 md:h-16 rounded-full border-2 border-gray-300 shadow-sm" onerror="this.src='https://placehold.co/100x100?text=Cream'">
+        </div>
+
+        <!-- Dialogue Box -->
+        <div class="p-4 min-h-[100px] flex items-center justify-center border-b transition-colors duration-500 bg-orange-50 border-orange-100" id="dialogue-container">
+            <p id="dialogue-text" class="text-lg md:text-xl font-bold text-orange-800 text-center leading-relaxed">
+                喵嗚！準備好開始「動手來做冰」了嗎？<br>步驟一：請在夾鏈袋中加入 30 毫升的水。
+            </p>
+        </div>
+
+        <!-- Main Experiment Area -->
+        <div class="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 items-center bg-gray-50">
+            
+            <!-- Stage (Left/Top) - 固定比例防跑位 -->
+            <div class="stage-wrapper border border-gray-200 relative">
+                <div class="stage-core">
+                    
+                    <!-- 燒杯 -->
+                    <div id="beaker" class="beaker">
+                        <div id="ice-layer" class="ice-layer"></div>
+                        <div id="salt-layer" class="salt-layer"></div>
+                    </div>
+                    
+                    <!-- 夾鏈袋與溫度計同步群組 -->
+                    <div id="bag-group" class="bag-group">
+                        <!-- 真實夾鏈袋外觀 -->
+                        <div class="ziplock-visual">
+                            <div class="zip-flap"></div>
+                            <div class="zip-track-red"></div>
+                            <div class="zip-track-blue"></div>
+                            <div id="water" class="water-inside"></div>
+                        </div>
+                        
+                        <!-- 溫度計 (綁定在水袋中) -->
+                        <div id="thermo-container" class="thermo-container">
+                            <div class="thermometer">
+                                <div id="thermo-fluid" class="thermo-fluid" style="height: 60%;"></div>
+                                <div class="thermo-bulb"></div>
+                                <div class="thermo-marks">
+                                    <span>40</span><span>30</span><span>20</span><span>10</span><span>0</span><span>-10</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 視線水平儀 (獨立於水袋) -->
+                    <div id="eye-level" class="eye-level-guide">
+                        <span class="eye-icon">👁️</span>
+                        <span class="eye-text">眼睛平視</span>
+                    </div>
+
+                    <!-- 觀察紀錄表 UI -->
+                    <div id="record-board" class="hidden absolute top-2 right-2 bg-yellow-50 p-3 rounded-lg border-2 border-yellow-300 shadow-md z-50">
+                        <div class="text-center font-bold text-yellow-800 border-b border-yellow-300 pb-1 mb-2">觀察紀錄</div>
+                        <div class="flex justify-between items-center space-x-4 mb-2">
+                            <span class="text-sm font-bold text-gray-600">溫度：</span>
+                            <span id="obs-temp" class="text-xl font-mono font-black text-red-600">25.0°C</span>
+                        </div>
+                        <div class="flex justify-between items-center space-x-4">
+                            <span class="text-sm font-bold text-gray-600">狀態：</span>
+                            <span id="obs-state" class="text-sm font-bold text-blue-700 bg-blue-100 px-2 py-1 rounded">液態 (水)</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Controls Panel (Right/Bottom) -->
+            <div class="bg-white p-4 md:p-6 rounded-xl shadow-md border border-gray-200 min-h-[300px] flex flex-col justify-center">
+                
+                <!-- Step 1: 加水 -->
+                <div id="ctrl-step1" class="flex flex-col space-y-3">
+                    <h3 class="font-bold text-gray-700 mb-2 border-b-2 border-blue-200 pb-1">🔬 實驗步驟一</h3>
+                    <button onclick="addWater()" class="w-full py-4 bg-blue-500 text-white rounded-xl font-bold text-lg hover:bg-blue-600 shadow-[0_4px_0_#2563eb] active:translate-y-1 active:shadow-none transition-all">💧 夾鏈袋加入 30 毫升的水</button>
+                </div>
+
+                <!-- Step 2: 溫度計使用測驗 -->
+                <div id="ctrl-step2" class="hidden flex flex-col space-y-3">
+                    <h3 class="font-bold text-gray-700 mb-1 border-b-2 border-green-200 pb-1">🔬 實驗步驟二：測量常溫</h3>
+                    
+                    <div class="slider-box">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">1. 調整溫度計高低</label>
+                        <input type="range" id="slider-height" min="0" max="100" value="100" oninput="adjustHeight(this.value)">
+                        <p class="text-xs text-gray-500 mt-1">⚠️ 提示：液囊不碰到底部，且要泡在水中</p>
+                    </div>
+
+                    <div class="slider-box">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">2. 調整眼睛平視角度</label>
+                        <input type="range" id="slider-eye" min="0" max="100" value="0" oninput="adjustEyeLevel(this.value)">
+                        <p class="text-xs text-gray-500 mt-1">⚠️ 提示：眼睛必須平視液柱頂端刻度</p>
+                    </div>
+
+                    <button onclick="checkThermometer()" class="w-full py-3 bg-green-500 text-white rounded-xl font-bold text-lg hover:bg-green-600 shadow-[0_4px_0_#16a34a] active:translate-y-1 active:shadow-none transition-all">✅ 確認讀取溫度</button>
+                    <p id="thermo-hint" class="text-sm text-center font-bold text-red-500 hidden mt-2"></p>
+                </div>
+
+                <!-- Step 3 & 4: 準備燒杯與混和 -->
+                <div id="ctrl-step3" class="hidden flex flex-col space-y-3">
+                    <h3 class="font-bold text-gray-700 mb-2 border-b-2 border-cyan-200 pb-1">🔬 實驗步驟三與四：調配冷卻劑</h3>
+                    <button id="btn-ice1" onclick="addFirstIce()" class="w-full py-3 bg-cyan-100 text-cyan-800 border-2 border-cyan-400 rounded-xl font-bold text-md hover:bg-cyan-200 transition-all">🧊 1. 燒杯放碎冰與適量食鹽</button>
+                    <button id="btn-putbag" onclick="putBagIn()" disabled class="w-full py-3 bg-gray-100 text-gray-400 border-2 border-gray-200 rounded-xl font-bold text-md transition-all">🛍️ 2. 放入夾鏈袋</button>
+                    <button id="btn-ice2" onclick="addMoreIce()" disabled class="w-full py-3 bg-gray-100 text-gray-400 border-2 border-gray-200 rounded-xl font-bold text-md transition-all">❄️ 3. 再加入更多冰塊和食鹽</button>
+                </div>
+
+                <!-- Step 5: 觀察與結論 -->
+                <div id="ctrl-step4" class="hidden flex flex-col space-y-3">
+                    <h3 class="font-bold text-gray-700 mb-2 border-b-2 border-purple-200 pb-1">🔬 實驗步驟五：靜置觀察</h3>
+                    <div id="warning-msg" class="bg-red-50 border-l-4 border-red-500 p-3 mb-2 flex flex-col items-center">
+                        <p class="text-sm text-red-700 font-bold mb-2">⚠️ 注意：操作時，手不可握住燒杯，以免凍傷！</p>
+                        <button id="btn-ack" onclick="acknowledgeWarning()" class="px-4 py-1 bg-red-500 text-white rounded font-bold text-sm hover:bg-red-600">我記住了</button>
+                    </div>
+                    <button id="btn-observe" onclick="startObservation()" disabled class="w-full py-4 bg-gray-300 text-gray-500 rounded-xl font-bold text-lg transition-all cursor-not-allowed">⏱️ 開始靜置一段時間</button>
+                </div>
+
+                <!-- 結論畫面 -->
+                <div id="ctrl-end" class="hidden flex flex-col space-y-3">
+                    <div class="bg-blue-50 p-4 rounded-xl border-2 border-blue-200 mb-2">
+                        <h4 class="text-blue-900 font-black text-center mb-2">📋 實驗結論</h4>
+                        <p class="text-gray-700 text-sm leading-relaxed font-bold">
+                            當水的溫度下降到低於 <span class="text-red-500">0°C</span> 時，就會改變形態，由<span class="text-blue-600">液態</span>的水變成<span class="text-cyan-600">固態</span>的冰的現象，稱為<span class="text-purple-600 text-lg">凝固</span>。
+                        </p>
+                    </div>
+                    <button onclick="location.reload()" class="w-full py-3 bg-orange-500 text-white rounded-xl font-bold text-lg hover:bg-orange-600 shadow-[0_4px_0_#ea580c] active:translate-y-1 active:shadow-none transition-all">🔄 重新實驗</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // UI Elements
+        const dialogueText = document.getElementById('dialogue-text');
+        const dialogueContainer = document.getElementById('dialogue-container');
+        const waterDiv = document.getElementById('water');
+        const bagGroup = document.getElementById('bag-group');
+        const beaker = document.getElementById('beaker');
+        const iceLayer = document.getElementById('ice-layer');
+        const saltLayer = document.getElementById('salt-layer');
+        const thermoContainer = document.getElementById('thermo-container');
+        const thermoFluid = document.getElementById('thermo-fluid');
+        const eyeLevel = document.getElementById('eye-level');
+        const recordBoard = document.getElementById('record-board');
+        const hintText = document.getElementById('thermo-hint');
+
+        // Logic Variables & Math
+        let thermoBottom = 40; 
+        let eyeBottom = 100;   
+        let isStep2Active = false;
+
+        // --- Dialogue Helper ---
+        function updateDialogue(text, speaker = 'mimi') {
+            dialogueText.innerHTML = text;
+            if(speaker === 'cream') {
+                dialogueContainer.className = "p-4 min-h-[100px] flex items-center justify-center border-b transition-colors duration-500 bg-gray-100 border-gray-200";
+                dialogueText.className = "text-lg md:text-xl font-bold text-gray-700 text-center leading-relaxed";
+            } else {
+                dialogueContainer.className = "p-4 min-h-[100px] flex items-center justify-center border-b transition-colors duration-500 bg-orange-50 border-orange-100";
+                dialogueText.className = "text-lg md:text-xl font-bold text-orange-800 text-center leading-relaxed";
+            }
+        }
+
+        // --- Step 1 ---
+        function addWater() {
+            waterDiv.style.height = "55%";
+            setTimeout(() => { waterDiv.innerText = "30ml 水"; }, 500);
+            
+            document.getElementById('ctrl-step1').classList.add('hidden');
+            document.getElementById('ctrl-step2').classList.remove('hidden');
+            
+            thermoContainer.style.display = "flex";
+            eyeLevel.style.display = "flex";
+            isStep2Active = true;
+            
+            // 預設重置一下拉桿位置
+            adjustHeight(100);
+            adjustEyeLevel(0);
+            
+            updateDialogue("白奶油：照課本說的，使用溫度計前先檢查液柱有沒有中斷。<br>然後放進去時，<b>注意液囊不碰到夾鏈袋底部</b>，並且<b>眼睛平視液柱頂端刻度</b>！", "cream");
+        }
+
+        // --- Step 2: Thermometer Minigame ---
+        function adjustHeight(val) {
+            // 【修復物理穿透限制】: 限制在 8px (碰到袋底) ~ 80px (稍微離開水面) 之間
+            // 這樣紅色液囊最底端(-8px) 剛好等於 0 (袋子底部)，絕不會穿破夾鏈袋！
+            thermoBottom = 8 + (val / 100) * 72;
+            thermoContainer.style.bottom = thermoBottom + "px";
+            hintText.classList.add('hidden');
+        }
+
+        function adjustEyeLevel(val) {
+            eyeBottom = 100 + (val / 100) * 250;
+            eyeLevel.style.bottom = eyeBottom + "px";
+            hintText.classList.add('hidden');
+        }
+
+        function checkThermometer() {
+            // 【放寬標準】：只要稍微離開袋底(>9)且沒有完全離開水面(<60)就給過關
+            let isHeightCorrect = thermoBottom > 9 && thermoBottom < 60;
+            
+            // 判斷視線：根據放大的視覺高度換算 (同步放寬誤差範圍到 40)
+            let targetEyeLevel = 80 + (thermoBottom + 132) * 1.2;
+            let isEyeCorrect = Math.abs(eyeBottom - targetEyeLevel) < 40;
+
+            if (!isHeightCorrect) {
+                if (thermoBottom <= 9) {
+                    hintText.innerText = "❌ 白奶油警告：液囊碰到夾鏈袋底部了！這樣量不準！只要稍微往上拉一點點離開底部就好囉。";
+                } else {
+                    hintText.innerText = "❌ 白奶油警告：液囊太高了，沒有完全泡在水裡！往下拉一點。";
+                }
+                hintText.classList.remove('hidden');
+                updateDialogue("白奶油：重來一次！課本上寫得很清楚，液囊不碰到夾鏈袋底部！", "cream");
+                return;
+            }
+
+            if (!isEyeCorrect) {
+                hintText.innerText = "❌ 橘咪咪提醒：眼睛沒有平視液柱頂端的刻度喔！再對齊一點！";
+                hintText.classList.remove('hidden');
+                updateDialogue("橘咪咪：眼睛要『平視』紅色液柱的最高點讀取度數，才是正確的喔！", "mimi");
+                return;
+            }
+
+            // Success!
+            isStep2Active = false;
+            hintText.classList.add('hidden');
+            document.getElementById('ctrl-step2').classList.add('hidden');
+            document.getElementById('ctrl-step3').classList.remove('hidden');
+            
+            eyeLevel.style.display = "none"; // Hide guide
+            recordBoard.classList.remove('hidden'); // Show record board
+
+            // 【修復重疊問題】: 將袋子往更左邊移動 (translateX(-140px))，完全避開置中的燒杯
+            bagGroup.style.transform = "translateX(-140px) scale(0.9)"; 
+            beaker.style.opacity = "1";
+            
+            updateDialogue("橘咪咪：測量正確！目前的常溫是 25°C。<br>接下來我們把燒杯拿出來，依照步驟準備冰塊和食鹽吧！", "mimi");
+        }
+
+        // --- Step 3 & 4: Beaker & Mix ---
+        function addFirstIce() {
+            iceLayer.style.height = "30%";
+            saltLayer.style.height = "25%";
+            
+            let btn1 = document.getElementById('btn-ice1');
+            btn1.classList.replace('bg-cyan-100', 'bg-green-100');
+            btn1.classList.replace('text-cyan-800', 'text-green-800');
+            btn1.classList.replace('border-cyan-400', 'border-green-400');
+            btn1.innerText = "✅ 1. 燒杯放碎冰與適量食鹽";
+            btn1.disabled = true;
+
+            let btn2 = document.getElementById('btn-putbag');
+            btn2.disabled = false;
+            btn2.classList.replace('bg-gray-100', 'bg-blue-100');
+            btn2.classList.replace('text-gray-400', 'text-blue-800');
+            btn2.classList.replace('border-gray-200', 'border-blue-400');
+            btn2.classList.add('hover:bg-blue-200', 'cursor-pointer');
+
+            updateDialogue("橘咪咪：第一層冰和鹽準備好了！現在把剛才的水袋放進去燒杯裡。", "mimi");
+        }
+
+        function putBagIn() {
+            // 放回正中央
+            bagGroup.style.transform = "translateX(-50%) scale(1)";
+            bagGroup.style.bottom = "25px"; 
+            
+            let btn2 = document.getElementById('btn-putbag');
+            btn2.classList.replace('bg-blue-100', 'bg-green-100');
+            btn2.classList.replace('text-blue-800', 'text-green-800');
+            btn2.classList.replace('border-blue-400', 'border-green-400');
+            btn2.innerText = "✅ 2. 放入夾鏈袋";
+            btn2.disabled = true;
+
+            let btn3 = document.getElementById('btn-ice2');
+            btn3.disabled = false;
+            btn3.classList.replace('bg-gray-100', 'bg-cyan-500');
+            btn3.classList.replace('text-gray-400', 'text-white');
+            btn3.classList.replace('border-gray-200', 'border-cyan-600');
+            btn3.classList.add('hover:bg-cyan-600', 'cursor-pointer', 'shadow-[0_4px_0_#0891b2]', 'active:translate-y-1');
+
+            updateDialogue("白奶油：放進去了！但課本第 4 步說，還要『再加入更多的冰塊和食鹽』覆蓋它，快加！", "cream");
+        }
+
+        function addMoreIce() {
+            iceLayer.style.height = "90%";
+            saltLayer.style.height = "85%";
+
+            document.getElementById('ctrl-step3').classList.add('hidden');
+            document.getElementById('ctrl-step4').classList.remove('hidden');
+
+            updateDialogue("白奶油：很好！準備完成。等等，在開始靜置前，看看下面紅色的注意事項！", "cream");
+        }
+
+        // --- Step 5: Observation ---
+        function acknowledgeWarning() {
+            document.getElementById('warning-msg').classList.replace('bg-red-50', 'bg-green-50');
+            document.getElementById('warning-msg').classList.replace('border-red-500', 'border-green-500');
+            document.getElementById('warning-msg').innerHTML = '<p class="text-sm text-green-700 font-bold">✅ 記住了：手不可握住燒杯，以免凍傷！</p>';
+            
+            let btnObs = document.getElementById('btn-observe');
+            btnObs.disabled = false;
+            btnObs.classList.replace('bg-gray-300', 'bg-purple-500');
+            btnObs.classList.replace('text-gray-500', 'text-white');
+            btnObs.classList.replace('cursor-not-allowed', 'cursor-pointer');
+            btnObs.classList.add('hover:bg-purple-600', 'shadow-[0_4px_0_#7e22ce]', 'active:translate-y-1');
+            
+            updateDialogue("橘咪咪：太棒了！安全第一。現在按下『開始靜置』，我們來觀察水袋裡的溫度和形態變化吧！", "mimi");
+        }
+
+        function startObservation() {
+            document.getElementById('btn-observe').classList.add('hidden');
+            beaker.classList.add('frost-effect'); 
+            
+            let temp = 25.0;
+            const tempText = document.getElementById('obs-temp');
+            const stateText = document.getElementById('obs-state');
+            
+            updateDialogue("橘咪咪：滴答滴答... 放置一段時間後，溫度計的紅色液柱下降了！", "mimi");
+
+            let interval = setInterval(() => {
+                temp -= 0.7; 
+                if(temp < -5) temp = -5;
+                
+                tempText.innerText = temp.toFixed(1) + "°C";
+                
+                let heightPct = 15 + ((temp + 5) / 30) * 45; 
+                thermoFluid.style.height = heightPct + "%";
+
+                if (temp <= 0 && temp > -1.5) {
+                    waterDiv.classList.add('ice-state');
+                    waterDiv.innerText = "逐漸結冰";
+                    stateText.innerText = "液態轉固態";
+                    stateText.className = "text-sm font-bold text-teal-700 bg-teal-100 px-2 py-1 rounded";
+                    updateDialogue("白奶油：看！溫度下降到 0°C 以下了，水開始改變形態了！", "cream");
+                }
+
+                if (temp <= -4) {
+                    clearInterval(interval);
+                    waterDiv.innerText = "固態的冰";
+                    stateText.innerText = "固態 (冰)";
+                    stateText.className = "text-sm font-bold text-blue-800 bg-blue-200 px-2 py-1 rounded";
+                    
+                    document.getElementById('ctrl-step4').classList.add('hidden');
+                    document.getElementById('ctrl-end').classList.remove('hidden');
+                    updateDialogue("橘咪咪：實驗大成功！🎉 水變成冰了。請看右下角的實驗結論！", "mimi");
+                }
+            }, 300);
+        }
+
+    </script>
+</body>
+</html>
