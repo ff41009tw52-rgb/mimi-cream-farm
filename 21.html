@@ -484,16 +484,16 @@
         }
 
         function checkThermometer() {
-            // 【放寬標準】：只要稍微離開袋底(>9)且沒有完全離開水面(<60)就給過關
-            let isHeightCorrect = thermoBottom > 9 && thermoBottom < 60;
+            // 【極度放寬標準】：只要不是完全貼底 (>8.1) 且沒有完全離開水面(<65)就給過關
+            let isHeightCorrect = thermoBottom > 8.1 && thermoBottom < 65;
             
             // 判斷視線：根據放大的視覺高度換算 (同步放寬誤差範圍到 40)
             let targetEyeLevel = 80 + (thermoBottom + 132) * 1.2;
             let isEyeCorrect = Math.abs(eyeBottom - targetEyeLevel) < 40;
 
             if (!isHeightCorrect) {
-                if (thermoBottom <= 9) {
-                    hintText.innerText = "❌ 白奶油警告：液囊碰到夾鏈袋底部了！這樣量不準！只要稍微往上拉一點點離開底部就好囉。";
+                if (thermoBottom <= 8.1) {
+                    hintText.innerText = "❌ 白奶油警告：液囊完全貼在夾鏈袋底部了！只要拉桿稍微往上移一點點就好囉。";
                 } else {
                     hintText.innerText = "❌ 白奶油警告：液囊太高了，沒有完全泡在水裡！往下拉一點。";
                 }
