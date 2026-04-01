@@ -1,0 +1,21 @@
+{
+  "name": "橘咪咪與白奶油的科學農場",
+  "short_name": "科學農場",
+  "description": "有趣的科學互動遊戲與教學小工具",
+  "start_url": "/",
+  "display": "fullscreen",
+  "background_color": "#ffffff",
+  "theme_color": "#ffcc00",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
