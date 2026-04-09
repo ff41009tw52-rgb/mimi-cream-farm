@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>科學農場大挑戰：天氣與蔬菜保衛戰</title>
+    <!-- 引入 Tailwind CSS 進行快速且響應式的排版 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 React 與 ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- 引入 Babel 以在瀏覽器中編譯 JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        /* 隱藏滾動條但保留滾動功能 */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .card-hover:hover { transform: translateY(-10px); transition: transform 0.2s ease; }
+        .treasure-hover:hover { transform: scale(1.1); transition: transform 0.2s ease; }
+        
+        /* 確保卡牌區塊不會被截斷，增加底部空間 */
+        .card-container {
+            padding-bottom: 2.5rem; /* 增加底部空間 */
+            padding-top: 1.5rem; 
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans h-screen overflow-hidden flex flex-col">
+
+    <!-- React 應用的掛載點 -->
+    <div id="root" class="h-full w-full flex flex-col"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- SVG 圖示庫 (精緻的向量圖，取代 Emoji) ---
+        const SvgIcons = {
+            Tray: () => ( // 集水盤
+                <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                    <rect x="15" y="60" width="70" height="15" rx="5" fill="#94a3b8"/>
+                    <path d="M40 30 Q50 20 60 30 Q65 40 50 50 Q35 40 40 30 Z" fill="#60a5fa" opacity="0.8"/>
+                    <path d="M30 45 Q40 35 50 45 Q55 55 40 65 Q25 55 30 45 Z" fill="#3b82f6" opacity="0.9"/>
+                </svg>
+            ),
+            StevensonScreen: () => ( // 百葉箱
+                <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                    <rect x="25" y="25" width="50" height="45" fill="#f8fafc" stroke="#64748b" strokeWidth="3" rx="2"/>
+                    <line x1="30" y1="35" x2="70" y2="35" stroke="#cbd5e1" strokeWidth="3"/>
+                    <line x1="30" y1="45" x2="70" y2="45" stroke="#cbd5e1" strokeWidth="3"/>
+                    <line x1="30" y1="55" x2="70" y2="55" stroke="#cbd5e1" strokeWidth="3"/>
+                    <rect x="35" y="70" width="6" height="20" fill="#94a3b8"/>
+                    <rect x="59" y="70" width="6" height="20" fill="#94a3b8"/>
+                    <polygon points="20,25 50,10 80,25" fill="#e2e8f0" stroke="#64748b" strokeWidth="2" strokeLinejoin="round"/>
+                </svg>
+            ),
+            SunWater: () => ( // 陽光與水分
+                <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                    <circle cx="35" cy="35" r="20" fill="#facc15"/>
+                    <path d="M55 55 Q70 40 85 55 Q90 75 70 90 Q50 75 55 55 Z" fill="#3b82f6" opacity="0.9"/>
+                    <circle cx="35" cy="35" r="15" fill="#fef08a"/>
+                </svg>
+            ),
+            Tweezers: () => ( // 鑷子
+                <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                    <path d="M20 75 L65 20 L72 25 L25 80 Z" fill="#94a3b8"/>
+                    <path d="M30 85 L75 30 L82 35 L35 90 Z" fill="#cbd5e1"/>
+                    <circle cx="75" cy="30" r="4" fill="#475569"/>
+                    <rect x="20" y="75" width="10" height="5" fill="#64748b" transform="rotate(-45 25 80)"/>
+                    <rect x="30" y="85" width="10" height="5" fill="#94a3b8" transform="rotate(-45 35 90)"/>
+                </svg>
+            ),
+            Fertilizer: () => ( // 肥料袋
+                <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                    <path d="M25 85 L35 35 L65 35 L75 85 Z" fill="#d97706"/>
+                    <path d="M25 85 L35 35 L65 35 L75 85 Z" fill="url(#grad)" opacity="0.2"/>
+                    <path d="M45 55 Q50 40 55 55 Q50 65 45 55 Z" fill="#4ade80"/>
+                    <rect x="30" y="35" width="40" height="8" fill="#b45309" rx="2"/>
+                    <text x="50" y="75" fontSize="16" fill="#fef3c7" textAnchor="middle" fontWeight="bold">NPK</text>
+                </svg>
+            ),
+            Net: () => ( // 防蟲網
+                <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                    <path d="M20 75 Q50 15 80 75" fill="none" stroke="#94a3b8" strokeWidth="3" strokeDasharray="4,4"/>
+                    <path d="M25 75 Q50 25 75 75" fill="none" stroke="#cbd5e1" strokeWidth="2" strokeDasharray="3,3"/>
+                    <path d="M10 75 L90 75" stroke="#64748b" strokeWidth="5" strokeLinecap="round"/>
+                    <path d="M45 75 L45 55 M55 75 L55 65" stroke="#4ade80" strokeWidth="5" strokeLinecap="round"/>
+                    <circle cx="50" cy="45" r="4" fill="#22c55e"/>
+                    <circle cx="62" cy="55" r="3" fill="#22c55e"/>
+                </svg>
+            ),
+            Notebook: () => ( // 筆記本
+                <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                    <rect x="25" y="15" width="50" height="70" rx="4" fill="#22c55e"/>
+                    <rect x="20" y="15" width="5" height="70" fill="#16a34a"/>
+                    <rect x="35" y="30" width="30" height="3" fill="#86efac"/>
+                    <rect x="35" y="45" width="30" height="3" fill="#86efac"/>
+                    <rect x="35" y="60" width="30" height="3" fill="#86efac"/>
+                    <path d="M75 35 L85 25 L90 30 L80 40 Z" fill="#fcd34d"/>
+                    <polygon points="75,35 80,40 70,45" fill="#94a3b8"/>
+                    <circle cx="22.5" cy="25" r="2" fill="#f8fafc"/>
+                    <circle cx="22.5" cy="50" r="2" fill="#f8fafc"/>
+                    <circle cx="22.5" cy="75" r="2" fill="#f8fafc"/>
+                </svg>
+            ),
+            WateringCan: () => ( // 澆水器
+                <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                    <rect x="35" y="45" width="35" height="35" rx="8" fill="#4ade80"/>
+                    <path d="M35 55 Q15 45 20 75" fill="none" stroke="#22c55e" strokeWidth="7" strokeLinecap="round"/>
+                    <path d="M70 75 L85 50" stroke="#22c55e" strokeWidth="7" strokeLinecap="round"/>
+                    <ellipse cx="85" cy="50" rx="4" ry="8" fill="#60a5fa" transform="rotate(30 85 50)"/>
+                    <path d="M85 50 Q90 60 85 70" fill="none" stroke="#3b82f6" strokeWidth="2" strokeDasharray="2,2"/>
+                </svg>
+            )
+        };
+
+        // --- 遊戲資料庫設定 ---
+        
+        // 敵方：學習單情境挑戰 (8 種) - 高難度！
+        const enemiesData = [
+            { id: 1, name: "幼苗太密了", emoji: "🌱", maxHp: 30, atk: 5, type: "單元一：田園樂", desc: "種子撒得太密集，長出來的幼苗會互相搶奪養分！" },
+            { id: 2, name: "錯誤的澆水法", emoji: "🚿", maxHp: 45, atk: 8, type: "單元一：田園樂", desc: "水柱太大、而且選在中午澆水，植物會受傷的！" },
+            { id: 3, name: "植物長歪了", emoji: "🥀", maxHp: 60, atk: 12, type: "單元一：田園樂", desc: "植物一直往同一個方向長，而且有些快倒伏了！" },
+            { id: 4, name: "巧克力融化了", emoji: "🍫", maxHp: 75, atk: 15, type: "單元二：溫度變化", desc: "巧克力受熱變成液態了！這種變化還能復原嗎？" },
+            { id: 5, name: "不可復原的變化", emoji: "🔥", maxHp: 90, atk: 18, type: "單元二：溫度變化", desc: "玉米粒加熱爆開、木炭燃燒，這些物質能變回原狀嗎？" },
+            { id: 6, name: "消失的杯中水", emoji: "💨", maxHp: 110, atk: 20, type: "單元二：溫度變化", desc: "裝水的容器靜置兩三天，裡面的水竟然減少了！" },
+            { id: 7, name: "神祕的小水珠", emoji: "💧", maxHp: 130, atk: 22, type: "單元二：溫度變化", desc: "從冰箱拿出的飲料瓶，過一段時間表面布滿了小水珠！" },
+            { id: 8, name: "氣溫計量不準", emoji: "🌡️", maxHp: 150, atk: 25, type: "單元二：溫度變化", desc: "測量氣溫時姿勢不對，會讓讀取到的溫度有誤差！" }
+        ];
+
+        // 知識卡牌庫 (20 種)
+        const initialDeck = [
+            // 單元一：田園樂
+            { id: 'c1', name: '適當播種距離', cost: 1, type: 'attack', val: 6, desc: '點播時要在土壤上間隔適當距離挖淺洞，確保生長空間。', bg: 'bg-green-100' },
+            { id: 'c2', name: '覆蓋薄薄的土', cost: 1, type: 'defend', val: 5, desc: '播種後只覆蓋一層薄薄的土，太厚會影響發芽。', bg: 'bg-green-200' },
+            { id: 'c3', name: '扁平鑷子間拔', cost: 2, type: 'attack', val: 12, desc: '幼苗太密時，用末端扁平的鑷子夾除不要的幼苗。', bg: 'bg-lime-200' },
+            { id: 'c4', name: '避開中午澆水', cost: 1, type: 'defend', val: 6, desc: '中午氣溫高，澆水應該避開中午時段以免傷害植物。', bg: 'bg-yellow-200' },
+            { id: 'c5', name: '水柱小位置低', cost: 1, type: 'attack', val: 5, desc: '澆水器的位置要低一點，水柱小一點，直接澆在土壤上。', bg: 'bg-blue-200' },
+            { id: 'c6', name: '植物向光性', cost: 2, type: 'defend', val: 12, desc: '植物有向著陽光方向生長的現象，要注意日照方向。', bg: 'bg-yellow-100' },
+            { id: 'c7', name: '食用部位(根)', cost: 1, type: 'attack', val: 7, desc: '蘿蔔和胡蘿蔔，我們吃的是植物儲存養分的「根」。', bg: 'bg-emerald-100' },
+            { id: 'c8', name: '食用部位(莖)', cost: 1, type: 'attack', val: 6, desc: '馬鈴薯長在地下，但它是我們食用的「莖」部位。', bg: 'bg-orange-100' },
+            { id: 'c9', name: '食用部位(葉)', cost: 1, type: 'defend', val: 6, desc: '菠菜和小白菜，我們吃的是植物行光合作用的「葉」。', bg: 'bg-emerald-200' },
+            { id: 'c10', name: '食用部位(果實)', cost: 1, type: 'attack', val: 6, desc: '南瓜、秋葵和絲瓜，我們吃的是植物的「果實」。', bg: 'bg-red-100' },
+            
+            // 單元二：溫度變化對物質的影響
+            { id: 'c11', name: '平視液柱頂端', cost: 1, type: 'defend', val: 6, desc: '讀取溫度時，眼睛必須平視氣溫計紅色液柱的頂端。', bg: 'bg-red-200' },
+            { id: 'c12', name: '遇熱融化', cost: 1, type: 'attack', val: 7, desc: '冰塊受熱或放在 0℃ 以上的環境時，會融化變成水。', bg: 'bg-cyan-100' },
+            { id: 'c13', name: '遇熱蒸發', cost: 2, type: 'attack', val: 13, desc: '水在自然情況或受熱後，會蒸發變成看不見的水蒸氣。', bg: 'bg-teal-100' },
+            { id: 'c14', name: '遇冷凝固', cost: 2, type: 'defend', val: 12, desc: '水的溫度低於 0℃ 時，會凝固變成固態的冰塊。', bg: 'bg-blue-200' },
+            { id: 'c15', name: '遇冷凝結', cost: 2, type: 'attack', val: 14, desc: '空氣中看不到的水蒸氣，遇冷會凝結成液態小水珠！', bg: 'bg-blue-300' },
+            { id: 'c16', name: '壺口白煙', cost: 1, type: 'defend', val: 6, desc: '水沸騰時壺口上方的白煙，是熱水蒸氣遇冷凝結而成的。', bg: 'bg-gray-200' },
+            { id: 'c17', name: '可復原變化', cost: 1, type: 'defend', val: 8, desc: '水、巧克力、蠟先加熱，等溫度恢復時可以復原。', bg: 'bg-purple-100' },
+            { id: 'c18', name: '不可復原變化', cost: 2, type: 'attack', val: 15, desc: '玉米粒和木炭加熱後，就算溫度恢復也無法復原！', bg: 'bg-orange-300' },
+            { id: 'c19', name: '外在因素影響', cost: 0, type: 'defend', val: 4, desc: '物質受到空氣、水、溫度等外在因素影響時會改變。', bg: 'bg-indigo-100' },
+            { id: 'c20', name: '飲料瓶水珠', cost: 1, type: 'attack', val: 5, desc: '冰箱拿出的飲料瓶外布滿水珠，但瓶裡的水位沒有改變。', bg: 'bg-cyan-200' }
+        ];
+
+        // 寶藏庫 (結合學習單的物品)
+        const treasuresData = [
+            { id: 't1', name: '集水盤', icon: 'Tray', desc: '每回合開始時，回復 2 點學習生命值。', type: 'heal_turn', val: 2 },
+            { id: 't2', name: '百葉箱', icon: 'StevensonScreen', desc: '每回合開始時，自動獲得 3 點知識防護。', type: 'auto_block', val: 3 },
+            { id: 't3', name: '陽光與水分', icon: 'SunWater', desc: '最大知識點數 +1。', type: 'max_energy', val: 1 },
+            { id: 't4', name: '末端扁平鑷子', icon: 'Tweezers', desc: '打出解答卡時，解題進度額外 +2。', type: 'bonus_dmg', val: 2 },
+            { id: 't5', name: '營養肥料', icon: 'Fertilizer', desc: '最大知識點數 +1。', type: 'max_energy', val: 1 },
+            { id: 't6', name: '防蟲網', icon: 'Net', desc: '每回合開始時，自動獲得 4 點知識防護。', type: 'auto_block', val: 4 },
+            { id: 't7', name: '紀錄筆記本', icon: 'Notebook', desc: '結算時立刻回復 15 點學習生命值。', type: 'instant_heal', val: 15 },
+            { id: 't8', name: '專用澆水器', icon: 'WateringCan', desc: '打出解答卡時，解題進度額外 +3。', type: 'bonus_dmg', val: 3 }
+        ];
+
+        // --- 主遊戲元件 ---
+        function App() {
+            const [playerHp, setPlayerHp] = useState(60); 
+            const constMaxHp = 60;
+            const [playerBlock, setPlayerBlock] = useState(0);
+            const [energy, setEnergy] = useState(3);
+            
+            const [treasures, setTreasures] = useState([]);
+            const [rewardOptions, setRewardOptions] = useState([]);
+
+            const currentMaxEnergy = 3 + treasures.filter(t => t.type === 'max_energy').reduce((sum, t) => sum + t.val, 0);
+
+            const [hand, setHand] = useState([]);
+            const [level, setLevel] = useState(0);
+            const [enemy, setEnemy] = useState(enemiesData[0]);
+            const [enemyHp, setEnemyHp] = useState(enemiesData[0].maxHp);
+            const [enemyIntent, setEnemyIntent] = useState(enemiesData[0].atk);
+
+            const [gameState, setGameState] = useState('start'); 
+            const [tutorialPage, setTutorialPage] = useState(1); 
+            const [logs, setLogs] = useState(["學習單挑戰開始！請運用知識過關！"]);
+
+            const addLog = (msg) => {
+                setLogs(prev => [msg, ...prev].slice(0, 4));
+            };
+
+            const replenishHand = () => {
+                setHand(prev => {
+                    const needed = 5 - prev.length;
+                    if (needed <= 0) return prev;
+                    
+                    const existingIds = prev.map(c => c.id);
+                    let availableCards = initialDeck.filter(c => !existingIds.includes(c.id));
+                    
+                    const newCards = [];
+                    for (let i = 0; i < needed; i++) {
+                        if (availableCards.length === 0) break;
+                        const randomIndex = Math.floor(Math.random() * availableCards.length);
+                        const randomCard = availableCards[randomIndex];
+                        newCards.push({ ...randomCard, uniqueId: Math.random().toString(36).substr(2, 9) });
+                        availableCards.splice(randomIndex, 1);
+                    }
+                    return [...prev, ...newCards];
+                });
+            };
+
+            const startTurn = (currentTreasures = treasures) => {
+                const maxE = 3 + currentTreasures.filter(t => t.type === 'max_energy').reduce((sum, t) => sum + t.val, 0);
+                setEnergy(maxE);
+                
+                const autoBlock = currentTreasures.filter(t => t.type === 'auto_block').reduce((sum, t) => sum + t.val, 0);
+                setPlayerBlock(autoBlock);
+                if (autoBlock > 0) addLog(`✨ 寶物發威：自動獲得 ${autoBlock} 點防護！`);
+
+                const autoHeal = currentTreasures.filter(t => t.type === 'heal_turn').reduce((sum, t) => sum + t.val, 0);
+                if (autoHeal > 0) {
+                    setPlayerHp(prev => Math.min(constMaxHp, prev + autoHeal));
+                    addLog(`💖 寶物發威：回復 ${autoHeal} 點學習生命！`);
+                }
+
+                replenishHand();
+            };
+
+            useEffect(() => {
+                if (gameState === 'playing' && hand.length === 0) {
+                    startTurn();
+                }
+            }, [gameState]);
+
+            const playCard = (card, index) => {
+                if (energy < card.cost) {
+                    addLog(`❌ 知識點數不足！需要 ${card.cost} 點。`);
+                    return;
+                }
+
+                setEnergy(e => e - card.cost);
+                setHand(prevHand => prevHand.filter((_, i) => i !== index));
+
+                if (card.type === 'attack') {
+                    const bonusDmg = treasures.filter(t => t.type === 'bonus_dmg').reduce((sum, t) => sum + t.val, 0);
+                    const finalDmg = card.val + bonusDmg;
+                    
+                    setEnemyHp(hp => Math.max(0, hp - finalDmg));
+                    let logStr = `📖 運用【${card.name}】，增加 ${finalDmg} 點進度！`;
+                    if (bonusDmg > 0) logStr += ` (寶物額外+${bonusDmg})`;
+                    addLog(logStr);
+
+                } else if (card.type === 'defend') {
+                    const blk = card.val;
+                    setPlayerBlock(b => b + blk);
+                    addLog(`🛡️ 運用【${card.name}】，增加 ${blk} 點知識防護！`);
+                }
+            };
+
+            useEffect(() => {
+                if (gameState === 'playing' && enemyHp <= 0) {
+                    addLog(`🎉 成功解決了【${enemy.name}】的問題！`);
+                    
+                    setTimeout(() => {
+                        if (level + 1 < enemiesData.length) {
+                            const availableTreasures = treasuresData.filter(t => !treasures.find(myT => myT.id === t.id));
+                            const shuffled = availableTreasures.sort(() => 0.5 - Math.random());
+                            setRewardOptions(shuffled.slice(0, 2));
+                            setGameState('reward');
+                        } else {
+                            setGameState('win');
+                        }
+                    }, 800);
+                }
+            }, [enemyHp]);
+
+            const handleClaimReward = (treasure) => {
+                const newTreasures = [...treasures, treasure];
+                setTreasures(newTreasures);
+                
+                if (treasure.type === 'instant_heal') {
+                    setPlayerHp(prev => Math.min(constMaxHp, prev + treasure.val));
+                }
+
+                const nextLevel = level + 1;
+                setLevel(nextLevel);
+                setEnemy(enemiesData[nextLevel]);
+                setEnemyHp(enemiesData[nextLevel].maxHp);
+                setEnemyIntent(enemiesData[nextLevel].atk);
+                
+                setGameState('playing');
+                
+                setTimeout(() => {
+                    startTurn(newTreasures);
+                }, 100);
+            };
+
+            const endTurn = () => {
+                addLog("⏳ 回合結束，測驗來襲...");
+                const dmg = enemyIntent;
+                let actualDmg = Math.max(0, dmg - playerBlock);
+                
+                setTimeout(() => {
+                    if (actualDmg > 0) {
+                        setPlayerHp(hp => {
+                            const newHp = Math.max(0, hp - actualDmg);
+                            if (newHp <= 0) setGameState('gameover');
+                            return newHp;
+                        });
+                        addLog(`⚠️ 答錯被扣分！你失去了 ${actualDmg} 點學習生命值！`);
+                    } else {
+                        addLog(`✨ 你的知識防護完美抵擋了考驗！`);
+                    }
+
+                    setTimeout(() => {
+                        if (gameState === 'playing') startTurn(treasures); 
+                    }, 800);
+
+                }, 800);
+            };
+
+            // 輔助函式：根據名稱渲染 SVG
+            const renderIcon = (iconName) => {
+                const IconComponent = SvgIcons[iconName];
+                return IconComponent ? <IconComponent /> : null;
+            };
+
+            // --- UI 渲染 ---
+            
+            if (gameState === 'start') {
+                return (
+                    <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-b from-sky-200 via-green-100 to-green-300 p-4 relative">
+                        <div className="bg-white p-8 rounded-3xl shadow-xl max-w-lg text-center border-4 border-green-600 relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-4 bg-green-500"></div>
+                            <h1 className="text-3xl md:text-4xl font-bold text-green-700 mb-2 mt-4">📖 自然科學觀察塔</h1>
+                            <h2 className="text-xl font-bold text-orange-600 mb-4">田園樂與溫度寶藏版</h2>
+                            <p className="text-gray-600 mb-6 text-sm md:text-base leading-relaxed">
+                                歡迎來到橘咪咪與白奶油的農田！在這次的挑戰中，你不僅要運用學習單上的科學知識，還能在每次通關後挖出神奇的「科學寶物」喔！
+                            </p>
+                            <div className="flex justify-center gap-4 mb-6">
+                                <img src="Christmasmimi.jpg" alt="橘咪咪" className="w-24 h-24 rounded-full border-4 border-orange-300 object-cover" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'><rect width=\'100\' height=\'100\' fill=\'%23fbd38d\'/><text x=\'50\' y=\'60\' font-size=\'40\' text-anchor=\'middle\'>🐱</text></svg>'"/>
+                                <img src="Christmascream.jpg" alt="白奶油" className="w-24 h-24 rounded-full border-4 border-gray-300 object-cover" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'><rect width=\'100\' height=\'100\' fill=\'%23e2e8f0\'/><text x=\'50\' y=\'60\' font-size=\'40\' text-anchor=\'middle\'>😸</text></svg>'"/>
+                            </div>
+                            <button onClick={() => {setGameState('tutorial'); setTutorialPage(1);}} className="bg-green-600 text-white px-8 py-3 rounded-full text-xl font-bold hover:bg-green-700 transition shadow-md w-full animate-bounce">
+                                進入挑戰！
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (gameState === 'tutorial') {
+                return (
+                    <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-b from-sky-200 via-green-100 to-green-300 p-4 relative">
+                        <div className="bg-white p-6 md:p-8 rounded-3xl shadow-xl max-w-lg w-full text-left border-4 border-yellow-500 overflow-y-auto max-h-[90vh] flex flex-col">
+                            <h2 className="text-2xl font-bold text-center text-gray-800 mb-4 flex justify-center items-center gap-2">
+                                📝 遊戲規則說明 ({tutorialPage}/3)
+                            </h2>
+                            
+                            <div className="flex-1">
+                                {tutorialPage === 1 && (
+                                    <div className="space-y-4 text-gray-700 text-sm md:text-base animate-fade-in">
+                                        <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                                            <p className="font-bold text-green-700 text-lg mb-2">🎯 遊戲目標與名詞</p>
+                                            <ul className="list-disc ml-5 space-y-2">
+                                                <li><strong>❤️ 學習生命值：</strong>代表你還能承受多少錯誤。被挑戰的「測驗難度」攻擊時會減少，扣到 0 就失敗了。</li>
+                                                <li><strong>⚡ 知識點數：</strong>打出知識卡牌需要消耗點數。每回合固定補滿（可藉由寶物增加上限）。</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {tutorialPage === 2 && (
+                                    <div className="space-y-4 text-gray-700 text-sm md:text-base animate-fade-in">
+                                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                            <p className="font-bold text-blue-700 text-lg mb-2">🃏 卡牌的作用</p>
+                                            <p className="mb-2 text-gray-800">在戰鬥畫面中，你會遇到不同的「學習挑戰（敵人）」，你需要打出這兩種卡牌來過關：</p>
+                                            <ul className="list-disc ml-5 space-y-3">
+                                                <li>
+                                                    <strong>📖 解答卡 (+進度)：</strong><br/>
+                                                    這是你的「攻擊牌」！打出解答卡可以增加「解題進度」。當敵人的「待解答（血量）」被你扣到 0 的時候，你就成功解決了這個難題！
+                                                </li>
+                                                <li>
+                                                    <strong>🛡️ 防護卡 (+防護)：</strong><br/>
+                                                    這是你的「防禦牌」！在回合結束時，敵人會發動「測驗難度」的攻擊。打出防護卡可以抵擋這些攻擊，保護你的「學習生命值」不被扣除！
+                                                </li>
+                                            </ul>
+                                            <p className="mt-4 text-red-600 font-bold bg-white/80 p-2 rounded text-center border border-red-200">👉 記得在沒有知識點數時，按下「結束回合」！</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {tutorialPage === 3 && (
+                                    <div className="space-y-4 text-gray-700 text-sm md:text-base animate-fade-in">
+                                        <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                                            <p className="font-bold text-yellow-700 text-lg mb-2">🎁 挖掘寶藏</p>
+                                            <p className="mb-2">每打倒一個關卡，就會進入「結算畫面」。你可以從泥土裡挑選 1 個神奇的寶物！這些寶物都來自學習單喔：</p>
+                                            <ul className="list-disc ml-5 space-y-1">
+                                                <li><strong>📦 百葉箱：</strong>每回合自動給你防護。</li>
+                                                <li><strong>☀️ 陽光與水分：</strong>增加最大知識點數。</li>
+                                                <li><strong>🥢 末端扁平鑷子：</strong>讓你的解答卡威力更強！</li>
+                                            </ul>
+                                            <p className="mt-2 text-gray-500 text-xs">寶物會顯示在遊戲左上角，滑鼠移上去可以看說明。</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex justify-between mt-6 gap-4">
+                                {tutorialPage > 1 ? (
+                                    <button onClick={() => setTutorialPage(p => p - 1)} className="bg-gray-300 text-gray-800 px-6 py-2 rounded-full font-bold hover:bg-gray-400 transition flex-1">
+                                        上一頁
+                                    </button>
+                                ) : (
+                                    <div className="flex-1"></div>
+                                )}
+                                
+                                {tutorialPage < 3 ? (
+                                    <button onClick={() => setTutorialPage(p => p + 1)} className="bg-blue-500 text-white px-6 py-2 rounded-full font-bold hover:bg-blue-600 transition flex-1 shadow-md">
+                                        下一頁
+                                    </button>
+                                ) : (
+                                    <button onClick={() => setGameState('playing')} className="bg-orange-500 text-white px-6 py-2 rounded-full font-bold hover:bg-orange-600 transition flex-1 shadow-md animate-pulse">
+                                        開始測驗！
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (gameState === 'reward') {
+                return (
+                    <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-b from-yellow-100 to-orange-200 p-4 relative">
+                        <div className="bg-white p-6 md:p-8 rounded-3xl shadow-2xl max-w-2xl w-full text-center border-4 border-orange-400">
+                            <h1 className="text-3xl md:text-4xl font-bold text-orange-600 mb-2">🎉 關卡結算！</h1>
+                            <p className="text-gray-700 mb-6 font-bold text-sm md:text-base">橘咪咪在農田裡發現了寶物！請挑選一個帶上吧：</p>
+                            
+                            <div className="flex flex-col md:flex-row justify-center gap-4">
+                                {rewardOptions.map((treasure, idx) => (
+                                    <div 
+                                        key={idx}
+                                        onClick={() => handleClaimReward(treasure)}
+                                        className="bg-orange-50 border-2 border-orange-300 rounded-2xl p-4 flex-1 cursor-pointer hover:bg-orange-100 hover:scale-105 transition shadow-md flex flex-col items-center justify-between"
+                                    >
+                                        <div className="w-16 h-16 md:w-20 md:h-20 mb-3">{renderIcon(treasure.icon)}</div>
+                                        <h3 className="font-bold text-xl text-gray-800 border-b border-orange-200 pb-2 w-full mb-2">{treasure.name}</h3>
+                                        <p className="text-gray-600 text-sm flex-1 flex items-center justify-center font-semibold px-2">{treasure.desc}</p>
+                                        <button className="mt-4 bg-orange-500 text-white px-6 py-2 rounded-full font-bold w-full">選擇它！</button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (gameState === 'win' || gameState === 'gameover') {
+                return (
+                    <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-b from-sky-200 via-green-100 to-green-300 p-4 relative">
+                        <a href="index.html" className="absolute top-2 left-2 z-50 bg-orange-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-orange-600 transition flex items-center gap-2 font-bold text-sm md:text-base">
+                            🏠 回農場
+                        </a>
+                        <div className="bg-white p-8 rounded-3xl shadow-xl max-w-lg text-center border-4 border-green-600">
+                            <h1 className="text-5xl mb-4">{gameState === 'win' ? '🏆' : '📝'}</h1>
+                            <h1 className="text-3xl font-bold text-green-700 mb-4">
+                                {gameState === 'win' ? '滿分通關！收集大師！' : '生命耗盡，需要複習'}
+                            </h1>
+                            <p className="text-gray-600 mb-6 leading-relaxed">
+                                {gameState === 'win' ? `太神啦！你不但掌握了自然科學的重點，還收集了 ${treasures.length} 個神奇寶物！` : '別灰心，去翻翻學習單，複習一下重點，下次一定能過關！'}
+                            </p>
+                            <button onClick={() => window.location.reload()} className="bg-orange-500 text-white px-8 py-3 rounded-full text-xl font-bold hover:bg-orange-600 transition shadow-md w-full">
+                                重新挑戰
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="flex-1 flex flex-col bg-gradient-to-b from-sky-200 via-green-100 to-green-300 relative h-full">
+                    
+                    {/* 左上角：寶物袋 */}
+                    <div className="absolute top-2 left-2 z-40 bg-white/90 px-3 py-1.5 rounded-full shadow-md border border-gray-300 flex items-center gap-2">
+                        <span className="font-bold text-sm text-gray-700">🎒 寶物袋:</span>
+                        {treasures.length === 0 ? <span className="text-xs text-gray-500">空空的</span> : null}
+                        <div className="flex gap-2">
+                            {treasures.map((t, i) => (
+                                <div key={i} title={`${t.name}: ${t.desc}`} className="w-6 h-6 treasure-hover cursor-help">
+                                    {renderIcon(t.icon)}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* 上半部：對戰區 */}
+                    <div className="flex-none flex flex-col h-[48%] pt-12 pb-2 px-4">
+                        <div className="bg-white/70 p-2 md:p-3 shadow-sm flex items-center gap-3 rounded-xl mb-2 flex-none">
+                            <img src="Christmascream.jpg" alt="白奶油" className="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-gray-400 object-cover" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'50\' height=\'50\'><rect width=\'50\' height=\'50\' fill=\'%23e2e8f0\'/><text x=\'25\' y=\'35\' font-size=\'20\' text-anchor=\'middle\'>😸</text></svg>'"/>
+                            <div className="flex-1">
+                                <p className="text-sm md:text-base font-bold text-gray-800">白奶油園長提示：</p>
+                                <p className="text-xs md:text-sm text-gray-600 italic">「哼，遇到{enemy.type}的問題，要仔細回想學習單裡的關鍵字喔！」</p>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 flex flex-col md:flex-row items-center justify-around relative min-h-0">
+                            <div className="flex flex-col items-center">
+                                <div className="relative mb-2">
+                                    <img src="Christmasmimi.jpg" alt="橘咪咪" className="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-orange-400 object-cover shadow-lg" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'><rect width=\'100\' height=\'100\' fill=\'%23fbd38d\'/><text x=\'50\' y=\'60\' font-size=\'40\' text-anchor=\'middle\'>🐱</text></svg>'"/>
+                                    {playerBlock > 0 && (
+                                        <div className="absolute -bottom-2 -right-2 bg-blue-500 text-white font-bold rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center border-2 border-white shadow-md text-xs md:text-base z-10">
+                                            🛡️ {playerBlock}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="bg-white px-3 py-1 rounded-full shadow font-bold text-red-500 mb-1 text-xs md:text-sm whitespace-nowrap">
+                                    ❤️ 生命: {playerHp} / {constMaxHp}
+                                </div>
+                                <div className="flex gap-1 mt-1">
+                                    {[...Array(currentMaxEnergy)].map((_, i) => (
+                                        <div key={i} className={`w-3 h-3 md:w-4 md:h-4 rounded-full ${i < energy ? 'bg-yellow-400 border border-yellow-600 shadow' : 'bg-gray-300'}`}></div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="w-full md:w-1/3 bg-white/90 rounded-xl p-2 h-20 md:h-24 overflow-y-auto text-xs md:text-sm flex flex-col justify-end text-center my-2 md:my-0 shadow-sm border border-gray-200 mx-2 no-scrollbar">
+                                {logs.map((l, i) => (
+                                    <div key={i} className={`text-gray-800 ${i===0 ? 'font-bold opacity-100' : 'opacity-60'}`}>{l}</div>
+                                ))}
+                            </div>
+
+                            <div className="flex flex-col items-center">
+                                <div className="bg-red-100 border border-red-300 text-red-700 px-3 py-0.5 rounded-xl mb-1 text-xs md:text-sm font-bold flex items-center gap-1 shadow-sm whitespace-nowrap">
+                                    ⚠️ 測驗難度 {enemyIntent}
+                                </div>
+                                <div className="text-5xl md:text-6xl bg-white p-2 md:p-3 rounded-full shadow-lg border-4 border-gray-400 mb-1 flex items-center justify-center">
+                                    {enemy.emoji}
+                                </div>
+                                <h2 className="font-bold text-sm md:text-base text-gray-800 text-center">{enemy.name} <br/><span className="text-[10px] font-normal text-blue-600">({enemy.type})</span></h2>
+                                <div className="w-28 md:w-36 bg-gray-300 rounded-full h-3 md:h-4 mt-1 relative overflow-hidden border border-gray-400">
+                                    <div className="bg-green-500 h-full transition-all duration-300" style={{ width: `${(enemyHp / enemy.maxHp) * 100}%` }}></div>
+                                    <div className="absolute inset-0 text-[9px] md:text-[10px] flex items-center justify-center font-bold text-white shadow-sm drop-shadow-md">
+                                        待解答: {enemyHp} / {enemy.maxHp}
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    {/* 下半部：手牌區 */}
+                    <div className="flex-none h-[52%] bg-gray-800/90 rounded-t-3xl shadow-[0_-10px_20px_rgba(0,0,0,0.3)] relative z-30 border-t-4 border-gray-600 flex flex-col">
+                        <div className="flex justify-between items-center w-full px-4 pt-3 pb-2 flex-none">
+                            <div className="text-yellow-400 font-bold text-sm md:text-lg flex items-center gap-1 md:gap-2">
+                                ⚡ 知識點數: {energy} / {currentMaxEnergy}
+                            </div>
+                            <button 
+                                onClick={endTurn}
+                                className="bg-red-500 hover:bg-red-600 text-white px-5 md:px-8 py-1.5 md:py-2 rounded-full font-bold shadow-lg transition transform hover:scale-105 active:scale-95 text-sm md:text-base border-2 border-red-700"
+                            >
+                                結束回合 ⏳
+                            </button>
+                        </div>
+
+                        <div className="flex-1 w-full overflow-x-auto overflow-y-visible no-scrollbar">
+                            <div className="flex items-center justify-start md:justify-center gap-3 px-4 min-w-max h-full card-container">
+                                {hand.map((card, index) => (
+                                    <div 
+                                        key={card.uniqueId || `${card.id}-${index}`} 
+                                        onClick={() => playCard(card, index)}
+                                        className={`${card.bg} card-hover w-32 md:w-36 h-48 md:h-52 rounded-xl border-2 border-gray-400 shadow-md flex flex-col p-2 cursor-pointer relative flex-shrink-0 bg-white z-10 hover:z-50`}
+                                    >
+                                        <div className="absolute -top-3 -left-3 bg-yellow-400 w-8 h-8 rounded-full border-2 border-white flex items-center justify-center font-bold text-gray-800 shadow-md text-sm z-20">
+                                            {card.cost}
+                                        </div>
+                                        <div className="absolute top-1 right-1 text-sm md:text-lg">
+                                            {card.type === 'attack' ? '📖' : '🛡️'}
+                                        </div>
+                                        
+                                        <h3 className="font-bold text-center mt-3 text-gray-800 text-xs md:text-sm border-b border-gray-400/50 pb-1">{card.name}</h3>
+                                        
+                                        <div className="flex-1 flex items-center justify-center px-1 py-1">
+                                            <p className="text-[11px] md:text-sm font-bold leading-snug text-gray-800 text-center">
+                                                {card.desc}
+                                            </p>
+                                        </div>
+
+                                        <div className="flex justify-center mt-auto pb-1">
+                                            <span className={`text-[11px] md:text-xs font-black px-2 py-0.5 rounded shadow-sm border ${card.type === 'attack' ? 'bg-green-100 text-green-700 border-green-400' : 'bg-blue-100 text-blue-700 border-blue-400'}`}>
+                                                {card.type === 'attack' ? `+${card.val} 進度` : `+${card.val} 防護`}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
