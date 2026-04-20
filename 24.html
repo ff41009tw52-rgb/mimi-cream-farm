@@ -56,6 +56,13 @@
         .horn-left { left: 10px; transform: rotate(-25deg); }
         .horn-right { right: 10px; transform: rotate(25deg); }
 
+        /* Boss 受傷閃爍特效 */
+        .boss-hurt .monster-body { animation: boss-hurt-anim 0.3s ease-out; }
+        @keyframes boss-hurt-anim {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(0.9); filter: brightness(1.5) sepia(1) hue-rotate(-50deg) saturate(3); }
+        }
+
         /* --- 專屬魔法受擊特效 --- */
         .effect-融化 .speech-bubble { opacity: 0; transition: 0.2s; }
         .effect-融化 .monster-body { animation: melt-anim 0.6s forwards; }
@@ -105,12 +112,13 @@
                         <h2 class="text-cyan-400 font-bold text-3xl mb-4 flex items-center justify-center">💡 遊戲說明</h2>
                         <ul class="text-slate-200 text-lg md:text-xl space-y-3 list-disc pl-6">
                             <li>魔物會<span class="text-cyan-300 font-bold">隨機掉落</span>，點擊正確的魔法元素擊退它們！</li>
-                            <li>魔物的數量與速度會<span class="text-yellow-300 font-bold">循序漸進變多、變快</span>。</li>
                             <li>⚠️ <span class="text-rose-400 font-bold">施展錯誤魔法會扣除 1 隻擊退數</span>！</li>
+                            <li><span class="text-yellow-300 font-bold">最後一關會有巨大史萊姆王</span>，必須連續答對多題才能消滅牠！</li>
                         </ul>
                     </div>
                 </div>
 
+                <!-- 難度選擇區 -->
                 <div id="settings-box" class="w-full max-w-sm bg-slate-800/80 p-4 rounded-xl border border-fuchsia-500/30 mb-6 flex flex-col items-center gap-3">
                     <span class="text-cyan-300 font-bold text-lg md:text-xl">選擇挑戰難度</span>
                     <div class="flex items-center justify-center w-full gap-4">
@@ -148,7 +156,7 @@
             </div>
             
             <div class="flex-1 mx-6 max-w-sm relative hidden md:block">
-                <div id="progress-target-text" class="text-base text-fuchsia-300 text-center mb-1.5 font-bold tracking-wide">過關進度 (目標: 15隻)</div>
+                <div id="progress-target-text" class="text-base text-fuchsia-300 text-center mb-1.5 font-bold tracking-wide">過關進度 (包含最終Boss)</div>
                 <div class="w-full bg-slate-700 rounded-full h-3">
                     <div class="bg-cyan-400 h-3 rounded-full transition-all duration-300" id="progress-bar" style="width: 0%"></div>
                 </div>
@@ -193,8 +201,8 @@
     </div>
 
     <script>
-        let TARGET_MONSTERS = 15; 
-        let lastSpawnedAnswer = ""; // 記錄上一隻魔物所需的「魔法答案」，確保不會連續出現同一種
+        let TARGET_MONSTERS = 15; // 預設普通難度：14隻小怪 + 1隻Boss
+        let lastSpawnedAnswer = ""; 
         
         const questionBank = [
             { text: "冰塊放在桌上變成水", ans: "融化", icon: "🧊" },
@@ -228,9 +236,9 @@
         let lives = 3;
         
         let activeEnemies = [];
+        let isBossActive = false;
         let animationFrameId;
         let lastTime = 0;
-        let timeElapsed = 0; 
         let spawnTimer = 0;
 
         const uiScore = document.getElementById('score-display');
@@ -265,9 +273,9 @@
 
             defeatedCount = 0;
             lives = 3;
-            timeElapsed = 0;
             spawnTimer = 2000; 
             isPlaying = true;
+            isBossActive = false;
             lastSpawnedAnswer = ""; 
             activeEnemies.forEach(e => e.el.remove()); 
             activeEnemies = [];
@@ -283,6 +291,14 @@
             animationFrameId = requestAnimationFrame(gameLoop);
         }
 
+        function getUniqueQuestion() {
+            let availableQuestions = questionBank.filter(q => q.ans !== lastSpawnedAnswer);
+            if (availableQuestions.length === 0) availableQuestions = questionBank; 
+            const q = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+            lastSpawnedAnswer = q.ans; 
+            return q;
+        }
+
         function createEnemy() {
             let targetX;
             let attempts = 0;
@@ -293,13 +309,7 @@
                 attempts++;
             }
 
-            // 過濾掉上一隻魔物的「答案」，確保不會連續出現需要同一種魔法的題目
-            let availableQuestions = questionBank.filter(q => q.ans !== lastSpawnedAnswer);
-            if (availableQuestions.length === 0) availableQuestions = questionBank; 
-            
-            const q = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
-            lastSpawnedAnswer = q.ans; // 更新最後一次抽到的「魔法答案」
-
+            const q = getUniqueQuestion();
             const color = monsterColors[Math.floor(Math.random() * monsterColors.length)];
             const el = document.createElement('div');
             
@@ -310,7 +320,7 @@
                     ${q.text}
                     <div class="absolute -bottom-1.5 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-slate-100 border-b-2 border-r-2 border-slate-300 rotate-45"></div>
                 </div>
-                <div class="monster-body w-16 h-16 md:w-20 md:h-20 ${color} relative flex items-center justify-center text-3xl md:text-4xl shadow-[0_5px_15px_rgba(0,0,0,0.4)]">
+                <div class="monster-body w-16 h-16 md:w-20 md:h-20 ${color} relative flex items-center justify-center text-3xl md:text-4xl shadow-[0_5px_15px_rgba(0,0,0,0.4)] border-2 border-slate-700/30">
                     <div class="monster-horn horn-left"></div>
                     <div class="monster-horn horn-right"></div>
                     <span class="z-10 drop-shadow-md mt-2 opacity-90">${q.icon}</span>
@@ -319,7 +329,35 @@
                 </div>
             `;
             playArea.appendChild(el);
-            return { el, y: -140, x: targetX, q, isDying: false };
+            return { el, y: -140, x: targetX, q, isDying: false, isBoss: false, hp: 1 };
+        }
+
+        function spawnBoss() {
+            isBossActive = true;
+            const q = getUniqueQuestion();
+
+            const el = document.createElement('div');
+            el.className = 'enemy-container absolute transform -translate-x-1/2 flex flex-col items-center z-20';
+            el.style.left = `50%`; 
+
+            let hpStars = Array(5).fill('⭐').join('');
+
+            el.innerHTML = `
+                <div class="speech-bubble bg-slate-100 text-slate-900 font-bold text-[16px] md:text-xl leading-snug text-center p-4 rounded-2xl shadow-[0_0_20px_rgba(232,121,249,0.8)] mb-3 relative w-56 md:w-72 z-20 border-4 border-fuchsia-400">
+                    <div class="boss-hp text-lg text-yellow-400 mb-2 drop-shadow flex justify-center gap-1">${hpStars}</div>
+                    <div class="boss-q-text">${q.text}</div>
+                    <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-5 h-5 bg-slate-100 border-b-4 border-r-4 border-fuchsia-400 rotate-45"></div>
+                </div>
+                <div class="monster-body w-28 h-28 md:w-36 md:h-36 bg-purple-700 relative flex items-center justify-center text-5xl md:text-6xl shadow-[0_15px_35px_rgba(147,51,234,0.6)] border-4 border-fuchsia-400">
+                    <div class="monster-horn horn-left" style="border-bottom: 24px solid #ef4444; top: -12px; left: 15px;"></div>
+                    <div class="monster-horn horn-right" style="border-bottom: 24px solid #ef4444; top: -12px; right: 15px;"></div>
+                    <span class="boss-icon z-10 drop-shadow-xl mt-3 opacity-95">${q.icon}</span>
+                    <div class="absolute top-5 left-5 w-6 h-6 bg-white rounded-full flex justify-center items-center shadow-inner"><div class="w-3 h-3 bg-rose-900 rounded-full mt-1"></div></div>
+                    <div class="absolute top-5 right-5 w-6 h-6 bg-white rounded-full flex justify-center items-center shadow-inner"><div class="w-3 h-3 bg-rose-900 rounded-full mt-1"></div></div>
+                </div>
+            `;
+            playArea.appendChild(el);
+            activeEnemies.push({ el, y: -250, x: 50, q, isDying: false, isBoss: true, hp: 5 });
         }
 
         function gameLoop(currentTime) {
@@ -327,23 +365,27 @@
 
             const deltaTime = currentTime - lastTime;
             lastTime = currentTime;
-            timeElapsed += deltaTime;
             spawnTimer += deltaTime;
 
-            let maxEnemies = 1 + Math.floor(defeatedCount / 5);
-            maxEnemies = Math.min(3, maxEnemies);
+            let currentSpeed = 0.45 + (defeatedCount * 0.008); 
 
-            let speedMultiplier = TARGET_MONSTERS === 30 ? 1.2 : 1.0;
-            let currentSpeed = (0.35 + (defeatedCount * 0.015)) * speedMultiplier; 
-            
-            let spawnIntervalMultiplier = TARGET_MONSTERS === 30 ? 0.8 : 1.0;
-            let currentSpawnInterval = Math.max(1000, 3000 - (defeatedCount * 80)) * spawnIntervalMultiplier;
+            // Bug 修復：判斷分數是否已達到「召喚Boss的門檻」
+            // 讓小怪不再產出，並等待畫面上小怪清空後，召喚巨大史萊姆王
+            if (defeatedCount >= TARGET_MONSTERS - 1) {
+                if (!isBossActive && activeEnemies.length === 0) {
+                    spawnBoss();
+                }
+            } else {
+                let maxEnemies = 1 + Math.floor(defeatedCount / 5);
+                maxEnemies = Math.min(3, maxEnemies);
+                let currentSpawnInterval = Math.max(1200, 3000 - (defeatedCount * 80));
 
-            if (spawnTimer >= currentSpawnInterval) {
-                spawnTimer = 0;
-                if (activeEnemies.length < maxEnemies) {
-                    const newEnemy = createEnemy();
-                    if (newEnemy) activeEnemies.push(newEnemy);
+                if (spawnTimer >= currentSpawnInterval) {
+                    spawnTimer = 0;
+                    if (activeEnemies.length < maxEnemies) {
+                        const newEnemy = createEnemy();
+                        if (newEnemy) activeEnemies.push(newEnemy);
+                    }
                 }
             }
 
@@ -354,13 +396,22 @@
                 let enemy = activeEnemies[i];
                 if (enemy.isDying) continue;
 
-                enemy.y += currentSpeed * (deltaTime / 16);
+                if (enemy.isBoss) {
+                    enemy.y += currentSpeed * 0.22 * (deltaTime / 16);
+                } else {
+                    enemy.y += currentSpeed * (deltaTime / 16);
+                }
+                
                 enemy.el.style.top = enemy.y + 'px';
 
                 if (enemy.y > hitZone) {
                     takeDamage();
-                    enemy.el.remove();
-                    activeEnemies.splice(i, 1);
+                    if (enemy.isBoss) {
+                        enemy.y = 20; 
+                    } else {
+                        enemy.el.remove();
+                        activeEnemies.splice(i, 1);
+                    }
                 }
             }
 
@@ -375,12 +426,17 @@
             if (validEnemies.length > 0) {
                 validEnemies.sort((a, b) => b.y - a.y);
                 const targetEnemy = validEnemies[0];
-                targetEnemy.isDying = true;
+                targetEnemy.isDying = true; 
 
                 shootProjectile(spellIcons[spellName], targetEnemy, spellName);
 
             } else {
-                defeatedCount = Math.max(0, defeatedCount - 1);
+                // 防呆機制：若有 Boss 存在，最低扣分到 TARGET_MONSTERS - 1，避免退回小怪關
+                if (isBossActive) {
+                    defeatedCount = Math.max(TARGET_MONSTERS - 1, defeatedCount - 1);
+                } else {
+                    defeatedCount = Math.max(0, defeatedCount - 1);
+                }
                 updateScoreUI();
                 
                 gameContainer.classList.add('shake-it');
@@ -398,7 +454,7 @@
             proj.className = 'absolute left-1/2 bottom-12 transform -translate-x-1/2 text-5xl md:text-6xl z-30 filter drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]' + (spellName === '蒸發' ? ' text-slate-200' : '');
             playArea.appendChild(proj);
 
-            const targetY = targetEnemy.y + 55; 
+            const targetY = targetEnemy.isBoss ? targetEnemy.y + 80 : targetEnemy.y + 55; 
             const playAreaHeight = playArea.clientHeight;
             const playAreaWidth = playArea.clientWidth;
             const startY = playAreaHeight - 80;
@@ -411,16 +467,48 @@
 
             anim.onfinish = () => {
                 proj.remove();
-                defeatedCount++;
-                updateScoreUI();
-                
-                targetEnemy.el.classList.add(`effect-${spellName}`);
-                
-                setTimeout(() => {
-                    targetEnemy.el.remove();
-                    activeEnemies = activeEnemies.filter(e => e !== targetEnemy);
-                    checkWinCondition(); 
-                }, 600); 
+
+                if (targetEnemy.isBoss) {
+                    targetEnemy.hp--;
+                    
+                    if (targetEnemy.hp > 0) {
+                        targetEnemy.isDying = false; 
+                        
+                        const newQ = getUniqueQuestion();
+                        targetEnemy.q = newQ;
+                        
+                        let hpStars = Array(targetEnemy.hp).fill('⭐').join('');
+                        targetEnemy.el.querySelector('.boss-hp').innerHTML = hpStars;
+                        targetEnemy.el.querySelector('.boss-q-text').innerHTML = newQ.text;
+                        targetEnemy.el.querySelector('.boss-icon').innerHTML = newQ.icon;
+
+                        targetEnemy.el.classList.add('boss-hurt');
+                        setTimeout(() => targetEnemy.el.classList.remove('boss-hurt'), 300);
+
+                    } else {
+                        defeatedCount++;
+                        updateScoreUI();
+                        targetEnemy.el.classList.add(`effect-${spellName}`);
+                        setTimeout(() => {
+                            targetEnemy.el.remove();
+                            activeEnemies = activeEnemies.filter(e => e !== targetEnemy);
+                            isBossActive = false;
+                            checkWinCondition(); 
+                        }, 600); 
+                    }
+                } else {
+                    // Bug 修復：確保小怪死亡只會加分到出王門檻，避免直接通關
+                    if (defeatedCount < TARGET_MONSTERS - 1) {
+                        defeatedCount++;
+                    }
+                    updateScoreUI();
+                    targetEnemy.el.classList.add(`effect-${spellName}`);
+                    
+                    setTimeout(() => {
+                        targetEnemy.el.remove();
+                        activeEnemies = activeEnemies.filter(e => e !== targetEnemy);
+                    }, 600); 
+                }
             };
         }
 
@@ -465,7 +553,7 @@
             if (isWin) {
                 overlayTitle.innerText = "🌟 守護成功 🌟";
                 overlayTitle.className = "text-6xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-emerald-400 mb-6 drop-shadow-lg leading-tight";
-                overlayDesc.innerHTML = "太厲害了！你完全掌握了水的三態變化，<br>成為了最棒的魔法科學家！";
+                overlayDesc.innerHTML = "太厲害了！你完全掌握了水的三態變化，<br>成功消滅了巨大史萊姆王！";
                 finalMsg.innerText = "成功擊退魔物";
                 finalScoreText.classList.replace('text-cyan-400', 'text-yellow-400');
                 startBtn.innerText = "再次挑戰傳說 🏆";
