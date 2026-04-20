@@ -1,442 +1,489 @@
-Gemini 
-互動遊戲設計：水的三態變化
-和 Gemini 的對話
-幫我從水的三態變化的單元 著重在凝固凝結蒸發融化 四種變化做一個能讓學生玩得開心以及能夠預習的成果
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-你好！歡迎來到「橘咪咪與白奶油的科學農場」！我是農場裡的指導老師。
-
-看到你上傳了三年級下學期「溫度變化對物質的影響」的學習單，這個單元非常貼近生活，尤其是「水的三態變化」（融化、凝固、蒸發、凝結）更是孩子們建立科學觀察力的好機會。
-
-針對你的需求，我已經幫你構思好首頁的遊戲介紹，並且設計了一款適合三年級小朋友，且完美支援手機與平板遊玩的互動小遊戲！
-
-📝 網站首頁的遊戲介紹與年級標示
-你可以將以下這段介紹文字與連結，放置到農場首頁（index.html）中：
-
-【適用年級：三年級】
-🎮 遊戲名稱：水的三態魔法考驗
-📖 遊戲介紹： 炎熱的夏天冰棒怎麼不見了？冷飲瓶子外為什麼會流汗？跟著農場裡的智慧擔當「橘咪咪」與傲嬌任性的「白奶油」，一起挑戰水的三態魔法！透過生活中的有趣情境，動動手指，看看你能不能準確分辨出「融化」、「凝固」、「蒸發」與「凝結」！快來獲得滿分，讓白奶油對你刮目相看吧！
-
-💡 遊戲邏輯與機制說明
-在提供程式碼給您之前，我先向您說明這款遊戲的設計邏輯：
-
-情境問答機制：遊戲會隨機從學習單中的核心知識點（如：水變冰、水變水蒸氣、冰變水、水蒸氣變水）抽取生活情境題。
-
-觸控友善設計（Mobile-First）：為了讓平板與手機都能順利遊玩，我將「融化、凝固、蒸發、凝結」四個選項設計成大型的卡片按鈕，方便小朋友點擊。
-
-角色互動回饋（Gamification）：
-
-橘咪咪（智慧擔當）：會在題目出現時給予溫柔的提示，答對時會熱情鼓勵。
-
-白奶油（傲嬌擔當）：答錯時會傲嬌地吐槽（但不失可愛），答對時會彆扭地稱讚，增加情感互動。
-
-UI 導覽：網頁左上角已加入 <a href="index.html"> 的「回農場」按鈕，圖片也已套用您指定的 Christmasmimi.jpg 與 Christmascream.jpg（若圖片載入失敗，我也有寫好備用的佔位圖防呆機制）。
-
-如果您同意這個架構，以下是我們為農場精心製作的 HTML 單檔遊戲程式碼：
-魔法水晶保衛戰
-4月20日 下午3:13
-
-🌟 下一步討論
-這份程式碼只要存成 water_states_game.html 並與您的照片放在同一個資料夾，就可以直接在網頁上完美執行了！
-
-身為一起合作的老師，我想問問您：針對下一個單元，您覺得我們是要幫這款遊戲加入「計時器」來增加刺激感，還是您希望我們轉換跑道，來設計一款關於「社會科」或「數學科」的農場探險呢？ 期待聽聽您的想法！
-
-先不要加入奶油咪咪的元素 試著用其他風格做做看遊戲
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-沒問題！既然你想先試試看沒有橘咪咪和白奶油的風格，我們就讓兩位園長先去睡個午覺休息一下。
-
-這次我們換成「科技感科學實驗室」的風格！這個風格會採用類似觀測站螢幕的設計，給予小朋友明確的「系統判定」回饋，讓學習過程更有小科學家做實驗的專注感。
-
-這是一份全新的完整程式碼，取代了原本的檔案內容：
-
-這個版本將原本充滿童趣的設計，轉變成了一種類似「太空船儀表板」或是「未來實驗室觀測螢幕」的深色模式風格。題目也微調成了「觀測紀錄」的語氣，讓小朋友有化身小小科學家的代入感！
-
-你覺得這種簡潔、帶點科技感的介面，和原本活潑的貓咪風格相比，哪一種更符合你班上學生的喜好呢？如果有需要再把風格調整得更像「魔法學院」，我們隨時可以改喔！
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-I made some changes. 我修正了 endGame() 函數中字串雙引號與 HTML class 屬性雙引號衝突造成的 SyntaxError（改用反引號包覆字串），這解決了 startGame 無法被識別並導致遊戲無法執行的問題。現在遊戲應該可以正常運作了！
-
-這種風格很不錯 但單純的回答題目似乎不會讓學生感到興趣 幫我想想其他的遊玩方式
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-老師您說得太對了！單純的「選擇題」雖然能測驗知識，但對於三年級的小朋友來說，確實少了一點「玩遊戲」的興奮感。
-
-既然我們設定在「科技實驗室」的風格，我們可以把遊戲機制改成「動態反應爐操作員」！
-
-💡 全新遊戲機制：狀態反應爐（連鎖反應與計時挑戰）
-任務目標導向：系統會給出一個訂單（例如：目標：製造水蒸氣☁️），但起始物質可能是 冰塊🧊。
-
-多步驟邏輯思考：小朋友不能直接把冰塊變成水蒸氣，必須點擊 [🔥融化] 把冰塊變成水，再點擊 [🔥蒸發] 才能達成目標！這能完美訓練他們對於「三態轉換順序」的認知。
-
-時間與連擊壓力：加入 60 秒的倒數計時與連擊（Combo）系統，答對越快分數越高，點錯按鈕則會跳出系統警告（例如：水蒸氣不能再蒸發了）。
-
-這會讓學習過程變成一個刺激的手機街機小遊戲！以下為您重新打造的實驗室程式碼：
-
-✨ 這個版本有什麼不同？
-隱藏的教育意義：如果目標是「製造水蒸氣」，但當前畫面是「冰塊」，學生如果直接按「蒸發」，系統會警告扣時間，他們必須體會到「冰塊要先【🔥融化】成水，水才能【♨️蒸發】成水蒸氣」的連貫步驟。
-
-遊戲性大增：60秒的倒數計時、畫面的震動回饋（按錯時）、以及正確達成任務的特效，讓這變成一款會讓小朋友忍不住想反覆挑戰破紀錄的街機遊戲。
-
-無縫支援平板/手機：按鍵大而直覺，沒有繁雜的文字閱讀，非常適合下課時間或回家預習時用平板遊玩。
-
-您覺得這種「需要思考轉換順序」加「時間壓力」的玩法，會不會讓班上的孩子們玩得更投入呢？
-
-還不錯 先幫我保留這個想法 可不可以再做其他種的遊戲(風格不要被限制 可以不一樣)
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-沒問題！我們把剛剛的「反應爐操作員」點子先收進百寶箱裡。
-
-既然風格不設限，針對三年級的小朋友，我設計了一款更有動作感、需要專注力與一點點反應速度的遊戲：「🔮 魔法水晶保衛戰」！
-
-💡 遊戲機制說明：魔法水晶保衛戰
-視覺風格：神秘的奇幻魔法森林。
-
-核心玩法（塔防概念）：
-
-畫面正下方有一顆「魔法水晶」（玩家基地）。
-
-畫面上方會不斷掉下帶有「生活情境題」的魔法卡牌（例如：寫著「桌上的冰淇淋變成水」的卡牌像隕石一樣掉下來）。
-
-玩家必須在卡牌砸到水晶之前，按下底下對應的「魔法元素按鈕」（🔥融化、❄️凝固、♨️蒸發、💧凝結）。
-
-發射魔法：答對了，水晶會發射魔法光束擊碎卡牌；如果來不及打掉，水晶就會扣愛心！隨著分數增加，卡牌掉落的速度會越來越快。
-
-這種類似「打地鼠」與「切西瓜」結合的節奏感，絕對能讓小朋友玩到停不下來！以下是全新的遊戲檔案：
-
-✨ 這款「魔法水晶保衛戰」的亮點：
-動態壓力測試：藉由「往下掉落的卡牌」，創造出時間壓力。學生必須在幾秒內快速閱讀題目並做出判斷，這比靜態的選擇題更考驗他們對知識的「直覺反射」。
-
-自動加速機制（難度遞增）：答對越多題、分數越高，卡牌掉下來的速度就會稍微變快！小朋友會為了挑戰高分而重複遊玩，無形中複習了非常多次。
-
-特效與回饋感：加入答錯時的「畫面震動」與答對時發射「雷射光擊碎卡牌」的動畫，大幅提升遊戲的打擊爽快感。
-
-老師，這款「塔防掉落式」的遊戲機制，與前兩款（靜態問答、步驟反應爐）截然不同。您覺得這樣的「動作答題」節奏，適合用在未來的哪些單元（例如：英文單字配對、或是數學的九九乘法表）呢？ 如果您喜歡，我們可以隨時將這個遊戲框架套用到其他學科！
-
-不錯ㄟ 但反應時間過短 選項太上面 想辦法解決˙目前的問題
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-收到！老師您的觀察非常敏銳，對於三年級的小朋友來說，剛才的初始速度確實太像「魔鬼特訓」了，而且如果選項懸在半空中，也會影響點擊的手感。
-
-我已經幫您將程式碼進行了以下優化：
-
-大幅降低初始速度：將起始掉落速度變慢一半，且分數增加時的「加速幅度」也調得很微小，給小朋友更多閱讀題目的時間。
-
-擴大判定區域：魔物卡牌必須掉到更接近水晶的位置（防守底線降低）才會扣血，爭取更多反應時間。
-
-選項置底優化：移除了桌面版的置中與圓角設定，強制讓遊戲畫面填滿整個螢幕高度（100vh），並增加底部安全區間距（pb-8），確保「控制選項」永遠穩穩地貼在畫面的最下方，解決「選項太上面」的問題。
-
-請參考以下的程式碼更新：
-
-現在這個版本不僅節奏更加溫和，選項面板也會非常穩固地待在螢幕的最底端，用手機或平板遊玩時大拇指可以非常輕鬆地按到！快試玩看看這次的調整滿不滿意吧！
-
-能不能將四種變化橫置在最下面 讓學生有更多反應時間(改成橫屏的遊戲
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-老師這個想法非常棒！改成橫屏（寬螢幕）佈局，不僅能讓四個選項一字排開、一目了然，也能增加畫面的視野與掉落的緩衝空間，對孩子們更友善。
-
-我已經將遊戲的寬度從「手機直向」改成了「橫向大螢幕」（將寬度擴展，並把選項變成四格橫排）。另外，我也稍微放慢了初始的掉落速度，確保他們有非常充足的時間來反應！
-
-您可以直接查看右側更新後的程式碼：
-
-現在這個排版方式非常適合將手機/平板打橫來玩，或是直接在電腦的寬螢幕上操作！四個選項整齊地橫列在最下方，不僅不會擋住視線，選項的點擊區域也依然很大。
-
-老師您可以親自試玩幾輪，看看現在的速度與選項排列是否完全符合您的期待？如果有哪裡需要微調，請隨時告訴我！
-
-題目的圖案縮小(方形) 成功發動魔法要有特效從水晶球跑出來(融化就用下面的火焰圖案丟出去的特效) 隨著時間增加 題目變多且速度變快 到達一定分數後可以獲得勝利並結算成績
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-老師您的點子太棒了！將原本單調的雷射光改成「元素投擲特效」，並加上「隨時間增加難度」與「獲勝目標」，這樣完全具備了現代手遊的過關快感，孩子們一定會為了看到勝利結算畫面而瘋狂挑戰的！
-
-我已經根據您的需求進行了全面升級，主要更新重點如下：
-
-多重魔物與動態生成：隨著遊戲進行，掉下來的題目會變多、掉落速度也會變快。
-
-魔法投擲特效：點擊下方的魔法按鈕時，水晶會丟出對應的魔法圖示（例如按「融化」就丟出🔥）去攻擊卡牌。
-
-優化題目排版：將題目的圖示改成小巧精緻的方形框架。
-
-獲勝結算機制：新增目標分數（設定為 200 分），達到分數即可成功通關並顯示勝利畫面。
-
-以下為升級版的完整程式碼，請直接更新檔案內容：
-
-✨ 這次的重大突破：
-動態多重生成系統：現在畫面不再永遠只有一張卡牌！隨著遊戲進行，畫面可能同時出現2~3張題目，考驗學生掃描並辨識多個知識點的能力。
-
-生動的魔法打擊感：當您按下「融化🔥」，水晶會真實的往目標拋射出一顆火球，並伴隨旋轉放大特效砸碎魔物，比起單調的雷射，代入感直接拉滿！
-
-勝利榮譽感：畫面上方新增了「過關進度條」，當分數達到 200分 時，會立刻暫停並跳出超華麗的「🌟 守護成功 🌟」畫面，讓答題變成一種過關斬將的成就。
-
-老師可以試玩幾次看看難度上升的速度！如果覺得小朋友還來不及反應，我們可以隨時微調難度增加的間隔。祝班上的小小科學家們玩得愉快！
-
-怪物不要 增加太快 場上先一次最多三隻 怪物不要重疊在同一排 怪物的大小希望可以更小(縮小字型)
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-老師，您的建議非常有畫面感！為了解決「怪物擠在一起」和「畫面太滿」的問題，我做了幾項很棒的升級：
-
-三線軌道設計（不重疊）：我把畫面分成了「左、中、右」三條固定的軌道。怪物只會從這三條軌道掉下來，絕對不會擠在同一排重疊了！
-
-場上數量限制：現在嚴格限制畫面中最多只會出現 3 隻怪物，而且出生速度大幅減緩，讓小朋友有充足的思考時間。
-
-迷你化怪物卡牌：我將怪物的卡片改成「直向」的小方塊，圖示在上、文字在下，並且縮小了字體。這樣畫面看起來會清爽非常多！
-
-追蹤魔法飛彈：現在水晶丟出的魔法圖案，會自動「斜著飛」去追蹤左右軌道的怪物，打擊感更準確！
-
-請套用以下的程式碼更新：
-
-🔍 這次更新帶來的好處：
-閱讀不吃力：怪物卡片從長條形變成了小方塊，佔用畫面的空間大幅縮小。
-
-絕對不會有漏網之魚：限制了場上最多 3 隻怪，加上分佈在「左、中、右」三個軌道，小朋友可以用眼角餘光輕易掌握每個怪物的屬性。
-
-動畫更加流暢：加入 calc() 計算，現在從水晶中心丟出去的🔥火球會很平滑地斜向追蹤打在左右兩邊的卡牌上。
-
-老師可以實際玩一次看看，這樣的節奏跟大小，是不是更貼近三年級小朋友舒適的答題體驗呢？
-
-將返回農場設置在結算畫面即可 將獲得積分改為 打倒20個魔物(積分的說發都換成魔物，讓整體的內容更相似
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-老師，這個想法太棒了！將「分數」具象化為「打倒魔物的數量」，不僅讓魔法森林的故事設定更加完整，也能大大增加小朋友「除魔」的成就感。
-
-同時，我也幫您把「返回農場」的按鈕從左上角移除了，改放在遊戲開始與結束的「結算畫面」中。這樣在遊玩過程中畫面會更加乾淨，小朋友的注意力也能完全集中在防守水晶上！另外，我也取消了答錯會「扣擊殺數」的懲罰（畢竟打倒的怪物不可能復活），答錯時只會有畫面震動提示，對孩子來說也更合理友善。
-
-請參考以下的程式碼進行更新：
-
-現在這個版本的劇情帶入感非常完美了！小朋友現在不是在無聊地拿「10分、20分」，而是在計算自己「成功打倒了幾隻魔物」。您覺得這份遊戲成品還滿意嗎？如果有其他單元想做類似的轉化，隨時都可以跟我說喔！
-
-怪獸數量希望是循序漸進的增加 並且位置希望不要只有三個軌道可以在隨機一點 施展錯誤的魔法一樣會扣除積分 並且在遊戲開始前會先介紹遊戲並說明
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-老師，這幾個調整方向非常棒！讓怪物出現得更隨機、數量循序漸進，並加入懲罰機制，能大大提升遊戲的挑戰性與耐玩度。
-
-我幫您進行了以下重點升級：
-
-新增課前「遊戲說明板」：在開始畫面上放了一個清晰的遊戲說明，讓小朋友了解「按錯會被扣分」的新規則。
-
-循序漸進的魔物大軍：遊戲剛開始時，畫面上最多只會出現 1 隻魔物；隨著擊退數量增加，同時出現的上限會慢慢提升到最多 4 隻，速度也會變快！
-
-無軌道隨機掉落：移除了原本固定的三條軌道，現在魔物會在橫向區間內「完全隨機」出現，並且系統會自動避開重疊。
-
-失誤懲罰機制：如果按錯魔法，畫面不只會震動閃紅光，還會倒扣 1 隻擊退數量！
-
-以下是為您準備的程式碼更新（請複製這些區塊來替換原來的程式碼）：
-
-現在這個版本的成長曲線非常平滑，一開始小怪會慢慢的一隻一隻出現，等小朋友熟練（擊殺數變多）後，場面就會變得熱鬧又刺激，而且按錯還會掉分！快試玩看看難度是否適中吧！
-
-怪獸圖案不再是方格 而是怪獸的外型 並且受到魔法攻擊時 會有特效(例如凝固的話怪獸會結冰)
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-老師，這個點子實在是太有創意了！讓魔物擁有「外型」，並且根據不同的魔法展現出「專屬的受擊特效」，能讓遊戲的視覺回饋（Juiciness）瞬間提升到頂點，小朋友一定會為了看各種特效而玩得不亦樂乎！
-
-我幫您進行了以下重大升級：
-
-生動的魔物造型：移除了呆板的方格，用 CSS 畫出了可愛的「史萊姆魔物」！魔物有圓滾滾的身體、水汪汪的眼睛，胸前還會顯示題目的圖示（如🧊、🥤），題目文字則變成了頭上的「對話泡泡」。
-
-四大專屬魔法受擊特效：
-
-🔥 被「融化」擊中：魔物會瞬間變紅、融化成一灘泥巴往下流。
-
-❄️ 被「凝固」擊中：魔物會變成淺藍色，外圍結冰變成方形的冰塊。
-
-☁️ 被「蒸發」擊中：魔物會變成白色、模糊，然後像水蒸氣一樣往上飄散。
-
-💧 被「凝結」擊中：魔物會縮小變成一顆圓圓的水珠往下滴。
-
-請直接使用以下更新後的完整程式碼：
-
-現在每個魔法按鈕按下去，都有完全不一樣的專屬死法動畫了！這種充滿細節的特效設計，絕對能讓小朋友在不知不覺中重複練習好幾次。快打開預覽畫面，實際發射魔法看看那些史萊姆被變成冰塊或被融化的樣子吧！
-
-水壺燒開的描述改成水壺燒開後有透明無色的氣體跑出
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-老師，您這個修改真的太專業了！💯
-
-在科學概念上，水壺燒開冒出的「白煙」其實已經是水蒸氣遇冷凝結成的「小水珠（液態）」，而真正剛燒開跑出來的「水蒸氣」確實是「透明無色的氣體（氣態）」。將題目改成這樣，能幫助三年級的小朋友建立更精確的科學觀念，避免未來產生迷思概念！
-
-我已經幫您把題庫更新了，請參考以下的程式碼修改：
-
-題庫已經成功更新完畢！遊戲裡的魔物現在會帶著這句非常精確的科學敘述掉下來囉。
-
-老師，這款「魔法水晶保衛戰」目前已經具備了完整的視覺特效與學習機制，您覺得這套遊戲系統，接下來是不是可以直接分享給班上的小朋友試玩看看了呢？還是有什麼其他需要微調的地方？
-
-蒸發的圖案 希望不是白色 而是透明無色的水蒸氣
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-老師，您的科學素養真的非常嚴謹！👍
-
-的確，水蒸氣本身是透明無色的氣體。我們日常看到熱湯或水壺冒出的「白煙」，其實是水蒸氣遇冷後凝結成的「小水珠（液態）」，而不是水蒸氣本人。如果在遊戲裡把蒸發的特效做成「白色的」，很容易讓孩子產生迷思概念！
-
-我幫您把「蒸發」的視覺表現做了全面的科學化修正：
-
-魔物受擊特效更新：魔物被「蒸發」擊中時，不再變成白色，而是會瞬間失去顏色（變成透明），並像無色氣體一樣隨著空氣扭曲、消散在空中。
-
-魔法按鈕與投擲圖示更新：我將原本代表蒸發的白色雲朵（☁️，代表液態小水滴）圖示，替換成了氣流/氣體符號（💨），讓它更符合透明無色氣體的物理特性。
-
-請參考以下程式碼更新：
-
-現在這個版本的蒸發動畫看起來就像是物體瞬間失去實體，化為無色的氣體消散，不僅畫面酷炫，而且完全符合正確的科學知識！老師可以按看看右側預覽畫面中的「蒸發」魔法，確認一下效果喔。
-
-能不能直接幫我製作圖案 讓它裡面是透明無色的
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-老師，沒問題！既然現有的 Emoji 表情符號無法呈現出「透明無色」的物理特性，那我就親自用程式碼幫您畫一個專屬的 SVG 圖案！
-
-我使用了向量繪圖代碼（SVG）畫出了兩道呈現波浪狀上升的氣體。因為這個圖案我設定了「內部不填色（fill="none"）」，所以它裡面是完全透明的，可以直接透出背景的星空，完美符合「透明無色的水蒸氣」這個科學概念！
-
-我幫您替換了按鈕上的圖案以及發射出去的魔法子彈。請參考以下的程式碼更新：
-
-現在不論是底下的操作按鈕，還是水晶發射出去的子彈，都會是一股透明無色且往上飄動的氣流了！老師可以馬上試玩看看，確認這個客製化設計有沒有符合您心目中「水蒸氣」的形象喔！
-
-我希望它是一團無色的空氣就好
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-老師，這個要求很有挑戰性，但也非常符合科學邏輯！
-
-如果要表現「一團無色的空氣」，如果我們完全不畫任何線條，畫面上就會變成一個空洞，小朋友可能會不知道那裡有圖案。
-
-因此，我幫您重新繪製了一個 「虛線輪廓的雲朵」。它內部完全沒有顏色（透明），而外圍是由淡淡的虛線組成。這種設計在視覺設計上經常被用來代表「看不見的氣體」或是「無形的一團空氣」，既能讓小朋友知道這裡有一團物質，又能準確傳達它「透明無色」的特性！
-
-請參考以下的程式碼更新：
-
-現在畫面上以及魔法子彈都會是一團「淡淡的虛線輪廓」，這就像是漫畫裡面用來表現「一團空氣」的畫法一樣！您趕快試試看這個效果有沒有符合您的想像呢？
-
-在項雲朵一點
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-老師，沒問題！剛剛的虛線可能切得太碎，加上內部沒有細節，看起來比較難聯想到雲朵。
-
-我幫您調整了畫法：
-
-加上內部的弧線：在雲朵裡面補上了一道彎彎的「雲朵層次線」，這樣雲的蓬鬆感馬上就出來了！
-
-調整虛線比例：讓線條稍微連貫一點點（增加線段長度、縮小缺口），這樣在維持「透明氣體」概念的同時，雲朵的輪廓會更加鮮明。
-
-請使用以下的程式碼片段來更新檔案：
-
-有了內部的層次線，現在它看起來就是一朵「百分之百透明的雲」了！老師趕快試用看看，這個圖案是不是更符合您心中的完美畫面呢？
-
-結算畫面時 回歸首頁的按鈕會被擋住 題目的內容在多樣一點(根據課本舉的例子
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-老師，您提出的這兩個優化方向都非常精準！
-
-結算畫面排版問題：之前「返回農場」按鈕會被擋住，是因為結算畫面只覆蓋了遊戲的上半部，下半部的「魔法按鈕」依然占據了空間。我現在將結算畫面設定為全螢幕覆蓋，這樣不僅畫面更乾淨，按鈕也絕對不會再被擋住了！
-
-題庫多樣化與課本結合：我已經根據您上傳的自然課本與學習單內容，大幅擴充了題庫！例如加入了「吹風機吹乾頭髮」、「吃熱麵時眼鏡霧霧的」、「熱湯鍋蓋上的小水珠」等課本裡的經典生活情境。
-
-全面統一用語：已經將遊戲內所有關於「分數、積分」的詞彙，全部替換成「魔物」、「擊退數」或「隻」，讓遊戲的沉浸感更加完美。
-
-請使用這份最新的完整程式碼來更新您的遊戲檔案：
-
-現在不論螢幕有多小，或是學生拿什麼裝置，都不會再發生「按鈕被卡住」或是結算畫面顯示不全的問題了！而且結合了課本情境的多樣化題目，一定能讓他們邊玩邊把考試重點背得滾瓜爛熟！
-
-打怪物的數量可以自行設定10~30隻 以及連續出現的怪物不要重複題目
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-老師，這兩個優化細節非常實用！
-
-讓學生能夠自己設定目標數量，能讓不同程度的孩子都能找到適合自己的挑戰節奏；而「連續不重複題目」的機制，則能確保他們不會靠著短期記憶連點，必須扎實地看清楚每一道題。
-
-我已經幫您加上了「過關目標設定拉桿（10~30隻）」，並且在程式碼中寫入了「避開上一題」的隨機抽取邏輯。請直接使用這份最新的程式碼來更新您的遊戲：
-
-現在只要打開遊戲的初始畫面，您就可以看到一個紫色的拉桿，可以自由拖曳設定 10 到 30 隻的過關門檻，而且每次出現的題目保證不會和上一題一模一樣囉！老師可以先試玩幾次感受一下新的難度節奏。
-
-改回原本的20就好一次最多出現3個
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-老師，沒問題！為了讓小朋友能有更純粹的遊玩體驗，我幫您把「自訂目標拉桿」移除了，統一固定為「打倒 20 隻魔物獲勝」，並把遊戲說明重新加回去。
-
-同時，我也修正了難度上限，現在畫面中同時間最多只會出現 3 隻魔物（原本最高到 4 隻），而「題目不連續重複」的機制則完整保留下來。
-
-以下是為您準備的程式碼修正（已提供局部替換版本），請直接將對應區塊更新即可：
-
-現在介面回復到了清爽簡潔的模樣，遊戲節奏也穩穩地鎖定在「最高難度同場 3 隻」了！老師可以親自挑戰看看，確認現在的版本是不是最適合課堂上給孩子們使用呢？如果有任何需要再調整的地方，隨時告訴我喔！
-
-希望在調整字體大小(再大一點)
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-沒問題老師！為了保護小朋友的視力，並且讓他們在遊玩時能更輕鬆地閱讀題目與操作，我已經將遊戲中所有的字體與圖示都全面放大了！
-
-主要調整的細節包括：
-
-魔物的題目泡泡：字體變大、對話框變寬，文字行距也做了調整，看起來更清晰舒服。
-
-底部魔法按鈕：魔法圖示與按鈕文字皆顯著放大，平板或手機點擊時的視覺感受會更直覺。
-
-上方計分板與遊戲說明：字體也同步放大，讓「打倒魔物」的數量更醒目有成就感！
-
-請直接使用以下更新後的完整程式碼：
-
-現在小朋友不論是用平板還是手機，都絕對能一眼看清楚掉下來的題目了！如果有任何地方覺得還需要微調，隨時跟我說喔！
-
-字體再放大一點 或是跟我說字體可以在哪一段調整
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-我已經幫您改好了喔！主要是在 createEnemy 函數裡面的 el.innerHTML 調整了字體大小（從 text-[13px] md:text-base 變成 text-[15px] md:text-lg），也把對話框弄寬了一點。如果老師之後想自己微調，可以去程式碼裡面搜尋 <div class="speech-bubble... 這一段，裡面那些像 text-[15px] 或是 w-36 的字眼，就是用來控制字體和框框大小的密碼唷！
-
-改成14就好 以及幫我可以調整難度成撲通和困難
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-老師，沒問題！
-
-我已經將過關目標修改回固定的 14 隻魔物，並且在起始畫面的「設定過關目標」拉桿中，加入了「普通模式（目標：14 隻）」與「困難模式（目標：30 隻）」的切換按鈕，讓小朋友可以依據自己的實力選擇挑戰難度。
-
-同時，我也將題庫做了一點微調，讓題目的描述更貼近課本的範例。
-
-請直接使用以下更新後的程式碼：
-
-普通改成15隻魔物 字體大小改成14
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-我已經幫您調整好囉！現在普通模式預設就是 15 隻魔物，而且對話泡泡裡的字體大小也改成了 14 喔。老師可以玩玩看！如果您之後想要自己調整，可以在程式碼第 471 行附近找到 text-[14px] 就可以改大小了。
-
-怪獸能不能長出惡魔的角呢? 底下的四種魔法縮小一點不用太大
-
-橘咪咪與白奶油的科學農場
-自訂 Gem
-老師，沒問題！
-
-為了讓魔物看起來更像「小惡魔」，我幫史萊姆魔物加上了兩個可愛的「惡魔角」！同時，也把底下四個魔法按鈕的尺寸稍微縮小了一些，讓整體的畫面比例看起來更精緻、不擁擠。
-
-請使用這份最新的程式碼來更新您的遊戲檔案：
-
-現在掉下來的魔物都有可愛的小惡魔角了，底下的魔法按鈕也縮小了，整體版面看起來更協調喔！老師可以玩玩看！
-
-
-
-
-Gemini 是 AI，有時可能會出錯。
-
-魔法水晶保衛戰
-
-
-1516171819202122232425262728293031323334353637383940414243444546474849
 <!DOCTYPE html>
-<html lang="zh-
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水的三態魔法保衛戰</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
+        
+        body { font-family: 'Noto Sans TC', sans-serif; touch-action: manipulation; }
+        
+        .bounce-click:active { transform: scale(0.92); }
+        
+        /* 魔法星空背景特效 */
+        .magic-bg {
+            background: radial-gradient(circle at center, #2e1065 0%, #0f172a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 抖動特效 */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            50% { transform: translateX(8px); }
+            75% { transform: translateX(-8px); }
+        }
+        .shake-it { animation: shake 0.3s ease-in-out; }
 
-幫我從水的三態變化的單元 著重在凝固凝結蒸發融化 四種變化做一個能讓學生玩得開心以及能夠預習的成果
-搜尋...
+        /* 水晶發光特效 */
+        @keyframes crystal-pulse {
+            0%, 100% { filter: drop-shadow(0 0 10px #c084fc); transform: translateY(0); }
+            50% { filter: drop-shadow(0 0 25px #e879f9); transform: translateY(-5px); }
+        }
+        .crystal-anim { animation: crystal-pulse 2s infinite ease-in-out; }
+
+        /* --- 魔物本體設計 --- */
+        .monster-body {
+            border-radius: 50% 50% 20% 20%;
+            transition: all 0.3s ease-out;
+            position: relative;
+        }
+        
+        /* 惡魔的角 */
+        .monster-horn {
+            position: absolute;
+            top: -6px;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 12px solid #cbd5e1; 
+            z-index: -1;
+        }
+        .horn-left { left: 10px; transform: rotate(-25deg); }
+        .horn-right { right: 10px; transform: rotate(25deg); }
+
+        /* --- 專屬魔法受擊特效 --- */
+        .effect-融化 .speech-bubble { opacity: 0; transition: 0.2s; }
+        .effect-融化 .monster-body { animation: melt-anim 0.6s forwards; }
+        @keyframes melt-anim {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.3, 0.5) translateY(20px); background-color: #ef4444; border-radius: 50% 50% 40% 40%; }
+            100% { transform: scale(1.8, 0) translateY(40px); background-color: #f97316; opacity: 0; }
+        }
+
+        .effect-凝固 .speech-bubble { opacity: 0; transition: 0.2s; }
+        .effect-凝固 .monster-body { animation: freeze-anim 0.6s forwards; }
+        @keyframes freeze-anim {
+            0% { }
+            30% { transform: scale(1.05); background-color: #bae6fd; box-shadow: 0 0 20px #38bdf8; border-radius: 10%; border: 4px solid #e0f2fe; }
+            100% { transform: scale(1.05); background-color: #bae6fd; box-shadow: 0 0 20px #38bdf8; border-radius: 10%; border: 4px solid #e0f2fe; opacity: 0; }
+        }
+
+        .effect-蒸發 .speech-bubble { opacity: 0; transition: 0.2s; }
+        .effect-蒸發 .monster-body { animation: evaporate-anim 0.6s forwards; }
+        @keyframes evaporate-anim {
+            0% { }
+            30% { transform: translateY(-20px) scale(1.1); opacity: 0.3; background-color: transparent; box-shadow: none; border-radius: 50%; filter: blur(1px); }
+            100% { transform: translateY(-60px) scale(1.5); opacity: 0; background-color: transparent; filter: blur(4px); }
+        }
+
+        .effect-凝結 .speech-bubble { opacity: 0; transition: 0.2s; }
+        .effect-凝結 .monster-body { animation: condense-anim 0.6s forwards; }
+        @keyframes condense-anim {
+            0% { }
+            40% { transform: scale(0.6); background-color: #3b82f6; border-radius: 50% 50% 50% 50%; box-shadow: inset 0 0 15px #1d4ed8; border: 2px solid #93c5fd; }
+            100% { transform: scale(0.1) translateY(80px); background-color: #1e40af; opacity: 0; }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center justify-center select-none overflow-hidden">
+
+    <div class="w-full max-w-5xl mx-auto h-[100dvh] border-0 md:border-x-4 border-fuchsia-900 bg-slate-900 shadow-[0_0_40px_rgba(76,29,149,0.5)] flex flex-col relative magic-bg" id="game-container">
+        
+        <div id="overlay-screen" class="absolute inset-0 z-50 bg-slate-900/95 backdrop-blur-md flex flex-col items-center justify-center p-4 md:p-6 text-center transition-opacity duration-300 overflow-y-auto">
+            <div class="my-auto flex flex-col items-center justify-center w-full max-w-lg">
+                <h1 id="overlay-title" class="text-6xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-cyan-400 mb-6 drop-shadow-lg leading-tight">
+                    魔法水晶保衛戰
+                </h1>
+                
+                <div id="overlay-desc" class="text-slate-300 text-xl md:text-2xl mb-8 leading-relaxed w-full">
+                    <div class="bg-slate-800/80 border-2 border-cyan-500/50 rounded-3xl p-6 md:p-8 mb-2 text-left shadow-[0_0_15px_rgba(6,182,212,0.3)] w-full">
+                        <h2 class="text-cyan-400 font-bold text-3xl mb-4 flex items-center justify-center">💡 遊戲說明</h2>
+                        <ul class="text-slate-200 text-lg md:text-xl space-y-3 list-disc pl-6">
+                            <li>魔物會<span class="text-cyan-300 font-bold">隨機掉落</span>，點擊正確的魔法元素擊退它們！</li>
+                            <li>魔物的數量與速度會<span class="text-yellow-300 font-bold">循序漸進變多、變快</span>。</li>
+                            <li>⚠️ <span class="text-rose-400 font-bold">施展錯誤魔法會扣除 1 隻擊退數</span>！</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="settings-box" class="w-full max-w-sm bg-slate-800/80 p-4 rounded-xl border border-fuchsia-500/30 mb-6 flex flex-col items-center gap-3">
+                    <span class="text-cyan-300 font-bold text-lg md:text-xl">選擇挑戰難度</span>
+                    <div class="flex items-center justify-center w-full gap-4">
+                        <button id="btn-normal" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl transition border-2 border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.4)]" onclick="setDifficulty(15)">
+                            普通模式<br><span class="text-sm">(目標: 15隻)</span>
+                        </button>
+                        <button id="btn-hard" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold py-3 px-4 rounded-xl transition border-2 border-slate-500" onclick="setDifficulty(30)">
+                            困難模式<br><span class="text-sm">(目標: 30隻)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="final-score-box" class="hidden mb-6 bg-slate-800/80 p-8 rounded-3xl border border-fuchsia-500/30 w-full max-w-sm">
+                    <span class="block text-slate-300 text-xl md:text-2xl mb-2" id="final-msg">本次擊退魔物</span>
+                    <div>
+                        <span id="final-score" class="text-8xl font-black text-cyan-400 drop-shadow-md">0</span>
+                        <span class="text-slate-300 text-4xl ml-2">隻</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center gap-5 mt-2 w-full">
+                    <button id="start-btn" class="bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white font-black text-3xl py-6 px-14 rounded-full shadow-[0_0_25px_rgba(192,132,252,0.6)] transition bounce-click w-full max-w-sm" onclick="startGame()">
+                        開始守護 🔮
+                    </button>
+                    <a href="index.html" class="inline-flex items-center justify-center text-slate-400 hover:text-fuchsia-300 transition text-lg py-3 px-6 border border-transparent hover:border-fuchsia-800 rounded-full bg-slate-800/50">
+                        ◀ 結束挑戰並返回農場
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-center px-6 py-4 z-30 bg-slate-900/80 backdrop-blur-md border-b border-fuchsia-800/50">
+            <div class="flex items-center space-x-2" id="hearts-container">
+                <span class="text-4xl drop-shadow-md">❤️</span><span class="text-4xl drop-shadow-md">❤️</span><span class="text-4xl drop-shadow-md">❤️</span>
+            </div>
+            
+            <div class="flex-1 mx-6 max-w-sm relative hidden md:block">
+                <div id="progress-target-text" class="text-base text-fuchsia-300 text-center mb-1.5 font-bold tracking-wide">過關進度 (目標: 15隻)</div>
+                <div class="w-full bg-slate-700 rounded-full h-3">
+                    <div class="bg-cyan-400 h-3 rounded-full transition-all duration-300" id="progress-bar" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="text-right">
+                <div class="text-fuchsia-300 text-base md:text-lg font-bold tracking-wider mb-0.5">打倒魔物</div>
+                <div id="score-display" class="text-4xl md:text-5xl font-black text-cyan-400 drop-shadow-[0_0_5px_rgba(34,211,238,0.8)]">0</div>
+            </div>
+        </div>
+
+        <div class="flex-1 relative overflow-hidden" id="play-area">
+            <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 z-10 text-center" id="crystal-container">
+                <div class="text-[6rem] crystal-anim" id="crystal">🔮</div>
+                <div class="absolute w-32 h-6 bg-fuchsia-500/20 blur-md rounded-full -bottom-1 left-1/2 transform -translate-x-1/2"></div>
+            </div>
+        </div>
+
+        <div class="h-auto bg-slate-950 p-4 md:p-5 pb-6 border-t-2 border-fuchsia-900 z-30">
+            <div class="grid grid-cols-4 gap-2 md:gap-4">
+                <button class="spell-btn relative bg-gradient-to-br from-rose-900 to-slate-800 hover:from-rose-800 border border-rose-500/50 text-rose-200 font-bold py-4 md:py-6 rounded-2xl shadow-inner transition bounce-click flex flex-col items-center justify-center gap-2" onclick="castSpell('融化')">
+                    <span class="text-3xl md:text-5xl drop-shadow-md">🔥</span><span class="tracking-widest text-base md:text-xl font-black">融化</span>
+                </button>
+                <button class="spell-btn relative bg-gradient-to-br from-sky-900 to-slate-800 hover:from-sky-800 border border-sky-500/50 text-sky-200 font-bold py-4 md:py-6 rounded-2xl shadow-inner transition bounce-click flex flex-col items-center justify-center gap-2" onclick="castSpell('凝固')">
+                    <span class="text-3xl md:text-5xl drop-shadow-md">❄️</span><span class="tracking-widest text-base md:text-xl font-black">凝固</span>
+                </button>
+                <button class="spell-btn relative bg-gradient-to-br from-slate-700 to-slate-800 hover:from-slate-600 border border-slate-400/50 text-slate-200 font-bold py-4 md:py-6 rounded-2xl shadow-inner transition bounce-click flex flex-col items-center justify-center gap-2" onclick="castSpell('蒸發')">
+                    <span class="text-3xl md:text-5xl drop-shadow-md text-slate-300 flex items-center justify-center">
+                        <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 2" stroke-linecap="round" stroke-linejoin="round" class="opacity-75">
+                            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
+                            <path d="M13 10.5a3.5 3.5 0 0 0-5 3"></path>
+                        </svg>
+                    </span>
+                    <span class="tracking-widest text-base md:text-xl font-black">蒸發</span>
+                </button>
+                <button class="spell-btn relative bg-gradient-to-br from-teal-900 to-slate-800 hover:from-teal-800 border border-teal-500/50 text-teal-200 font-bold py-4 md:py-6 rounded-2xl shadow-inner transition bounce-click flex flex-col items-center justify-center gap-2" onclick="castSpell('凝結')">
+                    <span class="text-3xl md:text-5xl drop-shadow-md">💧</span><span class="tracking-widest text-base md:text-xl font-black">凝結</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let TARGET_MONSTERS = 15; 
+        let lastSpawnedAnswer = ""; // 記錄上一隻魔物所需的「魔法答案」，確保不會連續出現同一種
+        
+        const questionBank = [
+            { text: "冰塊放在桌上變成水", ans: "融化", icon: "🧊" },
+            { text: "冷飲瓶外面布滿小水珠", ans: "凝結", icon: "🥤" },
+            { text: "水壺燒開後有透明無色的氣體跑出", ans: "蒸發", icon: "🫖" },
+            { text: "果汁放進冷凍庫變成冰棒", ans: "凝固", icon: "🍧" },
+            { text: "裝水的容器放幾天後水變少", ans: "蒸發", icon: "🪣" },
+            { text: "空氣裡的水蒸氣遇冷變水珠", ans: "凝結", icon: "🌧️" },
+            { text: "巧克力遇熱變軟", ans: "融化", icon: "🍫" },
+            { text: "水溫低於0℃結成冰", ans: "凝固", icon: "🌡️" },
+            { text: "吹風機把溼頭髮吹乾", ans: "蒸發", icon: "💨" },
+            { text: "吃熱麵時，眼鏡鏡片變得霧霧的", ans: "凝結", icon: "👓" },
+            { text: "裝熱湯的鍋蓋上有很多小水珠", ans: "凝結", icon: "🍲" },
+            { text: "撐開溼雨傘放在旁邊晾乾", ans: "蒸發", icon: "☔" },
+            { text: "天冷呵氣時，嘴巴吐出白煙", ans: "凝結", icon: "🗣️" },
+            { text: "冰塊加入熱紅茶後變小不見了", ans: "融化", icon: "☕" },
+            { text: "太陽把地上的積水晒乾", ans: "蒸發", icon: "☀️" },
+            { text: "冬天窗戶玻璃上出現小水珠", ans: "凝結", icon: "🪟" }
+        ];
+
+        const monsterColors = ['bg-purple-500', 'bg-rose-500', 'bg-emerald-500', 'bg-amber-500', 'bg-indigo-500'];
+        const spellIcons = { 
+            '融化': '🔥', 
+            '凝固': '❄️', 
+            '蒸發': '<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 2" stroke-linecap="round" stroke-linejoin="round" class="opacity-75"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path><path d="M13 10.5a3.5 3.5 0 0 0-5 3"></path></svg>', 
+            '凝結': '💧' 
+        };
+
+        let isPlaying = false;
+        let defeatedCount = 0;
+        let lives = 3;
+        
+        let activeEnemies = [];
+        let animationFrameId;
+        let lastTime = 0;
+        let timeElapsed = 0; 
+        let spawnTimer = 0;
+
+        const uiScore = document.getElementById('score-display');
+        const uiHearts = document.getElementById('hearts-container');
+        const progressBar = document.getElementById('progress-bar');
+        const playArea = document.getElementById('play-area');
+        const overlayScreen = document.getElementById('overlay-screen');
+        const overlayTitle = document.getElementById('overlay-title');
+        const overlayDesc = document.getElementById('overlay-desc');
+        const finalScoreBox = document.getElementById('final-score-box');
+        const finalScoreText = document.getElementById('final-score');
+        const finalMsg = document.getElementById('final-msg');
+        const startBtn = document.getElementById('start-btn');
+        const gameContainer = document.getElementById('game-container');
+        const settingsBox = document.getElementById('settings-box');
+        const btnNormal = document.getElementById('btn-normal');
+        const btnHard = document.getElementById('btn-hard');
+
+        function setDifficulty(target) {
+            TARGET_MONSTERS = target;
+            if (target === 15) {
+                btnNormal.className = "flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl transition border-2 border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.4)]";
+                btnHard.className = "flex-1 bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold py-3 px-4 rounded-xl transition border-2 border-slate-500";
+            } else {
+                btnNormal.className = "flex-1 bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold py-3 px-4 rounded-xl transition border-2 border-slate-500";
+                btnHard.className = "flex-1 bg-rose-600 hover:bg-rose-500 text-white font-bold py-3 px-4 rounded-xl transition border-2 border-rose-400 shadow-[0_0_15px_rgba(225,29,72,0.4)]";
+            }
+        }
+
+        function startGame() {
+            document.getElementById('progress-target-text').innerText = `過關進度 (目標: ${TARGET_MONSTERS}隻)`;
+
+            defeatedCount = 0;
+            lives = 3;
+            timeElapsed = 0;
+            spawnTimer = 2000; 
+            isPlaying = true;
+            lastSpawnedAnswer = ""; 
+            activeEnemies.forEach(e => e.el.remove()); 
+            activeEnemies = [];
+            
+            updateScoreUI();
+            updateLivesUI();
+            
+            overlayScreen.classList.add('opacity-0', 'pointer-events-none');
+            finalScoreBox.classList.add('hidden');
+            settingsBox.classList.add('hidden');
+            
+            lastTime = performance.now();
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function createEnemy() {
+            let targetX;
+            let attempts = 0;
+            let isOverlapping = true;
+            while (isOverlapping && attempts < 10) {
+                targetX = 15 + Math.random() * 70; 
+                isOverlapping = activeEnemies.some(e => e.y < 160 && Math.abs(e.x - targetX) < 25);
+                attempts++;
+            }
+
+            // 過濾掉上一隻魔物的「答案」，確保不會連續出現需要同一種魔法的題目
+            let availableQuestions = questionBank.filter(q => q.ans !== lastSpawnedAnswer);
+            if (availableQuestions.length === 0) availableQuestions = questionBank; 
+            
+            const q = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+            lastSpawnedAnswer = q.ans; // 更新最後一次抽到的「魔法答案」
+
+            const color = monsterColors[Math.floor(Math.random() * monsterColors.length)];
+            const el = document.createElement('div');
+            
+            el.className = 'enemy-container absolute transform -translate-x-1/2 flex flex-col items-center z-20';
+            el.style.left = `${targetX}%`;
+            el.innerHTML = `
+                <div class="speech-bubble bg-slate-100 text-slate-900 font-bold text-[14px] leading-snug text-center p-3 rounded-xl shadow-md mb-2 relative w-36 md:w-52 z-20 border-2 border-slate-300">
+                    ${q.text}
+                    <div class="absolute -bottom-1.5 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-slate-100 border-b-2 border-r-2 border-slate-300 rotate-45"></div>
+                </div>
+                <div class="monster-body w-16 h-16 md:w-20 md:h-20 ${color} relative flex items-center justify-center text-3xl md:text-4xl shadow-[0_5px_15px_rgba(0,0,0,0.4)]">
+                    <div class="monster-horn horn-left"></div>
+                    <div class="monster-horn horn-right"></div>
+                    <span class="z-10 drop-shadow-md mt-2 opacity-90">${q.icon}</span>
+                    <div class="absolute top-3 left-3.5 w-4 h-4 bg-white rounded-full flex justify-center items-center shadow-inner"><div class="w-2 h-2 bg-slate-900 rounded-full mt-0.5"></div></div>
+                    <div class="absolute top-3 right-3.5 w-4 h-4 bg-white rounded-full flex justify-center items-center shadow-inner"><div class="w-2 h-2 bg-slate-900 rounded-full mt-0.5"></div></div>
+                </div>
+            `;
+            playArea.appendChild(el);
+            return { el, y: -140, x: targetX, q, isDying: false };
+        }
+
+        function gameLoop(currentTime) {
+            if (!isPlaying) return;
+
+            const deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+            timeElapsed += deltaTime;
+            spawnTimer += deltaTime;
+
+            let maxEnemies = 1 + Math.floor(defeatedCount / 5);
+            maxEnemies = Math.min(3, maxEnemies);
+
+            let speedMultiplier = TARGET_MONSTERS === 30 ? 1.2 : 1.0;
+            let currentSpeed = (0.35 + (defeatedCount * 0.015)) * speedMultiplier; 
+            
+            let spawnIntervalMultiplier = TARGET_MONSTERS === 30 ? 0.8 : 1.0;
+            let currentSpawnInterval = Math.max(1000, 3000 - (defeatedCount * 80)) * spawnIntervalMultiplier;
+
+            if (spawnTimer >= currentSpawnInterval) {
+                spawnTimer = 0;
+                if (activeEnemies.length < maxEnemies) {
+                    const newEnemy = createEnemy();
+                    if (newEnemy) activeEnemies.push(newEnemy);
+                }
+            }
+
+            const playAreaHeight = playArea.clientHeight;
+            const hitZone = playAreaHeight - 120; 
+
+            for (let i = activeEnemies.length - 1; i >= 0; i--) {
+                let enemy = activeEnemies[i];
+                if (enemy.isDying) continue;
+
+                enemy.y += currentSpeed * (deltaTime / 16);
+                enemy.el.style.top = enemy.y + 'px';
+
+                if (enemy.y > hitZone) {
+                    takeDamage();
+                    enemy.el.remove();
+                    activeEnemies.splice(i, 1);
+                }
+            }
+
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function castSpell(spellName) {
+            if (!isPlaying) return;
+
+            const validEnemies = activeEnemies.filter(e => e.q.ans === spellName && !e.isDying);
+            
+            if (validEnemies.length > 0) {
+                validEnemies.sort((a, b) => b.y - a.y);
+                const targetEnemy = validEnemies[0];
+                targetEnemy.isDying = true;
+
+                shootProjectile(spellIcons[spellName], targetEnemy, spellName);
+
+            } else {
+                defeatedCount = Math.max(0, defeatedCount - 1);
+                updateScoreUI();
+                
+                gameContainer.classList.add('shake-it');
+                document.body.style.backgroundColor = '#4c0519'; 
+                setTimeout(() => {
+                    gameContainer.classList.remove('shake-it');
+                    document.body.style.backgroundColor = '';
+                }, 300);
+            }
+        }
+
+        function shootProjectile(icon, targetEnemy, spellName) {
+            const proj = document.createElement('div');
+            proj.innerHTML = icon;
+            proj.className = 'absolute left-1/2 bottom-12 transform -translate-x-1/2 text-5xl md:text-6xl z-30 filter drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]' + (spellName === '蒸發' ? ' text-slate-200' : '');
+            playArea.appendChild(proj);
+
+            const targetY = targetEnemy.y + 55; 
+            const playAreaHeight = playArea.clientHeight;
+            const playAreaWidth = playArea.clientWidth;
+            const startY = playAreaHeight - 80;
+            const targetX_px = (targetEnemy.x - 50) / 100 * playAreaWidth;
+
+            const anim = proj.animate([
+                { transform: `translate(-50%, 0) scale(0.5)`, opacity: 1 },
+                { transform: `translate(calc(-50% + ${targetX_px}px), -${startY - targetY}px) scale(1.5) rotate(360deg)`, opacity: 1 }
+            ], { duration: 300, easing: 'ease-in' });
+
+            anim.onfinish = () => {
+                proj.remove();
+                defeatedCount++;
+                updateScoreUI();
+                
+                targetEnemy.el.classList.add(`effect-${spellName}`);
+                
+                setTimeout(() => {
+                    targetEnemy.el.remove();
+                    activeEnemies = activeEnemies.filter(e => e !== targetEnemy);
+                    checkWinCondition(); 
+                }, 600); 
+            };
+        }
+
+        function takeDamage() {
+            lives--;
+            updateLivesUI();
+            
+            gameContainer.classList.add('shake-it');
+            document.body.style.backgroundColor = '#4c0519'; 
+            
+            setTimeout(() => {
+                gameContainer.classList.remove('shake-it');
+                document.body.style.backgroundColor = '';
+            }, 300);
+
+            if (lives <= 0) endGame(false);
+        }
+
+        function updateScoreUI() {
+            uiScore.innerText = defeatedCount;
+            const progress = Math.min(100, (defeatedCount / TARGET_MONSTERS) * 100);
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function updateLivesUI() {
+            let heartsHtml = '';
+            for (let i = 0; i < lives; i++) heartsHtml += '<span class="text-4xl drop-shadow-md">❤️</span>';
+            for (let i = lives; i < 3; i++) heartsHtml += '<span class="text-4xl drop-shadow-md opacity-30 grayscale">🖤</span>';
+            uiHearts.innerHTML = heartsHtml;
+        }
+
+        function checkWinCondition() {
+            if (defeatedCount >= TARGET_MONSTERS && isPlaying) {
+                endGame(true);
+            }
+        }
+
+        function endGame(isWin) {
+            isPlaying = false;
+            cancelAnimationFrame(animationFrameId);
+            
+            if (isWin) {
+                overlayTitle.innerText = "🌟 守護成功 🌟";
+                overlayTitle.className = "text-6xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-emerald-400 mb-6 drop-shadow-lg leading-tight";
+                overlayDesc.innerHTML = "太厲害了！你完全掌握了水的三態變化，<br>成為了最棒的魔法科學家！";
+                finalMsg.innerText = "成功擊退魔物";
+                finalScoreText.classList.replace('text-cyan-400', 'text-yellow-400');
+                startBtn.innerText = "再次挑戰傳說 🏆";
+            } else {
+                overlayTitle.innerText = "水晶魔力耗盡...";
+                overlayTitle.className = "text-6xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-orange-500 mb-6 drop-shadow-lg leading-tight";
+                overlayDesc.innerHTML = "魔物太多了！別灰心，<br>再複習一下「溫度變化」下次一定能過關！";
+                finalMsg.innerText = "本次擊退魔物";
+                finalScoreText.classList.replace('text-yellow-400', 'text-cyan-400');
+                startBtn.innerText = "重新防禦 🛡️";
+            }
+            
+            finalScoreText.innerText = defeatedCount;
+            finalScoreBox.classList.remove('hidden');
+            settingsBox.classList.remove('hidden');
+            overlayScreen.classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+    </script>
+</body>
+</html>
