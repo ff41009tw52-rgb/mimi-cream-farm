@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <link rel="manifest" href="./manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>橘咪咪與白奶油的科學農場</title>
@@ -103,7 +102,6 @@
             z-index: 1;
         }
 
-        /* 橘貓與布偶貓 icon */
         .cat-orange { color: #FFD700; filter: drop-shadow(2px 2px 0 #d35400); }
         .cat-ragdoll { color: var(--ragdoll-cream); filter: drop-shadow(2px 2px 0 #8D6E63); }
 
@@ -249,16 +247,30 @@
         h3 { margin: 0 0 15px 0; color: var(--soil-brown); font-size: 1.4rem; }
         p.desc { margin: 0; color: #666; font-size: 1rem; line-height: 1.6; margin-bottom: 20px; }
 
-        /* 按鈕樣式 */
         .open-btn {
             display: block; text-decoration: none; text-align: center;
             background-color: var(--farm-green); color: white; padding: 18px;
-            font-size: 1.1rem; font-weight: bold; transition: background-color 0.3s;
+            font-size: 1.1rem; font-weight: bold; 
+            transition: all 0.3s ease;
+            position: relative;
         }
-        .open-btn:hover { background-color: #5da035; }
-        .open-btn i { margin-left: 8px; }
+        .open-btn:hover { 
+            background-color: #5da035; 
+            letter-spacing: 1px;
+        }
+        .open-btn:active {
+            background-color: #4a822a;
+            transform: scale(0.98);
+        }
+        .open-btn i { 
+            margin-left: 8px; 
+            transition: transform 0.3s ease; 
+            display: inline-block;
+        }
+        .open-btn:hover i { 
+            transform: scale(1.2) rotate(-10deg); 
+        }
 
-        /* 頁尾樣式 */
         footer {
             margin-top: 40px;
             text-align: center; 
@@ -274,7 +286,6 @@
             z-index: 2;
         }
 
-        /* 懸浮回報按鈕樣式 */
         .feedback-float-btn {
             position: fixed; 
             bottom: 30px;
@@ -300,7 +311,6 @@
             box-shadow: 0 6px 20px rgba(0,0,0,0.4);
         }
 
-        /* --- 手機版 RWD 調整 --- */
         @media (max-width: 900px) {
             .header-cat, .footer-cat {
                 position: static; 
@@ -308,11 +318,7 @@
                 margin: 10px auto; 
                 transform: none;    
             }
-            
-            header {
-                padding-top: 1rem;
-            }
-
+            header { padding-top: 1rem; }
             footer {
                 padding: 20px;
                 display: flex;
@@ -320,27 +326,12 @@
                 align-items: center;
                 gap: 15px;
             }
-
-            .home-btn {
-                top: 10px;
-                left: 10px;
-                padding: 8px 15px;
-                font-size: 0.9rem;
-            footer {
-                padding: 20px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 15px;
-            }
-
             .feedback-float-btn {
                 padding: 12px 20px;
                 font-size: 0.95rem;
                 bottom: 20px;
                 right: 20px;
             }
-
             .filter-btn {
                 font-size: 1rem;
                 padding: 8px 18px;
@@ -352,13 +343,11 @@
 
     <header>
         <img src="welcome-cats.JPG" alt="歡迎光臨" class="deco-img header-cat" onerror="this.style.display='none'">
-
         <h1>
             <i class="fas fa-cat cat-orange"></i> 
             橘咪咪與白奶油的科學農場 
             <i class="fas fa-cat cat-ragdoll"></i>
         </h1>
-        
         <div class="subtitle">
             這裡種的不是胡蘿蔔，而是充滿智慧的科學知識！請點選下方農地開始學習。
         </div>
@@ -384,7 +373,6 @@
     </div>
 
     <div class="container">
-        
         <!-- 過濾導覽列 -->
         <div class="filter-nav">
             <button class="filter-btn active" data-filter="all">全部遊戲</button>
@@ -396,23 +384,7 @@
 
         <div class="farm-grid" id="game-grid">
             
-            <!-- ============================================== -->
-            <!-- ★ 新增遊戲：植物向光性 (三年級) ★ -->
-            <!-- ============================================== -->
-            <div class="science-card" data-grades="3">
-                <div class="card-icon-header">
-                    <span class="grade-badge">三年級</span>
-                    <i class="fas fa-sun"></i> <!-- 使用太陽代表向光性 -->
-                </div>
-                <div class="card-body">
-                    <h3>🌻 植物向光性</h3>
-                    <p class="desc">橘咪咪把盆栽放在窗台邊，發現植物的莖葉竟然都偷偷轉向陽光了！白奶油覺得這太神奇了，快來幫助植物尋找陽光，了解植物神奇的「向光性」吧！</p>
-                </div>
-                <a href="20.html" target="_blank" class="open-btn">
-                    開始體驗 <i class="fas fa-external-link-alt"></i>
-                </a>
-            </div>
- <!-- ★ 新增：物質分類大挑戰 (22.html) ★ -->
+            <!-- ★ 新增：物質分類大挑戰 (22.html) ★ -->
             <div class="science-card" data-grades="3">
                 <div class="card-icon-header">
                     <span class="grade-badge">三年級</span>
@@ -426,279 +398,232 @@
                     開始挑戰 <i class="fas fa-external-link-alt"></i>
                 </a>
             </div>
-            <!-- ============================================== -->
-            <!-- ★ 新增遊戲：小水滴結冰記 (三年級) ★ -->
-            <!-- ============================================== -->
+
+            <!-- ★ 新增：魔法水晶保衛戰 (23.html) ★ -->
             <div class="science-card" data-grades="3">
                 <div class="card-icon-header">
                     <span class="grade-badge">三年級</span>
-                    <i class="fas fa-snowflake"></i> <!-- 使用雪花代表結冰 -->
+                    <i class="fas fa-gem"></i>
                 </div>
                 <div class="card-body">
-                    <h3>❄️ 小水滴結冰記</h3>
-                    <p class="desc">天氣變冷了，白奶油傲嬌地不想碰冷水！橘咪咪發現水溫降到0度C以下時會發生奇妙的變化。一起來探索液態的小水滴是怎麼變成堅硬的冰塊吧！</p>
+                    <h3>💎 魔法水晶保衛戰</h3>
+                    <p class="desc">農場的魔法水晶受到攻擊啦！快運用「水的三態變化」來防禦！無論是堅硬的冰塊牆、沖刷敵人的水流，還是高溫的水蒸氣，幫白奶油建立最堅固的防線吧！</p>
+                </div>
+                <a href="23.html" target="_blank" class="open-btn">
+                    保衛水晶 <i class="fas fa-external-link-alt"></i>
+                </a>
+            </div>
+
+            <!-- ★ 新增：植物向光性 (20.html) ★ -->
+            <div class="science-card" data-grades="3">
+                <div class="card-icon-header">
+                    <span class="grade-badge">三年級</span>
+                    <i class="fas fa-sun"></i>
+                </div>
+                <div class="card-body">
+                    <h3>🌿 植物向光性：尋找陽光大冒險</h3>
+                    <p class="desc">橘咪咪發現窗邊的小豆苗歪著頭在看什麼？原來植物也會「追星」！快來幫助小植物繞過障礙物，朝著暖洋洋的太陽生長吧！</p>
+                </div>
+                <a href="20.html" target="_blank" class="open-btn">
+                    開始冒險 <i class="fas fa-external-link-alt"></i>
+                </a>
+            </div>
+
+            <!-- ★ 新增：小水滴結冰記 (21.html) ★ -->
+            <div class="science-card" data-grades="3">
+                <div class="card-icon-header">
+                    <span class="grade-badge">三年級</span>
+                    <i class="fas fa-icicles"></i>
+                </div>
+                <div class="card-body">
+                    <h3>🧊 小水滴結冰記：溫度的神祕魔法</h3>
+                    <p class="desc">冬天到了，白奶油的洗臉水竟然變成了硬邦邦的冰塊！跟著小水滴一起體驗從液體變成固體的奇妙旅程，了解溫度是如何改變物質的！</p>
                 </div>
                 <a href="21.html" target="_blank" class="open-btn">
-                    開始體驗 <i class="fas fa-external-link-alt"></i>
+                    進入冰雪世界 <i class="fas fa-external-link-alt"></i>
                 </a>
             </div>
 
-            <!-- 酸鹼滴定：三年級、五年級 -->
-            <div class="science-card" data-grades="3,5">
-                <div class="card-icon-header">
-                    <span class="grade-badge">三、五年級</span>
-                    <i class="fas fa-flask"></i>
-                </div>
-                <div class="card-body">
-                    <h3>🧪 酸鹼滴定</h3>
-                    <p class="desc">就像農場土壤需要酸鹼平衡一樣，讓我們來學習如何知道溶液的酸鹼！</p>
-                </div>
-                <a href="four.html" target="_blank" class="open-btn">
-                    前往閱讀筆記 <i class="fas fa-external-link-alt"></i>
-                </a>
+        <!-- 酸鹼滴定 -->
+        <div class="science-card" data-grades="3,5">
+            <div class="card-icon-header">
+                <span class="grade-badge">三、五年級</span>
+                <i class="fas fa-flask"></i>
             </div>
-
-            <!-- 特性分類 (基礎)：三年級 -->
-            <div class="science-card" data-grades="3">
-                <div class="card-icon-header">
-                    <span class="grade-badge">三年級</span>
-                    <i class="fas fa-boxes"></i>
-                </div>
-                <div class="card-body">
-                    <h3>📦 特性分類 (基礎)</h3>
-                    <p class="desc">橘咪咪把農具分類整理好了！這份簡報將帶你認識物質的基本特性與分類方法。</p>
-                </div>
-                <a href="one.html" target="_blank" class="open-btn">
-                    前往閱讀筆記 <i class="fas fa-external-link-alt"></i>
-                </a>
+            <div class="card-body">
+                <h3>🧪 酸鹼滴定</h3>
+                <p class="desc">就像農場土壤需要酸鹼平衡一樣，讓我們來學習如何知道溶液的酸鹼！</p>
             </div>
-
-            <!-- 特性分類 (進階)：三年級 -->
-            <div class="science-card" data-grades="3">
-                <div class="card-icon-header">
-                    <span class="grade-badge">三年級</span>
-                    <i class="fas fa-microscope"></i>
-                </div>
-                <div class="card-body">
-                    <h3>🚀 特性分類 (進階)</h3>
-                    <p class="desc">白奶油發現了更深奧的分類學問！適合已經了解基礎概念的小小科學家挑戰。</p>
-                </div>
-                <a href="two.html" target="_blank" class="open-btn">
-                    前往閱讀筆記 <i class="fas fa-external-link-alt"></i>
-                </a>
-            </div>
-
-            <!-- 電流磁效應：六年級 -->
-            <div class="science-card" data-grades="6">
-                <div class="card-icon-header">
-                    <span class="grade-badge">六年級</span>
-                    <i class="fas fa-bolt"></i>
-                </div>
-                <div class="card-body">
-                    <h3>⚡ 電流磁效應</h3>
-                    <p class="desc">不可思議的電與磁！與橘咪咪一起來探索電流如何產生磁場</p>
-                </div>
-                <a href="three.html" target="_blank" class="open-btn">
-                    前往閱讀筆記 <i class="fas fa-external-link-alt"></i>
-                </a>
-            </div>
-
-            <!-- 鹽巴沙子分離術：三年級 -->
-            <div class="science-card" data-grades="3">
-                <div class="card-icon-header">
-                    <span class="grade-badge">三年級</span>
-                    <i class="fas fa-filter"></i>
-                </div>
-                <div class="card-body">
-                    <h3>🧂 鹽巴沙子分離術</h3>
-                    <p class="desc">糟糕！橘咪咪把鹽巴混進沙坑了。快運用「溶解、過濾、結晶」的科學方法，幫白奶油把乾淨的鹽巴變回來！</p>
-                </div>
-                <a href="5.html" target="_blank" class="open-btn">
-                    前往閱讀筆記 <i class="fas fa-external-link-alt"></i>
-                </a>
-            </div>
-
-            <!-- 空氣壓縮大挑戰：三年級 -->
-            <div class="science-card" data-grades="3">
-                <div class="card-icon-header">
-                    <span class="grade-badge">三年級</span>
-                    <i class="fas fa-syringe"></i>
-                </div>
-                <div class="card-body">
-                    <h3>💉 空氣壓縮大挑戰</h3>
-                    <p class="desc">白奶油發現針筒裡的空氣像是裝了彈簧！用力壓下去它還會彈回來。快來試試看壓縮針筒，看你能把空氣壓得多扁呢？</p>
-                </div>
-                <a href="7.html" target="_blank" class="open-btn">
-                    前往閱讀筆記 <i class="fas fa-external-link-alt"></i>
-                </a>
-            </div>
-
-            <!-- 奇妙的電路實驗：四年級 -->
-            <div class="science-card" data-grades="4">
-                <div class="card-icon-header">
-                    <span class="grade-badge">四年級</span>
-                    <i class="fas fa-lightbulb"></i>
-                </div>
-                <div class="card-body">
-                    <h3>🔌 奇妙的電路實驗</h3>
-                    <p class="desc">天黑了，橘咪咪在農場倉庫找到了一些電池跟電線，她想知道怎麼做才能讓燈泡發光？一起來動手接通電路吧！</p>
-                </div>
-                <a href="8.html" target="_blank" class="open-btn">
-                    前往閱讀筆記 <i class="fas fa-external-link-alt"></i>
-                </a>
-            </div>
-
-            <!-- 酸鹼接接樂：三年級、五年級 -->
-            <div class="science-card" data-grades="3,5">
-                <div class="card-icon-header">
-                    <span class="grade-badge">三、五年級</span>
-                    <i class="fas fa-hand-holding-water"></i>
-                </div>
-                <div class="card-body">
-                    <h3>🎮 酸鹼接接樂</h3>
-                    <p class="desc">反應力大考驗！請依照白奶油的指令，移動橘咪咪接住正確的溶液。小心別接到錯的喔！</p>
-                </div>
-                <a href="9.html" target="_blank" class="open-btn">
-                    前往閱讀筆記 <i class="fas fa-external-link-alt"></i>
-                </a>
-            </div>
-            
-            <!-- 酸鹼接接樂-家長日：三年級、五年級 -->
-            <div class="science-card" data-grades="3,5">
-                <div class="card-icon-header">
-                    <span class="grade-badge">三、五年級</span>
-                    <i class="fas fa-hand-holding-water"></i>
-                </div>
-                <div class="card-body">
-                    <h3>🎮 酸鹼接接樂-家長日</h3>
-                    <p class="desc">歡迎各位家長蒞臨民安國小，孩子即將參與反應力大考驗！請依照白奶油的指令，移動橘咪咪接住正確的溶液。小心別接到錯的喔！</p>
-                </div>
-                <a href="13.html" target="_blank" class="open-btn">
-                    前往閱讀筆記 <i class="fas fa-external-link-alt"></i>
-                </a>
-            </div>
-            
-            <!-- 蔬菜身世之謎：三年級 -->
-            <div class="science-card" data-grades="3">
-                <div class="card-icon-header">
-                    <span class="grade-badge">三年級</span>
-                    <i class="fas fa-carrot"></i>
-                </div>
-                <div class="card-body">
-                    <h3>🥕 蔬菜身世之謎</h3>
-                    <p class="desc">橘咪咪在收成時把蔬菜全搞混了！哪些是根莖類？哪些是葉菜類？快來玩分類遊戲，幫白奶油整理出正確的晚餐食材！</p>
-                </div>
-                <a href="11.html" target="_blank" class="open-btn">
-                    前往閱讀筆記 <i class="fas fa-external-link-alt"></i>
-                </a>
-            </div>
-            
-            <!-- 四季農莊：島嶼物語：三年級 -->
-            <div class="science-card" data-grades="3">
-                <div class="card-icon-header">
-                    <span class="grade-badge">三年級</span>
-                    <i class="fas fa-map-marked-alt"></i>
-                </div>
-                <div class="card-body">
-                    <h3>🏝️ 四季農莊：島嶼物語</h3>
-                    <p class="desc">橘咪咪和白奶油發現了一個神祕島嶼！這裡的四季變化對植物有什麼影響？快跟著他們一起探索不同季節最適合種植的作物吧！</p>
-                </div>
-                <a href="12.html" target="_blank" class="open-btn">
-                    前往閱讀筆記 <i class="fas fa-external-link-alt"></i>
-                </a>
-            </div>
-
-            <!-- 播種小達人：三年級 -->
-            <div class="science-card" data-grades="3">
-                <div class="card-icon-header">
-                    <span class="grade-badge">三年級</span>
-                    <i class="fas fa-seedling"></i>
-                </div>
-                <div class="card-body">
-                    <h3>🌱 播種小達人</h3>
-                    <p class="desc">來挑戰種植小白菜與番茄吧！學習「撒播」與「點播」的技巧，並用正確的方式幫幼苗覆土與澆水，成為優秀的小農夫！</p>
-                </div>
-                <a href="14.html" target="_blank" class="open-btn">
-                    開始體驗 <i class="fas fa-external-link-alt"></i>
-                </a>
-            </div>
-            
-            <!-- 槓桿與輪軸對對碰(昀)：六年級 -->
-            <div class="science-card" data-grades="6">
-                <div class="card-icon-header">
-                    <span class="grade-badge">六年級</span>
-                    <i class="fas fa-balance-scale"></i>
-                </div>
-                <div class="card-body">
-                    <h3>⚖️ 槓桿與輪軸對對碰(昀)</h3>
-                    <p class="desc">農場裡的省力小祕密！橘咪咪發現只要找對支點，就能輕鬆搬起巨大的南瓜。快來跟白奶油挑戰對對碰，找出生活中的槓桿與輪軸吧！</p>
-                </div>
-                <a href="15.html" target="_blank" class="open-btn">
-                    前往閱讀筆記 <i class="fas fa-external-link-alt"></i>
-                </a>
-            </div>
-
-            <!-- 電路接線挑戰賽(澔)：四年級 -->
-            <div class="science-card" data-grades="4">
-                <div class="card-icon-header">
-                    <span class="grade-badge">四年級</span>
-                    <i class="fas fa-plug"></i>
-                </div>
-                <div class="card-body">
-                    <h3>🔌 電路接線挑戰賽(澔)</h3>
-                    <p class="desc">橘咪咪的燈泡又不亮了！快跟著澔哥一起挑戰更複雜的電路接線，找出讓所有燈泡發光的正確接法吧！</p>
-                </div>
-                <a href="16.html" target="_blank" class="open-btn">
-                    開始體驗 <i class="fas fa-external-link-alt"></i>
-                </a>
-            </div>
-
-            <!-- 水生植物到新家：四年級 -->
-            <div class="science-card" data-grades="4">
-                <div class="card-icon-header">
-                    <span class="grade-badge">四年級</span>
-                    <i class="fas fa-water"></i>
-                </div>
-                <div class="card-body">
-                    <h3>💧 水生植物到新家</h3>
-                    <p class="desc">生態池種了新植物，請幫白奶油把水生植物們搬到適合它們的新家，一起認識漂浮、沉水與挺水植物！</p>
-                </div>
-                <a href="17.html" target="_blank" class="open-btn">
-                    開始體驗 <i class="fas fa-external-link-alt"></i>
-                </a>
-            </div>
-
-            <!-- 槓桿與輪軸對對碰2(昀)：六年級 -->
-            <div class="science-card" data-grades="6">
-                <div class="card-icon-header">
-                    <span class="grade-badge">六年級</span>
-                    <i class="fas fa-cogs"></i>
-                </div>
-                <div class="card-body">
-                    <h3>⚙️ 槓桿與輪軸對對碰2(昀)</h3>
-                    <p class="desc">昀帶來了全新的力學進階挑戰！這次有更多不一樣的農場工具，快來測試你的力學知識，看看能不能全部配對成功！</p>
-                </div>
-                <a href="18.html" target="_blank" class="open-btn">
-                    開始體驗 <i class="fas fa-external-link-alt"></i>
-                </a>
-            </div>
-
-            <!-- 尋找北極星：五年級 -->
-            <div class="science-card" data-grades="5">
-                <div class="card-icon-header">
-                    <span class="grade-badge">五年級</span>
-                    <i class="fas fa-star"></i>
-                </div>
-                <div class="card-body">
-                    <h3>⭐ 尋找北極星</h3>
-                    <p class="desc">夜空中的指北針！跟著橘咪咪一起觀察四季星空的變化，學習如何透過北斗七星與仙后座找到指引方向的北極星吧！</p>
-                </div>
-                <a href="19.html" target="_blank" class="open-btn">
-                    開始體驗 <i class="fas fa-external-link-alt"></i>
-                </a>
-            </div>
-
+            <a href="four.html" target="_blank" class="open-btn">
+                開始滴定 <i class="fas fa-eye-dropper"></i>
+            </a>
         </div>
+
+        <!-- 特性分類 (基礎) -->
+        <div class="science-card" data-grades="3">
+            <div class="card-icon-header">
+                <span class="grade-badge">三年級</span>
+                <i class="fas fa-boxes"></i>
+            </div>
+            <div class="card-body">
+                <h3>📦 特性分類 (基礎)</h3>
+                <p class="desc">橘咪咪把農具分類整理好了！這份簡報將帶你認識物質的基本特性與分類方法。</p>
+            </div>
+            <a href="one.html" target="_blank" class="open-btn">
+                幫忙整理 <i class="fas fa-box-open"></i>
+            </a>
+        </div>
+
+        <!-- 特性分類 (進階) -->
+        <div class="science-card" data-grades="3">
+            <div class="card-icon-header">
+                <span class="grade-badge">三年級</span>
+                <i class="fas fa-microscope"></i>
+            </div>
+            <div class="card-body">
+                <h3>🚀 特性分類 (進階)</h3>
+                <p class="desc">白奶油發現了更深奧的分類學問！適合已經了解基礎概念的小小科學家挑戰。</p>
+            </div>
+            <a href="two.html" target="_blank" class="open-btn">
+                進階觀測 <i class="fas fa-search-plus"></i>
+            </a>
+        </div>
+
+        <!-- 電流磁效應 -->
+        <div class="science-card" data-grades="6">
+            <div class="card-icon-header">
+                <span class="grade-badge">六年級</span>
+                <i class="fas fa-bolt"></i>
+            </div>
+            <div class="card-body">
+                <h3>⚡ 電流磁效應</h3>
+                <p class="desc">不可思議的電與磁！與橘咪咪一起來探索電流如何產生磁場</p>
+            </div>
+            <a href="three.html" target="_blank" class="open-btn">
+                探索電磁 <i class="fas fa-magnet"></i>
+            </a>
+        </div>
+
+        <!-- 鹽巴沙子分離術 -->
+        <div class="science-card" data-grades="3">
+            <div class="card-icon-header">
+                <span class="grade-badge">三年級</span>
+                <i class="fas fa-filter"></i>
+            </div>
+            <div class="card-body">
+                <h3>🧂 鹽巴沙子分離術</h3>
+                <p class="desc">糟糕！橘咪咪把鹽巴混進沙坑了。快運用「溶解、過濾、結晶」的科學方法，幫白奶油把乾淨的鹽巴變回來！</p>
+            </div>
+            <a href="5.html" target="_blank" class="open-btn">
+                施展分離術 <i class="fas fa-magic"></i>
+            </a>
+        </div>
+
+        <!-- 空氣壓縮大挑戰 -->
+        <div class="science-card" data-grades="3">
+            <div class="card-icon-header">
+                <span class="grade-badge">三年級</span>
+                <i class="fas fa-syringe"></i>
+            </div>
+            <div class="card-body">
+                <h3>💉 空氣壓縮大挑戰</h3>
+                <p class="desc">白奶油發現針筒裡的空氣像是裝了彈簧！用力壓下去它還會彈回來。快來試試看壓縮針筒，看你能把空氣壓得多扁呢？</p>
+            </div>
+            <a href="7.html" target="_blank" class="open-btn">
+                用力壓縮 <i class="fas fa-compress-alt"></i>
+            </a>
+        </div>
+
+        <!-- 奇妙的電路實驗 -->
+        <div class="science-card" data-grades="4">
+            <div class="card-icon-header">
+                <span class="grade-badge">四年級</span>
+                <i class="fas fa-lightbulb"></i>
+            </div>
+            <div class="card-body">
+                <h3>🔌 奇妙的電路實驗</h3>
+                <p class="desc">天黑了，橘咪咪在農場倉庫找到了一些電池跟電線，她想知道怎麼做才能讓燈泡發光？一起來動手接通電路吧！</p>
+            </div>
+            <a href="8.html" target="_blank" class="open-btn">
+                點亮燈泡 <i class="fas fa-lightbulb"></i>
+            </a>
+        </div>
+
+        <!-- 酸鹼接接樂 -->
+        <div class="science-card" data-grades="3,5">
+            <div class="card-icon-header">
+                <span class="grade-badge">三、五年級</span>
+                <i class="fas fa-hand-holding-water"></i>
+            </div>
+            <div class="card-body">
+                <h3>🎮 酸鹼接接樂</h3>
+                <p class="desc">反應力大考驗！請依照白奶油的指令，移動橘咪咪接住正確的溶液。小心別接到錯的喔！</p>
+            </div>
+            <a href="9.html" target="_blank" class="open-btn">
+                挑戰反應力 <i class="fas fa-stopwatch"></i>
+            </a>
+        </div>
+        
+        <!-- 蔬菜身世之謎 -->
+        <div class="science-card" data-grades="3">
+            <div class="card-icon-header">
+                <span class="grade-badge">三年級</span>
+                <i class="fas fa-carrot"></i>
+            </div>
+            <div class="card-body">
+                <h3>🥕 蔬菜身世之謎</h3>
+                <p class="desc">橘咪咪在收成時把蔬菜全搞混了！哪些是根莖類？哪些是葉菜類？快來玩分類遊戲，幫白奶油整理出正確的晚餐食材！</p>
+            </div>
+            <a href="11.html" target="_blank" class="open-btn">
+                挑選晚餐 <i class="fas fa-shopping-basket"></i>
+            </a>
+        </div>
+        
+        <!-- 四季農莊：島嶼物語 -->
+        <div class="science-card" data-grades="3">
+            <div class="card-icon-header">
+                <span class="grade-badge">三年級</span>
+                <i class="fas fa-map-marked-alt"></i>
+            </div>
+            <div class="card-body">
+                <h3>🏝️ 四季農莊：島嶼物語</h3>
+                <p class="desc">橘咪咪和白奶油發現了一個神祕島嶼！這裡的四季變化對植物有什麼影響？快跟著他們一起探索不同季節最適合種植的作物吧！</p>
+            </div>
+            <a href="12.html" target="_blank" class="open-btn">
+                出發探索 <i class="fas fa-compass"></i>
+            </a>
+        </div>
+
+        <!-- 播種小達人 -->
+        <div class="science-card" data-grades="3">
+            <div class="card-icon-header">
+                <span class="grade-badge">三年級</span>
+                <i class="fas fa-seedling"></i>
+            </div>
+            <div class="card-body">
+                <h3>🌱 播種小達人</h3>
+                <p class="desc">來挑戰種植小白菜與番茄吧！學習「撒播」與「點播」的技巧，並用正確的方式幫幼苗覆土與澆水，成為優秀的小農夫！</p>
+            </div>
+            <a href="14.html" target="_blank" class="open-btn">
+                動手播種 <i class="fas fa-seedling"></i>
+            </a>
+        </div>
+
+        <!-- 尋找北極星 -->
+        <div class="science-card" data-grades="5">
+            <div class="card-icon-header">
+                <span class="grade-badge">五年級</span>
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="card-body">
+                <h3>⭐ 尋找北極星</h3>
+                <p class="desc">夜空中的指北針！跟著橘咪咪一起觀察四季星空的變化，學習如何透過北斗七星與仙后座找到指引方向的北極星吧！</p>
+            </div>
+            <a href="19.html" target="_blank" class="open-btn">
+                觀測星空 <i class="fas fa-binoculars"></i>
+            </a>
+        </div>
+
     </div>
 
     <footer>
@@ -710,7 +635,6 @@
         <i class="fas fa-comment-dots"></i> 回報問題
     </a>
 
-    <!-- 篩選邏輯 JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const filterBtns = document.querySelectorAll('.filter-btn');
@@ -718,24 +642,16 @@
 
             filterBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
-                    // 1. 移除所有按鈕的 active 狀態，並為當前點擊的按鈕加上 active
                     filterBtns.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
-
-                    // 2. 取得要篩選的年級 (例如 '3', '4', 'all')
                     const filterValue = btn.getAttribute('data-filter');
 
-                    // 3. 遍歷所有卡片進行顯示/隱藏切換
                     cards.forEach(card => {
                         if (filterValue === 'all') {
-                            // 若點選「全部」，則顯示所有卡片
                             card.classList.remove('hidden');
                         } else {
-                            // 取得卡片的 data-grades 屬性 (例如 "3,5")
                             const gradesStr = card.getAttribute('data-grades');
-                            
                             if (gradesStr) {
-                                // 將字串切成陣列進行比對
                                 const gradesArray = gradesStr.split(',');
                                 if (gradesArray.includes(filterValue)) {
                                     card.classList.remove('hidden');
@@ -743,7 +659,6 @@
                                     card.classList.add('hidden');
                                 }
                             } else {
-                                // 若該卡片沒有設定任何年級，在特定年級分類下就隱藏
                                 card.classList.add('hidden');
                             }
                         }
