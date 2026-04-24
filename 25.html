@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>動物猜謎</title>
+  <!-- 引入 Tailwind CSS CDN 以保留原有樣式 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <!-- 這裡是用來掛載整個應用程式的容器 -->
+  <div id="app"></div>
+
+  <script>
+    // 1. 資料結構定義 (已移除頭角與彩虹)
+    const categories = [
+      {
+        title: '棲息地 (Habitat)',
+        color: 'border-green-400 bg-green-50',
+        icon: '🏠',
+        items: [
+          { icon: '⛰️', label: '高山' },
+          { icon: '🏜️', label: '沙漠' },
+          { icon: '<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L1 22h22L12 2z" fill="#78716c"/><path d="M8 22v-6a4 4 0 018 0v6H8z" fill="#1c1917"/></svg>', label: '洞穴' },
+          { icon: '🐸', label: '沼澤' },
+          { icon: '🏞️', label: '草原' },
+          { icon: '🌲', label: '森林' },
+          { icon: '🏖️', label: '沙灘' },
+          { icon: '🌊', label: '海面' },
+          { icon: '🐋', label: '深海' },
+          { icon: '🏘️', label: '房屋' },
+          { icon: '🚜', label: '農場' },
+        ]
+      },
+      {
+        title: '外觀與特徵 (Traits)',
+        color: 'border-orange-400 bg-orange-50',
+        icon: '🦀',
+        items: [
+          { icon: '🐁', label: '體型小' },
+          { icon: '🐕', label: '體型中' },
+          { icon: '🐘', label: '體型大' },
+          { icon: '💪', label: '強壯' },
+          { icon: '🦠', label: '柔軟/扁平' },
+          { icon: '<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="6.5"></line></svg>', label: '羽毛' },
+          { icon: '🦔', label: '尖刺' },
+          { icon: '🐟', label: '鱗片/裝甲' },
+          { icon: '🐢', label: '甲殼' },
+          { icon: '🦷', label: '銳齒' },
+          { icon: '🦆', label: '鳥喙' },
+          { icon: '🐌', label: '觸角' },
+          { icon: '🦞', label: '雙鉗' },
+          { icon: '🦍', label: '手臂' },
+          { icon: '🐙', label: '觸手' },
+          { icon: '🚶', label: '雙腳' },
+          { icon: '🐈', label: '四腳' },
+          { icon: '🐛', label: '多腳' },
+          { icon: '❌', label: '沒有腳' },
+        ]
+      },
+      {
+        title: '顏色與花紋 (Colors)',
+        color: 'border-slate-300 bg-slate-50',
+        icon: '🎨',
+        items: [
+          { icon: '🔴', label: '紅' },
+          { icon: '🟠', label: '橘' },
+          { icon: '🟡', label: '黃' },
+          { icon: '🟢', label: '綠' },
+          { icon: '🟤', label: '棕' },
+          { icon: '<svg width="1em" height="1em" viewBox="0 0 24 24" fill="#f472b6" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"/></svg>', label: '粉' },
+          { icon: '🟣', label: '紫' },
+          { icon: '🔵', label: '藍' },
+          { icon: '⚫', label: '黑' },
+          { icon: '<svg width="1em" height="1em" viewBox="0 0 24 24" fill="#9ca3af" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"/></svg>', label: '灰' },
+          { icon: '⚪', label: '白' },
+          { icon: '<svg width="1em" height="1em" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="20" height="20" rx="4" fill="white" stroke="#334155" stroke-width="2"/><path d="M7 2v20 M12 2v20 M17 2v20" stroke="#334155" stroke-width="2.5"/></svg>', label: '條紋' },
+          { icon: '🐾', label: '斑點' },
+        ]
+      },
+      {
+        title: '運動方式 (Movement)',
+        color: 'border-red-300 bg-red-50',
+        icon: '➡️',
+        items: [
+          { icon: '🦘', label: '跳躍' },
+          { icon: '🦅', label: '飛行' },
+          { icon: '🧗', label: '攀爬' },
+          { icon: '🐢', label: '緩慢/爬行' },
+          { icon: '🐆', label: '快速/奔跑' },
+          { icon: '🏊', label: '游泳' },
+          { icon: '⛏️', label: '挖掘' },
+          { icon: '🌀', label: '滾動' },
+        ]
+      },
+      {
+        title: '飲食與習性 (Diet & Habits)',
+        color: 'border-blue-300 bg-blue-50',
+        icon: '🍽️',
+        items: [
+          { icon: '🍃', label: '植物/草食' },
+          { icon: '🥩', label: '肉食' },
+          { icon: '☀️', label: '日行性' },
+          { icon: '🌙', label: '夜行性' },
+          { icon: '😊', label: '溫馴' },
+          { icon: '😠', label: '兇猛' },
+        ]
+      }
+    ];
+
+    // 2. 建立狀態來儲存已選取的項目 (使用 Set 來保證唯一性)
+    let selectedItems = new Set();
+
+    // 3. 切換選取狀態的函式
+    function toggleSelection(label) {
+      if (selectedItems.has(label)) {
+        selectedItems.delete(label); // 如果已經選過就取消
+      } else {
+        selectedItems.add(label);    // 沒選過就加入
+      }
+      render(); // 每次點擊後重新渲染畫面
+    }
+
+    // 4. 畫面渲染函式
+    function render() {
+      const appContainer = document.getElementById('app');
+      
+      let htmlContent = `
+        <div class="min-h-screen bg-slate-100 p-4 md:p-8 font-sans text-slate-800">
+          <div class="max-w-6xl mx-auto">
+            <header class="mb-8 text-center">
+              <h1 class="text-3xl font-bold text-slate-700 mb-2">動物猜謎</h1>
+              <p class="text-slate-500">遊戲說明：點擊下方圖示給予特徵提示（出現紅框表示已選取），讓大家猜猜看這是什麼動物！</p>
+            </header>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      `;
+
+      categories.forEach((category) => {
+        htmlContent += `
+          <div class="border-t-4 shadow-sm rounded-xl p-5 ${category.color}">
+            <div class="flex items-center mb-4 border-b pb-2 border-slate-200/50">
+              <span class="text-2xl mr-2">${category.icon}</span>
+              <h2 class="text-xl font-semibold text-slate-700">${category.title}</h2>
+            </div>
+            <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
+        `;
+
+        category.items.forEach((item) => {
+          const isSelected = selectedItems.has(item.label);
+          // 根據選取狀態決定 Tailwind 樣式
+          const baseClasses = "flex flex-col items-center justify-center p-2 rounded-lg shadow-sm hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer";
+          const dynamicClasses = isSelected 
+            ? "bg-red-50 border-2 border-red-500 ring-2 ring-red-200" 
+            : "bg-white border border-slate-100";
+            
+          htmlContent += `
+              <div 
+                onclick="toggleSelection('${item.label}')"
+                class="${baseClasses} ${dynamicClasses}"
+              >
+                <span class="text-3xl mb-1 drop-shadow-sm">${item.icon}</span>
+                <span class="text-xs font-medium text-slate-600 text-center">${item.label}</span>
+              </div>
+          `;
+        });
+
+        htmlContent += `
+            </div>
+          </div>
+        `;
+      });
+
+      htmlContent += `
+            </div>
+          </div>
+        </div>
+      `;
+
+      appContainer.innerHTML = htmlContent;
+    }
+
+    // 5. 頁面載入時執行第一次渲染
+    render();
+  </script>
+</body>
+</html>
