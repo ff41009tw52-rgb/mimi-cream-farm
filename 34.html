@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>虹吸現象互動實驗</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f0fdf4;
+            user-select: none;
+            overflow-x: hidden;
+        }
+        
+        /* 自定義波浪動畫 */
+        @keyframes wave {
+            0% { stroke-dashoffset: 40; }
+            100% { stroke-dashoffset: 0; }
+        }
+
+        .flowing-water {
+            stroke-dasharray: 20 10;
+            animation: wave linear infinite; /* 移除固定的 1s，改由 JS 動態控制 */
+        }
+
+        /* 脈衝提示動畫 */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); }
+            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+
+        .drag-hint {
+            animation: pulse-ring 2s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-6 px-4">
+
+    <!-- 標題區 -->
+    <header class="max-w-5xl w-full flex flex-col md:flex-row justify-between items-center bg-white p-6 rounded-2xl shadow-sm border-b-4 border-green-500 mb-6">
+        <div class="flex items-center gap-4">
+            <div class="bg-orange-400 text-white w-12 h-12 flex items-center justify-center rounded-full text-2xl font-black shadow-md">
+                2
+            </div>
+            <div>
+                <h1 class="text-3xl font-black text-gray-800 tracking-wide">虹吸現象有什麼特性？</h1>
+                <p class="text-gray-500 font-medium mt-1">單元 2-1：虹吸現象的條件</p>
+            </div>
+        </div>
+        <button onclick="resetExperiment()" class="mt-4 md:mt-0 px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full shadow-md transition-transform transform hover:scale-105 active:scale-95 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            重新實驗
+        </button>
+    </header>
+
+    <!-- 主要內容區 -->
+    <main class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- 左側面板：說明與結論 -->
+        <div class="flex flex-col gap-6">
+            <!-- 操作說明 -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-2 h-full bg-blue-400"></div>
+                <h2 class="text-xl font-bold text-blue-800 mb-3 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                    操作說明
+                </h2>
+                <p class="text-gray-700 leading-relaxed">
+                    1. 水管已經裝滿水，一端放在上方的水族箱中。<br><br>
+                    2. 請用滑鼠 (或手指) <strong>拖曳右側的黃色出水口</strong> 上下移動。<br><br>
+                    3. 觀察出水口在哪個位置時，水會順利流出來？
+                </p>
+            </div>
+
+            <!-- 實驗狀態與結論 -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden flex-grow">
+                <div class="absolute top-0 left-0 w-2 h-full bg-orange-400"></div>
+                <h2 class="text-xl font-bold text-orange-800 mb-3 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    實驗觀察
+                </h2>
+                
+                <div id="status-box" class="p-4 rounded-xl bg-gray-50 border-2 border-gray-200 mt-4 transition-colors duration-300">
+                    <p class="text-sm text-gray-500 font-bold mb-1">目前狀態：</p>
+                    <p id="status-text" class="text-lg font-black text-gray-700">準備開始實驗！請拖曳出水口。</p>
+                </div>
+
+                <div class="mt-6">
+                    <p class="text-sm text-gray-500 font-bold mb-2">重點歸納：</p>
+                    <p class="text-gray-700 text-sm leading-relaxed bg-orange-50 p-3 rounded-lg border border-orange-100">
+                        將裝滿水的管子，一端放入裝水的容器內，當容器外另一端的<strong class="text-red-500">出水口位置低於水面時</strong>，水就會越過容器，順著管子流出，這種情形稱為<strong class="text-purple-600 text-base">虹吸現象</strong>。<br><br>
+                        <span class="text-blue-700 font-bold">✨ 進階發現：出水口距離水面越遠（高度差越大），水的流速就會越快！</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右側面板：互動畫布 -->
+        <div class="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden relative">
+            <div class="w-full h-[500px] md:h-[600px] relative bg-[#f8fafc] touch-none" id="sim-container">
+                <!-- SVG 繪圖區 -->
+                <svg id="sim-svg" class="w-full h-full" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
+                    <!-- 定義漸層與圖案 -->
+                    <defs>
+                        <linearGradient id="waterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8" />
+                            <stop offset="100%" stop-color="#0284c7" stop-opacity="0.9" />
+                        </linearGradient>
+                        <linearGradient id="tableGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#d97706" />
+                            <stop offset="100%" stop-color="#92400e" />
+                        </linearGradient>
+                    </defs>
+
+                    <!-- 背景裝飾 -->
+                    <rect x="0" y="550" width="800" height="50" fill="#cbd5e1" /> <!-- 地板 -->
+                    <line x1="0" y1="550" x2="800" y2="550" stroke="#94a3b8" stroke-width="4" />
+
+                    <!-- 桌子 -->
+                    <rect x="80" y="350" width="240" height="20" fill="#f59e0b" rx="5" />
+                    <rect x="100" y="370" width="30" height="180" fill="url(#tableGrad)" />
+                    <rect x="270" y="370" width="30" height="180" fill="url(#tableGrad)" />
+
+                    <!-- 高水族箱 (Tank A) 後壁 -->
+                    <rect x="100" y="200" width="200" height="150" fill="#e0f2fe" opacity="0.4" />
+                    
+                    <!-- 高水族箱 (Tank A) 水 -->
+                    <!-- y=220, max depth h=130 -->
+                    <rect id="waterA" x="102" y="220" width="196" height="128" fill="url(#waterGrad)" />
+                    
+                    <!-- 高水族箱 (Tank A) 前壁與邊框 -->
+                    <rect x="100" y="200" width="200" height="150" fill="none" stroke="#7dd3fc" stroke-width="6" rx="4" />
+                    <line x1="100" y1="200" x2="300" y2="200" stroke="#bae6fd" stroke-width="6" />
+
+                    <!-- 低水族箱/水桶 (Tank B) 後壁 -->
+                    <rect x="450" y="400" width="240" height="150" fill="#e0f2fe" opacity="0.4" />
+                    
+                    <!-- 低水族箱/水桶 (Tank B) 水 -->
+                    <!-- 初始無水，y=548, h=0 -->
+                    <rect id="waterB" x="452" y="548" width="236" height="0" fill="url(#waterGrad)" />
+                    
+                    <!-- 低水族箱/水桶 (Tank B) 前壁與邊框 -->
+                    <rect x="450" y="400" width="240" height="150" fill="none" stroke="#7dd3fc" stroke-width="6" rx="4" />
+                    <line x1="450" y1="400" x2="690" y2="400" stroke="#bae6fd" stroke-width="6" />
+
+                    <!-- 水面輔助線 (紅色虛線) -->
+                    <g id="level-indicator">
+                        <line id="levelLine" x1="100" y1="220" x2="750" y2="220" stroke="#ef4444" stroke-width="3" stroke-dasharray="10,8" opacity="0.7" />
+                        <text id="levelText" x="760" y="225" fill="#ef4444" font-size="16" font-weight="bold">基準水面</text>
+                    </g>
+
+                    <!-- 水管 (外層、水、內層反光) -->
+                    <!-- 路徑會由 JS 動態更新 -->
+                    <path id="hose-back" d="" fill="none" stroke="#94a3b8" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" opacity="0.8" />
+                    
+                    <path id="hose-water" class="flowing-water" d="" fill="none" stroke="#0ea5e9" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" opacity="0" />
+                    
+                    <path id="hose-front" d="" fill="none" stroke="#ffffff" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" opacity="0.2" />
+
+                    <!-- 拖曳把手 (出水口) -->
+                    <g id="drag-handle" class="cursor-grab" transform="translate(600, 250)">
+                        <!-- 提示光環 -->
+                        <circle cx="0" cy="0" r="30" fill="none" stroke="#f59e0b" stroke-width="4" class="drag-hint" id="hint-ring" />
+                        <circle cx="0" cy="0" r="24" fill="#fbbf24" stroke="#d97706" stroke-width="3" />
+                        <circle cx="0" cy="0" r="14" fill="#1e3a8a" />
+                        <path d="M-6,-6 L6,0 L-6,6 Z" fill="white" transform="rotate(90)" /> <!-- 箭頭朝下表示水流方向 -->
+                        <!-- 文字標籤 -->
+                        <rect x="-35" y="-55" width="70" height="26" rx="5" fill="#334155" opacity="0.9" />
+                        <text x="0" y="-37" fill="white" font-size="14" font-weight="bold" text-anchor="middle">出水口</text>
+                    </g>
+
+                    <!-- 流出的水滴動畫 (純示意，使用 SVG 簡單實作) -->
+                    <g id="water-drops" opacity="0">
+                        <line id="drop1" x1="600" y1="250" x2="600" y2="550" stroke="#0ea5e9" stroke-width="10" stroke-dasharray="15, 30" class="flowing-water" />
+                    </g>
+                </svg>
+
+                <!-- 浮動提示框 (顯示高於/低於水面) -->
+                <div id="tooltip" class="absolute hidden px-4 py-2 bg-gray-800 text-white font-bold rounded-lg shadow-lg pointer-events-none transform -translate-x-1/2 -translate-y-[80px] transition-opacity duration-200">
+                    高於水面
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // DOM 元素取得
+        const svg = document.getElementById('sim-svg');
+        const waterA = document.getElementById('waterA');
+        const waterB = document.getElementById('waterB');
+        const levelLine = document.getElementById('levelLine');
+        const levelText = document.getElementById('levelText');
+        const hoseBack = document.getElementById('hose-back');
+        const hoseWater = document.getElementById('hose-water');
+        const hoseFront = document.getElementById('hose-front');
+        const dragHandle = document.getElementById('drag-handle');
+        const hintRing = document.getElementById('hint-ring');
+        const waterDrops = document.getElementById('water-drops');
+        const drop1 = document.getElementById('drop1');
+        const statusBox = document.getElementById('status-box');
+        const statusText = document.getElementById('status-text');
+        const tooltip = document.getElementById('tooltip');
+
+        // 實驗狀態常數與變數
+        const TANK_A_MAX_Y = 348; // 水位最低處 (底)
+        const TANK_A_MIN_Y = 220; // 水位最高處 (滿)
+        const TANK_B_MAX_Y = 548; // B 滿水位時
+        const TANK_B_MIN_Y = 410; // B 空水位時 (對應 y + height)
+        
+        let initialWaterLevelA = 220;
+        let waterLevelA_Y = initialWaterLevelA; 
+        let waterLevelB_Y = TANK_B_MAX_Y;
+        
+        // 出水口位置
+        let outletX = 550;
+        let outletY = 150;
+        
+        // 拖曳狀態
+        let isDragging = false;
+        let isFlowing = false;
+        let isTankAEmpty = false;
+        let currentFlowRate = 0; // 新增：記錄當前流速
+
+        // 初始化
+        function init() {
+            updateHosePath();
+            updateWaterLevels();
+            requestAnimationFrame(animationLoop);
+        }
+
+        // 重置實驗
+        function resetExperiment() {
+            waterLevelA_Y = TANK_A_MIN_Y;
+            waterLevelB_Y = TANK_B_MAX_Y;
+            outletX = 550;
+            outletY = 150; // 回到高處
+            isTankAEmpty = false;
+            currentFlowRate = 0;
+            
+            hintRing.style.display = 'block';
+            hoseWater.style.animationDuration = '1s'; // 重置動畫速度
+            drop1.style.animationDuration = '1s';
+            updateHosePath();
+            updateWaterLevels();
+            updateStatusUI(false, false, false);
+        }
+
+        // SVG 座標轉換
+        function getMousePosition(evt) {
+            let CTM = svg.getScreenCTM();
+            if (evt.touches) { evt = evt.touches[0]; }
+            return {
+                x: (evt.clientX - CTM.e) / CTM.a,
+                y: (evt.clientY - CTM.f) / CTM.d
+            };
+        }
+
+        // 拖曳事件監聽
+        dragHandle.addEventListener('mousedown', startDrag);
+        dragHandle.addEventListener('touchstart', startDrag, {passive: false});
+        
+        window.addEventListener('mousemove', drag);
+        window.addEventListener('touchmove', drag, {passive: false});
+        
+        window.addEventListener('mouseup', endDrag);
+        window.addEventListener('touchend', endDrag);
+
+        function startDrag(evt) {
+            isDragging = true;
+            dragHandle.style.cursor = 'grabbing';
+            hintRing.style.display = 'none'; // 隱藏提示光環
+            tooltip.classList.remove('hidden');
+        }
+
+        function drag(evt) {
+            if (!isDragging) return;
+            evt.preventDefault(); // 防止滾動
+            
+            let coord = getMousePosition(evt);
+            
+            // 限制拖曳範圍
+            outletX = Math.max(350, Math.min(coord.x, 750));
+            outletY = Math.max(50, Math.min(coord.y, 500));
+            
+            updateHosePath();
+            updateTooltip();
+        }
+
+        function endDrag(evt) {
+            if(!isDragging) return;
+            isDragging = false;
+            dragHandle.style.cursor = 'grab';
+            tooltip.classList.add('hidden');
+        }
+
+        // 更新水管路徑
+        function updateHosePath() {
+            // 起點在水族箱A深處
+            const startX = 200;
+            const startY = 340;
+            
+            // 畫一條平滑的貝茲曲線
+            // 控制點1: 向上拉起跨過水族箱
+            const cp1X = 200;
+            const cp1Y = 50;
+            
+            // 控制點2: 對齊出水口的X，保持高度
+            const cp2X = outletX;
+            const cp2Y = 50;
+            
+            const pathData = `M ${startX} ${startY} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${outletX} ${outletY}`;
+            
+            hoseBack.setAttribute('d', pathData);
+            hoseWater.setAttribute('d', pathData);
+            hoseFront.setAttribute('d', pathData);
+            
+            // 更新把手位置
+            dragHandle.setAttribute('transform', `translate(${outletX}, ${outletY})`);
+            
+            // 更新水滴起始位置
+            drop1.setAttribute('x1', outletX);
+            drop1.setAttribute('x2', outletX);
+            drop1.setAttribute('y1', outletY);
+        }
+
+        // 更新輔助標籤
+        function updateTooltip() {
+            // 取得 SVG 的實際大小與位置，計算 Tooltip 的 DOM 位置
+            const svgRect = svg.getBoundingClientRect();
+            const viewBoxWidth = 800;
+            const viewBoxHeight = 600;
+            
+            const scaleX = svgRect.width / viewBoxWidth;
+            const scaleY = svgRect.height / viewBoxHeight;
+            
+            const tooltipX = outletX * scaleX;
+            const tooltipY = outletY * scaleY;
+            
+            tooltip.style.left = `${tooltipX}px`;
+            tooltip.style.top = `${tooltipY}px`;
+
+            if (outletY > waterLevelA_Y) {
+                tooltip.textContent = "低於水面 ↓";
+                tooltip.className = "absolute px-4 py-2 bg-green-600 text-white font-bold rounded-lg shadow-lg pointer-events-none transform -translate-x-1/2 -translate-y-[80px] transition-opacity duration-200 z-10";
+            } else {
+                tooltip.textContent = "高於水面 ↑";
+                tooltip.className = "absolute px-4 py-2 bg-red-600 text-white font-bold rounded-lg shadow-lg pointer-events-none transform -translate-x-1/2 -translate-y-[80px] transition-opacity duration-200 z-10";
+            }
+        }
+
+        // 動畫主迴圈
+        function animationLoop() {
+            // 判斷條件：出水口是否低於A水箱「目前」水面
+            const isBelowWaterLevel = outletY > waterLevelA_Y;
+            isTankAEmpty = waterLevelA_Y >= TANK_A_MAX_Y;
+
+            if (isBelowWaterLevel && !isTankAEmpty) {
+                isFlowing = true;
+                
+                // 計算高度差 (H) 來決定流速
+                const heightDiff = outletY - waterLevelA_Y;
+                
+                // 將高度差轉換為流速係數 (數值越大流速越快)
+                currentFlowRate = Math.max(0.1, heightDiff / 50); 
+                
+                // 動態調整 CSS 動畫時間 (時間越短，視覺上流動越快)
+                const animDuration = Math.max(0.15, 1.5 / currentFlowRate);
+                hoseWater.style.animationDuration = `${animDuration}s`;
+                drop1.style.animationDuration = `${animDuration}s`;
+
+                // 水量轉移，乘以流速係數讓水位變化也變快
+                waterLevelA_Y += 0.15 * currentFlowRate; // A 水面下降
+                waterLevelB_Y -= 0.12 * currentFlowRate; // B 水面上升
+                
+                // 防止溢位
+                if (waterLevelA_Y > TANK_A_MAX_Y) waterLevelA_Y = TANK_A_MAX_Y;
+                if (waterLevelB_Y < TANK_B_MIN_Y) waterLevelB_Y = TANK_B_MIN_Y;
+
+                updateWaterLevels();
+                updateStatusUI(true, true, false);
+
+                // 顯示水流特效
+                hoseWater.style.opacity = 1;
+                waterDrops.style.opacity = 1;
+
+            } else {
+                isFlowing = false;
+                currentFlowRate = 0;
+                
+                // 停止水流特效
+                hoseWater.style.opacity = 0;
+                waterDrops.style.opacity = 0;
+
+                if (isTankAEmpty) {
+                    updateStatusUI(false, false, true);
+                } else if (!isBelowWaterLevel) {
+                    updateStatusUI(false, false, false);
+                }
+            }
+
+            requestAnimationFrame(animationLoop);
+        }
+
+        function updateWaterLevels() {
+            // 更新 A 水箱
+            waterA.setAttribute('y', waterLevelA_Y);
+            waterA.setAttribute('height', TANK_A_MAX_Y - waterLevelA_Y);
+            
+            // 更新水面基準線
+            levelLine.setAttribute('y1', waterLevelA_Y);
+            levelLine.setAttribute('y2', waterLevelA_Y);
+            levelText.setAttribute('y', waterLevelA_Y + 5);
+
+            // 更新 B 水箱
+            waterB.setAttribute('y', waterLevelB_Y);
+            waterB.setAttribute('height', TANK_B_MAX_Y - waterLevelB_Y);
+        }
+
+        // 更新介面狀態文字
+        function updateStatusUI(isFlowing, isBelow, isEmpty) {
+            if (isEmpty) {
+                statusBox.className = "p-4 rounded-xl bg-blue-50 border-2 border-blue-200 mt-4 transition-colors duration-300";
+                statusText.className = "text-xl font-black text-blue-700";
+                statusText.innerHTML = "水族箱的水已經順利抽乾囉！<br><span class='text-sm text-blue-500 font-normal'>您可以點擊右上角「重新實驗」</span>";
+            } else if (isFlowing) {
+                // 根據流速決定顯示的文字與顏色
+                let speedText = "平緩";
+                let speedColor = "text-yellow-600";
+                if (currentFlowRate > 3) { 
+                    speedText = "極快 ⚡"; 
+                    speedColor = "text-red-600"; 
+                } else if (currentFlowRate > 1.5) { 
+                    speedText = "快速 💨"; 
+                    speedColor = "text-orange-500"; 
+                }
+
+                statusBox.className = "p-4 rounded-xl bg-green-50 border-2 border-green-400 mt-4 transition-colors duration-300 shadow-inner";
+                statusText.className = "text-xl font-black text-green-700";
+                statusText.innerHTML = `出水口<span class='text-red-500'>低於</span>水面：<br>水順利流出！<br><span class='text-sm mt-2 block text-gray-600'>目前水流速度：<strong class='${speedColor} text-lg'>${speedText}</strong></span>`;
+            } else if (outletY <= waterLevelA_Y) {
+                statusBox.className = "p-4 rounded-xl bg-red-50 border-2 border-red-200 mt-4 transition-colors duration-300";
+                statusText.className = "text-xl font-black text-red-600";
+                statusText.innerHTML = "出水口<span class='text-blue-500'>高於</span>水面：<br>水無法流出。";
+            }
+        }
+
+        // 啟動
+        init();
+
+    </script>
+</body>
+</html>

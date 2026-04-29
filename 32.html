@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>鬥魚行為觀察實驗</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes swim {
+      0% { transform: translateX(20px) scaleX(1); }
+      45% { transform: translateX(200px) scaleX(1); }
+      50% { transform: translateX(200px) scaleX(-1); }
+      95% { transform: translateX(20px) scaleX(-1); }
+      100% { transform: translateX(20px) scaleX(1); }
+    }
+    @keyframes face-left {
+      0% { transform: translateX(100px) scaleX(-1); }
+      100% { transform: translateX(70px) scaleX(-1); }
+    }
+    @keyframes swim-wall {
+      0% { transform: translateX(20px) scaleX(1); }
+      45% { transform: translateX(140px) scaleX(1); }
+      50% { transform: translateX(140px) scaleX(-1); }
+      95% { transform: translateX(20px) scaleX(-1); }
+      100% { transform: translateX(20px) scaleX(1); }
+    }
+    @keyframes slow-tail {
+      0%, 100% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(4deg) scale(1.02); }
+    }
+    @keyframes aggro-flare {
+      0%, 100% { transform: rotate(-3deg) scale(1.2); }
+      50% { transform: rotate(6deg) scale(1.4); }
+    }
+    @keyframes aggro-tail {
+      0%, 100% { transform: rotate(-8deg) scale(1.15); }
+      50% { transform: rotate(12deg) scale(1.35); }
+    }
+    @keyframes flutter {
+      0%, 100% { transform: scaleX(1) rotate(0deg); }
+      50% { transform: scaleX(0.5) rotate(-15deg); }
+    }
+
+    .fish-idle { animation: swim 10s infinite linear; will-change: transform; }
+    .fish-transparent { animation: swim-wall 7s infinite linear; will-change: transform; }
+    .fish-mirror { animation: face-left 1s forwards; will-change: transform; }
+    
+    .fin-idle { animation: slow-tail 3s infinite ease-in-out; }
+    .fin-aggro { animation: aggro-flare 1.2s infinite ease-in-out; filter: saturate(1.8) brightness(1.15); will-change: transform; transform: translateZ(0); }
+    .tail-aggro { animation: aggro-tail 1s infinite ease-in-out; filter: saturate(1.8) brightness(1.15); will-change: transform; transform: translateZ(0); }
+    
+    .pectoral-idle { animation: flutter 0.8s infinite ease-in-out; }
+    .pectoral-aggro { animation: flutter 0.2s infinite ease-in-out; filter: saturate(1.5); will-change: transform; transform: translateZ(0); }
+
+    .gill-idle { opacity: 0; transform: scale(0.6) rotate(30deg) translateZ(0); transition: all 0.3s ease-in-out; }
+    .gill-aggro { opacity: 1; transform: scale(1.15) rotate(0deg) translateZ(0); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); filter: drop-shadow(-2px 3px 2px rgba(0,0,0,0.4)); }
+
+    /* Button disabled states */
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800 p-4 md:p-8 font-sans">
+
+  <div class="max-w-6xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden border border-slate-200">
+    <!-- Header -->
+    <header class="bg-blue-600 text-white p-6 text-center">
+      <h1 class="text-3xl font-bold tracking-wider mb-2">鬥魚行為觀察實驗</h1>
+      <p class="text-blue-100 text-lg">探究影片：為什麼鬥魚必須單獨飼養在一個容器中？</p>
+    </header>
+
+    <div class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+      
+      <!-- 左側：虛擬水族箱 -->
+      <div class="flex flex-col space-y-4">
+        <h2 class="text-xl font-bold text-slate-700 flex items-center border-b-2 border-blue-200 pb-2">
+          <span class="bg-blue-100 text-blue-800 text-sm py-1 px-3 rounded-full mr-3">實驗區</span>
+          模擬水族箱
+        </h2>
+        
+        <div class="relative w-full h-80 bg-gradient-to-b from-blue-50 to-blue-200 rounded-xl border-4 border-slate-300 shadow-inner overflow-hidden">
+          <!-- 水波紋效果 -->
+          <div class="absolute top-0 w-full h-4 bg-white opacity-30 animate-pulse"></div>
+
+          <!-- 實驗物品：鏡子 (預設隱藏，強化鏡面反光質感取代重影) -->
+          <div id="item-mirror" class="hidden absolute left-8 top-10 z-10">
+            <span class="absolute -top-7 left-1/2 -translate-x-1/2 text-sm font-bold text-slate-600 bg-white px-2 py-0.5 rounded shadow-sm whitespace-nowrap">鏡子</span>
+            <div class="w-6 h-60 bg-gradient-to-b from-slate-200 to-slate-400 border-2 border-slate-400 shadow-2xl rounded-sm overflow-hidden relative">
+               <div class="absolute inset-0 bg-gradient-to-br from-white/90 via-transparent to-black/20"></div>
+               <div class="absolute left-0 top-0 w-full h-full bg-gradient-to-tr from-transparent via-white/70 to-transparent skew-x-12 translate-x-2"></div>
+            </div>
+          </div>
+
+          <!-- 實驗物品：透明片 (預設隱藏) -->
+          <div id="item-transparent" class="hidden absolute left-1/2 top-10 w-2 h-60 bg-blue-100 border border-blue-300 opacity-40 z-10 rounded-sm">
+            <span class="absolute -top-6 -left-6 text-sm font-bold text-blue-800 bg-white/80 px-2 rounded shadow-sm">透明片</span>
+          </div>
+
+          <!-- 鬥魚 SVG -->
+          <div id="fish-container" class="absolute top-1/3 left-0 w-32 h-32 transition-all duration-500 z-20 fish-idle">
+            <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-2xl">
+              <defs>
+                <!-- 身體與魚鰭的漸層色彩 -->
+                <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#450a0a" />
+                  <stop offset="30%" stop-color="#991b1b" />
+                  <stop offset="80%" stop-color="#ef4444" />
+                  <stop offset="100%" stop-color="#7f1d1d" />
+                </linearGradient>
+                <linearGradient id="tailGrad" x1="0%" y1="50%" x2="100%" y2="50%">
+                  <stop offset="0%" stop-color="#fca5a5" stop-opacity="0.8"/>
+                  <stop offset="50%" stop-color="#ef4444" stop-opacity="0.9"/>
+                  <stop offset="100%" stop-color="#7f1d1d" stop-opacity="1"/>
+                </linearGradient>
+                <linearGradient id="topFinGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+                  <stop offset="0%" stop-color="#991b1b" />
+                  <stop offset="100%" stop-color="#f87171" stop-opacity="0.85" />
+                </linearGradient>
+                <linearGradient id="bottomFinGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#991b1b" />
+                  <stop offset="100%" stop-color="#f87171" stop-opacity="0.85" />
+                </linearGradient>
+              </defs>
+
+              <!-- 尾鰭 (Caudal Fin) -->
+              <g id="fish-tail" class="fin-idle" style="transform-origin: 25px 50px; transform-box: view-box;">
+                <path d="M 28 50 C 15 10, -10 15, 2 50 C -10 85, 15 90, 28 50 Z" fill="url(#tailGrad)" />
+                <path d="M 28 50 Q 15 25 5 25 M 28 50 Q 5 40 2 50 M 28 50 Q 15 75 5 75" stroke="#7f1d1d" stroke-width="0.5" fill="none" opacity="0.5" />
+              </g>
+
+              <!-- 臀鰭/下鰭 (Anal Fin) -->
+              <g id="fish-bottom-fin" class="fin-idle" style="transform-origin: 45px 58px; transform-box: view-box;">
+                <path d="M 60 58 C 55 85, 30 95, 15 85 C 25 70, 35 60, 40 58 Z" fill="url(#bottomFinGrad)" />
+                <path d="M 55 60 Q 45 85 25 88 M 45 59 Q 35 75 20 75" stroke="#7f1d1d" stroke-width="0.5" fill="none" opacity="0.5" />
+              </g>
+
+              <!-- 背鰭/上鰭 (Dorsal Fin) -->
+              <g id="fish-top-fin" class="fin-idle" style="transform-origin: 45px 42px; transform-box: view-box;">
+                <path d="M 55 42 C 45 10, 20 15, 15 30 C 25 38, 35 40, 40 42 Z" fill="url(#topFinGrad)" />
+                <path d="M 50 40 Q 40 18 25 22 M 40 40 Q 30 25 18 30" stroke="#7f1d1d" stroke-width="0.5" fill="none" opacity="0.5" />
+              </g>
+
+              <!-- 腹鰭 (Pelvic Fins - 長條狀觸鬚) -->
+              <path d="M 60 58 Q 50 80 45 95 Q 55 80 62 58 Z" fill="#ef4444" opacity="0.9" />
+              <path d="M 62 58 Q 55 85 50 100 Q 60 85 64 58 Z" fill="#b91c1c" opacity="0.8" />
+
+              <!-- 身體 -->
+              <path d="M 85 50 Q 80 40 60 38 Q 40 38 25 50 Q 40 62 60 62 Q 80 60 85 50 Z" fill="url(#bodyGrad)" />
+              
+              <!-- 魚鱗細節 -->
+              <path d="M 50 42 Q 55 50 50 58 M 55 41 Q 60 50 55 59 M 60 40 Q 65 50 60 60 M 45 44 Q 50 50 45 56 M 40 46 Q 45 50 40 54" stroke="#fca5a5" stroke-width="0.5" fill="none" opacity="0.3" />
+
+              <!-- 眼睛 -->
+              <circle cx="75" cy="46" r="2.5" fill="#1a0505" />
+              <circle cx="76" cy="45" r="0.8" fill="#ffffff" />
+              <circle cx="75" cy="46" r="3" fill="none" stroke="#fbbf24" stroke-width="0.5" opacity="0.8"/>
+
+              <!-- 嘴巴 -->
+              <path d="M 85 50 Q 88 48 86 46" stroke="#450a0a" stroke-width="1" fill="none" />
+              <path d="M 85 50 Q 87 52 84 53" stroke="#450a0a" stroke-width="1" fill="none" />
+
+              <!-- 胸鰭 (Pectoral Fin) -->
+              <g id="fish-pectoral" class="pectoral-idle" style="transform-origin: 65px 54px; transform-box: view-box;">
+                <path d="M 68 54 C 62 50, 55 56, 58 64 C 64 64, 70 60, 68 54 Z" fill="#fca5a5" opacity="0.6" />
+                <path d="M 68 54 Q 60 56 59 62 M 68 54 Q 65 58 63 63" stroke="#ef4444" stroke-width="0.3" fill="none" />
+              </g>
+
+              <!-- 鰓蓋張開/威嚇 (Gill Flare - 增加擬真的黑色鰓膜與立體層次) -->
+              <g id="fish-gill" class="gill-idle" style="transform-origin: 78px 52px; transform-box: view-box;">
+                <!-- 深黑色鰓膜 (鬍鬚 / Branchiostegal membrane，往下且往後撐開) -->
+                <path d="M 80 52 C 72 60, 60 70, 65 80 C 72 75, 78 62, 80 54 Z" fill="#0f0505" />
+                <!-- 暗紅色內層疊加增添立體感 -->
+                <path d="M 79 52 C 73 58, 64 66, 68 74 C 73 70, 77 60, 78 54 Z" fill="#7f1d1d" opacity="0.8" />
+                <!-- 鰓蓋外緣的紅色張力線 (模擬硬質鰓蓋邊緣) -->
+                <path d="M 80 52 C 72 60, 60 70, 65 80" stroke="#ef4444" stroke-width="1.2" fill="none" />
+                <path d="M 79 52 C 73 58, 64 66, 68 74" stroke="#fca5a5" stroke-width="0.5" fill="none" opacity="0.7"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <!-- 控制面板 -->
+        <div class="bg-white p-4 border rounded-xl shadow-sm">
+          <p class="text-sm text-red-500 mb-3 font-bold flex items-center">
+            <span class="bg-red-100 text-red-600 px-2 py-0.5 rounded mr-2">注意</span>
+            實驗過程，必須讓鬥魚休息，再重新實驗。不能將鬥魚任意放生。
+          </p>
+          <div class="flex flex-wrap gap-3 justify-center">
+            <button id="btn-mirror" class="px-5 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-md">
+              放入鏡子
+            </button>
+            <button id="btn-transparent" class="px-5 py-2.5 bg-sky-500 text-white font-semibold rounded-lg hover:bg-sky-600 transition-colors shadow-md">
+              放入透明片
+            </button>
+            <button id="btn-rest" disabled class="px-5 py-2.5 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors shadow-md">
+              移除物品 (讓魚休息)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右側：實驗紀錄與結論 -->
+      <div class="flex flex-col space-y-6">
+        <div>
+          <h2 class="text-xl font-bold text-slate-700 flex items-center border-b-2 border-emerald-200 pb-2 mb-4">
+            <span class="bg-emerald-100 text-emerald-800 text-sm py-1 px-3 rounded-full mr-3">紀錄</span>
+            檢驗實驗結果是否支持假設？
+          </h2>
+          
+          <div class="overflow-x-auto rounded-lg border border-slate-200 shadow-sm">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-100">
+                  <th colspan="3" class="p-3 border-b border-slate-200 text-center font-bold text-slate-700">
+                    觀察的動物名稱：<span class="inline-block border-b border-slate-400 px-4 min-w-[100px]">鬥魚</span>
+                  </th>
+                </tr>
+                <tr class="bg-emerald-50">
+                  <th class="p-3 border-r border-slate-200 w-1/3 text-slate-600">結果 \ 實驗材料<br/>行為動作</th>
+                  <th class="p-3 border-r border-slate-200 w-1/3 text-center text-slate-700 font-bold">放入鏡子</th>
+                  <th class="p-3 w-1/3 text-center text-slate-700 font-bold">放入透明片</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-t border-slate-200 hover:bg-slate-50 transition-colors">
+                  <td class="p-3 border-r border-slate-200 font-medium text-slate-600">鰓蓋張合的情形</td>
+                  <td id="res-m-1" class="p-3 border-r border-slate-200 text-center text-red-600 font-bold text-lg">?</td>
+                  <td id="res-t-1" class="p-3 text-center text-blue-600 font-bold text-lg">?</td>
+                </tr>
+                <tr class="border-t border-slate-200 hover:bg-slate-50 transition-colors">
+                  <td class="p-3 border-r border-slate-200 font-medium text-slate-600">魚鰭擺動的情形</td>
+                  <td id="res-m-2" class="p-3 border-r border-slate-200 text-center text-red-600 font-bold text-lg">?</td>
+                  <td id="res-t-2" class="p-3 text-center text-blue-600 font-bold text-lg">?</td>
+                </tr>
+                <tr class="border-t border-slate-200 hover:bg-slate-50 transition-colors">
+                  <td class="p-3 border-r border-slate-200 font-medium text-slate-600">尾部擺動的情形</td>
+                  <td id="res-m-3" class="p-3 border-r border-slate-200 text-center text-red-600 font-bold text-lg">?</td>
+                  <td id="res-t-3" class="p-3 text-center text-blue-600 font-bold text-lg">?</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p id="hint-text" class="text-sm text-slate-500 mt-2 text-center animate-pulse">
+            請點擊左側控制面板的按鈕，完成兩種材料的測試以解鎖結論。
+          </p>
+        </div>
+
+        <!-- 討論與結論 (完成測試後顯示) -->
+        <div id="conclusion-panel" class="transition-all duration-700 ease-in-out opacity-0 translate-y-4 pointer-events-none">
+          <div class="bg-amber-50 border-l-4 border-amber-400 p-5 rounded-r-lg shadow-sm">
+            <h3 class="font-bold text-amber-800 text-lg mb-3 flex items-center">
+              <span class="bg-amber-200 text-amber-900 text-xs py-1 px-2 rounded mr-2">結論</span>
+              實驗討論與統整
+            </h3>
+            
+            <div class="space-y-4 text-slate-700">
+              <div>
+                <p class="font-bold mb-1">1. 放入不同材料，鬥魚的行為動作有什麼不同？</p>
+                <p class="text-sm pl-4 border-l-2 border-amber-200">
+                  放入鏡子時，鬥魚看見鏡中的自己以為是入侵者，會出現鰓蓋張開、魚鰭和尾部用力擺動的<span class="text-red-600 font-bold">威嚇行為</span>。放入透明片則沒有這些反應。
+                </p>
+              </div>
+              
+              <div>
+                <p class="font-bold mb-1">2. 威嚇行為對動物生存有什麼幫助？</p>
+                <p class="text-sm pl-4 border-l-2 border-amber-200">
+                  鬥魚具有<span class="font-bold text-blue-700">領域性</span>，遇到競爭會出現敵對行為。動物為了生存，會出現威嚇、避敵、索食和適應環境等行為，以保護自己的生存空間、食物或配偶。這就是為什麼鬥魚<span class="font-bold border-b-2 border-red-400">必須單獨飼養</span>的原因。
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 實驗狀態管理
+    let reactionTimeout; // 新增：控制反應時間的計時器
+    const state = {
+      current: 'idle', // 'idle', 'mirror', 'transparent'
+      mirrorDone: false,
+      transparentDone: false,
+      isAggro: false // 新增：控制是否表現出威嚇行為
+    };
+
+    // DOM 元素選取
+    const btnMirror = document.getElementById('btn-mirror');
+    const btnTransparent = document.getElementById('btn-transparent');
+    const btnRest = document.getElementById('btn-rest');
+
+    const itemMirror = document.getElementById('item-mirror');
+    const itemTransparent = document.getElementById('item-transparent');
+    const fishContainer = document.getElementById('fish-container');
+
+    const fishTail = document.getElementById('fish-tail');
+    const fishTopFin = document.getElementById('fish-top-fin');
+    const fishBottomFin = document.getElementById('fish-bottom-fin');
+    const fishGill = document.getElementById('fish-gill');
+    const fishPectoral = document.getElementById('fish-pectoral');
+
+    const hintText = document.getElementById('hint-text');
+    const conclusionPanel = document.getElementById('conclusion-panel');
+
+    // 更新畫面渲染的函數
+    function render() {
+      // 1. 更新按鈕狀態
+      btnMirror.disabled = state.current === 'mirror';
+      btnTransparent.disabled = state.current === 'transparent';
+      btnRest.disabled = state.current === 'idle';
+
+      // 2. 顯示/隱藏實驗物品
+      if (state.current === 'mirror') {
+        itemMirror.classList.remove('hidden');
+        itemTransparent.classList.add('hidden');
+      } else if (state.current === 'transparent') {
+        itemMirror.classList.add('hidden');
+        itemTransparent.classList.remove('hidden');
+      } else {
+        itemMirror.classList.add('hidden');
+        itemTransparent.classList.add('hidden');
+      }
+
+      // 3. 更新魚的移動動畫 class
+      fishContainer.className = 'absolute top-1/3 left-0 w-32 h-32 transition-all duration-500 z-20';
+      if (state.current === 'idle') {
+        fishContainer.classList.add('fish-idle');
+      } else if (state.current === 'mirror') {
+        fishContainer.classList.add('fish-mirror');
+      } else if (state.current === 'transparent') {
+        fishContainer.classList.add('fish-transparent');
+      }
+
+      // 4. 更新魚的肢體動作 (鰓蓋、鰭) class，改由 state.isAggro 控制
+      if (state.isAggro) {
+        fishTail.setAttribute('class', 'tail-aggro');
+        fishTopFin.setAttribute('class', 'fin-aggro');
+        fishBottomFin.setAttribute('class', 'fin-aggro');
+        fishGill.setAttribute('class', 'gill-aggro');
+        if (fishPectoral) fishPectoral.setAttribute('class', 'pectoral-aggro');
+      } else {
+        fishTail.setAttribute('class', 'fin-idle');
+        fishTopFin.setAttribute('class', 'fin-idle');
+        fishBottomFin.setAttribute('class', 'fin-idle');
+        fishGill.setAttribute('class', 'gill-idle');
+        if (fishPectoral) fishPectoral.setAttribute('class', 'pectoral-idle');
+      }
+
+      // 5. 更新紀錄表格資料
+      if (state.mirrorDone) {
+        document.getElementById('res-m-1').textContent = '明顯張開';
+        document.getElementById('res-m-2').textContent = '大幅展開並擺動';
+        document.getElementById('res-m-3').textContent = '快速用力擺動';
+      }
+      if (state.transparentDone) {
+        document.getElementById('res-t-1').textContent = '無明顯變化';
+        document.getElementById('res-t-2').textContent = '平緩擺動';
+        document.getElementById('res-t-3').textContent = '平緩擺動';
+      }
+
+      // 6. 檢查是否顯示結論
+      if (state.mirrorDone && state.transparentDone) {
+        hintText.classList.add('hidden');
+        conclusionPanel.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+        conclusionPanel.classList.add('opacity-100', 'translate-y-0');
+      }
+    }
+
+    // 事件監聽器
+    btnMirror.addEventListener('click', () => {
+      clearTimeout(reactionTimeout); // 清除舊的計時器
+      state.current = 'mirror';
+      state.isAggro = false; // 先重置狀態：保持冷靜轉身游過去
+      state.mirrorDone = true;
+      render();
+
+      // 延遲 1 秒，等待鬥魚游到鏡子前面向鏡子後，才瞬間觸發威嚇反應
+      reactionTimeout = setTimeout(() => {
+        state.isAggro = true;
+        render();
+      }, 1000);
+    });
+
+    btnTransparent.addEventListener('click', () => {
+      clearTimeout(reactionTimeout);
+      state.current = 'transparent';
+      state.isAggro = false;
+      state.transparentDone = true;
+      render();
+    });
+
+    btnRest.addEventListener('click', () => {
+      clearTimeout(reactionTimeout);
+      state.current = 'idle';
+      state.isAggro = false;
+      render();
+    });
+
+    // 初始渲染
+    render();
+
+  </script>
+</body>
+</html>

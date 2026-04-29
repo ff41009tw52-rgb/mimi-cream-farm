@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1-4 電腦和基本配備</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* 自訂動畫效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-sky-50 font-sans p-4 md:p-8 selection:bg-yellow-200">
+    <div id="app-root" class="max-w-5xl mx-auto space-y-6">
+        
+        <!-- Header -->
+        <header class="bg-white rounded-3xl p-6 shadow-sm border border-sky-100 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-sky-800 flex items-center gap-2">
+                    <i data-lucide="monitor" class="text-sky-500"></i>
+                    1-4 電腦和基本配備
+                </h1>
+                <p class="text-sky-600 mt-2 font-medium">了解電腦的基本配備，快速進入電腦世界！</p>
+            </div>
+            <div class="flex bg-gray-100 p-1 rounded-full">
+                <button id="btn-explore" onclick="setMode('explore')" class="flex items-center gap-2 px-6 py-3 rounded-full font-bold transition-colors bg-white text-sky-600 shadow-sm">
+                    <i data-lucide="book-open" class="w-5 h-5"></i> 探索模式
+                </button>
+                <button id="btn-quiz" onclick="setMode('quiz')" class="flex items-center gap-2 px-6 py-3 rounded-full font-bold transition-colors text-gray-500 hover:text-sky-500">
+                    <i data-lucide="gamepad-2" class="w-5 h-5"></i> 測驗挑戰
+                </button>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Left Panel -->
+            <div class="lg:col-span-1 bg-white rounded-3xl p-6 shadow-sm border border-sky-100 flex flex-col">
+                
+                <!-- 探索模式內容 -->
+                <div id="panel-explore" class="flex-1 animate-fade-in">
+                    <div class="inline-block bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-bold mb-4">
+                        📖 點擊右側設備查看說明
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div id="exp-id" class="bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg">1</div>
+                            <h2 id="exp-name" class="text-3xl font-extrabold text-gray-800">主機</h2>
+                        </div>
+                        <div class="bg-sky-50 p-5 rounded-2xl border-l-4 border-sky-400">
+                            <p id="exp-desc" class="text-gray-700 text-lg leading-relaxed">電腦最重要的部分，包括 CPU 和記憶體等。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 測驗模式內容 -->
+                <div id="panel-quiz" class="flex-1 flex flex-col hidden animate-fade-in">
+                    
+                    <!-- 測驗進行中 -->
+                    <div id="quiz-active" class="flex-1 flex flex-col">
+                        <div class="flex justify-between items-center mb-6">
+                            <div class="inline-block bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-bold">
+                                🎮 測驗進行中
+                            </div>
+                            <div id="quiz-progress" class="font-bold text-gray-500">第 1 / 9 題</div>
+                        </div>
+
+                        <div class="flex-1 flex flex-col justify-center">
+                            <h3 class="text-gray-500 font-bold mb-2">請找出以下設備：</h3>
+                            <div class="bg-purple-50 p-6 rounded-2xl border-2 border-purple-200 shadow-inner text-center relative overflow-hidden">
+                                <!-- 回饋動畫遮罩層 -->
+                                <div id="quiz-feedback-overlay"></div>
+                                <p id="quiz-question" class="text-2xl font-bold text-purple-900 leading-snug">
+                                    「題目敘述」
+                                </p>
+                            </div>
+                            <p class="text-center text-gray-400 mt-6 text-sm">點擊右側對應的圖示</p>
+                        </div>
+                    </div>
+
+                    <!-- 測驗結束畫面 -->
+                    <div id="quiz-end" class="flex-1 flex flex-col items-center justify-center text-center hidden animate-fade-in">
+                        <i data-lucide="trophy" class="w-16 h-16 text-yellow-400 mb-4"></i>
+                        <h2 class="text-3xl font-extrabold text-gray-800 mb-2">挑戰完成！</h2>
+                        <p class="text-xl text-gray-600 mb-6">你的分數：<span id="quiz-score" class="text-4xl font-bold text-sky-500 ml-2">0 / 9</span></p>
+                        <button onclick="startQuiz()" class="flex items-center gap-2 bg-sky-500 hover:bg-sky-600 text-white px-8 py-4 rounded-full font-bold text-lg transition-transform hover:scale-105 shadow-md">
+                            <i data-lucide="rotate-ccw" class="w-6 h-6"></i> 再玩一次
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Right Panel: Interactive Computer Setup -->
+            <div class="lg:col-span-2 bg-slate-100 rounded-3xl p-6 md:p-10 shadow-inner border border-slate-200 relative">
+                <h3 class="text-center text-slate-400 font-bold mb-8 uppercase tracking-widest">電腦設備互動區</h3>
+                
+                <div class="flex flex-col md:flex-row items-center justify-center gap-10">
+                    
+                    <!-- Desktop Setup Group -->
+                    <div class="grid grid-cols-2 gap-6 place-items-center w-full md:w-1/2">
+                        <!-- 2. 螢幕 -->
+                        <div class="col-span-2 w-full max-w-[200px]">
+                            <div id="item-2" onclick="handleItemClick(2, event)" class="relative flex flex-col items-center justify-center p-3 rounded-xl cursor-pointer transition-all duration-300 transform hover:scale-105 shadow-md bg-white w-full aspect-square">
+                                <div class="absolute -top-3 -left-3 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center font-bold border-2 border-white shadow-sm z-10">2</div>
+                                <div class="p-3 rounded-full text-white mb-2 bg-blue-500"><i data-lucide="monitor" class="w-8 h-8"></i></div>
+                                <span class="font-bold text-gray-700">螢幕</span>
+                            </div>
+                        </div>
+                        <!-- 4. 喇叭 -->
+                        <div class="w-full">
+                            <div id="item-4" onclick="handleItemClick(4, event)" class="relative flex flex-col items-center justify-center p-3 rounded-xl cursor-pointer transition-all duration-300 transform hover:scale-105 shadow-md bg-white h-[140px]">
+                                <div class="absolute -top-3 -left-3 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center font-bold border-2 border-white shadow-sm z-10">4</div>
+                                <div class="p-3 rounded-full text-white mb-2 bg-stone-500"><i data-lucide="speaker" class="w-8 h-8"></i></div>
+                                <span class="font-bold text-gray-700">喇叭</span>
+                            </div>
+                        </div>
+                        <!-- 5. 滑鼠 -->
+                        <div class="w-full">
+                            <div id="item-5" onclick="handleItemClick(5, event)" class="relative flex flex-col items-center justify-center p-3 rounded-xl cursor-pointer transition-all duration-300 transform hover:scale-105 shadow-md bg-white h-[140px]">
+                                <div class="absolute -top-3 -left-3 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center font-bold border-2 border-white shadow-sm z-10">5</div>
+                                <div class="p-3 rounded-full text-white mb-2 bg-zinc-800"><i data-lucide="mouse" class="w-8 h-8"></i></div>
+                                <span class="font-bold text-gray-700">滑鼠</span>
+                            </div>
+                        </div>
+                        <!-- 3. 鍵盤 -->
+                        <div class="col-span-2 w-full">
+                            <div id="item-3" onclick="handleItemClick(3, event)" class="relative flex flex-col items-center justify-center p-3 rounded-xl cursor-pointer transition-all duration-300 transform hover:scale-105 shadow-md bg-white w-full">
+                                <div class="absolute -top-3 -left-3 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center font-bold border-2 border-white shadow-sm z-10">3</div>
+                                <div class="p-3 rounded-full text-white mb-2 bg-slate-600"><i data-lucide="keyboard" class="w-8 h-8"></i></div>
+                                <span class="font-bold text-gray-700">鍵盤</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tower Group -->
+                    <div id="item-1" onclick="handleItemClick(1, event)" class="relative w-full md:w-[320px] bg-slate-800 p-6 rounded-2xl shadow-2xl border-4 border-slate-700 cursor-pointer transition-all duration-300">
+                        <div class="absolute -top-4 -left-4 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold border-2 border-white shadow-sm z-20">1</div>
+                        
+                        <h4 class="text-slate-400 text-center font-bold mb-6 flex justify-center items-center gap-2">
+                            <i data-lucide="server" class="w-4 h-4"></i> 主機
+                        </h4>
+
+                        <div class="space-y-4">
+                            <!-- 6. 光碟機 -->
+                            <div onclick="handleItemClick(6, event)" class="relative group cursor-pointer">
+                                <div id="item-6" class="bg-slate-700 hover:bg-slate-600 rounded-lg p-3 flex items-center gap-3 border border-slate-600 transition-colors">
+                                    <i data-lucide="disc" class="text-gray-300 w-6 h-6"></i>
+                                    <div class="w-full h-1 bg-slate-900 rounded-full"></div>
+                                </div>
+                                <div class="absolute -top-2 -left-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold z-10 border border-white">6</div>
+                            </div>
+
+                            <!-- 7. 擴充插孔 -->
+                            <div onclick="handleItemClick(7, event)" class="relative group cursor-pointer">
+                                <div id="item-7" class="bg-slate-700 hover:bg-slate-600 rounded-lg p-3 flex justify-between items-center border border-slate-600 transition-colors">
+                                    <i data-lucide="usb" class="text-blue-300 w-5 h-5"></i>
+                                    <div class="flex gap-2">
+                                        <div class="w-3 h-3 bg-slate-900 rounded-full"></div>
+                                        <div class="w-3 h-3 bg-slate-900 rounded-full"></div>
+                                    </div>
+                                </div>
+                                <div class="absolute -top-2 -left-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold z-10 border border-white">7</div>
+                            </div>
+
+                            <!-- 8. 電源開關 -->
+                            <div class="flex justify-center my-6">
+                                <div onclick="handleItemClick(8, event)" class="relative group cursor-pointer">
+                                    <div id="item-8" class="bg-slate-700 hover:bg-slate-600 rounded-full p-4 border border-slate-600 shadow-inner transition-colors">
+                                        <i data-lucide="power" class="text-red-400 w-8 h-8"></i>
+                                    </div>
+                                    <div class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold z-10 border border-white">8</div>
+                                </div>
+                            </div>
+
+                            <!-- 9. 硬碟機 -->
+                            <div onclick="handleItemClick(9, event)" class="relative mt-8 group cursor-pointer">
+                                <div id="item-9" class="border-2 border-dashed border-slate-600 text-slate-400 bg-slate-800/50 hover:bg-slate-700/50 rounded-xl p-4 flex flex-col items-center justify-center transition-colors">
+                                    <i data-lucide="hard-drive" class="w-8 h-8 mb-2"></i>
+                                    <span class="text-sm font-bold">內部裝置：硬碟機</span>
+                                </div>
+                                <div class="absolute -top-2 -left-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold z-10 border border-white">9</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center text-sky-700 mt-8 font-medium pb-8">
+            <p>參考自國小資訊課本：電腦教室與硬體設備章節</p>
+        </div>
+    </div>
+
+    <!-- 遊戲邏輯腳本 -->
+    <script>
+        // 1. 資料定義
+        const hardwareData = [
+            { id: 1, name: "主機", desc: "電腦最重要的部分，包括 CPU 和記憶體等。" },
+            { id: 2, name: "螢幕", desc: "輸出顯示資料，又稱為顯示器。" },
+            { id: 3, name: "鍵盤", desc: "輸入資料或指令到電腦裡。" },
+            { id: 4, name: "喇叭", desc: "播放、輸出聲音。避免聲音吵人，可以使用耳機。" },
+            { id: 5, name: "滑鼠", desc: "透過按鍵和滾輪，傳送資料或指令。分為有線和無線兩種，無線必須搭配接收器。" },
+            { id: 6, name: "光碟機", desc: "裝在槽蓋裡，可讀取和燒錄光碟資料，越來越少。" },
+            { id: 7, name: "擴充插孔", desc: "包含 USB 插孔、音效插孔和 SD 插孔等，用來外接設備。" },
+            { id: 8, name: "電源開關", desc: "按下它，啟動或關閉電腦。開、關機，最好間隔一下下。" },
+            { id: 9, name: "硬碟機", desc: "裝在主機裡，是主要的儲存設備。有傳統硬碟 (HDD) 和速度快的固態硬碟 (SSD)。" }
+        ];
+
+        // 2. 狀態變數
+        let mode = 'explore'; // 'explore' 或 'quiz'
+        let selectedItemId = 1;
+        let questions = [];
+        let currentQIndex = 0;
+        let score = 0;
+        let quizFinished = false;
+        let feedback = null;
+
+        // 初始化圖示
+        lucide.createIcons();
+        updateUI();
+
+        // 3. 核心功能
+        function setMode(newMode) {
+            mode = newMode;
+            if (mode === 'quiz') {
+                startQuiz();
+            } else {
+                updateUI();
+            }
+        }
+
+        function startQuiz() {
+            // 洗牌陣列產生題目
+            questions = [...hardwareData].sort(() => 0.5 - Math.random());
+            currentQIndex = 0;
+            score = 0;
+            quizFinished = false;
+            feedback = null;
+            updateUI();
+        }
+
+        function handleItemClick(id, event) {
+            // 防止點擊內部零件時觸發到主機外殼的事件
+            if (event) event.stopPropagation();
+
+            if (mode === 'explore') {
+                selectedItemId = id;
+                updateUI();
+            } else if (mode === 'quiz' && !quizFinished && !feedback) {
+                const isCorrect = id === questions[currentQIndex].id;
+                feedback = isCorrect ? 'correct' : 'wrong';
+                if (isCorrect) score++;
+                
+                updateUI(); // 顯示回饋動畫
+
+                // 1.5秒後進入下一題
+                setTimeout(() => {
+                    feedback = null;
+                    if (currentQIndex < questions.length - 1) {
+                        currentQIndex++;
+                    } else {
+                        quizFinished = true;
+                    }
+                    updateUI();
+                }, 1500);
+            }
+        }
+
+        // 4. 更新畫面 (負責同步狀態到 DOM)
+        function updateUI() {
+            // -- 切換 Header 按鈕樣式 --
+            const btnExplore = document.getElementById('btn-explore');
+            const btnQuiz = document.getElementById('btn-quiz');
+            if (mode === 'explore') {
+                btnExplore.className = "flex items-center gap-2 px-6 py-3 rounded-full font-bold transition-colors bg-white text-sky-600 shadow-sm";
+                btnQuiz.className = "flex items-center gap-2 px-6 py-3 rounded-full font-bold transition-colors text-gray-500 hover:text-sky-500";
+            } else {
+                btnExplore.className = "flex items-center gap-2 px-6 py-3 rounded-full font-bold transition-colors text-gray-500 hover:text-sky-500";
+                btnQuiz.className = "flex items-center gap-2 px-6 py-3 rounded-full font-bold transition-colors bg-sky-500 text-white shadow-sm";
+            }
+
+            // -- 切換左側面板內容 --
+            const panelExplore = document.getElementById('panel-explore');
+            const panelQuiz = document.getElementById('panel-quiz');
+
+            if (mode === 'explore') {
+                panelExplore.classList.remove('hidden');
+                panelQuiz.classList.add('hidden');
+                
+                // 更新探索內容
+                const item = hardwareData.find(d => d.id === selectedItemId);
+                document.getElementById('exp-id').innerText = item.id;
+                document.getElementById('exp-name').innerText = item.name;
+                document.getElementById('exp-desc').innerText = item.desc;
+                
+                // 重置動畫
+                panelExplore.classList.remove('animate-fade-in');
+                void panelExplore.offsetWidth; // 觸發重繪
+                panelExplore.classList.add('animate-fade-in');
+
+            } else {
+                panelExplore.classList.add('hidden');
+                panelQuiz.classList.remove('hidden');
+
+                const activeQuiz = document.getElementById('quiz-active');
+                const endQuiz = document.getElementById('quiz-end');
+
+                if (!quizFinished) {
+                    activeQuiz.classList.remove('hidden');
+                    endQuiz.classList.add('hidden');
+
+                    document.getElementById('quiz-progress').innerText = `第 ${currentQIndex + 1} / ${questions.length} 題`;
+                    document.getElementById('quiz-question').innerText = `「${questions[currentQIndex]?.desc}」`;
+
+                    // 處理答題回饋動畫
+                    const overlay = document.getElementById('quiz-feedback-overlay');
+                    if (feedback === 'correct') {
+                        overlay.innerHTML = '<div class="absolute inset-0 bg-green-500/90 flex items-center justify-center text-white z-10"><i data-lucide="check-circle-2" class="w-16 h-16 animate-bounce"></i></div>';
+                        lucide.createIcons(); // 渲染新的 SVG 圖標
+                    } else if (feedback === 'wrong') {
+                        overlay.innerHTML = '<div class="absolute inset-0 bg-red-500/90 flex items-center justify-center text-white z-10"><i data-lucide="x-circle" class="w-16 h-16 animate-pulse"></i></div>';
+                        lucide.createIcons(); // 渲染新的 SVG 圖標
+                    } else {
+                        overlay.innerHTML = '';
+                    }
+                } else {
+                    // 顯示結算畫面
+                    activeQuiz.classList.add('hidden');
+                    endQuiz.classList.remove('hidden');
+                    document.getElementById('quiz-score').innerText = `${score} / ${questions.length}`;
+                }
+            }
+
+            // -- 更新右側裝置 Highlight 樣式 --
+            updateHighlights();
+        }
+
+        // 管理硬體設備的高光(Highlight)狀態
+        function updateHighlights() {
+            // 1. 先清除所有項目的選取狀態 (重置為預設)
+            [2, 3, 4, 5].forEach(id => {
+                const el = document.getElementById(`item-${id}`);
+                el.classList.remove('ring-4', 'ring-yellow-400', 'bg-yellow-50');
+                el.classList.add('bg-white');
+            });
+            document.getElementById('item-1').classList.remove('ring-4', 'ring-yellow-400');
+            [6, 7, 8].forEach(id => {
+                document.getElementById(`item-${id}`).classList.remove('ring-2', 'ring-yellow-400');
+            });
+            const item9 = document.getElementById('item-9');
+            item9.classList.remove('border-yellow-400', 'text-yellow-400');
+            item9.classList.add('border-slate-600', 'text-slate-400');
+
+            // 2. 只有在探索模式才加上對應的高光
+            if (mode === 'explore') {
+                if ([2, 3, 4, 5].includes(selectedItemId)) {
+                    const el = document.getElementById(`item-${selectedItemId}`);
+                    el.classList.remove('bg-white');
+                    el.classList.add('ring-4', 'ring-yellow-400', 'bg-yellow-50');
+                } else if (selectedItemId === 1) {
+                    document.getElementById('item-1').classList.add('ring-4', 'ring-yellow-400');
+                } else if ([6, 7, 8].includes(selectedItemId)) {
+                    document.getElementById(`item-${selectedItemId}`).classList.add('ring-2', 'ring-yellow-400');
+                } else if (selectedItemId === 9) {
+                    item9.classList.remove('border-slate-600', 'text-slate-400');
+                    item9.classList.add('border-yellow-400', 'text-yellow-400');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>小妍這一組：操作動滑輪</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f0fdf4;
+            margin: 0;
+            overflow: hidden; /* Prevent scrolling, make it app-like */
+            touch-action: none; /* Prevent browser default touch actions on canvas */
+        }
+        .slider-thumb::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: #f97316;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .slider-thumb::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            background: #f97316;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        #simCanvas {
+            touch-action: none; /* Crucial for touch dragging */
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-orange-400 text-white p-3 md:p-4 shadow-md flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-bold tracking-wider hidden sm:block">實驗</div>
+            <h1 class="text-lg md:text-2xl font-bold">小妍這一組：操作動滑輪</h1>
+        </div>
+        <div class="bg-white/20 px-3 py-1 rounded-full text-sm font-medium animate-pulse">
+            ✨ 提示：可以直接在畫面中上下拉動彈簧秤！
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col md:flex-row overflow-hidden p-2 md:p-4 gap-2 md:gap-4">
+        
+        <!-- Left Panel: Instructions & Controls -->
+        <div class="w-full md:w-1/3 bg-white rounded-xl shadow-lg p-4 md:p-5 flex flex-col h-full overflow-y-auto shrink-0 border border-gray-100">
+            
+            <div class="space-y-4 md:space-y-6">
+                <!-- Step 1 -->
+                <div>
+                    <p class="text-gray-800 font-medium mb-2 text-sm md:text-base"><span class="text-orange-500 font-bold mr-1">1.</span>先利用彈簧秤分別測量物體與滑輪的重量並記錄下來。</p>
+                    <div class="bg-orange-50 p-3 md:p-4 rounded-lg space-y-4 border border-orange-100">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">設定物體重量 (gw): <span id="objWeightVal" class="text-orange-600">100</span></label>
+                            <input type="range" id="objWeight" min="20" max="200" step="10" value="100" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">設定滑輪重量 (gw): <span id="pulleyWeightVal" class="text-orange-600">20</span></label>
+                            <input type="range" id="pulleyWeight" min="10" max="50" step="5" value="20" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div>
+                    <p class="text-gray-800 font-medium text-sm md:text-base"><span class="text-orange-500 font-bold mr-1">2.</span>將繩子一端固定在支架上，另一端繞過已掛上物體的滑輪，綁在彈簧秤的掛鉤上。</p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="bg-blue-50 p-3 md:p-4 rounded-lg border border-blue-100">
+                    <p class="text-gray-800 font-medium mb-3 text-sm md:text-base"><span class="text-orange-500 font-bold mr-1">3.</span>將彈簧秤垂直往上慢慢拉，觀察滑輪與物體的移動方向，靜止後，再讀取並記錄施力的大小。</p>
+                    
+                    <div class="flex items-center justify-center gap-2 md:gap-4 my-2 md:my-4">
+                        <span class="text-sm font-bold text-gray-500 whitespace-nowrap">放鬆</span>
+                        <input type="range" id="pullScale" min="0" max="150" value="0" class="w-full h-3 bg-blue-200 rounded-lg appearance-none cursor-pointer slider-thumb" style="-webkit-appearance: none; background: #bfdbfe;">
+                        <span class="text-sm font-bold text-gray-500 whitespace-nowrap">往上拉</span>
+                    </div>
+                    <p class="text-xs text-blue-600 text-center font-bold mt-2">💡 您也可以直接在右側畫面中拖拉手部！</p>
+                </div>
+
+                <!-- Reading Display -->
+                <div class="mt-auto pt-4 border-t-2 border-dashed border-gray-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-bold text-base md:text-lg text-blue-800 flex items-center gap-2">
+                            <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded border border-blue-600 text-xs md:text-sm">觀念引導</span>
+                            實驗數據觀察
+                        </h3>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 md:gap-4 text-center">
+                        <div class="bg-yellow-100 p-2 md:p-3 rounded-lg border border-yellow-300 shadow-inner">
+                            <div class="text-xs text-yellow-800 font-bold mb-1">彈簧秤讀數 (施力)</div>
+                            <div class="text-2xl md:text-3xl font-black text-red-600" id="forceReading">60 <span class="text-sm md:text-base font-bold">gw</span></div>
+                        </div>
+                        <div class="bg-green-100 p-2 md:p-3 rounded-lg border border-green-300 shadow-inner">
+                            <div class="text-xs text-green-800 font-bold mb-1">總重 (物+滑輪)</div>
+                            <div class="text-2xl md:text-3xl font-black text-green-700" id="totalWeight">120 <span class="text-sm md:text-base font-bold">gw</span></div>
+                        </div>
+                        <div class="bg-purple-100 p-2 md:p-3 rounded-lg border border-purple-300 shadow-inner">
+                            <div class="text-xs text-purple-800 font-bold mb-1">手拉動距離</div>
+                            <div class="text-xl md:text-2xl font-black text-purple-700" id="handDist">0 <span class="text-sm md:text-base font-bold">cm</span></div>
+                        </div>
+                        <div class="bg-teal-100 p-2 md:p-3 rounded-lg border border-teal-300 shadow-inner">
+                            <div class="text-xs text-teal-800 font-bold mb-1">物體上升距離</div>
+                            <div class="text-xl md:text-2xl font-black text-teal-700" id="objDist">0 <span class="text-sm md:text-base font-bold">cm</span></div>
+                        </div>
+                    </div>
+                    <div class="mt-3 md:mt-4 text-xs md:text-sm text-gray-700 bg-gray-50 p-2 md:p-3 rounded-lg text-center border border-gray-200">
+                        結論：動滑輪可以<strong>省一半的力</strong>，但手拉動的距離會是物體上升距離的<strong>兩倍</strong>。
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Right Panel: Canvas Simulation -->
+        <div class="w-full md:w-2/3 bg-white rounded-xl shadow-lg relative flex items-center justify-center overflow-hidden border border-gray-100" id="canvasContainer">
+            <canvas id="simCanvas" class="w-full h-full cursor-grab"></canvas>
+            
+            <!-- Magnifying Glass overlay effect -->
+            <div class="absolute bottom-4 right-4 md:bottom-10 md:right-10 w-24 h-24 md:w-32 md:h-32 bg-yellow-300 rounded-full border-4 border-yellow-500 shadow-[0_0_15px_rgba(0,0,0,0.3)] flex flex-col items-center justify-center opacity-90 transition-opacity pointer-events-none z-10">
+                <div class="text-[10px] md:text-xs font-bold text-yellow-800 mb-1">彈簧秤放大圖</div>
+                <div class="relative w-10 h-12 md:w-12 md:h-16 bg-gradient-to-b from-yellow-400 to-yellow-500 border border-yellow-600 rounded flex justify-center overflow-hidden">
+                    <!-- tick marks -->
+                    <div class="absolute left-1 top-2 w-2 h-0.5 bg-black"></div>
+                    <div class="absolute right-1 top-2 w-2 h-0.5 bg-black"></div>
+                    <div class="absolute left-1 top-1/2 -translate-y-1/2 w-3 h-0.5 bg-black"></div>
+                    <div class="absolute right-1 top-1/2 -translate-y-1/2 w-3 h-0.5 bg-black"></div>
+                    <div class="absolute left-1 bottom-2 w-2 h-0.5 bg-black"></div>
+                    <div class="absolute right-1 bottom-2 w-2 h-0.5 bg-black"></div>
+                    <!-- Indicator -->
+                    <div class="absolute top-1/2 -translate-y-1/2 w-full h-0.5 bg-red-600 shadow-[0_0_2px_red]"></div>
+                    <!-- value -->
+                    <div class="absolute inset-0 flex items-center justify-center mt-1">
+                        <span id="magReading" class="text-white text-base md:text-lg font-black drop-shadow-md">60</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // DOM Elements
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvasContainer');
+        
+        const objWeightInput = document.getElementById('objWeight');
+        const pulleyWeightInput = document.getElementById('pulleyWeight');
+        const pullScaleInput = document.getElementById('pullScale');
+        
+        const objWeightVal = document.getElementById('objWeightVal');
+        const pulleyWeightVal = document.getElementById('pulleyWeightVal');
+        const forceReadingDisplay = document.getElementById('forceReading');
+        const totalWeightDisplay = document.getElementById('totalWeight');
+        const handDistDisplay = document.getElementById('handDist');
+        const objDistDisplay = document.getElementById('objDist');
+        const magReading = document.getElementById('magReading');
+
+        // Virtual Coordinate System (Base width: 800, Base height: 600)
+        const VIRTUAL_W = 800;
+        const VIRTUAL_H = 600;
+        let scale = 1;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        // State Variables
+        let objW = parseInt(objWeightInput.value);
+        let pulleyW = parseInt(pulleyWeightInput.value);
+        let pullAmount = parseInt(pullScaleInput.value); // 0 to 150
+
+        // Dragging State
+        let isDragging = false;
+        let dragOffsetY = 0; // Offset between click point and current spring Y
+
+        // Geometry Constants (Virtual Coordinates)
+        const STAND_X = 550;
+        const ARM_Y = 150;
+        const FIXED_ROPE_X = 400;
+        const PULLEY_R = 40;
+        const PULLEY_X = 360; 
+        const SPRING_SCALE_X = 320;
+        const TABLE_Y = 550;
+        
+        // Initial Y positions
+        const INITIAL_PULLEY_Y = 400;
+        const INITIAL_SPRING_Y = 250;
+        let currentSpringY = INITIAL_SPRING_Y; // Keep track for hit detection
+
+        function resizeCanvas() {
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            // Calculate scale to fit virtual resolution into actual canvas
+            const scaleX = canvas.width / VIRTUAL_W;
+            const scaleY = canvas.height / VIRTUAL_H;
+            scale = Math.min(scaleX, scaleY); // Maintain aspect ratio
+            
+            offsetX = (canvas.width - VIRTUAL_W * scale) / 2;
+            offsetY = (canvas.height - VIRTUAL_H * scale) / 2;
+            
+            draw();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        // --- Interaction & Physics Logic ---
+
+        function updateState() {
+            objW = parseInt(objWeightInput.value);
+            pulleyW = parseInt(pulleyWeightInput.value);
+            // Ensure pullAmount matches the slider if updated from UI
+            pullAmount = parseInt(pullScaleInput.value);
+            
+            objWeightVal.innerText = objW;
+            pulleyWeightVal.innerText = pulleyW;
+            
+            // Physics Calculations
+            const totalW = objW + pulleyW;
+            const force = totalW / 2;
+            const objLifted = pullAmount / 2; // Movable pulley lifts half the pulled distance
+            
+            // Update Y positions
+            currentSpringY = INITIAL_SPRING_Y - pullAmount;
+
+            // Update UI Stats
+            forceReadingDisplay.innerHTML = `${force} <span class="text-xs md:text-base font-bold">gw</span>`;
+            totalWeightDisplay.innerHTML = `${totalW} <span class="text-xs md:text-base font-bold">gw</span>`;
+            handDistDisplay.innerHTML = `${pullAmount} <span class="text-xs md:text-base font-bold">cm</span>`;
+            objDistDisplay.innerHTML = `${objLifted.toFixed(1)} <span class="text-xs md:text-base font-bold">cm</span>`;
+            magReading.innerText = force;
+            
+            draw();
+        }
+
+        // Slider listeners
+        objWeightInput.addEventListener('input', updateState);
+        pulleyWeightInput.addEventListener('input', updateState);
+        pullScaleInput.addEventListener('input', updateState);
+
+        // --- Dragging Logic (Mouse & Touch) ---
+
+        function getVirtualPos(evt) {
+            const rect = canvas.getBoundingClientRect();
+            let clientX = evt.clientX;
+            let clientY = evt.clientY;
+
+            if (evt.touches && evt.touches.length > 0) {
+                clientX = evt.touches[0].clientX;
+                clientY = evt.touches[0].clientY;
+            }
+
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+
+            const vX = (x - offsetX) / scale;
+            const vY = (y - offsetY) / scale;
+
+            return { x: vX, y: vY };
+        }
+
+        function isHitSpringScaleOrHand(vX, vY) {
+            // 擴大左側的判定範圍，讓整隻手臂與手腕都能被滑鼠點擊抓取
+            const boxLeft = SPRING_SCALE_X - 150; 
+            const boxRight = SPRING_SCALE_X + 50;
+            const boxTop = currentSpringY - 60; // Top of hand
+            const boxBottom = currentSpringY + 130; // Bottom of scale
+
+            return (vX >= boxLeft && vX <= boxRight && vY >= boxTop && vY <= boxBottom);
+        }
+
+        function handlePointerDown(evt) {
+            const pos = getVirtualPos(evt);
+            
+            if (isHitSpringScaleOrHand(pos.x, pos.y)) {
+                isDragging = true;
+                // Calculate the offset so the scale doesn't snap abruptly to cursor center
+                dragOffsetY = pos.y - currentSpringY;
+                canvas.style.cursor = 'grabbing';
+                evt.preventDefault(); // Prevent scrolling on touch
+            }
+        }
+
+        function handlePointerMove(evt) {
+            const pos = getVirtualPos(evt);
+
+            if (isDragging) {
+                // Calculate new position based on where mouse is, minus initial offset
+                let newSpringY = pos.y - dragOffsetY;
+                
+                // Convert back to pullAmount (how much it moved UP from initial)
+                let newPullAmount = INITIAL_SPRING_Y - newSpringY;
+
+                // Clamp between 0 and 150 (limits of the experiment)
+                if (newPullAmount < 0) newPullAmount = 0;
+                if (newPullAmount > 150) newPullAmount = 150;
+
+                // Update input slider and state
+                pullScaleInput.value = Math.round(newPullAmount);
+                updateState(); // This recalculates and redraws
+                evt.preventDefault();
+            } else {
+                // Hover effect
+                if (isHitSpringScaleOrHand(pos.x, pos.y)) {
+                    canvas.style.cursor = 'grab';
+                } else {
+                    canvas.style.cursor = 'default';
+                }
+            }
+        }
+
+        function handlePointerUp(evt) {
+            if (isDragging) {
+                isDragging = false;
+                const pos = getVirtualPos(evt);
+                if (isHitSpringScaleOrHand(pos.x, pos.y)) {
+                    canvas.style.cursor = 'grab';
+                } else {
+                    canvas.style.cursor = 'default';
+                }
+            }
+        }
+
+        // Mouse Events
+        canvas.addEventListener('mousedown', handlePointerDown);
+        window.addEventListener('mousemove', handlePointerMove); // Listen on window to catch fast drags
+        window.addEventListener('mouseup', handlePointerUp);
+
+        // Touch Events
+        canvas.addEventListener('touchstart', handlePointerDown, {passive: false});
+        window.addEventListener('touchmove', handlePointerMove, {passive: false});
+        window.addEventListener('touchend', handlePointerUp);
+        window.addEventListener('touchcancel', handlePointerUp);
+
+
+        // --- Drawing Functions ---
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.save();
+            ctx.translate(offsetX, offsetY);
+            ctx.scale(scale, scale);
+
+            // Calculate current dynamic positions
+            const currentPulleyY = INITIAL_PULLEY_Y - (pullAmount / 2);
+
+            drawBackground();
+            drawStand();
+            drawRope(currentSpringY, currentPulleyY);
+            drawPulley(currentPulleyY);
+            drawObject(currentPulleyY);
+            drawSpringScale(currentSpringY);
+            drawHand(currentSpringY);
+
+            ctx.restore();
+        }
+
+        function drawBackground() {
+            // Table top
+            ctx.fillStyle = '#e2e8f0';
+            ctx.fillRect(100, TABLE_Y, 700, 50);
+            ctx.fillStyle = '#cbd5e1';
+            ctx.fillRect(100, TABLE_Y, 700, 10);
+            // Table edge depth
+            ctx.fillStyle = '#94a3b8';
+            ctx.beginPath();
+            ctx.moveTo(100, TABLE_Y + 50);
+            ctx.lineTo(120, TABLE_Y + 70);
+            ctx.lineTo(800, TABLE_Y + 70);
+            ctx.lineTo(800, TABLE_Y + 50);
+            ctx.fill();
+        }
+
+        function drawStand() {
+            // Base clamp
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillRect(STAND_X - 30, TABLE_Y - 20, 60, 20);
+            ctx.fillStyle = '#cbd5e1';
+            ctx.fillRect(STAND_X - 10, TABLE_Y, 20, 40);
+            
+            // Vertical rod
+            ctx.fillStyle = '#334155';
+            ctx.fillRect(STAND_X - 6, ARM_Y, 12, TABLE_Y - ARM_Y - 20);
+            
+            // Horizontal arm
+            ctx.fillRect(FIXED_ROPE_X - 20, ARM_Y - 6, STAND_X - FIXED_ROPE_X + 26, 12);
+            
+            // Fixed anchor point
+            ctx.fillStyle = '#94a3b8';
+            ctx.beginPath();
+            ctx.arc(FIXED_ROPE_X, ARM_Y, 5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawRope(springY, pulleyY) {
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            
+            // Fixed end to right side of pulley
+            ctx.moveTo(FIXED_ROPE_X, ARM_Y);
+            ctx.lineTo(FIXED_ROPE_X, pulleyY);
+            
+            // Wrap under pulley (semi-circle)
+            ctx.arc(PULLEY_X, pulleyY, PULLEY_R, 0, Math.PI, false);
+            
+            // Left side of pulley up to spring scale
+            ctx.lineTo(SPRING_SCALE_X, springY + 60); // 60 is bottom hook offset of spring scale
+            
+            ctx.stroke();
+
+            // Rope shadow/depth
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        function drawPulley(y) {
+            // Pulley frame
+            ctx.fillStyle = '#fef08a';
+            ctx.beginPath();
+            ctx.arc(PULLEY_X, y, PULLEY_R, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#fde047';
+            ctx.stroke();
+            
+            // Center pin & holes
+            ctx.fillStyle = '#334155';
+            ctx.beginPath();
+            ctx.arc(PULLEY_X, y, 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#a16207';
+            ctx.beginPath();
+            ctx.arc(PULLEY_X, y - 15, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(PULLEY_X, y + 15, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Bottom hook
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(PULLEY_X, y + PULLEY_R);
+            ctx.lineTo(PULLEY_X, y + PULLEY_R + 20);
+            ctx.stroke();
+        }
+
+        function drawObject(pulleyY) {
+            const objTopY = pulleyY + PULLEY_R + 20;
+            const boxW = 60;
+            const boxH = 80;
+            
+            // String holding it
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(PULLEY_X, objTopY);
+            ctx.lineTo(PULLEY_X - 20, objTopY + 15);
+            ctx.moveTo(PULLEY_X, objTopY);
+            ctx.lineTo(PULLEY_X + 20, objTopY + 15);
+            ctx.stroke();
+
+            // The object
+            ctx.fillStyle = '#f97316';
+            ctx.fillRect(PULLEY_X - boxW/2, objTopY + 15, boxW, boxH);
+            
+            // Grid lines
+            ctx.strokeStyle = '#ea580c';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for(let i = 1; i < 4; i++) {
+                ctx.moveTo(PULLEY_X - boxW/2, objTopY + 15 + i*(boxH/4));
+                ctx.lineTo(PULLEY_X + boxW/2, objTopY + 15 + i*(boxH/4));
+            }
+            for(let i = 1; i < 3; i++) {
+                ctx.moveTo(PULLEY_X - boxW/2 + i*(boxW/3), objTopY + 15);
+                ctx.lineTo(PULLEY_X - boxW/2 + i*(boxW/3), objTopY + 15 + boxH);
+            }
+            ctx.stroke();
+
+            // Highlight/bag effect
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(PULLEY_X - boxW/2 - 5, objTopY + 10, boxW + 10, boxH + 15);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.fillRect(PULLEY_X - boxW/2 - 5, objTopY + 10, boxW + 10, boxH + 15);
+        }
+
+        function drawSpringScale(y) {
+            const scaleW = 30;
+            const scaleH = 120;
+            
+            // Drag highlight glow if dragging
+            if (isDragging) {
+                ctx.shadowColor = 'rgba(234, 179, 8, 0.8)';
+                ctx.shadowBlur = 15;
+            }
+
+            // Top ring
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(SPRING_SCALE_X, y - 10, 10, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Scale Body
+            ctx.fillStyle = '#eab308'; // Yellow
+            ctx.fillRect(SPRING_SCALE_X - scaleW/2, y, scaleW, scaleH);
+            
+            // Reset shadow
+            ctx.shadowBlur = 0;
+
+            // Scale markings (Ticks)
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 1;
+            for(let i = 0; i <= 10; i++) {
+                ctx.beginPath();
+                let tickY = y + 20 + i*8;
+                ctx.moveTo(SPRING_SCALE_X - scaleW/2 + 2, tickY);
+                ctx.lineTo(SPRING_SCALE_X - scaleW/2 + (i%2===0? 10:6), tickY);
+                ctx.moveTo(SPRING_SCALE_X + scaleW/2 - 2, tickY);
+                ctx.lineTo(SPRING_SCALE_X + scaleW/2 - (i%2===0? 10:6), tickY);
+                ctx.stroke();
+            }
+
+            // Red indicator
+            const force = (objW + pulleyW) / 2;
+            const maxDisplayForce = 150;
+            let indicatorOffset = Math.min((force / maxDisplayForce) * 80, 80); 
+            
+            ctx.fillStyle = '#dc2626'; // Red
+            ctx.fillRect(SPRING_SCALE_X - scaleW/2, y + 20 + indicatorOffset, scaleW, 4);
+
+            // Bottom hook
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(SPRING_SCALE_X, y + scaleH);
+            ctx.lineTo(SPRING_SCALE_X, y + scaleH + 20);
+            ctx.arc(SPRING_SCALE_X - 5, y + scaleH + 20, 5, 0, Math.PI);
+            ctx.stroke();
+        }
+
+        function drawHand(springY) {
+            ctx.save();
+            // 將座標原點移至彈簧秤頂部拉環的中心
+            ctx.translate(SPRING_SCALE_X, springY - 10);
+            
+            // 拖拉時手部會有微小的角度變化，模擬出力的感覺
+            if (isDragging) {
+                ctx.rotate(-0.03);
+            }
+
+            const skinMain = '#f4c5a0'; // 寫實的皮膚底色
+            const outlineColor = '#c98f65'; // 皮膚邊緣與陰影色
+
+            // 1. 手臂與手背主體
+            ctx.fillStyle = skinMain;
+            ctx.beginPath();
+            ctx.moveTo(-500, -12); // 手臂往左延伸出畫面
+            ctx.lineTo(-40, -12); // 手腕上方
+            ctx.quadraticCurveTo(-20, -16, -10, -10); // 手背
+            ctx.quadraticCurveTo(2, -10, 4, 0); // 指關節
+            ctx.quadraticCurveTo(2, 18, -10, 20); // 手掌下緣
+            ctx.lineTo(-40, 18); // 手腕下方
+            ctx.lineTo(-500, 25);
+            ctx.fill();
+
+            // 手臂上下輪廓線
+            ctx.strokeStyle = outlineColor;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(-500, -12); ctx.lineTo(-40, -12);
+            ctx.moveTo(-500, 25); ctx.lineTo(-40, 18);
+            ctx.stroke();
+
+            // 2. 畫出握住拉環與秤身的手指 (食指、中指、無名指、小拇指)
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            const drawFinger = (startX, startY, endX, endY) => {
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.quadraticCurveTo(startX + 10, startY + 2, endX, endY);
+                // 粗外框製造手指間的陰影分隔
+                ctx.lineWidth = 10;
+                ctx.strokeStyle = outlineColor;
+                ctx.stroke();
+                // 內部填色
+                ctx.lineWidth = 8;
+                ctx.strokeStyle = skinMain;
+                ctx.stroke();
+            };
+
+            drawFinger(-8, -4, 11, 0);   // 食指 (扣在拉環上)
+            drawFinger(-8, 4, 12, 8);    // 中指 (扣在拉環上)
+            drawFinger(-8, 12, 10, 15);  // 無名指 (握在黃色秤身頂部)
+            drawFinger(-12, 19, 4, 21);  // 小拇指 (握在黃色秤身)
+
+            // 3. 大拇指 (壓在食指上方)
+            ctx.beginPath();
+            ctx.moveTo(-35, -4); // 大拇指根部
+            ctx.quadraticCurveTo(-20, -22, -4, -16); // 拇指第一關節
+            ctx.quadraticCurveTo(10, -12, 7, -4); // 拇指指尖
+            ctx.quadraticCurveTo(-2, -3, -15, 2); // 拇指內側
+            
+            ctx.fillStyle = skinMain;
+            ctx.fill();
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = outlineColor;
+            ctx.stroke();
+
+            // 4. 大拇指指甲 (增加寫實感)
+            ctx.fillStyle = '#fae1d4';
+            ctx.beginPath();
+            ctx.ellipse(-1, -11, 4, 2.5, Math.PI/5, 0, Math.PI*2);
+            ctx.fill();
+            ctx.strokeStyle = '#c98f65';
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+            
+            // 5. 拇指關節微小皺褶細節
+            ctx.strokeStyle = 'rgba(201, 143, 101, 0.4)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(-15, -12); ctx.lineTo(-12, -8);
+            ctx.moveTo(-18, -10); ctx.lineTo(-15, -6);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        // Initialize setup
+        updateState();
+        setTimeout(resizeCanvas, 100);
+
+    </script>
+</body>
+</html>

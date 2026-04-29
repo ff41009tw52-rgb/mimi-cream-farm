@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手臂運動原理互動教學</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #f0f9ff;
+            font-family: "Microsoft JhengHei", sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .muscle-biceps {
+            transition: all 0.1s ease;
+        }
+        .muscle-triceps {
+            transition: all 0.1s ease;
+        }
+        input[type=range] {
+            width: 100%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container text-center">
+    <h1 class="text-3xl font-bold text-blue-600 mb-4">💪 手臂運動原理互動教學</h1>
+    <p class="text-gray-600 mb-8">拉動下方的滑桿，觀察骨骼與肌肉是如何配合讓手臂動作的！</p>
+
+    <!-- 互動圖形區 -->
+    <div class="relative flex justify-center items-center bg-gray-50 rounded-xl p-8 mb-8 overflow-hidden" style="height: 400px;">
+        <svg id="arm-svg" width="500" height="400" viewBox="0 0 500 400">
+            <!-- 關節與骨頭 -->
+            <!-- 肩膀點 -->
+            <circle cx="150" cy="100" r="8" fill="#cbd5e1" />
+            
+            <!-- 上臂骨 (固定) -->
+            <line x1="150" y1="100" x2="150" y2="250" stroke="#94a3b8" stroke-width="12" stroke-linecap="round" />
+            <text x="100" y="175" fill="#64748b" font-size="14">上臂骨 (固定)</text>
+
+            <!-- 肌肉與下臂骨的組件 -->
+            <g id="forearm-group">
+                <!-- 下臂骨 -->
+                <line x1="0" y1="0" x2="200" y2="0" stroke="#94a3b8" stroke-width="10" stroke-linecap="round" id="ulna" />
+                <!-- 手部示意 -->
+                <circle cx="210" cy="0" r="15" fill="#fecaca" />
+                
+                <!-- 標籤 -->
+                <text x="100" y="25" fill="#64748b" font-size="14">下臂骨</text>
+            </g>
+
+            <!-- 肱二頭肌 (內側) -->
+            <path id="biceps" d="" fill="#4ade80" stroke="#22c55e" stroke-width="2" />
+            <!-- 肱三頭肌 (外側) -->
+            <path id="triceps" d="" fill="#f87171" stroke="#ef4444" stroke-width="2" />
+
+            <!-- 肘關節 -->
+            <circle cx="150" cy="250" r="10" fill="#64748b" />
+            <text x="120" y="275" fill="#475569" font-weight="bold">肘關節</text>
+        </svg>
+
+        <!-- 狀態顯示面板 -->
+        <div class="absolute top-4 right-4 bg-white/80 backdrop-blur p-4 border border-blue-100 rounded-lg shadow-sm text-left">
+            <div class="mb-2">
+                <span class="inline-block w-3 h-3 bg-green-400 rounded-full mr-2"></span>
+                <strong>內側肌肉 (肱二頭肌)：</strong>
+                <span id="biceps-status" class="text-green-600 font-bold">舒張</span>
+            </div>
+            <div>
+                <span class="inline-block w-3 h-3 bg-red-400 rounded-full mr-2"></span>
+                <strong>外側肌肉 (肱三頭肌)：</strong>
+                <span id="triceps-status" class="text-red-600 font-bold">收縮</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 控制區 -->
+    <div class="px-12">
+        <div class="flex justify-between mb-2 font-bold text-gray-500">
+            <span>彎曲 (45度)</span>
+            <span>伸直 (180度)</span>
+        </div>
+        <input type="range" id="angle-slider" min="45" max="180" value="180" class="h-2 bg-blue-200 rounded-lg appearance-none">
+        <p class="mt-4 text-lg" id="action-desc">手臂處於 <span class="text-blue-500 font-bold">伸直</span> 狀態</p>
+    </div>
+
+    <!-- 知識補給站 -->
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+        <div class="p-4 bg-green-50 border-l-4 border-green-400 rounded">
+            <h3 class="font-bold text-green-800 mb-1">彎曲手臂時：</h3>
+            <ul class="text-sm text-green-700 list-disc list-inside">
+                <li>內側肌肉收縮 (變短變厚)</li>
+                <li>外側肌肉舒張 (變長變薄)</li>
+                <li>帶動骨骼向上運動</li>
+            </ul>
+        </div>
+        <div class="p-4 bg-red-50 border-l-4 border-red-400 rounded">
+            <h3 class="font-bold text-red-800 mb-1">伸直手臂時：</h3>
+            <ul class="text-sm text-red-700 list-disc list-inside">
+                <li>內側肌肉舒張 (變長變薄)</li>
+                <li>外側肌肉收縮 (變短變厚)</li>
+                <li>帶動骨骼向下運動</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    const slider = document.getElementById('angle-slider');
+    const forearmGroup = document.getElementById('forearm-group');
+    const bicepsPath = document.getElementById('biceps');
+    const tricepsPath = document.getElementById('triceps');
+    const bicepsStatus = document.getElementById('biceps-status');
+    const tricepsStatus = document.getElementById('triceps-status');
+    const actionDesc = document.getElementById('action-desc');
+
+    function updateArm(jointAngle) {
+        // 1. 旋轉下臂 (將手臂關節角度 45~180 對應到 SVG 旋轉角度)
+        // 180度伸直 -> 視覺垂直向下 (rotate 90)
+        // 45度彎曲 -> 視覺向右上 (rotate -45)
+        const visualAngle = jointAngle - 90;
+        forearmGroup.setAttribute('transform', `translate(150, 250) rotate(${visualAngle})`);
+
+        // 2. 計算肌肉形狀 (使用貝茲曲線模擬肌肉隆起，並強化對比效果)
+        // 計算彎曲程度 t：0 (彎曲 45度) 到 1 (伸直 180度)
+        const t = (jointAngle - 45) / 135; 
+        const rad = (visualAngle * Math.PI) / 180;
+        
+        // 下臂上的附著點 (大約在下臂骨的 1/4 處)
+        const attachX = 150 + Math.cos(rad) * 40;
+        const attachY = 250 + Math.sin(rad) * 40;
+
+        // 肱二頭肌 (內側 - 綠色)
+        // 強化收縮與舒張的厚度對比：彎曲時極厚(65)，伸直時極薄(5)
+        const bThickness = 5 + (1 - t) * 60; 
+        const bMidY = 175 - (1 - t) * 25; // 彎曲時讓肌肉隆起點往上提，視覺更真實
+        
+        bicepsPath.setAttribute('d', `M 150 120 Q ${150 + bThickness} ${bMidY} ${attachX} ${attachY} Q ${150 + 5} ${bMidY} 150 120`);
+
+        // 肱三頭肌 (外側 - 紅色)
+        // 強化收縮與舒張的厚度對比：伸直時極厚(45)，彎曲時極薄(5)
+        const tThickness = 5 + t * 40;
+        const tMidY = 175 + t * 15;
+        const tAttachX = 150 + Math.cos(rad) * (-15); // 附著在肘後方
+        const tAttachY = 250 + Math.sin(rad) * (-15);
+
+        tricepsPath.setAttribute('d', `M 150 110 Q ${150 - tThickness} ${tMidY} ${tAttachX} ${tAttachY} Q ${150 - 5} ${tMidY} 150 110`);
+
+        // 3. 更新文字狀態與視覺強調
+        if (jointAngle <= 110) {
+            bicepsStatus.innerText = '收縮 (明顯變短、變厚)';
+            bicepsStatus.className = 'text-green-700 font-bold bg-green-100 px-2 py-0.5 rounded';
+            tricepsStatus.innerText = '舒張 (拉長、變扁)';
+            tricepsStatus.className = 'text-red-400 font-normal';
+            actionDesc.innerHTML = '手臂處於 <span class="text-green-600 font-bold">彎曲</span> 狀態';
+        } else {
+            bicepsStatus.innerText = '舒張 (拉長、變扁)';
+            bicepsStatus.className = 'text-green-500 font-normal';
+            tricepsStatus.innerText = '收縮 (明顯變短、變厚)';
+            tricepsStatus.className = 'text-red-700 font-bold bg-red-100 px-2 py-0.5 rounded';
+            actionDesc.innerHTML = '手臂處於 <span class="text-red-600 font-bold">伸直</span> 狀態';
+        }
+    }
+
+    slider.addEventListener('input', (e) => {
+        updateArm(parseInt(e.target.value));
+    });
+
+    // 初始化設定為伸直狀態 (180度)
+    window.onload = () => updateArm(180);
+</script>
+
+</body>
+</html>

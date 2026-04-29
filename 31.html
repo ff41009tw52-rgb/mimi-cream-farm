@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>獨角仙飼養大師 - 網頁儀表板版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 額外的自訂動畫效果 */
+        @keyframes bounce-slow {
+            0%, 100% { transform: translateY(-3%); }
+            50% { transform: translateY(0); }
+        }
+        .animate-bounce-slow {
+            animation: bounce-slow 4s infinite ease-in-out;
+        }
+        
+        /* 捲軸美化 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+
+        /* 測量計玻璃質感 */
+        .glass-tube {
+            background: linear-gradient(to right, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.6) 100%);
+            box-shadow: inset -2px -2px 4px rgba(0,0,0,0.1), inset 2px 2px 4px rgba(255,255,255,0.8);
+        }
+        
+        /* 泥土乾濕材質 */
+        .soil-wet { background: radial-gradient(circle, #5c3a21 0%, #3e2723 100%); }
+        .soil-normal { background: radial-gradient(circle, #8b5a2b 0%, #5d4037 100%); }
+        .soil-dry { background: radial-gradient(circle, #d2b48c 0%, #a1887f 100%); }
+        .wood-bark { background: radial-gradient(circle, #6d4c41 0%, #4e342e 100%); }
+    </style>
+</head>
+<body class="min-h-screen bg-stone-200 p-2 md:p-6 lg:p-10 font-sans flex items-center justify-center">
+
+    <div id="app" class="w-full max-w-5xl">
+        <!-- 遊戲主體由 JS 渲染 -->
+    </div>
+
+    <script>
+        // --- 視覺化 SVG 資源 (參考使用者上傳的真實照片繪製) ---
+        const EGG_SVG = `<svg viewBox="0 0 100 100" class="w-16 h-16 md:w-20 md:h-20 drop-shadow-md overflow-visible"><ellipse cx="50" cy="50" rx="35" ry="45" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="2"/><ellipse cx="40" cy="35" rx="15" ry="20" fill="#ffffff" opacity="0.8" transform="rotate(-30 40 35)"/><circle cx="60" cy="30" r="1" fill="#78350f" opacity="0.5"/><circle cx="75" cy="45" r="1.5" fill="#78350f" opacity="0.4"/><circle cx="40" cy="75" r="1" fill="#78350f" opacity="0.4"/></svg>`;
+
+        const LARVA_SVG = (sizeClass) => `<svg viewBox="0 0 120 120" class="${sizeClass} drop-shadow-xl overflow-visible"><defs><linearGradient id="grubBody" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffffff"/><stop offset="50%" stop-color="#e2e8f0"/><stop offset="100%" stop-color="#94a3b8"/></linearGradient><linearGradient id="grubHead" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ea580c"/><stop offset="100%" stop-color="#9a3412"/></linearGradient></defs><g stroke="#cbd5e1" stroke-width="1.5" fill="url(#grubBody)"><ellipse cx="35" cy="85" rx="18" ry="16" transform="rotate(-20 35 85)"/><ellipse cx="22" cy="70" rx="20" ry="17" transform="rotate(-40 22 70)"/><ellipse cx="15" cy="50" rx="21" ry="18" transform="rotate(-60 15 50)"/><ellipse cx="18" cy="30" rx="22" ry="19" transform="rotate(-80 18 30)"/><ellipse cx="33" cy="15" rx="22" ry="20" transform="rotate(-20 33 15)"/><ellipse cx="53" cy="12" rx="20" ry="20" transform="rotate(10 53 12)"/><ellipse cx="73" cy="20" rx="18" ry="18" transform="rotate(40 73 20)"/><ellipse cx="88" cy="35" rx="16" ry="16" transform="rotate(60 88 35)"/><ellipse cx="95" cy="52" rx="14" ry="14" transform="rotate(80 95 52)"/></g><g fill="#78350f"><circle cx="35" cy="80" r="2"/><circle cx="22" cy="63" r="2"/><circle cx="18" cy="45" r="2"/><circle cx="23" cy="28" r="2"/><circle cx="38" cy="18" r="2"/><circle cx="58" cy="18" r="2"/><circle cx="75" cy="25" r="2"/><circle cx="85" cy="39" r="2"/></g><path d="M 88 56 C 80 75, 105 75, 102 56 Z" fill="url(#grubHead)" stroke="#78350f" stroke-width="1"/><path d="M 89 66 Q 93 72 96 66" fill="none" stroke="#451a03" stroke-width="3" stroke-linecap="round"/></svg>`;
+
+        const PUPA_SVG = `<svg viewBox="0 0 120 120" class="w-32 h-32 md:w-48 md:h-48 drop-shadow-xl overflow-visible"><defs><linearGradient id="pupaBody" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f59e0b"/><stop offset="50%" stop-color="#d97706"/><stop offset="100%" stop-color="#92400e"/></linearGradient><linearGradient id="pupaDetail" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#b45309"/><stop offset="100%" stop-color="#78350f"/></linearGradient></defs><g transform="rotate(25 60 60)"><ellipse cx="60" cy="65" rx="25" ry="40" fill="url(#pupaBody)" stroke="#78350f" stroke-width="2"/><path d="M 37 50 Q 60 58 83 50" fill="none" stroke="#78350f" stroke-width="3" opacity="0.6"/><path d="M 35 65 Q 60 73 85 65" fill="none" stroke="#78350f" stroke-width="3" opacity="0.6"/><path d="M 37 80 Q 60 88 83 80" fill="none" stroke="#78350f" stroke-width="3" opacity="0.6"/><path d="M 43 95 Q 60 100 77 95" fill="none" stroke="#78350f" stroke-width="3" opacity="0.6"/><ellipse cx="45" cy="55" rx="8" ry="25" fill="url(#pupaDetail)" transform="rotate(-15 45 55)"/><ellipse cx="75" cy="55" rx="8" ry="25" fill="url(#pupaDetail)" transform="rotate(15 75 55)"/><ellipse cx="60" cy="25" rx="18" ry="15" fill="url(#pupaBody)" stroke="#78350f" stroke-width="2"/><path d="M 52 15 C 50 -5, 70 -5, 68 15 Z" fill="url(#pupaDetail)" stroke="#78350f" stroke-width="1"/><path d="M 56 0 L 52 -8 M 64 0 L 68 -8" fill="none" stroke="#78350f" stroke-width="3" stroke-linecap="round"/></g></svg>`;
+
+        const ADULT_SVG = `<svg viewBox="0 0 140 140" class="w-48 h-48 md:w-64 md:h-64 drop-shadow-2xl overflow-visible"><defs><linearGradient id="adultShell" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#3f312b"/><stop offset="40%" stop-color="#1f1815"/><stop offset="100%" stop-color="#0a0807"/></linearGradient><linearGradient id="adultHighlight" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="rgba(255,255,255,0.25)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></linearGradient></defs><g transform="translate(10, 10)"><path d="M 45 45 L 15 20 L 10 35 M 15 20 L 20 15" fill="none" stroke="#1a1410" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M 75 45 L 105 20 L 110 35 M 105 20 L 100 15" fill="none" stroke="#1a1410" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M 40 60 L 10 65 L 5 80 M 10 65 L 7 55" fill="none" stroke="#1a1410" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M 80 60 L 110 65 L 115 80 M 110 65 L 113 55" fill="none" stroke="#1a1410" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M 45 80 L 20 105 L 20 120 M 20 105 L 10 105" fill="none" stroke="#1a1410" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M 75 80 L 100 105 L 100 120 M 100 105 L 110 105" fill="none" stroke="#1a1410" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M 60 45 C 85 45, 95 65, 85 100 C 75 118, 65 115, 60 115 C 55 115, 45 118, 35 100 C 25 65, 35 45, 60 45 Z" fill="url(#adultShell)" stroke="#0a0807" stroke-width="2"/><path d="M 52 45 L 60 55 L 68 45 Z" fill="#1f1815" stroke="#0a0807" stroke-width="1"/><line x1="60" y1="55" x2="60" y2="115" stroke="#0a0807" stroke-width="2"/><ellipse cx="45" cy="70" rx="6" ry="20" fill="url(#adultHighlight)" transform="rotate(-15 45 70)"/><path d="M 60 25 C 80 25, 85 35, 80 45 C 70 48, 50 48, 40 45 C 35 35, 40 25, 60 25 Z" fill="url(#adultShell)" stroke="#0a0807" stroke-width="2"/><ellipse cx="48" cy="35" rx="5" ry="8" fill="url(#adultHighlight)" transform="rotate(-20 48 35)"/><ellipse cx="60" cy="22" rx="12" ry="6" fill="#1a1410"/><path d="M 56 22 L 64 22 L 62 5 L 58 5 Z" fill="#1a1410"/><path d="M 58 5 L 45 -10 M 62 5 L 75 -10 M 45 -10 L 48 -15 M 45 -10 L 40 -12 M 75 -10 L 72 -15 M 75 -10 L 80 -12" fill="none" stroke="#1a1410" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M 58 35 L 62 35 L 60 25 Z" fill="#0a0807"/><path d="M 60 25 L 56 20 M 60 25 L 64 20" fill="none" stroke="#0a0807" stroke-width="2" stroke-linecap="round"/></g></svg>`;
+
+        // 定義獨角仙的生長階段與相關資訊 (將 emoji 改為對應的精緻 SVG 圖片)
+        const STAGES = [
+            { id: 0, name: "卵", svg: EGG_SVG, info: "剛產下的白色的卵，大約 4mm，需要保持適當的濕度才能孵化。" },
+            { id: 1, name: "初齡幼蟲", svg: LARVA_SVG("w-16 h-16 md:w-20 md:h-20"), info: "孵化了！幼蟲會吃自己的卵殼，然後開始吃腐植土。" },
+            { id: 2, name: "二齡幼蟲", svg: LARVA_SVG("w-24 h-24 md:w-32 md:h-32"), info: "第一次蛻皮！食量變大了，身體也明顯變粗。" },
+            { id: 3, name: "三齡幼蟲", svg: LARVA_SVG("w-36 h-36 md:w-48 md:h-48"), info: "第二次蛻皮！體型變得非常巨大，為了化蛹會瘋狂進食累積養分。" },
+            { id: 4, name: "蛹", svg: PUPA_SVG, info: "化蛹中！幼蟲不再進食且不會移動。身體正在進行巨大的改變，請勿打擾！" },
+            { id: 5, name: "成蟲", svg: ADULT_SVG, info: "羽化成功！變成帥氣的獨角仙了，現在的主食是樹汁或昆蟲果凍。" }
+        ];
+
+        // 初始狀態
+        const initialState = {
+            stageIdx: 0,
+            health: 100,
+            satiety: 100,
+            growth: 0,
+            moisture: 80,
+            cleanliness: 100,
+            isGameOver: false,
+            isVictory: false,
+            days: 0,
+            diaryEntries: [], // 儲存玩家手動填寫的日記
+            isPaused: false,  // 遊戲是否暫停(讓玩家打字)
+            showDiaryModal: false, // 是否顯示填寫視窗
+            lastDiaryDay: 0   // 紀錄最後一次彈出視窗的天數
+        };
+
+        let gameState = { ...initialState };
+        let logs = ["【系統】遊戲開始！你獲得了一顆獨角仙的卵，請好好照顧牠。"];
+        let gameTimer = null;
+
+        // 固定的便便位置 (避免每秒隨機跳動)
+        const POOP_POSITIONS = [
+            {t: 25, l: 15}, {t: 80, l: 75}, {t: 75, l: 20}, {t: 30, l: 80}, {t: 55, l: 10},
+            {t: 85, l: 45}, {t: 15, l: 55}, {t: 60, l: 85}, {t: 45, l: 30}, {t: 65, l: 15}
+        ];
+
+        // 取得 DOM 元素
+        const appElement = document.getElementById('app');
+
+        // 更新日誌
+        function addLog(msg) {
+            logs.push(msg);
+            if (logs.length > 10) logs.shift(); // 縮減歷史紀錄數量，避免洗版
+            renderLogs();
+        }
+
+        // 渲染日誌區塊
+        function renderLogs() {
+            const logsContainer = document.getElementById('logs-container');
+            if (logsContainer) {
+                logsContainer.innerHTML = logs.map(log => `<div class="mb-1 leading-relaxed">${log}</div>`).join('');
+                logsContainer.scrollTop = logsContainer.scrollHeight;
+            }
+        }
+
+        // 建立直立式測量計 (溫度計/濕度計造型)
+        function createGauge(label, value, fillClass, bulbClass, icon, isAlert) {
+            const safeValue = Math.max(0, Math.min(100, value));
+            const alertAnim = isAlert ? 'animate-pulse' : '';
+            return `
+                <div class="flex flex-col items-center justify-end h-32 w-full">
+                    <span class="text-xs font-bold text-gray-500 mb-1">${Math.floor(safeValue)}%</span>
+                    
+                    <!-- 玻璃管 -->
+                    <div class="w-3.5 h-16 bg-gray-100 rounded-t-full relative border border-gray-300 z-10 flex items-end overflow-hidden glass-tube shadow-inner">
+                        <div class="w-full ${fillClass} transition-all duration-500 ${alertAnim}" style="height: ${safeValue}%;"></div>
+                    </div>
+                    
+                    <!-- 底部圓球 -->
+                    <div class="w-7 h-7 ${bulbClass} rounded-full shadow-md border border-gray-300 -mt-2 z-0 flex items-center justify-center text-white text-[10px] ${alertAnim}">
+                        ${icon}
+                    </div>
+                    
+                    <span class="text-xs font-bold text-gray-700 mt-2">${label}</span>
+                </div>
+            `;
+        }
+
+        // 獲取容器樣式
+        function getContainerClasses() {
+            let classes = "w-full bg-white rounded-3xl shadow-2xl overflow-hidden border-4 flex flex-col ";
+            if (gameState.isGameOver) return classes + "border-red-500 opacity-95";
+            if (gameState.isVictory) return classes + "border-yellow-400";
+            
+            if (gameState.stageIdx === 0) classes += "border-gray-300";
+            else if (gameState.stageIdx <= 3) classes += "border-amber-700";
+            else if (gameState.stageIdx === 4) classes += "border-amber-900";
+            else classes += "border-green-600";
+            
+            return classes;
+        }
+
+        // 渲染整個遊戲介面
+        function render() {
+            const currentStage = STAGES[gameState.stageIdx];
+            const isFinished = gameState.isGameOver || gameState.isVictory;
+
+            // 決定環境背景 (濕度與階段影響)
+            let envClass = "soil-normal";
+            let envText = "";
+            if (gameState.stageIdx === 5) {
+                envClass = "wood-bark"; // 成蟲在樹幹上
+            } else {
+                if (gameState.moisture < 30) {
+                    envClass = "soil-dry";
+                    envText = "<div class='absolute top-4 left-4 text-red-800 bg-white/80 px-3 py-1 rounded text-sm font-bold shadow-md z-20'>⚠️ 泥土太乾了，快點保濕！</div>";
+                } else if (gameState.moisture > 70) {
+                    envClass = "soil-wet";
+                }
+            }
+
+            // 產生便便圖示 (髒亂度視覺化)
+            let dirtLevel = Math.floor((100 - gameState.cleanliness) / 10);
+            let dirtHtml = "";
+            for (let i = 0; i < dirtLevel && i < POOP_POSITIONS.length; i++) {
+                dirtHtml += `<div class="absolute text-2xl md:text-3xl transform transition-all z-0" style="top: ${POOP_POSITIONS[i].t}%; left: ${POOP_POSITIONS[i].l}%; filter: drop-shadow(0 4px 3px rgba(0,0,0,0.4));">💩</div>`;
+            }
+
+            let html = `
+                <div class="${getContainerClasses()}" id="game-container">
+                    
+                    <!-- 標題區 (全寬) -->
+                    <div class="bg-amber-800 text-white p-4 md:p-5 text-center relative z-20 shadow-md flex justify-between items-center">
+                        <div class="text-left">
+                            <h1 class="text-2xl md:text-3xl font-black tracking-wider drop-shadow-md">獨角仙飼養大師</h1>
+                            <p class="text-amber-200 text-sm mt-1 hidden md:block">生態觀察網頁儀表板 Dashboard</p>
+                        </div>
+                        <div class="text-lg md:text-xl font-bold bg-amber-950 px-4 py-2 rounded-xl shadow-inner border border-amber-900/50">
+                            Day ${gameState.days}
+                        </div>
+                    </div>
+
+                    <!-- 網頁內容區塊 (左右分欄) -->
+                    <div class="flex flex-col md:flex-row flex-grow">
+                        
+                        <!-- 左側：生態展示區 (佔較大寬度) -->
+                        <div class="md:w-[60%] lg:w-[65%] flex flex-col border-b md:border-b-0 md:border-r border-gray-300 relative bg-gray-100">
+                            
+                            <!-- 視覺展示區 (飼養箱內部) -->
+                            <div class="min-h-[250px] md:min-h-[350px] relative flex flex-col items-center justify-center overflow-hidden ${envClass} transition-colors duration-1000 shadow-inner">
+                                ${envText}
+                                
+                                <!-- 髒亂便便層 -->
+                                ${dirtHtml}
+                                
+                                <!-- 獨角仙本體 (已套用全新的擬真 SVG 圖片) -->
+                                <div class="relative z-10 transition-all duration-500 transform ${gameState.isGameOver ? 'rotate-180 grayscale' : 'animate-bounce-slow hover:scale-105'} flex justify-center items-center">
+                                    ${currentStage.svg}
+                                </div>
+                                
+                                <div class="absolute bottom-8 bg-black/60 backdrop-blur-md px-6 py-2 rounded-full text-white text-lg font-bold shadow-xl z-10 border border-white/20">
+                                    ${currentStage.name}
+                                </div>
+                            </div>
+
+                            <!-- 發育進度條 (放置在畫面下方) -->
+                            <div class="p-5 bg-white z-20 shadow-sm border-t border-gray-200">
+                                ${(gameState.stageIdx < 5) ? `
+                                    <div class="flex justify-between text-sm md:text-base font-bold text-gray-700 mb-2">
+                                        <span>⭐ 成長至下一階段</span>
+                                        <span class="text-purple-600">${Math.floor(gameState.growth)}%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-4 shadow-inner">
+                                        <div class="bg-gradient-to-r from-purple-400 to-purple-600 h-4 rounded-full transition-all duration-300 ease-in-out relative overflow-hidden" style="width: ${Math.max(0, Math.min(100, gameState.growth))}%">
+                                            <div class="absolute top-0 left-0 w-full h-full bg-white/20 animate-pulse"></div>
+                                        </div>
+                                    </div>
+                                ` : `
+                                    <div class="flex justify-center items-center py-1">
+                                        <span class="text-green-600 font-bold text-lg flex items-center gap-2">✨ 已達到最終成蟲階段！ ✨</span>
+                                    </div>
+                                `}
+                            </div>
+
+                            <!-- 我的觀察日記 (手動填寫的紀錄) -->
+                            <div class="p-4 md:p-5 bg-stone-50 border-t border-gray-200 flex-grow flex flex-col max-h-[250px] md:max-h-[300px]">
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="font-bold text-amber-900 flex items-center gap-2"><span class="text-xl">📝</span> 我的觀察日記</span>
+                                    <span class="text-xs bg-amber-200 text-amber-800 px-2 py-1 rounded font-bold shadow-sm">每 10 天紀錄一次</span>
+                                </div>
+                                <div class="flex-grow overflow-y-auto space-y-2 pr-2">
+                                    ${gameState.diaryEntries.length === 0 ? 
+                                        `<div class="text-gray-400 text-sm text-center py-6 border-2 border-dashed border-gray-200 rounded-xl">目前還沒有紀錄，等待遊戲自動暫停時填寫吧！</div>` : 
+                                        gameState.diaryEntries.map(entry => `
+                                            <div class="bg-white p-3 rounded-xl border border-amber-200 shadow-sm relative">
+                                                <div class="flex justify-between items-end mb-1 border-b border-amber-100 pb-1">
+                                                    <span class="font-bold text-amber-800 text-sm">Day ${entry.day}</span>
+                                                    <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">${entry.stageName}</span>
+                                                </div>
+                                                <div class="text-sm text-gray-700 whitespace-pre-wrap mt-1">${entry.text}</div>
+                                            </div>
+                                        `).join('')
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 右側：儀表板與操作區 -->
+                        <div class="md:w-[40%] lg:w-[35%] flex flex-col bg-stone-50 p-4 md:p-6 shadow-inner z-10">
+                            
+                            <!-- 知識庫提示 -->
+                            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-5 text-sm text-blue-900 rounded-r shadow-sm font-medium leading-relaxed">
+                                <span class="font-bold text-blue-700 flex items-center gap-1 mb-1">📘 系統知識庫</span>
+                                ${currentStage.info}
+                            </div>
+
+                            <!-- 儀表板區塊 (溫度計/濕度計 2x2 或 4排1列) -->
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 mb-6 grid grid-cols-4 gap-2 justify-items-center">
+                                ${createGauge("健康", gameState.health, "bg-red-500", "bg-red-600", "❤️", gameState.health <= 30)}
+                                
+                                ${(gameState.stageIdx !== 0 && gameState.stageIdx !== 4) ? 
+                                    createGauge("飽食", gameState.satiety, "bg-orange-400", "bg-orange-500", "🍗", gameState.satiety <= 20) : 
+                                    createGauge("飽食", 0, "bg-gray-300", "bg-gray-400", "💤", false)}
+                                
+                                ${createGauge("濕度", gameState.moisture, "bg-blue-400", "bg-blue-500", "💧", gameState.moisture <= 30)}
+                                ${createGauge("環境", gameState.cleanliness, "bg-green-400", "bg-green-500", "✨", gameState.cleanliness <= 30)}
+                            </div>
+
+                            <!-- 控制面板 (大按鈕) -->
+                            <div class="grid grid-cols-2 gap-3 mb-6">
+                                <button onclick="handleAction('feed_humus')" ${isFinished ? 'disabled' : ''} class="bg-amber-700 hover:bg-amber-800 text-white font-bold py-4 px-2 rounded-xl shadow-md transition-all active:scale-95 hover:-translate-y-1 disabled:opacity-50 disabled:hover:translate-y-0 flex flex-col items-center justify-center gap-1 border-b-4 border-amber-900">
+                                    <span class="text-2xl">🪵</span>
+                                    <span class="text-sm">餵腐植土</span>
+                                </button>
+                                <button onclick="handleAction('feed_jelly')" ${isFinished ? 'disabled' : ''} class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-4 px-2 rounded-xl shadow-md transition-all active:scale-95 hover:-translate-y-1 disabled:opacity-50 disabled:hover:translate-y-0 flex flex-col items-center justify-center gap-1 border-b-4 border-yellow-700">
+                                    <span class="text-2xl">🍮</span>
+                                    <span class="text-sm">餵果凍</span>
+                                </button>
+                                <button onclick="handleAction('spray_water')" ${isFinished ? 'disabled' : ''} class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-2 rounded-xl shadow-md transition-all active:scale-95 hover:-translate-y-1 disabled:opacity-50 disabled:hover:translate-y-0 flex flex-col items-center justify-center gap-1 border-b-4 border-blue-700">
+                                    <span class="text-2xl">💦</span>
+                                    <span class="text-sm">噴水保濕</span>
+                                </button>
+                                <button onclick="handleAction('clean')" ${isFinished ? 'disabled' : ''} class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-2 rounded-xl shadow-md transition-all active:scale-95 hover:-translate-y-1 disabled:opacity-50 disabled:hover:translate-y-0 flex flex-col items-center justify-center gap-1 border-b-4 border-emerald-700">
+                                    <span class="text-2xl">🧹</span>
+                                    <span class="text-sm">清理環境</span>
+                                </button>
+                            </div>
+
+                            <!-- 訊息面板 (限制高度避免撐爆畫面) -->
+                            <div class="flex flex-col h-[130px] shrink-0">
+                                <span class="text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">System Logs</span>
+                                <div id="logs-container" class="bg-gray-900 text-green-400 p-3 rounded-xl font-mono text-xs flex-grow overflow-y-auto shadow-inner border-2 border-gray-800">
+                                    <!-- 日誌內容透過 JS 塞入 -->
+                                </div>
+                            </div>
+
+                            <!-- 結束/過關畫面 -->
+                            ${isFinished ? `
+                                <div class="mt-4 text-center bg-white p-5 rounded-2xl shadow-lg border-2 ${gameState.isVictory ? 'border-yellow-400' : 'border-red-400'} animate-fade-in">
+                                    ${gameState.isVictory ? `
+                                        <div class="text-xl font-black text-yellow-600 mb-4 animate-bounce">
+                                            🏆 培育成功！恭喜！
+                                        </div>
+                                    ` : `
+                                        <div class="text-xl font-black text-red-600 mb-4">
+                                            🥀 培育失敗，請再試一次。
+                                        </div>
+                                    `}
+                                    <button onclick="restartGame()" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-transform active:scale-95 w-full flex items-center justify-center gap-2">
+                                        <span>🔄</span> 重新開始飼養
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 觀察日記彈出視窗 (Modal) -->
+                ${gameState.showDiaryModal ? `
+                    <div class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+                        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden transition-all transform scale-100">
+                            <div class="bg-amber-800 text-white p-4 text-center font-bold text-xl">
+                                📝 填寫觀察日記
+                            </div>
+                            <div class="p-6">
+                                <p class="text-gray-700 text-sm mb-4 font-bold text-center">經過了 10 天，觀察箱裡有什麼變化呢？<br>請記錄下來吧！（遊戲已自動暫停）</p>
+                                <textarea id="diary-input" class="w-full h-32 p-3 border-2 border-amber-200 rounded-xl focus:border-amber-500 focus:outline-none resize-none mb-4 shadow-inner" placeholder="例如：幼蟲變得更肥了，而且大便變多了！食量好像也變大了。"></textarea>
+                                <button onclick="saveDiary()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-transform active:scale-95 text-lg flex items-center justify-center gap-2">
+                                    💾 儲存並繼續遊戲
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+
+            appElement.innerHTML = html;
+            renderLogs(); // 確保每次渲染後日誌也是最新的
+        }
+
+        // 儲存觀察日記
+        window.saveDiary = function() {
+            const input = document.getElementById('diary-input');
+            const text = input ? input.value.trim() : '';
+            
+            if (text) {
+                // 將最新的紀錄加到最前面
+                gameState.diaryEntries.unshift({ 
+                    day: gameState.days, 
+                    text: text, 
+                    stageName: STAGES[gameState.stageIdx].name 
+                });
+                addLog(`📝 完成第 ${gameState.days} 天的觀察日記。`);
+            } else {
+                addLog(`⏭️ 跳過第 ${gameState.days} 天的觀察日記。`);
+            }
+            
+            gameState.showDiaryModal = false;
+            gameState.isPaused = false; // 恢復遊戲計時
+            render(); // 重新渲染以隱藏 Modal 並顯示新紀錄
+        };
+
+        // 玩家動作處理
+        window.handleAction = function(actionType) {
+            if (gameState.isGameOver || gameState.isVictory) return;
+
+            let msg = "";
+
+            switch (actionType) {
+                case 'feed_humus':
+                    if (gameState.stageIdx >= 1 && gameState.stageIdx <= 3) {
+                        gameState.satiety = Math.min(100, gameState.satiety + 40);
+                        gameState.cleanliness = Math.max(0, gameState.cleanliness - 10);
+                        // 移除常規動作記錄，避免撐爆畫面
+                    } else if (gameState.stageIdx === 0 || gameState.stageIdx === 4) {
+                        msg = "❌ 現在是卵或蛹的階段，不需要吃東西喔！";
+                    } else {
+                        msg = "❌ 成蟲不吃腐植土，牠們喜歡甜甜的汁液！";
+                        gameState.health -= 5;
+                    }
+                    break;
+                case 'feed_jelly':
+                    if (gameState.stageIdx === 5) {
+                        gameState.satiety = Math.min(100, gameState.satiety + 50);
+                        // 移除常規動作記錄
+                    } else if (gameState.stageIdx === 0 || gameState.stageIdx === 4) {
+                        msg = "❌ 現在的階段不需要進食喔！";
+                    } else {
+                        msg = "❌ 幼蟲消化不了果凍，請餵食腐植土！";
+                        gameState.health -= 5;
+                    }
+                    break;
+                case 'spray_water':
+                    gameState.moisture = Math.min(100, gameState.moisture + 40);
+                    // 移除常規動作記錄
+                    break;
+                case 'clean':
+                    gameState.cleanliness = 100;
+                    if (gameState.stageIdx === 4) {
+                        msg = "⚠️ 蛹期盡量不要移動飼養箱，但你還是小心地清理了周圍。";
+                        gameState.health -= 5;
+                    } else {
+                        // 移除常規動作記錄
+                    }
+                    break;
+            }
+            
+            if(msg) addLog(msg);
+            render();
+        };
+
+        // 重新開始遊戲
+        window.restartGame = function() {
+            gameState = { ...initialState };
+            logs = ["【系統】重新開始遊戲！你獲得了一顆獨角仙的卵。"];
+            startGameLoop();
+            render();
+        };
+
+        // 遊戲主循環
+        function startGameLoop() {
+            if (gameTimer) clearInterval(gameTimer);
+
+            gameTimer = setInterval(() => {
+                if (gameState.isGameOver || gameState.isVictory) {
+                    clearInterval(gameTimer);
+                    return;
+                }
+
+                // 如果遊戲暫停 (例如正在寫日記)，不更新數值也不重新渲染畫面
+                if (gameState.isPaused) {
+                    return;
+                }
+
+                let { stageIdx, health, satiety, growth, moisture, cleanliness, days } = gameState;
+                let logsToAdd = [];
+
+                // 1. 環境數值自然下降
+                moisture = Math.max(0, moisture - 2);
+                
+                if (stageIdx !== 0 && stageIdx !== 4) {
+                    satiety = Math.max(0, satiety - 4);
+                    cleanliness = Math.max(0, cleanliness - 1.5);
+                }
+
+                // 2. 判斷健康狀態
+                if (moisture < 20) health -= 3;
+                if (cleanliness < 20) health -= 3;
+                if (satiety === 0 && stageIdx !== 0 && stageIdx !== 4) health -= 5;
+
+                // 恢復機制
+                if (satiety > 60 && moisture > 40 && cleanliness > 50 && health < 100) {
+                    health = Math.min(100, health + 2);
+                }
+
+                // 3. 成長機制
+                if (stageIdx === 0) {
+                    if (moisture >= 30) growth += 4;
+                } else if (stageIdx === 4) {
+                    if (moisture >= 20) growth += 5;
+                } else if (stageIdx < 5) {
+                    if (satiety > 50) growth += 3.5;
+                }
+
+                // 前蛹期提示
+                if (stageIdx === 3 && growth >= 90 && growth < 94) {
+                    if (growth - 3.5 < 90) logsToAdd.push("【觀察】三齡幼蟲進入「前蛹期」了！牠停止進食，準備化蛹。");
+                }
+
+                // 4. 階段升級
+                if (growth >= 100 && stageIdx < 5) {
+                    stageIdx += 1;
+                    growth = 0;
+                    health = 100;
+                    
+                    if (stageIdx === 1) logsToAdd.push("✨ 恭喜！卵孵化成「初齡幼蟲」了！");
+                    else if (stageIdx === 2) logsToAdd.push("✨ 幼蟲蛻皮了！升級為「二齡幼蟲」。");
+                    else if (stageIdx === 3) logsToAdd.push("✨ 幼蟲再次蛻皮！升級為巨大的「三齡幼蟲」。");
+                    else if (stageIdx === 4) logsToAdd.push("✨ 蛻皮化蛹了！進入「蛹」的階段，即將產生完全變態的奇妙變化。");
+                    else if (stageIdx === 5) {
+                        logsToAdd.push("🎉 破蛹而出！羽化成功！變成帥氣的「獨角仙成蟲」了！");
+                        gameState.isVictory = true;
+                    }
+                }
+
+                // 5. 死亡判定
+                if (health <= 0) {
+                    health = 0;
+                    gameState.isGameOver = true;
+                    logsToAdd.push("💀 獨角仙死掉了... 請注意環境與餵食！");
+                }
+
+                // 更新狀態
+                gameState.stageIdx = stageIdx;
+                gameState.health = health;
+                gameState.satiety = satiety;
+                gameState.growth = growth;
+                gameState.moisture = moisture;
+                gameState.cleanliness = cleanliness;
+                gameState.days = days + 1;
+
+                // 檢查是否需要彈出觀察日記 (每 10 天，且當天還沒彈出過)
+                if (gameState.days > 0 && gameState.days % 10 === 0 && gameState.days !== gameState.lastDiaryDay) {
+                    gameState.isPaused = true;
+                    gameState.showDiaryModal = true;
+                    gameState.lastDiaryDay = gameState.days;
+                }
+
+                if (logsToAdd.length > 0) {
+                    logsToAdd.forEach(msg => {
+                        logs.push(msg);
+                    });
+                    while(logs.length > 25) logs.shift();
+                }
+
+                render(); // 每秒重新渲染畫面
+            }, 1000);
+        }
+
+        // 初始化啟動
+        render();
+        startGameLoop();
+
+    </script>
+</body>
+</html>

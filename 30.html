@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>槓桿原理實驗</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 隱藏未選擇的施力點砝碼 */
+        .weight-hidden { display: none !important; }
+    </style>
+</head>
+<body class="min-h-screen bg-[#f4f7f6] p-4 font-sans text-gray-800">
+    <div class="max-w-4xl mx-auto space-y-6">
+        
+        <!-- 實驗切換頁籤 -->
+        <div class="flex space-x-2 bg-gray-200 p-1.5 rounded-xl w-fit mx-auto shadow-inner">
+            <button id="tab-A" onclick="switchMode('A')" class="px-8 py-2 rounded-lg font-bold bg-white shadow-sm text-green-700 transition-all">實驗 A (改變施力臂)</button>
+            <button id="tab-B" onclick="switchMode('B')" class="px-8 py-2 rounded-lg font-bold text-gray-500 hover:bg-gray-300 transition-all">實驗 B (改變抗力臂)</button>
+        </div>
+
+        <!-- 標題區 -->
+        <div class="bg-white rounded-2xl shadow-sm p-6 border-l-8 border-green-600 flex items-center space-x-4 transition-all" id="header-card">
+            <div class="bg-green-600 text-white p-3 rounded-full flex flex-col items-center justify-center w-16 h-16 shrink-0" id="header-icon">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                <span class="text-xs font-bold mt-1">實驗</span>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-2" id="exp-title">
+                    <span class="bg-[#fcdab7] text-[#8e4a23] px-3 py-1 rounded-full text-lg">A.小晴這一組的實驗</span> 
+                    固定抗力臂與抗力
+                </h1>
+                <p class="text-gray-600 mt-2" id="exp-desc">
+                    目標：在支點左邊固定抗力（20克重）與抗力臂（第3格），改變右邊的施力點位置，找出能讓槓桿平衡的施力大小。
+                </p>
+            </div>
+        </div>
+
+        <!-- 互動實驗區 -->
+        <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
+            
+            <!-- 槓桿視覺化 -->
+            <div class="relative h-[340px] bg-blue-50/50 rounded-xl mb-6 flex flex-col items-center justify-end pb-8 overflow-hidden border border-blue-100">
+                
+                <!-- 支架與底座 -->
+                <div class="w-32 h-4 bg-blue-600 rounded-t-md relative z-10"></div>
+                <div class="w-4 h-32 bg-gray-200 relative z-10 border-x border-gray-300"></div>
+                
+                <!-- 支點 (黃色方塊) -->
+                <div class="w-8 h-10 bg-yellow-400 absolute bottom-40 z-20 rounded-sm border border-yellow-500 shadow-sm flex items-center justify-center">
+                    <div class="w-2 h-2 rounded-full bg-gray-800"></div>
+                </div>
+
+                <!-- 槓桿本體 -->
+                <div id="lever-bar" class="absolute bottom-44 w-[600px] h-6 bg-[#e65c40] rounded-sm shadow-md flex items-center justify-between px-2 z-10 transition-transform duration-500 ease-out origin-center">
+                    <!-- 左側刻度 (抗力臂) -->
+                    <div class="flex w-1/2 justify-between flex-row-reverse px-4" id="left-scale-container">
+                        <!-- 由 JS 填充 -->
+                    </div>
+
+                    <!-- 中間分隔線 -->
+                    <div class="w-1 h-6 bg-yellow-500/50"></div>
+
+                    <!-- 右側刻度 (施力臂) -->
+                    <div class="flex w-1/2 justify-between px-4" id="right-scale-container">
+                        <!-- 由 JS 填充 -->
+                    </div>
+                </div>
+
+                <!-- 狀態提示 -->
+                <div class="absolute top-4 left-1/2 -translate-x-1/2 flex gap-2 z-30">
+                    <div id="status-badge" class="px-4 py-2 rounded-full font-bold shadow-sm transition-colors border whitespace-nowrap">
+                        <!-- 狀態文字由 JS 更新 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 操作面板 -->
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-gray-50 p-5 rounded-xl border border-gray-200">
+                    <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2" id="step-1-title">
+                        <span class="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">1</span> 
+                        選擇施力點 (右側位置)
+                    </h3>
+                    <div class="flex gap-2 justify-center" id="position-buttons">
+                        <!-- 按鈕由 JS 產生 -->
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 p-5 rounded-xl border border-gray-200">
+                    <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2" id="weight-display-title">
+                        <span class="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">2</span>
+                        調整施力砝碼 (目前: 0 克重)
+                    </h3>
+                    <div class="flex flex-wrap gap-2 justify-center mb-4">
+                        <button onclick="adjustWeight(10)" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded shadow-sm font-medium">+10g</button>
+                        <button onclick="adjustWeight(5)" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded shadow-sm font-medium">+5g</button>
+                        <button onclick="adjustWeight(1)" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded shadow-sm font-medium">+1g</button>
+                        <button onclick="adjustWeight(-10)" class="px-3 py-1 bg-white border border-gray-300 hover:bg-gray-100 text-gray-600 rounded shadow-sm font-medium">-10g</button>
+                        <button onclick="adjustWeight(-1)" class="px-3 py-1 bg-white border border-gray-300 hover:bg-gray-100 text-gray-600 rounded shadow-sm font-medium">-1g</button>
+                    </div>
+                    
+                    <button id="record-btn" onclick="handleRecord()" class="w-full py-3 rounded-lg font-bold shadow-sm transition-all flex justify-center items-center gap-2 bg-gray-300 text-gray-500 cursor-not-allowed">
+                        請先調整至水平平衡
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 結果展示區 (表格與圖表) -->
+        <div class="grid md:grid-cols-2 gap-6">
+            
+            <!-- 表格 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+                <div class="bg-green-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center" id="table-header-bg">
+                    <h3 class="font-bold text-green-800" id="table-title">實驗紀錄表</h3>
+                    <button id="reset-btn" onclick="handleReset()" class="text-sm text-red-500 hover:text-red-700 font-medium hidden">清除所有紀錄</button>
+                </div>
+                
+                <!-- 變因拖曳區 -->
+                <div class="p-4 border-b border-gray-100 bg-gray-50/50">
+                    <div class="text-sm text-gray-600 mb-2 font-bold flex justify-between items-center">
+                        <span>🧪 請將變因標籤拖曳到對應的欄位上方：</span>
+                        <span id="var-feedback" class="text-xs px-2 py-1 rounded hidden"></span>
+                    </div>
+                    <div class="flex gap-2 min-h-[40px] p-2 bg-white rounded border border-dashed border-gray-300 transition-colors" id="variable-tags-container" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+                        <div draggable="true" class="cursor-grab active:cursor-grabbing bg-gray-100 border border-gray-400 text-gray-700 hover:bg-gray-200 px-3 py-1 rounded-full text-xs font-bold shadow-sm transition-all" data-var="control" ondragstart="drag(event)" id="tag-ctrl-1">控制變因</div>
+                        <div draggable="true" class="cursor-grab active:cursor-grabbing bg-gray-100 border border-gray-400 text-gray-700 hover:bg-gray-200 px-3 py-1 rounded-full text-xs font-bold shadow-sm transition-all" data-var="control" ondragstart="drag(event)" id="tag-ctrl-2">控制變因</div>
+                        <div draggable="true" class="cursor-grab active:cursor-grabbing bg-red-100 border border-red-400 text-red-800 hover:bg-red-200 px-3 py-1 rounded-full text-xs font-bold shadow-sm transition-all" data-var="manipulated" ondragstart="drag(event)" id="tag-mani">操縱變因</div>
+                        <div draggable="true" class="cursor-grab active:cursor-grabbing bg-blue-100 border border-blue-400 text-blue-800 hover:bg-blue-200 px-3 py-1 rounded-full text-xs font-bold shadow-sm transition-all" data-var="responding" ondragstart="drag(event)" id="tag-resp">應變變因</div>
+                    </div>
+                </div>
+
+                <div class="p-4 flex-1">
+                    <table class="w-full text-center border-collapse">
+                        <thead>
+                            <tr class="bg-[#e2f1e6] text-[#367c4b]" id="table-head-row">
+                                <th class="border border-white p-2 w-1/4 align-top">
+                                    <div id="col-leftPos" class="var-drop-zone min-h-[32px] mb-2 bg-white/60 rounded border-2 border-dashed border-gray-400 flex items-center justify-center text-xs text-gray-500 transition-colors" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">放置變因</div>
+                                    抗力臂長度<br/><span class="text-xs font-normal">(格)</span>
+                                </th>
+                                <th class="border border-white p-2 w-1/4 align-top">
+                                    <div id="col-leftWeight" class="var-drop-zone min-h-[32px] mb-2 bg-white/60 rounded border-2 border-dashed border-gray-400 flex items-center justify-center text-xs text-gray-500 transition-colors" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">放置變因</div>
+                                    抗力點重量<br/><span class="text-xs font-normal">(克重)</span>
+                                </th>
+                                <th class="border border-white p-2 w-1/4 align-top">
+                                    <div id="col-rightPos" class="var-drop-zone min-h-[32px] mb-2 bg-white/60 rounded border-2 border-dashed border-gray-400 flex items-center justify-center text-xs text-gray-500 transition-colors" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">放置變因</div>
+                                    施力臂長度<br/><span class="text-xs font-normal">(格)</span>
+                                </th>
+                                <th class="border border-white p-2 w-1/4 align-top">
+                                    <div id="col-rightWeight" class="var-drop-zone min-h-[32px] mb-2 bg-white/60 rounded border-2 border-dashed border-gray-400 flex items-center justify-center text-xs text-gray-500 transition-colors" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">放置變因</div>
+                                    施力點重量<br/><span class="text-xs font-normal">(克重)</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="record-table-body">
+                            <!-- 表格內容由 JS 產生 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 折線圖 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col">
+                <div class="bg-blue-50 px-4 py-3 border-b border-gray-200 flex items-center gap-2" id="chart-header-bg">
+                    <h3 class="font-bold text-blue-800" id="chart-title">施力點重量與施力臂長度關係圖</h3>
+                    <span class="bg-blue-100 text-blue-600 text-xs px-2 py-0.5 rounded border border-blue-200 font-bold" id="chart-badge">觀念引導</span>
+                </div>
+                <div class="p-4 flex-1 flex items-center justify-center relative bg-[#f8fbfa]">
+                    
+                    <svg width="400" height="300" class="overflow-visible bg-blue-50/20 border border-blue-100 shadow-inner rounded-sm">
+                        
+                        <!-- 網格背景 -->
+                        <defs>
+                            <pattern id="grid" width="5.5" height="3.428" patternUnits="userSpaceOnUse">
+                                <rect width="5.5" height="3.428" fill="none" stroke="#bfe2e8" stroke-width="0.5" />
+                            </pattern>
+                        </defs>
+                        <rect x="50" y="20" width="330" height="240" fill="url(#grid)" />
+
+                        <!-- X 軸與 Y 軸主線 -->
+                        <line x1="50" y1="260" x2="380" y2="260" stroke="#333" stroke-width="1" />
+                        <line x1="50" y1="20" x2="50" y2="260" stroke="#333" stroke-width="1" />
+
+                        <!-- 靜態刻度與標籤 -->
+                        <g id="chart-axes"></g>
+
+                        <!-- Y 軸標題 -->
+                        <text x="15" y="150" transform="rotate(-90 15 150)" font-size="12" text-anchor="middle" fill="#333" class="font-bold">施力點的重量 (克重)</text>
+                        <!-- X 軸標題 -->
+                        <text x="200" y="295" font-size="12" text-anchor="middle" fill="#333" class="font-bold" id="chart-x-title">施力臂長度 (格)</text>
+
+                        <!-- 動態資料群組 -->
+                        <g id="chart-data"></g>
+                    </svg>
+
+                    <!-- 遮罩：未記錄時顯示 -->
+                    <div id="chart-overlay" class="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center rounded-b-2xl transition-opacity">
+                        <p class="text-gray-500 font-medium">請進行實驗並記錄數據</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 結論區 -->
+        <div id="conclusion-section" class="transition-all duration-700 opacity-50 translate-y-4 grayscale">
+            <!-- 實驗 A 結論 -->
+            <div id="conclusion-A" class="bg-green-50 border-2 border-green-500 rounded-2xl p-6 shadow-sm relative overflow-hidden hidden">
+                <div class="absolute -left-4 -top-4 w-16 h-16 bg-green-200 rounded-full opacity-50"></div>
+                <div class="absolute right-10 -bottom-10 w-24 h-24 bg-green-200 rounded-full opacity-50"></div>
+                
+                <div class="relative z-10 flex flex-col items-center text-center space-y-3">
+                    <div class="bg-green-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-sm mb-2">實驗結論</div>
+                    <h2 class="text-2xl font-bold text-gray-800 tracking-wide">
+                        當抗力臂與抗力固定，<br class="md:hidden"/>施力臂越<span class="text-[#a020f0] font-black text-3xl mx-1">長</span>，施力越<span class="text-[#a020f0] font-black text-3xl mx-1">小</span>。
+                    </h2>
+                    <p class="text-green-800 font-medium mt-2">
+                        這就是槓桿原理中的「省力」情況！當我們的施力點距離支點越遠，我們需要出的力氣就越少。(關係呈反比的折線)
+                    </p>
+                </div>
+            </div>
+
+            <!-- 實驗 B 結論 -->
+            <div id="conclusion-B" class="bg-blue-50 border-2 border-blue-500 rounded-2xl p-6 shadow-sm relative overflow-hidden hidden">
+                <div class="absolute -left-4 -top-4 w-16 h-16 bg-blue-200 rounded-full opacity-50"></div>
+                <div class="absolute right-10 -bottom-10 w-24 h-24 bg-blue-200 rounded-full opacity-50"></div>
+                
+                <div class="relative z-10 flex flex-col items-center text-center space-y-3">
+                    <div class="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-sm mb-2">實驗結論</div>
+                    <h2 class="text-2xl font-bold text-gray-800 tracking-wide">
+                        當施力臂與抗力固定，<br class="md:hidden"/>抗力臂越<span class="text-[#a020f0] font-black text-3xl mx-1">長</span>，施力越<span class="text-[#a020f0] font-black text-3xl mx-1">大</span>。
+                    </h2>
+                    <div class="text-blue-800 font-medium mt-2 text-sm leading-relaxed max-w-2xl text-left">
+                        施力臂與抗力臂的長短，會影響施力大小：<br/>
+                        • <span class="text-[#a020f0] font-bold">施力臂大於抗力臂</span>，施力會比抗力小（<span class="text-green-600 font-bold">省力</span>）<br/>
+                        • <span class="text-[#a020f0] font-bold">施力臂小於抗力臂</span>，施力會比抗力大（<span class="text-red-600 font-bold">費力</span>）<br/>
+                        • <span class="text-[#a020f0] font-bold">抗力臂等於施力臂</span>時，施力與抗力一樣大（<span class="text-gray-600 font-bold">不省力也不費力</span>）
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JavaScript 邏輯 -->
+    <script>
+        // 狀態變數管理：支援雙實驗模式
+        const state = {
+            mode: 'A', // 'A' or 'B'
+            A: {
+                leftPos: 3,        // 固定
+                leftWeight: 20,    // 固定
+                rightPos: 1,       // 變數
+                rightWeight: 0,
+                records: []        // Array of {varPos, weight}
+            },
+            B: {
+                leftPos: 1,        // 變數
+                leftWeight: 10,    // 固定
+                rightPos: 1,       // 固定
+                rightWeight: 0,
+                records: []        // Array of {varPos, weight}
+            }
+        };
+
+        // DOM 元素參考
+        const leverBar = document.getElementById('lever-bar');
+        const statusBadge = document.getElementById('status-badge');
+        const posButtonsContainer = document.getElementById('position-buttons');
+        const weightDisplayTitle = document.getElementById('weight-display-title');
+        const recordBtn = document.getElementById('record-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const tableBody = document.getElementById('record-table-body');
+        const chartDataGroup = document.getElementById('chart-data');
+        const chartOverlay = document.getElementById('chart-overlay');
+        const conclusionSection = document.getElementById('conclusion-section');
+        const leftScaleContainer = document.getElementById('left-scale-container');
+        const rightScaleContainer = document.getElementById('right-scale-container');
+
+        // 切換實驗模式
+        function switchMode(mode) {
+            state.mode = mode;
+            
+            // 更新頁籤樣式
+            const tabA = document.getElementById('tab-A');
+            const tabB = document.getElementById('tab-B');
+            if (mode === 'A') {
+                tabA.className = "px-8 py-2 rounded-lg font-bold bg-white shadow-sm text-green-700 transition-all";
+                tabB.className = "px-8 py-2 rounded-lg font-bold text-gray-500 hover:bg-gray-300 transition-all";
+            } else {
+                tabB.className = "px-8 py-2 rounded-lg font-bold bg-white shadow-sm text-blue-700 transition-all";
+                tabA.className = "px-8 py-2 rounded-lg font-bold text-gray-500 hover:bg-gray-300 transition-all";
+            }
+
+            resetVariables(); // 新增：切換模式時重置變因拖曳
+            updateStaticTexts();
+            updateUI();
+        }
+
+        // 更新靜態文字內容 (標題、描述、表格樣式等)
+        function updateStaticTexts() {
+            const isA = state.mode === 'A';
+            
+            // 主題顏色與文字
+            document.getElementById('header-card').className = `bg-white rounded-2xl shadow-sm p-6 border-l-8 ${isA ? 'border-green-600' : 'border-blue-600'} flex items-center space-x-4 transition-all`;
+            document.getElementById('header-icon').className = `${isA ? 'bg-green-600' : 'bg-blue-600'} text-white p-3 rounded-full flex flex-col items-center justify-center w-16 h-16 shrink-0`;
+            
+            document.getElementById('exp-title').innerHTML = isA 
+                ? `<span class="bg-[#fcdab7] text-[#8e4a23] px-3 py-1 rounded-full text-lg">A.小晴這一組的實驗</span> 固定抗力臂與抗力`
+                : `<span class="bg-[#d2e5fb] text-[#204a8e] px-3 py-1 rounded-full text-lg">B.小恩這一組的實驗</span> 固定施力臂與抗力`;
+            
+            document.getElementById('exp-desc').innerHTML = isA
+                ? `目標：在支點左邊固定抗力（20克重）與抗力臂（第3格），改變右邊的施力點位置，找出能讓槓桿平衡的施力大小。`
+                : `目標：在支點右邊固定施力臂（第1格），改變左邊的抗力點位置（固定10克重），找出能讓槓桿平衡的施力大小。`;
+
+            document.getElementById('step-1-title').innerHTML = isA
+                ? `<span class="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">1</span> 選擇施力點 (右側位置)`
+                : `<span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">1</span> 選擇抗力點 (左側位置)`;
+
+            // 表格與圖表顏色
+            document.getElementById('table-header-bg').className = isA ? "bg-green-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center" : "bg-blue-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center";
+            document.getElementById('table-title').className = isA ? "font-bold text-green-800" : "font-bold text-blue-800";
+            document.getElementById('table-head-row').className = isA ? "bg-[#e2f1e6] text-[#367c4b]" : "bg-[#e2ebf1] text-[#2c5282]";
+            
+            document.getElementById('chart-header-bg').className = isA ? "bg-blue-50 px-4 py-3 border-b border-gray-200 flex items-center gap-2" : "bg-indigo-50 px-4 py-3 border-b border-gray-200 flex items-center gap-2";
+            document.getElementById('chart-title').className = isA ? "font-bold text-blue-800" : "font-bold text-indigo-800";
+            document.getElementById('chart-badge').className = isA ? "bg-blue-100 text-blue-600 text-xs px-2 py-0.5 rounded border border-blue-200 font-bold" : "bg-indigo-100 text-indigo-600 text-xs px-2 py-0.5 rounded border border-indigo-200 font-bold";
+            
+            // 圖表 X 軸標題
+            document.getElementById('chart-x-title').innerText = isA ? "施力臂長度 (格)" : "抗力臂長度 (格)";
+        }
+
+        // 初始化圖表靜態刻度
+        function initChartAxes() {
+            const axesGroup = document.getElementById('chart-axes');
+            let axesHTML = '';
+            const getX = (pos) => 50 + (pos / 6) * 330;
+            const getY = (weight) => 20 + 240 - (weight / 70) * 240;
+
+            // Y 軸刻度
+            [0, 10, 20, 30, 40, 50, 60, 70].forEach(val => {
+                const y = getY(val);
+                axesHTML += `
+                    <line x1="46" y1="${y}" x2="380" y2="${y}" stroke="${val === 0 ? 'none' : '#99c6d3'}" stroke-width="1" />
+                    <text x="40" y="${y + 4}" font-size="10" text-anchor="end" fill="#555">${val}</text>
+                `;
+            });
+            // X 軸刻度
+            [1, 2, 3, 4, 5, 6].forEach(val => {
+                const x = getX(val);
+                axesHTML += `
+                    <line x1="${x}" y1="20" x2="${x}" y2="264" stroke="#99c6d3" stroke-width="1" />
+                    <text x="${x}" y="276" font-size="10" text-anchor="middle" fill="#555">${val}</text>
+                `;
+            });
+            axesGroup.innerHTML = axesHTML;
+        }
+
+        // 核心更新 UI 邏輯
+        function updateUI() {
+            const cur = state[state.mode];
+            const isA = state.mode === 'A';
+            const leftTorque = cur.leftPos * cur.leftWeight;
+            const rightTorque = cur.rightPos * cur.rightWeight;
+            const netTorque = rightTorque - leftTorque;
+            
+            // 計算角度
+            const isBalanced = netTorque === 0;
+            const angle = isBalanced ? 0 : Math.max(-20, Math.min(20, netTorque * 0.5));
+            const activeVarPos = isA ? cur.rightPos : cur.leftPos;
+            const isRecorded = cur.records.some(r => r.varPos === activeVarPos);
+
+            // 1. 動態渲染槓桿與砝碼
+            leverBar.style.transform = `rotate(${angle}deg)`;
+
+            // 渲染左側刻度 (抗力臂)
+            leftScaleContainer.innerHTML = [1, 2, 3, 4, 5, 6].map(num => {
+                const isSelected = !isA && num === cur.leftPos;
+                const hasWeight = (isA && num === cur.leftPos) || (!isA && num === cur.leftPos);
+                return `
+                <div class="flex flex-col items-center relative">
+                    <div class="w-2 h-2 rounded-full mb-1 shadow-inner ${isSelected ? 'bg-blue-300 ring-2 ring-blue-500' : 'bg-white'}"></div>
+                    <span class="text-white text-xs font-bold">${num}</span>
+                    ${hasWeight ? `
+                    <div class="absolute top-6 left-1/2 -translate-x-1/2 w-6 flex flex-col items-center origin-top transition-transform duration-500" style="transform: rotate(${-angle}deg)">
+                        <div class="w-0.5 h-6 bg-gray-400"></div>
+                        <div class="w-8 h-10 bg-gray-400 rounded-sm shadow-lg border border-gray-500 flex flex-col items-center justify-center">
+                            <div class="w-full h-1/2 border-b border-gray-500 bg-gradient-to-b from-gray-300 to-gray-400"></div>
+                            <div class="w-full h-1/2 bg-gradient-to-b from-gray-400 to-gray-500 flex items-center justify-center">
+                                <span class="text-white text-[10px] font-bold">${cur.leftWeight}g</span>
+                            </div>
+                        </div>
+                    </div>` : ''}
+                </div>`;
+            }).join('');
+
+            // 渲染右側刻度 (施力臂)
+            rightScaleContainer.innerHTML = [1, 2, 3, 4, 5, 6].map(num => {
+                const isSelected = isA && num === cur.rightPos;
+                const isFixedPos = !isA && num === cur.rightPos;
+                const hasWeight = cur.rightWeight > 0 && num === cur.rightPos;
+                return `
+                <div class="flex flex-col items-center relative">
+                    <div class="w-2 h-2 rounded-full mb-1 shadow-inner ${isSelected ? 'bg-green-300 ring-2 ring-green-500' : (isFixedPos ? 'bg-gray-300 ring-1 ring-gray-500' : 'bg-white')}"></div>
+                    <span class="text-white text-xs font-bold">${num}</span>
+                    ${hasWeight ? `
+                    <div class="absolute top-6 left-1/2 -translate-x-1/2 w-6 flex flex-col items-center origin-top transition-transform duration-500" style="transform: rotate(${-angle}deg)">
+                        <div class="w-0.5 h-6 bg-gray-400"></div>
+                        <div class="w-8 bg-gray-300 rounded-sm shadow-lg border border-gray-400 flex flex-col items-center justify-center overflow-hidden" style="min-height: 30px; height: ${Math.max(20, (cur.rightWeight / 20) * 20)}px;">
+                            <span class="text-gray-700 text-[10px] font-bold">${cur.rightWeight}g</span>
+                        </div>
+                    </div>` : ''}
+                </div>`;
+            }).join('');
+
+            // 2. 更新狀態徽章
+            if (isBalanced) {
+                statusBadge.className = "px-4 py-2 rounded-full font-bold shadow-sm transition-colors bg-green-100 text-green-700 border-green-300";
+                statusBadge.innerHTML = '✓ 槓桿已平衡';
+            } else {
+                statusBadge.className = "px-4 py-2 rounded-full font-bold shadow-sm transition-colors bg-red-100 text-red-700 border-red-300";
+                statusBadge.innerHTML = netTorque > 0 ? '↘ 右側太重' : '↙ 左側太重';
+            }
+
+            // 3. 更新按鈕區
+            weightDisplayTitle.innerHTML = `<span class="${isA ? 'bg-green-600' : 'bg-blue-600'} text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">2</span> 調整施力砝碼 (目前: ${cur.rightWeight} 克重)`;
+            
+            const btnColor = isA ? 'bg-[#e65c40]' : 'bg-[#3b82f6]';
+            posButtonsContainer.innerHTML = [1, 2, 3, 4, 5, 6].map(num => `
+                <button onclick="setPosition(${num})" class="w-10 h-10 rounded-full font-bold transition-all ${
+                    activeVarPos === num 
+                        ? `${btnColor} text-white shadow-md transform scale-110` 
+                        : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-100'
+                }">${num}</button>
+            `).join('');
+
+            // 更新紀錄按鈕
+            if (isRecorded) {
+                recordBtn.className = "w-full py-3 rounded-lg font-bold shadow-sm transition-all flex justify-center items-center gap-2 bg-gray-300 text-gray-500 cursor-not-allowed";
+                recordBtn.innerText = "已記錄此位置";
+                recordBtn.disabled = true;
+            } else if (isBalanced) {
+                recordBtn.className = `w-full py-3 rounded-lg font-bold shadow-sm transition-all flex justify-center items-center gap-2 ${isA ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600'} text-white transform hover:scale-[1.02] cursor-pointer`;
+                recordBtn.innerText = "📌 將結果記錄在習作中";
+                recordBtn.disabled = false;
+            } else {
+                recordBtn.className = "w-full py-3 rounded-lg font-bold shadow-sm transition-all flex justify-center items-center gap-2 bg-gray-300 text-gray-500 cursor-not-allowed";
+                recordBtn.innerText = "請先調整至水平平衡";
+                recordBtn.disabled = true;
+            }
+
+            // 4. 更新表格
+            resetBtn.style.display = cur.records.length > 0 ? 'block' : 'none';
+            tableBody.innerHTML = [1, 2, 3, 4, 5, 6].map(pos => {
+                const record = cur.records.find(r => r.varPos === pos);
+                const rLeftPos = isA ? cur.leftPos : pos;
+                const rRightPos = isA ? pos : cur.rightPos;
+                const rowBg = record ? (isA ? 'bg-green-50/50' : 'bg-blue-50/50') : 'bg-white';
+                
+                return `
+                    <tr class="border-b border-gray-100 ${rowBg}">
+                        <td class="p-3 text-gray-700">${rLeftPos}</td>
+                        <td class="p-3 text-gray-700">${cur.leftWeight}</td>
+                        <td class="p-3 text-gray-700">${rRightPos}</td>
+                        <td class="p-3 font-bold text-[#e65c40]">${record ? record.weight : '<span class="text-gray-300">-</span>'}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            // 5. 更新折線圖
+            chartOverlay.style.opacity = cur.records.length > 0 ? '0' : '1';
+            chartOverlay.style.pointerEvents = cur.records.length > 0 ? 'none' : 'auto';
+            
+            if (cur.records.length > 0) {
+                const getX = (pos) => 50 + (pos / 6) * 330;
+                const getY = (weight) => 260 - (weight / 70) * 240;
+
+                let svgContent = '';
+                
+                // 畫折線
+                if (cur.records.length > 1) {
+                    const pathD = `M ${getX(cur.records[0].varPos)} ${getY(cur.records[0].weight)} ` + 
+                                  cur.records.slice(1).map(r => `L ${getX(r.varPos)} ${getY(r.weight)}`).join(" ");
+                    const lineColor = isA ? "#e69c40" : "#3b82f6";
+                    svgContent += `<path d="${pathD}" fill="none" stroke="${lineColor}" stroke-width="2" stroke-linejoin="round" />`;
+                }
+
+                // 畫資料點
+                cur.records.forEach(r => {
+                    svgContent += `<circle cx="${getX(r.varPos)}" cy="${getY(r.weight)}" r="3" fill="#333" />`;
+                });
+
+                chartDataGroup.innerHTML = svgContent;
+            } else {
+                chartDataGroup.innerHTML = '';
+            }
+
+            // 6. 更新結論區顯示狀態
+            const conclusionA = document.getElementById('conclusion-A');
+            const conclusionB = document.getElementById('conclusion-B');
+            
+            if (cur.records.length >= 6) {
+                if (isA) {
+                    conclusionA.classList.remove('hidden');
+                    conclusionB.classList.add('hidden');
+                } else {
+                    conclusionB.classList.remove('hidden');
+                    conclusionA.classList.add('hidden');
+                }
+                conclusionSection.classList.remove('opacity-50', 'translate-y-4', 'grayscale');
+                conclusionSection.classList.add('opacity-100', 'translate-y-0');
+            } else {
+                conclusionA.classList.add('hidden');
+                conclusionB.classList.add('hidden');
+                conclusionSection.classList.remove('opacity-100', 'translate-y-0');
+                conclusionSection.classList.add('opacity-50', 'translate-y-4', 'grayscale');
+            }
+        }
+
+        // 互動功能函式
+        function adjustWeight(amount) {
+            const cur = state[state.mode];
+            cur.rightWeight = Math.max(0, cur.rightWeight + amount);
+            updateUI();
+        }
+
+        function setPosition(pos) {
+            const cur = state[state.mode];
+            if (state.mode === 'A') {
+                cur.rightPos = pos;
+            } else {
+                cur.leftPos = pos;
+            }
+            cur.rightWeight = 0; // 更換位置時重量歸零重測
+            updateUI();
+        }
+
+        function handleRecord() {
+            const cur = state[state.mode];
+            const leftTorque = cur.leftPos * cur.leftWeight;
+            const rightTorque = cur.rightPos * cur.rightWeight;
+            const isBalanced = (rightTorque - leftTorque) === 0;
+            const activeVarPos = state.mode === 'A' ? cur.rightPos : cur.leftPos;
+            const isRecorded = cur.records.some(r => r.varPos === activeVarPos);
+
+            if (isBalanced && !isRecorded) {
+                cur.records.push({ varPos: activeVarPos, weight: cur.rightWeight });
+                cur.records.sort((a, b) => a.varPos - b.varPos); // 依長度排序
+                updateUI();
+            }
+        }
+
+        function handleReset() {
+            const cur = state[state.mode];
+            cur.records = [];
+            if (state.mode === 'A') {
+                cur.rightPos = 1;
+            } else {
+                cur.leftPos = 1;
+            }
+            cur.rightWeight = 0;
+            updateUI();
+        }
+
+        // --- 拖曳變因功能 ---
+        function allowDrop(ev) {
+            ev.preventDefault();
+            ev.currentTarget.classList.add('bg-blue-50', 'border-blue-400');
+        }
+
+        function dragLeave(ev) {
+            ev.currentTarget.classList.remove('bg-blue-50', 'border-blue-400');
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+            setTimeout(() => { ev.target.classList.add('opacity-50'); }, 0);
+        }
+        
+        document.addEventListener('dragend', function(ev) {
+            if(ev.target.draggable) {
+                ev.target.classList.remove('opacity-50');
+            }
+        });
+
+        function drop(ev) {
+            ev.preventDefault();
+            let dropZone = ev.currentTarget;
+            dropZone.classList.remove('bg-blue-50', 'border-blue-400');
+
+            var data = ev.dataTransfer.getData("text");
+            var draggedElement = document.getElementById(data);
+
+            if (!draggedElement) return;
+
+            // 放入表格上方的放置區
+            if (dropZone.classList.contains('var-drop-zone')) {
+                // 如果已經有標籤了，先把舊標籤丟回原本的容器
+                if (dropZone.children.length > 0) {
+                    const existingTag = dropZone.children[0];
+                    if (existingTag.id !== draggedElement.id) {
+                        document.getElementById('variable-tags-container').appendChild(existingTag);
+                    }
+                }
+                dropZone.innerHTML = '';
+                dropZone.appendChild(draggedElement);
+            } 
+            // 放回原本的容器
+            else if (dropZone.id === 'variable-tags-container') {
+                dropZone.appendChild(draggedElement);
+            }
+
+            restorePlaceholders();
+            checkVariables();
+        }
+
+        function restorePlaceholders() {
+            document.querySelectorAll('.var-drop-zone').forEach(zone => {
+                if (zone.children.length === 0) {
+                    zone.innerHTML = '放置變因';
+                    zone.classList.remove('border-green-500', 'bg-green-100', 'border-red-500', 'bg-red-100', 'border-solid');
+                    zone.classList.add('border-dashed', 'border-gray-400');
+                }
+            });
+        }
+
+        function checkVariables() {
+            const isA = state.mode === 'A';
+            // 定義兩種實驗的正解對應
+            const expected = isA ? {
+                'col-leftPos': 'control',        // 抗力臂(固定)
+                'col-leftWeight': 'control',     // 抗力(固定)
+                'col-rightPos': 'manipulated',   // 施力臂(改變)
+                'col-rightWeight': 'responding'  // 施力(測量結果)
+            } : {
+                'col-leftPos': 'manipulated',    // 抗力臂(改變)
+                'col-leftWeight': 'control',     // 抗力(固定)
+                'col-rightPos': 'control',       // 施力臂(固定)
+                'col-rightWeight': 'responding'  // 施力(測量結果)
+            };
+
+            let correctCount = 0;
+            let totalPlaced = 0;
+
+            document.querySelectorAll('.var-drop-zone').forEach(zone => {
+                const colId = zone.id;
+                if (zone.children.length > 0 && zone.children[0].hasAttribute('data-var')) {
+                    totalPlaced++;
+                    const placedVar = zone.children[0].getAttribute('data-var');
+                    
+                    zone.classList.remove('border-dashed', 'border-gray-400', 'border-green-500', 'bg-green-100', 'border-red-500', 'bg-red-100');
+                    
+                    if (placedVar === expected[colId]) {
+                        correctCount++;
+                        zone.classList.add('border-green-500', 'bg-green-100', 'border-solid');
+                    } else {
+                        zone.classList.add('border-red-500', 'bg-red-100', 'border-solid');
+                    }
+                }
+            });
+
+            const feedback = document.getElementById('var-feedback');
+            if (totalPlaced === 4) {
+                if (correctCount === 4) {
+                    feedback.innerHTML = '✅ 觀念完全正確！';
+                    feedback.className = 'text-xs px-2 py-1 rounded bg-green-100 text-green-700 font-bold';
+                } else {
+                    feedback.innerHTML = '❌ 有些變因放錯了喔';
+                    feedback.className = 'text-xs px-2 py-1 rounded bg-red-100 text-red-700 font-bold';
+                }
+                feedback.classList.remove('hidden');
+            } else {
+                feedback.classList.add('hidden');
+            }
+        }
+
+        function resetVariables() {
+            const container = document.getElementById('variable-tags-container');
+            if (!container) return;
+            const tags = ['tag-ctrl-1', 'tag-ctrl-2', 'tag-mani', 'tag-resp'];
+            tags.forEach(id => {
+                const tag = document.getElementById(id);
+                if(tag) container.appendChild(tag);
+            });
+            restorePlaceholders();
+            const feedback = document.getElementById('var-feedback');
+            if (feedback) feedback.classList.add('hidden');
+        }
+
+        // 啟動應用程式
+        window.onload = function() {
+            initChartAxes();
+            updateStaticTexts();
+            updateUI();
+        };
+    </script>
+</body>
+</html>

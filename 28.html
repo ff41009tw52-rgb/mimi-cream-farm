@@ -3,376 +3,412 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>自然科學實驗：槓桿原理</title>
-    <!-- 引入 Tailwind CSS 框架用於快速排版 -->
+    <title>2-1 氣溫的測量</title>
+    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 Chart.js 用於繪製折線圖 -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 引入 Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* 槓桿本體的旋轉動畫設定 */
-        #lever-beam {
-            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            transform-origin: center center;
+        /* 自訂樣式 */
+        input[type=range].slider-vertical {
+            -webkit-appearance: none;
+            background: transparent;
         }
-        /* 砝碼掛勾動畫 */
-        .weight-transition {
-            transition: left 0.3s ease, height 0.3s ease;
+        input[type=range].slider-vertical::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            margin-top: -10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
+        input[type=range].slider-vertical::-webkit-slider-runnable-track {
+            width: 8px;
+            cursor: pointer;
+            background: #e5e7eb;
+            border-radius: 4px;
+        }
+        .animate-bounce-in {
+            animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        /* 隱藏輔助類 */
+        .hidden { display: none !important; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen pb-12">
+<body class="min-h-screen bg-sky-50 font-sans text-gray-800 p-4 md:p-8">
 
-    <div class="max-w-5xl mx-auto px-4 py-8">
+    <!-- 標題區 -->
+    <header class="max-w-4xl mx-auto mb-8 text-center">
+        <div class="inline-block bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-bold mb-2 shadow">
+            活動 2 | 如何觀測天氣
+        </div>
+        <h1 class="text-3xl md:text-4xl font-extrabold text-blue-900 flex items-center justify-center gap-3">
+            <i data-lucide="thermometer-sun" class="w-10 h-10 text-orange-500"></i>
+            2-1 氣溫的測量
+        </h1>
+        <p class="mt-3 text-lg text-gray-600">氣溫的高低變化，常常會影響我們的生活。讓我們一起學習如何準確測量！</p>
+    </header>
+
+    <!-- 導覽列 -->
+    <div class="max-w-4xl mx-auto flex justify-center gap-4 mb-8">
+        <button id="tab-how-to" onclick="switchTab('how-to')" class="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-lg transition-all shadow-md bg-yellow-400 text-yellow-900 scale-105">
+            <i data-lucide="book-open" class="w-5 h-5"></i>
+            怎麼用氣溫計
+        </button>
+        <button id="tab-experiment" onclick="switchTab('experiment')" class="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-lg transition-all shadow-md bg-white text-gray-500 hover:bg-blue-100">
+            <i data-lucide="beaker" class="w-5 h-5"></i>
+            測量氣溫實驗
+        </button>
+    </div>
+
+    <!-- 內容區塊 -->
+    <main class="max-w-4xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border-4 border-yellow-200">
         
-        <!-- 標題區 -->
-        <header class="text-center mb-4">
-            <h1 class="text-2xl md:text-3xl font-bold text-teal-700 mb-2">自然科學實驗：槓桿原理</h1>
-            <p class="text-slate-500 text-sm md:text-base max-w-2xl mx-auto">
-                本實驗旨在驗證「當抗力臂與抗力固定，施力臂越長，施力越小」。<br>
-                請操作下方實驗器，找出不同施力臂長度下能使槓桿平衡的砝碼重量。
-            </p>
-        </header>
-
-        <!-- 主要互動區：上部分為圖解，下部分為控制 -->
-        <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden mb-8">
+        <!-- ==================== 頁籤 1: 怎麼用氣溫計 ==================== -->
+        <div id="section-how-to" class="p-6 md:p-10 block">
+            <h2 class="text-2xl font-bold text-blue-800 mb-6 flex items-center gap-2">
+                <span class="bg-blue-800 text-white w-8 h-8 rounded-full flex items-center justify-center text-lg">!</span>
+                氣溫計的使用方法與注意事項
+            </h2>
             
-            <!-- 實驗情境說明標籤 -->
-            <div class="bg-teal-50 px-6 py-3 border-b border-teal-100 flex justify-between items-center">
-                <span class="font-bold text-teal-800">實驗條件設定</span>
-                <span class="text-sm text-teal-600 font-medium">抗力點固定於左側第 3 格，掛載 20 克重。</span>
-            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- 文字說明區 -->
+                <div class="space-y-4 text-lg">
+                    <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
+                        <p>1. 常見的氣溫計溫標有 <strong>°C（攝氏）</strong>和 <strong>°F（華氏）</strong>，我們較常使用的是 <strong>°C</strong>。</p>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-200 space-y-3">
+                        <p class="font-bold text-blue-800">2. 使用注意事項：</p>
+                        <ul class="list-disc pl-6 space-y-2">
+                            <li>氣溫計<strong>液囊</strong>一端須朝下，手握的地方避免碰觸液囊。</li>
+                            <li>讀取刻度時，<strong>眼睛要平視</strong>紅色酒精柱的頂端。</li>
+                            <li>不可以被太陽直射，要在<strong>陰涼通風</strong>的地方測量 (例如：樹蔭下、走廊等)。</li>
+                        </ul>
+                    </div>
+                </div>
 
-            <div class="p-6 md:p-10 flex flex-col items-center">
-                
-                <!-- 視覺化槓桿模擬區 (加高整體區塊 h-72 改為 h-96) -->
-                <div class="relative w-full max-w-4xl h-96 mt-8 mb-6 bg-slate-50 rounded-xl border border-slate-100">
+                <!-- 互動練習區 -->
+                <div class="bg-gray-50 p-6 rounded-2xl flex flex-col items-center justify-center relative border-2 border-dashed border-gray-300">
+                    <h3 class="font-bold text-gray-700 mb-4">互動練習：請調整視線高度</h3>
                     
-                    <!-- 支點 (底座) -->
-                    <div class="absolute left-1/2 bottom-0 transform -translate-x-1/2">
-                        <!-- 柱子 (再拉長變高 h-40 改為 h-64) -->
-                        <div class="w-4 h-64 bg-gray-300 mx-auto rounded-t-sm"></div>
-                        <!-- 底部 -->
-                        <div class="w-24 h-3 bg-blue-600 mx-auto rounded-md shadow-md"></div>
-                        <!-- 支點軸心圖示 -->
-                        <div class="absolute top-2 left-1/2 transform -translate-x-1/2 w-5 h-5 bg-yellow-500 rounded-full border-4 border-white z-20"></div>
+                    <div class="flex items-center gap-12 h-[300px]">
+                        <!-- 視線滑桿 -->
+                        <div class="flex flex-col items-center h-full relative">
+                            <input 
+                                type="range" 
+                                id="eye-slider"
+                                min="0" max="100" 
+                                step="0.1"
+                                value="50" 
+                                class="h-full appearance-none bg-gray-200 w-2 rounded-full cursor-pointer slider-vertical"
+                                style="writing-mode: vertical-lr; direction: rtl;"
+                            />
+                            <div id="eye-feedback" class="absolute left-6 transition-transform duration-75 flex items-center gap-2" style="bottom: 50%; transform: translateY(50%);">
+                                <i id="eye-icon" data-lucide="eye" class="w-8 h-8 text-gray-600 transition-colors duration-200"></i>
+                                <span class="text-sm font-bold w-16">
+                                    <span id="feedback-correct" class="text-green-600 flex items-center gap-1 hidden"><i data-lucide="check-circle-2" class="w-4 h-4"></i>正確</span>
+                                    <span id="feedback-wrong" class="text-red-500 flex items-center gap-1"><i data-lucide="x-circle" class="w-4 h-4"></i>視差</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- 虛擬氣溫計 (固定30度) -->
+                        <div class="relative flex flex-col items-center" style="height: 250px;">
+                            <div class="w-6 h-full bg-white/80 border-2 border-gray-400 rounded-t-full relative z-10 shadow-inner flex justify-center">
+                                <div class="absolute left-full ml-1 h-full flex flex-col justify-between py-[10%] text-xs text-gray-600 font-bold">
+                                    <span>50</span><span>40</span><span>30</span><span>20</span><span>10</span><span>0</span>
+                                </div>
+                                <div class="absolute right-full mr-1 h-full w-2 flex flex-col justify-between py-[10%]">
+                                    <div class="border-b-2 border-gray-500 w-full"></div><div class="border-b-2 border-gray-500 w-full"></div><div class="border-b-2 border-gray-500 w-full"></div><div class="border-b-2 border-gray-500 w-full"></div><div class="border-b-2 border-gray-500 w-full"></div><div class="border-b-2 border-gray-500 w-full"></div>
+                                </div>
+                                <div class="absolute bottom-0 w-3 bg-red-500 rounded-t-full transition-all duration-1000 ease-in-out" style="height: 60%;"></div>
+                            </div>
+                            <div class="w-10 h-10 bg-red-500 rounded-full border-2 border-gray-400 -mt-4 z-20 shadow-md"></div>
+                            <div class="mt-2 text-lg font-bold text-gray-700">30°C</div>
+                        </div>
+                    </div>
+                    
+                    <p class="mt-6 text-center text-sm text-gray-500">
+                        上下拖曳左側滑桿。眼睛必須<strong class="text-blue-600">平視</strong>紅色酒精柱頂端才能準確讀取！
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 頁籤 2: 測量實驗 ==================== -->
+        <div id="section-experiment" class="p-0 hidden">
+            <div class="bg-blue-600 text-white p-4 text-center">
+                <h2 class="text-xl font-bold">實驗：一天中，上午、中午和下午的氣溫會如何變化？</h2>
+            </div>
+            
+            <div class="p-6 md:p-8 flex flex-col lg:flex-row gap-8">
+                
+                <!-- 實驗操作區 -->
+                <div class="flex-1 bg-sky-100 rounded-2xl p-6 border-2 border-sky-200 flex flex-col items-center">
+                    <h3 class="font-bold text-lg text-sky-900 mb-4 flex items-center gap-2">
+                        <i data-lucide="map-pin" class="w-5 h-5"></i> 觀測地點：走廊上 (陰涼通風處)
+                    </h3>
+                    
+                    <!-- 時間切換按鈕 -->
+                    <div class="flex gap-2 w-full justify-center mb-8">
+                        <button id="btn-morning" onclick="selectTime('morning')" class="flex-1 py-3 px-2 rounded-xl font-bold flex flex-col items-center gap-1 transition-all bg-white shadow-lg border-2 border-blue-400 scale-105 z-10">
+                            <i data-lucide="sun" class="text-orange-400 w-8 h-8"></i>
+                            <span class="text-sm md:text-base">上午 9:00</span>
+                        </button>
+                        <button id="btn-noon" onclick="selectTime('noon')" class="flex-1 py-3 px-2 rounded-xl font-bold flex flex-col items-center gap-1 transition-all bg-white/50 text-gray-500 hover:bg-white/80 border-2 border-transparent">
+                            <i data-lucide="sun" class="text-red-500 w-10 h-10"></i>
+                            <span class="text-sm md:text-base">中午 12:00</span>
+                        </button>
+                        <button id="btn-afternoon" onclick="selectTime('afternoon')" class="flex-1 py-3 px-2 rounded-xl font-bold flex flex-col items-center gap-1 transition-all bg-white/50 text-gray-500 hover:bg-white/80 border-2 border-transparent">
+                            <i data-lucide="sun" class="text-orange-500 w-8 h-8 opacity-80"></i>
+                            <span class="text-sm md:text-base">下午 3:00</span>
+                        </button>
                     </div>
 
-                    <!-- 槓桿本體 (將 left-0 w-full 改為置中並縮小寬度為 80%) -->
-                    <div class="absolute top-[calc(100%-16rem)] left-1/2 transform -translate-x-1/2 w-[90%] sm:w-[80%] h-[60px] flex items-center z-10" style="perspective: 1000px;">
-                        <div id="lever-beam" class="w-full relative">
-                            <!-- 桿子圖片/顏色 -->
-                            <div class="w-full h-10 bg-orange-400 border-2 border-orange-500 rounded flex relative shadow-sm">
-                                <!-- 刻度產生區 (由 JS 動態生成) -->
-                                <div id="ticks-container" class="absolute w-full h-full"></div>
-                            </div>
-                            
-                            <!-- 左側固定抗力 (砝碼) -->
-                            <!-- 位置：準確對齊左側第3格 (中心點50% - 3格*6.666%) = 30% -->
-                            <div class="absolute top-8 w-10 flex flex-col items-center" style="left: 30%; transform: translateX(-50%);">
-                                <div class="w-1 h-6 bg-gray-400"></div> <!-- 掛勾線 -->
-                                <div class="w-10 h-10 bg-slate-700 rounded-sm shadow-md text-white flex items-center justify-center text-xs font-bold relative">
-                                    20g
-                                    <!-- 示意掛載兩個砝碼 -->
-                                    <div class="absolute top-1/2 left-0 w-full border-b border-slate-500"></div>
+                    <!-- 測量畫面 -->
+                    <div class="flex gap-12 items-end justify-center mb-8">
+                        <!-- 虛擬氣溫計 (動態變化) -->
+                        <div class="relative flex flex-col items-center" style="height: 200px;">
+                            <div class="w-6 h-full bg-white/80 border-2 border-gray-400 rounded-t-full relative z-10 shadow-inner flex justify-center">
+                                <div class="absolute left-full ml-1 h-full flex flex-col justify-between py-[10%] text-xs text-gray-600 font-bold">
+                                    <span>50</span><span>40</span><span>30</span><span>20</span><span>10</span><span>0</span>
                                 </div>
-                                <span class="text-xs font-bold text-blue-600 mt-1">抗力點</span>
+                                <div class="absolute right-full mr-1 h-full w-2 flex flex-col justify-between py-[10%]">
+                                    <div class="border-b-2 border-gray-500 w-full"></div><div class="border-b-2 border-gray-500 w-full"></div><div class="border-b-2 border-gray-500 w-full"></div><div class="border-b-2 border-gray-500 w-full"></div><div class="border-b-2 border-gray-500 w-full"></div><div class="border-b-2 border-gray-500 w-full"></div>
+                                </div>
+                                <div id="thermo-exp-fill" class="absolute bottom-0 w-3 bg-red-500 rounded-t-full transition-all duration-1000 ease-in-out" style="height: 54%;"></div>
                             </div>
+                            <div class="w-10 h-10 bg-red-500 rounded-full border-2 border-gray-400 -mt-4 z-20 shadow-md"></div>
+                            <div id="thermo-exp-text" class="mt-2 text-lg font-bold text-gray-700">27°C</div>
+                        </div>
 
-                            <!-- 右側動態施力 (砝碼) -->
-                            <div id="effort-weight-visual" class="absolute top-8 w-10 flex flex-col items-center weight-transition" style="left: 60%; transform: translateX(-50%); opacity: 0;">
-                                <div class="w-1 h-6 bg-gray-400"></div> <!-- 掛勾線 -->
-                                <div id="effort-weight-box" class="w-10 bg-emerald-600 rounded-sm shadow-md text-white flex items-center justify-center text-xs font-bold transition-all duration-300" style="height: 40px;">
-                                    ?g
-                                </div>
-                                <span class="text-xs font-bold text-emerald-600 mt-1">施力點</span>
+                        <div class="flex flex-col gap-4">
+                            <div class="bg-white p-4 rounded-xl shadow-md text-center">
+                                <p class="text-gray-500 text-sm mb-1">目前選擇時間</p>
+                                <p id="current-time-label" class="font-bold text-xl text-blue-900">上午 9:00</p>
+                                <p id="current-time-temp-large" class="text-3xl font-extrabold text-red-500 mt-2">27°C</p>
                             </div>
+                            <button id="btn-record" onclick="recordTemperature()" class="py-3 px-6 rounded-xl font-bold text-white shadow-md transition-all bg-green-500 hover:bg-green-600 hover:-translate-y-1">
+                                測量並記錄
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- 狀態提示訊息 -->
-                <div id="status-message" class="text-lg font-bold text-slate-500 mb-6 h-8 text-center transition-colors duration-300">
-                    請設定右側施力臂與施力重量，然後點擊「測試平衡」。
-                </div>
+                <!-- 紀錄表與結論區 -->
+                <div class="flex-1 flex flex-col gap-6">
+                    
+                    <!-- 紀錄表 -->
+                    <div class="bg-yellow-50 rounded-2xl border-2 border-yellow-300 overflow-hidden shadow-md">
+                        <div class="bg-yellow-200 text-yellow-900 font-bold py-2 text-center text-lg">
+                            氣溫測量紀錄表
+                        </div>
+                        <div class="p-4 space-y-4">
+                            <div class="flex justify-between text-sm font-bold text-gray-700 border-b border-yellow-300 pb-2">
+                                <span>記錄者：小翔</span>
+                                <span>觀測地點：走廊上</span>
+                            </div>
+                            <div class="flex justify-between text-sm text-gray-700">
+                                <span class="flex items-center gap-1"><i data-lucide="calendar" class="w-4 h-4"></i> 2024/6/10</span>
+                                <span class="flex items-center gap-1"><i data-lucide="cloud" class="w-4 h-4"></i> 晴天</span>
+                            </div>
+                            
+                            <table class="w-full text-center mt-2 border-collapse">
+                                <thead>
+                                    <tr class="bg-blue-100 text-blue-900">
+                                        <th class="border border-blue-200 py-2">觀測時間</th>
+                                        <th class="border border-blue-200 py-2">氣溫 (°C)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="border border-blue-200 py-3 text-gray-700 font-medium">上午 9:00</td>
+                                        <td id="table-val-morning" class="border border-blue-200 py-3 font-bold text-red-600 text-lg">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border border-blue-200 py-3 text-gray-700 font-medium">中午 12:00</td>
+                                        <td id="table-val-noon" class="border border-blue-200 py-3 font-bold text-red-600 text-lg">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border border-blue-200 py-3 text-gray-700 font-medium">下午 3:00</td>
+                                        <td id="table-val-afternoon" class="border border-blue-200 py-3 font-bold text-red-600 text-lg">-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
-                <!-- 控制面板 -->
-                <div class="w-full max-w-2xl bg-slate-100 p-6 rounded-xl flex flex-col md:flex-row gap-6 items-end">
-                    <div class="flex-1 w-full">
-                        <label class="block text-sm font-bold text-slate-700 mb-2">施力臂長度 (支點右邊第幾格)</label>
-                        <select id="arm-select" class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-lg">
-                            <option value="1">第 1 格</option>
-                            <option value="2">第 2 格</option>
-                            <option value="3">第 3 格</option>
-                            <option value="4">第 4 格</option>
-                            <option value="5">第 5 格</option>
-                            <option value="6">第 6 格</option>
-                        </select>
-                    </div>
-                    <div class="flex-1 w-full">
-                        <label class="block text-sm font-bold text-slate-700 mb-2">施力點的重量 (克重)</label>
-                        <input type="number" id="weight-input" min="1" max="100" placeholder="輸入重量 (例如: 30)" class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-lg">
-                    </div>
-                    <div class="w-full md:w-auto">
-                        <button id="test-btn" class="w-full md:w-auto px-8 py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg transition-colors shadow-md text-lg active:scale-95 transform">
-                            測試平衡
+                    <!-- 討論與結論 -->
+                    <div id="conclusion-box" class="bg-green-50 border-2 border-green-300 rounded-2xl p-5 shadow-md animate-bounce-in hidden">
+                        <h4 class="font-bold text-green-800 text-lg mb-2 flex items-center gap-2">
+                            <i data-lucide="book-open" class="w-5 h-5"></i> 討論與結論
+                        </h4>
+                        <p class="text-gray-700 leading-relaxed">
+                            從紀錄表中可以看出，一天中，通常 <strong class="text-red-600 text-xl mx-1">中午</strong> 氣溫較高，
+                            <strong class="text-blue-600 mx-1">上午</strong> 和 <strong class="text-blue-600 mx-1">下午</strong> 氣溫較低。
+                        </p>
+                        <button onclick="resetExperiment()" class="mt-4 text-sm text-green-700 underline hover:text-green-900">
+                            重新實驗
                         </button>
                     </div>
+                    
+                    <div id="experiment-hint" class="text-center text-gray-400 text-sm mt-4 italic block">
+                        請依序完成上午、中午、下午的測量以觀看結論。
+                    </div>
+
                 </div>
             </div>
         </div>
+    </main>
 
-        <!-- 實驗結果記錄與圖表區 (左右並排顯示) -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
-            <!-- 數據表格區 -->
-            <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden flex flex-col">
-                <div class="bg-emerald-50 px-6 py-4 border-b border-emerald-100 flex justify-between items-center">
-                    <h2 class="text-xl font-bold text-emerald-800">實驗結果紀錄表</h2>
-                    <button id="reset-btn" class="text-sm px-3 py-1 bg-white border border-emerald-200 text-emerald-600 rounded hover:bg-emerald-100 transition-colors">清除數據</button>
-                </div>
-                <div class="p-0 overflow-x-auto flex-1">
-                    <table class="w-full text-center text-sm md:text-base border-collapse">
-                        <thead>
-                            <tr class="bg-emerald-600 text-white">
-                                <th class="py-3 px-2 border-r border-emerald-500 w-1/4">抗力臂長度<br><span class="text-xs font-normal">(格)</span></th>
-                                <th class="py-3 px-2 border-r border-emerald-500 w-1/4">抗力點重量<br><span class="text-xs font-normal">(克重)</span></th>
-                                <th class="py-3 px-2 border-r border-emerald-500 w-1/4">施力臂長度<br><span class="text-xs font-normal">(格)</span></th>
-                                <th class="py-3 px-2 w-1/4">施力點重量<br><span class="text-xs font-normal">(克重)</span></th>
-                            </tr>
-                        </thead>
-                        <tbody id="data-table-body">
-                            <!-- 數據將由 JS 動態填入 -->
-                            <tr>
-                                <td colspan="4" class="py-8 text-slate-400 italic bg-slate-50">尚未記錄任何平衡數據，請操作上方實驗器。</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 折線圖區 -->
-            <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden flex flex-col">
-                <div class="bg-indigo-50 px-6 py-4 border-b border-indigo-100">
-                    <h2 class="text-xl font-bold text-indigo-800">施力臂與施力重量關係圖</h2>
-                </div>
-                <div class="p-6 flex-1 flex items-center justify-center min-h-[300px]">
-                    <canvas id="experimentChart" class="w-full max-h-[350px]"></canvas>
-                </div>
-                <div id="conclusion-box" class="px-6 py-4 bg-indigo-600 text-white text-center font-bold text-lg hidden">
-                    結論：當抗力臂與抗力固定，施力臂越長，施力越小。
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- JavaScript 邏輯 -->
+    <!-- 互動邏輯腳本 -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- 常數設定 (依據課本設定) ---
-            const FIXED_RESISTANCE_ARM = 3;  // 抗力臂 3 格
-            const FIXED_RESISTANCE = 20;     // 抗力 20 克重
-            const FIXED_TORQUE = FIXED_RESISTANCE_ARM * FIXED_RESISTANCE; // 左側固定力矩 = 60
+        // 初始化 Lucide Icons
+        lucide.createIcons();
 
-            // --- DOM 元素取得 ---
-            const leverBeam = document.getElementById('lever-beam');
-            const armSelect = document.getElementById('arm-select');
-            const weightInput = document.getElementById('weight-input');
-            const testBtn = document.getElementById('test-btn');
-            const resetBtn = document.getElementById('reset-btn');
-            const statusMessage = document.getElementById('status-message');
-            const tableBody = document.getElementById('data-table-body');
-            const ticksContainer = document.getElementById('ticks-container');
-            const effortVisual = document.getElementById('effort-weight-visual');
-            const effortBox = document.getElementById('effort-weight-box');
-            const conclusionBox = document.getElementById('conclusion-box');
+        // --- 狀態管理 ---
+        const expData = {
+            morning: { id: 'morning', label: '上午 9:00', temp: 27 },
+            noon: { id: 'noon', label: '中午 12:00', temp: 33 },
+            afternoon: { id: 'afternoon', label: '下午 3:00', temp: 29 }
+        };
+        let currentTime = 'morning';
+        let records = { morning: null, noon: null, afternoon: null };
 
-            // 儲存已找到平衡的數據
-            let balancedData = new Map(); // 使用 Map 以 arm 為 key 避免重複記錄
+        // --- 頁籤切換 ---
+        function switchTab(tabId) {
+            const tabHowTo = document.getElementById('tab-how-to');
+            const tabExperiment = document.getElementById('tab-experiment');
+            const secHowTo = document.getElementById('section-how-to');
+            const secExperiment = document.getElementById('section-experiment');
 
-            // 定義刻度間距 (12格佔據 80% 的寬度，每格約 6.666%)
-            const TICK_STEP_PCT = 80 / 12;
-
-            // --- 繪製槓桿刻度 ---
-            function drawTicks() {
-                ticksContainer.innerHTML = '';
-                // 畫 13 個點 (包含正中央支點 0)
-                for (let i = -6; i <= 6; i++) {
-                    const tick = document.createElement('div');
-                    tick.className = 'flex flex-col items-center justify-center absolute top-0 h-full';
-                    // 精確定位：50% 為中心點
-                    tick.style.left = `${50 + (i * TICK_STEP_PCT)}%`;
-                    tick.style.transform = 'translateX(-50%)';
-                    
-                    // 標數字 (調整位置為 -top-7 並稍微加大為 text-xs)
-                    const num = document.createElement('span');
-                    num.className = 'absolute -top-7 text-xs font-bold text-slate-700';
-                    if (i !== 0) {
-                        num.innerText = Math.abs(i);
-                    }
-                    
-                    // 刻度點 (白色小圓點)
-                    const dot = document.createElement('div');
-                    dot.className = 'w-2 h-2 bg-white rounded-full border border-slate-300';
-                    
-                    tick.appendChild(num);
-                    tick.appendChild(dot);
-                    ticksContainer.appendChild(tick);
-                }
+            if (tabId === 'how-to') {
+                tabHowTo.className = "flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-lg transition-all shadow-md bg-yellow-400 text-yellow-900 scale-105";
+                tabExperiment.className = "flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-lg transition-all shadow-md bg-white text-gray-500 hover:bg-blue-100";
+                secHowTo.classList.remove('hidden');
+                secExperiment.classList.add('hidden');
+            } else {
+                tabExperiment.className = "flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-lg transition-all shadow-md bg-blue-500 text-white scale-105";
+                tabHowTo.className = "flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-lg transition-all shadow-md bg-white text-gray-500 hover:bg-yellow-100";
+                secHowTo.classList.add('hidden');
+                secExperiment.classList.remove('hidden');
             }
-            drawTicks();
+        }
 
-            // --- 折線圖初始化 (Chart.js) ---
-            const ctx = document.getElementById('experimentChart').getContext('2d');
-            const chartConfig = {
-                type: 'line',
-                data: {
-                    labels: ['1', '2', '3', '4', '5', '6'], // X 軸：施力臂長度
-                    datasets: [{
-                        label: '施力點的重量 (克重)',
-                        data: [null, null, null, null, null, null], // 初始為空
-                        borderColor: 'rgb(245, 158, 11)', // 橘黃色線條
-                        backgroundColor: 'rgba(245, 158, 11, 0.2)',
-                        borderWidth: 2,
-                        pointBackgroundColor: 'rgb(59, 130, 246)', // 藍色資料點
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
-                        tension: 0.3 // 曲線平滑度
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            title: { display: true, text: '施力臂長度 (格)' },
-                            grid: { color: '#e2e8f0' }
-                        },
-                        y: {
-                            title: { display: true, text: '施力點的重量 (克重)' },
-                            min: 0,
-                            max: 70, // 設定最大值讓圖表比例固定
-                            grid: { color: '#e2e8f0' }
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false } // 隱藏圖例，因為標題已經很清楚
-                    }
-                }
-            };
-            let experimentChart = new Chart(ctx, chartConfig);
+        // --- 視線互動 (怎麼用氣溫計) ---
+        const eyeSlider = document.getElementById('eye-slider');
+        const eyeFeedback = document.getElementById('eye-feedback');
+        const eyeIcon = document.getElementById('eye-icon');
+        const fbCorrect = document.getElementById('feedback-correct');
+        const fbWrong = document.getElementById('feedback-wrong');
 
-            // --- 更新視覺畫面 ---
-            function updateVisuals(arm, weight, tiltStatus) {
-                // 1. 移動施力點位置
-                // 透過 TICK_STEP_PCT 讓砝碼精確對齊刻度線
-                const newLeftPos = 50 + (arm * TICK_STEP_PCT);
-                
-                effortVisual.style.left = `${newLeftPos}%`;
-                effortVisual.style.opacity = '1';
+        eyeSlider.addEventListener('input', (e) => {
+            const level = e.target.value;
+            const targetLevel = 60; // 30度的高度比例
+            const isCorrect = Math.abs(level - targetLevel) < 5;
 
-                // 2. 改變施力點視覺大小與文字
-                effortBox.innerText = `${weight}g`;
-                const newHeight = Math.max(30, Math.min(80, 20 + (weight * 0.8))); // 視覺化高度
-                effortBox.style.height = `${newHeight}px`;
+            // 更新提示區塊高度
+            eyeFeedback.style.bottom = `${level}%`;
 
-                // 3. 旋轉槓桿
-                if (tiltStatus === 'left') {
-                    leverBeam.style.transform = 'rotate(-12deg)';
-                    statusMessage.innerText = '⚠️ 哎呀！左邊比較重，槓桿向左傾斜了。試著增加重量！';
-                    statusMessage.className = 'text-lg font-bold text-red-500 mb-6 h-8 text-center';
-                } else if (tiltStatus === 'right') {
-                    leverBeam.style.transform = 'rotate(12deg)';
-                    statusMessage.innerText = '⚠️ 哎呀！右邊比較重，槓桿向右傾斜了。試著減少重量！';
-                    statusMessage.className = 'text-lg font-bold text-red-500 mb-6 h-8 text-center';
-                } else {
-                    leverBeam.style.transform = 'rotate(0deg)';
-                    statusMessage.innerText = '🎉 太棒了！槓桿達到水平平衡！數據已記錄。';
-                    statusMessage.className = 'text-lg font-bold text-emerald-600 mb-6 h-8 text-center';
-                }
+            // 更新正確/錯誤樣式
+            if (isCorrect) {
+                eyeIcon.classList.remove('text-gray-600');
+                eyeIcon.classList.add('text-green-500');
+                fbCorrect.classList.remove('hidden');
+                fbWrong.classList.add('hidden');
+            } else {
+                eyeIcon.classList.remove('text-green-500');
+                eyeIcon.classList.add('text-gray-600');
+                fbCorrect.classList.add('hidden');
+                fbWrong.classList.remove('hidden');
             }
-
-            // --- 更新表格與圖表 ---
-            function recordSuccessData(arm, weight) {
-                // 存入 Map
-                balancedData.set(arm, weight);
-
-                // 重繪表格
-                tableBody.innerHTML = '';
-                // 將 Map 轉換為陣列並按 arm 長度排序
-                const sortedData = Array.from(balancedData.entries()).sort((a, b) => a[0] - b[0]);
-                
-                sortedData.forEach(([a, w]) => {
-                    const tr = document.createElement('tr');
-                    tr.className = 'border-b border-slate-100 hover:bg-slate-50 transition-colors';
-                    tr.innerHTML = `
-                        <td class="py-3 px-2 border-r border-slate-200">${FIXED_RESISTANCE_ARM}</td>
-                        <td class="py-3 px-2 border-r border-slate-200">${FIXED_RESISTANCE}</td>
-                        <td class="py-3 px-2 border-r border-slate-200 font-bold text-teal-700">${a}</td>
-                        <td class="py-3 px-2 font-bold text-teal-700">${w}</td>
-                    `;
-                    tableBody.appendChild(tr);
-                });
-
-                // 更新折線圖
-                // Chart.js 的 data index 對應施力臂 1~6，即 index = arm - 1
-                experimentChart.data.datasets[0].data[arm - 1] = weight;
-                experimentChart.update();
-
-                // 檢查是否六個數據都找齊了
-                if (balancedData.size === 6) {
-                    conclusionBox.classList.remove('hidden');
-                }
-            }
-
-            // --- 點擊「測試平衡」按鈕 ---
-            testBtn.addEventListener('click', () => {
-                const arm = parseInt(armSelect.value);
-                const weight = parseFloat(weightInput.value);
-
-                if (isNaN(weight) || weight <= 0) {
-                    alert('請輸入有效的施力點重量喔！');
-                    return;
-                }
-
-                // 計算右側力矩
-                const rightTorque = arm * weight;
-
-                // 判斷平衡狀態
-                if (rightTorque < FIXED_TORQUE) {
-                    updateVisuals(arm, weight, 'left');
-                } else if (rightTorque > FIXED_TORQUE) {
-                    updateVisuals(arm, weight, 'right');
-                } else {
-                    // 平衡！
-                    updateVisuals(arm, weight, 'balance');
-                    recordSuccessData(arm, weight);
-                }
-            });
-
-            // --- 點擊「清除數據」按鈕 ---
-            resetBtn.addEventListener('click', () => {
-                if(confirm('確定要清除所有實驗紀錄並重新開始嗎？')) {
-                    balancedData.clear();
-                    
-                    // 重設表格
-                    tableBody.innerHTML = `<tr><td colspan="4" class="py-8 text-slate-400 italic bg-slate-50">尚未記錄任何平衡數據，請操作上方實驗器。</td></tr>`;
-                    
-                    // 重設圖表
-                    experimentChart.data.datasets[0].data = [null, null, null, null, null, null];
-                    experimentChart.update();
-                    
-                    // 重設視覺與提示
-                    leverBeam.style.transform = 'rotate(0deg)';
-                    effortVisual.style.opacity = '0';
-                    weightInput.value = '';
-                    statusMessage.innerText = '請設定右側施力臂與施力重量，然後點擊「測試平衡」。';
-                    statusMessage.className = 'text-lg font-bold text-slate-500 mb-6 h-8 text-center';
-                    conclusionBox.classList.add('hidden');
-                }
-            });
-
         });
+
+        // --- 實驗操作區 (測量氣溫實驗) ---
+        function selectTime(timeId) {
+            currentTime = timeId;
+            updateExperimentUI();
+        }
+
+        function updateExperimentUI() {
+            // 更新時間按鈕樣式
+            ['morning', 'noon', 'afternoon'].forEach(time => {
+                const btn = document.getElementById(`btn-${time}`);
+                if (time === currentTime) {
+                    btn.className = "flex-1 py-3 px-2 rounded-xl font-bold flex flex-col items-center gap-1 transition-all bg-white shadow-lg border-2 border-blue-400 scale-105 z-10";
+                } else {
+                    btn.className = "flex-1 py-3 px-2 rounded-xl font-bold flex flex-col items-center gap-1 transition-all bg-white/50 text-gray-500 hover:bg-white/80 border-2 border-transparent";
+                }
+            });
+
+            const data = expData[currentTime];
+            
+            // 更新文字與數值
+            document.getElementById('current-time-label').innerText = data.label;
+            document.getElementById('current-time-temp-large').innerText = `${data.temp}°C`;
+            document.getElementById('thermo-exp-text').innerText = `${data.temp}°C`;
+            
+            // 更新溫度計紅柱高度
+            const fillHeight = Math.max(0, Math.min(100, (data.temp / 50) * 100));
+            document.getElementById('thermo-exp-fill').style.height = `${fillHeight}%`;
+
+            // 更新按鈕狀態
+            const recordBtn = document.getElementById('btn-record');
+            if (records[currentTime] !== null) {
+                recordBtn.innerText = '已記錄';
+                recordBtn.className = "py-3 px-6 rounded-xl font-bold text-white shadow-md transition-all bg-gray-400 cursor-not-allowed";
+                recordBtn.disabled = true;
+            } else {
+                recordBtn.innerText = '測量並記錄';
+                recordBtn.className = "py-3 px-6 rounded-xl font-bold text-white shadow-md transition-all bg-green-500 hover:bg-green-600 hover:-translate-y-1";
+                recordBtn.disabled = false;
+            }
+        }
+
+        function recordTemperature() {
+            if (records[currentTime] !== null) return;
+
+            // 記錄數值
+            records[currentTime] = expData[currentTime].temp;
+            
+            // 更新表格
+            document.getElementById(`table-val-${currentTime}`).innerText = records[currentTime];
+            
+            // 更新介面
+            updateExperimentUI();
+
+            // 檢查是否全部記錄完成
+            if (records.morning && records.noon && records.afternoon) {
+                setTimeout(() => {
+                    document.getElementById('conclusion-box').classList.remove('hidden');
+                    document.getElementById('experiment-hint').classList.add('hidden');
+                }, 500);
+            }
+        }
+
+        function resetExperiment() {
+            // 清空記錄
+            records = { morning: null, noon: null, afternoon: null };
+            
+            // 清空表格
+            ['morning', 'noon', 'afternoon'].forEach(time => {
+                document.getElementById(`table-val-${time}`).innerText = '-';
+            });
+            
+            // 隱藏結論
+            document.getElementById('conclusion-box').classList.add('hidden');
+            document.getElementById('experiment-hint').classList.remove('hidden');
+            
+            // 回到早上
+            selectTime('morning');
+        }
+
     </script>
 </body>
 </html>
