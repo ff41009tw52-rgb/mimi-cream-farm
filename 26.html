@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手臂肌肉動一動 - 科學農場</title>
+    <!-- 引入 Tailwind CSS 作為快速排版與設計樣式 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 自訂滑桿樣式，增加兒童友善的觸感 */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 36px;
+            width: 36px;
+            border-radius: 50%;
+            background: #f59e0b;
+            cursor: pointer;
+            margin-top: -12px;
+            border: 4px solid #fff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 12px;
+            cursor: pointer;
+            background: #d1d5db;
+            border-radius: 6px;
+        }
+        /* 動畫過渡設定 */
+        path, g, line, circle {
+            transition: all 0.1s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-sky-50 font-sans text-gray-800 min-h-screen pb-12">
+
+    <!-- 頂部導覽列 -->
+    <header class="bg-emerald-500 text-white p-4 flex flex-wrap items-center justify-between shadow-md gap-4">
+        <!-- 左上角：回農場首頁按鈕 -->
+        <a href="index.html" class="flex items-center gap-2 bg-white text-emerald-600 hover:text-emerald-800 px-4 py-2 rounded-full font-bold shadow-sm hover:shadow-md transition duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+            </svg>
+            回農場首頁
+        </a>
+        <h1 class="text-xl md:text-2xl font-black tracking-wider flex-1 text-center">💪 手臂肌肉動一動</h1>
+        <div class="hidden md:block w-36"></div> <!-- 佔位符以保持標題置中 -->
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 mt-6 flex flex-col gap-6">
+
+        <!-- 互動操作區 -->
+        <div class="bg-white rounded-3xl shadow-lg p-6 border-4 border-sky-100 flex flex-col items-center">
+            <h2 class="text-2xl font-bold text-sky-800 mb-6 text-center border-b-2 border-sky-200 pb-2 inline-block">🛠️ 觀察肌肉與骨骼的連動</h2>
+            
+            <!-- 狀態顯示卡片 -->
+            <div class="flex w-full max-w-2xl justify-between mb-6 gap-4 text-center">
+                <div class="flex-1 bg-green-50 rounded-xl p-3 border-2 border-green-200 shadow-sm">
+                    <p class="font-bold text-green-700 text-lg">內側肌肉 (綠色)</p>
+                    <p id="innerStatus" class="text-2xl font-black text-green-500 mt-1">舒張</p>
+                </div>
+                <div class="flex-1 bg-pink-50 rounded-xl p-3 border-2 border-pink-200 shadow-sm">
+                    <p class="font-bold text-pink-700 text-lg">外側肌肉 (粉色)</p>
+                    <p id="outerStatus" class="text-2xl font-black text-red-500 mt-1">收縮</p>
+                </div>
+            </div>
+
+            <!-- SVG 互動模型 -->
+            <div class="w-full max-w-2xl bg-sky-50 rounded-2xl border-2 border-sky-200 overflow-hidden relative shadow-inner" style="height: 380px;">
+                <!-- 調整 viewBox，擴大整體空間並將字體放大，避免手臂遮擋 -->
+                <svg viewBox="-40 -80 540 440" class="w-full h-full">
+                    <!-- 定義陰影與濾鏡 -->
+                    <defs>
+                        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feDropShadow dx="2" dy="4" stdDeviation="3" flood-opacity="0.2"/>
+                        </filter>
+                    </defs>
+
+                    <!-- ====== 底層：透視版手臂皮膚 (變細、正常比例) ====== -->
+                    <!-- 上臂皮膚外框 -->
+                    <path id="upperArmSkin" d="M 100 120 Q 195 120 260 125 A 25 25 0 0 1 260 175 Q 195 210 100 180 Q 80 150 100 120 Z" fill="#fff7ed" stroke="#fb923c" stroke-width="3" filter="url(#shadow)" />
+
+                    <!-- 旋轉組群：前臂與手 -->
+                    <g id="forearmGroup" transform="rotate(0, 260, 150)">
+                        
+                        <!-- 完整的前臂與手掌外廓 (變細) -->
+                        <path d="
+                            M 260 125 
+                            Q 320 132 375 136 
+                            Q 390 120 400 125 Q 395 135 385 138 
+                            L 420 138 A 4 4 0 0 1 420 146 L 415 146 
+                            L 425 146 A 4 4 0 0 1 425 154 L 415 154 
+                            L 420 154 A 4 4 0 0 1 420 162 L 410 162 
+                            L 410 162 A 4.5 4.5 0 0 1 410 170 
+                            L 375 164 
+                            Q 320 168 260 175 
+                            A 25 25 0 0 1 260 125 Z" 
+                            fill="#fff7ed" stroke="#fb923c" stroke-width="3" stroke-linejoin="round" filter="url(#shadow)" />
+                        
+                        <!-- 手指的分隔線 -->
+                        <line x1="390" y1="142" x2="415" y2="142" stroke="#fb923c" stroke-width="2" stroke-linecap="round" />
+                        <line x1="390" y1="150" x2="415" y2="150" stroke="#fb923c" stroke-width="2" stroke-linecap="round" />
+                        <line x1="385" y1="158" x2="410" y2="158" stroke="#fb923c" stroke-width="2" stroke-linecap="round" />
+
+                        <!-- 前臂骨 (變細) -->
+                        <g>
+                            <line x1="260" y1="150" x2="380" y2="150" stroke="#cbd5e1" stroke-width="16" stroke-linecap="round" />
+                            <line x1="260" y1="150" x2="380" y2="150" stroke="#f8fafc" stroke-width="8" stroke-linecap="round" />
+                        </g>
+                        <!-- 手腕關節節點 -->
+                        <circle cx="380" cy="150" r="6" fill="#cbd5e1" />
+                        <circle cx="380" cy="150" r="3" fill="#f8fafc" />
+                    </g>
+
+                    <!-- 骨骼結構：上臂骨 (變細) -->
+                    <g>
+                        <!-- 外框 -->
+                        <line x1="120" y1="150" x2="260" y2="150" stroke="#cbd5e1" stroke-width="20" stroke-linecap="round" />
+                        <!-- 內底 -->
+                        <line x1="120" y1="150" x2="260" y2="150" stroke="#f8fafc" stroke-width="12" stroke-linecap="round" />
+                    </g>
+
+                    <!-- 關節點 (肩膀與手肘) -->
+                    <!-- 肩膀 -->
+                    <circle cx="120" cy="150" r="14" fill="#cbd5e1" />
+                    <circle cx="120" cy="150" r="8" fill="#f8fafc" />
+                    <!-- 手肘關節 (放在最上層連接) -->
+                    <circle cx="260" cy="150" r="12" fill="#f59e0b" filter="url(#shadow)" />
+                    <circle cx="260" cy="150" r="6" fill="#fef3c7" />
+
+                    <!-- ====== 頂層：肌肉層 (變細，更貼合正常手臂) ====== -->
+                    <!-- 內側肌肉 (二頭肌 - 綠色) -->
+                    <path id="innerMuscle" d="M 120 140 Q 195 125 260 140 Q 195 145 120 140 Z" fill="#4ade80" stroke="#16a34a" stroke-width="2" filter="url(#shadow)" opacity="0.95" />
+                    
+                    <!-- 外側肌肉 (三頭肌 - 粉色) -->
+                    <path id="outerMuscle" d="M 120 160 Q 195 155 260 160 Q 195 205 120 160 Z" fill="#f472b6" stroke="#db2777" stroke-width="2" filter="url(#shadow)" opacity="0.95" />
+
+                    <!-- ====== 標示文字與指引線 (錯開位置，避免文字重疊) ====== -->
+                    <g font-size="18" font-weight="bold">
+                        <!-- 肩膀標示 (移至左上方) -->
+                        <line x1="40" y1="90" x2="110" y2="135" stroke="#64748b" stroke-width="2" stroke-dasharray="4" />
+                        <text x="40" y="80" text-anchor="middle" fill="#64748b">肩膀固定端</text>
+
+                        <!-- 內側肌肉標示 (保持正上方) -->
+                        <line x1="195" y1="-20" x2="195" y2="110" stroke="#16a34a" stroke-width="2" stroke-dasharray="4" />
+                        <text x="195" y="-30" text-anchor="middle" fill="#16a34a">內側肌肉</text>
+
+                        <!-- 外側肌肉標示 (移至左下方) -->
+                        <line x1="140" y1="280" x2="185" y2="195" stroke="#db2777" stroke-width="2" stroke-dasharray="4" />
+                        <text x="140" y="305" text-anchor="middle" fill="#db2777">外側肌肉</text>
+
+                        <!-- 關節標示 (移至右下方，拉開距離) -->
+                        <line x1="310" y1="280" x2="265" y2="170" stroke="#b45309" stroke-width="2" stroke-dasharray="4" />
+                        <text x="310" y="305" text-anchor="middle" fill="#b45309">關節(連接骨頭)</text>
+                    </g>
+
+                </svg>
+            </div>
+
+            <!-- 控制滑桿 -->
+            <div class="w-full max-w-xl mt-8 bg-gray-100 p-6 rounded-2xl shadow-inner">
+                <div class="flex justify-between text-gray-600 font-bold mb-3 text-lg">
+                    <span>手臂伸直</span>
+                    <span>手臂彎曲</span>
+                </div>
+                <input type="range" id="armSlider" min="0" max="100" value="0">
+            </div>
+        </div>
+
+        <!-- 隨堂小測驗區 -->
+        <div class="bg-yellow-50 rounded-3xl shadow-lg p-6 border-4 border-yellow-300">
+            <h2 class="text-xl font-bold text-yellow-800 mb-4 flex items-center gap-2">
+                <span>📝</span> 動動腦時間：觀察後的發現
+            </h2>
+            
+            <!-- 題目 1 -->
+            <div class="bg-white p-4 rounded-xl shadow-sm mb-4 border border-yellow-100">
+                <p class="font-bold text-lg mb-3">Q1：當我們將「手臂彎曲」時，哪一側的肌肉會「收縮（變短變胖）」並牽動骨骼呢？</p>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button onclick="checkAns(this, true, 'q1-msg')" class="flex-1 py-3 px-4 rounded-xl font-bold border-2 border-gray-200 hover:border-green-400 hover:bg-green-50 transition">A. 內側肌肉 (綠色)</button>
+                    <button onclick="checkAns(this, false, 'q1-msg')" class="flex-1 py-3 px-4 rounded-xl font-bold border-2 border-gray-200 hover:border-red-400 hover:bg-red-50 transition">B. 外側肌肉 (粉色)</button>
+                </div>
+                <p id="q1-msg" class="mt-3 text-base font-bold hidden"></p>
+            </div>
+
+            <!-- 題目 2 -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-yellow-100">
+                <p class="font-bold text-lg mb-3">Q2：骨骼本身可以自己伸展、收縮來做出動作嗎？</p>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button onclick="checkAns(this, false, 'q2-msg')" class="flex-1 py-3 px-4 rounded-xl font-bold border-2 border-gray-200 hover:border-red-400 hover:bg-red-50 transition">A. 可以，骨骼會自己伸縮</button>
+                    <button onclick="checkAns(this, true, 'q2-msg')" class="flex-1 py-3 px-4 rounded-xl font-bold border-2 border-gray-200 hover:border-green-400 hover:bg-green-50 transition">B. 不行，必須依靠肌肉拉動</button>
+                </div>
+                <p id="q2-msg" class="mt-3 text-base font-bold hidden"></p>
+            </div>
+        </div>
+    </main>
+
+    <!-- 邏輯控制腳本 -->
+    <script>
+        // 取得 DOM 元素
+        const slider = document.getElementById('armSlider');
+        const forearmGroup = document.getElementById('forearmGroup');
+        const innerMuscle = document.getElementById('innerMuscle');
+        const outerMuscle = document.getElementById('outerMuscle');
+        const upperArmSkin = document.getElementById('upperArmSkin');
+        const innerStatus = document.getElementById('innerStatus');
+        const outerStatus = document.getElementById('outerStatus');
+
+        // 當滑桿變動時觸發
+        slider.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value); // 值從 0(伸直) 到 100(彎曲)
+            
+            // 1. 控制前臂旋轉角度 (0度 到 -130度)
+            const angle = -1.3 * val;
+            forearmGroup.setAttribute('transform', `rotate(${angle}, 260, 150)`);
+
+            // 2. 控制內側肌肉(綠色)的形狀變動
+            // 伸直(0): 上緣平緩(125) -> 彎曲(100): 上緣明顯隆起(75)
+            const innerCtrlY1 = 125 - (val * 0.50);
+            const innerCtrlY2 = 145;
+            innerMuscle.setAttribute('d', `M 120 140 Q 195 ${innerCtrlY1} 260 140 Q 195 ${innerCtrlY2} 120 140 Z`);
+
+            // 3. 控制外側肌肉(粉色)的形狀變動
+            // 伸直(0): 下緣明顯隆起(205) -> 彎曲(100): 下緣平緩(175)
+            const outerCtrlY1 = 155;
+            const outerCtrlY2 = 205 - (val * 0.30);
+            outerMuscle.setAttribute('d', `M 120 160 Q 195 ${outerCtrlY1} 260 160 Q 195 ${outerCtrlY2} 120 160 Z`);
+
+            // 4. 動態控制上臂皮膚跟著膨脹/收縮 (配合正常手臂比例)
+            const skinInnerY = 120 - (val * 0.50);
+            const skinOuterY = 210 - (val * 0.30);
+            upperArmSkin.setAttribute('d', `M 100 120 Q 195 ${skinInnerY} 260 125 A 25 25 0 0 1 260 175 Q 195 ${skinOuterY} 100 180 Q 80 150 100 120 Z`);
+
+            // 5. 更新狀態文字與顏色對比
+            if (val > 60) {
+                innerStatus.innerHTML = "收縮 <span class='text-sm block text-red-400'>(變短、變胖)</span>";
+                innerStatus.className = "text-2xl font-black text-red-500 mt-1"; 
+                outerStatus.innerHTML = "舒張 <span class='text-sm block text-gray-400'>(變長、變細)</span>";
+                outerStatus.className = "text-2xl font-black text-gray-400 mt-1";
+            } else if (val < 40) {
+                innerStatus.innerHTML = "舒張 <span class='text-sm block text-gray-400'>(變長、變細)</span>";
+                innerStatus.className = "text-2xl font-black text-gray-400 mt-1";
+                outerStatus.innerHTML = "收縮 <span class='text-sm block text-red-400'>(變短、變胖)</span>";
+                outerStatus.className = "text-2xl font-black text-red-500 mt-1"; 
+            } else {
+                innerStatus.textContent = "變動中...";
+                innerStatus.className = "text-xl font-black text-gray-400 mt-2";
+                outerStatus.textContent = "變動中...";
+                outerStatus.className = "text-xl font-black text-gray-400 mt-2";
+            }
+        });
+
+        // 小測驗檢查邏輯
+        function checkAns(btn, isCorrect, msgId) {
+            // 取得該題目的所有按鈕
+            const siblings = btn.parentElement.querySelectorAll('button');
+            siblings.forEach(b => {
+                b.disabled = true; // 鎖定作答
+                b.classList.add('opacity-50', 'cursor-not-allowed');
+            });
+
+            // 顯示提示訊息
+            const msgEl = document.getElementById(msgId);
+            msgEl.classList.remove('hidden');
+
+            if (isCorrect) {
+                btn.classList.remove('border-gray-200', 'opacity-50');
+                btn.classList.add('bg-green-500', 'text-white', 'border-green-600', 'opacity-100');
+                msgEl.innerHTML = "🎉 <strong>答對了！</strong> 你觀察得非常仔細喔！";
+                msgEl.classList.add('text-green-600');
+            } else {
+                btn.classList.remove('border-gray-200', 'opacity-50');
+                btn.classList.add('bg-red-500', 'text-white', 'border-red-600', 'opacity-100');
+                msgEl.innerHTML = "🤔 <strong>再想一下喔！</strong> 可以重新拉動上面的滑桿觀察看看。";
+                msgEl.classList.add('text-red-600');
+            }
+        }
+    </script>
+</body>
+</html>

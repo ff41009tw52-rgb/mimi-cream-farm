@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自然科學實驗：槓桿原理</title>
+    <!-- 引入 Tailwind CSS 框架用於快速排版 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Chart.js 用於繪製折線圖 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* 槓桿本體的旋轉動畫設定 */
+        #lever-beam {
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform-origin: center center;
+        }
+        /* 砝碼掛勾動畫 */
+        .weight-transition {
+            transition: left 0.3s ease, height 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen pb-12">
+
+    <div class="max-w-5xl mx-auto px-4 py-8">
+        
+        <!-- 標題區 -->
+        <header class="text-center mb-4">
+            <h1 class="text-2xl md:text-3xl font-bold text-teal-700 mb-2">自然科學實驗：槓桿原理</h1>
+            <p class="text-slate-500 text-sm md:text-base max-w-2xl mx-auto">
+                本實驗旨在驗證「當抗力臂與抗力固定，施力臂越長，施力越小」。<br>
+                請操作下方實驗器，找出不同施力臂長度下能使槓桿平衡的砝碼重量。
+            </p>
+        </header>
+
+        <!-- 主要互動區：上部分為圖解，下部分為控制 -->
+        <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden mb-8">
+            
+            <!-- 實驗情境說明標籤 -->
+            <div class="bg-teal-50 px-6 py-3 border-b border-teal-100 flex justify-between items-center">
+                <span class="font-bold text-teal-800">實驗條件設定</span>
+                <span class="text-sm text-teal-600 font-medium">抗力點固定於左側第 3 格，掛載 20 克重。</span>
+            </div>
+
+            <div class="p-6 md:p-10 flex flex-col items-center">
+                
+                <!-- 視覺化槓桿模擬區 (加高整體區塊 h-72 改為 h-96) -->
+                <div class="relative w-full max-w-4xl h-96 mt-8 mb-6 bg-slate-50 rounded-xl border border-slate-100">
+                    
+                    <!-- 支點 (底座) -->
+                    <div class="absolute left-1/2 bottom-0 transform -translate-x-1/2">
+                        <!-- 柱子 (再拉長變高 h-40 改為 h-64) -->
+                        <div class="w-4 h-64 bg-gray-300 mx-auto rounded-t-sm"></div>
+                        <!-- 底部 -->
+                        <div class="w-24 h-3 bg-blue-600 mx-auto rounded-md shadow-md"></div>
+                        <!-- 支點軸心圖示 -->
+                        <div class="absolute top-2 left-1/2 transform -translate-x-1/2 w-5 h-5 bg-yellow-500 rounded-full border-4 border-white z-20"></div>
+                    </div>
+
+                    <!-- 槓桿本體 (將 left-0 w-full 改為置中並縮小寬度為 80%) -->
+                    <div class="absolute top-[calc(100%-16rem)] left-1/2 transform -translate-x-1/2 w-[90%] sm:w-[80%] h-[60px] flex items-center z-10" style="perspective: 1000px;">
+                        <div id="lever-beam" class="w-full relative">
+                            <!-- 桿子圖片/顏色 -->
+                            <div class="w-full h-10 bg-orange-400 border-2 border-orange-500 rounded flex relative shadow-sm">
+                                <!-- 刻度產生區 (由 JS 動態生成) -->
+                                <div id="ticks-container" class="absolute w-full h-full"></div>
+                            </div>
+                            
+                            <!-- 左側固定抗力 (砝碼) -->
+                            <!-- 位置：準確對齊左側第3格 (中心點50% - 3格*6.666%) = 30% -->
+                            <div class="absolute top-8 w-10 flex flex-col items-center" style="left: 30%; transform: translateX(-50%);">
+                                <div class="w-1 h-6 bg-gray-400"></div> <!-- 掛勾線 -->
+                                <div class="w-10 h-10 bg-slate-700 rounded-sm shadow-md text-white flex items-center justify-center text-xs font-bold relative">
+                                    20g
+                                    <!-- 示意掛載兩個砝碼 -->
+                                    <div class="absolute top-1/2 left-0 w-full border-b border-slate-500"></div>
+                                </div>
+                                <span class="text-xs font-bold text-blue-600 mt-1">抗力點</span>
+                            </div>
+
+                            <!-- 右側動態施力 (砝碼) -->
+                            <div id="effort-weight-visual" class="absolute top-8 w-10 flex flex-col items-center weight-transition" style="left: 60%; transform: translateX(-50%); opacity: 0;">
+                                <div class="w-1 h-6 bg-gray-400"></div> <!-- 掛勾線 -->
+                                <div id="effort-weight-box" class="w-10 bg-emerald-600 rounded-sm shadow-md text-white flex items-center justify-center text-xs font-bold transition-all duration-300" style="height: 40px;">
+                                    ?g
+                                </div>
+                                <span class="text-xs font-bold text-emerald-600 mt-1">施力點</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 狀態提示訊息 -->
+                <div id="status-message" class="text-lg font-bold text-slate-500 mb-6 h-8 text-center transition-colors duration-300">
+                    請設定右側施力臂與施力重量，然後點擊「測試平衡」。
+                </div>
+
+                <!-- 控制面板 -->
+                <div class="w-full max-w-2xl bg-slate-100 p-6 rounded-xl flex flex-col md:flex-row gap-6 items-end">
+                    <div class="flex-1 w-full">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">施力臂長度 (支點右邊第幾格)</label>
+                        <select id="arm-select" class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-lg">
+                            <option value="1">第 1 格</option>
+                            <option value="2">第 2 格</option>
+                            <option value="3">第 3 格</option>
+                            <option value="4">第 4 格</option>
+                            <option value="5">第 5 格</option>
+                            <option value="6">第 6 格</option>
+                        </select>
+                    </div>
+                    <div class="flex-1 w-full">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">施力點的重量 (克重)</label>
+                        <input type="number" id="weight-input" min="1" max="100" placeholder="輸入重量 (例如: 30)" class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-lg">
+                    </div>
+                    <div class="w-full md:w-auto">
+                        <button id="test-btn" class="w-full md:w-auto px-8 py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg transition-colors shadow-md text-lg active:scale-95 transform">
+                            測試平衡
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 實驗結果記錄與圖表區 (左右並排顯示) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- 數據表格區 -->
+            <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden flex flex-col">
+                <div class="bg-emerald-50 px-6 py-4 border-b border-emerald-100 flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-emerald-800">實驗結果紀錄表</h2>
+                    <button id="reset-btn" class="text-sm px-3 py-1 bg-white border border-emerald-200 text-emerald-600 rounded hover:bg-emerald-100 transition-colors">清除數據</button>
+                </div>
+                <div class="p-0 overflow-x-auto flex-1">
+                    <table class="w-full text-center text-sm md:text-base border-collapse">
+                        <thead>
+                            <tr class="bg-emerald-600 text-white">
+                                <th class="py-3 px-2 border-r border-emerald-500 w-1/4">抗力臂長度<br><span class="text-xs font-normal">(格)</span></th>
+                                <th class="py-3 px-2 border-r border-emerald-500 w-1/4">抗力點重量<br><span class="text-xs font-normal">(克重)</span></th>
+                                <th class="py-3 px-2 border-r border-emerald-500 w-1/4">施力臂長度<br><span class="text-xs font-normal">(格)</span></th>
+                                <th class="py-3 px-2 w-1/4">施力點重量<br><span class="text-xs font-normal">(克重)</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-table-body">
+                            <!-- 數據將由 JS 動態填入 -->
+                            <tr>
+                                <td colspan="4" class="py-8 text-slate-400 italic bg-slate-50">尚未記錄任何平衡數據，請操作上方實驗器。</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 折線圖區 -->
+            <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden flex flex-col">
+                <div class="bg-indigo-50 px-6 py-4 border-b border-indigo-100">
+                    <h2 class="text-xl font-bold text-indigo-800">施力臂與施力重量關係圖</h2>
+                </div>
+                <div class="p-6 flex-1 flex items-center justify-center min-h-[300px]">
+                    <canvas id="experimentChart" class="w-full max-h-[350px]"></canvas>
+                </div>
+                <div id="conclusion-box" class="px-6 py-4 bg-indigo-600 text-white text-center font-bold text-lg hidden">
+                    結論：當抗力臂與抗力固定，施力臂越長，施力越小。
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JavaScript 邏輯 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- 常數設定 (依據課本設定) ---
+            const FIXED_RESISTANCE_ARM = 3;  // 抗力臂 3 格
+            const FIXED_RESISTANCE = 20;     // 抗力 20 克重
+            const FIXED_TORQUE = FIXED_RESISTANCE_ARM * FIXED_RESISTANCE; // 左側固定力矩 = 60
+
+            // --- DOM 元素取得 ---
+            const leverBeam = document.getElementById('lever-beam');
+            const armSelect = document.getElementById('arm-select');
+            const weightInput = document.getElementById('weight-input');
+            const testBtn = document.getElementById('test-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const statusMessage = document.getElementById('status-message');
+            const tableBody = document.getElementById('data-table-body');
+            const ticksContainer = document.getElementById('ticks-container');
+            const effortVisual = document.getElementById('effort-weight-visual');
+            const effortBox = document.getElementById('effort-weight-box');
+            const conclusionBox = document.getElementById('conclusion-box');
+
+            // 儲存已找到平衡的數據
+            let balancedData = new Map(); // 使用 Map 以 arm 為 key 避免重複記錄
+
+            // 定義刻度間距 (12格佔據 80% 的寬度，每格約 6.666%)
+            const TICK_STEP_PCT = 80 / 12;
+
+            // --- 繪製槓桿刻度 ---
+            function drawTicks() {
+                ticksContainer.innerHTML = '';
+                // 畫 13 個點 (包含正中央支點 0)
+                for (let i = -6; i <= 6; i++) {
+                    const tick = document.createElement('div');
+                    tick.className = 'flex flex-col items-center justify-center absolute top-0 h-full';
+                    // 精確定位：50% 為中心點
+                    tick.style.left = `${50 + (i * TICK_STEP_PCT)}%`;
+                    tick.style.transform = 'translateX(-50%)';
+                    
+                    // 標數字 (調整位置為 -top-7 並稍微加大為 text-xs)
+                    const num = document.createElement('span');
+                    num.className = 'absolute -top-7 text-xs font-bold text-slate-700';
+                    if (i !== 0) {
+                        num.innerText = Math.abs(i);
+                    }
+                    
+                    // 刻度點 (白色小圓點)
+                    const dot = document.createElement('div');
+                    dot.className = 'w-2 h-2 bg-white rounded-full border border-slate-300';
+                    
+                    tick.appendChild(num);
+                    tick.appendChild(dot);
+                    ticksContainer.appendChild(tick);
+                }
+            }
+            drawTicks();
+
+            // --- 折線圖初始化 (Chart.js) ---
+            const ctx = document.getElementById('experimentChart').getContext('2d');
+            const chartConfig = {
+                type: 'line',
+                data: {
+                    labels: ['1', '2', '3', '4', '5', '6'], // X 軸：施力臂長度
+                    datasets: [{
+                        label: '施力點的重量 (克重)',
+                        data: [null, null, null, null, null, null], // 初始為空
+                        borderColor: 'rgb(245, 158, 11)', // 橘黃色線條
+                        backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgb(59, 130, 246)', // 藍色資料點
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        tension: 0.3 // 曲線平滑度
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: { display: true, text: '施力臂長度 (格)' },
+                            grid: { color: '#e2e8f0' }
+                        },
+                        y: {
+                            title: { display: true, text: '施力點的重量 (克重)' },
+                            min: 0,
+                            max: 70, // 設定最大值讓圖表比例固定
+                            grid: { color: '#e2e8f0' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false } // 隱藏圖例，因為標題已經很清楚
+                    }
+                }
+            };
+            let experimentChart = new Chart(ctx, chartConfig);
+
+            // --- 更新視覺畫面 ---
+            function updateVisuals(arm, weight, tiltStatus) {
+                // 1. 移動施力點位置
+                // 透過 TICK_STEP_PCT 讓砝碼精確對齊刻度線
+                const newLeftPos = 50 + (arm * TICK_STEP_PCT);
+                
+                effortVisual.style.left = `${newLeftPos}%`;
+                effortVisual.style.opacity = '1';
+
+                // 2. 改變施力點視覺大小與文字
+                effortBox.innerText = `${weight}g`;
+                const newHeight = Math.max(30, Math.min(80, 20 + (weight * 0.8))); // 視覺化高度
+                effortBox.style.height = `${newHeight}px`;
+
+                // 3. 旋轉槓桿
+                if (tiltStatus === 'left') {
+                    leverBeam.style.transform = 'rotate(-12deg)';
+                    statusMessage.innerText = '⚠️ 哎呀！左邊比較重，槓桿向左傾斜了。試著增加重量！';
+                    statusMessage.className = 'text-lg font-bold text-red-500 mb-6 h-8 text-center';
+                } else if (tiltStatus === 'right') {
+                    leverBeam.style.transform = 'rotate(12deg)';
+                    statusMessage.innerText = '⚠️ 哎呀！右邊比較重，槓桿向右傾斜了。試著減少重量！';
+                    statusMessage.className = 'text-lg font-bold text-red-500 mb-6 h-8 text-center';
+                } else {
+                    leverBeam.style.transform = 'rotate(0deg)';
+                    statusMessage.innerText = '🎉 太棒了！槓桿達到水平平衡！數據已記錄。';
+                    statusMessage.className = 'text-lg font-bold text-emerald-600 mb-6 h-8 text-center';
+                }
+            }
+
+            // --- 更新表格與圖表 ---
+            function recordSuccessData(arm, weight) {
+                // 存入 Map
+                balancedData.set(arm, weight);
+
+                // 重繪表格
+                tableBody.innerHTML = '';
+                // 將 Map 轉換為陣列並按 arm 長度排序
+                const sortedData = Array.from(balancedData.entries()).sort((a, b) => a[0] - b[0]);
+                
+                sortedData.forEach(([a, w]) => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'border-b border-slate-100 hover:bg-slate-50 transition-colors';
+                    tr.innerHTML = `
+                        <td class="py-3 px-2 border-r border-slate-200">${FIXED_RESISTANCE_ARM}</td>
+                        <td class="py-3 px-2 border-r border-slate-200">${FIXED_RESISTANCE}</td>
+                        <td class="py-3 px-2 border-r border-slate-200 font-bold text-teal-700">${a}</td>
+                        <td class="py-3 px-2 font-bold text-teal-700">${w}</td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+
+                // 更新折線圖
+                // Chart.js 的 data index 對應施力臂 1~6，即 index = arm - 1
+                experimentChart.data.datasets[0].data[arm - 1] = weight;
+                experimentChart.update();
+
+                // 檢查是否六個數據都找齊了
+                if (balancedData.size === 6) {
+                    conclusionBox.classList.remove('hidden');
+                }
+            }
+
+            // --- 點擊「測試平衡」按鈕 ---
+            testBtn.addEventListener('click', () => {
+                const arm = parseInt(armSelect.value);
+                const weight = parseFloat(weightInput.value);
+
+                if (isNaN(weight) || weight <= 0) {
+                    alert('請輸入有效的施力點重量喔！');
+                    return;
+                }
+
+                // 計算右側力矩
+                const rightTorque = arm * weight;
+
+                // 判斷平衡狀態
+                if (rightTorque < FIXED_TORQUE) {
+                    updateVisuals(arm, weight, 'left');
+                } else if (rightTorque > FIXED_TORQUE) {
+                    updateVisuals(arm, weight, 'right');
+                } else {
+                    // 平衡！
+                    updateVisuals(arm, weight, 'balance');
+                    recordSuccessData(arm, weight);
+                }
+            });
+
+            // --- 點擊「清除數據」按鈕 ---
+            resetBtn.addEventListener('click', () => {
+                if(confirm('確定要清除所有實驗紀錄並重新開始嗎？')) {
+                    balancedData.clear();
+                    
+                    // 重設表格
+                    tableBody.innerHTML = `<tr><td colspan="4" class="py-8 text-slate-400 italic bg-slate-50">尚未記錄任何平衡數據，請操作上方實驗器。</td></tr>`;
+                    
+                    // 重設圖表
+                    experimentChart.data.datasets[0].data = [null, null, null, null, null, null];
+                    experimentChart.update();
+                    
+                    // 重設視覺與提示
+                    leverBeam.style.transform = 'rotate(0deg)';
+                    effortVisual.style.opacity = '0';
+                    weightInput.value = '';
+                    statusMessage.innerText = '請設定右側施力臂與施力重量，然後點擊「測試平衡」。';
+                    statusMessage.className = 'text-lg font-bold text-slate-500 mb-6 h-8 text-center';
+                    conclusionBox.classList.add('hidden');
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>

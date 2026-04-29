@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>虹吸現象實驗室</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 水流動的動畫效果 */
+        @keyframes flowAnimation {
+            from { stroke-dashoffset: 20; }
+            to { stroke-dashoffset: 0; }
+        }
+        .flowing-water {
+            stroke-dasharray: 10 10;
+            animation: flowAnimation 0.5s linear infinite;
+        }
+        /* 自定義 range slider 樣式 */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #e5e7eb;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-sky-50 min-h-screen font-sans text-gray-800">
+
+    <!-- 導覽列 -->
+    <nav class="bg-white shadow-sm px-4 py-3 flex items-center relative z-10">
+        <a href="index.html" class="flex items-center text-blue-600 hover:text-blue-800 font-bold transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            回農場
+        </a>
+        <h1 class="text-xl font-bold text-center flex-grow text-gray-700 mr-20">💧 虹吸現象互動實驗</h1>
+    </nav>
+
+    <!-- 主要內容區 -->
+    <main class="container mx-auto px-4 py-6 max-w-5xl">
+        
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+            
+            <!-- 左側/上方：控制面板 -->
+            <div class="md:col-span-4 bg-white rounded-2xl shadow-md p-6 flex flex-col space-y-6">
+                <div>
+                    <h2 class="text-lg font-bold text-blue-700 border-b-2 border-blue-200 pb-2 mb-3">🛠️ 實驗步驟</h2>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li class="flex items-start">
+                            <span class="bg-blue-100 text-blue-800 rounded-full w-5 h-5 flex items-center justify-center font-bold text-xs mr-2 mt-0.5 shrink-0">1</span>
+                            <span>觀察左邊較高水箱的紅色虛線（水面高度）。</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="bg-blue-100 text-blue-800 rounded-full w-5 h-5 flex items-center justify-center font-bold text-xs mr-2 mt-0.5 shrink-0">2</span>
+                            <span>拖拉滑桿，改變右邊「出水口」的高低位置。</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="bg-blue-100 text-blue-800 rounded-full w-5 h-5 flex items-center justify-center font-bold text-xs mr-2 mt-0.5 shrink-0">3</span>
+                            <span>點擊「將水管裝滿水」，觀察水是否順利流出！</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 控制器 -->
+                <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">
+                        上下調整出水口位置：
+                    </label>
+                    <input type="range" id="outletSlider" min="80" max="350" value="150" class="mb-4">
+                    
+                    <button id="fillBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-sm mb-3">
+                        將水管裝滿水
+                    </button>
+                    
+                    <button id="resetBtn" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-xl transition-colors">
+                        重置實驗
+                    </button>
+                </div>
+
+                <!-- 狀態顯示 -->
+                <div id="statusBox" class="bg-orange-50 border-l-4 border-orange-400 p-4 rounded-r-lg">
+                    <p class="font-bold text-orange-800 text-sm">💡 觀察重點：</p>
+                    <p id="statusText" class="text-orange-700 mt-1 text-sm font-medium">請先調整出水口，然後將水管裝滿水。</p>
+                </div>
+            </div>
+
+            <!-- 右側/下方：視覺化畫布 -->
+            <div class="md:col-span-8 bg-white rounded-2xl shadow-md overflow-hidden relative border border-gray-100 flex items-center justify-center">
+                <!-- 使用 SVG 確保在所有設備上的縮放比例與清晰度 -->
+                <svg id="experimentCanvas" viewBox="0 0 600 450" class="w-full h-auto max-h-[60vh] object-contain bg-slate-50">
+                    
+                    <!-- 背景裝飾 -->
+                    <rect x="0" y="300" width="300" height="150" fill="#e2e8f0" rx="4" /> <!-- 左邊高台 -->
+                    <rect x="300" y="420" width="300" height="30" fill="#e2e8f0" rx="4" /> <!-- 右邊平地 -->
+
+                    <!-- 容器 A (左高) -->
+                    <path d="M 50,150 L 50,300 L 250,300 L 250,150" fill="none" stroke="#94a3b8" stroke-width="4" />
+                    <!-- 容器 A 的水 -->
+                    <rect id="waterA" x="52" y="160" width="196" height="138" fill="rgba(56, 189, 248, 0.5)" />
+                    <!-- 容器 A 的水面基準線 -->
+                    <line id="waterLevelLine" x1="20" y1="160" x2="580" y2="160" stroke="#ef4444" stroke-width="2" stroke-dasharray="6,6" />
+                    <text id="waterLevelText" x="25" y="150" fill="#ef4444" font-size="14" font-weight="bold">高處水面</text>
+
+                    <!-- 容器 B (右低) -->
+                    <path d="M 330,280 L 330,420 L 530,420 L 530,280" fill="none" stroke="#94a3b8" stroke-width="4" />
+                    <!-- 容器 B 的水 -->
+                    <rect id="waterB" x="332" y="400" width="196" height="18" fill="rgba(56, 189, 248, 0.5)" />
+
+                    <!-- 水管 (空) -->
+                    <path id="tubeEmpty" d="M 150,290 L 150,80 Q 150,40 190,40 L 410,40 Q 450,40 450,80 L 450,150" fill="none" stroke="#cbd5e1" stroke-width="16" stroke-linecap="round" />
+                    
+                    <!-- 水管 (有水) -->
+                    <path id="tubeWater" d="M 150,290 L 150,80 Q 150,40 190,40 L 410,40 Q 450,40 450,80 L 450,150" fill="none" stroke="#38bdf8" stroke-width="10" stroke-linecap="round" style="opacity: 0; transition: opacity 0.3s;" />
+                    
+                    <!-- 水管內流動的波紋動畫 -->
+                    <path id="tubeFlow" d="M 150,290 L 150,80 Q 150,40 190,40 L 410,40 Q 450,40 450,80 L 450,150" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" style="opacity: 0;" />
+
+                    <!-- 自由落下的水柱 -->
+                    <rect id="fallingWater" x="445" y="150" width="10" height="0" fill="#38bdf8" style="opacity: 0;" />
+
+                    <!-- 出水口標示箭頭與文字 -->
+                    <g id="outletMarker">
+                        <polygon points="475,150 490,143 490,157" fill="#f59e0b" />
+                        <text x="495" y="155" fill="#d97706" font-size="16" font-weight="bold">出水口</text>
+                    </g>
+
+                </svg>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // DOM 元素選取
+        const slider = document.getElementById('outletSlider');
+        const fillBtn = document.getElementById('fillBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const statusText = document.getElementById('statusText');
+        const statusBox = document.getElementById('statusBox');
+        
+        // SVG 元素
+        const waterA = document.getElementById('waterA');
+        const waterB = document.getElementById('waterB');
+        const waterLevelLine = document.getElementById('waterLevelLine');
+        const waterLevelText = document.getElementById('waterLevelText');
+        const tubeEmpty = document.getElementById('tubeEmpty');
+        const tubeWater = document.getElementById('tubeWater');
+        const tubeFlow = document.getElementById('tubeFlow');
+        const fallingWater = document.getElementById('fallingWater');
+        const outletMarker = document.getElementById('outletMarker');
+
+        // 實驗狀態與常數
+        const TANK_A_BOTTOM = 298;
+        const TANK_B_BOTTOM = 418;
+        const TUBE_INTAKE = 290; // 管子左側吸水口高度
+        const MAX_WATER_A = 138;
+        
+        let state = {
+            waterLevelA: 138, // 水量高度
+            waterLevelB: 18,  // 水量高度
+            outletY: 150,     // 出水口 Y 座標 (越大代表位置越低)
+            isTubeFilled: false,
+            isFlowing: false,
+            animationFrame: null
+        };
+
+        // 更新視覺呈現
+        function updateVisuals() {
+            // 1. 更新容器 A 水位
+            const currentY_A = TANK_A_BOTTOM - state.waterLevelA;
+            waterA.setAttribute('y', currentY_A);
+            waterA.setAttribute('height', Math.max(0, state.waterLevelA));
+            
+            // 更新紅色基準線
+            waterLevelLine.setAttribute('y1', currentY_A);
+            waterLevelLine.setAttribute('y2', currentY_A);
+            waterLevelText.setAttribute('y', currentY_A - 10);
+
+            // 2. 更新容器 B 水位
+            const currentY_B = TANK_B_BOTTOM - state.waterLevelB;
+            waterB.setAttribute('y', currentY_B);
+            waterB.setAttribute('height', Math.max(0, state.waterLevelB));
+
+            // 3. 更新管子形狀與出水口位置
+            // 管子路徑: M 150,290 -> 上去 -> 彎曲 -> M 450, outletY
+            const pathData = `M 150,290 L 150,80 Q 150,40 190,40 L 410,40 Q 450,40 450,80 L 450,${state.outletY}`;
+            tubeEmpty.setAttribute('d', pathData);
+            tubeWater.setAttribute('d', pathData);
+            tubeFlow.setAttribute('d', pathData);
+
+            // 4. 更新出水口標示
+            outletMarker.setAttribute('transform', `translate(0, ${state.outletY - 150})`);
+
+            // 5. 更新狀態與動畫
+            if (state.isTubeFilled) {
+                tubeWater.style.opacity = "1";
+                
+                // 判斷是否流動：出水口必須低於 A 容器的水面 (在 SVG 座標中，Y 越大代表越低)
+                if (state.outletY > currentY_A && state.waterLevelA > (TANK_A_BOTTOM - TUBE_INTAKE)) {
+                    state.isFlowing = true;
+                    tubeFlow.style.opacity = "1";
+                    tubeFlow.classList.add('flowing-water');
+                    
+                    // 落下水柱
+                    fallingWater.style.opacity = "1";
+                    fallingWater.setAttribute('y', state.outletY);
+                    // 水柱長度為出水口到 B 容器水面的距離
+                    const dropDistance = currentY_B - state.outletY;
+                    fallingWater.setAttribute('height', dropDistance > 0 ? dropDistance : 0);
+                    
+                    statusBox.className = "bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg";
+                    statusText.className = "text-green-700 mt-1 text-sm font-medium";
+                    statusText.innerHTML = "✅ <b>水正在流動！</b><br>因為水管充滿水，且出水口位置「低於」高處水面，形成了<b>虹吸現象</b>。";
+                } else {
+                    state.isFlowing = false;
+                    tubeFlow.style.opacity = "0";
+                    tubeFlow.classList.remove('flowing-water');
+                    fallingWater.style.opacity = "0";
+                    
+                    statusBox.className = "bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg";
+                    statusText.className = "text-red-700 mt-1 text-sm font-medium";
+                    
+                    if (state.waterLevelA <= (TANK_A_BOTTOM - TUBE_INTAKE)) {
+                         statusText.innerHTML = "🚫 <b>水流停止了！</b><br>因為高處的水已經低於吸水管口，空氣跑進管子裡破壞了虹吸現象。";
+                         state.isTubeFilled = false; // 管子進空氣，水空了
+                         tubeWater.style.opacity = "0";
+                    } else {
+                         statusText.innerHTML = "⏸️ <b>水停止流動！</b><br>出水口位置「高於」或「等於」高處水面，水無法流出。";
+                    }
+                }
+            } else {
+                tubeWater.style.opacity = "0";
+                tubeFlow.style.opacity = "0";
+                tubeFlow.classList.remove('flowing-water');
+                fallingWater.style.opacity = "0";
+                
+                // 如果沒有裝水時的提示
+                if (!state.isFlowing) {
+                    statusBox.className = "bg-orange-50 border-l-4 border-orange-400 p-4 rounded-r-lg";
+                    statusText.className = "text-orange-700 mt-1 text-sm font-medium";
+                    statusText.innerHTML = "準備好後，請點擊「將水管裝滿水」按鈕。";
+                }
+            }
+        }
+
+        // 實驗主迴圈 (物理模擬)
+        function gameLoop() {
+            if (state.isFlowing) {
+                // 水流速度
+                const flowRate = 0.5;
+                state.waterLevelA -= flowRate;
+                
+                // 防止 B 容器溢出 (設定最大高度)
+                if (state.waterLevelB < 135) {
+                    state.waterLevelB += flowRate;
+                }
+                
+                updateVisuals();
+            }
+            state.animationFrame = requestAnimationFrame(gameLoop);
+        }
+
+        // 事件監聽
+        slider.addEventListener('input', (e) => {
+            state.outletY = parseInt(e.target.value);
+            updateVisuals();
+        });
+
+        fillBtn.addEventListener('click', () => {
+            if (state.waterLevelA <= (TANK_A_BOTTOM - TUBE_INTAKE)) {
+                alert("高處水量不足，請先重置實驗！");
+                return;
+            }
+            state.isTubeFilled = true;
+            updateVisuals();
+        });
+
+        resetBtn.addEventListener('click', () => {
+            state.waterLevelA = MAX_WATER_A;
+            state.waterLevelB = 18;
+            state.isTubeFilled = false;
+            state.isFlowing = false;
+            updateVisuals();
+        });
+
+        // 初始化
+        updateVisuals();
+        state.animationFrame = requestAnimationFrame(gameLoop);
+
+    </script>
+</body>
+</html>
