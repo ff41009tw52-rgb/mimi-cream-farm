@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>教檢歷屆刷題系統</title>
+  <!-- 引入 Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* 全域套用標楷體 */
+    body {
+      font-family: "標楷體", "BiauKai", "DFKai-SB", "KaiTi", serif;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-gray-800">
+
+  <!-- 應用程式掛載點 -->
+  <div id="app"></div>
+
+  <script>
+    // --- 題庫資料 (Data) ---
+    const quizData = {
+      114: [
+        {
+          id: 1,
+          question: "小朱一年級時，只要心情不好就會哭鬧或罵人。升上五年級後，他心情不好時已能用深呼吸讓自己平靜下來。請問，小朱的轉變跟大腦哪一部分的成熟比較有關？",
+          options: ["(A) 松果體", "(B) 胼胝體", "(C) 前額葉", "(D) 海馬迴"],
+          answer: 2 // (C)
+        },
+        {
+          id: 2,
+          question: "小強反省這次考試失敗的原因，覺得應該是自己準備考試的方法有問題，對大部分內容都一味死記，沒有好好理解它們。依據溫納(B. Weiner)的理論，小強的歸因符合下列何者？",
+          options: ["(A) 穩定、可控制", "(B) 穩定、不可控制", "(C) 不穩定、可控制", "(D) 不穩定、不可控制"],
+          answer: 2 // (C)
+        },
+        {
+          id: 3,
+          question: "老師持續傾聽，讓學生表達感受。這樣的輔導方式符合羅吉斯(C. Rogers)人本學派的哪一個概念？",
+          options: ["(A) 賦能", "(B) 普同感", "(C) 同理心", "(D) 無條件積極關注"],
+          answer: 3 // (D)
+        }
+      ],
+      113: [
+        {
+          id: 1,
+          question: "小元是班上最擅長組裝積木模型的人，甚至不需要說明書就可以拼出複雜的物件，讓同學們都非常敬佩。若根據迦納(H. Gardner)的觀點，小元於下列何種智力展現較獨特的優勢能力？",
+          options: ["(A) 內省", "(B) 空間", "(C) 人際", "(D) 肢體動覺"],
+          answer: 1 // (B)
+        },
+        {
+          id: 2,
+          question: "兒童若能瞭解「8+6=14」，以及「14-6=8」，需要具備下列何種運思能力？",
+          options: ["(A) 集中性", "(B) 遞移性", "(C) 可逆性", "(D) 恆存性"],
+          answer: 2 // (C)
+        },
+        {
+          id: 3,
+          question: "月考後，小勤說：「我考了92分，只差1分就是全班最高分，我下次一定要考第一名。」從目標導向(goal orientation)的觀點，小勤為下次考試設定的目標屬於下列何者？",
+          options: ["(A) 逃避精熟目標", "(B) 趨向精熟目標", "(C) 逃避表現目標", "(D) 趨向表現目標"],
+          answer: 3 // (D)
+        }
+      ],
+      112: [
+        {
+          id: 1,
+          question: "下列大腦區域何者與情緒控制較有關係？",
+          options: ["(A) 額葉", "(B) 頂葉", "(C) 枕葉", "(D) 顳葉"],
+          answer: 0 // (A)
+        },
+        {
+          id: 2,
+          question: "下列何者是指「透過各種社會互動經驗，人們逐漸形成一組對自己優點、缺點、能力、態度、與價值等」的整體性知覺？",
+          options: ["(A) 自我概念", "(B) 自我效能", "(C) 自我監控", "(D) 自我管理"],
+          answer: 0 // (A)
+        },
+        {
+          id: 3,
+          question: "二年級的小華被診斷為「注意力缺陷過動症」(ADHD)的「注意力不集中型」。根據診斷，下列何者較不可能是小華會出現的臨床症狀？",
+          options: ["(A) 經常無法仔細注意細節", "(B) 在日常生活中常忘東忘西", "(C) 經常無法遵循指示完成功課", "(D) 經常在問題還沒說完時衝口說出答案"],
+          answer: 3 // (D)
+        }
+      ],
+      111: [
+        {
+          id: 1,
+          question: "依據艾瑞克森(E. Erikson)的心理社會發展理論，下列何者是學齡期兒童發展的核心議題？",
+          options: ["(A) 勤奮對自卑", "(B) 自動自發對內疚", "(C) 自主對羞愧懷疑", "(D) 自我認同對角色混淆"],
+          answer: 0 // (A)
+        },
+        {
+          id: 2,
+          question: "小光常有上課不專心、容易衝動發言、做事缺乏計畫性等行為表現。他最有可能是哪一腦區的功能有所缺損？",
+          options: ["(A) 胼胝體", "(B) 邊緣系統", "(C) 顳葉皮質區", "(D) 前額葉皮質區"],
+          answer: 3 // (D)
+        },
+        {
+          id: 3,
+          question: "下列哪一種方法不適合用於評量學齡兒童的口語敘事能力？",
+          options: ["(A) 背誦詩詞", "(B) 自述經驗", "(C) 自我介紹", "(D) 看圖說故事"],
+          answer: 0 // (A)
+        }
+      ],
+      110: [
+        {
+          id: 1,
+          question: "【110年度範例題】小明在學習過程中，能夠將新知識與舊經驗連結。這是屬於何種學習歷程？",
+          options: ["(A) 意義學習", "(B) 機械學習", "(C) 觀察學習", "(D) 制約學習"],
+          answer: 0 // (A)
+        },
+        {
+          id: 2,
+          question: "【110年度範例題】皮亞傑的認知發展理論中，兒童能理解「守恆」概念是處於哪個階段？",
+          options: ["(A) 感覺動作期", "(B) 前運思期", "(C) 具體運思期", "(D) 形式運思期"],
+          answer: 2 // (C)
+        }
+      ]
+    };
+
+    // --- 應用程式狀態 (State) ---
+    let currentView = 'home'; // 'home' 或 'quiz'
+    let selectedYear = null;
+    let answers = {}; // { questionId: selectedOptionIndex }
+    let isSubmitted = false;
+    let score = 0;
+    const years = [114, 113, 112, 111, 110];
+
+    // --- SVG 圖示 (Icons) ---
+    const icons = {
+      book: `<svg class="w-16 h-16 mx-auto mb-4 relative z-10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`,
+      arrowLeft: `<svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>`,
+      checkCircle: `<svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>`,
+      xCircle: `<svg class="w-5 h-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>`,
+      alertCircle: `<svg class="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>`
+    };
+
+    // --- 互動邏輯 (Actions) ---
+    function handleYearSelect(year) {
+      selectedYear = year;
+      answers = {};
+      isSubmitted = false;
+      score = 0;
+      currentView = 'quiz';
+      render();
+      window.scrollTo(0, 0);
+    }
+
+    function handleOptionSelect(questionId, optionIndex) {
+      if (isSubmitted) return;
+      answers[questionId] = optionIndex;
+      render();
+    }
+
+    function handleSubmit() {
+      const questions = quizData[selectedYear];
+      if (Object.keys(answers).length < questions.length) {
+        if (!window.confirm("還有題目未作答，確定要提早交卷嗎？")) {
+          return;
+        }
+      }
+
+      let currentScore = 0;
+      questions.forEach((q) => {
+        if (answers[q.id] === q.answer) {
+          currentScore += 1;
+        }
+      });
+
+      score = currentScore;
+      isSubmitted = true;
+      render();
+      window.scrollTo(0, 0);
+    }
+
+    function handleBackHome() {
+      currentView = 'home';
+      selectedYear = null;
+      render();
+    }
+
+    // --- 渲染畫面 (Render) ---
+    function render() {
+      const app = document.getElementById('app');
+
+      if (currentView === 'home') {
+        app.innerHTML = `
+          <div class="min-h-screen flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden max-w-3xl w-full">
+              <div class="bg-indigo-600 text-white p-10 text-center relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent"></div>
+                ${icons.book}
+                <h1 class="text-4xl font-bold mb-3 tracking-wider relative z-10">教檢歷屆刷題系統</h1>
+                <p class="text-indigo-100 text-lg tracking-wide relative z-10">
+                  國民小學 - 學習者發展與適性輔導（完整版 110-114）
+                </p>
+              </div>
+              <div class="p-10">
+                <h2 class="text-xl font-bold text-gray-800 text-center mb-8">
+                  選擇練習年度（共 125 題與詳解）
+                </h2>
+                <div class="flex flex-wrap justify-center gap-4">
+                  ${years.map(year => `
+                    <button
+                      onclick="handleYearSelect(${year})"
+                      class="px-6 py-3 bg-indigo-50 text-indigo-700 font-semibold rounded-lg hover:bg-indigo-600 hover:text-white hover:shadow-md transition-all duration-300 transform hover:-translate-y-1"
+                    >
+                      ${year} 年度
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (currentView === 'quiz') {
+        const questions = quizData[selectedYear] || [];
+        
+        let quizHTML = `
+          <div class="pb-20">
+            <div class="bg-white shadow-sm sticky top-0 z-50">
+              <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+                <button 
+                  onclick="handleBackHome()"
+                  class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors"
+                >
+                  ${icons.arrowLeft}
+                  返回首頁
+                </button>
+                <div class="font-bold text-xl text-indigo-900">
+                  ${selectedYear} 年度試題
+                </div>
+                <div class="text-gray-500 font-medium">
+                  完成度: ${Object.keys(answers).length} / ${questions.length}
+                </div>
+              </div>
+            </div>
+
+            <div class="max-w-4xl mx-auto px-4 mt-8">
+        `;
+
+        if (isSubmitted) {
+          quizHTML += `
+            <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-6 mb-8 text-center shadow-sm">
+              <h2 class="text-2xl font-bold text-indigo-900 mb-2">測驗結果</h2>
+              <p class="text-lg text-indigo-700">
+                您的得分：<span class="text-3xl font-black mx-2">${Math.round((score / questions.length) * 100)}</span> 分
+                <span class="text-sm ml-2">(${score} / ${questions.length} 題)</span>
+              </p>
+            </div>
+          `;
+        }
+
+        quizHTML += `<div class="space-y-8">`;
+
+        questions.forEach((q, qIndex) => {
+          let optionsHTML = q.options.map((opt, optIndex) => {
+            const isSelected = answers[q.id] === optIndex;
+            const isCorrect = q.answer === optIndex;
+            
+            let optionClass = "w-full text-left p-4 rounded-lg border-2 transition-all duration-200 flex justify-between items-center ";
+            
+            if (!isSubmitted) {
+              optionClass += isSelected 
+                ? "border-indigo-500 bg-indigo-50 text-indigo-700" 
+                : "border-gray-100 bg-gray-50 hover:border-indigo-200 hover:bg-indigo-50/50 text-gray-700";
+            } else {
+              if (isCorrect) {
+                optionClass += "border-green-500 bg-green-50 text-green-800 font-medium";
+              } else if (isSelected && !isCorrect) {
+                optionClass += "border-red-500 bg-red-50 text-red-800";
+              } else {
+                optionClass += "border-gray-100 bg-gray-50 text-gray-400 opacity-60";
+              }
+            }
+
+            let iconHTML = '';
+            if (isSubmitted && isCorrect) iconHTML = icons.checkCircle;
+            if (isSubmitted && isSelected && !isCorrect) iconHTML = icons.xCircle;
+
+            return `
+              <button
+                ${isSubmitted ? 'disabled' : ''}
+                onclick="handleOptionSelect(${q.id}, ${optIndex})"
+                class="${optionClass}"
+              >
+                <span>${opt}</span>
+                ${iconHTML}
+              </button>
+            `;
+          }).join('');
+
+          let explanationHTML = '';
+          if (isSubmitted && answers[q.id] !== q.answer) {
+            explanationHTML = `
+              <div class="mt-4 p-4 bg-orange-50 rounded-lg flex items-start text-orange-800">
+                ${icons.alertCircle}
+                <div>
+                  <span class="font-bold">正確答案：</span> ${q.options[q.answer]}
+                </div>
+              </div>
+            `;
+          }
+
+          quizHTML += `
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+              <div class="flex gap-4">
+                <div class="flex-shrink-0 w-8 h-8 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center font-bold">
+                  ${qIndex + 1}
+                </div>
+                <div class="flex-grow">
+                  <h3 class="text-lg font-medium text-gray-900 mb-4 leading-relaxed">
+                    ${q.question}
+                  </h3>
+                  <div class="space-y-3">
+                    ${optionsHTML}
+                  </div>
+                  ${explanationHTML}
+                </div>
+              </div>
+            </div>
+          `;
+        });
+
+        quizHTML += `</div>`; // 結束 space-y-8
+
+        if (!isSubmitted) {
+          quizHTML += `
+            <div class="mt-10 text-center">
+              <button
+                onclick="handleSubmit()"
+                class="px-10 py-4 bg-indigo-600 text-white font-bold text-lg rounded-xl shadow-lg hover:bg-indigo-700 hover:shadow-indigo-500/30 transition-all duration-300 transform hover:-translate-y-1"
+              >
+                確認交卷
+              </button>
+            </div>
+          `;
+        }
+
+        quizHTML += `</div></div>`;
+        app.innerHTML = quizHTML;
+      }
+    }
+
+    // 初始化渲染
+    render();
+  </script>
+</body>
+</html>
