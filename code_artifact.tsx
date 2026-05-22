@@ -1,0 +1,353 @@
+import React, { useState } from 'react';
+import { BookOpen, CheckCircle, XCircle, ChevronRight, ChevronLeft, AlertCircle, Home } from 'lucide-react';
+
+const examData = {
+  "114": [
+    { id: 1, question: "運用培根(F. Bacon)破除市場偶像(idols of the market)的論點於教學場域中，與下列哪一個教育課題最相近？", options: { A: "教導學生合作學習", B: "教導學生正向思考", C: "教導學生媒體識讀", D: "教導學生人定勝天" }, answer: "C", explanation: "培根的「市場偶像」意指人們在社會交際與溝通中，常因語言或文字的誤用與操弄而產生認知謬誤。教導學生「媒體識讀」以辨識假訊息與語言包裝，正是破除市場偶像的具體實踐。" },
+    { id: 2, question: "英熙的家長極為注重其學習過程的自我感受，為滿足其學習需求，安排參與自學團體，學生須自己掌握學習進度。此種強調以學習者為中心的教育方式較契合下列哪一項教育理念？", options: { A: "進步主義運動", B: "回歸基礎運動", C: "邁向卓越運動", D: "標準本位運動" }, answer: "A", explanation: "進步主義深受杜威影響，反對傳統教育的填鴨與權威，主張「以兒童為中心」、「從做中學」，重視學生的興趣、需求及自我感受。" },
+    { id: 3, question: "下課期間教師離開教室後，阿明和大雄兩個學生起了衝突，同學告狀：「阿明被大雄欺負哭了！」下列教師的處理方式，哪一種較符合現象學思考？", options: { A: "一個巴掌拍不響，兩人都要究責", B: "先不驟下評斷，問明事情的始末", C: "根據兩個人過往的表現來做判斷", D: "依據現場多數小朋友的判斷為準" }, answer: "B", explanation: "現象學強調「回到事物本身」，核心方法是「懸置」(epoché)或「存而不論」，即暫時放下先入為主的成見。「先不驟下評斷」正是懸置預設的表現。" },
+    { id: 4, question: "康德(Imm. Kant)主張應該把人當作目的看待，不能把人當作工具利用。下列教師的作為何者最符合把學生當作目的看待？", options: { A: "鼓勵學生用功讀書，成為同儕欽羨的好榜樣", B: "鼓勵學生勤奮努力，成為具職場即戰力的人", C: "鼓勵學生有好表現，成為為校爭光的好學生", D: "鼓勵學生自我探索，成為一個理性自律的人" }, answer: "D", explanation: "康德道德哲學強調人本身就是目的。若為了「榜樣」、「即戰力」或「為校爭光」，都是將學生視為達成其他目標的「工具」。選項D鼓勵發展理性自律，是將學生自身視為目的。" },
+    { id: 5, question: "韓愈在《師說》中提到：「師者，所以傳道、受業、解惑也。」試問下列何者最符合韓愈對教師整體圖像的描述？", options: { A: "教師如陶匠，可隨心所欲塑造學生成為好的人", B: "教師即引領入門者，啟導學生進入知識的殿堂", C: "教師即陌生人，幫助學生產生新視野來界定自己", D: "教師如大鐘，待學生主動敲響才回應其學習欲望" }, answer: "B", explanation: "韓愈賦予教師知識傳授與引導解惑的積極角色。選項B最為契合。選項A過於宰制(行為主義)，選項C為存在主義，選項D為被動觀點。" },
+    { id: 6, question: "教師運用「作者已死」的概念，引導學生分組討論並從不同視角解讀詩詞，進而讓詩詞的主題和意象更為豐富。前述教師的教學理念最符合下列哪一種主張？", options: { A: "意義具客觀性故可發現", B: "意義具同一性故可推論", C: "意義具流動性且非固定", D: "意義具普遍性且可驗證" }, answer: "C", explanation: "「作者已死」是後結構主義學者羅蘭·巴特提出的觀點，主張文本完成後意義不再由作者獨占，而是由讀者賦予。因此意義具有流動性且非固定。" },
+    { id: 7, question: "蘇格拉底的產婆法強調啟發人的理性以求知，此與下列何種教育理念最相近？", options: { A: "關注對話歷程，引導學生學會如何思考", B: "重視經典教育，以求知識的融會與貫通", C: "強調合作學習，透過同儕分工解決問題", D: "蒐集不同觀點，整理與歸納將知識內化" }, answer: "A", explanation: "蘇格拉底的「產婆法」(詰問法)透過不斷提問與反詰，幫助對方察覺無知並憑藉理性推導出真理，極度重視「對話歷程」與「引導思考」。" },
+    { id: 8, question: "教師藉由電影《飢餓遊戲》情節，讓學生運用羅爾斯(J. Rawls)正義論中的差異原則，思考資源分配如何更有利於社會正義的實現。下列何者最符合羅爾斯的觀點？", options: { A: "首都及12區平均分配資源", B: "依據每個人的社會貢獻分配", C: "強者優先以使資源有效利用", D: "應優先改善最貧困區的處境" }, answer: "D", explanation: "羅爾斯正義論包含「差異原則」，主張社會經濟的不平等分配，只有在對社會中「處境最不利者」產生最大利益時，才是符合正義的。" },
+    { id: 9, question: "教師發現小華與同學在期中考時作弊互相掩護，但小華成績優異且平常表現良好，老師猶豫是否依校規處置，因為這樣做會使小華喪失清寒獎學金的申請資格。教師此時面臨何種困境？", options: { A: "師生界線", B: "道德判斷", C: "文化差異", D: "專業發展" }, answer: "B", explanation: "教師面臨「維護校規(正義)」與「體恤弱勢(關懷)」的價值衝突，這是在做決定時對於「何謂對」的掙扎，屬於倫理學中的「道德判斷」兩難。" },
+    { id: 10, question: "短影音平臺深受年輕人喜愛，各種影片吸引用戶接力創作，許多學生跳起流行舞蹈上傳，形成獨特的文化與身分認同。下列何者最能代表此現象？", options: { A: "族群文化", B: "休閒文化", C: "反學校文化", D: "青少年次文化" }, answer: "D", explanation: "次文化是在主流社會文化中特定群體發展出的獨特行為模式。年輕人透過短影音形塑認同，正是屬於該年齡層群體的「青少年次文化」。" },
+    { id: 11, question: "根據教育社會學的觀點，下列何者最能反映「功績主義」(meritocracy)所強調的核心理念？", options: { A: "以考試分數決定升學進路", B: "特權群體易獲得優勢資源", C: "依門第關係取得晉升機會", D: "以抽籤方式確保機會均等" }, answer: "A", explanation: "功績主義主張個人的社會地位與資源分配，應取決於個人的「天賦與努力」(透過考試分數衡量)，而非世襲或特權。以考試分數決定進路最能反映此理念。" },
+    { id: 12, question: "教師在上公民課時，經常鼓勵學生討論社會現象與問題，希望學生能培養批判性思維，反思社會不平等和了解權力結構。前述教學方式最接近哪種教育理念？", options: { A: "形式教育", B: "民族教育", C: "提問式教育", D: "囤積式教育" }, answer: "C", explanation: "批判教育學學者弗雷勒批判把學生當作被動容器的「囤積式教育」，倡導「提問式教育」，強調師生透過對話共同批判社會權力結構以獲得覺醒。" },
+    { id: 13, question: "小芳發現歷史課本上的人物大多集中在社會精英，卻很少提到市井小民對社會的貢獻。她的提問反映出何種課程社會學的概念？", options: { A: "課程知識是客觀中立的", B: "課程知識適合所有學生", C: "課程知識反映普遍性真理", D: "課程知識經過選擇與排除" }, answer: "D", explanation: "新教育社會學指出，學校課程並非客觀絕對真理，而是反映優勢階級意識形態的產物。課本內容是權力運作下刻意「選擇(精英)」與「排除(小民)」的結果。" },
+    { id: 14, question: "依據現行《十二年國民基本教育課程綱要》，十一年級的數學針對未來就讀大學需求分為數學A和數學B，學生可根據不同需求修習。此描述屬於下列哪一種教育功能？", options: { A: "安置", B: "選擇", C: "照顧", D: "整合" }, answer: "B", explanation: "學校教育的「選擇」(Selection)功能是指學校依據學生的能力或未來志向，將學生分配到不同的學習路徑(如數A/數B)，以銜接未來的社會角色。" },
+    { id: 15, question: "制式化的課程評鑑若過度要求教師做填寫表格等瑣碎工作，反而讓教師無法全心投入課程與教學。下列何種概念最能解釋此現象？", options: { A: "社會化", B: "專業化", C: "去技能化", D: "再專業化" }, answer: "C", explanation: "「去技能化」(Deskilling)由阿波提出，指教師工作被分割為瑣碎的技術程序，喪失了課程設計與教學自主權，淪為純粹的執行技術工。" },
+    { id: 16, question: "部分學業名列前茅的學生會集體不到班上課，從事社團活動並認為：「我們能讀又能玩，比那些乖乖牌酷多了。」下列何者最能描述這群學生的行為？", options: { A: "權力(power)", B: "秀異(distinction)", C: "物化(reification)", D: "濡化(enculturation)" }, answer: "B", explanation: "「秀異」(Distinction)是布迪爾提出的概念，指優勢群體透過發展出特定的品味、行為模式(能讀又能玩)，來展現與眾不同，藉此與他者區隔並維持優越感。" },
+    { id: 17, question: "研究指出家庭社經地位可能影響子女選擇學校類型，導致教育系統再製社會不平等。下列何者最符合包爾斯和金帝斯「符應理論」的解釋？", options: { A: "教育系統的主要目標在於促進社會流動", B: "學校的課程設計基於學生的天賦和能力", C: "教育目的是幫助學生找到合適職業角色", D: "教育分流區隔並強化不同知識體系價值" }, answer: "D", explanation: "符應理論認為學校權威結構對應資本主義生產關係。教育分流系統實質上區隔並強化了階級差異(不同階級分配到不同價值體系)，從而再製社會不平等。" },
+    { id: 18, question: "有些學生即使學業掙扎，也會刻意在同學面前表現輕鬆，這種表裡不一致現象被形容為「鴨子症候群」。下列何種理論最能說明此現象？", options: { A: "戲劇論", B: "功能論", C: "素養論", D: "衝突論" }, answer: "A", explanation: "高夫曼的「戲劇論」(Dramaturgy)將社會互動比擬為舞台表演，人在「前台」呈現完美形象(水面上優游)，將真實掙扎隱藏在「後台」(水面下奮力划水)。" },
+    { id: 19, question: "當政策尚在研擬，決策處在問題及目標不確定情境，參與者流動性大，決策常配合當下情境隨機應變而形成。此敘述符合哪種決定模式？", options: { A: "政治模式", B: "理性模式", C: "垃圾桶模式", D: "綜合掃描模式" }, answer: "C", explanation: "「垃圾桶模式」描述組織在目標模糊、參與者流動性高的「有組織的無政府狀態」下，決策往往是問題、解決方案、參與者與選擇機會四股洪流隨機碰撞的結果。" },
+    { id: 20, question: "某縣市針對已完成的國民中小學校務評鑑，依其適切性、有效性與評鑑績效再進行評鑑，據以精簡評鑑指標。此方式最接近哪一種評鑑類型？", options: { A: "後設評鑑", B: "自我評鑑", C: "內部評鑑", D: "360度評鑑" }, answer: "A", explanation: "「後設評鑑」(Meta-evaluation)意即「對評鑑本身進行評鑑」，目的在檢視原始評鑑方案的品質、適切性及有效性，以作為改進機制的依據。" },
+    { id: 21, question: "王老師：「以前學生會怕記過，行為會收斂；現在則是老師需要讓學生見識到實力，才叫得動學生。」前述說明分別反映哪兩種權力類型？", options: { A: "關係權、法職權", B: "強制權、獎賞權", C: "強制權、專家權", D: "參照權、情感權" }, answer: "C", explanation: "「怕記過」利用懲罰使人服從，屬「強制權」(Coercive Power)；「見識到實力」仰賴豐富專業知識使人心服，屬「專家權」(Expert Power)。" },
+    { id: 22, question: "依據現行《教育部國民及學前教育署補助辦理國民小學及國民中學學生學習扶助作業注意事項》，下列敘述何者正確？", options: { A: "學習扶助應於學期中實施，不得於寒暑假辦理", B: "採原班級上課方式，幫助學生縮減學力落差", C: "受輔對象為國語、數學、英語、社會、自然學習低成就學生", D: "大二以上師資生修畢十八小時研習課程者，得擔任授課教師" }, answer: "D", explanation: "學習扶助可於寒暑假辦理(A錯)；採抽離式或小班輔導(B錯)；受輔科目主要為國、英、數(C錯)；為充實師資，開放修畢18小時研習之大二以上師資生擔任教學(D正確)。" },
+    { id: 23, question: "有關校園霸凌事件之檢舉及處理，下列何者不正確？", options: { A: "疑似校園霸凌事件之通報不得超過24小時", B: "學校經大眾傳播媒體之報導而知悉者不能視同檢舉", C: "非調查學校接獲檢舉應於三個工作日內移送調查學校", D: "學校接獲疑似師對生霸凌檢舉，應移送校園事件處理會議" }, answer: "B", explanation: "依《校園霸凌防制準則》，學校經大眾傳播媒體報導、警政通知或由其他管道知悉疑似事件時，應「視同檢舉」主動進行處理。故B選項敘述錯誤。" },
+    { id: 24, question: "依據現行《學校訂定教師輔導與管教學生辦法注意事項》，針對輔導與管教的描述何者正確？", options: { A: "經校務會議決議通過，始得訂定對學生罰錢之校規", B: "在人員指導下，得請學生進行適合適量之運動項目", C: "教師不得限制學生參加正式課程以外之學校活動", D: "學校不得對學生宿舍進行定期或不定期的檢查" }, answer: "B", explanation: "校規不得明定罰款(A錯)；教師得合理限制非正式課程活動(C錯)；為維護安全學校得合法對宿舍常規檢查(D錯)；合理管教措施包含在指導下進行適量運動(B正確)。" },
+    { id: 25, question: "根據雙重系統理論(dual system theory)，下列有關學校組織中行政系統與教學系統的描述何者正確？", options: { A: "教學系統與行政系統間可能存有衝突", B: "行政系統內之成員彼此依賴程度較低", C: "教學系統的運作具有科層體制的特徵", D: "行政系統為鬆散結合，教學系統較緊密結合" }, answer: "A", explanation: "雙重系統理論指行政系統屬緊密結合的科層體制(B、D錯)；教學系統屬鬆散結合的專業體制(C錯)。因兩者運作邏輯不同，常會產生管理上的衝突(A對)。" }
+  ],
+  "113": [
+    { id: 1, question: "成語「蘭芷漸滫」典故出自《荀子·勸學》，意指蘭芷浸於惡水之中，而為人所不喜。此言強調下列何者在教育中的重要性？", options: { A: "身教", B: "言教", C: "境教", D: "制教" }, answer: "C", explanation: "「境教」是指環境對個體潛移默化的教育影響。蘭芷本為香草，浸泡在臭水中則令人厭惡，比喻人若處於不良環境中會受到負面影響，強調境教重要性。" },
+    { id: 2, question: "下列哪一項說法與哲學家沙特(J.-P. Sartre) 「存在先於本質」的核心論點相符？", options: { A: "成為重要他人眼中的好孩子", B: "成為人生劇本中注定的樣子", C: "成為你自己選擇成為的樣子", D: "成為社會所期望成為的樣子" }, answer: "C", explanation: "存在主義代表人物沙特主張，人首先存在於世界上，沒有預先設定的本質。人的本質是透過後天不斷的自由意志與「自我選擇」塑造而成的。" },
+    { id: 3, question: "李老師引導學生觀察藻礁照片，思考破壞原因，接著分組討論解決方法，上臺分享行動策略。此教學活動設計最接近下列何種方法？", options: { A: "現象學思考", B: "反省性思維", C: "概念分析法", D: "蘇格拉底法" }, answer: "B", explanation: "杜威的「反省性思維」強調問題解決歷程：發現問題(觀察破壞)、界定問題、提出假設(討論方法)、演繹驗證(行動策略)。" },
+    { id: 4, question: "下列情境何者最接近哲學家辛格(P. Singer)提倡的互惠利他主義(reciprocal altruism)觀點？", options: { A: "小華是班長，覺得同學都應該自願幫忙", B: "小明爸爸認為有繳學費，老師應隨叫隨到", C: "老師平時請幹部協助，期末老師請客吃點心", D: "小美主動為班上倒垃圾，小美手受傷同學自願幫忙" }, answer: "D", explanation: "互惠利他主義是指個體在期待未來會獲得回報的基礎上做出利他行為。「你幫我、我幫你」的情境最符合，小美平時的利他行為在受傷時獲得同學回報。" },
+    { id: 5, question: "當代教育相當重視將多元文化觀點納入課程中，請問此觀點受到下列哪一項教育哲學理念的影響？", options: { A: "後現代主義的萬花筒課程觀", B: "永恆主義的經典不敗課程觀", C: "觀念論的不變真理之課程觀", D: "行為主義的編序教學課程觀" }, answer: "A", explanation: "後現代主義反對絕對真理與大敘事，提倡去中心化、尊重差異。多元文化強調包容不同族群性別聲音，深受後現代主義多元價值影響。" },
+    { id: 6, question: "杜威的教育理念和108課綱的「核心素養」有所異同。下列哪一描述最符合兩者的相同之處？", options: { A: "強調具體知識技能，提供結構化素養標準", B: "強調學習應與實際生活結合，關注個體全面發展", C: "注重學校教育和課程改革，將學校視為與社會不同的場域", D: "注重實踐性和體驗性，以為未來職業生涯做準備" }, answer: "B", explanation: "杜威提倡「教育即生活」從做中學；108課綱核心素養強調知識能力態度整合以解決生活問題。兩者皆極度強調與「實際生活情境」的結合及「全人發展」。" },
+    { id: 7, question: "林老師採用建構主義進行教學，下列何者最能展現其教學理念？", options: { A: "應用數位媒體資源，提供教師認為學生須了解的內容", B: "給詳盡筆記，要求記住並背誦", C: "提供開放主題，鼓勵學生自行選擇方向進行小組探究", D: "精心設計完整教案，確保每位學生按同一步驟學習" }, answer: "C", explanation: "建構主義主張知識是由學習者主動建構，而非由教師單向傳遞。選項C鼓勵自行選擇探究並透過社會互動(小組)建構知識，最符合。" },
+    { id: 8, question: "葛妮(M. Greene)出版《教師即陌生人》，開啟批判思考與抉擇。下列何者最不符合葛妮的觀點？", options: { A: "提供學生可以自由抉擇的教育環境", B: "關注每位學生，因為學生是獨特生命個體", C: "保持「歸鄉者」心態，重新檢視教學行為模式", D: "與學生保持一定距離，維持客觀無私的師生關係" }, answer: "D", explanation: "葛妮屬存在主義學者，主張以「陌生人」視角重新審視現象。存在主義強調師生間是真誠投入與對話(I-Thou)，而非保持距離的客觀無私。" },
+    { id: 9, question: "余校長鼓勵教師們要參與研習、工作坊、專題講座、實地參訪等活動。此理念最符合課綱總綱中何項內涵？", options: { A: "教師待遇福利", B: "教師人際互動", C: "教師專業發展", D: "教師輔導關懷" }, answer: "C", explanation: "研習、工作坊與參訪等皆屬精進教學專業知能的途徑，完全對應課綱中的「教師專業發展」。" },
+    { id: 10, question: "阿貴寫信感謝導師在他被認為不聰明時鼓勵他：「只要願意努力，一定能闖出一片天」。何者最接近導師的說法？", options: { A: "功能論(functionalism)", B: "批判論(critical theory)", C: "衝突論(conflict theory)", D: "解釋論(interpretive theory)" }, answer: "A", explanation: "功能論強調「功績主義」(Meritocracy)，認為社會階層化基於個人的能力與努力，只要願意打拚就能獲回報，充滿向上流動的樂觀期待。" },
+    { id: 11, question: "劉同學家境清寒，自發念書錄取醫學系公費生，後成為醫生。此現象反映哪種概念？", options: { A: "轉型正義", B: "代間流動", C: "結構流動", D: "形式平等" }, answer: "B", explanation: "「代間流動」指子女的社會階級相對於父母階級發生改變。劉同學從清寒家庭躍升為醫生，是典型的代間向上流動。" },
+    { id: 12, question: "政府針對經濟弱勢學生提供更多學費補助的政策最符合下列何者？", options: { A: "功績主義", B: "階級再製", C: "水平公平", D: "垂直公平" }, answer: "D", explanation: "垂直公平主張「對不同條件的人給予不同待遇」。對經濟弱勢給予「更多」的補助，是一種積極性差別待遇與補償正義。" },
+    { id: 13, question: "下列何者最符合批判教育學對現行課程知識的觀點？", options: { A: "現行課程知識潛藏特定階級對社會的控制", B: "現行課程知識批判現存政經體系的價值觀", C: "現行課程知識的選擇與組織是價值中立的", D: "現行課程知識的分類客觀呈現知識和真理" }, answer: "A", explanation: "批判教育學認為學校課程絕非中立，而是由優勢階級所支配的產物，潛藏意識形態與控制(文化霸權)以再製不平等。" },
+    { id: 14, question: "布迪爾(P. Bourdieu)的文化資本中，強調個人經後天薰陶的修養(氣質、品味等)。此符合下列何者？", options: { A: "身體化形式(embodied state)", B: "階層化形式(stratified state)", C: "客體化形式(objectified state)", D: "制度化形式(institutionalized state)" }, answer: "A", explanation: "布迪爾文化資本分三態：身體化(氣質品味談吐)、客體化(物質藝術品)與制度化(文憑證照)。修養氣質屬「身體化形式」。" },
+    { id: 15, question: "甲生詳細描述車禍前因後果，乙生僅說「老奶奶被車撞」。根據柏恩斯坦符碼理論，甲生使用的語言傾向何種符碼？", options: { A: "限制型符碼", B: "聚集型符碼", C: "統整型符碼", D: "精緻型符碼" }, answer: "D", explanation: "柏恩斯坦將語言分精緻型(語法複雜脈絡清晰)與限制型(語法簡單依賴默契)。甲生詳細描述細節與脈絡，屬精緻型符碼。" },
+    { id: 16, question: "教改推動教師組成共同備課、觀課及議課等專業社群。此政策最可以改善教師的何種教學文化型態？", options: { A: "即時主義", B: "社群主義", C: "個人主義", D: "反智主義" }, answer: "C", explanation: "傳統教師教學文化具高度「個人主義」與孤立性。推動公開觀議課與社群，正是為打破孤立，促進協作分享。" },
+    { id: 17, question: "教師課程零碎片段，抹滅學生創造力，使學生越來越像沒有人性的機器，意識變得麻木。此描述最接近何種概念？", options: { A: "異化(alienation)", B: "涵化(acculturation)", C: "濡化(enculturation)", D: "分化(differentiation)" }, answer: "A", explanation: "「異化」指學生被迫接受零碎知識，喪失學習熱情，淪為麻木的考試機器，失去對學習的自主與認同。" },
+    { id: 18, question: "許老師因家長期望衝高升學率增加作業，造成學生負擔過重而抗議，使他無所適從。許老師面臨何種角色衝突？", options: { A: "角色內不同對象的衝突", B: "角色內相同對象的衝突", C: "角色間相同對象的衝突", D: "角色間不同對象的衝突" }, answer: "A", explanation: "許老師扮演單一「教師角色」(角色內)，但同時面對「家長」與「學生」的期待矛盾，屬「不同對象」引發的衝突。" },
+    { id: 19, question: "學生因為認同教師人品，進而願意追隨或聽從教導。上述權力基礎主要為何者？", options: { A: "專家權(expert power)", B: "參照權(referent power)", C: "情感權(affection power)", D: "關係權(connection power)" }, answer: "B", explanation: "參照權(歸屬權)指領導者憑藉個人魅力、品德，使追隨者產生認同、敬仰並心甘情願服從的權力。" },
+    { id: 20, question: "依現行《教師法》，主管機關為協助學校處理「教學不力或不能勝任工作」案件，應成立何種委員會？", options: { A: "教師評審委員會", B: "教師專業審查會", C: "成績考核委員會", D: "校園事件處理會議" }, answer: "B", explanation: "各級主管機關應設立「教師專業審查會」(專審會)，協助學校處理涉及教學不力或不能勝任工作的不適任教師案件。" },
+    { id: 21, question: "周校長認為擔任校長一定要「高關懷」且「高倡導」，才能有效帶領學校發展。此理念符合何種領導理論？", options: { A: "特質論", B: "功能論", C: "權變論", D: "行為論" }, answer: "D", explanation: "「倡導」(任務)與「關懷」(人際)是俄亥俄州立大學領導研究的向度，該研究屬領導理論發展中的「行為論」時期。" },
+    { id: 22, question: "關於參與國民教育階段個人實驗教育(在家自行教育)之學生，下列敘述何者正確？", options: { A: "只能使用自有的設施、設備", B: "學籍需設立在原學區所在地之鄉鎮市區公所", C: "得平等參加需由學校推薦之各項競賽及活動", D: "參照《學校型態實驗教育實施條例》相關規定進行" }, answer: "C", explanation: "自學生享有使用學校設施權利，學籍設於原學區學校，且學校應提供其平等參與競賽與活動之機會(C正確)。" },
+    { id: 23, question: "陳老師常透過專業對話，將個人的內隱教學知識轉化為教學活動設計應用於實務。最符合知識創新的何種型態？", options: { A: "社會化", B: "外化", C: "結合", D: "內化" }, answer: "B", explanation: "野中郁次郎SECI模型中，「外化」(externalization)是指將隱性知識(個人經驗)轉化為顯性知識(教案設計)的過程。" },
+    { id: 24, question: "依現行《偏遠地區學校教育發展條例》規定，關於偏遠地區學校之敘述，何者不正確？", options: { A: "可以實施混齡編班或混齡教學", B: "公費生分發應服務滿四年始得申請介聘", C: "行政組織可以依需要彈性設置", D: "可以跨同級或不同級學校聘任合聘教師" }, answer: "B", explanation: "依條例規定，公費生分發至偏遠地區學校，應實際服務滿「六年」(非四年)，始得提出介聘。故B錯誤。" },
+    { id: 25, question: "依《教育經費編列與管理法》第13條，地方政府設立地方教育發展基金，年度終了之賸餘並滾存基金於以後年度繼續運用。最主要目的為何？", options: { A: "增加獲得中央補助款的機會", B: "規避來自地方政府的審議機制", C: "增加地方政府消化預算的機會", D: "增加經費運用的彈性與自主性" }, answer: "D", explanation: "允許年度賸餘款「滾存基金」繼續使用，打破傳統預算年度結束繳庫的限制，大幅提升經費運用彈性與自主性。" }
+  ],
+  "112": [
+    { id: 1, question: "詐騙集團以精心編製的SOP手冊教導新成員詐騙技巧，成效卓著。這樣的教學活動明顯牴觸哪一項教育的規準？", options: { A: "合認知性", B: "合價值性", C: "合自願性", D: "合意向性" }, answer: "B", explanation: "皮德思提出的教育三大規準中，「合價值性」強調內容必須對身心發展具正向、良善的道德價值。詐騙技巧有害社會，違反此規準。" },
+    { id: 2, question: "假新聞經由社會知名人士傳述時，易使民眾不假思索的接受與散播。這種「訴諸人身」的傾向，顯示人在認知上容易受哪種力量影響？", options: { A: "權威", B: "理性", C: "感官", D: "天啟" }, answer: "A", explanation: "民眾因相信「知名人士」(具地位或影響力者)而盲目接受假新聞，是知識來源中過度依賴「權威」的表現。" },
+    { id: 3, question: "下列敘述何者不符合弗雷勒(P. Freire)對話式教學的意涵？", options: { A: "學生可以同時是教學者，教師可以同時是學習者", B: "對話式教學的目的之一，在於保持教學價值中立", C: "師生間採取非宰制的對待他人，以溝通代替對立", D: "教師避免囤積式的教學，以啟發學生的批判能力" }, answer: "B", explanation: "弗雷勒堅決認為教育「絕對不可能是價值中立的」，教育不是協助適應現狀，就是成為解放與變革的工具。故B錯誤。" },
+    { id: 4, question: "小華最近沈迷手機遊戲導致賴床遲到。導師推崇盧梭(J.-J. Rousseau)的教育主張，比較可能對家長提出哪一項建議？", options: { A: "幫小華報名多種才藝課轉移興趣", B: "沒收小華的手機直到戒掉為止", C: "與小華約法三章明訂時間", D: "不再叫小華起床，讓小華上學遲到受到應有懲罰" }, answer: "D", explanation: "盧梭提倡自然主義教育，主張「自然懲罰」，不施加人為體罰說教，讓孩子承擔不良行為帶來的自然結果(遲到受罰)。" },
+    { id: 5, question: "為了讓學生了解紅樹林生態，王老師帶領前往鰲鼓溼地進行觀察與體驗。此教學規劃最接近哪種教育理念？", options: { A: "理性主義", B: "自由主義", C: "經驗主義", D: "觀念主義" }, answer: "C", explanation: "離開教室到溼地進行真實感官「觀察與體驗」，透過直接經驗獲取知識，強烈契合「經驗主義」觀點。" },
+    { id: 6, question: "鄂蘭提出「平庸之惡」意指人們面對不公義時缺乏獨立思考而任人擺布。下列教育現場的現象，何者最符合平庸之惡？", options: { A: "陽奉陰違的應付", B: "盲目的順從體制", C: "不經思索的反對", D: "違法的濫用處罰" }, answer: "B", explanation: "「平庸之惡」(Banality of evil)指放棄個人思考與道德判斷，自認只是服從命令。在學校中「盲目順從體制」即其體現。" },
+    { id: 7, question: "稻米學校以「節氣」為核心，讓學生學習大氣變化、當季飲食、合乎時節的作息。該課程最符合下列哪一種哲學理念？", options: { A: "道法自然", B: "道德法則", C: "兼愛非攻", D: "理想世界" }, answer: "A", explanation: "順應「節氣」作息飲食，體現人類生活順應大自然規律。與老子道家思想「道法自然」理念完全契合。" },
+    { id: 8, question: "臺詞：「就算城牆100年來都沒有被摧毀，也無法保證未來不會被摧毀。」引導學生討論經驗與知識關聯。此反映哪位學者觀點？", options: { A: "培根(F. Bacon)——知識即力量", B: "傅柯(M. Foucault)——知識即權力", C: "波普(K. Popper)——知識的可否證性", D: "李歐塔(J.-F. Lyotard)——知識的操作性" }, answer: "C", explanation: "波普提出「可否證性」，批判歸納法。過去100年未倒不能保證未來不倒(不能證明沒黑天鵝)，科學知識永遠處於可能被推翻的狀態。" },
+    { id: 9, question: "網路化時代，人們可隨時透過網路平台學習技能、交換資訊及結識夥伴。此情形較接近哪一部著作主張？", options: { A: "伊利希(I. Illich)的《非學校化社會》", B: "格拉塞的《沒有失敗的學校》", C: "康茲的《學校敢勇於建立新的社會秩序嗎？》", D: "赫西的《我們所需要的學校以及為何我們沒有這些學校》" }, answer: "A", explanation: "伊利希在《非學校化社會》主張廢除學校，建立由資源、技能交換構成的「學習網絡」(Learning webs)。現代網路完美實現此構想。" },
+    { id: 10, question: "某校的「學生法庭」由學生擔任成員處理爭執，讓學生學習自主與對話溝通。學生法庭設立最符合哪位思想家的觀點？", options: { A: "柏拉圖(Plato)", B: "尼爾(A. Neill)", C: "布魯姆(B. Bloom)", D: "笛卡兒(R. Descartes)" }, answer: "B", explanation: "英國教育家尼爾創辦夏山學校，強調兒童自由與「學生自治」。學校事務由師生共同參與的大會或學生法庭處理。" },
+    { id: 11, question: "教師不僅需要肩負德育職責，且自身需要敦品，這種主張著眼於教師的哪一種權威？", options: { A: "行政法理權威", B: "學術認知權威", C: "傳統習俗權威", D: "道德涵養權威" }, answer: "D", explanation: "教師「敦品勵學」、言行合一，透過高尚人格品德成為楷模產生影響力，屬彼得斯(Peters)權威理論的「道德涵養權威」。" },
+    { id: 12, question: "陳老師認為各學科有不同的知識系統，安排跨領域會縮減學科內容降低成效。此觀點屬於伯恩斯坦課程論述中哪種分類與架構？", options: { A: "強分類強架構", B: "強分類弱架構", C: "弱分類強架構", D: "弱分類弱架構" }, answer: "A", explanation: "分類(Classification)指學科界限。堅持學科獨立拒絕跨領域，代表維持嚴格界線，屬「強分類」。學科本位多對應「強架構」。" },
+    { id: 13, question: "原生家庭為勞工的孫老師，以自己靠讀書向上流動成為中產階級為例，帶領了解社會階級與教育關係。其信念較符合哪個理論？", options: { A: "階級衝突論", B: "結構功能論", C: "符號互動論", D: "社會重建論" }, answer: "B", explanation: "結構功能論強調社會公平與「功績主義」，認為學校教育是向上流動有效管道，努力讀書就能突破階級獲得成功。" },
+    { id: 14, question: "小恩時常跟父母到國家音樂廳、美術館，擅長鋼琴演奏及繪畫。小恩累積的經驗最符合哪一種資本？", options: { A: "經濟資本", B: "象徵資本", C: "人力資本", D: "文化資本" }, answer: "D", explanation: "布迪爾的「文化資本」包含家庭傳遞的品味、藝術素養、音樂與繪畫欣賞能力等。小恩的高雅文化素養即屬此類。" },
+    { id: 15, question: "王老師是新進教師，校長要求結合其資訊專長帶動全校跨領域教學，但王老師希望能專心於班級教學。她的處境為何種概念？", options: { A: "角色距離", B: "角色衝突", C: "角色模糊", D: "角色擴散" }, answer: "B", explanation: "面臨校長期待(帶動全校)與自身期待(專心帶班)間的不相容，這種面臨兩種以上互相矛盾期待時產生的壓力稱為「角色衝突」。" },
+    { id: 16, question: "《新住民就讀大學辦法》規定，新住民申請大學入學各校招生名額採外加百分之二計算。此做法屬於何種教育概念的實踐？", options: { A: "文化再製", B: "文化同化", C: "積極性差別待遇", D: "補救性教育措施" }, answer: "C", explanation: "對弱勢群體(原/新住民)在入學名額給予額外保障，是透過補償手段達到實質平等的「積極性差別待遇」(Affirmative action)。" },
+    { id: 17, question: "某著作提及勞工家庭背景學生的反學校文化，包括崇尚陽剛、輕蔑學術知識與文憑。該著作最接近哪位學者的觀點？", options: { A: "艾波(M. Apple)", B: "布迪爾(P. Bourdieu)", C: "傅柯(M. Foucault)", D: "衛里斯(P. Willis)" }, answer: "D", explanation: "衛里斯的名著《學做工》，深入研究勞工階級子弟如何發展出崇尚體力勞動、輕蔑學校規範的「反學校文化」。" },
+    { id: 18, question: "實際上，為達班級凝聚之目的，同儕會相互約束統一服儀。上述情境最符合涂爾幹(E. Durkheim)的哪一個理論觀點？", options: { A: "道德規範", B: "社會正義", C: "權力展演", D: "社會認同" }, answer: "A", explanation: "涂爾幹道德教育論包含紀律精神。同儕間為了集體目標產生「相互約束」力量，體現集體意識制約，最符合「道德規範」(紀律)。" },
+    { id: 19, question: "趙老師認為領導者要能掌控情緒、充滿自信、正直、具備責任感。上述看法較接近下列哪一種領導理論？", options: { A: "行為論", B: "權變論", C: "情境論", D: "特質論" }, answer: "D", explanation: "「特質論」(偉人論)認為領導者必須具備某些非凡的個人屬性或天生特質(如自信、正直、責任感)。" },
+    { id: 20, question: "聽覺障礙女學生反映隔壁班男生藉機摸她胸部。學校依規定在24小時內向主管機關通報。此乃依循何種法規進行通報？", options: { A: "性騷擾防治法", B: "特殊教育法", C: "學生輔導法", D: "性別平等教育法" }, answer: "D", explanation: "發生在學校場域且雙方具備學生身分之性侵害/性騷擾/性霸凌事件，均優先適用《性別平等教育法》於24小時內通報。" },
+    { id: 21, question: "依照現行《師資培育法》規定，師資生應修畢師資職前教育課程，下列哪一種課程未明訂於該法規中？", options: { A: "校訂課程", B: "普通課程", C: "專門課程", D: "教育專業課程" }, answer: "A", explanation: "師資職前教育課程包含：普通、專門、教育專業課程及教育實習。「校訂課程」是108課綱中中小學課程名詞，不在師培法規範。" },
+    { id: 22, question: "某縣市政府委託本國自然人，將偏遠地區公立學校轉型為公辦民營實驗教育學校。此情形是依據何種法規辦理？", options: { A: "學校型態實驗教育實施條例", B: "偏遠地區學校教育發展條例", C: "公立高級中等以下學校委託私人辦理實驗教育條例", D: "高級中等以下教育階段非學校型態實驗教育實施條例" }, answer: "C", explanation: "將公立學校委託給民間(自然人/法人)經營(公辦民營)，法源為《公立高級中等以下學校委託私人辦理實驗教育條例》。" },
+    { id: 23, question: "教育行政理論區分為理性、自然、開放、非均衡系統，下列哪一種理論屬於自然系統模式？", options: { A: "權變理論", B: "科層理論", C: "人際關係理論", D: "科學管理理論" }, answer: "C", explanation: "理性系統重視效率結構；自然系統(如人際關係學派)則發現組織中的「人」與「非正式組織」，強調士氣與心理需求。" },
+    { id: 24, question: "學生在教室爭吵，導師介入以為處理妥當，豈料學生紛紛轉學，輿論沸騰影響校譽。此現象最符合混沌理論的哪一特性？", options: { A: "蝴蝶效應(butterfly effect)", B: "奇特吸引子(strange attractor)", C: "耗散結構(dissipative structure)", D: "回饋機制(feedback mechanism)" }, answer: "A", explanation: "「蝴蝶效應」指動態系統中，初始微小變化(學生爭吵)，經連鎖反應導致不成比例的巨大後果(集體轉學輿論沸騰)。" },
+    { id: 25, question: "孫老師認為教師工作深具價值，積極投入並獲成就感。遭遇挫折時能正向思考，樂觀面對挑戰。最符合哪種概念？", options: { A: "自我效能(self-efficacy)", B: "學術樂觀(academic optimism)", C: "幸福感(psychological well-being)", D: "組織承諾(organizational commitment)" }, answer: "C", explanation: "心理學家Ryff的心理幸福感包含自我接納、正向人際、生活目的等。孫老師深覺工作有意義且能正向面對挑戰，展現高度「幸福感」。" }
+  ],
+  "111": [
+    { id: 1, question: "「不要讓你的孩子輸在起跑點！」這句話依據謝富樂(I. Scheffler)的主張，屬於下列哪一種教育語言？", options: { A: "教育的定義", B: "教育的明喻", C: "教育的隱喻", D: "教育的口號" }, answer: "D", explanation: "謝富樂提出的「教育的口號」(slogans)是指具鼓動情緒、簡明易記、用於號召群眾的標語，不強調嚴謹邏輯論證。" },
+    { id: 2, question: "某雜誌有一期的標題為：「品格致富」。這種主張較為接近下列哪一派道德哲學觀點？", options: { A: "效益論(Utilitarianism)", B: "理性論(Rationalism)", C: "義務論(Deontological Ethics)", D: "關懷論(Ethics of Care)" }, answer: "A", explanation: "「品格致富」將品格當作獲得財富的工具，強調行為帶來的實際利益與結果，這是典型的「效益論」(功利主義)觀點。" },
+    { id: 3, question: "中國《禮記·曲禮》中，所謂的「禮聞來學，不聞往教」之精神，最接近皮德思(R.S. Peters)所提出的何種「教育規準」？", options: { A: "合實用性", B: "合認知性", C: "合價值性", D: "合自願性" }, answer: "D", explanation: "「來學」代表學生主動前來求教，強調學習者本身的意願與主動性，與皮德思的「合自願性」(不以灌輸、洗腦方式強迫)精神相符。" },
+    { id: 4, question: "智睿說：「老師請我們大量閱讀《理想國》、《論語》等古典著作。他認為透過閱讀這些鉅著(The Great Books)，可以建立最有價值的觀念。」此理念接近？", options: { A: "經驗主義", B: "實用主義", C: "永恆主義", D: "重建主義" }, answer: "C", explanation: "永恆主義(Perennialism)強調教育應追求跨越時空的永恆真理，主張透過研讀歷久彌新的「經典鉅著」(Great Books)來啟發理性。" },
+    { id: 5, question: "遊戲在教學活動中的作用，下列哪一敘述有誤？", options: { A: "遊戲可發揮學生想像力", B: "遊戲可使學生不受預設目的之侷限", C: "遊戲的主要目的在於競賽與爭取勝利", D: "遊戲可以創造美感經驗，豐富學習內涵" }, answer: "C", explanation: "遊戲在教育上主要價值在於過程的體驗、探索與樂趣。若將目的窄化為「競賽與爭取勝利」，將失去遊戲自發與創造的教育意義。" },
+    { id: 6, question: "劉老師是一位「實用主義」(Pragmatism)的實踐者，認為其方法有助提升學習成效。下列哪一項是他認為最重要的學習活動？", options: { A: "針對複雜概念進行細緻分析", B: "針對意識型態進行嚴密批判", C: "針對長期需求進行美感設計", D: "針對生活問題進行縝密探究" }, answer: "D", explanation: "實用主義(如杜威)極度強調「做中學」與經驗的重組，認為知識應作為解決當下真實「生活問題」的實用工具。" },
+    { id: 7, question: "「平面三角形內角和等於兩直角的和」，這個命題是屬於下列哪一種性質的知識？", options: { A: "經驗的", B: "先驗的", C: "超驗的", D: "體驗的" }, answer: "B", explanation: "數學與幾何學命題(如三角形內角和)是依賴人類理性思維進行演繹推論即能確定的真理，不需依賴外在感官經驗去丈量，屬「先驗」(A priori)知識。" },
+    { id: 8, question: "李老師認為「把最重要、最基本的知識教給學生，不必要浪費時間從嘗試錯誤中學習。」李老師的觀點較接近下列哪一種教育哲學理論？", options: { A: "精粹主義(Essentialism)", B: "進步主義(Progressivism)", C: "重建主義(Reconstructionism)", D: "存在主義(Existentialism)" }, answer: "A", explanation: "精粹主義(本質主義)主張學校應教導人類文化遺產中最核心、最精粹的基本學科知識，重視教師權威與系統性傳授，反對無效率的嘗試錯誤。" },
+    { id: 9, question: "學校組織變革過程中，下列哪一項是教師增能賦權(empowerment)受到重視的主因？", options: { A: "可強化教師形象，加速教師分級", B: "可彰顯教師的權力，強化學校自籌經費的能力", C: "可強化教師之多元能力，較有機會找到非教職的工作", D: "可讓教師擁有更多專業自主權，參與校務及教學的革新" }, answer: "D", explanation: "賦權增能的核心精神在於打破傳統科層結構的由上而下控制，賦予第一線教師更多參與決策的權力與專業自主空間。" },
+    { id: 10, question: "「學校應用正向管教辦法輔導有霸凌行為的同學」，這種作法是運用何種懲罰原理？", options: { A: "報復說(Retributive Theory)", B: "懲戒說(Deterrent Theory)", C: "感化說(Reformative Theory)", D: "人道說(Humanist Theory)" }, answer: "C", explanation: "「感化說」(恕道性懲罰)認為懲罰的目的不在報復或殺雞儆猴，而是為了教育、輔導犯錯者，使其知錯並改過遷善(正向管教)。" },
+    { id: 11, question: "有關諾丁思(N. Noddings)關懷(care)倫理學的主張，下列敘述何者最正確？", options: { A: "認為「關懷」是基於理性所生之道德感", B: "主張道德教育的重點是肯定、楷模、實踐、對話", C: "主張關懷關係是人與人之間和平相處不得不然的行為", D: "道德教育的方法主要為透過兩難故事的論辯以澄清價值判斷" }, answer: "B", explanation: "諾丁思的關懷倫理學強調情感與關係(非純理性)，主張道德教育的四大要素為：身教楷模(Modeling)、對話(Dialogue)、實踐(Practice)、肯定(Confirmation)。" },
+    { id: 12, question: "潘老師十分珍惜理解學生的契機，會試著放下對學生既有的印象，而以全新角度迎接學生。這樣的作法較接近下列哪一種教師理念？", options: { A: "教師即鑄劍者", B: "教師即陌生人", C: "教師即研究者", D: "教師即轉化的知識份子" }, answer: "B", explanation: "「教師即陌生人」(Teacher as stranger)為葛妮(M. Greene)提出，鼓勵教師跳脫習以為常的偏見與標籤，以宛如初見的陌生人視角重新審視教育與學生。" },
+    { id: 13, question: "斯普朗格(E. Spranger)主張有六種人格類型，其中追求「愛」的價值者是下列哪一類型？", options: { A: "社會型", B: "宗教型", C: "藝術型", D: "理論型" }, answer: "A", explanation: "斯普朗格六型人格：理論型(真)、經濟型(利)、藝術型(美)、社會型(愛/利他)、政治型(權)、宗教型(神聖)。社會型以愛為最高價值。" },
+    { id: 14, question: "下列哪一種論述較符合批判教育學(Critical Pedagogy)的觀點？", options: { A: "族群意識不會影響課程與教學的預期效果", B: "教科書都經過嚴格審查，不會有文化霸權的問題", C: "教師應鼓勵學生質疑社會現象，幫助學生形塑自我認同", D: "課程與知識應該中立客觀，在教學時應避免討論政治議題" }, answer: "C", explanation: "批判教育學強調教育從不是中立的，教師應引導學生批判、質疑潛藏的霸權與社會不公，進而獲得意識覺醒與解放。" },
+    { id: 15, question: "學校的教學活動在於切合生產關係所需，符合資本主義社會的需求。此種看法較屬於下列哪一種觀點？", options: { A: "文化傳承", B: "文憑主義", C: "符應理論", D: "順從理論" }, answer: "C", explanation: "包爾斯與金帝斯的「符應理論」(Correspondence Theory)主張，學校的權威結構與運作方式，完全對應(符應)了資本主義社會的生產與階級關係。" },
+    { id: 16, question: "張老師讓學生探討社區產業、環保正反意見，規劃道路構想並向主管機關提出建議書。張老師的作法主要採取下列哪一種理論取向？", options: { A: "社會效率論", B: "社會重建論", C: "社會功能論", D: "社會和諧論" }, answer: "B", explanation: "社會重建論主張教育不應只是適應社會，更應成為推動社會改革的工具。張老師引導學生積極探討社會問題並提出改善建議，正是此論實踐。" },
+    { id: 17, question: "在學校中透過評量與獎懲，將學生的表現排定優劣，區分名次。結構功能論學者認為這種作法屬於下列哪一種功能？", options: { A: "選擇", B: "社會化", C: "分配地位", D: "建立學習標準" }, answer: "A", explanation: "學校的「選擇」(Selection)或稱分流功能，是指透過考試評量篩選出能力不同的學生，以便將來分配至不同的社會角色與職業位置。" },
+    { id: 18, question: "下列敘述何者較能闡述競爭性流動之意涵？", options: { A: "注重學生社經背景的影響", B: "能讓努力者得其英才地位", C: "既有的英才及其代表者控制了英才的選擇權", D: "傳統世襲制度的社會是競爭性流動社會的代表" }, answer: "B", explanation: "特納(Turner)提出兩種社會流動模式：「贊助性流動」(英才由少數菁英挑選贊助)與「競爭性流動」(地位是在公開公平的賽跑中憑個人努力爭取而來，如美國體制)。" },
+    { id: 19, question: "學校利用大門口牆壁貼滿學生參加各項比賽優異成績，作為與家長進行對話素材，增進社區好感。學校這種作法最符合下列哪一種理論之應用？", options: { A: "交換理論", B: "衝突理論", C: "符號互動論", D: "結構功能論" }, answer: "C", explanation: "符號互動論強調人們透過語言、文字或具體物件(榮譽榜單)等「符號」進行互動，並從中賦予意義與建構認同(增進好感)。" },
+    { id: 20, question: "教育行政在討論資源分配時，會考量公平原則。下列哪一種教育作為屬於垂直公平？", options: { A: "學校營養午餐的價格齊一化", B: "學校的教科書內容和價格一致", C: "學校規劃班級教室大小面積盡量一致", D: "教師協助班上弱勢學生申請費用減免" }, answer: "D", explanation: "垂直公平(Vertical equity)主張「對不同需求的人給予不同的待遇與補償」，協助弱勢學生減免費用正是此積極性差別待遇的體現。" },
+    { id: 21, question: "教育變革R-D-D-A模式中，「利用多元管道說明課程綱要修訂的原因與經過」，屬於哪一個階段？", options: { A: "研究", B: "發展", C: "傳播", D: "採用" }, answer: "C", explanation: "傳播(Diffusion)階段的任務是將已經研發完成的創新方案，透過宣導、溝通管道推廣給第一線執行者或大眾知曉。" },
+    { id: 22, question: "某校的決策過程大多是顧及不同立場教師之間的爭執，經利益折衝後做出決定。該校行政決策較屬於下列哪一種模式？", options: { A: "政治模式(Political Model)", B: "直覺模式(Intuitive Model)", C: "垃圾桶模式(Garbage Can Model)", D: "漸進模式(Incremental Model)" }, answer: "A", explanation: "政治模式認為組織由不同利益團體組成，決策過程充滿了權力角力、爭執、談判與利益折衝(妥協)。" },
+    { id: 23, question: "權變領導理論中，下列哪一因素不是費德勒(F. Fiedler)的情境考量因素？", options: { A: "職務權力", B: "工作結構", C: "人際關係", D: "道德規範" }, answer: "D", explanation: "費德勒情境領導理論的三大變項為：領導者與部屬的關係(人際)、任務結構(明確度)、職位權力。道德規範非其考量變項。" },
+    { id: 24, question: "教育行政理論之演進，依年代先後的發展順序，下列何者正確？", options: { A: "開放系統→非均衡系統→理性系統→自然系統", B: "自然系統→理性系統→開放系統→非均衡系統", C: "非均衡系統→自然系統→開放系統→理性系統", D: "理性系統→自然系統→開放系統→非均衡系統" }, answer: "D", explanation: "演進順序：1.理性系統(科學管理/科層) -> 2.自然系統(人群關係) -> 3.開放系統(系統論/權變) -> 4.非均衡系統(混沌理論)。" },
+    { id: 25, question: "依《國民中小學學生成績評量準則》，上課總出席率至少達到多少比率，且經獎懲抵銷未滿三大過，才可發給畢業證書？", options: { A: "二分之一以上", B: "三分之二以上", C: "四分之三以上", D: "五分之三以上" }, answer: "B", explanation: "依規定期滿且出席率達「三分之二」以上，並經獎懲抵銷未滿三大過者，准予畢業並發給畢業證書。" }
+  ],
+  "110": [
+    { id: 1, question: "劉老師一直在追求永恆而普遍的知識，因此在他的教學設計中，主要會使用下列哪一種教材？", options: { A: "經典名著", B: "流行樂曲", C: "報章社論", D: "電視新聞" }, answer: "A", explanation: "永恆主義(Perennialism)認為教育的核心在於傳授跨越時空的絕對真理，因此極度推崇古聖先賢流傳下來的「經典名著」(Great Books)。" },
+    { id: 2, question: "張校長強調教師上課內容必須有助學習者準備各種證照考試，才是有用的知識。此觀點接近哪種主張？", options: { A: "職業預備說", B: "形式訓練說", C: "博雅素養說", D: "文化傳承說" }, answer: "A", explanation: "斯賓塞(H. Spencer)提出生活預備說，其中強調知識的實用性以應付未來謀生需求，證照考試即是標準的「職業預備說」展現。" },
+    { id: 3, question: "關於懲罰的敘述，下列何者符合「感化性原理」(Reformative Theory)？", options: { A: "學校不應該有懲罰", B: "有多少罪行就施以等值等量的懲罰", C: "懲罰時要對症下藥，以使其改過遷善", D: "懲罰時公告周知，以收殺雞儆猴之效" }, answer: "C", explanation: "感化說又稱恕道性懲罰，認為懲罰的最終目的是教育與輔導，針對犯錯原因對症下藥，期望學生知錯能改(改過遷善)。" },
+    { id: 4, question: "校長：「老師無法預知學生未來需要什麼，無法提供先驗知識。請依據學生需要與社會需求，讓學生從中獲得豐富經驗與體會！」此期許接近何種學說？", options: { A: "未來主義", B: "觀念主義", C: "實用主義", D: "永恆主義" }, answer: "C", explanation: "反對絕對先驗知識、強調重視當下「學生需要與社會需求」、並從做中學獲得「經驗與體會」，是杜威「實用主義」的經典論述。" },
+    { id: 5, question: "張老師常對學生提問引導其修正想法。他說：「我所要做的就只是把你們與生俱來的觀念引出來而已。」此作法較接近何種教育方法的隱喻？", options: { A: "塑造", B: "雕刻", C: "撞鐘", D: "接生" }, answer: "D", explanation: "(註：官方公布本題送分，但學理上為產婆法即接生)。蘇格拉底將教師比喻為「產婆」(接生婆)，透過詰問法將學生內在原有的真理觀念「接生」引導出來。" },
+    { id: 6, question: "下列哪一項不是後現代主義(Postmodernism)用於教育的觀點？", options: { A: "反本質主義", B: "反多元主義", C: "反基礎主義", D: "反威權主義" }, answer: "B", explanation: "後現代主義極度「提倡」多元主義、尊重差異、反對單一大敘事與霸權。因此「反多元主義」絕對不是其觀點。" },
+    { id: 7, question: "康米紐斯(J. A. Comenius)強調文字的學習不能僅仰賴書本，必須配合實物或圖片來教授。他的教育理念符合下列哪一種學說？", options: { A: "理性主義", B: "經驗主義", C: "永恆主義", D: "批判主義" }, answer: "B", explanation: "康米紐斯著有《世界圖解》，提倡透過感官(視覺、觸覺等)直接接觸實物或圖片來學習，這是「經驗主義」強調感官經驗為知識來源的展現。" },
+    { id: 8, question: "有關教育目的之敘述，下列何者較接近杜威(J. Dewey)的教育觀？", options: { A: "教育的目的是引導學生為未來生活作準備", B: "教育的目的是為了培養孩童永恆不變的觀念", C: "教育的目的在於訓練學生精熟各個學科的知識", D: "教育的目的在於讓學生學習如何參與民主的生活" }, answer: "D", explanation: "杜威名著《民主主義與教育》強調教育即生活(非未來預備)，學校應微型化民主社會，教育目的就是讓學生從實踐中學習參與民主生活。" },
+    { id: 9, question: "近年教育部大力提倡「創客教育」(Maker Education)，這種政策較接近下列哪一種教育哲學觀點？", options: { A: "觀念主義", B: "行為主義", C: "批判理論", D: "實驗主義" }, answer: "D", explanation: "創客教育強調「動手做」(Maker)、結合科技解決問題，這承襲了杜威「從做中學」與「實驗主義」(實用主義)重實踐與探究的精神。" },
+    { id: 10, question: "吳老師喜歡採取小組討論。他經常坐在小組中與學生一同討論，認真傾聽與回應想法。此作法較接近哪位學者的教育觀？", options: { A: "布伯(M. Buber)", B: "洛克(J. Locke)", C: "傅科(M. Foucault)", D: "布迪爾(P. Bourdieu)" }, answer: "A", explanation: "布伯提出「我與汝」(I-Thou)的哲學，強調師生之間應建立平等、真誠投入、互相傾聽與回應的對話關係。" },
+    { id: 11, question: "學校透過時間與空間配置、儀式及生活規則，規範成員言行，並藉由獎懲維持校內秩序。這較符合下列哪一種概念？", options: { A: "社會變遷", B: "社會控制", C: "社會流動", D: "社會階層化" }, answer: "B", explanation: "「社會控制」(Social control)是指社會或組織透過各種正式(法規獎懲)與非正式(儀式)手段，約束成員行為以維持秩序的過程。" },
+    { id: 12, question: "下列哪一項學校組織的分析不屬於科層體制的特色？", options: { A: "權威性階層", B: "功能性分工", C: "明訂成員角色", D: "依人情規則運作" }, answer: "D", explanation: "韋伯(Weber)的科層體制(Bureaucracy)核心特徵包含：依法辦事、明確分工、層級節制，以及「不徇私/非人情化」(impersonality)，嚴禁依人情運作。" },
+    { id: 13, question: "下列何者屬於「代內流動」(Intragenerational Mobility)的垂直社會流動？", options: { A: "富商將公司傳給子女繼承家業", B: "富商家族經過幾代子孫繼承後逐漸衰敗", C: "窮苦的勞工努力求學後成為專業的工程師", D: "窮苦的勞工辛苦地將其子女培養成中產階級" }, answer: "C", explanation: "「代內流動」指個人在其『一生當中』社會地位的改變。勞工本身透過求學變成工程師，是發生在個人世代內的垂直向上流動。" },
+    { id: 14, question: "教育具有維繫社會生存的目的，透過教育可使社會成員具有共同的觀念、態度及行為。下列何者最能說明這樣的過程？", options: { A: "社會化", B: "社會分工", C: "社會流動", D: "社會階級" }, answer: "A", explanation: "「社會化」(Socialization)是指個體學習並內化其所屬社會的文化規範、價值觀與態度，藉以融入社會並維持社會生存的過程。" },
+    { id: 15, question: "常態編班的國中實施能力分組教學，給予不同程度的教學內容，比較屬於下列哪一種教育的功能？", options: { A: "安置", B: "選擇", C: "照顧", D: "社會化" }, answer: "B", explanation: "依據學生能力高低將其分入不同組別給予不同教學，本質上是一種篩選與分流的機制，屬於學校教育的「選擇」(Selection)功能。" },
+    { id: 16, question: "林教授將教師視為文化工作者或轉化型知識份子，突顯教師在專業化歷程中有關權力支配、社會控制等社會意涵。這接近何種論點？", options: { A: "功能論", B: "衝突論", C: "解釋論", D: "交換論" }, answer: "B", explanation: "強調「權力支配」、「社會控制」與將教師視為能打破霸權的「轉化型知識份子」(吉魯Giroux語)，屬於批判理論與「衝突論」的經典觀點。" },
+    { id: 17, question: "下列哪一項屬於詮釋學派的觀點？", options: { A: "了解補救教學的學校整體運作機制", B: "分析學校制度與家庭制度相互影響之關係", C: "探究教師教學專業訓練課程架構與實施成效", D: "分析班級教師個人的教學理念與蘊含的意義" }, answer: "D", explanation: "詮釋學(Hermeneutics)等微觀解釋學派，著重於探究行動者(教師)主觀的內在動機、理念以及其賦予社會行動的「意義」。" },
+    { id: 18, question: "依現行《中小學兼任代課及代理教師聘任辦法》，下列敘述何者正確？", options: { A: "代理教師待遇以鐘點費支給", B: "代課教師係以全部時間擔任因差假所遺課務", C: "情況特殊經核准者，代理教師得擔任導師或行政", D: "聘任三個月內之代課教師應公開甄選經教評會審查" }, answer: "C", explanation: "代理教師待遇通常按月給薪(A錯)；代課教師是按節計酬(B錯)；三個月以下代課通常由校長依規聘任即可(D錯)；代理教師原則不兼行政，但情況特殊經核准得兼任(C對)。" },
+    { id: 19, question: "某國小有5位教師自發成立讀書會，透過人際互動增進情誼。此一團體性質屬於下列何種組織？", options: { A: "幕僚組織", B: "正式組織", C: "科層組織", D: "非正式組織" }, answer: "D", explanation: "並非學校法規與層級架構下明文設立，而是成員基於共同興趣與情感「自發成立」的團體，即為「非正式組織」。" },
+    { id: 20, question: "依《國民小學及國民中學學生成績評量準則》，下列選項何者正確？甲、定期紙筆測驗至多三次 乙、彈性學習應包括平時與定期 丙、分數七十至未滿八十轉為乙等 丁、評量不包括日常生活表現", options: { A: "甲丙", B: "乙丁", C: "甲乙", D: "丙丁" }, answer: "A", explanation: "紙筆測驗每學期至多三次(甲正確)；八十九~八十為甲，七十九~七十為乙(丙正確)；彈性學習多不採定期紙筆(乙錯)；評量亦涵蓋日常表現(丁錯)。故選A。" },
+    { id: 21, question: "現行中小學校內會議，下列哪一種會議的組成方式，其任一性別委員應佔委員總數三分之一以上？", options: { A: "特殊教育推行委員會會議", B: "學校課程發展委員會會議", C: "性別平等教育委員會會議", D: "校園霸凌事件審議小組會議" }, answer: "A", explanation: "(依110年考題時空環境)特推會之組成明確規範任一性別委員應達三分之一以上。性平會依法為女性委員過半。(註：法規隨年份可能修訂，請依最新法規為主)" },
+    { id: 22, question: "依現行「實驗教育三法」，學校透過教師教學與課程設計讓學生能有創新學習，屬於哪一種實驗教育型態？", options: { A: "在家教育", B: "學校型態的實驗教育", C: "非學校型態的實驗教育", D: "委託私人辦理的實驗教育" }, answer: "B", explanation: "由「學校」(公私立學校體制內)主導進行全校性的創新教學與課程理念實驗，即稱為「學校型態的實驗教育」。" },
+    { id: 23, question: "依現行《性別平等教育法》，學校應於受理申請或檢舉後完成調查，必要時得延長，調查時間最晚應於幾個月之內完成？", options: { A: "二個月", B: "三個月", C: "四個月", D: "五個月" }, answer: "C", explanation: "性平法規定，應於2個月內完成調查；必要時得延長之，延長以2次為限，每次不得逾1個月。故最長總計為4個月內需完成。" },
+    { id: 24, question: "丙老師：「我更希望引導學生勇於表達自我，和學生進行生命問題的思考與對話。」此想法較接近何種教育理念？", options: { A: "存在主義", B: "精粹主義", C: "重建主義", D: "批判理論" }, answer: "A", explanation: "「表達真實自我」、「生命問題意義的追尋」以及人與人之間真誠的「對話」，是存在主義(Existentialism)在教育上最核心的訴求。" },
+    { id: 25, question: "丁老師：「考慮到學生拒絕溝通的原因，可能是家庭背景或經濟因素造成，就比較能以同理心看待。」此想法接近何種理念？", options: { A: "永恆主義", B: "理性主義", C: "批判理論", D: "精粹主義" }, answer: "C", explanation: "跳脫個體表面行為，深入察覺背後的「家庭社經背景」、「階級結構」不平等對學生的壓迫，這展現了批判理論(Critical Theory)反思社會結構關懷弱勢的精神。" }
+  ]
+};
+
+export default function App() {
+  const [selectedYear, setSelectedYear] = useState(null);
+  const [currentQIndex, setCurrentQIndex] = useState(0);
+  const [userAnswers, setUserAnswers] = useState({});
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const handleYearSelect = (year) => {
+    setSelectedYear(year);
+    setCurrentQIndex(0);
+    setUserAnswers({});
+    setIsSubmitted(false);
+    setErrorMsg('');
+  };
+
+  const handleOptionSelect = (optionKey) => {
+    if (isSubmitted) return;
+    setUserAnswers({ ...userAnswers, [currentQIndex]: optionKey });
+    setErrorMsg('');
+  };
+
+  const handleNext = () => {
+    if (currentQIndex < examData[selectedYear].length - 1) setCurrentQIndex(currentQIndex + 1);
+  };
+
+  const handlePrev = () => {
+    if (currentQIndex > 0) setCurrentQIndex(currentQIndex - 1);
+  };
+
+  const handleSubmit = () => {
+    const totalQ = examData[selectedYear].length;
+    const answered = Object.keys(userAnswers).length;
+    if (answered < totalQ) {
+      setErrorMsg(`您還有 ${totalQ - answered} 題未作答，請完成所有題目後再交卷。`);
+      return;
+    }
+    setIsSubmitted(true);
+    setCurrentQIndex(0);
+  };
+
+  const handleGoHome = () => setSelectedYear(null);
+
+  const calculateScore = () => {
+    if (!selectedYear) return 0;
+    let correct = 0;
+    examData[selectedYear].forEach((q, idx) => {
+      if (userAnswers[idx] === q.answer) correct++;
+    });
+    return Math.round((correct / examData[selectedYear].length) * 100);
+  };
+
+  // 全局標楷體設定
+  const biauKaiStyle = { fontFamily: "'BiauKai', 'DFKai-SB', '楷體', 'KaiTi', serif" };
+
+  if (!selectedYear) {
+    return (
+      <div style={biauKaiStyle} className="min-h-screen bg-slate-50 flex items-center justify-center p-6 tracking-wide">
+        <div className="max-w-4xl w-full bg-white rounded-3xl shadow-xl overflow-hidden">
+          <div className="bg-indigo-700 p-12 text-center relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-full bg-indigo-800 opacity-20 transform -skew-y-3"></div>
+            <BookOpen className="w-20 h-20 text-white mx-auto mb-6 relative z-10" />
+            <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-3 relative z-10 drop-shadow-md">教檢歷屆刷題系統</h1>
+            <p className="text-indigo-100 text-xl font-medium relative z-10">國民小學 - 教育理念與實務 (完整版 110-114)</p>
+          </div>
+          <div className="p-10 md:p-14">
+            <h2 className="text-2xl font-bold text-gray-800 mb-8 text-center">選擇練習年度 (共 125 題與詳解)</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {Object.keys(examData).sort((a, b) => b - a).map((year) => (
+                <button
+                  key={year}
+                  onClick={() => handleYearSelect(year)}
+                  className="py-5 px-4 rounded-2xl text-xl font-bold bg-indigo-50 text-indigo-800 hover:bg-indigo-600 hover:text-white hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  {year} 年度
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const currentQuestions = examData[selectedYear];
+  const questionData = currentQuestions[currentQIndex];
+  const totalQ = currentQuestions.length;
+  const progress = ((currentQIndex + 1) / totalQ) * 100;
+
+  return (
+    <div style={biauKaiStyle} className="min-h-screen bg-slate-100 p-4 md:p-8 tracking-wide">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <button onClick={handleGoHome} className="flex items-center text-lg text-slate-600 hover:text-indigo-700 font-bold transition-colors bg-white px-5 py-2 rounded-full shadow-sm hover:shadow">
+            <Home className="w-5 h-5 mr-2" /> 回首頁
+          </button>
+          <div className="text-2xl font-extrabold text-slate-800 tracking-wider">
+            {selectedYear} 年度歷屆試題
+          </div>
+          <div className="text-lg font-bold text-indigo-700 bg-indigo-100 px-5 py-2 rounded-full shadow-sm">
+            第 {currentQIndex + 1} / {totalQ} 題
+          </div>
+        </div>
+
+        {isSubmitted && (
+          <div className="bg-white rounded-3xl shadow-md p-8 mb-8 text-center border-t-8 border-indigo-600 animate-fade-in">
+            <h2 className="text-3xl font-extrabold text-gray-800 mb-3">測驗完成！</h2>
+            <p className="text-gray-500 text-lg mb-6">點擊下方按鈕可回顧您的作答與逐題詳解</p>
+            <div className="inline-flex items-center justify-center w-36 h-36 rounded-full bg-gradient-to-br from-indigo-50 to-indigo-100 border-4 border-white shadow-inner mb-2">
+              <span className="text-6xl font-black text-indigo-700 drop-shadow-sm">{calculateScore()}</span>
+              <span className="text-2xl text-indigo-500 ml-1 font-bold">分</span>
+            </div>
+          </div>
+        )}
+
+        <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
+          <div className="w-full bg-slate-100 h-2.5">
+            <div className="bg-indigo-500 h-2.5 transition-all duration-500 ease-out rounded-r-full" style={{ width: `${progress}%` }}></div>
+          </div>
+
+          <div className="p-8 md:p-12">
+            <div className="flex gap-5 mb-10">
+              <span className="flex-shrink-0 flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-800 font-black text-2xl shadow-sm">
+                {currentQIndex + 1}
+              </span>
+              <h3 className="text-2xl md:text-3xl text-gray-900 font-bold leading-relaxed pt-1">
+                {questionData.question}
+              </h3>
+            </div>
+
+            <div className="space-y-5">
+              {Object.entries(questionData.options).map(([key, text]) => {
+                const isSelected = userAnswers[currentQIndex] === key;
+                const isCorrectAns = questionData.answer === key;
+                
+                let optionStyle = "border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 cursor-pointer text-gray-800";
+                let icon = null;
+
+                if (isSubmitted) {
+                  optionStyle = "border-slate-200 opacity-60 cursor-default bg-slate-50"; 
+                  if (isCorrectAns) {
+                    optionStyle = "bg-green-50 border-green-500 text-green-900 font-bold opacity-100 shadow-md ring-1 ring-green-500";
+                    icon = <CheckCircle className="w-8 h-8 text-green-600" />;
+                  } else if (isSelected && !isCorrectAns) {
+                    optionStyle = "bg-red-50 border-red-400 text-red-800 font-bold opacity-100 shadow-md";
+                    icon = <XCircle className="w-8 h-8 text-red-600" />;
+                  }
+                } else if (isSelected) {
+                  optionStyle = "bg-indigo-50 border-indigo-500 text-indigo-900 font-bold shadow-md ring-1 ring-indigo-500 transform scale-[1.01]";
+                }
+
+                return (
+                  <div key={key} onClick={() => handleOptionSelect(key)} className={`flex items-center justify-between w-full p-5 md:p-6 rounded-2xl border-2 transition-all duration-200 ${optionStyle}`}>
+                    <div className="flex items-center gap-5">
+                      <span className={`flex items-center justify-center w-10 h-10 rounded-xl font-black text-xl shadow-sm
+                        ${isSelected && !isSubmitted ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-300 text-slate-500'}`}>
+                        {key}
+                      </span>
+                      <span className="text-2xl leading-relaxed">{text}</span>
+                    </div>
+                    {icon}
+                  </div>
+                );
+              })}
+            </div>
+
+            {errorMsg && (
+              <div className="mt-8 flex items-center p-5 text-xl font-bold text-amber-900 border-2 border-amber-400 bg-amber-50 rounded-2xl shadow-sm animate-pulse">
+                <AlertCircle className="w-7 h-7 mr-3 text-amber-600" />
+                {errorMsg}
+              </div>
+            )}
+
+            {isSubmitted && questionData.explanation && (
+              <div className="mt-10 p-8 bg-blue-50/80 border-l-8 border-blue-500 rounded-r-2xl shadow-sm">
+                <h4 className="flex items-center text-blue-900 font-black text-2xl mb-4">
+                  <BookOpen className="w-7 h-7 mr-3" /> 專業解析
+                </h4>
+                <p className="text-blue-900/90 leading-loose text-xl font-medium tracking-wide">
+                  {questionData.explanation}
+                </p>
+              </div>
+            )}
+          </div>
+          
+          <div className="bg-slate-50 p-6 md:p-8 flex items-center justify-between border-t border-slate-200">
+            <button onClick={handlePrev} disabled={currentQIndex === 0} className={`flex items-center px-6 py-4 rounded-xl text-xl font-bold transition-all duration-200
+                ${currentQIndex === 0 ? 'text-slate-400 opacity-50 cursor-not-allowed' : 'text-slate-700 hover:bg-white hover:shadow-md bg-slate-200/50'}`}>
+              <ChevronLeft className="w-6 h-6 mr-2" /> 上一題
+            </button>
+
+            {!isSubmitted ? (
+              currentQIndex === totalQ - 1 ? (
+                <button onClick={handleSubmit} className="flex items-center px-10 py-4 rounded-xl text-xl font-black text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all transform hover:-translate-y-1">
+                  <CheckCircle className="w-6 h-6 mr-3" /> 交卷結算
+                </button>
+              ) : (
+                <button onClick={handleNext} className="flex items-center px-8 py-4 rounded-xl text-xl font-bold text-white bg-slate-800 hover:bg-slate-700 shadow-md transition-all transform hover:-translate-y-1">
+                  下一題 <ChevronRight className="w-6 h-6 ml-2" />
+                </button>
+              )
+            ) : (
+               <button onClick={handleNext} disabled={currentQIndex === totalQ - 1} className={`flex items-center px-8 py-4 rounded-xl text-xl font-bold transition-all
+                    ${currentQIndex === totalQ - 1 ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'text-white bg-indigo-600 hover:bg-indigo-700 shadow-md hover:-translate-y-1'}`}>
+                  下一題解析 <ChevronRight className="w-6 h-6 ml-2" />
+                </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
