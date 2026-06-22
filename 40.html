@@ -109,6 +109,13 @@
                 <div><label class="block text-sm font-bold text-gray-600 mb-1">教師調整：</label><textarea id="teacher-note-adjust" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 focus:outline-blue-500 text-sm font-bold text-gray-700 resize-none" rows="2" placeholder="例如：在救援任務前新增案例討論..."></textarea></div>
                 <div><label class="block text-sm font-bold text-gray-600 mb-1">修正證據：</label><textarea id="teacher-note-evidence" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 focus:outline-blue-500 text-sm font-bold text-gray-700 resize-none" rows="2" placeholder="例如：後測該題答對率提升..."></textarea></div>
             </div>
+            
+            <div class="mt-6 border-t border-gray-100 pt-4">
+                <h4 class="font-bold text-slate-600 mb-3 flex items-center gap-2">📜 歷次導學紀錄</h4>
+                <div id="teacher-notes-list-container" class="space-y-3">
+                    <!-- JS 動態生成歷史紀錄 -->
+                </div>
+            </div>
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
@@ -214,7 +221,6 @@
         <div class="text-center mt-8 mb-4"><h2 class="text-2xl font-bold text-green-800">🚑 植物救援任務</h2><p class="text-sm text-gray-500 mt-1 font-bold">搶救小白菜：第 <span id="current-rescue-num">1</span> / 3 盆</p></div>
         
         <div class="bg-blue-50 rounded-3xl p-6 text-center mb-4 border-2 border-blue-200">
-            <!-- 已實裝：三張觀察圖片取代 Emoji -->
             <img id="rescue-plant-image" src="" alt="等待學生觀察的小白菜" class="w-full max-h-72 object-contain rounded-2xl mx-auto mb-2 bg-white shadow-sm" onerror="this.src='https://placehold.co/400x300/e2e8f0/64748b?text=Plant+Image'">
             <h3 id="rescue-plant-name" class="font-bold text-lg text-blue-800">一號小白菜</h3>
         </div>
@@ -342,11 +348,8 @@
             projectId: "science-class-c0337",
             storageBucket: "science-class-c0337.firebasestorage.app",
             messagingSenderId: "713843814869",
-            appId: "1:713843814869:web:62be2b82afaaeff0ae8d5c",
-            measurementId: "G-R4RCJJ38FK"
+            appId: "1:713843814869:web:62be2b82afaaeff0ae8d5c"
         };
-
-        // 這是你的課程資料庫資料夾名稱，可自行設定
         const appId = "science-farm-v1";
 
         const app = initializeApp(firebaseConfig);
@@ -357,8 +360,17 @@
         window.isCloudReady = false;
 
         const initAuth = async () => {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
-            else await signInAnonymously(auth);
+            try {
+                await signInAnonymously(auth);
+            } catch (error) {
+                console.error("Firebase 登入初始化失敗：", error);
+                const statusEl = document.getElementById('cloud-indicator');
+                if(statusEl) {
+                    statusEl.innerText = "☁️ 連線錯誤";
+                    statusEl.style.backgroundColor = "#fee2e2";
+                    statusEl.style.color = "#991b1b";
+                }
+            }
         };
 
         onAuthStateChanged(auth, (user) => {
@@ -378,8 +390,16 @@
                     }
                 });
 
-                const notesRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'teacher_notes');
-                onSnapshot(notesRef, (docSnap) => { if (docSnap.exists()) window.teacherNotes = docSnap.data(); });
+                // 監聽教師導學紀錄多筆
+                const notesEntriesRef = collection(db, 'artifacts', appId, 'public', 'data', 'teacher_notes_entries');
+                onSnapshot(notesEntriesRef, (snapshot) => {
+                    window.allTeacherNotes = [];
+                    snapshot.forEach(docSnap => window.allTeacherNotes.push(docSnap.data()));
+                    window.allTeacherNotes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    if (document.getElementById('view-teacher').classList.contains('active') && typeof renderTeacherNotes === 'function') {
+                        renderTeacherNotes();
+                    }
+                });
 
                 const studentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'students');
                 onSnapshot(studentsRef, (snapshot) => {
@@ -462,7 +482,15 @@
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'peer_reviews', reviewData.id), reviewData);
         };
         window.saveGlobalSettingsCloud = async (settings) => { if (currentUser) await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'global'), settings); };
-        window.saveTeacherNotesCloud = async (notes) => { if(currentUser) await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'teacher_notes'), notes); };
+        
+        window.saveTeacherNoteEntryCloud = async (noteData) => {
+            if (!currentUser) return;
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'teacher_notes_entries', noteData.id), noteData);
+        };
+        window.deleteTeacherNoteEntryCloud = async (id) => {
+            if (!currentUser) return;
+            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'teacher_notes_entries', id));
+        };
     </script>
 
     <!-- ==================== JavaScript 邏輯區 (UI 與互動) ==================== -->
@@ -471,8 +499,8 @@
         function escapeCSV(value) { if (value === null || value === undefined) return '""'; return `"${String(value).replace(/"/g, '""')}"`; }
         function getGroupAssign(seat) { const s = parseInt(seat, 10); if(s<=6) return 1; if(s<=12) return 2; if(s<=17) return 3; if(s<=22) return 4; if(s<=27) return 5; return Math.ceil(s/6)||1; }
 
-        window.usersList = []; window.groupsList = []; window.allDiaries = []; window.allPeerReviews = []; 
-        window.globalSettings = { maxUnlockedLevel: 5 }; window.teacherNotes = {};
+        window.usersList = []; window.groupsList = []; window.allDiaries = []; window.allPeerReviews = []; window.allTeacherNotes = [];
+        window.globalSettings = { maxUnlockedLevel: 1 }; 
         window.userData = { name: '', seat: '', group: 1, classCode: '311', progress: 0, pretest: {score: null, answers: []}, firstPretestScore: null, rescueData: [], rescueCompletedAt: null, posttest: {score: null, answers: []}, firstPosttestScore: null, reflection: null };
         window.groupData = { classCode: '311', group: 1, diary: [], carePlan: null, peerReviews: [] };
 
@@ -494,7 +522,6 @@
             { q: "期末報告要證明「我們的照顧方法有效」，哪種紀錄方式最有說服力？", options: ["(A) 憑感覺說出哪一盆比較漂亮", "(B) 呈現每週量測的高度數據和對比照片", "(C) 畫一張植物很開心的圖", "(D) 寫下每天澆水的次數"], answer: 1 }
         ];
 
-        // 將 Emoji 替換為圖片，移除「改善通風」與第四盆
         const rescuePlants = [
             { id: 1, name: "一號小白菜", image: "edge/cabbage-dry.png", clues: { leaf: "葉子垂垂的，整株植物軟趴趴的。", soil: "土壤看起來白白的、摸起來乾巴巴的。", env: "放在陽光充足的窗台邊。" }, correctAction: "適量澆水", misconception: "沒發現土壤乾巴巴就是缺水，誤以為是日照問題喔！" }, 
             { id: 2, name: "二號小白菜", image: "edge/cabbage-pest.png", clues: { leaf: "葉子綠油油的，但是上面有好多破洞！", soil: "土壤濕潤，剛剛才澆過水。", env: "放在通風良好的菜園裡，旁邊有小蝴蝶飛舞。" }, correctAction: "抓蟲", misconception: "葉子破洞是因為有菜蟲或毛毛蟲在啃食，不是缺水喔！" }, 
@@ -513,12 +540,15 @@
         async function saveData() { if (window.saveDataCloud) await window.saveDataCloud(); }
 
         async function login() {
-            const classCode = document.getElementById('input-class').value; 
-            const seat = document.getElementById('input-seat').value.trim(); 
-            if (!seat) { showModal('哎呀！', '要記得輸入座號才能進農場喔！喵～'); return; }
+            const classCode = document.getElementById('input-class').value;
+            const rawSeat = document.getElementById('input-seat').value.trim();
+            const seatNumber = Number(rawSeat);
+            
+            if (!Number.isInteger(seatNumber) || seatNumber < 1 || seatNumber > 27) { showModal('座號不正確', '請輸入 1 到 27 之間的座號喔！'); return; }
             if (!window.isCloudReady) { showModal('連線中', '正在與雲端農場連線中，請稍候幾秒再試！'); return; }
-            const groupNum = getGroupAssign(seat); 
-            const name = `${seat}號`; 
+
+            const seat = String(seatNumber); const groupNum = getGroupAssign(seat); const name = `${seat}號`;
+
             showModal('登入中', `自動分配至：第 ${groupNum} 組\n資料讀取中...`);
             try {
                 await window.loadUserDataCloud(classCode, name, seat, groupNum); 
@@ -527,15 +557,32 @@
                 updateMapUI(); 
                 switchView('view-map');
             } catch(error) {
-                closeModal();
-                showModal('登入失敗', '與雲端連線發生錯誤，請確認網路後重試！');
-                console.error(error);
+                closeModal(); showModal('登入失敗', '與雲端連線發生錯誤，請確認網路後重試！'); console.error(error);
             }
         }
         function goToHome() { switchView('view-home'); }
         function goToMap() { updateMapUI(); switchView('view-map'); }
 
+        function resetMapCards() {
+            const levels = [
+                ['level-2-card', 'level-2-status', 'level-2-icon', '請先完成第一關'],
+                ['level-3-card', 'level-3-status', 'level-3-icon', '請先完成第二關'],
+                ['level-4-card', 'level-4-status', 'level-4-icon', '請先寫至少一篇日誌'],
+                ['level-5-card', 'level-5-status', 'level-5-icon', '請先完成前四關']
+            ];
+            levels.forEach(([cardId, statusId, iconId, message]) => {
+                const card = document.getElementById(cardId);
+                card.className = 'bg-gray-50 p-5 rounded-2xl shadow border-l-8 border-gray-300 flex items-center justify-between opacity-70 transition';
+                card.removeAttribute('onclick');
+                document.getElementById(statusId).innerText = message;
+                document.getElementById(statusId).className = 'text-sm text-gray-400 font-bold';
+                const icon = document.getElementById(iconId);
+                icon.innerText = '🔒'; icon.classList.add('grayscale');
+            });
+        }
+
         function updateMapUI() {
+            resetMapCards();
             document.getElementById('student-welcome-text').innerText = `${escapeHTML(window.userData.name)} - 第 ${escapeHTML(window.userData.group)} 組`;
             let totalProgress = 0; const maxLevel = window.globalSettings.maxUnlockedLevel;
 
@@ -564,13 +611,15 @@
 
             const lvl5 = document.getElementById('level-5-card');
             const reviewsGiven = (window.allPeerReviews || []).filter(review => review.classCode === window.userData.classCode && review.fromGroup === window.userData.group);
-            const canDoPosttest = window.groupData.carePlan && window.groupData.carePlan.result && reviewsGiven.length >= 1;
+            
+            const hasIndividualPrerequisites = window.userData.pretest && window.userData.pretest.score !== null && window.userData.rescueCompletedAt !== null;
+            const canDoPosttest = hasIndividualPrerequisites && window.groupData.carePlan && window.groupData.carePlan.result && reviewsGiven.length >= 1;
             
             if (canDoPosttest) {
                 if(maxLevel >= 5) { lvl5.className = 'bg-white p-5 rounded-2xl shadow border-l-8 border-yellow-400 flex items-center justify-between cursor-pointer hover:bg-yellow-50 transition'; lvl5.setAttribute('onclick', window.userData.reflection ? 'showCertificate()' : 'startPosttest()'); document.getElementById('level-5-status').innerText = window.userData.reflection ? `已完成 (${window.userData.posttest.score}分)` : '挑戰最終任務'; document.getElementById('level-5-status').className = window.userData.reflection ? 'text-sm font-bold text-yellow-600' : 'text-sm font-bold text-gray-500'; document.getElementById('level-5-icon').innerText = '🏆'; document.getElementById('level-5-icon').classList.remove('grayscale'); } 
                 else { lvl5.setAttribute('onclick', 'showModal("提示", "老師目前尚未開放此關卡喔！")'); document.getElementById('level-5-status').innerText = '老師尚未開放'; }
             } else {
-                lvl5.setAttribute('onclick', 'showModal("提示", "第五關解鎖條件：\n1. 至少寫一篇小組日誌\n2. 完成計畫的「第二階段觀察結果」\n3. 小組至少主動送出一則互評給同學")');
+                lvl5.setAttribute('onclick', 'showModal("提示", "第五關解鎖條件：\\n1. 個人完成前測與救援任務\\n2. 小組至少寫一篇日誌\\n3. 完成計畫的「第二階段觀察結果」\\n4. 小組至少主動送出一則互評給同學")');
             }
             if (window.userData.reflection) totalProgress += 20;
 
@@ -701,24 +750,42 @@
             else { document.getElementById('d-date').value = new Date().toISOString().split('T')[0]; document.getElementById('d-height').value = ''; document.getElementById('d-leaves').value = ''; document.getElementById('d-action').value = ''; document.getElementById('d-obs').value = ''; document.getElementById('d-next').value = ''; document.getElementById('d-soil').selectedIndex = 0; document.getElementById('d-sun').selectedIndex = 0; removePhoto(); } 
         }
         function cancelDiaryForm() { showDiaryPanel('diary-list'); }
-        function handlePhotoUpload(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { const img = new Image(); img.onload = function() { const canvas = document.createElement('canvas'); const MAX_WIDTH = 400; let width = img.width; let height = img.height; if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); currentPhotoBase64 = canvas.toDataURL('image/jpeg', 0.4); document.getElementById('d-photo-preview').src = currentPhotoBase64; document.getElementById('photo-preview-container').classList.remove('hidden'); document.querySelector('.file-upload-label').classList.add('hidden'); }; img.src = e.target.result; }; reader.readAsDataURL(file); }
+        function handlePhotoUpload(event) { 
+            const file = event.target.files[0]; if (!file) return; 
+            const reader = new FileReader(); 
+            reader.onload = function(e) { 
+                const img = new Image(); img.onload = function() { 
+                    const canvas = document.createElement('canvas'); const MAX_WIDTH = 400; let width = img.width; let height = img.height; 
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } 
+                    canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); 
+                    const base64Str = canvas.toDataURL('image/jpeg', 0.4); 
+                    if (base64Str.length > 700000) { showModal("圖片太大", "壓縮後的圖片仍超過限制 (約700KB)。請重新選擇較單純或更小的照片！"); removePhoto(); return; }
+                    currentPhotoBase64 = base64Str; document.getElementById('d-photo-preview').src = currentPhotoBase64; document.getElementById('photo-preview-container').classList.remove('hidden'); document.querySelector('.file-upload-label').classList.add('hidden'); 
+                }; img.src = e.target.result; 
+            }; reader.readAsDataURL(file); 
+        }
         function removePhoto() { currentPhotoBase64 = null; document.getElementById('d-photo-input').value = ""; document.getElementById('photo-preview-container').classList.add('hidden'); document.querySelector('.file-upload-label').classList.remove('hidden'); }
         function saveDiaryEntry() { 
             const date = document.getElementById('d-date').value; const height = document.getElementById('d-height').value; const leaves = document.getElementById('d-leaves').value; const soil = document.getElementById('d-soil').value; const sun = document.getElementById('d-sun').value; const action = document.getElementById('d-action').value.trim(); const obs = document.getElementById('d-obs').value.trim(); const nextStep = document.getElementById('d-next').value.trim(); 
             if(!date || !height || !leaves || !obs) { showModal("漏掉囉！", "日期、高度、葉片數量和觀察紀錄都是必填的喔！"); return; } 
             if(parseFloat(height) < 0 || parseInt(leaves, 10) < 0) { showModal("等一下！", "高度和葉片數量不能小於 0 喔！"); return; }
             
+            const otherDiaries = (window.groupData.diary || []).filter(d => d.id !== currentEditingDiaryId);
+            const existingPhotosCount = otherDiaries.filter(d => d.photo).length;
+            if (currentPhotoBase64 && existingPhotosCount >= 5) { showModal("照片數量已滿", "本組已累積 5 張觀察照片。請改用文字紀錄，或先請老師確認是否刪除舊照片。"); return; }
+
             const entryData = { id: currentEditingDiaryId || Date.now().toString(), groupId: `${window.userData.classCode}_G${window.userData.group}`, classCode: window.userData.classCode, group: window.userData.group, author: window.userData.name, date, height: parseFloat(height), leaves: parseInt(leaves, 10), soil, sun, action, observation: obs, nextStep, photo: currentPhotoBase64 }; 
             
             if(window.saveDiaryEntryCloud) {
                 window.saveDiaryEntryCloud(entryData).then(() => { showModal("同步成功", "紀錄已經儲存到雲端農場囉！"); cancelDiaryForm(); }).catch(e => { console.error(e); showModal("同步失敗", "資料尚未儲存，請確認網路後再試一次！"); });
             }
         }
-        async function deleteDiary(id) { 
+        function deleteDiary(id) { 
             showConfirm("確定要刪除嗎？", "這筆紀錄會從小組雲端永久刪除喔！", async () => { 
                 if(window.deleteDiaryEntryCloud) {
                     try {
                         await window.deleteDiaryEntryCloud(id);
+                        showModal("刪除成功", "紀錄已刪除。");
                     } catch(e) {
                         showModal('刪除失敗', '網路不穩，請確認網路後再試一次。');
                         console.error(e);
@@ -805,19 +872,71 @@
                     .catch(e => { console.error(e); showModal("同步失敗", "設定未能存至雲端，請確認網路！"); });
             }
         }
-        function saveTeacherNotes() { 
-            const notes = { date: document.getElementById('teacher-note-date').value, basis: document.getElementById('teacher-note-basis').value, adjust: document.getElementById('teacher-note-adjust').value, evidence: document.getElementById('teacher-note-evidence').value }; 
-            if(window.saveTeacherNotesCloud) { 
-                window.saveTeacherNotesCloud(notes)
-                    .then(()=>showModal("儲存成功", "導學紀錄已同步至雲端！"))
-                    .catch(e => { console.error(e); showModal("同步失敗", "資料尚未儲存，請確認網路！"); }); 
+        async function saveTeacherNotes() { 
+            const date = document.getElementById('teacher-note-date').value.trim(); 
+            const basis = document.getElementById('teacher-note-basis').value.trim(); 
+            const adjust = document.getElementById('teacher-note-adjust').value.trim(); 
+            const evidence = document.getElementById('teacher-note-evidence').value.trim(); 
+            
+            if(!date && !basis && !adjust && !evidence) { showModal("提示", "請至少填寫一個欄位喔！"); return; }
+            
+            const noteData = {
+                id: Date.now().toString(), createdAt: new Date().toISOString(), date, basis, adjust, evidence
+            };
+            
+            if(window.saveTeacherNoteEntryCloud) { 
+                try {
+                    await window.saveTeacherNoteEntryCloud(noteData);
+                    document.getElementById('teacher-note-date').value = '';
+                    document.getElementById('teacher-note-basis').value = '';
+                    document.getElementById('teacher-note-adjust').value = '';
+                    document.getElementById('teacher-note-evidence').value = '';
+                    showModal("儲存成功", "導學紀錄已新增至雲端！");
+                } catch(e) {
+                    console.error(e); showModal("同步失敗", "資料尚未儲存，請確認網路！");
+                }
             } 
+        }
+
+        function renderTeacherNotes() {
+            const container = document.getElementById('teacher-notes-list-container');
+            if(!container) return;
+            container.innerHTML = '';
+            if(!window.allTeacherNotes || window.allTeacherNotes.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-400">目前尚無導學紀錄。</p>';
+                return;
+            }
+            window.allTeacherNotes.forEach(note => {
+                const card = document.createElement('div');
+                card.className = "bg-gray-50 border border-gray-200 rounded-lg p-4 relative";
+                card.innerHTML = `
+                    <button onclick="deleteTeacherNote('${escapeHTML(note.id)}')" class="absolute top-2 right-2 text-red-500 bg-red-50 hover:bg-red-100 p-1.5 rounded-md transition text-xs font-bold">刪除</button>
+                    <div class="mb-2"><span class="text-xs font-bold bg-blue-100 text-blue-700 px-2 py-1 rounded">日期／節次</span> <span class="text-sm font-bold ml-2 text-gray-700">${escapeHTML(note.date || '無')}</span></div>
+                    <div class="mb-2"><span class="text-xs font-bold bg-yellow-100 text-yellow-700 px-2 py-1 rounded">依據資料</span> <span class="text-sm text-gray-600 ml-2">${escapeHTML(note.basis || '無')}</span></div>
+                    <div class="mb-2"><span class="text-xs font-bold bg-green-100 text-green-700 px-2 py-1 rounded">教師調整</span> <span class="text-sm text-gray-600 ml-2">${escapeHTML(note.adjust || '無')}</span></div>
+                    <div><span class="text-xs font-bold bg-purple-100 text-purple-700 px-2 py-1 rounded">修正證據</span> <span class="text-sm text-gray-600 ml-2">${escapeHTML(note.evidence || '無')}</span></div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function deleteTeacherNote(id) {
+            showConfirm("刪除確認", "確定要刪除這筆導學紀錄嗎？", async () => {
+                if(window.deleteTeacherNoteEntryCloud) {
+                    try {
+                        await window.deleteTeacherNoteEntryCloud(id);
+                        showModal("刪除成功", "紀錄已刪除。");
+                    } catch(e) {
+                        console.error(e);
+                        showModal("刪除失敗", "網路不穩，請確認網路後再試一次。");
+                    }
+                }
+            });
         }
 
         function openTeacherDashboard() {
             switchView('view-teacher');
             const list = window.usersList || []; document.getElementById('dash-total-students').innerText = list.length;
-            if(window.teacherNotes) { document.getElementById('teacher-note-date').value = window.teacherNotes.date || ''; document.getElementById('teacher-note-basis').value = window.teacherNotes.basis || ''; document.getElementById('teacher-note-adjust').value = window.teacherNotes.adjust || ''; document.getElementById('teacher-note-evidence').value = window.teacherNotes.evidence || ''; }
             
             let completedCount = 0; let sumPre = 0, preCount = 0; let sumPost = 0, postCount = 0;
             let waterMythUsers = []; let sunMythUsers = []; let preCorrects = [0, 0, 0, 0, 0]; let postCorrects = [0, 0, 0, 0, 0];
@@ -875,6 +994,8 @@
 
             if (dashHeightChartInstance) dashHeightChartInstance.destroy(); dashHeightChartInstance = new Chart(document.getElementById('dash-chart-height'), { type: 'line', data: { labels: groupLabels, datasets: [{ label: '最新高度 (cm)', data: groupHeights, borderColor: '#eab308', backgroundColor: 'rgba(234, 179, 8, 0.2)', borderWidth: 3, pointBackgroundColor: '#fff', pointBorderColor: '#eab308', pointRadius: 6, fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
             if (dashDiaryChartInstance) dashDiaryChartInstance.destroy(); dashDiaryChartInstance = new Chart(document.getElementById('dash-chart-diary'), { type: 'bar', data: { labels: groupLabels, datasets: [ { label: '日誌篇數', data: groupDiaryCounts, backgroundColor: 'rgba(249, 115, 22, 0.7)', borderRadius: 4 }, { label: '收到互評', data: groupPeerCounts, backgroundColor: 'rgba(59, 130, 246, 0.7)', borderRadius: 4 } ] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } } });
+            
+            if(typeof renderTeacherNotes === 'function') renderTeacherNotes();
         }
 
         function downloadCSV(csvContent, fileName) { const BOM = "\uFEFF"; const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); const url = URL.createObjectURL(blob); link.setAttribute("href", url); link.setAttribute("download", fileName); link.style.visibility = 'hidden'; document.body.appendChild(link); link.click(); document.body.removeChild(link); }
