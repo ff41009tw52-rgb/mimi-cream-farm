@@ -54,40 +54,40 @@
     </div>
 
     <!-- ==================== 1. 首頁 (Home View) ==================== -->
-    <div id="view-home" class="view-section active max-w-md mx-auto pt-10 px-4 pb-20 relative">
-        <div class="bg-white rounded-3xl shadow-lg p-8 text-center border-4 border-green-200 mt-10 relative">
-            <h1 class="text-2xl sm:text-3xl font-black text-green-700 mb-2">橘咪咪與白奶油的<br>科學農場</h1>
-            <h2 class="text-lg text-green-600 mb-8 font-bold">小組協作任務基地</h2>
+    <div id="view-home" class="view-section active max-w-xl mx-auto pt-10 px-4 pb-20 relative">
+        <div class="bg-white rounded-3xl shadow-lg p-8 sm:p-12 text-center border-4 border-green-200 mt-10 relative">
+            <h1 class="text-3xl sm:text-4xl font-black text-green-700 mb-2 leading-snug">橘咪咪與白奶油的<br>科學農場</h1>
+            <h2 class="text-lg sm:text-xl text-green-600 mb-8 font-bold">小組協作任務基地</h2>
             
-            <div class="space-y-5 text-left max-w-xs mx-auto">
+            <div class="space-y-6 text-left max-w-sm mx-auto">
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">🏫 班級代碼：</label>
-                    <input type="text" id="input-class" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-gray-100 text-gray-600 font-bold focus:outline-none text-center" value="311" readonly>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">🏫 班級代碼：</label>
+                    <input type="text" id="input-class" class="w-full px-5 py-4 rounded-xl border-2 border-gray-200 bg-gray-100 text-gray-600 font-bold focus:outline-none text-center sm:text-lg" value="311" readonly>
                 </div>
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">🧑 座號 (1~27)：</label>
-                    <input type="number" id="input-seat" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-500 focus:outline-none font-bold text-center text-lg tracking-wider" placeholder="例: 15" min="1" max="27">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">🧑 座號 (1~27)：</label>
+                    <input type="number" id="input-seat" class="w-full px-5 py-4 rounded-xl border-2 border-gray-200 focus:border-green-500 focus:outline-none font-bold text-center text-xl tracking-wider shadow-inner" placeholder="請輸入座號" min="1" max="27">
                 </div>
-                <p class="text-xs text-gray-500 font-bold text-center mt-2">* 系統將依據座號自動為您分配小組與建立檔案。</p>
-                <button onclick="login()" class="w-full mt-6 bg-gradient-to-r from-green-400 to-green-600 text-white font-bold py-3 px-4 rounded-xl shadow-md hover:scale-105 transition transform">進入農場</button>
+                <p class="text-sm text-gray-500 font-bold text-center mt-2 bg-green-50 py-2 rounded-lg">* 系統將依據座號自動為您分配小組與建立檔案。</p>
+                <button onclick="login()" class="w-full mt-6 bg-gradient-to-r from-green-400 to-green-600 text-white font-bold py-4 px-4 rounded-xl shadow-md hover:scale-[1.02] transition-transform duration-300 sm:text-lg">進入農場</button>
             </div>
         </div>
-        <div class="text-center mt-8">
-            <button onclick="promptTeacherPassword()" class="text-sm font-bold text-gray-400 hover:text-gray-600 underline">👨‍🏫 教師儀表板</button>
+        <div class="text-center mt-10">
+            <button onclick="promptTeacherPassword()" class="text-sm sm:text-base font-bold text-gray-400 hover:text-gray-600 underline">👨‍🏫 教師儀表板</button>
         </div>
     </div>
 
     <!-- ==================== 2. 教師儀表板 (Teacher Dashboard View) ==================== -->
     <div id="view-teacher" class="view-section max-w-5xl mx-auto pt-6 px-4 pb-20 relative">
         <div class="flex justify-between items-center mb-6">
-            <button onclick="goToHome()" class="bg-white border-2 border-gray-500 text-gray-600 px-3 py-1 rounded-full text-sm font-bold shadow hover:bg-gray-50 transition">回首頁</button>
-            <h2 class="text-2xl font-black text-slate-700">👨‍🏫 教師儀表板</h2>
+            <button onclick="goToHome()" class="bg-white border-2 border-gray-500 text-gray-600 px-4 py-2 rounded-full text-sm font-bold shadow hover:bg-gray-50 transition">回首頁</button>
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-700">👨‍🏫 教師儀表板</h2>
             <div class="w-20"></div>
         </div>
 
         <div class="bg-white rounded-xl shadow-sm border-l-8 border-purple-500 p-5 mb-6">
             <h3 class="font-bold text-slate-700 mb-2 flex items-center gap-2">🔓 關卡開放進度中控</h3>
-            <select id="teacher-unlock-level" onchange="changeUnlockLevel()" class="w-full sm:w-1/2 bg-purple-50 border-2 border-purple-200 rounded-lg p-2 font-bold text-purple-700 focus:outline-none focus:border-purple-500 transition">
+            <select id="teacher-unlock-level" onchange="changeUnlockLevel()" class="w-full sm:w-1/2 bg-purple-50 border-2 border-purple-200 rounded-lg p-3 font-bold text-purple-700 focus:outline-none focus:border-purple-500 transition">
                 <option value="1">🔒 只開放第一關：前測</option>
                 <option value="2">🔒 開放至第二關：救援任務</option>
                 <option value="3">🔒 開放至第三關：成長日誌</option>
@@ -96,13 +96,13 @@
             </select>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-6 p-5">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-slate-700 flex items-center gap-2">✍️ 導學紀錄 (雲端同步)</h3>
-                <button onclick="saveTeacherNotes()" class="bg-blue-500 text-white px-4 py-1.5 rounded-lg shadow hover:bg-blue-600 transition text-sm font-bold">儲存紀錄</button>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-6 p-5 sm:p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-bold text-slate-700 text-lg flex items-center gap-2">✍️ 導學紀錄 (雲端同步)</h3>
+                <button onclick="saveTeacherNotes()" class="bg-blue-500 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-600 transition font-bold">儲存紀錄</button>
             </div>
-            <div class="space-y-3">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div><label class="block text-sm font-bold text-gray-600 mb-1">日期／節次：</label><input type="text" id="teacher-note-date" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 focus:outline-blue-500 text-sm font-bold text-gray-700" placeholder="例如：10/25 (二) 第三節"></div>
                     <div><label class="block text-sm font-bold text-gray-600 mb-1">依據資料：</label><input type="text" id="teacher-note-basis" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 focus:outline-blue-500 text-sm font-bold text-gray-700" placeholder="例如：前測Q2錯誤率達 60%..."></div>
                 </div>
@@ -110,145 +110,145 @@
                 <div><label class="block text-sm font-bold text-gray-600 mb-1">修正證據：</label><textarea id="teacher-note-evidence" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 focus:outline-blue-500 text-sm font-bold text-gray-700 resize-none" rows="2" placeholder="例如：後測該題答對率提升..."></textarea></div>
             </div>
             
-            <div class="mt-6 border-t border-gray-100 pt-4">
-                <h4 class="font-bold text-slate-600 mb-3 flex items-center gap-2">📜 歷次導學紀錄</h4>
-                <div id="teacher-notes-list-container" class="space-y-3">
+            <div class="mt-8 border-t border-gray-100 pt-6">
+                <h4 class="font-bold text-slate-600 mb-4 text-lg flex items-center gap-2">📜 歷次導學紀錄</h4>
+                <div id="teacher-notes-list-container" class="space-y-4">
                     <!-- JS 動態生成歷史紀錄 -->
                 </div>
             </div>
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white p-4 rounded-xl shadow border-l-4 border-blue-500"><p class="text-xs text-gray-500 font-bold">參與人數</p><p class="text-2xl font-black text-blue-600" id="dash-total-students">0</p></div>
-            <div class="bg-white p-4 rounded-xl shadow border-l-4 border-yellow-500"><p class="text-xs text-gray-500 font-bold">完成後測</p><p class="text-2xl font-black text-yellow-600" id="dash-completed">0</p></div>
-            <div class="bg-white p-4 rounded-xl shadow border-l-4 border-green-500"><p class="text-xs text-gray-500 font-bold">前測平均</p><p class="text-2xl font-black text-green-600" id="dash-avg-pre">0</p></div>
-            <div class="bg-white p-4 rounded-xl shadow border-l-4 border-purple-500"><p class="text-xs text-gray-500 font-bold">後測平均</p><p class="text-2xl font-black text-purple-600" id="dash-avg-post">0</p></div>
+            <div class="bg-white p-5 rounded-xl shadow border-l-4 border-blue-500"><p class="text-sm text-gray-500 font-bold">參與人數</p><p class="text-3xl font-black text-blue-600 mt-1" id="dash-total-students">0</p></div>
+            <div class="bg-white p-5 rounded-xl shadow border-l-4 border-yellow-500"><p class="text-sm text-gray-500 font-bold">完成後測</p><p class="text-3xl font-black text-yellow-600 mt-1" id="dash-completed">0</p></div>
+            <div class="bg-white p-5 rounded-xl shadow border-l-4 border-green-500"><p class="text-sm text-gray-500 font-bold">前測平均</p><p class="text-3xl font-black text-green-600 mt-1" id="dash-avg-pre">0</p></div>
+            <div class="bg-white p-5 rounded-xl shadow border-l-4 border-purple-500"><p class="text-sm text-gray-500 font-bold">後測平均</p><p class="text-3xl font-black text-purple-600 mt-1" id="dash-avg-post">0</p></div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200"><h3 class="text-center font-bold text-slate-700 mb-4 bg-slate-50 py-2 rounded-lg">前後測平均比較</h3><div class="relative h-56 w-full"><canvas id="dash-chart-avg"></canvas></div></div>
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200"><h3 class="text-center font-bold text-slate-700 mb-4 bg-slate-50 py-2 rounded-lg">前後測各概念題答對率 (%)</h3><div class="relative h-56 w-full"><canvas id="dash-chart-correct-rate"></canvas></div></div>
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
-                <h3 class="text-center font-bold text-slate-700 mb-1 bg-slate-50 py-2 rounded-lg">各組最新植物高度 (cm)</h3>
-                <p class="text-xs text-gray-500 text-center mb-3">* 僅作為觀察紀錄，不作為小組排名</p>
-                <div class="relative h-56 w-full"><canvas id="dash-chart-height"></canvas></div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200"><h3 class="text-center font-bold text-slate-700 mb-4 bg-slate-50 py-3 rounded-lg text-lg">前後測平均比較</h3><div class="relative h-64 w-full"><canvas id="dash-chart-avg"></canvas></div></div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200"><h3 class="text-center font-bold text-slate-700 mb-4 bg-slate-50 py-3 rounded-lg text-lg">前後測各概念題答對率 (%)</h3><div class="relative h-64 w-full"><canvas id="dash-chart-correct-rate"></canvas></div></div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                <h3 class="text-center font-bold text-slate-700 mb-1 bg-slate-50 py-3 rounded-lg text-lg">各組最新植物高度 (cm)</h3>
+                <p class="text-sm text-gray-500 text-center mb-4">* 僅作為觀察紀錄，不作為小組排名</p>
+                <div class="relative h-64 w-full"><canvas id="dash-chart-height"></canvas></div>
             </div>
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200"><h3 class="text-center font-bold text-slate-700 mb-4 bg-slate-50 py-2 rounded-lg">各組日誌與互評次數</h3><div class="relative h-56 w-full"><canvas id="dash-chart-diary"></canvas></div></div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200"><h3 class="text-center font-bold text-slate-700 mb-4 bg-slate-50 py-3 rounded-lg text-lg">各組日誌與互評次數</h3><div class="relative h-64 w-full"><canvas id="dash-chart-diary"></canvas></div></div>
         </div>
 
-        <div class="bg-red-50 p-5 rounded-xl shadow-sm border border-red-200 mb-6">
-            <h3 class="font-bold text-red-700 mb-3 flex items-center gap-2">🚨 迷思概念警報區</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="bg-white p-3 rounded-lg border border-red-100 shadow-sm"><p class="text-sm text-red-600 font-bold mb-1">以為水越多越好 (前測Q2答錯)</p><p class="text-xl text-gray-800 font-black mb-1" id="dash-myth-water-ratio">0 / 0 人</p><p class="text-xs text-gray-500" id="dash-water-myth">名單：無</p></div>
-                <div class="bg-white p-3 rounded-lg border border-red-100 shadow-sm"><p class="text-sm text-red-600 font-bold mb-1">以為放室內沒關係 (前測Q3答錯)</p><p class="text-xl text-gray-800 font-black mb-1" id="dash-myth-sun-ratio">0 / 0 人</p><p class="text-xs text-gray-500" id="dash-sun-myth">名單：無</p></div>
+        <div class="bg-red-50 p-6 rounded-xl shadow-sm border border-red-200 mb-6">
+            <h3 class="font-bold text-red-700 mb-4 text-lg flex items-center gap-2">🚨 迷思概念警報區</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div class="bg-white p-4 rounded-lg border border-red-100 shadow-sm"><p class="text-base text-red-600 font-bold mb-2">以為水越多越好 (前測Q2答錯)</p><p class="text-2xl text-gray-800 font-black mb-2" id="dash-myth-water-ratio">0 / 0 人</p><p class="text-sm text-gray-500" id="dash-water-myth">名單：無</p></div>
+                <div class="bg-white p-4 rounded-lg border border-red-100 shadow-sm"><p class="text-base text-red-600 font-bold mb-2">以為放室內沒關係 (前測Q3答錯)</p><p class="text-2xl text-gray-800 font-black mb-2" id="dash-myth-sun-ratio">0 / 0 人</p><p class="text-sm text-gray-500" id="dash-sun-myth">名單：無</p></div>
             </div>
         </div>
 
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-6 overflow-hidden">
-            <div class="p-4 border-b border-gray-100 bg-slate-50 flex justify-between items-center"><h3 class="font-bold text-slate-700">📋 學生任務進度</h3></div>
-            <div class="table-container p-4">
-                <table class="w-full text-left border-collapse text-sm whitespace-nowrap">
-                    <thead><tr class="text-gray-500 border-b-2 border-gray-200"><th class="py-2 px-2">組別</th><th class="py-2 px-2">座號</th><th class="py-2 px-2">前測</th><th class="py-2 px-2">後測</th><th class="py-2 px-2">日誌</th><th class="py-2 px-2">計畫</th><th class="py-2 px-2">收到互評</th></tr></thead>
-                    <tbody id="dash-student-table" class="font-bold text-gray-700 divide-y divide-gray-100"></tbody>
+            <div class="p-5 border-b border-gray-100 bg-slate-50 flex justify-between items-center"><h3 class="font-bold text-slate-700 text-lg">📋 學生任務進度</h3></div>
+            <div class="table-container p-5">
+                <table class="w-full text-left border-collapse whitespace-nowrap">
+                    <thead><tr class="text-gray-500 border-b-2 border-gray-200"><th class="py-3 px-3">組別</th><th class="py-3 px-3">座號</th><th class="py-3 px-3">前測</th><th class="py-3 px-3">後測</th><th class="py-3 px-3">日誌</th><th class="py-3 px-3">計畫</th><th class="py-3 px-3">收到互評</th></tr></thead>
+                    <tbody id="dash-student-table" class="font-bold text-gray-700 divide-y divide-gray-100 text-sm sm:text-base"></tbody>
                 </table>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-            <h3 class="font-bold text-slate-700 mb-4">📥 資料匯出 (CSV)</h3>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <button onclick="exportScoresCSV()" class="bg-green-100 text-green-700 border border-green-300 py-2 rounded-lg font-bold hover:bg-green-200 transition">個人成績</button>
-                <button onclick="exportRescueCSV()" class="bg-blue-100 text-blue-700 border border-blue-300 py-2 rounded-lg font-bold hover:bg-blue-200 transition">個人救援</button>
-                <button onclick="exportDiaryCSV()" class="bg-orange-100 text-orange-700 border border-orange-300 py-2 rounded-lg font-bold hover:bg-orange-200 transition">小組日誌</button>
-                <button onclick="exportPeerCSV()" class="bg-purple-100 text-purple-700 border border-purple-300 py-2 rounded-lg font-bold hover:bg-purple-200 transition">小組互評</button>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h3 class="font-bold text-slate-700 mb-5 text-lg">📥 資料匯出 (CSV)</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <button onclick="exportScoresCSV()" class="bg-green-100 text-green-700 border border-green-300 py-3 rounded-xl font-bold hover:bg-green-200 transition sm:text-lg">個人成績</button>
+                <button onclick="exportRescueCSV()" class="bg-blue-100 text-blue-700 border border-blue-300 py-3 rounded-xl font-bold hover:bg-blue-200 transition sm:text-lg">個人救援</button>
+                <button onclick="exportDiaryCSV()" class="bg-orange-100 text-orange-700 border border-orange-300 py-3 rounded-xl font-bold hover:bg-orange-200 transition sm:text-lg">小組日誌</button>
+                <button onclick="exportPeerCSV()" class="bg-purple-100 text-purple-700 border border-purple-300 py-3 rounded-xl font-bold hover:bg-purple-200 transition sm:text-lg">小組互評</button>
             </div>
         </div>
     </div>
 
     <!-- ==================== 3. 學習地圖 (Map View) ==================== -->
-    <div id="view-map" class="view-section max-w-lg mx-auto pt-6 px-4 pb-20 relative">
-        <button onclick="goToHome()" class="absolute top-4 left-4 bg-white border-2 border-green-500 text-green-600 px-3 py-1 rounded-full text-sm font-bold shadow hover:bg-green-50 z-10 flex items-center gap-1">首頁</button>
-        <div class="text-center mt-8 mb-6">
-            <h2 class="text-2xl font-bold text-green-800">農場學習地圖</h2>
-            <p class="text-gray-600 mt-1 font-bold" id="student-welcome-text">載入中...</p>
+    <div id="view-map" class="view-section max-w-2xl mx-auto pt-6 px-4 pb-20 relative">
+        <button onclick="goToHome()" class="absolute top-4 left-4 bg-white border-2 border-green-500 text-green-600 px-4 py-1.5 rounded-full text-sm font-bold shadow hover:bg-green-50 z-10 flex items-center gap-1">首頁</button>
+        <div class="text-center mt-10 mb-8">
+            <h2 class="text-3xl font-bold text-green-800">農場學習地圖</h2>
+            <p class="text-gray-600 mt-2 font-bold sm:text-lg" id="student-welcome-text">載入中...</p>
         </div>
-        <div class="bg-white p-4 rounded-2xl shadow-sm mb-6 border border-gray-100">
-            <div class="flex justify-between text-sm font-bold text-green-700 mb-2"><span>進度</span><span id="progress-text">0%</span></div>
-            <div class="w-full bg-gray-200 rounded-full h-4"><div id="progress-bar" class="bg-green-500 h-4 rounded-full transition-all duration-500" style="width: 0%"></div></div>
-        </div>
-
-        <div class="space-y-4 relative">
-            <div id="level-1-card" class="bg-white p-5 rounded-2xl shadow border-l-8 border-green-500 flex items-center justify-between cursor-pointer hover:bg-green-50 transition" onclick="startPretest()">
-                <div><span class="text-xs font-bold text-white bg-green-500 px-2 py-1 rounded-lg">個人</span><h3 class="text-lg font-bold text-gray-800 mt-2">🌱 1. 生長大考驗</h3><p class="text-sm text-gray-500 font-bold" id="level-1-status">尚未挑戰</p></div>
-                <div class="text-3xl" id="level-1-icon">🔍</div>
-            </div>
-            <div id="level-2-card" class="bg-gray-50 p-5 rounded-2xl shadow border-l-8 border-gray-300 flex items-center justify-between opacity-70 transition">
-                <div><span class="text-xs font-bold text-white bg-blue-400 px-2 py-1 rounded-lg">個人</span><h3 class="text-lg font-bold text-gray-800 mt-2">🚑 2. 救援任務</h3><p class="text-sm text-gray-400 font-bold" id="level-2-status">請先完成第一關</p></div>
-                <div class="text-3xl grayscale" id="level-2-icon">🔒</div>
-            </div>
-            <div id="level-3-card" class="bg-gray-50 p-5 rounded-2xl shadow border-l-8 border-gray-300 flex items-center justify-between opacity-70 transition">
-                <div><span class="text-xs font-bold text-white bg-orange-500 px-2 py-1 rounded-lg">小組</span><h3 class="text-lg font-bold text-gray-800 mt-2">📝 3. 成長日誌</h3><p class="text-sm text-gray-400 font-bold" id="level-3-status">請先完成第二關</p></div>
-                <div class="text-3xl grayscale" id="level-3-icon">🔒</div>
-            </div>
-            <div id="level-4-card" class="bg-gray-50 p-5 rounded-2xl shadow border-l-8 border-gray-300 flex items-center justify-between opacity-70 transition">
-                <div><span class="text-xs font-bold text-white bg-purple-500 px-2 py-1 rounded-lg">小組</span><h3 class="text-lg font-bold text-gray-800 mt-2">📋 4. 計畫與互評</h3><p class="text-sm text-gray-400 font-bold" id="level-4-status">請先寫至少一篇日誌</p></div>
-                <div class="text-3xl grayscale" id="level-4-icon">🔒</div>
-            </div>
-            <div id="level-5-card" class="bg-gray-50 p-5 rounded-2xl shadow border-l-8 border-gray-300 flex items-center justify-between opacity-70 transition">
-                <div><span class="text-xs font-bold text-white bg-yellow-400 px-2 py-1 rounded-lg">個人</span><h3 class="text-lg font-bold text-gray-800 mt-2">🏆 5. 守護員挑戰</h3><p class="text-sm text-gray-400 font-bold" id="level-5-status">請先完成前四關</p></div>
-                <div class="text-3xl grayscale" id="level-5-icon">🔒</div>
-            </div>
+        <div class="bg-white p-5 rounded-2xl shadow-sm mb-8 border border-gray-100">
+            <div class="flex justify-between text-sm sm:text-base font-bold text-green-700 mb-3"><span>任務總進度</span><span id="progress-text">0%</span></div>
+            <div class="w-full bg-gray-200 rounded-full h-5 sm:h-6"><div id="progress-bar" class="bg-green-500 h-5 sm:h-6 rounded-full transition-all duration-500" style="width: 0%"></div></div>
         </div>
 
-        <div class="mt-10 flex items-end gap-3">
-            <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-green-300 flex-shrink-0 bg-gray-100"><img src="Christmascream.jpg" alt="白奶油" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100/eee/999?text=Cream'"></div>
-            <div class="flex-1"><div class="chat-bubble chat-bubble-outline text-sm font-bold text-gray-700">白奶油園長：哼，小組任務是會同步的，大家一起合作才能解鎖最後一關喔！</div></div>
+        <div class="space-y-5 relative">
+            <div id="level-1-card" class="bg-white p-6 sm:p-8 rounded-2xl shadow border-l-8 border-green-500 flex items-center justify-between cursor-pointer transition-transform duration-300 hover:scale-[1.02] hover:bg-green-50" onclick="startPretest()">
+                <div><span class="text-xs sm:text-sm font-bold text-white bg-green-500 px-3 py-1.5 rounded-lg">個人</span><h3 class="text-xl sm:text-2xl font-bold text-gray-800 mt-3">🌱 1. 生長大考驗</h3><p class="text-sm sm:text-base text-gray-500 font-bold mt-1" id="level-1-status">尚未挑戰</p></div>
+                <div class="text-4xl sm:text-5xl" id="level-1-icon">🔍</div>
+            </div>
+            <div id="level-2-card" class="bg-gray-50 p-6 sm:p-8 rounded-2xl shadow border-l-8 border-gray-300 flex items-center justify-between opacity-70 transition-transform duration-300">
+                <div><span class="text-xs sm:text-sm font-bold text-white bg-blue-400 px-3 py-1.5 rounded-lg">個人</span><h3 class="text-xl sm:text-2xl font-bold text-gray-800 mt-3">🚑 2. 救援任務</h3><p class="text-sm sm:text-base text-gray-400 font-bold mt-1" id="level-2-status">請先完成第一關</p></div>
+                <div class="text-4xl sm:text-5xl grayscale" id="level-2-icon">🔒</div>
+            </div>
+            <div id="level-3-card" class="bg-gray-50 p-6 sm:p-8 rounded-2xl shadow border-l-8 border-gray-300 flex items-center justify-between opacity-70 transition-transform duration-300">
+                <div><span class="text-xs sm:text-sm font-bold text-white bg-orange-500 px-3 py-1.5 rounded-lg">小組</span><h3 class="text-xl sm:text-2xl font-bold text-gray-800 mt-3">📝 3. 成長日誌</h3><p class="text-sm sm:text-base text-gray-400 font-bold mt-1" id="level-3-status">請先完成第二關</p></div>
+                <div class="text-4xl sm:text-5xl grayscale" id="level-3-icon">🔒</div>
+            </div>
+            <div id="level-4-card" class="bg-gray-50 p-6 sm:p-8 rounded-2xl shadow border-l-8 border-gray-300 flex items-center justify-between opacity-70 transition-transform duration-300">
+                <div><span class="text-xs sm:text-sm font-bold text-white bg-purple-500 px-3 py-1.5 rounded-lg">小組</span><h3 class="text-xl sm:text-2xl font-bold text-gray-800 mt-3">📋 4. 計畫與互評</h3><p class="text-sm sm:text-base text-gray-400 font-bold mt-1" id="level-4-status">請先寫至少一篇日誌</p></div>
+                <div class="text-4xl sm:text-5xl grayscale" id="level-4-icon">🔒</div>
+            </div>
+            <div id="level-5-card" class="bg-gray-50 p-6 sm:p-8 rounded-2xl shadow border-l-8 border-gray-300 flex items-center justify-between opacity-70 transition-transform duration-300">
+                <div><span class="text-xs sm:text-sm font-bold text-white bg-yellow-400 px-3 py-1.5 rounded-lg">個人</span><h3 class="text-xl sm:text-2xl font-bold text-gray-800 mt-3">🏆 5. 守護員挑戰</h3><p class="text-sm sm:text-base text-gray-400 font-bold mt-1" id="level-5-status">請先完成前四關</p></div>
+                <div class="text-4xl sm:text-5xl grayscale" id="level-5-icon">🔒</div>
+            </div>
+        </div>
+
+        <div class="mt-12 flex items-end gap-4 max-w-lg mx-auto">
+            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-green-300 flex-shrink-0 bg-gray-100 shadow-md"><img src="Christmascream.jpg" alt="白奶油" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100/eee/999?text=Cream'"></div>
+            <div class="flex-1"><div class="chat-bubble chat-bubble-outline text-sm sm:text-base font-bold text-gray-700 p-4">白奶油園長：哼，小組任務是會同步的，大家一起合作才能解鎖最後一關喔！</div></div>
         </div>
     </div>
 
     <!-- ==================== 4. 前測 ==================== -->
-    <div id="view-pretest" class="view-section max-w-lg mx-auto pt-6 px-4 pb-20 relative"><button onclick="goToMap()" class="absolute top-4 left-4 bg-white border-2 border-green-500 text-green-600 px-3 py-1 rounded-full text-sm font-bold shadow hover:bg-green-50 z-10 flex items-center gap-1">返回</button>
-        <div class="text-center mt-8 mb-6"><h2 class="text-2xl font-bold text-green-800">🌱 生長大考驗</h2><p class="text-sm text-gray-500 mt-1 font-bold">第 <span id="current-q-num">1</span> / 5 題</p></div>
-        <div class="bg-white rounded-3xl shadow-md p-6 border-2 border-green-100 mb-6"><h3 class="text-xl font-bold text-gray-800 mb-6 leading-relaxed" id="question-text">載入中...</h3><div class="space-y-3" id="options-container"></div></div>
-        <div class="mt-6 flex items-end gap-3"><div class="w-16 h-16 rounded-full overflow-hidden border-2 border-orange-300 flex-shrink-0 bg-orange-50"><img src="Christmasmimi.jpg" alt="橘咪咪" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100/fcd34d/d97706?text=Mimi'"></div><div class="flex-1"><div class="chat-bubble chat-bubble-orange chat-bubble-orange-outline text-sm font-bold text-gray-700">橘咪咪園長：仔細回想自然課本的內容，你一定可以做到的喵！</div></div></div>
+    <div id="view-pretest" class="view-section max-w-2xl mx-auto pt-6 px-4 pb-20 relative"><button onclick="goToMap()" class="absolute top-4 left-4 bg-white border-2 border-green-500 text-green-600 px-4 py-1.5 rounded-full text-sm font-bold shadow hover:bg-green-50 z-10 flex items-center gap-1">返回</button>
+        <div class="text-center mt-10 mb-8"><h2 class="text-2xl sm:text-3xl font-bold text-green-800">🌱 生長大考驗</h2><p class="text-base text-gray-500 mt-2 font-bold">第 <span id="current-q-num" class="text-green-600">1</span> / 5 題</p></div>
+        <div class="bg-white rounded-3xl shadow-lg p-6 sm:p-10 border-2 border-green-100 mb-8"><h3 class="text-xl sm:text-2xl font-bold text-gray-800 mb-8 leading-relaxed" id="question-text">載入中...</h3><div class="space-y-4" id="options-container"></div></div>
+        <div class="mt-8 flex items-end gap-4 max-w-lg mx-auto"><div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-orange-300 flex-shrink-0 bg-orange-50 shadow-md"><img src="Christmasmimi.jpg" alt="橘咪咪" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100/fcd34d/d97706?text=Mimi'"></div><div class="flex-1"><div class="chat-bubble chat-bubble-orange chat-bubble-orange-outline text-sm sm:text-base font-bold text-gray-700 p-4">橘咪咪園長：仔細回想自然課本的內容，你一定可以做到的喵！</div></div></div>
     </div>
     
     <!-- ==================== 5. 測驗結算 ==================== -->
-    <div id="view-result" class="view-section max-w-lg mx-auto pt-16 px-4 pb-20 text-center relative"><div class="bg-white rounded-3xl shadow-xl p-8 border-4 border-yellow-300 relative overflow-hidden"><div class="absolute -top-4 -right-4 text-6xl opacity-20">🌟</div><h2 class="text-3xl font-bold text-yellow-600 mb-2">任務完成！</h2><p class="text-gray-600 mb-6 font-bold">成績已同步至雲端保存！</p><div class="text-6xl font-black text-green-500 mb-2" id="score-text">100</div><p class="text-gray-500 font-bold mb-8">分</p><button onclick="goToMap()" class="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-xl shadow-md hover:bg-green-600 transition">回到地圖</button></div></div>
+    <div id="view-result" class="view-section max-w-2xl mx-auto pt-20 px-4 pb-20 text-center relative"><div class="bg-white rounded-3xl shadow-xl p-10 sm:p-16 border-4 border-yellow-300 relative overflow-hidden"><div class="absolute -top-6 -right-6 text-8xl opacity-20">🌟</div><h2 class="text-4xl font-black text-yellow-600 mb-4">任務完成！</h2><p class="text-lg text-gray-600 mb-8 font-bold">成績已同步至雲端保存！</p><div class="text-7xl sm:text-8xl font-black text-green-500 mb-4" id="score-text">100</div><p class="text-xl text-gray-500 font-bold mb-10">分</p><button onclick="goToMap()" class="w-full sm:w-2/3 mx-auto bg-green-500 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:scale-[1.02] transition-transform duration-300 text-xl block">回到地圖</button></div></div>
     
     <!-- ==================== 6. 救援任務 (圖像觀察版) ==================== -->
-    <div id="view-rescue" class="view-section max-w-lg mx-auto pt-6 px-4 pb-20 relative"><button onclick="goToMap()" class="absolute top-4 left-4 bg-white border-2 border-green-500 text-green-600 px-3 py-1 rounded-full text-sm font-bold shadow hover:bg-green-50 z-10 flex items-center gap-1">返回</button>
-        <div class="text-center mt-8 mb-4"><h2 class="text-2xl font-bold text-green-800">🚑 植物救援任務</h2><p class="text-sm text-gray-500 mt-1 font-bold">搶救小白菜：第 <span id="current-rescue-num">1</span> / 3 盆</p></div>
+    <div id="view-rescue" class="view-section max-w-2xl mx-auto pt-6 px-4 pb-20 relative"><button onclick="goToMap()" class="absolute top-4 left-4 bg-white border-2 border-green-500 text-green-600 px-4 py-1.5 rounded-full text-sm font-bold shadow hover:bg-green-50 z-10 flex items-center gap-1">返回</button>
+        <div class="text-center mt-10 mb-6"><h2 class="text-2xl sm:text-3xl font-bold text-green-800">🚑 植物救援任務</h2><p class="text-base text-gray-500 mt-2 font-bold">搶救小白菜：第 <span id="current-rescue-num" class="text-green-600">1</span> / 3 盆</p></div>
         
-        <div class="bg-blue-50 rounded-3xl p-6 text-center mb-4 border-2 border-blue-200">
-            <img id="rescue-plant-image" src="" alt="等待學生觀察的小白菜" class="w-full max-h-72 object-contain rounded-2xl mx-auto mb-2 bg-white shadow-sm" onerror="this.src='https://placehold.co/400x300/e2e8f0/64748b?text=Plant+Image'">
-            <h3 id="rescue-plant-name" class="font-bold text-lg text-blue-800">一號小白菜</h3>
+        <div class="bg-blue-50 rounded-3xl p-6 sm:p-8 text-center mb-6 border-2 border-blue-200">
+            <img id="rescue-plant-image" src="" alt="等待學生觀察的小白菜" class="w-full max-h-72 sm:max-h-96 object-contain rounded-2xl mx-auto mb-4 bg-white shadow-sm border border-blue-100" onerror="this.src='https://placehold.co/600x400/e2e8f0/64748b?text=Plant+Image'">
+            <h3 id="rescue-plant-name" class="font-black text-xl sm:text-2xl text-blue-800">一號小白菜</h3>
         </div>
 
-        <div class="bg-white rounded-2xl shadow p-4 border border-gray-100 mb-4"><p class="font-bold text-orange-600 mb-2">步驟 1. 小偵探任務：三個線索都看過了嗎？</p><div class="grid grid-cols-3 gap-2 mb-4"><button id="btn-clue-leaf" onclick="checkClue('leaf')" class="bg-gray-100 hover:bg-green-100 border-2 border-gray-200 rounded-xl py-2 text-sm font-bold text-gray-600 transition">🔍 葉子</button><button id="btn-clue-soil" onclick="checkClue('soil')" class="bg-gray-100 hover:bg-green-100 border-2 border-gray-200 rounded-xl py-2 text-sm font-bold text-gray-600 transition">🔍 土壤</button><button id="btn-clue-env" onclick="checkClue('env')" class="bg-gray-100 hover:bg-green-100 border-2 border-gray-200 rounded-xl py-2 text-sm font-bold text-gray-600 transition">🔍 環境</button></div><div id="clue-display" class="bg-yellow-50 text-yellow-800 text-sm font-bold p-3 rounded-lg border border-yellow-200 min-h-[3rem] flex items-center justify-center text-center">請點擊上方按鈕開始觀察。</div></div>
-        <div class="bg-white rounded-2xl shadow p-4 border border-gray-100 mb-4"><p class="font-bold text-gray-700 mb-2">步驟 2. 選擇你要做的行動：</p><div class="grid grid-cols-2 gap-2"><button id="action-1" onclick="chooseAction('適量澆水', 'action-1')" class="action-btn bg-white border-2 border-blue-300 text-blue-700 rounded-xl py-2 text-sm font-bold hover:bg-blue-50 transition">💧 適量澆水</button><button id="action-2" onclick="chooseAction('暫時不要再澆水', 'action-2')" class="action-btn bg-white border-2 border-red-300 text-red-700 rounded-xl py-2 text-sm font-bold hover:bg-red-50 transition">🚫 暫不澆水</button><button id="action-3" onclick="chooseAction('移到陽光充足處', 'action-3')" class="action-btn bg-white border-2 border-orange-300 text-orange-700 rounded-xl py-2 text-sm font-bold hover:bg-orange-50 transition">☀️ 移到陽光下</button><button id="action-5" onclick="chooseAction('抓蟲', 'action-5')" class="action-btn bg-white border-2 border-green-300 text-green-700 rounded-xl py-2 text-sm font-bold hover:bg-green-50 transition">🐛 抓蟲</button></div></div>
-        <div class="bg-white rounded-2xl shadow p-4 border border-gray-100 mb-6"><p class="font-bold text-gray-700 mb-2">步驟 3. 寫下判斷理由：</p><div class="space-y-3 text-gray-700 font-bold text-sm"><div class="flex items-center gap-2 flex-wrap"><span>觀察到</span><input type="text" id="rescue-obs" class="flex-1 min-w-[100px] border-b-2 border-green-500 bg-green-50 px-2 py-1 rounded focus:outline-none" placeholder="土壤乾乾的"></div><div class="flex items-center gap-2 flex-wrap"><span>我認為植物需要</span><input type="text" id="rescue-reason" class="flex-1 min-w-[100px] border-b-2 border-green-500 bg-green-50 px-2 py-1 rounded focus:outline-none" placeholder="喝水"></div></div></div>
-        <button onclick="submitRescue()" class="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-xl shadow-md hover:bg-blue-600 transition">送出決定！</button>
-        <div class="mt-6 flex items-end gap-3"><div class="w-12 h-12 rounded-full overflow-hidden border-2 border-orange-300 flex-shrink-0 bg-orange-50"><img src="Christmasmimi.jpg" onerror="this.src='https://placehold.co/100/fcd34d/d97706?text=Mimi'"></div><div class="flex-1"><div class="chat-bubble chat-bubble-orange chat-bubble-orange-outline text-xs font-bold text-gray-700">橘咪咪園長：一定要三個線索都看完才能下決定喔！</div></div></div>
+        <div class="bg-white rounded-3xl shadow-md p-5 sm:p-8 border border-gray-100 mb-6"><p class="font-black text-lg text-orange-600 mb-4">步驟 1. 小偵探任務：三個線索都看過了嗎？</p><div class="grid grid-cols-3 gap-3 mb-5"><button id="btn-clue-leaf" onclick="checkClue('leaf')" class="bg-gray-50 hover:bg-green-100 border-2 border-gray-200 rounded-xl py-3 sm:py-4 text-base font-bold text-gray-600 transition-colors">🔍 葉子</button><button id="btn-clue-soil" onclick="checkClue('soil')" class="bg-gray-50 hover:bg-green-100 border-2 border-gray-200 rounded-xl py-3 sm:py-4 text-base font-bold text-gray-600 transition-colors">🔍 土壤</button><button id="btn-clue-env" onclick="checkClue('env')" class="bg-gray-50 hover:bg-green-100 border-2 border-gray-200 rounded-xl py-3 sm:py-4 text-base font-bold text-gray-600 transition-colors">🔍 環境</button></div><div id="clue-display" class="bg-yellow-50 text-yellow-800 text-base sm:text-lg font-bold p-4 sm:p-5 rounded-xl border border-yellow-200 min-h-[4rem] flex items-center justify-center text-center shadow-inner">請點擊上方按鈕開始觀察。</div></div>
+        <div class="bg-white rounded-3xl shadow-md p-5 sm:p-8 border border-gray-100 mb-6"><p class="font-black text-lg text-gray-700 mb-4">步驟 2. 選擇你要做的行動：</p><div class="grid grid-cols-2 sm:grid-cols-4 gap-3"><button id="action-1" onclick="chooseAction('適量澆水', 'action-1')" class="action-btn bg-white border-2 border-blue-300 text-blue-700 rounded-xl py-3 sm:py-4 text-base font-bold hover:bg-blue-50 transition-colors">💧 適量澆水</button><button id="action-2" onclick="chooseAction('暫時不要再澆水', 'action-2')" class="action-btn bg-white border-2 border-red-300 text-red-700 rounded-xl py-3 sm:py-4 text-base font-bold hover:bg-red-50 transition-colors">🚫 暫不澆水</button><button id="action-3" onclick="chooseAction('移到陽光充足處', 'action-3')" class="action-btn bg-white border-2 border-orange-300 text-orange-700 rounded-xl py-3 sm:py-4 text-base font-bold hover:bg-orange-50 transition-colors">☀️ 移到陽光下</button><button id="action-5" onclick="chooseAction('抓蟲', 'action-5')" class="action-btn bg-white border-2 border-green-300 text-green-700 rounded-xl py-3 sm:py-4 text-base font-bold hover:bg-green-50 transition-colors">🐛 抓蟲</button></div></div>
+        <div class="bg-white rounded-3xl shadow-md p-5 sm:p-8 border border-gray-100 mb-8"><p class="font-black text-lg text-gray-700 mb-4">步驟 3. 寫下判斷理由：</p><div class="space-y-4 text-gray-700 font-bold text-base sm:text-lg"><div class="flex items-center gap-3 flex-wrap"><span>觀察到</span><input type="text" id="rescue-obs" class="flex-1 min-w-[150px] border-b-2 border-green-500 bg-green-50 px-3 py-2 rounded focus:outline-none focus:bg-green-100 transition-colors" placeholder="例: 土壤乾乾的"></div><div class="flex items-center gap-3 flex-wrap"><span>我認為植物需要</span><input type="text" id="rescue-reason" class="flex-1 min-w-[150px] border-b-2 border-green-500 bg-green-50 px-3 py-2 rounded focus:outline-none focus:bg-green-100 transition-colors" placeholder="例: 喝水"></div></div></div>
+        <button onclick="submitRescue()" class="w-full bg-blue-500 text-white font-bold py-4 px-4 rounded-xl shadow-lg hover:scale-[1.02] transition-transform duration-300 text-lg sm:text-xl">送出決定！</button>
+        <div class="mt-10 flex items-end gap-4 max-w-lg mx-auto"><div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-4 border-orange-300 flex-shrink-0 bg-orange-50 shadow-md"><img src="Christmasmimi.jpg" onerror="this.src='https://placehold.co/100/fcd34d/d97706?text=Mimi'"></div><div class="flex-1"><div class="chat-bubble chat-bubble-orange chat-bubble-orange-outline text-sm sm:text-base font-bold text-gray-700 p-3 sm:p-4">橘咪咪園長：一定要三個線索都看完才能下決定喔！</div></div></div>
     </div>
 
     <!-- ==================== 7. 小組日誌 ==================== -->
-    <div id="view-diary" class="view-section max-w-lg mx-auto pt-4 px-4 pb-20 relative">
-        <div class="flex justify-between items-center mb-6"><button onclick="goToMap()" class="bg-white border-2 border-orange-400 text-orange-600 px-3 py-2 rounded-full text-sm font-bold shadow hover:bg-orange-50 transition">返回</button><h2 class="text-xl font-black text-orange-600 tracking-wider">📝 成長日誌</h2><div class="w-16"></div></div>
-        <div class="flex gap-2 mb-6 bg-white p-1 rounded-xl shadow-sm border border-gray-200"><button onclick="switchDiaryTab('diary-list')" id="tab-btn-list" class="flex-1 py-2 rounded-lg font-bold text-sm transition">📜 紀錄表</button><button onclick="switchDiaryTab('diary-charts')" id="tab-btn-charts" class="flex-1 py-2 rounded-lg font-bold text-sm transition">📈 成長圖</button><button onclick="switchDiaryTab('diary-timeline')" id="tab-btn-timeline" class="flex-1 py-2 rounded-lg font-bold text-sm transition">🖼️ 照片牆</button></div>
+    <div id="view-diary" class="view-section max-w-2xl mx-auto pt-6 px-4 pb-20 relative">
+        <div class="flex justify-between items-center mb-6"><button onclick="goToMap()" class="bg-white border-2 border-orange-400 text-orange-600 px-4 py-1.5 rounded-full text-sm font-bold shadow hover:bg-orange-50 transition">返回</button><h2 class="text-2xl font-black text-orange-600 tracking-wider">📝 成長日誌</h2><div class="w-20"></div></div>
+        <div class="flex gap-2 mb-8 bg-white p-1 rounded-2xl shadow-sm border border-gray-200"><button onclick="switchDiaryTab('diary-list')" id="tab-btn-list" class="flex-1 py-3 rounded-xl font-bold text-sm sm:text-base transition">📜 紀錄表</button><button onclick="switchDiaryTab('diary-charts')" id="tab-btn-charts" class="flex-1 py-3 rounded-xl font-bold text-sm sm:text-base transition">📈 成長圖</button><button onclick="switchDiaryTab('diary-timeline')" id="tab-btn-timeline" class="flex-1 py-3 rounded-xl font-bold text-sm sm:text-base transition">🖼️ 照片牆</button></div>
         
         <div id="diary-list" class="hidden">
-            <button onclick="openDiaryForm()" class="w-full bg-gradient-to-r from-orange-400 to-yellow-500 text-white font-black text-lg py-4 px-4 rounded-2xl shadow-md hover:scale-105 transition transform mb-6 border-b-4 border-orange-600 flex justify-center items-center gap-2">✍️ 新增觀察紀錄</button>
-            <div id="diary-cards-container" class="space-y-4"></div>
-            <div id="empty-diary-msg" class="text-center text-gray-400 font-bold mt-10 hidden"><div class="text-5xl mb-3 opacity-50">🌱</div><p>小組還沒有紀錄喔！</p></div>
+            <button onclick="openDiaryForm()" class="w-full bg-gradient-to-r from-orange-400 to-yellow-500 text-white font-black text-lg sm:text-xl py-5 px-4 rounded-2xl shadow-md hover:scale-[1.02] transition-transform duration-300 mb-8 border-b-4 border-orange-600 flex justify-center items-center gap-3">✍️ 新增觀察紀錄</button>
+            <div id="diary-cards-container" class="space-y-6"></div>
+            <div id="empty-diary-msg" class="text-center text-gray-400 font-bold mt-16 hidden"><div class="text-6xl mb-4 opacity-50">🌱</div><p class="text-lg">小組還沒有紀錄喔！</p></div>
         </div>
         
-        <div id="diary-form" class="hidden bg-white p-5 rounded-3xl shadow-lg border-2 border-orange-200 mb-6">
-            <h3 class="text-lg font-black text-orange-600 mb-4 border-b-2 border-orange-100 pb-2" id="form-title">撰寫觀察紀錄</h3>
+        <div id="diary-form" class="hidden bg-white p-6 sm:p-10 rounded-3xl shadow-xl border-2 border-orange-200 mb-8">
+            <h3 class="text-xl sm:text-2xl font-black text-orange-600 mb-6 border-b-2 border-orange-100 pb-3" id="form-title">撰寫觀察紀錄</h3>
             
-            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4 rounded-r-xl shadow-sm">
-                <h4 class="font-bold text-yellow-800 flex items-center gap-2 mb-2">📏 小小科學家量測規則</h4>
-                <ul class="list-disc pl-5 text-sm text-yellow-700 font-bold space-y-1">
+            <div class="bg-yellow-50 border-l-8 border-yellow-400 p-5 mb-6 rounded-r-xl shadow-sm">
+                <h4 class="font-bold text-yellow-800 text-lg flex items-center gap-2 mb-3">📏 小小科學家量測規則</h4>
+                <ul class="list-disc pl-6 text-base text-yellow-700 font-bold space-y-2">
                     <li>尺從「土壤表面」開始量，量到最高的葉片。</li>
                     <li>每次測量請站在盆栽的「同一側」。</li>
                     <li>拍照時，把尺直立放在盆栽旁邊一起拍入畫面。</li>
@@ -256,85 +256,85 @@
                 </ul>
             </div>
 
-            <div class="space-y-4 font-bold text-gray-700">
-                <div class="grid grid-cols-2 gap-3"><div><label class="block text-sm mb-1 text-gray-500">📅 日期</label><input type="date" id="d-date" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-3 py-2"></div><div><label class="block text-sm mb-1 text-gray-500">👥 小組</label><div id="d-group-display" class="w-full bg-gray-200 border-2 border-gray-200 rounded-xl px-3 py-2 text-gray-600 text-center">第 X 組</div></div></div>
-                <div class="grid grid-cols-2 gap-3 p-3 bg-green-50 rounded-xl border border-green-100"><div><label class="block text-sm mb-1 text-green-700">📏 高度(cm)</label><input type="number" id="d-height" step="0.1" min="0" class="w-full bg-white border-2 border-green-200 rounded-xl px-3 py-2 focus:border-green-500 focus:outline-none"></div><div><label class="block text-sm mb-1 text-green-700">🍃 葉片數(片)</label><input type="number" id="d-leaves" min="0" step="1" class="w-full bg-white border-2 border-green-200 rounded-xl px-3 py-2 focus:border-green-500 focus:outline-none"></div></div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div><label class="block text-sm mb-1 text-gray-500">💧 土壤狀態</label><select id="d-soil" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-3 py-2 focus:border-orange-400 focus:outline-none"><option value="濕潤">濕潤</option><option value="乾燥">乾燥</option><option value="積水">積水</option></select></div>
-                    <div><label class="block text-sm mb-1 text-gray-500">☀️ 日照位置</label><select id="d-sun" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-3 py-2 focus:border-orange-400 focus:outline-none"><option value="照得到陽光">照得到陽光</option><option value="明亮但無直射光">明亮但無直射光</option><option value="陰暗角落">陰暗角落</option></select></div>
+            <div class="space-y-5 font-bold text-gray-700 text-base sm:text-lg">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label class="block text-sm sm:text-base mb-1 text-gray-500">📅 日期</label><input type="date" id="d-date" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-orange-400"></div><div><label class="block text-sm sm:text-base mb-1 text-gray-500">👥 小組</label><div id="d-group-display" class="w-full bg-gray-200 border-2 border-gray-200 rounded-xl px-4 py-3 text-gray-600 text-center">第 X 組</div></div></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 sm:p-5 bg-green-50 rounded-2xl border border-green-100"><div><label class="block text-sm sm:text-base mb-1 text-green-700">📏 高度(cm)</label><input type="number" id="d-height" step="0.1" min="0" class="w-full bg-white border-2 border-green-200 rounded-xl px-4 py-3 focus:border-green-500 focus:outline-none"></div><div><label class="block text-sm sm:text-base mb-1 text-green-700">🍃 葉片數(片)</label><input type="number" id="d-leaves" min="0" step="1" class="w-full bg-white border-2 border-green-200 rounded-xl px-4 py-3 focus:border-green-500 focus:outline-none"></div></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div><label class="block text-sm sm:text-base mb-1 text-gray-500">💧 土壤狀態</label><select id="d-soil" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-orange-400 focus:outline-none"><option value="濕潤">濕潤</option><option value="乾燥">乾燥</option><option value="積水">積水</option></select></div>
+                    <div><label class="block text-sm sm:text-base mb-1 text-gray-500">☀️ 日照位置</label><select id="d-sun" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-orange-400 focus:outline-none"><option value="照得到陽光">照得到陽光</option><option value="明亮但無直射光">明亮但無直射光</option><option value="陰暗角落">陰暗角落</option></select></div>
                 </div>
-                <div><label class="block text-sm mb-1 text-gray-500">今天做了什麼？</label><input type="text" id="d-action" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-3 py-2 focus:border-orange-400 focus:outline-none"></div>
-                <div><label class="block text-sm mb-1 text-gray-500">觀察到什麼？</label><textarea id="d-obs" rows="2" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-3 py-2 resize-none focus:border-orange-400 focus:outline-none"></textarea></div>
-                <div><label class="block text-sm mb-1 text-gray-500">下次想確認什麼？</label><input type="text" id="d-next" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-3 py-2 focus:border-orange-400 focus:outline-none"></div>
-                <div class="border-2 border-dashed border-orange-300 rounded-xl p-4 text-center bg-orange-50 relative"><label class="file-upload-label w-full h-full"><span class="text-3xl mb-2 block">📸</span><span class="text-orange-600 text-sm">點擊上傳照片</span><input type="file" id="d-photo-input" accept="image/*" onchange="handlePhotoUpload(event)"></label><div id="photo-preview-container" class="hidden mt-3 relative"><img id="d-photo-preview" class="w-full max-h-48 object-cover rounded-lg border-2 border-orange-200"><button type="button" onclick="removePhoto()" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-8 h-8">✖</button></div></div>
-                <div class="flex gap-3 pt-4 border-t-2 border-gray-100"><button onclick="cancelDiaryForm()" class="flex-1 bg-gray-200 text-gray-600 py-3 rounded-xl hover:bg-gray-300 transition">取消</button><button onclick="saveDiaryEntry()" class="flex-1 bg-orange-500 text-white py-3 rounded-xl hover:bg-orange-600 transition shadow-md border-b-4 border-orange-700">💾 儲存</button></div>
+                <div><label class="block text-sm sm:text-base mb-1 text-gray-500">今天做了什麼？</label><input type="text" id="d-action" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-orange-400 focus:outline-none"></div>
+                <div><label class="block text-sm sm:text-base mb-1 text-gray-500">觀察到什麼？</label><textarea id="d-obs" rows="3" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 resize-none focus:border-orange-400 focus:outline-none"></textarea></div>
+                <div><label class="block text-sm sm:text-base mb-1 text-gray-500">下次想確認什麼？</label><input type="text" id="d-next" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-orange-400 focus:outline-none"></div>
+                <div class="border-2 border-dashed border-orange-300 rounded-2xl p-6 sm:p-8 text-center bg-orange-50 relative hover:bg-orange-100 transition-colors"><label class="file-upload-label w-full h-full flex flex-col items-center justify-center"><span class="text-4xl sm:text-5xl mb-3 block">📸</span><span class="text-orange-600 text-base sm:text-lg">點擊拍張照或上傳照片</span><input type="file" id="d-photo-input" accept="image/*" onchange="handlePhotoUpload(event)"></label><div id="photo-preview-container" class="hidden mt-4 relative"><img id="d-photo-preview" class="w-full max-h-64 sm:max-h-80 object-cover rounded-xl border-2 border-orange-200 shadow-sm"><button type="button" onclick="removePhoto()" class="absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-md border-2 border-white text-lg">✖</button></div></div>
+                <div class="flex gap-4 pt-6 border-t-2 border-gray-100"><button onclick="cancelDiaryForm()" class="flex-1 bg-gray-200 text-gray-600 py-4 rounded-xl hover:bg-gray-300 transition text-lg">取消</button><button onclick="saveDiaryEntry()" class="flex-1 bg-orange-500 text-white py-4 rounded-xl hover:bg-orange-600 transition shadow-md border-b-4 border-orange-700 text-lg">💾 儲存</button></div>
             </div>
         </div>
 
-        <div id="diary-charts" class="hidden"><div class="bg-white p-4 rounded-2xl shadow mb-6"><h3 class="text-center font-bold text-green-700 mb-4 bg-green-50 py-2 rounded-lg">植物高度 (cm)</h3><div class="relative h-64 w-full"><canvas id="heightChart"></canvas></div></div><div class="bg-white p-4 rounded-2xl shadow border border-gray-100"><h3 class="text-center font-bold text-green-700 mb-4 bg-green-50 py-2 rounded-lg">葉片數量 (片)</h3><div class="relative h-64 w-full"><canvas id="leafChart"></canvas></div></div></div>
-        <div id="diary-timeline" class="hidden"><div class="border-l-4 border-orange-300 ml-4 space-y-8 py-4" id="timeline-container"></div><div id="empty-timeline-msg" class="text-center text-gray-400 font-bold mt-10 hidden"><p>還沒有照片喔！</p></div></div>
+        <div id="diary-charts" class="hidden"><div class="bg-white p-5 sm:p-8 rounded-3xl shadow-sm mb-6 border border-gray-100"><h3 class="text-center font-bold text-green-700 mb-5 bg-green-50 py-3 rounded-lg text-lg">植物高度變化 (cm)</h3><div class="relative h-72 sm:h-80 w-full"><canvas id="heightChart"></canvas></div></div><div class="bg-white p-5 sm:p-8 rounded-3xl shadow-sm border border-gray-100"><h3 class="text-center font-bold text-green-700 mb-5 bg-green-50 py-3 rounded-lg text-lg">葉片數量變化 (片)</h3><div class="relative h-72 sm:h-80 w-full"><canvas id="leafChart"></canvas></div></div></div>
+        <div id="diary-timeline" class="hidden"><div class="border-l-4 border-orange-300 ml-6 space-y-10 py-6" id="timeline-container"></div><div id="empty-timeline-msg" class="text-center text-gray-400 font-bold mt-16 hidden"><p class="text-lg">小組還沒有上傳過照片喔！</p></div></div>
     </div>
 
     <!-- ==================== 8. 照護計畫與互評 ==================== -->
-    <div id="view-careplan" class="view-section max-w-lg mx-auto pt-6 px-4 pb-20 relative">
-        <div class="flex justify-between items-center mb-6"><button onclick="goToMap()" class="bg-white border-2 border-purple-400 text-purple-600 px-3 py-2 rounded-full text-sm font-bold shadow hover:bg-purple-50 transition">返回</button><h2 class="text-xl font-black text-purple-600 tracking-wider">📋 計畫與互評</h2><div class="w-16"></div></div>
-        <div class="flex gap-2 mb-6 bg-white p-1 rounded-xl shadow-sm border border-gray-200"><button onclick="switchCarePlanTab('plan-tab')" id="tab-btn-plan" class="flex-1 py-2 rounded-lg font-bold text-sm bg-purple-100 text-purple-700 transition">📝 階段計畫</button><button onclick="switchCarePlanTab('peer-tab')" id="tab-btn-peer" class="flex-1 py-2 rounded-lg font-bold text-sm text-gray-500 hover:bg-gray-50 transition">🤝 小組互評</button></div>
+    <div id="view-careplan" class="view-section max-w-2xl mx-auto pt-6 px-4 pb-20 relative">
+        <div class="flex justify-between items-center mb-6"><button onclick="goToMap()" class="bg-white border-2 border-purple-400 text-purple-600 px-4 py-1.5 rounded-full text-sm font-bold shadow hover:bg-purple-50 transition">返回</button><h2 class="text-2xl font-black text-purple-600 tracking-wider">📋 計畫與互評</h2><div class="w-20"></div></div>
+        <div class="flex gap-2 mb-8 bg-white p-1 rounded-2xl shadow-sm border border-gray-200"><button onclick="switchCarePlanTab('plan-tab')" id="tab-btn-plan" class="flex-1 py-3 rounded-xl font-bold text-sm sm:text-base bg-purple-100 text-purple-700 transition">📝 階段計畫</button><button onclick="switchCarePlanTab('peer-tab')" id="tab-btn-peer" class="flex-1 py-3 rounded-xl font-bold text-sm sm:text-base text-gray-500 hover:bg-gray-50 transition">🤝 小組互評</button></div>
 
         <div id="plan-tab" class="careplan-panel">
-            <div class="bg-white rounded-3xl shadow-md p-6 border-2 border-purple-100 mb-6 space-y-4 font-bold text-gray-700">
-                <h3 class="text-lg text-purple-700 border-b-2 border-purple-100 pb-2 mb-4" id="careplan-title">第 X 組 的照護方案</h3>
+            <div class="bg-white rounded-3xl shadow-xl p-6 sm:p-10 border-2 border-purple-100 mb-8 space-y-6 font-bold text-gray-700 text-base sm:text-lg">
+                <h3 class="text-xl sm:text-2xl text-purple-700 border-b-2 border-purple-100 pb-3 mb-6" id="careplan-title">第 X 組 的照護方案</h3>
                 
-                <div class="bg-purple-50 p-4 rounded-xl border border-purple-200 mb-2">
-                    <p class="text-purple-800 font-black mb-2">第一階段：擬定計畫 (必填)</p>
-                    <div class="space-y-3">
-                        <div><label class="block text-sm mb-1 text-purple-600">🔍 發現的問題：</label><input type="text" id="cp-problem" class="w-full bg-white border-2 border-purple-200 rounded-lg px-2 py-1"></div>
-                        <div><label class="block text-sm mb-1 text-purple-600">🤔 我們的假設：</label><input type="text" id="cp-hypothesis" class="w-full bg-white border-2 border-purple-200 rounded-lg px-2 py-1"></div>
-                        <div><label class="block text-sm mb-1 text-purple-600">📸 證據在哪裡：</label><textarea id="cp-evidence" rows="1" class="w-full bg-white border-2 border-purple-200 rounded-lg px-2 py-1 resize-none"></textarea></div>
-                        <div><label class="block text-sm mb-1 text-purple-600">🛠️ 預計的方法：</label><input type="text" id="cp-method" class="w-full bg-white border-2 border-purple-200 rounded-lg px-2 py-1"></div>
+                <div class="bg-purple-50 p-5 sm:p-6 rounded-2xl border border-purple-200 mb-4">
+                    <p class="text-purple-800 font-black text-lg sm:text-xl mb-4">第一階段：擬定計畫 (必填)</p>
+                    <div class="space-y-4">
+                        <div><label class="block text-sm sm:text-base mb-2 text-purple-600">🔍 發現的問題：</label><input type="text" id="cp-problem" class="w-full bg-white border-2 border-purple-200 rounded-xl px-4 py-3 focus:outline-purple-500"></div>
+                        <div><label class="block text-sm sm:text-base mb-2 text-purple-600">🤔 我們的假設：</label><input type="text" id="cp-hypothesis" class="w-full bg-white border-2 border-purple-200 rounded-xl px-4 py-3 focus:outline-purple-500"></div>
+                        <div><label class="block text-sm sm:text-base mb-2 text-purple-600">📸 證據在哪裡：</label><textarea id="cp-evidence" rows="2" class="w-full bg-white border-2 border-purple-200 rounded-xl px-4 py-3 resize-none focus:outline-purple-500"></textarea></div>
+                        <div><label class="block text-sm sm:text-base mb-2 text-purple-600">🛠️ 預計的方法：</label><input type="text" id="cp-method" class="w-full bg-white border-2 border-purple-200 rounded-xl px-4 py-3 focus:outline-purple-500"></div>
                     </div>
                 </div>
 
-                <div class="bg-blue-50 p-4 rounded-xl border border-blue-200">
-                    <p class="text-blue-800 font-black mb-2">第二階段：觀察與修正 (填寫以解鎖後測)</p>
-                    <div class="space-y-3">
-                        <div><label class="block text-sm mb-1 text-blue-600">📅 一週後結果：</label><input type="text" id="cp-result" class="w-full bg-white border-2 border-blue-200 rounded-lg px-2 py-1"></div>
-                        <div class="pt-2 border-t border-blue-100"><label class="block text-sm mb-2 text-blue-600">🔄 是否改變方法？</label>
-                            <div class="flex gap-4 mb-2"><label><input type="radio" name="cp-revise" value="是"> 是</label><label><input type="radio" name="cp-revise" value="否"> 否</label></div>
-                            <input type="text" id="cp-revise-reason" class="w-full bg-white border-2 border-blue-200 rounded-lg px-2 py-1" placeholder="為什麼？">
+                <div class="bg-blue-50 p-5 sm:p-6 rounded-2xl border border-blue-200">
+                    <p class="text-blue-800 font-black text-lg sm:text-xl mb-4">第二階段：觀察與修正 (填寫以解鎖後測)</p>
+                    <div class="space-y-4">
+                        <div><label class="block text-sm sm:text-base mb-2 text-blue-600">📅 一週後結果：</label><input type="text" id="cp-result" class="w-full bg-white border-2 border-blue-200 rounded-xl px-4 py-3 focus:outline-blue-500"></div>
+                        <div class="pt-4 border-t-2 border-blue-100"><label class="block text-sm sm:text-base mb-3 text-blue-600">🔄 是否改變方法？</label>
+                            <div class="flex gap-6 mb-3"><label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="cp-revise" value="是" class="w-5 h-5 text-blue-600"> 是</label><label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="cp-revise" value="否" class="w-5 h-5 text-blue-600"> 否</label></div>
+                            <input type="text" id="cp-revise-reason" class="w-full bg-white border-2 border-blue-200 rounded-xl px-4 py-3 focus:outline-blue-500" placeholder="為什麼？">
                         </div>
-                        <div><label class="block text-sm mb-1 text-blue-600">🏁 最終建議：</label><input type="text" id="cp-final-outcome" class="w-full bg-white border-2 border-blue-200 rounded-lg px-2 py-1" placeholder="給其他同學的建議"></div>
+                        <div><label class="block text-sm sm:text-base mb-2 text-blue-600">🏁 最終建議：</label><input type="text" id="cp-final-outcome" class="w-full bg-white border-2 border-blue-200 rounded-xl px-4 py-3 focus:outline-blue-500" placeholder="給其他同學的建議"></div>
                     </div>
                 </div>
 
-                <button onclick="saveCarePlan()" class="w-full bg-purple-500 text-white py-3 rounded-xl hover:bg-purple-600 transition shadow-md mt-4">💾 儲存並同步</button>
+                <button onclick="saveCarePlan()" class="w-full bg-purple-500 text-white font-bold py-4 rounded-xl hover:bg-purple-600 transition shadow-lg mt-6 text-lg sm:text-xl border-b-4 border-purple-700">💾 儲存並同步小組計畫</button>
             </div>
         </div>
 
         <div id="peer-tab" class="careplan-panel hidden">
-            <div class="bg-white rounded-3xl shadow-md p-6 border-2 border-blue-100 mb-6 space-y-4 font-bold text-gray-700">
-                <h3 class="text-lg text-blue-700 border-b-2 border-blue-100 pb-2 mb-4">給同學的回饋</h3>
-                <div><label class="block text-sm mb-1 text-blue-600">給哪一組：</label><select id="pr-group" class="w-full bg-blue-50 border-2 border-blue-200 rounded-xl px-3 py-2 font-bold text-blue-800"></select></div>
-                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-3">
-                    <div><span class="text-sm">1. 證據是：</span><input type="text" id="pr-q1" class="w-full border-b-2 border-blue-400 bg-transparent px-2 py-1"></div>
-                    <div><span class="text-sm">2. 喜歡方法因為：</span><input type="text" id="pr-q2" class="w-full border-b-2 border-blue-400 bg-transparent px-2 py-1"></div>
-                    <div><span class="text-sm">3. 建議下次觀察：</span><input type="text" id="pr-q3" class="w-full border-b-2 border-blue-400 bg-transparent px-2 py-1"></div>
+            <div class="bg-white rounded-3xl shadow-xl p-6 sm:p-10 border-2 border-blue-100 mb-8 space-y-5 font-bold text-gray-700 text-base sm:text-lg">
+                <h3 class="text-xl sm:text-2xl text-blue-700 border-b-2 border-blue-100 pb-3 mb-4">給同學的回饋</h3>
+                <div><label class="block text-sm sm:text-base mb-2 text-blue-600">給哪一組：</label><select id="pr-group" class="w-full bg-blue-50 border-2 border-blue-200 rounded-xl px-4 py-3 font-bold text-blue-800 focus:outline-blue-500"></select></div>
+                <div class="bg-gray-50 p-5 sm:p-6 rounded-2xl border border-gray-200 space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2"><span class="sm:w-32 flex-shrink-0 text-gray-600 text-sm sm:text-base">1. 證據是：</span><input type="text" id="pr-q1" class="flex-1 border-b-2 border-blue-400 bg-transparent px-2 py-2 focus:outline-none focus:border-blue-600"></div>
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2"><span class="sm:w-32 flex-shrink-0 text-gray-600 text-sm sm:text-base">2. 喜歡方法因為：</span><input type="text" id="pr-q2" class="flex-1 border-b-2 border-blue-400 bg-transparent px-2 py-2 focus:outline-none focus:border-blue-600"></div>
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2"><span class="sm:w-32 flex-shrink-0 text-gray-600 text-sm sm:text-base">3. 建議下次觀察：</span><input type="text" id="pr-q3" class="flex-1 border-b-2 border-blue-400 bg-transparent px-2 py-2 focus:outline-none focus:border-blue-600"></div>
                 </div>
-                <button onclick="savePeerReview()" class="w-full bg-blue-500 text-white py-3 rounded-xl shadow-md mt-4">送出回饋！</button>
+                <button onclick="savePeerReview()" class="w-full bg-blue-500 text-white font-bold py-4 rounded-xl shadow-lg mt-6 hover:bg-blue-600 transition text-lg sm:text-xl border-b-4 border-blue-700">送出回饋！</button>
             </div>
-            <h4 class="font-bold text-gray-600 mb-2 px-2" id="peer-review-title">收到的回饋：</h4><div id="peer-review-list" class="space-y-3"></div>
+            <h4 class="font-black text-gray-600 mb-4 px-2 text-lg sm:text-xl" id="peer-review-title">收到的回饋：</h4><div id="peer-review-list" class="space-y-4"></div>
         </div>
     </div>
 
     <!-- ==================== 9. 後測 ==================== -->
-    <div id="view-posttest" class="view-section max-w-lg mx-auto pt-6 px-4 pb-20 relative"><button onclick="goToMap()" class="absolute top-4 left-4 bg-white border-2 border-yellow-500 text-yellow-600 px-3 py-1 rounded-full text-sm font-bold shadow hover:bg-yellow-50 z-10 flex items-center gap-1">返回</button><div class="text-center mt-8 mb-6"><h2 class="text-2xl font-bold text-yellow-600">🏆 守護員挑戰</h2><p class="text-sm text-gray-500 mt-1 font-bold">第 <span id="current-postq-num">1</span> / 5 題</p></div><div class="bg-white rounded-3xl shadow-md p-6 border-2 border-yellow-200 mb-6"><h3 class="text-xl font-bold text-gray-800 mb-6 leading-relaxed" id="postquestion-text">載入中...</h3><div class="space-y-3" id="postoptions-container"></div></div>
-        <div class="mt-6 flex items-end gap-3"><div class="w-16 h-16 rounded-full overflow-hidden border-2 border-orange-300 flex-shrink-0 bg-orange-50"><img src="Christmasmimi.jpg" onerror="this.src='https://placehold.co/100/fcd34d/d97706?text=Mimi'"></div><div class="flex-1"><div class="chat-bubble chat-bubble-orange chat-bubble-orange-outline text-sm font-bold text-gray-700">橘咪咪園長：這是最後的挑戰，展現你的學習成果吧！</div></div></div>
+    <div id="view-posttest" class="view-section max-w-2xl mx-auto pt-6 px-4 pb-20 relative"><button onclick="goToMap()" class="absolute top-4 left-4 bg-white border-2 border-yellow-500 text-yellow-600 px-4 py-1.5 rounded-full text-sm font-bold shadow hover:bg-yellow-50 z-10 flex items-center gap-1">返回</button><div class="text-center mt-10 mb-8"><h2 class="text-2xl sm:text-3xl font-bold text-yellow-600">🏆 守護員挑戰</h2><p class="text-base text-gray-500 mt-2 font-bold">第 <span id="current-postq-num" class="text-yellow-600">1</span> / 5 題</p></div><div class="bg-white rounded-3xl shadow-lg p-6 sm:p-10 border-2 border-yellow-200 mb-8"><h3 class="text-xl sm:text-2xl font-bold text-gray-800 mb-8 leading-relaxed" id="postquestion-text">載入中...</h3><div class="space-y-4" id="postoptions-container"></div></div>
+        <div class="mt-8 flex items-end gap-4 max-w-lg mx-auto"><div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-orange-300 flex-shrink-0 bg-orange-50 shadow-md"><img src="Christmasmimi.jpg" onerror="this.src='https://placehold.co/100/fcd34d/d97706?text=Mimi'"></div><div class="flex-1"><div class="chat-bubble chat-bubble-orange chat-bubble-orange-outline text-sm sm:text-base font-bold text-gray-700 p-4">橘咪咪園長：這是最後的挑戰，展現你的學習成果吧！</div></div></div>
     </div>
     
     <!-- ==================== 10. 反思 ==================== -->
-    <div id="view-reflection" class="view-section max-w-lg mx-auto pt-6 px-4 pb-20 relative"><div class="text-center mt-8 mb-6"><h2 class="text-2xl font-bold text-green-700">🌱 成長與反思</h2></div><div class="bg-white rounded-3xl shadow-md p-6 border-2 border-green-200 mb-6 space-y-6 font-bold text-gray-700"><div><label class="block text-lg mb-2 text-gray-400">🤔 原本以為...</label><textarea id="ref-before" rows="3" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 resize-none focus:border-green-500 focus:outline-none"></textarea></div><div><label class="block text-lg mb-2 text-green-600">💡 現在知道...</label><textarea id="ref-after" rows="3" class="w-full bg-green-50 border-2 border-green-300 rounded-xl px-4 py-3 resize-none focus:border-green-500 focus:outline-none"></textarea></div><button onclick="submitReflection()" class="w-full bg-green-500 text-white text-lg py-3 rounded-xl shadow-md">完成反思，領取證書！</button></div></div>
+    <div id="view-reflection" class="view-section max-w-2xl mx-auto pt-10 px-4 pb-20 relative"><div class="text-center mt-10 mb-8"><h2 class="text-3xl font-bold text-green-700">🌱 成長與反思</h2><p class="text-gray-500 mt-2 font-bold sm:text-lg">恭喜完成所有挑戰！回想一下自己的改變吧。</p></div><div class="bg-white rounded-3xl shadow-xl p-8 sm:p-12 border-2 border-green-200 mb-8 space-y-8 font-bold text-gray-700"><div><label class="block text-xl mb-3 text-gray-400">🤔 在這次活動前，我原本以為...</label><textarea id="ref-before" rows="4" class="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl px-5 py-4 resize-none focus:border-green-500 focus:outline-none sm:text-lg"></textarea></div><div><label class="block text-xl mb-3 text-green-600">💡 經過實作與觀察，現在我知道...</label><textarea id="ref-after" rows="4" class="w-full bg-green-50 border-2 border-green-300 rounded-2xl px-5 py-4 resize-none focus:border-green-500 focus:outline-none sm:text-lg"></textarea></div><button onclick="submitReflection()" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white font-black text-xl py-5 rounded-2xl shadow-lg hover:scale-[1.02] transition-transform duration-300">領取農場結業證書！</button></div></div>
     
     <!-- ==================== 11. 證書 ==================== -->
-    <div id="view-certificate" class="view-section max-w-lg mx-auto pt-10 px-4 pb-20 text-center relative"><button onclick="goToHome()" class="absolute top-4 left-4 bg-white border-2 border-green-500 text-green-600 px-3 py-1 rounded-full text-sm font-bold shadow hover:bg-green-50 z-10 flex items-center gap-1">首頁</button><div class="bg-white rounded-xl shadow-2xl p-2 border-[8px] border-yellow-400 relative overflow-hidden mt-6"><div class="border-[4px] border-double border-yellow-300 p-6 bg-yellow-50 h-full flex flex-col items-center justify-center"><div class="text-6xl mb-4">🏆</div><h1 class="text-3xl font-black text-yellow-700 mb-6 tracking-widest">結業證書</h1><p class="text-lg font-bold text-gray-700 mb-2">茲證明</p><h2 class="text-2xl font-black text-green-700 border-b-2 border-green-500 px-8 pb-1 mb-6" id="cert-name">載入中...</h2><p class="text-md font-bold text-gray-600 mb-6">成功完成科學農場任務！<br>具備優良探究精神，特頒此證。</p><h3 class="text-xl font-black text-orange-600">🎖️ 小小植物救援員</h3><div class="mt-8 flex justify-center gap-8 w-full border-t border-yellow-200 pt-4"><div class="text-center"><div class="text-sm text-gray-400 font-bold">前測</div><div class="text-2xl font-black text-gray-500" id="cert-pre">0</div></div><div class="text-center"><div class="text-2xl text-green-500">➡️</div></div><div class="text-center"><div class="text-sm text-green-600 font-bold">後測</div><div class="text-2xl font-black text-green-600" id="cert-post">0</div></div></div></div></div><div class="mt-8 bg-white p-4 rounded-xl shadow border border-green-100 text-left"><h4 class="text-green-700 font-bold mb-2">反思語錄：</h4><p class="text-sm font-bold text-gray-600 italic bg-gray-50 p-3 rounded-lg border-l-4 border-green-400" id="cert-ref-text"></p></div></div>
+    <div id="view-certificate" class="view-section max-w-2xl mx-auto pt-10 px-4 pb-20 text-center relative"><button onclick="goToHome()" class="absolute top-4 left-4 bg-white border-2 border-green-500 text-green-600 px-4 py-1.5 rounded-full text-sm font-bold shadow hover:bg-green-50 z-10 flex items-center gap-1">首頁</button><div class="bg-white rounded-2xl shadow-2xl p-3 border-[10px] border-yellow-400 relative overflow-hidden mt-10"><div class="border-[6px] border-double border-yellow-300 p-8 sm:p-12 bg-yellow-50 h-full flex flex-col items-center justify-center"><div class="text-7xl sm:text-8xl mb-6">🏆</div><h1 class="text-4xl sm:text-5xl font-black text-yellow-700 mb-8 tracking-widest">結業證書</h1><p class="text-xl font-bold text-gray-700 mb-3">茲證明</p><h2 class="text-3xl sm:text-4xl font-black text-green-700 border-b-4 border-green-500 px-10 pb-2 mb-8" id="cert-name">載入中...</h2><p class="text-lg sm:text-xl font-bold text-gray-600 mb-8 leading-relaxed">成功完成科學農場任務！<br>具備優良探究精神，特頒此證。</p><h3 class="text-2xl sm:text-3xl font-black text-orange-600">🎖️ 小小植物救援員</h3><div class="mt-10 flex justify-center items-center gap-8 sm:gap-12 w-full border-t-2 border-yellow-200 pt-6"><div class="text-center"><div class="text-base text-gray-400 font-bold mb-1">前測</div><div class="text-4xl font-black text-gray-500" id="cert-pre">0</div></div><div class="text-center"><div class="text-3xl text-green-500">➡️</div></div><div class="text-center"><div class="text-base text-green-600 font-bold mb-1">後測</div><div class="text-4xl font-black text-green-600" id="cert-post">0</div></div></div></div></div><div class="mt-10 bg-white p-6 sm:p-8 rounded-2xl shadow-md border border-green-100 text-left"><h4 class="text-green-700 font-black text-xl mb-3">📝 反思語錄：</h4><p class="text-base sm:text-lg font-bold text-gray-600 italic bg-gray-50 p-4 sm:p-5 rounded-xl border-l-8 border-green-400 leading-relaxed" id="cert-ref-text"></p></div></div>
 
     <!-- ==================== Firebase 雲端資料庫設定區 ==================== -->
     <script type="module">
@@ -342,15 +342,23 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAJtQda3WUcafD2BI9AggSemagz-Kyd3ek",
-            authDomain: "science-class-c0337.firebaseapp.com",
-            projectId: "science-class-c0337",
-            storageBucket: "science-class-c0337.firebasestorage.app",
-            messagingSenderId: "713843814869",
-            appId: "1:713843814869:web:62be2b82afaaeff0ae8d5c"
-        };
-        const appId = "science-farm-v1";
+        let firebaseConfig;
+        let appId;
+
+        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+            firebaseConfig = JSON.parse(__firebase_config);
+            appId = typeof __app_id !== 'undefined' ? __app_id : 'science-farm-v1';
+        } else {
+            firebaseConfig = {
+                apiKey: "AIzaSyAJtQda3WUcafD2BI9AggSemagz-Kyd3ek",
+                authDomain: "science-class-c0337.firebaseapp.com",
+                projectId: "science-class-c0337",
+                storageBucket: "science-class-c0337.firebasestorage.app",
+                messagingSenderId: "713843814869",
+                appId: "1:713843814869:web:62be2b82afaaeff0ae8d5c"
+            };
+            appId = "science-farm-v1";
+        }
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -361,7 +369,16 @@
 
         const initAuth = async () => {
             try {
-                await signInAnonymously(auth);
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    try {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } catch (tokenError) {
+                        console.warn("自訂 Token 登入失敗，改為嘗試匿名登入...", tokenError);
+                        await signInAnonymously(auth);
+                    }
+                } else {
+                    await signInAnonymously(auth);
+                }
             } catch (error) {
                 console.error("Firebase 登入初始化失敗：", error);
                 const statusEl = document.getElementById('cloud-indicator');
@@ -390,15 +407,12 @@
                     }
                 });
 
-                // 監聽教師導學紀錄多筆
                 const notesEntriesRef = collection(db, 'artifacts', appId, 'public', 'data', 'teacher_notes_entries');
                 onSnapshot(notesEntriesRef, (snapshot) => {
                     window.allTeacherNotes = [];
                     snapshot.forEach(docSnap => window.allTeacherNotes.push(docSnap.data()));
                     window.allTeacherNotes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                    if (document.getElementById('view-teacher').classList.contains('active') && typeof renderTeacherNotes === 'function') {
-                        renderTeacherNotes();
-                    }
+                    if (document.getElementById('view-teacher').classList.contains('active') && typeof renderTeacherNotes === 'function') renderTeacherNotes();
                 });
 
                 const studentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'students');
@@ -482,15 +496,8 @@
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'peer_reviews', reviewData.id), reviewData);
         };
         window.saveGlobalSettingsCloud = async (settings) => { if (currentUser) await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'global'), settings); };
-        
-        window.saveTeacherNoteEntryCloud = async (noteData) => {
-            if (!currentUser) return;
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'teacher_notes_entries', noteData.id), noteData);
-        };
-        window.deleteTeacherNoteEntryCloud = async (id) => {
-            if (!currentUser) return;
-            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'teacher_notes_entries', id));
-        };
+        window.saveTeacherNoteEntryCloud = async (noteData) => { if (!currentUser) return; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'teacher_notes_entries', noteData.id), noteData); };
+        window.deleteTeacherNoteEntryCloud = async (id) => { if (!currentUser) return; await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'teacher_notes_entries', id)); };
     </script>
 
     <!-- ==================== JavaScript 邏輯區 (UI 與互動) ==================== -->
@@ -532,12 +539,11 @@
         let observedClues = { leaf: false, soil: false, env: false };
 
         window.onload = () => { const lastLogin = localStorage.getItem('farmLastLogin'); if (lastLogin) { const parsed = JSON.parse(lastLogin); document.getElementById('input-seat').value = parsed.seat || ''; } };
-        function switchView(viewId) { document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); document.getElementById(viewId).classList.add('active'); }
+        function switchView(viewId) { document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); document.getElementById(viewId).classList.add('active'); window.scrollTo(0,0); }
         function showModal(title, message) { document.getElementById('modal-title').innerText = title; document.getElementById('modal-message').innerText = message; document.getElementById('custom-modal').classList.remove('hidden'); document.getElementById('custom-modal').classList.add('flex'); }
         function closeModal() { document.getElementById('custom-modal').classList.add('hidden'); document.getElementById('custom-modal').classList.remove('flex'); }
         function showConfirm(title, message, onConfirmCallback) { document.getElementById('confirm-title').innerText = title; document.getElementById('confirm-message').innerText = message; document.getElementById('custom-confirm-modal').classList.remove('hidden'); document.getElementById('custom-confirm-modal').classList.add('flex'); const btn = document.getElementById('confirm-action-btn'); btn.replaceWith(btn.cloneNode(true)); document.getElementById('confirm-action-btn').addEventListener('click', () => { closeConfirmModal(); onConfirmCallback(); }); }
         function closeConfirmModal() { document.getElementById('custom-confirm-modal').classList.add('hidden'); document.getElementById('custom-confirm-modal').classList.remove('flex'); }
-        async function saveData() { if (window.saveDataCloud) await window.saveDataCloud(); }
 
         async function login() {
             const classCode = document.getElementById('input-class').value;
@@ -572,10 +578,10 @@
             ];
             levels.forEach(([cardId, statusId, iconId, message]) => {
                 const card = document.getElementById(cardId);
-                card.className = 'bg-gray-50 p-5 rounded-2xl shadow border-l-8 border-gray-300 flex items-center justify-between opacity-70 transition';
+                card.className = 'bg-gray-50 p-6 sm:p-8 rounded-2xl shadow border-l-8 border-gray-300 flex items-center justify-between opacity-70 transition-transform duration-300';
                 card.removeAttribute('onclick');
                 document.getElementById(statusId).innerText = message;
-                document.getElementById(statusId).className = 'text-sm text-gray-400 font-bold';
+                document.getElementById(statusId).className = 'text-sm sm:text-base text-gray-400 font-bold mt-1';
                 const icon = document.getElementById(iconId);
                 icon.innerText = '🔒'; icon.classList.add('grayscale');
             });
@@ -586,37 +592,36 @@
             document.getElementById('student-welcome-text').innerText = `${escapeHTML(window.userData.name)} - 第 ${escapeHTML(window.userData.group)} 組`;
             let totalProgress = 0; const maxLevel = window.globalSettings.maxUnlockedLevel;
 
-            if (window.userData.pretest.score !== null) { totalProgress += 20; document.getElementById('level-1-status').innerText = `已完成 (${window.userData.pretest.score}分)`; document.getElementById('level-1-status').className = 'text-sm font-bold text-green-600'; document.getElementById('level-1-icon').innerText = '✅'; }
+            if (window.userData.pretest.score !== null) { totalProgress += 20; document.getElementById('level-1-status').innerText = `已完成 (${window.userData.pretest.score}分)`; document.getElementById('level-1-status').className = 'text-sm sm:text-base font-bold text-green-600 mt-1'; document.getElementById('level-1-icon').innerText = '✅'; }
             
             const lvl2 = document.getElementById('level-2-card');
             if (window.userData.pretest.score !== null) {
-                if(maxLevel >= 2) { lvl2.className = 'bg-white p-5 rounded-2xl shadow border-l-8 border-blue-400 flex items-center justify-between cursor-pointer hover:bg-blue-50 transition'; lvl2.setAttribute('onclick', 'startRescue()'); document.getElementById('level-2-status').innerText = window.userData.rescueCompletedAt ? '任務達成！' : '準備出發'; document.getElementById('level-2-status').className = window.userData.rescueCompletedAt ? 'text-sm font-bold text-blue-600' : 'text-sm font-bold text-gray-500'; document.getElementById('level-2-icon').innerText = window.userData.rescueCompletedAt ? '🌟' : '🚑'; document.getElementById('level-2-icon').classList.remove('grayscale'); } 
+                if(maxLevel >= 2) { lvl2.className = 'bg-white p-6 sm:p-8 rounded-2xl shadow border-l-8 border-blue-400 flex items-center justify-between cursor-pointer hover:bg-blue-50 transition-transform duration-300 hover:scale-[1.02]'; lvl2.setAttribute('onclick', 'startRescue()'); document.getElementById('level-2-status').innerText = window.userData.rescueCompletedAt ? '任務達成！' : '準備出發'; document.getElementById('level-2-status').className = window.userData.rescueCompletedAt ? 'text-sm sm:text-base font-bold text-blue-600 mt-1' : 'text-sm sm:text-base font-bold text-gray-500 mt-1'; document.getElementById('level-2-icon').innerText = window.userData.rescueCompletedAt ? '🌟' : '🚑'; document.getElementById('level-2-icon').classList.remove('grayscale'); } 
                 else { lvl2.setAttribute('onclick', 'showModal("提示", "老師目前尚未開放此關卡喔！")'); document.getElementById('level-2-status').innerText = '老師尚未開放'; }
             }
             if (window.userData.rescueCompletedAt !== null) totalProgress += 20;
 
             const lvl3 = document.getElementById('level-3-card');
             if (window.userData.rescueCompletedAt !== null) {
-                if(maxLevel >= 3) { lvl3.className = 'bg-white p-5 rounded-2xl shadow border-l-8 border-orange-400 flex items-center justify-between cursor-pointer hover:bg-orange-50 transition'; lvl3.setAttribute('onclick', 'startDiary()'); document.getElementById('level-3-status').innerText = (window.groupData.diary && window.groupData.diary.length > 0) ? `小組已寫 ${window.groupData.diary.length} 篇` : '開始記錄吧！'; document.getElementById('level-3-status').className = (window.groupData.diary && window.groupData.diary.length > 0) ? 'text-sm font-bold text-orange-600' : 'text-sm font-bold text-gray-500'; document.getElementById('level-3-icon').innerText = '📝'; document.getElementById('level-3-icon').classList.remove('grayscale'); } 
+                if(maxLevel >= 3) { lvl3.className = 'bg-white p-6 sm:p-8 rounded-2xl shadow border-l-8 border-orange-400 flex items-center justify-between cursor-pointer hover:bg-orange-50 transition-transform duration-300 hover:scale-[1.02]'; lvl3.setAttribute('onclick', 'startDiary()'); document.getElementById('level-3-status').innerText = (window.groupData.diary && window.groupData.diary.length > 0) ? `小組已寫 ${window.groupData.diary.length} 篇` : '開始記錄吧！'; document.getElementById('level-3-status').className = (window.groupData.diary && window.groupData.diary.length > 0) ? 'text-sm sm:text-base font-bold text-orange-600 mt-1' : 'text-sm sm:text-base font-bold text-gray-500 mt-1'; document.getElementById('level-3-icon').innerText = '📝'; document.getElementById('level-3-icon').classList.remove('grayscale'); } 
                 else { lvl3.setAttribute('onclick', 'showModal("提示", "老師目前尚未開放此關卡喔！")'); document.getElementById('level-3-status').innerText = '老師尚未開放'; }
             }
             if (window.groupData.diary && window.groupData.diary.length > 0) totalProgress += 20;
 
             const lvl4 = document.getElementById('level-4-card');
             if (window.groupData.diary && window.groupData.diary.length > 0) {
-                if(maxLevel >= 4) { lvl4.className = 'bg-white p-5 rounded-2xl shadow border-l-8 border-purple-400 flex items-center justify-between cursor-pointer hover:bg-purple-50 transition'; lvl4.setAttribute('onclick', 'startCarePlan()'); document.getElementById('level-4-status').innerText = window.groupData.carePlan ? '計畫已建立' : '擬定小組計畫'; document.getElementById('level-4-status').className = window.groupData.carePlan ? 'text-sm font-bold text-purple-600' : 'text-sm font-bold text-gray-500'; document.getElementById('level-4-icon').innerText = '📋'; document.getElementById('level-4-icon').classList.remove('grayscale'); } 
+                if(maxLevel >= 4) { lvl4.className = 'bg-white p-6 sm:p-8 rounded-2xl shadow border-l-8 border-purple-400 flex items-center justify-between cursor-pointer hover:bg-purple-50 transition-transform duration-300 hover:scale-[1.02]'; lvl4.setAttribute('onclick', 'startCarePlan()'); document.getElementById('level-4-status').innerText = window.groupData.carePlan ? '計畫已建立' : '擬定小組計畫'; document.getElementById('level-4-status').className = window.groupData.carePlan ? 'text-sm sm:text-base font-bold text-purple-600 mt-1' : 'text-sm sm:text-base font-bold text-gray-500 mt-1'; document.getElementById('level-4-icon').innerText = '📋'; document.getElementById('level-4-icon').classList.remove('grayscale'); } 
                 else { lvl4.setAttribute('onclick', 'showModal("提示", "老師目前尚未開放此關卡喔！")'); document.getElementById('level-4-status').innerText = '老師尚未開放'; }
             }
             if (window.groupData.carePlan && window.groupData.carePlan.result) totalProgress += 20;
 
             const lvl5 = document.getElementById('level-5-card');
             const reviewsGiven = (window.allPeerReviews || []).filter(review => review.classCode === window.userData.classCode && review.fromGroup === window.userData.group);
-            
             const hasIndividualPrerequisites = window.userData.pretest && window.userData.pretest.score !== null && window.userData.rescueCompletedAt !== null;
             const canDoPosttest = hasIndividualPrerequisites && window.groupData.carePlan && window.groupData.carePlan.result && reviewsGiven.length >= 1;
             
             if (canDoPosttest) {
-                if(maxLevel >= 5) { lvl5.className = 'bg-white p-5 rounded-2xl shadow border-l-8 border-yellow-400 flex items-center justify-between cursor-pointer hover:bg-yellow-50 transition'; lvl5.setAttribute('onclick', window.userData.reflection ? 'showCertificate()' : 'startPosttest()'); document.getElementById('level-5-status').innerText = window.userData.reflection ? `已完成 (${window.userData.posttest.score}分)` : '挑戰最終任務'; document.getElementById('level-5-status').className = window.userData.reflection ? 'text-sm font-bold text-yellow-600' : 'text-sm font-bold text-gray-500'; document.getElementById('level-5-icon').innerText = '🏆'; document.getElementById('level-5-icon').classList.remove('grayscale'); } 
+                if(maxLevel >= 5) { lvl5.className = 'bg-white p-6 sm:p-8 rounded-2xl shadow border-l-8 border-yellow-400 flex items-center justify-between cursor-pointer hover:bg-yellow-50 transition-transform duration-300 hover:scale-[1.02]'; lvl5.setAttribute('onclick', window.userData.reflection ? 'showCertificate()' : 'startPosttest()'); document.getElementById('level-5-status').innerText = window.userData.reflection ? `已完成 (${window.userData.posttest.score}分)` : '挑戰最終任務'; document.getElementById('level-5-status').className = window.userData.reflection ? 'text-sm sm:text-base font-bold text-yellow-600 mt-1' : 'text-sm sm:text-base font-bold text-gray-500 mt-1'; document.getElementById('level-5-icon').innerText = '🏆'; document.getElementById('level-5-icon').classList.remove('grayscale'); } 
                 else { lvl5.setAttribute('onclick', 'showModal("提示", "老師目前尚未開放此關卡喔！")'); document.getElementById('level-5-status').innerText = '老師尚未開放'; }
             } else {
                 lvl5.setAttribute('onclick', 'showModal("提示", "第五關解鎖條件：\\n1. 個人完成前測與救援任務\\n2. 小組至少寫一篇日誌\\n3. 完成計畫的「第二階段觀察結果」\\n4. 小組至少主動送出一則互評給同學")');
@@ -632,7 +637,7 @@
             const qData = questions[currentQuestionIndex]; document.getElementById('current-q-num').innerText = currentQuestionIndex + 1; document.getElementById('question-text').innerText = qData.q;
             const container = document.getElementById('options-container'); container.innerHTML = '';
             qData.options.forEach((opt, idx) => {
-                const btn = document.createElement('button'); btn.className = "w-full text-left bg-gray-50 hover:bg-green-100 border-2 border-gray-200 hover:border-green-400 p-4 rounded-xl font-bold text-gray-700 transition"; btn.innerText = opt;
+                const btn = document.createElement('button'); btn.className = "w-full text-left bg-gray-50 hover:bg-green-100 border-2 border-gray-200 hover:border-green-400 p-4 sm:p-5 rounded-2xl font-bold text-gray-700 transition-all hover:scale-[1.01] text-base sm:text-lg"; btn.innerText = opt;
                 btn.onclick = () => { window.userData.pretest.answers.push(idx); if (idx === qData.answer) window.userData.pretest.score += 20; currentQuestionIndex++; if (currentQuestionIndex < questions.length) loadQuestion(); else finishPretest(); }; container.appendChild(btn);
             });
         }
@@ -642,10 +647,7 @@
                 await saveData(); 
                 document.getElementById('score-text').innerText = window.userData.pretest.score; 
                 switchView('view-result'); 
-            } catch(e) {
-                showModal('同步失敗', '資料尚未儲存，請確認網路後再試一次。');
-                console.error(e);
-            }
+            } catch(e) { showModal('同步失敗', '資料尚未儲存，請確認網路後再試一次。'); console.error(e); }
         }
 
         let currentPostQIndex = 0;
@@ -654,38 +656,26 @@
             const qData = posttestQuestions[currentPostQIndex]; document.getElementById('current-postq-num').innerText = currentPostQIndex + 1; document.getElementById('postquestion-text').innerText = qData.q;
             const container = document.getElementById('postoptions-container'); container.innerHTML = ''; 
             qData.options.forEach((opt, index) => {
-                const btn = document.createElement('button'); btn.className = "w-full text-left bg-gray-50 hover:bg-yellow-100 border-2 border-gray-200 hover:border-yellow-400 p-4 rounded-xl font-bold text-gray-700 transition"; btn.innerText = opt;
+                const btn = document.createElement('button'); btn.className = "w-full text-left bg-gray-50 hover:bg-yellow-100 border-2 border-gray-200 hover:border-yellow-400 p-4 sm:p-5 rounded-2xl font-bold text-gray-700 transition-all hover:scale-[1.01] text-base sm:text-lg"; btn.innerText = opt;
                 btn.onclick = () => { window.userData.posttest.answers.push(index); if (index === qData.answer) window.userData.posttest.score += 20; currentPostQIndex++; if (currentPostQIndex < posttestQuestions.length) loadPostQuestion(); else finishPosttest(); }; container.appendChild(btn);
             });
         }
         async function finishPosttest() { 
             if (window.userData.firstPosttestScore === null) window.userData.firstPosttestScore = window.userData.posttest.score; 
             document.getElementById('ref-before').value = ''; document.getElementById('ref-after').value = ''; 
-            try {
-                await saveData(); 
-                switchView('view-reflection'); 
-            } catch(e) {
-                showModal('同步失敗', '資料尚未儲存，請確認網路後再試一次。');
-                console.error(e);
-            }
+            try { await saveData(); switchView('view-reflection'); } catch(e) { showModal('同步失敗', '資料尚未儲存，請確認網路後再試一次。'); console.error(e); }
         }
         
         async function submitReflection() { 
             const before = document.getElementById('ref-before').value.trim(); const after = document.getElementById('ref-after').value.trim(); 
             if(!before || !after) { showModal("提示", "科學家，請完成你的反思喔！"); return; } 
             window.userData.reflection = { before, after }; 
-            try {
-                await saveData(); 
-                showCertificate(); 
-            } catch(e) {
-                showModal('同步失敗', '資料尚未儲存，請確認網路後再試一次。');
-                console.error(e);
-            }
+            try { await saveData(); showCertificate(); } catch(e) { showModal('同步失敗', '資料尚未儲存，請確認網路後再試一次。'); console.error(e); }
         }
         
         function showCertificate() { document.getElementById('cert-name').innerText = `${escapeHTML(window.userData.name)}`; document.getElementById('cert-pre').innerText = window.userData.pretest.score; document.getElementById('cert-post').innerText = window.userData.posttest.score; document.getElementById('cert-ref-text').innerText = `「我原本以為 ${escapeHTML(window.userData.reflection.before)}，現在我知道 ${escapeHTML(window.userData.reflection.after)}」`; switchView('view-certificate'); }
 
-        // --- 救援任務 (圖像觀察版) ---
+        // --- 救援任務 ---
         function startRescue() { currentRescueIndex = 0; if (!window.userData.rescueData) window.userData.rescueData = []; loadRescuePlant(); switchView('view-rescue'); }
         function loadRescuePlant() { 
             const plant = rescuePlants[currentRescueIndex]; 
@@ -718,32 +708,26 @@
             try {
                 if (!isCorrect) { 
                     await saveData();
-                    showModal('再觀察一下喔！', `你選錯了，請再看一次線索！\n\n💡 橘咪咪提示：${plant.misconception}`); 
-                    return; 
+                    showModal('再觀察一下喔！', `你選錯了，請再看一次線索！\n\n💡 橘咪咪提示：${plant.misconception}`); return; 
                 }
                 currentRescueIndex++;
                 if (currentRescueIndex < rescuePlants.length) { 
-                    await saveData();
-                    showModal('答對了！', '太棒了！對症下藥才能讓小白菜恢復健康！請接續救援下一盆。'); 
-                    loadRescuePlant(); 
+                    await saveData(); showModal('答對了！', '太棒了！對症下藥才能讓小白菜恢復健康！請接續救援下一盆。'); loadRescuePlant(); 
                 } else { 
                     window.userData.rescueCompletedAt = new Date().toLocaleString(); 
-                    await saveData(); 
-                    showModal('任務完成！', '你真是厲害的小小植物救援員！'); 
-                    goToMap(); 
+                    await saveData(); showModal('任務完成！', '你真是厲害的小小植物救援員！'); goToMap(); 
                 }
             } catch(e) {
                 window.userData.rescueData.pop();
                 if (currentRescueIndex >= rescuePlants.length) { currentRescueIndex--; window.userData.rescueCompletedAt = null; }
-                showModal('同步失敗', '資料尚未儲存，請確認網路後再試一次。');
-                console.error(e);
+                showModal('同步失敗', '資料尚未儲存，請確認網路後再試一次。'); console.error(e);
             }
         }
 
         // --- 成長日誌 ---
         function startDiary() { switchView('view-diary'); switchDiaryTab('diary-list'); }
         function showDiaryPanel(panelId) { ['diary-list', 'diary-form', 'diary-charts', 'diary-timeline'].forEach(id => document.getElementById(id).classList.add('hidden')); document.getElementById(panelId).classList.remove('hidden'); }
-        function switchDiaryTab(tabId) { showDiaryPanel(tabId); ['list', 'charts', 'timeline'].forEach(id => document.getElementById(`tab-btn-${id}`).className = "flex-1 py-2 rounded-lg font-bold text-sm text-gray-500 hover:bg-gray-50 transition"); const activeMap = {'diary-list':'list', 'diary-charts':'charts', 'diary-timeline':'timeline'}; const activeBtn = document.getElementById(`tab-btn-${activeMap[tabId]}`); if(activeBtn) activeBtn.className = "flex-1 py-2 rounded-lg font-bold text-sm bg-orange-100 text-orange-700 transition shadow-inner"; if (tabId === 'diary-list') { renderDiaryList(); } else if (tabId === 'diary-charts') { setTimeout(renderCharts, 50); } else if (tabId === 'diary-timeline') { renderTimeline(); } }
+        function switchDiaryTab(tabId) { showDiaryPanel(tabId); ['list', 'charts', 'timeline'].forEach(id => document.getElementById(`tab-btn-${id}`).className = "flex-1 py-3 rounded-xl font-bold text-sm sm:text-base text-gray-500 hover:bg-gray-50 transition"); const activeMap = {'diary-list':'list', 'diary-charts':'charts', 'diary-timeline':'timeline'}; const activeBtn = document.getElementById(`tab-btn-${activeMap[tabId]}`); if(activeBtn) activeBtn.className = "flex-1 py-3 rounded-xl font-bold text-sm sm:text-base bg-orange-100 text-orange-700 transition shadow-inner"; if (tabId === 'diary-list') { renderDiaryList(); } else if (tabId === 'diary-charts') { setTimeout(renderCharts, 50); } else if (tabId === 'diary-timeline') { renderTimeline(); } }
         function openDiaryForm(diaryId = null) { 
             showDiaryPanel('diary-form'); currentEditingDiaryId = diaryId; document.getElementById('form-title').innerText = diaryId ? "✏️ 編輯觀察紀錄" : "✍️ 新增今日觀察紀錄"; document.getElementById('d-group-display').innerText = `第 ${window.userData.group} 組`;
             if (diaryId) { const entry = window.groupData.diary.find(d => d.id === diaryId); if(entry) { document.getElementById('d-date').value = entry.date; document.getElementById('d-height').value = entry.height; document.getElementById('d-leaves').value = entry.leaves; document.getElementById('d-soil').value = entry.soil; document.getElementById('d-sun').value = entry.sun; document.getElementById('d-action').value = entry.action || ''; document.getElementById('d-obs').value = entry.observation || ''; document.getElementById('d-next').value = entry.nextStep || ''; if(entry.photo) { currentPhotoBase64 = entry.photo; document.getElementById('d-photo-preview').src = entry.photo; document.getElementById('photo-preview-container').classList.remove('hidden'); document.querySelector('.file-upload-label').classList.add('hidden'); } else { removePhoto(); } } } 
@@ -780,27 +764,15 @@
                 window.saveDiaryEntryCloud(entryData).then(() => { showModal("同步成功", "紀錄已經儲存到雲端農場囉！"); cancelDiaryForm(); }).catch(e => { console.error(e); showModal("同步失敗", "資料尚未儲存，請確認網路後再試一次！"); });
             }
         }
-        function deleteDiary(id) { 
-            showConfirm("確定要刪除嗎？", "這筆紀錄會從小組雲端永久刪除喔！", async () => { 
-                if(window.deleteDiaryEntryCloud) {
-                    try {
-                        await window.deleteDiaryEntryCloud(id);
-                        showModal("刪除成功", "紀錄已刪除。");
-                    } catch(e) {
-                        showModal('刪除失敗', '網路不穩，請確認網路後再試一次。');
-                        console.error(e);
-                    }
-                } 
-            }); 
-        }
+        function deleteDiary(id) { showConfirm("確定要刪除嗎？", "這筆紀錄會從小組雲端永久刪除喔！", async () => { if(window.deleteDiaryEntryCloud) { try { await window.deleteDiaryEntryCloud(id); showModal("刪除成功", "紀錄已刪除。"); } catch(e) { showModal('刪除失敗', '網路不穩，請確認網路後再試一次。'); console.error(e); } } }); }
         
         function renderDiaryList() { 
             const container = document.getElementById('diary-cards-container'); container.innerHTML = ''; 
             if (!window.groupData.diary || window.groupData.diary.length === 0) { document.getElementById('empty-diary-msg').classList.remove('hidden'); return; } 
             document.getElementById('empty-diary-msg').classList.add('hidden'); 
             for (let i = window.groupData.diary.length - 1; i >= 0; i--) { 
-                const entry = window.groupData.diary[i]; const card = document.createElement('div'); card.className = "bg-white p-4 rounded-2xl shadow-sm border border-gray-200 relative"; let photoHTML = ''; if (entry.photo) { photoHTML = `<img src="${entry.photo}" class="w-full h-32 object-cover rounded-lg mb-3 border border-gray-100">`; } 
-                card.innerHTML = ` ${photoHTML} <div class="flex justify-between items-start mb-2"> <div> <span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-md">${escapeHTML(entry.date)}</span> <span class="text-sm font-bold text-gray-500 ml-2">✍️ 紀錄者: ${escapeHTML(entry.author || '組員')}</span> </div> <div class="flex gap-1"> <button onclick="openDiaryForm('${escapeHTML(entry.id)}')" class="text-blue-500 bg-blue-50 p-2 rounded-lg hover:bg-blue-100 transition" title="編輯">✏️</button> <button onclick="deleteDiary('${escapeHTML(entry.id)}')" class="text-red-500 bg-red-50 p-2 rounded-lg hover:bg-red-100 transition" title="刪除">🗑️</button> </div> </div> <div class="grid grid-cols-2 gap-2 text-sm font-bold text-gray-700 mb-3 bg-gray-50 p-2 rounded-lg border border-gray-100"> <div>📏 高度: <span class="text-green-600">${escapeHTML(entry.height)} cm</span></div> <div>🍃 葉片: <span class="text-green-600">${escapeHTML(entry.leaves)} 片</span></div> <div>💧 土壤: ${escapeHTML(entry.soil)}</div> <div>☀️ 位置: ${escapeHTML(entry.sun)}</div> </div> <div class="text-sm text-gray-700 mb-1"><strong class="text-orange-600">觀察發現：</strong>${escapeHTML(entry.observation)}</div> ${entry.action ? `<div class="text-sm text-gray-600 mb-1"><strong>做的事：</strong>${escapeHTML(entry.action)}</div>` : ''} ${entry.nextStep ? `<div class="text-sm text-gray-600"><strong>下次確認：</strong>${escapeHTML(entry.nextStep)}</div>` : ''} `; 
+                const entry = window.groupData.diary[i]; const card = document.createElement('div'); card.className = "bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-gray-200 relative"; let photoHTML = ''; if (entry.photo) { photoHTML = `<img src="${entry.photo}" class="w-full h-40 sm:h-56 object-cover rounded-xl mb-4 border border-gray-100">`; } 
+                card.innerHTML = ` ${photoHTML} <div class="flex justify-between items-start mb-3"> <div> <span class="bg-green-100 text-green-700 text-sm font-bold px-3 py-1.5 rounded-lg">${escapeHTML(entry.date)}</span> <span class="text-sm sm:text-base font-bold text-gray-500 ml-3">✍️ 紀錄者: ${escapeHTML(entry.author || '組員')}</span> </div> <div class="flex gap-2"> <button onclick="openDiaryForm('${escapeHTML(entry.id)}')" class="text-blue-500 bg-blue-50 p-2 sm:p-3 rounded-xl hover:bg-blue-100 transition shadow-sm text-lg" title="編輯">✏️</button> <button onclick="deleteDiary('${escapeHTML(entry.id)}')" class="text-red-500 bg-red-50 p-2 sm:p-3 rounded-xl hover:bg-red-100 transition shadow-sm text-lg" title="刪除">🗑️</button> </div> </div> <div class="grid grid-cols-2 gap-3 text-sm sm:text-base font-bold text-gray-700 mb-4 bg-gray-50 p-3 sm:p-4 rounded-xl border border-gray-100"> <div>📏 高度: <span class="text-green-600">${escapeHTML(entry.height)} cm</span></div> <div>🍃 葉片: <span class="text-green-600">${escapeHTML(entry.leaves)} 片</span></div> <div>💧 土壤: ${escapeHTML(entry.soil)}</div> <div>☀️ 位置: ${escapeHTML(entry.sun)}</div> </div> <div class="text-base sm:text-lg text-gray-700 mb-2"><strong class="text-orange-600">觀察發現：</strong>${escapeHTML(entry.observation)}</div> ${entry.action ? `<div class="text-sm sm:text-base text-gray-600 mb-2"><strong>做的事：</strong>${escapeHTML(entry.action)}</div>` : ''} ${entry.nextStep ? `<div class="text-sm sm:text-base text-gray-600"><strong>下次確認：</strong>${escapeHTML(entry.nextStep)}</div>` : ''} `; 
                 container.appendChild(card); 
             } 
         }
@@ -814,7 +786,7 @@
         function renderTimeline() { 
             const container = document.getElementById('timeline-container'); container.innerHTML = ''; const entriesWithPhotos = (window.groupData.diary||[]).filter(d => d.photo); 
             if (entriesWithPhotos.length === 0) { document.getElementById('empty-timeline-msg').classList.remove('hidden'); return; } document.getElementById('empty-timeline-msg').classList.add('hidden'); 
-            entriesWithPhotos.forEach(entry => { const item = document.createElement('div'); item.className = "relative pl-6"; item.innerHTML = ` <div class="absolute w-4 h-4 bg-orange-500 rounded-full -left-[10px] top-1 border-4 border-white shadow"></div> <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"> <img src="${entry.photo}" class="w-full h-48 object-cover"> <div class="p-3"> <span class="text-xs font-bold text-gray-500">${escapeHTML(entry.date)}</span> <p class="font-bold text-gray-800 text-sm mt-1">${escapeHTML(entry.observation)}</p> </div> </div> `; container.appendChild(item); }); 
+            entriesWithPhotos.forEach(entry => { const item = document.createElement('div'); item.className = "relative pl-6 sm:pl-8"; item.innerHTML = ` <div class="absolute w-5 h-5 bg-orange-500 rounded-full -left-[10px] sm:-left-[12px] top-1 border-4 border-white shadow"></div> <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow"> <img src="${entry.photo}" class="w-full h-56 sm:h-72 object-cover"> <div class="p-4 sm:p-5"> <span class="text-sm font-bold text-gray-500">${escapeHTML(entry.date)}</span> <p class="font-bold text-gray-800 text-base sm:text-lg mt-2">${escapeHTML(entry.observation)}</p> </div> </div> `; container.appendChild(item); }); 
         }
 
         // --- 計畫與互評 ---
@@ -830,14 +802,12 @@
             const prGroupSelect = document.getElementById('pr-group'); prGroupSelect.innerHTML = '<option value="">請選擇要回饋的小組...</option>'; for(let i = 1; i <= 5; i++) { if(i !== window.userData.group) prGroupSelect.innerHTML += `<option value="${i}">第 ${i} 組</option>`; }
             renderPeerReviews(); 
         }
-        function switchCarePlanTab(tabId) { document.querySelectorAll('.careplan-panel').forEach(el => el.classList.add('hidden')); document.getElementById(tabId).classList.remove('hidden'); document.getElementById('tab-btn-plan').className = "flex-1 py-2 rounded-lg font-bold text-sm text-gray-500 hover:bg-gray-50 transition"; document.getElementById('tab-btn-peer').className = "flex-1 py-2 rounded-lg font-bold text-sm text-gray-500 hover:bg-gray-50 transition"; const activeBtn = tabId === 'plan-tab' ? 'tab-btn-plan' : 'tab-btn-peer'; document.getElementById(activeBtn).className = "flex-1 py-2 rounded-lg font-bold text-sm bg-purple-100 text-purple-700 transition"; }
+        function switchCarePlanTab(tabId) { document.querySelectorAll('.careplan-panel').forEach(el => el.classList.add('hidden')); document.getElementById(tabId).classList.remove('hidden'); document.getElementById('tab-btn-plan').className = "flex-1 py-3 rounded-xl font-bold text-sm sm:text-base text-gray-500 hover:bg-gray-50 transition"; document.getElementById('tab-btn-peer').className = "flex-1 py-3 rounded-xl font-bold text-sm sm:text-base text-gray-500 hover:bg-gray-50 transition"; const activeBtn = tabId === 'plan-tab' ? 'tab-btn-plan' : 'tab-btn-peer'; document.getElementById(activeBtn).className = "flex-1 py-3 rounded-xl font-bold text-sm sm:text-base bg-purple-100 text-purple-700 transition shadow-inner"; }
         function saveCarePlan() { 
             const problem = document.getElementById('cp-problem').value.trim(); const hypothesis = document.getElementById('cp-hypothesis').value.trim(); const evidence = document.getElementById('cp-evidence').value.trim(); const method = document.getElementById('cp-method').value.trim(); const result = document.getElementById('cp-result').value.trim(); const reviseRadio = document.querySelector('input[name="cp-revise"]:checked'); const revise = reviseRadio ? reviseRadio.value : ''; const reviseReason = document.getElementById('cp-revise-reason').value.trim(); const finalOutcome = document.getElementById('cp-final-outcome').value.trim();
             if(!problem || !hypothesis || !evidence || !method) { showModal("提示", "第一階段計畫請完整填寫喔！"); return; } 
             if(window.saveGroupCarePlanCloud) { 
-                window.saveGroupCarePlanCloud({ problem, hypothesis, evidence, method, result, revise, reviseReason, finalOutcome })
-                    .then(()=>{ showModal("雲端同步成功", "小組計畫已成功更新！"); })
-                    .catch(e => { console.error(e); showModal("同步失敗", "資料尚未儲存，請確認網路後再試一次！"); }); 
+                window.saveGroupCarePlanCloud({ problem, hypothesis, evidence, method, result, revise, reviseReason, finalOutcome }).then(()=>{ showModal("雲端同步成功", "小組計畫已成功更新！"); }).catch(e => { console.error(e); showModal("同步失敗", "資料尚未儲存，請確認網路後再試一次！"); }); 
             }
         }
         async function savePeerReview() { 
@@ -846,93 +816,43 @@
             showModal("發送中", "正在將回饋傳送給同學...");
             const reviewData = { id: Date.now().toString(), classCode: window.userData.classCode, targetGroupId: `${window.userData.classCode}_G${targetGroupNum}`, targetGroupNum: targetGroupNum, fromGroup: window.userData.group, fromName: window.userData.name, q1, q2, q3, date: new Date().toLocaleDateString() }; 
             if(window.savePeerReviewToCloud) { 
-                try {
-                    await window.savePeerReviewToCloud(targetGroupNum, reviewData); 
-                    closeModal(); showModal("送出成功", `你已成功將回饋送給第 ${targetGroupNum} 組！`); 
-                    document.getElementById('pr-group').value = ''; document.getElementById('pr-q1').value = ''; document.getElementById('pr-q2').value = ''; document.getElementById('pr-q3').value = ''; 
-                } catch(e) {
-                    showModal('同步失敗', '資料尚未儲存，請確認網路後再試一次。');
-                    console.error(e);
-                }
+                try { await window.savePeerReviewToCloud(targetGroupNum, reviewData); closeModal(); showModal("送出成功", `你已成功將回饋送給第 ${targetGroupNum} 組！`); document.getElementById('pr-group').value = ''; document.getElementById('pr-q1').value = ''; document.getElementById('pr-q2').value = ''; document.getElementById('pr-q3').value = ''; } 
+                catch(e) { showModal('同步失敗', '資料尚未儲存，請確認網路後再試一次。'); console.error(e); }
             }
         }
         function renderPeerReviews() { 
             const container = document.getElementById('peer-review-list'); container.innerHTML = ''; document.getElementById('peer-review-title').innerText = `收到的回饋 (第 ${window.userData.group} 組)：`;
-            if(!window.groupData.peerReviews || window.groupData.peerReviews.length === 0) { container.innerHTML = '<p class="text-gray-400 text-sm px-2">目前還沒有收到其他組別的回饋喔！</p>'; return; }
-            window.groupData.peerReviews.forEach(pr => { const card = document.createElement('div'); card.className = "bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-sm font-bold text-gray-700"; card.innerHTML = ` <div class="flex justify-between items-center border-b border-gray-100 pb-2 mb-2"> <span class="text-blue-600 text-base">來自：第 ${escapeHTML(pr.fromGroup)} 組 (${escapeHTML(pr.fromName)})</span> <span class="text-xs text-gray-400">${escapeHTML(pr.date)}</span> </div> <p class="mb-1">1. 證據：<span class="font-normal">${escapeHTML(pr.q1)}</span></p> <p class="mb-1">2. 方法：<span class="font-normal">${escapeHTML(pr.q2)}</span></p> <p>3. 提醒：<span class="font-normal">${escapeHTML(pr.q3)}</span></p> `; container.appendChild(card); }); 
+            if(!window.groupData.peerReviews || window.groupData.peerReviews.length === 0) { container.innerHTML = '<p class="text-gray-400 text-base px-2">目前還沒有收到其他組別的回饋喔！</p>'; return; }
+            window.groupData.peerReviews.forEach(pr => { const card = document.createElement('div'); card.className = "bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 text-base sm:text-lg font-bold text-gray-700"; card.innerHTML = ` <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-3"> <span class="text-blue-600">來自：第 ${escapeHTML(pr.fromGroup)} 組 (${escapeHTML(pr.fromName)})</span> <span class="text-sm text-gray-400">${escapeHTML(pr.date)}</span> </div> <p class="mb-2">1. 證據：<span class="font-normal">${escapeHTML(pr.q1)}</span></p> <p class="mb-2">2. 方法：<span class="font-normal">${escapeHTML(pr.q2)}</span></p> <p>3. 提醒：<span class="font-normal">${escapeHTML(pr.q3)}</span></p> `; container.appendChild(card); }); 
         }
 
         // --- 教師儀表板 ---
-        function promptTeacherPassword() { const pwd = prompt("請輸入教師專區密碼:"); if (pwd === "1227") { openTeacherDashboard(); } else if (pwd !== null) { alert("密碼錯誤！\n(註: 正式環境應改用 Firebase Authentication 搭配 Firestore Security Rules)"); } }
+        function promptTeacherPassword() { const pwd = prompt("請輸入教師專區密碼:"); if (pwd === "1227") { openTeacherDashboard(); } else if (pwd !== null) { alert("密碼錯誤！"); } }
         function changeUnlockLevel() { 
             window.globalSettings.maxUnlockedLevel = parseInt(document.getElementById('teacher-unlock-level').value, 10); 
-            if (window.saveGlobalSettingsCloud) {
-                window.saveGlobalSettingsCloud(window.globalSettings)
-                    .then(() => showModal("設定完成", `已同步至全班設備`))
-                    .catch(e => { console.error(e); showModal("同步失敗", "設定未能存至雲端，請確認網路！"); });
-            }
+            if (window.saveGlobalSettingsCloud) { window.saveGlobalSettingsCloud(window.globalSettings).then(() => showModal("設定完成", `已同步至全班設備`)).catch(e => { console.error(e); showModal("同步失敗", "設定未能存至雲端，請確認網路！"); }); }
         }
         async function saveTeacherNotes() { 
-            const date = document.getElementById('teacher-note-date').value.trim(); 
-            const basis = document.getElementById('teacher-note-basis').value.trim(); 
-            const adjust = document.getElementById('teacher-note-adjust').value.trim(); 
-            const evidence = document.getElementById('teacher-note-evidence').value.trim(); 
-            
+            const date = document.getElementById('teacher-note-date').value.trim(); const basis = document.getElementById('teacher-note-basis').value.trim(); const adjust = document.getElementById('teacher-note-adjust').value.trim(); const evidence = document.getElementById('teacher-note-evidence').value.trim(); 
             if(!date && !basis && !adjust && !evidence) { showModal("提示", "請至少填寫一個欄位喔！"); return; }
-            
-            const noteData = {
-                id: Date.now().toString(), createdAt: new Date().toISOString(), date, basis, adjust, evidence
-            };
-            
+            const noteData = { id: Date.now().toString(), createdAt: new Date().toISOString(), date, basis, adjust, evidence };
             if(window.saveTeacherNoteEntryCloud) { 
-                try {
-                    await window.saveTeacherNoteEntryCloud(noteData);
-                    document.getElementById('teacher-note-date').value = '';
-                    document.getElementById('teacher-note-basis').value = '';
-                    document.getElementById('teacher-note-adjust').value = '';
-                    document.getElementById('teacher-note-evidence').value = '';
-                    showModal("儲存成功", "導學紀錄已新增至雲端！");
-                } catch(e) {
-                    console.error(e); showModal("同步失敗", "資料尚未儲存，請確認網路！");
-                }
+                try { await window.saveTeacherNoteEntryCloud(noteData); document.getElementById('teacher-note-date').value = ''; document.getElementById('teacher-note-basis').value = ''; document.getElementById('teacher-note-adjust').value = ''; document.getElementById('teacher-note-evidence').value = ''; showModal("儲存成功", "導學紀錄已新增至雲端！"); } 
+                catch(e) { console.error(e); showModal("同步失敗", "資料尚未儲存，請確認網路！"); }
             } 
         }
 
         function renderTeacherNotes() {
-            const container = document.getElementById('teacher-notes-list-container');
-            if(!container) return;
-            container.innerHTML = '';
-            if(!window.allTeacherNotes || window.allTeacherNotes.length === 0) {
-                container.innerHTML = '<p class="text-sm text-gray-400">目前尚無導學紀錄。</p>';
-                return;
-            }
+            const container = document.getElementById('teacher-notes-list-container'); if(!container) return; container.innerHTML = '';
+            if(!window.allTeacherNotes || window.allTeacherNotes.length === 0) { container.innerHTML = '<p class="text-sm sm:text-base text-gray-400">目前尚無導學紀錄。</p>'; return; }
             window.allTeacherNotes.forEach(note => {
-                const card = document.createElement('div');
-                card.className = "bg-gray-50 border border-gray-200 rounded-lg p-4 relative";
-                card.innerHTML = `
-                    <button onclick="deleteTeacherNote('${escapeHTML(note.id)}')" class="absolute top-2 right-2 text-red-500 bg-red-50 hover:bg-red-100 p-1.5 rounded-md transition text-xs font-bold">刪除</button>
-                    <div class="mb-2"><span class="text-xs font-bold bg-blue-100 text-blue-700 px-2 py-1 rounded">日期／節次</span> <span class="text-sm font-bold ml-2 text-gray-700">${escapeHTML(note.date || '無')}</span></div>
-                    <div class="mb-2"><span class="text-xs font-bold bg-yellow-100 text-yellow-700 px-2 py-1 rounded">依據資料</span> <span class="text-sm text-gray-600 ml-2">${escapeHTML(note.basis || '無')}</span></div>
-                    <div class="mb-2"><span class="text-xs font-bold bg-green-100 text-green-700 px-2 py-1 rounded">教師調整</span> <span class="text-sm text-gray-600 ml-2">${escapeHTML(note.adjust || '無')}</span></div>
-                    <div><span class="text-xs font-bold bg-purple-100 text-purple-700 px-2 py-1 rounded">修正證據</span> <span class="text-sm text-gray-600 ml-2">${escapeHTML(note.evidence || '無')}</span></div>
-                `;
+                const card = document.createElement('div'); card.className = "bg-gray-50 border border-gray-200 rounded-xl p-5 relative shadow-sm";
+                card.innerHTML = ` <button onclick="deleteTeacherNote('${escapeHTML(note.id)}')" class="absolute top-3 right-3 text-red-500 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition text-sm font-bold shadow-sm">刪除</button> <div class="mb-3 flex items-start gap-2"><span class="text-xs sm:text-sm font-bold bg-blue-100 text-blue-700 px-2 py-1 rounded flex-shrink-0 mt-0.5">日期／節次</span> <span class="text-sm sm:text-base font-bold text-gray-700 leading-relaxed">${escapeHTML(note.date || '無')}</span></div> <div class="mb-3 flex items-start gap-2"><span class="text-xs sm:text-sm font-bold bg-yellow-100 text-yellow-700 px-2 py-1 rounded flex-shrink-0 mt-0.5">依據資料</span> <span class="text-sm sm:text-base text-gray-600 leading-relaxed">${escapeHTML(note.basis || '無')}</span></div> <div class="mb-3 flex items-start gap-2"><span class="text-xs sm:text-sm font-bold bg-green-100 text-green-700 px-2 py-1 rounded flex-shrink-0 mt-0.5">教師調整</span> <span class="text-sm sm:text-base text-gray-600 leading-relaxed">${escapeHTML(note.adjust || '無')}</span></div> <div class="flex items-start gap-2"><span class="text-xs sm:text-sm font-bold bg-purple-100 text-purple-700 px-2 py-1 rounded flex-shrink-0 mt-0.5">修正證據</span> <span class="text-sm sm:text-base text-gray-600 leading-relaxed">${escapeHTML(note.evidence || '無')}</span></div> `;
                 container.appendChild(card);
             });
         }
 
-        function deleteTeacherNote(id) {
-            showConfirm("刪除確認", "確定要刪除這筆導學紀錄嗎？", async () => {
-                if(window.deleteTeacherNoteEntryCloud) {
-                    try {
-                        await window.deleteTeacherNoteEntryCloud(id);
-                        showModal("刪除成功", "紀錄已刪除。");
-                    } catch(e) {
-                        console.error(e);
-                        showModal("刪除失敗", "網路不穩，請確認網路後再試一次。");
-                    }
-                }
-            });
-        }
+        function deleteTeacherNote(id) { showConfirm("刪除確認", "確定要刪除這筆導學紀錄嗎？", async () => { if(window.deleteTeacherNoteEntryCloud) { try { await window.deleteTeacherNoteEntryCloud(id); showModal("刪除成功", "紀錄已刪除。"); } catch(e) { console.error(e); showModal("刪除失敗", "網路不穩，請確認網路後再試一次。"); } } }); }
 
         function openTeacherDashboard() {
             switchView('view-teacher');
@@ -945,12 +865,7 @@
             const groupsMap = {}; 
             for(let i=1; i<=5; i++) {
                 const groupId = `311_G${i}`;
-                groupsMap[i] = {
-                    group: i,
-                    carePlan: (window.groupsList.find(g => g.groupId === groupId) || {}).carePlan,
-                    diary: window.allDiaries ? window.allDiaries.filter(d => d.groupId === groupId).sort((a,b)=>new Date(a.date)-new Date(b.date)) : [],
-                    peerReviews: window.allPeerReviews ? window.allPeerReviews.filter(p => p.targetGroupId === groupId) : []
-                };
+                groupsMap[i] = { group: i, carePlan: (window.groupsList.find(g => g.groupId === groupId) || {}).carePlan, diary: window.allDiaries ? window.allDiaries.filter(d => d.groupId === groupId).sort((a,b)=>new Date(a.date)-new Date(b.date)) : [], peerReviews: window.allPeerReviews ? window.allPeerReviews.filter(p => p.targetGroupId === groupId) : [] };
             }
 
             list.sort((a,b) => parseInt(a.seat||0) - parseInt(b.seat||0)).forEach(u => {
@@ -963,7 +878,7 @@
                 }
                 const gData = groupsMap[u.group] || { diary: [], carePlan: null, peerReviews: [] };
                 const tr = document.createElement('tr');
-                tr.innerHTML = ` <td class="py-3 px-2 border-b border-gray-100 font-black text-blue-600">第 ${escapeHTML(u.group)} 組</td> <td class="py-3 px-2 border-b border-gray-100">${escapeHTML(u.seat)}</td> <td class="py-3 px-2 border-b border-gray-100 text-green-600">${u.pretest?.score !== null ? u.pretest.score : '-'}</td> <td class="py-3 px-2 border-b border-gray-100 text-purple-600">${u.posttest?.score !== null ? u.posttest.score : '-'}</td> <td class="py-3 px-2 border-b border-gray-100">${gData.diary ? gData.diary.length : 0} 篇</td> <td class="py-3 px-2 border-b border-gray-100">${gData.carePlan ? '✅' : '❌'}</td> <td class="py-3 px-2 border-b border-gray-100">${gData.peerReviews ? gData.peerReviews.length : 0} 則</td> `;
+                tr.innerHTML = ` <td class="py-4 px-3 border-b border-gray-100 font-black text-blue-600">第 ${escapeHTML(u.group)} 組</td> <td class="py-4 px-3 border-b border-gray-100">${escapeHTML(u.seat)}</td> <td class="py-4 px-3 border-b border-gray-100 text-green-600">${u.pretest?.score !== null ? u.pretest.score : '-'}</td> <td class="py-4 px-3 border-b border-gray-100 text-purple-600">${u.posttest?.score !== null ? u.posttest.score : '-'}</td> <td class="py-4 px-3 border-b border-gray-100">${gData.diary ? gData.diary.length : 0} 篇</td> <td class="py-4 px-3 border-b border-gray-100">${gData.carePlan ? '✅' : '❌'}</td> <td class="py-4 px-3 border-b border-gray-100">${gData.peerReviews ? gData.peerReviews.length : 0} 則</td> `;
                 tbody.appendChild(tr);
             });
 
@@ -979,21 +894,19 @@
             if (dashAvgChartInstance) dashAvgChartInstance.destroy(); dashAvgChartInstance = new Chart(document.getElementById('dash-chart-avg'), { type: 'bar', data: { labels: ['前測平均', '後測平均'], datasets: [{ data: [avgPre, avgPost], backgroundColor: ['rgba(34, 197, 94, 0.7)', 'rgba(168, 85, 247, 0.7)'], borderColor: ['#16a34a', '#9333ea'], borderWidth: 2, borderRadius: 8 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 100 } } } });
 
             const preRates = preCorrects.map(c => preCount > 0 ? Math.round((c/preCount)*100) : 0); const postRates = postCorrects.map(c => postCount > 0 ? Math.round((c/postCount)*100) : 0);
-            if (dashCorrectChartInstance) dashCorrectChartInstance.destroy(); dashCorrectChartInstance = new Chart(document.getElementById('dash-chart-correct-rate'), { type: 'bar', data: { labels: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5'], datasets: [ { label: '前測答對率(%)', data: preRates, backgroundColor: 'rgba(34, 197, 94, 0.6)', borderColor: '#16a34a', borderWidth: 1, borderRadius: 4 }, { label: '後測答對率(%)', data: postRates, backgroundColor: 'rgba(168, 85, 247, 0.6)', borderColor: '#9333ea', borderWidth: 1, borderRadius: 4 } ] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } } });
+            if (dashCorrectChartInstance) dashCorrectChartInstance.destroy(); dashCorrectChartInstance = new Chart(document.getElementById('dash-chart-correct-rate'), { type: 'bar', data: { labels: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5'], datasets: [ { label: '前測答對率(%)', data: preRates, backgroundColor: 'rgba(34, 197, 94, 0.6)', borderColor: '#16a34a', borderWidth: 1, borderRadius: 6 }, { label: '後測答對率(%)', data: postRates, backgroundColor: 'rgba(168, 85, 247, 0.6)', borderColor: '#9333ea', borderWidth: 1, borderRadius: 6 } ] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } } });
 
             let groupLabels = ['第一組', '第二組', '第三組', '第四組', '第五組']; let groupHeights = [0, 0, 0, 0, 0]; let groupDiaryCounts = [0, 0, 0, 0, 0]; let groupPeerCounts = [0, 0, 0, 0, 0];
             for(let i=1; i<=5; i++) { 
                 const g = groupsMap[i]; 
                 if(g) { 
                     groupDiaryCounts[i-1] = g.diary ? g.diary.length : 0; groupPeerCounts[i-1] = g.peerReviews ? g.peerReviews.length : 0; 
-                    if(g.diary && g.diary.length > 0) {
-                        groupHeights[i-1] = parseFloat(g.diary[g.diary.length - 1].height) || 0;
-                    } 
+                    if(g.diary && g.diary.length > 0) { groupHeights[i-1] = parseFloat(g.diary[g.diary.length - 1].height) || 0; } 
                 } 
             }
 
-            if (dashHeightChartInstance) dashHeightChartInstance.destroy(); dashHeightChartInstance = new Chart(document.getElementById('dash-chart-height'), { type: 'line', data: { labels: groupLabels, datasets: [{ label: '最新高度 (cm)', data: groupHeights, borderColor: '#eab308', backgroundColor: 'rgba(234, 179, 8, 0.2)', borderWidth: 3, pointBackgroundColor: '#fff', pointBorderColor: '#eab308', pointRadius: 6, fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
-            if (dashDiaryChartInstance) dashDiaryChartInstance.destroy(); dashDiaryChartInstance = new Chart(document.getElementById('dash-chart-diary'), { type: 'bar', data: { labels: groupLabels, datasets: [ { label: '日誌篇數', data: groupDiaryCounts, backgroundColor: 'rgba(249, 115, 22, 0.7)', borderRadius: 4 }, { label: '收到互評', data: groupPeerCounts, backgroundColor: 'rgba(59, 130, 246, 0.7)', borderRadius: 4 } ] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } } });
+            if (dashHeightChartInstance) dashHeightChartInstance.destroy(); dashHeightChartInstance = new Chart(document.getElementById('dash-chart-height'), { type: 'line', data: { labels: groupLabels, datasets: [{ label: '最新高度 (cm)', data: groupHeights, borderColor: '#eab308', backgroundColor: 'rgba(234, 179, 8, 0.2)', borderWidth: 4, pointBackgroundColor: '#fff', pointBorderColor: '#eab308', pointRadius: 7, fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+            if (dashDiaryChartInstance) dashDiaryChartInstance.destroy(); dashDiaryChartInstance = new Chart(document.getElementById('dash-chart-diary'), { type: 'bar', data: { labels: groupLabels, datasets: [ { label: '日誌篇數', data: groupDiaryCounts, backgroundColor: 'rgba(249, 115, 22, 0.7)', borderRadius: 6 }, { label: '收到互評', data: groupPeerCounts, backgroundColor: 'rgba(59, 130, 246, 0.7)', borderRadius: 6 } ] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } } });
             
             if(typeof renderTeacherNotes === 'function') renderTeacherNotes();
         }
