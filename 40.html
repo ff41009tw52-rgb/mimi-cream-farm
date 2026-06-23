@@ -544,6 +544,18 @@
         function closeModal() { document.getElementById('custom-modal').classList.add('hidden'); document.getElementById('custom-modal').classList.remove('flex'); }
         function showConfirm(title, message, onConfirmCallback) { document.getElementById('confirm-title').innerText = title; document.getElementById('confirm-message').innerText = message; document.getElementById('custom-confirm-modal').classList.remove('hidden'); document.getElementById('custom-confirm-modal').classList.add('flex'); const btn = document.getElementById('confirm-action-btn'); btn.replaceWith(btn.cloneNode(true)); document.getElementById('confirm-action-btn').addEventListener('click', () => { closeConfirmModal(); onConfirmCallback(); }); }
         function closeConfirmModal() { document.getElementById('custom-confirm-modal').classList.add('hidden'); document.getElementById('custom-confirm-modal').classList.remove('flex'); }
+        
+        async function saveData() {
+            if (!window.isCloudReady) {
+                throw new Error('雲端尚未完成連線，請稍候再試。');
+            }
+
+            if (typeof window.saveDataCloud !== 'function') {
+                throw new Error('找不到雲端儲存函式 saveDataCloud。');
+            }
+
+            await window.saveDataCloud();
+        }
 
         async function login() {
             const classCode = document.getElementById('input-class').value;
