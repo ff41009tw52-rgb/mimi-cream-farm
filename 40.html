@@ -34,21 +34,66 @@
 
     <div id="cloud-indicator" class="cloud-status">☁️ 連線中...</div>
 
-    <!-- 彈出視窗 -->
+    <!-- 一般彈出視窗 -->
     <div id="custom-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center hidden">
-        <div class="bg-white p-6 rounded-xl shadow-xl max-w-sm w-11/12 text-center whitespace-pre-wrap">
-            <h3 class="text-lg font-bold mb-4 text-green-700" id="modal-title">提示</h3>
-            <p class="mb-6 font-bold text-gray-600" id="modal-message">訊息內容</p>
-            <button onclick="closeModal()" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition font-bold">知道囉！</button>
+        <div class="bg-white p-6 rounded-3xl shadow-xl max-w-sm w-11/12 text-center whitespace-pre-wrap border-4 border-green-200">
+            <h3 class="text-xl font-black mb-4 text-green-700" id="modal-title">提示</h3>
+            <p class="mb-6 font-bold text-gray-600 text-lg" id="modal-message">訊息內容</p>
+            <button onclick="closeModal()" class="bg-green-500 text-white px-8 py-3 rounded-xl hover:bg-green-600 transition font-black text-lg shadow-md hover:scale-105">知道囉！</button>
         </div>
     </div>
+    
+    <!-- 確認彈出視窗 -->
     <div id="custom-confirm-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center hidden">
-        <div class="bg-white p-6 rounded-xl shadow-xl max-w-sm w-11/12 text-center">
-            <h3 class="text-lg font-bold mb-4 text-orange-600" id="confirm-title">請確認</h3>
-            <p class="mb-6 font-bold text-gray-600" id="confirm-message">訊息內容</p>
+        <div class="bg-white p-6 rounded-3xl shadow-xl max-w-sm w-11/12 text-center border-4 border-orange-200">
+            <h3 class="text-xl font-black mb-4 text-orange-600" id="confirm-title">請確認</h3>
+            <p class="mb-6 font-bold text-gray-600 text-lg" id="confirm-message">訊息內容</p>
             <div class="flex justify-center gap-4">
-                <button onclick="closeConfirmModal()" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400 transition font-bold">取消</button>
-                <button id="confirm-action-btn" class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition font-bold">確定</button>
+                <button onclick="closeConfirmModal()" class="bg-gray-200 text-gray-700 px-6 py-3 rounded-xl hover:bg-gray-300 transition font-bold text-lg">取消</button>
+                <button id="confirm-action-btn" class="bg-orange-500 text-white px-6 py-3 rounded-xl hover:bg-orange-600 transition font-bold text-lg shadow-md">確定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 小白菜救援指南 (Summary Modal) ==================== -->
+    <div id="guide-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 items-center justify-center hidden p-4 sm:p-6">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-full border-[6px] border-yellow-300 relative">
+            <div class="absolute -top-4 -left-4 text-6xl opacity-30 rotate-[-15deg]">🥬</div>
+            <div class="bg-gradient-to-r from-green-500 to-green-600 p-6 sm:p-8 text-white text-center relative z-10 shadow-md">
+                <button onclick="closeGuideModal()" class="absolute top-4 right-4 text-white hover:text-green-200 text-3xl font-black transition-transform hover:scale-110">&times;</button>
+                <h3 class="text-2xl sm:text-3xl font-black mb-2 tracking-wide text-yellow-100 drop-shadow-md" id="guide-title">第 X 組的小白菜救援指南</h3>
+                <p class="text-sm sm:text-base font-bold opacity-90 bg-green-700 bg-opacity-40 inline-block px-4 py-1 rounded-full">給下一組小農夫的救命秘笈</p>
+            </div>
+            
+            <div class="p-6 sm:p-8 overflow-y-auto space-y-6 flex-1 bg-green-50 relative z-10">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-green-100 relative">
+                    <div class="absolute -left-3 -top-3 bg-red-400 text-white w-8 h-8 flex items-center justify-center rounded-full font-black shadow-sm text-sm">1</div>
+                    <p class="text-sm sm:text-base text-gray-500 font-bold mb-1">🔍 遇到什麼問題：</p>
+                    <p class="text-gray-800 font-black text-lg sm:text-xl leading-relaxed" id="guide-problem">...</p>
+                </div>
+                
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-green-100 relative">
+                    <div class="absolute -left-3 -top-3 bg-blue-400 text-white w-8 h-8 flex items-center justify-center rounded-full font-black shadow-sm text-sm">2</div>
+                    <p class="text-sm sm:text-base text-gray-500 font-bold mb-2">🔎 發現哪些線索：</p>
+                    <div class="flex flex-wrap gap-2 mb-3" id="guide-checkboxes"></div>
+                    <p class="text-gray-700 font-bold text-base sm:text-lg leading-relaxed bg-gray-50 p-3 rounded-xl border border-gray-100" id="guide-evidence">...</p>
+                </div>
+                
+                <div class="bg-white p-5 rounded-2xl shadow-sm border-2 border-purple-200 relative">
+                    <div class="absolute -left-3 -top-3 bg-purple-400 text-white w-8 h-8 flex items-center justify-center rounded-full font-black shadow-sm text-sm">3</div>
+                    <p class="text-sm sm:text-base text-purple-600 font-bold mb-1">🛠️ 我們決定這樣救它：</p>
+                    <p class="text-purple-900 font-black text-lg sm:text-xl leading-relaxed" id="guide-method">...</p>
+                </div>
+                
+                <div class="bg-yellow-50 p-6 rounded-2xl shadow-sm border-2 border-yellow-300 relative mt-8">
+                    <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-4xl bg-white rounded-full p-1 shadow-sm">⭐</div>
+                    <p class="text-center text-sm sm:text-base text-yellow-700 font-bold mb-3 mt-2">給下一組小農夫的提醒</p>
+                    <p class="text-yellow-900 font-black text-xl sm:text-2xl text-center leading-relaxed" id="guide-tip">...</p>
+                </div>
+            </div>
+            
+            <div class="bg-gray-50 p-4 border-t border-gray-200 text-center z-10">
+                <p class="text-xs font-bold text-gray-400">可以將此畫面截圖分享或投影給全班看喔！</p>
             </div>
         </div>
     </div>
@@ -57,18 +102,18 @@
     <div id="view-home" class="view-section active max-w-xl mx-auto pt-10 px-4 pb-20 relative">
         <div class="bg-white rounded-3xl shadow-lg p-8 sm:p-12 text-center border-4 border-green-200 mt-10 relative">
             <h1 class="text-3xl sm:text-4xl font-black text-green-700 mb-2 leading-snug">橘咪咪與白奶油的<br>科學農場</h1>
-            <h2 class="text-lg sm:text-xl text-green-600 mb-8 font-bold">小組協作任務基地</h2>
+            <h2 class="text-lg sm:text-xl text-green-600 mb-8 font-bold">小組任務站</h2>
             
             <div class="space-y-6 text-left max-w-sm mx-auto">
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">🏫 班級代碼：</label>
-                    <input type="text" id="input-class" class="w-full px-5 py-4 rounded-xl border-2 border-gray-200 bg-gray-100 text-gray-600 font-bold focus:outline-none text-center sm:text-lg" value="311" readonly>
+                    <input type="text" id="input-class" class="w-full px-5 py-4 rounded-xl border-2 border-gray-200 bg-gray-100 text-gray-600 font-bold focus:outline-none text-center sm:text-lg" value="307" readonly>
                 </div>
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">🧑 座號 (1~27)：</label>
-                    <input type="number" id="input-seat" class="w-full px-5 py-4 rounded-xl border-2 border-gray-200 focus:border-green-500 focus:outline-none font-bold text-center text-xl tracking-wider shadow-inner" placeholder="請輸入座號" min="1" max="27">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">🧑 座號 (1~25)：</label>
+                    <input type="number" id="input-seat" class="w-full px-5 py-4 rounded-xl border-2 border-gray-200 focus:border-green-500 focus:outline-none font-bold text-center text-xl tracking-wider shadow-inner" placeholder="請輸入座號" min="1" max="25">
                 </div>
-                <p class="text-sm text-gray-500 font-bold text-center mt-2 bg-green-50 py-2 rounded-lg">* 系統將依據座號自動為您分配小組與建立檔案。</p>
+                <p class="text-sm text-gray-500 font-bold text-center mt-2 bg-green-50 py-2 rounded-lg">* 輸入座號後，就會到自己的小組囉！</p>
                 <button onclick="login()" class="w-full mt-6 bg-gradient-to-r from-green-400 to-green-600 text-white font-bold py-4 px-4 rounded-xl shadow-md hover:scale-[1.02] transition-transform duration-300 sm:text-lg">進入農場</button>
             </div>
         </div>
@@ -112,9 +157,7 @@
             
             <div class="mt-8 border-t border-gray-100 pt-6">
                 <h4 class="font-bold text-slate-600 mb-4 text-lg flex items-center gap-2">📜 歷次導學紀錄</h4>
-                <div id="teacher-notes-list-container" class="space-y-4">
-                    <!-- JS 動態生成歷史紀錄 -->
-                </div>
+                <div id="teacher-notes-list-container" class="space-y-4"></div>
             </div>
         </div>
 
@@ -191,7 +234,7 @@
                 <div class="text-4xl sm:text-5xl grayscale" id="level-3-icon">🔒</div>
             </div>
             <div id="level-4-card" class="bg-gray-50 p-6 sm:p-8 rounded-2xl shadow border-l-8 border-gray-300 flex items-center justify-between opacity-70 transition-transform duration-300">
-                <div><span class="text-xs sm:text-sm font-bold text-white bg-purple-500 px-3 py-1.5 rounded-lg">小組</span><h3 class="text-xl sm:text-2xl font-bold text-gray-800 mt-3">📋 4. 計畫與互評</h3><p class="text-sm sm:text-base text-gray-400 font-bold mt-1" id="level-4-status">請先寫至少一篇日誌</p></div>
+                <div><span class="text-xs sm:text-sm font-bold text-white bg-purple-500 px-3 py-1.5 rounded-lg">小組</span><h3 class="text-xl sm:text-2xl font-bold text-gray-800 mt-3">📋 4. 照護計畫</h3><p class="text-sm sm:text-base text-gray-400 font-bold mt-1" id="level-4-status">請先寫至少一篇日誌</p></div>
                 <div class="text-4xl sm:text-5xl grayscale" id="level-4-icon">🔒</div>
             </div>
             <div id="level-5-card" class="bg-gray-50 p-6 sm:p-8 rounded-2xl shadow border-l-8 border-gray-300 flex items-center justify-between opacity-70 transition-transform duration-300">
@@ -202,7 +245,7 @@
 
         <div class="mt-12 flex items-end gap-4 max-w-lg mx-auto">
             <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-green-300 flex-shrink-0 bg-gray-100 shadow-md"><img src="Christmascream.jpg" alt="白奶油" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100/eee/999?text=Cream'"></div>
-            <div class="flex-1"><div class="chat-bubble chat-bubble-outline text-sm sm:text-base font-bold text-gray-700 p-4">白奶油園長：哼，小組任務是會同步的，大家一起合作才能解鎖最後一關喔！</div></div>
+            <div class="flex-1"><div class="chat-bubble chat-bubble-outline text-sm sm:text-base font-bold text-gray-700 p-4">白奶油園長：小組任務要一起完成喔！你們寫的內容，組員都看得到。</div></div>
         </div>
     </div>
 
@@ -214,7 +257,7 @@
     </div>
     
     <!-- ==================== 5. 測驗結算 ==================== -->
-    <div id="view-result" class="view-section max-w-2xl mx-auto pt-20 px-4 pb-20 text-center relative"><div class="bg-white rounded-3xl shadow-xl p-10 sm:p-16 border-4 border-yellow-300 relative overflow-hidden"><div class="absolute -top-6 -right-6 text-8xl opacity-20">🌟</div><h2 class="text-4xl font-black text-yellow-600 mb-4">任務完成！</h2><p class="text-lg text-gray-600 mb-8 font-bold">成績已同步至雲端保存！</p><div class="text-7xl sm:text-8xl font-black text-green-500 mb-4" id="score-text">100</div><p class="text-xl text-gray-500 font-bold mb-10">分</p><button onclick="goToMap()" class="w-full sm:w-2/3 mx-auto bg-green-500 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:scale-[1.02] transition-transform duration-300 text-xl block">回到地圖</button></div></div>
+    <div id="view-result" class="view-section max-w-2xl mx-auto pt-20 px-4 pb-20 text-center relative"><div class="bg-white rounded-3xl shadow-xl p-10 sm:p-16 border-4 border-yellow-300 relative overflow-hidden"><div class="absolute -top-6 -right-6 text-8xl opacity-20">🌟</div><h2 class="text-4xl font-black text-yellow-600 mb-4">任務完成！</h2><p class="text-lg text-gray-600 mb-8 font-bold">成績已經存好囉！</p><div class="text-7xl sm:text-8xl font-black text-green-500 mb-4" id="score-text">100</div><p class="text-xl text-gray-500 font-bold mb-10">分</p><button onclick="goToMap()" class="w-full sm:w-2/3 mx-auto bg-green-500 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:scale-[1.02] transition-transform duration-300 text-xl block">回到地圖</button></div></div>
     
     <!-- ==================== 6. 救援任務 (圖像觀察版) ==================== -->
     <div id="view-rescue" class="view-section max-w-2xl mx-auto pt-6 px-4 pb-20 relative"><button onclick="goToMap()" class="absolute top-4 left-4 bg-white border-2 border-green-500 text-green-600 px-4 py-1.5 rounded-full text-sm font-bold shadow hover:bg-green-50 z-10 flex items-center gap-1">返回</button>
@@ -225,9 +268,9 @@
             <h3 id="rescue-plant-name" class="font-black text-xl sm:text-2xl text-blue-800">一號小白菜</h3>
         </div>
 
-        <div class="bg-white rounded-3xl shadow-md p-5 sm:p-8 border border-gray-100 mb-6"><p class="font-black text-lg text-orange-600 mb-4">步驟 1. 小偵探任務：三個線索都看過了嗎？</p><div class="grid grid-cols-3 gap-3 mb-5"><button id="btn-clue-leaf" onclick="checkClue('leaf')" class="bg-gray-50 hover:bg-green-100 border-2 border-gray-200 rounded-xl py-3 sm:py-4 text-base font-bold text-gray-600 transition-colors">🔍 葉子</button><button id="btn-clue-soil" onclick="checkClue('soil')" class="bg-gray-50 hover:bg-green-100 border-2 border-gray-200 rounded-xl py-3 sm:py-4 text-base font-bold text-gray-600 transition-colors">🔍 土壤</button><button id="btn-clue-env" onclick="checkClue('env')" class="bg-gray-50 hover:bg-green-100 border-2 border-gray-200 rounded-xl py-3 sm:py-4 text-base font-bold text-gray-600 transition-colors">🔍 環境</button></div><div id="clue-display" class="bg-yellow-50 text-yellow-800 text-base sm:text-lg font-bold p-4 sm:p-5 rounded-xl border border-yellow-200 min-h-[4rem] flex items-center justify-center text-center shadow-inner">請點擊上方按鈕開始觀察。</div></div>
-        <div class="bg-white rounded-3xl shadow-md p-5 sm:p-8 border border-gray-100 mb-6"><p class="font-black text-lg text-gray-700 mb-4">步驟 2. 選擇你要做的行動：</p><div class="grid grid-cols-2 sm:grid-cols-4 gap-3"><button id="action-1" onclick="chooseAction('適量澆水', 'action-1')" class="action-btn bg-white border-2 border-blue-300 text-blue-700 rounded-xl py-3 sm:py-4 text-base font-bold hover:bg-blue-50 transition-colors">💧 適量澆水</button><button id="action-2" onclick="chooseAction('暫時不要再澆水', 'action-2')" class="action-btn bg-white border-2 border-red-300 text-red-700 rounded-xl py-3 sm:py-4 text-base font-bold hover:bg-red-50 transition-colors">🚫 暫不澆水</button><button id="action-3" onclick="chooseAction('移到陽光充足處', 'action-3')" class="action-btn bg-white border-2 border-orange-300 text-orange-700 rounded-xl py-3 sm:py-4 text-base font-bold hover:bg-orange-50 transition-colors">☀️ 移到陽光下</button><button id="action-5" onclick="chooseAction('抓蟲', 'action-5')" class="action-btn bg-white border-2 border-green-300 text-green-700 rounded-xl py-3 sm:py-4 text-base font-bold hover:bg-green-50 transition-colors">🐛 抓蟲</button></div></div>
-        <div class="bg-white rounded-3xl shadow-md p-5 sm:p-8 border border-gray-100 mb-8"><p class="font-black text-lg text-gray-700 mb-4">步驟 3. 寫下判斷理由：</p><div class="space-y-4 text-gray-700 font-bold text-base sm:text-lg"><div class="flex items-center gap-3 flex-wrap"><span>觀察到</span><input type="text" id="rescue-obs" class="flex-1 min-w-[150px] border-b-2 border-green-500 bg-green-50 px-3 py-2 rounded focus:outline-none focus:bg-green-100 transition-colors" placeholder="例: 土壤乾乾的"></div><div class="flex items-center gap-3 flex-wrap"><span>我認為植物需要</span><input type="text" id="rescue-reason" class="flex-1 min-w-[150px] border-b-2 border-green-500 bg-green-50 px-3 py-2 rounded focus:outline-none focus:bg-green-100 transition-colors" placeholder="例: 喝水"></div></div></div>
+        <div class="bg-white rounded-3xl shadow-md p-5 sm:p-8 border border-gray-100 mb-6"><p class="font-black text-lg text-orange-600 mb-4">步驟 1. 先看三個地方：葉子、土和放的位置！</p><div class="grid grid-cols-3 gap-3 mb-5"><button id="btn-clue-leaf" onclick="checkClue('leaf')" class="bg-gray-50 hover:bg-green-100 border-2 border-gray-200 rounded-xl py-3 sm:py-4 text-base font-bold text-gray-600 transition-colors">🔍 葉子</button><button id="btn-clue-soil" onclick="checkClue('soil')" class="bg-gray-50 hover:bg-green-100 border-2 border-gray-200 rounded-xl py-3 sm:py-4 text-base font-bold text-gray-600 transition-colors">🔍 土</button><button id="btn-clue-env" onclick="checkClue('env')" class="bg-gray-50 hover:bg-green-100 border-2 border-gray-200 rounded-xl py-3 sm:py-4 text-base font-bold text-gray-600 transition-colors">🔍 放哪裡</button></div><div id="clue-display" class="bg-yellow-50 text-yellow-800 text-base sm:text-lg font-bold p-4 sm:p-5 rounded-xl border border-yellow-200 min-h-[4rem] flex items-center justify-center text-center shadow-inner">請點擊上方按鈕開始觀察。</div></div>
+        <div class="bg-white rounded-3xl shadow-md p-5 sm:p-8 border border-gray-100 mb-6"><p class="font-black text-lg text-gray-700 mb-4">步驟 2. 選擇你要做的行動：</p><div class="grid grid-cols-2 sm:grid-cols-4 gap-3"><button id="action-1" onclick="chooseAction('澆一點水', 'action-1')" class="action-btn bg-white border-2 border-blue-300 text-blue-700 rounded-xl py-3 sm:py-4 text-base font-bold hover:bg-blue-50 transition-colors">💧 澆一點水</button><button id="action-2" onclick="chooseAction('先別澆水', 'action-2')" class="action-btn bg-white border-2 border-red-300 text-red-700 rounded-xl py-3 sm:py-4 text-base font-bold hover:bg-red-50 transition-colors">🚫 先別澆水</button><button id="action-3" onclick="chooseAction('換到有光的地方', 'action-3')" class="action-btn bg-white border-2 border-orange-300 text-orange-700 rounded-xl py-3 sm:py-4 text-base font-bold hover:bg-orange-50 transition-colors">☀️ 換到有光的地方</button><button id="action-5" onclick="chooseAction('找找有沒有菜蟲', 'action-5')" class="action-btn bg-white border-2 border-green-300 text-green-700 rounded-xl py-3 sm:py-4 text-base font-bold hover:bg-green-50 transition-colors">🐛 找找有沒有菜蟲</button></div></div>
+        <div class="bg-white rounded-3xl shadow-md p-5 sm:p-8 border border-gray-100 mb-8"><p class="font-black text-lg text-gray-700 mb-4">步驟 3. 把你的想法說一說</p><div class="space-y-4 text-gray-700 font-bold text-base sm:text-lg"><div class="flex items-center gap-3 flex-wrap"><span>我看到</span><input type="text" id="rescue-obs" class="flex-1 min-w-[150px] border-b-2 border-green-500 bg-green-50 px-3 py-2 rounded focus:outline-none focus:bg-green-100 transition-colors" placeholder="例: 土乾乾的、葉子有洞"></div><div class="flex items-center gap-3 flex-wrap"><span>所以我想先</span><input type="text" id="rescue-reason" class="flex-1 min-w-[150px] border-b-2 border-green-500 bg-green-50 px-3 py-2 rounded focus:outline-none focus:bg-green-100 transition-colors" placeholder="例: 澆一點水、找找有沒有菜蟲"></div></div></div>
         <button onclick="submitRescue()" class="w-full bg-blue-500 text-white font-bold py-4 px-4 rounded-xl shadow-lg hover:scale-[1.02] transition-transform duration-300 text-lg sm:text-xl">送出決定！</button>
         <div class="mt-10 flex items-end gap-4 max-w-lg mx-auto"><div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-4 border-orange-300 flex-shrink-0 bg-orange-50 shadow-md"><img src="Christmasmimi.jpg" onerror="this.src='https://placehold.co/100/fcd34d/d97706?text=Mimi'"></div><div class="flex-1"><div class="chat-bubble chat-bubble-orange chat-bubble-orange-outline text-sm sm:text-base font-bold text-gray-700 p-3 sm:p-4">橘咪咪園長：一定要三個線索都看完才能下決定喔！</div></div></div>
     </div>
@@ -247,12 +290,12 @@
             <h3 class="text-xl sm:text-2xl font-black text-orange-600 mb-6 border-b-2 border-orange-100 pb-3" id="form-title">撰寫觀察紀錄</h3>
             
             <div class="bg-yellow-50 border-l-8 border-yellow-400 p-5 mb-6 rounded-r-xl shadow-sm">
-                <h4 class="font-bold text-yellow-800 text-lg flex items-center gap-2 mb-3">📏 小小科學家量測規則</h4>
+                <h4 class="font-bold text-yellow-800 text-lg flex items-center gap-2 mb-3">📏 小小植物偵探的量一量規則</h4>
                 <ul class="list-disc pl-6 text-base text-yellow-700 font-bold space-y-2">
-                    <li>尺從「土壤表面」開始量，量到最高的葉片。</li>
-                    <li>每次測量請站在盆栽的「同一側」。</li>
-                    <li>拍照時，把尺直立放在盆栽旁邊一起拍入畫面。</li>
-                    <li>計算葉片數量時，只計算「完整長出展開」的葉片喔！</li>
+                    <li>尺從土上面開始，量到最高的葉子。</li>
+                    <li>每次都從盆栽同一邊量。</li>
+                    <li>拍照時，把尺放在盆栽旁邊。</li>
+                    <li>只數已經打開的葉子。</li>
                 </ul>
             </div>
 
@@ -260,12 +303,12 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label class="block text-sm sm:text-base mb-1 text-gray-500">📅 日期</label><input type="date" id="d-date" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-orange-400"></div><div><label class="block text-sm sm:text-base mb-1 text-gray-500">👥 小組</label><div id="d-group-display" class="w-full bg-gray-200 border-2 border-gray-200 rounded-xl px-4 py-3 text-gray-600 text-center">第 X 組</div></div></div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 sm:p-5 bg-green-50 rounded-2xl border border-green-100"><div><label class="block text-sm sm:text-base mb-1 text-green-700">📏 高度(cm)</label><input type="number" id="d-height" step="0.1" min="0" class="w-full bg-white border-2 border-green-200 rounded-xl px-4 py-3 focus:border-green-500 focus:outline-none"></div><div><label class="block text-sm sm:text-base mb-1 text-green-700">🍃 葉片數(片)</label><input type="number" id="d-leaves" min="0" step="1" class="w-full bg-white border-2 border-green-200 rounded-xl px-4 py-3 focus:border-green-500 focus:outline-none"></div></div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div><label class="block text-sm sm:text-base mb-1 text-gray-500">💧 土壤狀態</label><select id="d-soil" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-orange-400 focus:outline-none"><option value="濕潤">濕潤</option><option value="乾燥">乾燥</option><option value="積水">積水</option></select></div>
-                    <div><label class="block text-sm sm:text-base mb-1 text-gray-500">☀️ 日照位置</label><select id="d-sun" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-orange-400 focus:outline-none"><option value="照得到陽光">照得到陽光</option><option value="明亮但無直射光">明亮但無直射光</option><option value="陰暗角落">陰暗角落</option></select></div>
+                    <div><label class="block text-sm sm:text-base mb-1 text-gray-500">💧 土摸起來怎樣？</label><select id="d-soil" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-orange-400 focus:outline-none"><option value="乾乾的">乾乾的</option><option value="剛剛好">剛剛好</option><option value="水太多">水太多</option></select></div>
+                    <div><label class="block text-sm sm:text-base mb-1 text-gray-500">☀️ 盆栽放在哪裡？</label><select id="d-sun" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-orange-400 focus:outline-none"><option value="有照到太陽">有照到太陽</option><option value="有亮光但照不到太陽">有亮光但照不到太陽</option><option value="很暗的地方">很暗的地方</option></select></div>
                 </div>
-                <div><label class="block text-sm sm:text-base mb-1 text-gray-500">今天做了什麼？</label><input type="text" id="d-action" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-orange-400 focus:outline-none"></div>
-                <div><label class="block text-sm sm:text-base mb-1 text-gray-500">觀察到什麼？</label><textarea id="d-obs" rows="3" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 resize-none focus:border-orange-400 focus:outline-none"></textarea></div>
-                <div><label class="block text-sm sm:text-base mb-1 text-gray-500">下次想確認什麼？</label><input type="text" id="d-next" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-orange-400 focus:outline-none"></div>
+                <div><label class="block text-sm sm:text-base mb-1 text-gray-500">👩‍🌾 今天我們做了什麼？</label><input type="text" id="d-action" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-orange-400 focus:outline-none"></div>
+                <div><label class="block text-sm sm:text-base mb-1 text-gray-500">👀 我們看到什麼？</label><textarea id="d-obs" rows="3" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 resize-none focus:border-orange-400 focus:outline-none"></textarea></div>
+                <div><label class="block text-sm sm:text-base mb-1 text-gray-500">🤔 下次我們還想看什麼？</label><input type="text" id="d-next" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-orange-400 focus:outline-none" placeholder="例如：澆水後，葉子會不會比較挺？"></div>
                 <div class="border-2 border-dashed border-orange-300 rounded-2xl p-6 sm:p-8 text-center bg-orange-50 relative hover:bg-orange-100 transition-colors"><label class="file-upload-label w-full h-full flex flex-col items-center justify-center"><span class="text-4xl sm:text-5xl mb-3 block">📸</span><span class="text-orange-600 text-base sm:text-lg">點擊拍張照或上傳照片</span><input type="file" id="d-photo-input" accept="image/*" onchange="handlePhotoUpload(event)"></label><div id="photo-preview-container" class="hidden mt-4 relative"><img id="d-photo-preview" class="w-full max-h-64 sm:max-h-80 object-cover rounded-xl border-2 border-orange-200 shadow-sm"><button type="button" onclick="removePhoto()" class="absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-md border-2 border-white text-lg">✖</button></div></div>
                 <div class="flex gap-4 pt-6 border-t-2 border-gray-100"><button onclick="cancelDiaryForm()" class="flex-1 bg-gray-200 text-gray-600 py-4 rounded-xl hover:bg-gray-300 transition text-lg">取消</button><button onclick="saveDiaryEntry()" class="flex-1 bg-orange-500 text-white py-4 rounded-xl hover:bg-orange-600 transition shadow-md border-b-4 border-orange-700 text-lg">💾 儲存</button></div>
             </div>
@@ -275,39 +318,80 @@
         <div id="diary-timeline" class="hidden"><div class="border-l-4 border-orange-300 ml-6 space-y-10 py-6" id="timeline-container"></div><div id="empty-timeline-msg" class="text-center text-gray-400 font-bold mt-16 hidden"><p class="text-lg">小組還沒有上傳過照片喔！</p></div></div>
     </div>
 
-    <!-- ==================== 8. 照護計畫與互評 ==================== -->
+    <!-- ==================== 8. 照護計畫與互評 (全新 Mini-PBL 版) ==================== -->
     <div id="view-careplan" class="view-section max-w-2xl mx-auto pt-6 px-4 pb-20 relative">
         <div class="flex justify-between items-center mb-6"><button onclick="goToMap()" class="bg-white border-2 border-purple-400 text-purple-600 px-4 py-1.5 rounded-full text-sm font-bold shadow hover:bg-purple-50 transition">返回</button><h2 class="text-2xl font-black text-purple-600 tracking-wider">📋 計畫與互評</h2><div class="w-20"></div></div>
         <div class="flex gap-2 mb-8 bg-white p-1 rounded-2xl shadow-sm border border-gray-200"><button onclick="switchCarePlanTab('plan-tab')" id="tab-btn-plan" class="flex-1 py-3 rounded-xl font-bold text-sm sm:text-base bg-purple-100 text-purple-700 transition">📝 階段計畫</button><button onclick="switchCarePlanTab('peer-tab')" id="tab-btn-peer" class="flex-1 py-3 rounded-xl font-bold text-sm sm:text-base text-gray-500 hover:bg-gray-50 transition">🤝 小組互評</button></div>
 
         <div id="plan-tab" class="careplan-panel">
-            <div class="bg-white rounded-3xl shadow-xl p-6 sm:p-10 border-2 border-purple-100 mb-8 space-y-6 font-bold text-gray-700 text-base sm:text-lg">
-                <h3 class="text-xl sm:text-2xl text-purple-700 border-b-2 border-purple-100 pb-3 mb-6" id="careplan-title">第 X 組 的照護方案</h3>
-                
-                <div class="bg-purple-50 p-5 sm:p-6 rounded-2xl border border-purple-200 mb-4">
-                    <p class="text-purple-800 font-black text-lg sm:text-xl mb-4">第一階段：擬定計畫 (必填)</p>
-                    <div class="space-y-4">
-                        <div><label class="block text-sm sm:text-base mb-2 text-purple-600">🔍 發現的問題：</label><input type="text" id="cp-problem" class="w-full bg-white border-2 border-purple-200 rounded-xl px-4 py-3 focus:outline-purple-500"></div>
-                        <div><label class="block text-sm sm:text-base mb-2 text-purple-600">🤔 我們的假設：</label><input type="text" id="cp-hypothesis" class="w-full bg-white border-2 border-purple-200 rounded-xl px-4 py-3 focus:outline-purple-500"></div>
-                        <div><label class="block text-sm sm:text-base mb-2 text-purple-600">📸 證據在哪裡：</label><textarea id="cp-evidence" rows="2" class="w-full bg-white border-2 border-purple-200 rounded-xl px-4 py-3 resize-none focus:outline-purple-500"></textarea></div>
-                        <div><label class="block text-sm sm:text-base mb-2 text-purple-600">🛠️ 預計的方法：</label><input type="text" id="cp-method" class="w-full bg-white border-2 border-purple-200 rounded-xl px-4 py-3 focus:outline-purple-500"></div>
-                    </div>
-                </div>
-
-                <div class="bg-blue-50 p-5 sm:p-6 rounded-2xl border border-blue-200">
-                    <p class="text-blue-800 font-black text-lg sm:text-xl mb-4">第二階段：觀察與修正 (填寫以解鎖後測)</p>
-                    <div class="space-y-4">
-                        <div><label class="block text-sm sm:text-base mb-2 text-blue-600">📅 一週後結果：</label><input type="text" id="cp-result" class="w-full bg-white border-2 border-blue-200 rounded-xl px-4 py-3 focus:outline-blue-500"></div>
-                        <div class="pt-4 border-t-2 border-blue-100"><label class="block text-sm sm:text-base mb-3 text-blue-600">🔄 是否改變方法？</label>
-                            <div class="flex gap-6 mb-3"><label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="cp-revise" value="是" class="w-5 h-5 text-blue-600"> 是</label><label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="cp-revise" value="否" class="w-5 h-5 text-blue-600"> 否</label></div>
-                            <input type="text" id="cp-revise-reason" class="w-full bg-white border-2 border-blue-200 rounded-xl px-4 py-3 focus:outline-blue-500" placeholder="為什麼？">
-                        </div>
-                        <div><label class="block text-sm sm:text-base mb-2 text-blue-600">🏁 最終建議：</label><input type="text" id="cp-final-outcome" class="w-full bg-white border-2 border-blue-200 rounded-xl px-4 py-3 focus:outline-blue-500" placeholder="給其他同學的建議"></div>
-                    </div>
-                </div>
-
-                <button onclick="saveCarePlan()" class="w-full bg-purple-500 text-white font-bold py-4 rounded-xl hover:bg-purple-600 transition shadow-lg mt-6 text-lg sm:text-xl border-b-4 border-purple-700">💾 儲存並同步小組計畫</button>
+            <!-- 標題與驅動問題 -->
+            <h3 class="text-xl sm:text-2xl text-purple-700 border-b-2 border-purple-100 pb-3 mb-4 font-black" id="careplan-title">第 X 組的小白菜救援任務</h3>
+            <div class="bg-purple-100 text-purple-800 p-4 rounded-xl mb-6 shadow-sm font-bold text-sm sm:text-base border border-purple-200">
+                💡 任務目標：小白菜看起來怪怪的，我們怎麼幫它？想一想，也把好方法告訴別組！
             </div>
+
+            <!-- 第一階段 -->
+            <div class="bg-purple-50 p-5 sm:p-6 rounded-2xl border border-purple-200 mb-6 shadow-sm">
+                <p class="text-purple-800 font-black text-lg sm:text-xl mb-5">第一階段：植物偵探出動</p>
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm sm:text-base mb-2 text-purple-600 font-bold">👀 小白菜哪裡怪怪的？</label>
+                        <input type="text" id="cp-problem" class="w-full bg-white border-2 border-purple-200 rounded-xl px-4 py-3 focus:outline-purple-500 placeholder-gray-400 text-gray-700 font-bold" placeholder="葉子、土和放的位置，有哪裡不一樣？">
+                    </div>
+                    <div>
+                        <label class="block text-sm sm:text-base mb-2 text-purple-600 font-bold">🎯 我們想先弄清楚什麼？</label>
+                        <input type="text" id="cp-needToKnow" class="w-full bg-white border-2 border-purple-200 rounded-xl px-4 py-3 focus:outline-purple-500 placeholder-gray-400 text-gray-700 font-bold" placeholder="它是水不夠？水太多？光不夠？還是有蟲？">
+                    </div>
+                    <div>
+                        <label class="block text-sm sm:text-base mb-2 text-purple-600 font-bold">🤔 我們猜是什麼原因？</label>
+                        <input type="text" id="cp-hypothesis" class="w-full bg-white border-2 border-purple-200 rounded-xl px-4 py-3 focus:outline-purple-500 placeholder-gray-400 text-gray-700 font-bold" placeholder="我們猜可能是＿＿＿，因為＿＿＿。">
+                    </div>
+                    
+                    <div class="bg-white p-5 rounded-xl border-2 border-purple-100 shadow-inner">
+                        <label class="block text-sm sm:text-base mb-3 text-purple-600 font-bold">🔎 我們看到了哪些線索？</label>
+                        <div class="flex flex-wrap gap-2 mb-4" id="cp-evidence-checkboxes">
+                            <label class="inline-flex items-center gap-1.5 bg-purple-50 px-3 py-2 rounded-lg cursor-pointer hover:bg-purple-100 text-sm font-bold text-purple-800 border border-purple-100 transition-colors"><input type="checkbox" value="葉子黃黃的嗎？" class="w-4 h-4 text-purple-600 focus:ring-purple-500"> 葉子黃黃的嗎？</label>
+                            <label class="inline-flex items-center gap-1.5 bg-purple-50 px-3 py-2 rounded-lg cursor-pointer hover:bg-purple-100 text-sm font-bold text-purple-800 border border-purple-100 transition-colors"><input type="checkbox" value="葉子垂下來嗎？" class="w-4 h-4 text-purple-600 focus:ring-purple-500"> 葉子垂下來嗎？</label>
+                            <label class="inline-flex items-center gap-1.5 bg-purple-50 px-3 py-2 rounded-lg cursor-pointer hover:bg-purple-100 text-sm font-bold text-purple-800 border border-purple-100 transition-colors"><input type="checkbox" value="土是乾的還是濕的？" class="w-4 h-4 text-purple-600 focus:ring-purple-500"> 土是乾的還是濕的？</label>
+                            <label class="inline-flex items-center gap-1.5 bg-purple-50 px-3 py-2 rounded-lg cursor-pointer hover:bg-purple-100 text-sm font-bold text-purple-800 border border-purple-100 transition-colors"><input type="checkbox" value="有沒有照到太陽？" class="w-4 h-4 text-purple-600 focus:ring-purple-500"> 有沒有照到太陽？</label>
+                            <label class="inline-flex items-center gap-1.5 bg-purple-50 px-3 py-2 rounded-lg cursor-pointer hover:bg-purple-100 text-sm font-bold text-purple-800 border border-purple-100 transition-colors"><input type="checkbox" value="葉子有沒有洞？" class="w-4 h-4 text-purple-600 focus:ring-purple-500"> 葉子有沒有洞？</label>
+                            <label class="inline-flex items-center gap-1.5 bg-purple-50 px-3 py-2 rounded-lg cursor-pointer hover:bg-purple-100 text-sm font-bold text-purple-800 border border-purple-100 transition-colors"><input type="checkbox" value="莖有沒有又細又長？" class="w-4 h-4 text-purple-600 focus:ring-purple-500"> 莖有沒有又細又長？</label>
+                        </div>
+                        <textarea id="cp-evidence" rows="2" class="w-full bg-gray-50 border-2 border-purple-200 rounded-xl px-4 py-3 resize-none focus:outline-purple-500 placeholder-gray-400 text-gray-700 font-bold" placeholder="用兩個線索說一說：我們看到＿＿＿，還看到＿＿＿。"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm sm:text-base mb-2 text-purple-600 font-bold">🛠️ 我們先做什麼？</label>
+                        <input type="text" id="cp-method" class="w-full bg-white border-2 border-purple-200 rounded-xl px-4 py-3 focus:outline-purple-500 placeholder-gray-400 text-gray-700 font-bold" placeholder="我們先＿＿＿，再看看＿＿＿。">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第二階段 -->
+            <div class="bg-blue-50 p-5 sm:p-6 rounded-2xl border border-blue-200 mb-6 shadow-sm">
+                <p class="text-blue-800 font-black text-lg sm:text-xl mb-5">第二階段：聽一聽，改一改</p>
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm sm:text-base mb-2 text-blue-600 font-bold">🗣️ 同學提醒我們什麼？</label>
+                        <input type="text" id="cp-peerSuggestion" class="w-full bg-white border-2 border-blue-200 rounded-xl px-4 py-3 focus:outline-blue-500 placeholder-gray-400 text-gray-700 font-bold" placeholder="同學說我們還可以看...">
+                    </div>
+                    <div>
+                        <label class="block text-sm sm:text-base mb-2 text-blue-600 font-bold">✏️ 我們要把方法改成什麼？</label>
+                        <input type="text" id="cp-revisedPlan" class="w-full bg-white border-2 border-blue-200 rounded-xl px-4 py-3 focus:outline-blue-500 placeholder-gray-400 text-gray-700 font-bold" placeholder="原本我們要＿＿＿＿；現在改成＿＿＿＿。">
+                    </div>
+                    <div>
+                        <label class="block text-sm sm:text-base mb-2 text-blue-600 font-bold">🔄 我們為什麼要改一改？</label>
+                        <input type="text" id="cp-revisionReason" class="w-full bg-white border-2 border-blue-200 rounded-xl px-4 py-3 focus:outline-blue-500 placeholder-gray-400 text-gray-700 font-bold" placeholder="因為我們發現＿＿＿＿。">
+                    </div>
+                    <div>
+                        <label class="block text-sm sm:text-base mb-2 text-blue-600 font-bold">🏁 給下一組的小撇步</label>
+                        <input type="text" id="cp-rescueTip" class="w-full bg-white border-2 border-blue-200 rounded-xl px-4 py-3 focus:outline-blue-500 placeholder-gray-400 text-gray-700 font-bold" placeholder="下次看到這種情況，可以先＿＿＿＿，再＿＿＿＿。">
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="saveCarePlan()" class="w-full bg-purple-500 text-white font-bold py-4 rounded-xl hover:bg-purple-600 transition shadow-lg mb-4 text-lg sm:text-xl border-b-4 border-purple-700">💾 儲存小組計畫</button>
+            <button onclick="generateRescueGuide()" class="w-full bg-yellow-400 text-yellow-900 font-bold py-4 rounded-xl hover:bg-yellow-500 transition shadow-lg text-lg sm:text-xl border-b-4 border-yellow-600 flex items-center justify-center gap-2"><span>📇</span> 產生小白菜救援指南</button>
         </div>
 
         <div id="peer-tab" class="careplan-panel hidden">
@@ -315,9 +399,9 @@
                 <h3 class="text-xl sm:text-2xl text-blue-700 border-b-2 border-blue-100 pb-3 mb-4">給同學的回饋</h3>
                 <div><label class="block text-sm sm:text-base mb-2 text-blue-600">給哪一組：</label><select id="pr-group" class="w-full bg-blue-50 border-2 border-blue-200 rounded-xl px-4 py-3 font-bold text-blue-800 focus:outline-blue-500"></select></div>
                 <div class="bg-gray-50 p-5 sm:p-6 rounded-2xl border border-gray-200 space-y-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center gap-2"><span class="sm:w-32 flex-shrink-0 text-gray-600 text-sm sm:text-base">1. 證據是：</span><input type="text" id="pr-q1" class="flex-1 border-b-2 border-blue-400 bg-transparent px-2 py-2 focus:outline-none focus:border-blue-600"></div>
-                    <div class="flex flex-col sm:flex-row sm:items-center gap-2"><span class="sm:w-32 flex-shrink-0 text-gray-600 text-sm sm:text-base">2. 喜歡方法因為：</span><input type="text" id="pr-q2" class="flex-1 border-b-2 border-blue-400 bg-transparent px-2 py-2 focus:outline-none focus:border-blue-600"></div>
-                    <div class="flex flex-col sm:flex-row sm:items-center gap-2"><span class="sm:w-32 flex-shrink-0 text-gray-600 text-sm sm:text-base">3. 建議下次觀察：</span><input type="text" id="pr-q3" class="flex-1 border-b-2 border-blue-400 bg-transparent px-2 py-2 focus:outline-none focus:border-blue-600"></div>
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2"><span class="sm:w-40 flex-shrink-0 text-gray-600 text-sm sm:text-base">1. 我看到你們的線索是：</span><input type="text" id="pr-q1" class="flex-1 border-b-2 border-blue-400 bg-transparent px-2 py-2 focus:outline-none focus:border-blue-600"></div>
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2"><span class="sm:w-40 flex-shrink-0 text-gray-600 text-sm sm:text-base">2. 我覺得做得好的地方：</span><input type="text" id="pr-q2" class="flex-1 border-b-2 border-blue-400 bg-transparent px-2 py-2 focus:outline-none focus:border-blue-600"></div>
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2"><span class="sm:w-40 flex-shrink-0 text-gray-600 text-sm sm:text-base">3. 提醒你們還可以看看：</span><input type="text" id="pr-q3" class="flex-1 border-b-2 border-blue-400 bg-transparent px-2 py-2 focus:outline-none focus:border-blue-600"></div>
                 </div>
                 <button onclick="savePeerReview()" class="w-full bg-blue-500 text-white font-bold py-4 rounded-xl shadow-lg mt-6 hover:bg-blue-600 transition text-lg sm:text-xl border-b-4 border-blue-700">送出回饋！</button>
             </div>
@@ -326,7 +410,7 @@
     </div>
 
     <!-- ==================== 9. 後測 ==================== -->
-    <div id="view-posttest" class="view-section max-w-2xl mx-auto pt-6 px-4 pb-20 relative"><button onclick="goToMap()" class="absolute top-4 left-4 bg-white border-2 border-yellow-500 text-yellow-600 px-4 py-1.5 rounded-full text-sm font-bold shadow hover:bg-yellow-50 z-10 flex items-center gap-1">返回</button><div class="text-center mt-10 mb-8"><h2 class="text-2xl sm:text-3xl font-bold text-yellow-600">🏆 守護員挑戰</h2><p class="text-base text-gray-500 mt-2 font-bold">第 <span id="current-postq-num" class="text-yellow-600">1</span> / 5 題</p></div><div class="bg-white rounded-3xl shadow-lg p-6 sm:p-10 border-2 border-yellow-200 mb-8"><h3 class="text-xl sm:text-2xl font-bold text-gray-800 mb-8 leading-relaxed" id="postquestion-text">載入中...</h3><div class="space-y-4" id="postoptions-container"></div></div>
+    <div id="view-posttest" class="view-section max-w-2xl mx-auto pt-6 px-4 pb-20 relative"><button onclick="goToMap()" class="absolute top-4 left-4 bg-white border-2 border-yellow-500 text-yellow-600 px-4 py-1.5 rounded-full text-sm font-bold shadow hover:bg-green-50 z-10 flex items-center gap-1">返回</button><div class="text-center mt-10 mb-8"><h2 class="text-2xl sm:text-3xl font-bold text-yellow-600">🏆 守護員挑戰</h2><p class="text-base text-gray-500 mt-2 font-bold">第 <span id="current-postq-num" class="text-yellow-600">1</span> / 5 題</p></div><div class="bg-white rounded-3xl shadow-lg p-6 sm:p-10 border-2 border-yellow-200 mb-8"><h3 class="text-xl sm:text-2xl font-bold text-gray-800 mb-8 leading-relaxed" id="postquestion-text">載入中...</h3><div class="space-y-4" id="postoptions-container"></div></div>
         <div class="mt-8 flex items-end gap-4 max-w-lg mx-auto"><div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-orange-300 flex-shrink-0 bg-orange-50 shadow-md"><img src="Christmasmimi.jpg" onerror="this.src='https://placehold.co/100/fcd34d/d97706?text=Mimi'"></div><div class="flex-1"><div class="chat-bubble chat-bubble-orange chat-bubble-orange-outline text-sm sm:text-base font-bold text-gray-700 p-4">橘咪咪園長：這是最後的挑戰，展現你的學習成果吧！</div></div></div>
     </div>
     
@@ -334,7 +418,10 @@
     <div id="view-reflection" class="view-section max-w-2xl mx-auto pt-10 px-4 pb-20 relative"><div class="text-center mt-10 mb-8"><h2 class="text-3xl font-bold text-green-700">🌱 成長與反思</h2><p class="text-gray-500 mt-2 font-bold sm:text-lg">恭喜完成所有挑戰！回想一下自己的改變吧。</p></div><div class="bg-white rounded-3xl shadow-xl p-8 sm:p-12 border-2 border-green-200 mb-8 space-y-8 font-bold text-gray-700"><div><label class="block text-xl mb-3 text-gray-400">🤔 在這次活動前，我原本以為...</label><textarea id="ref-before" rows="4" class="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl px-5 py-4 resize-none focus:border-green-500 focus:outline-none sm:text-lg"></textarea></div><div><label class="block text-xl mb-3 text-green-600">💡 經過實作與觀察，現在我知道...</label><textarea id="ref-after" rows="4" class="w-full bg-green-50 border-2 border-green-300 rounded-2xl px-5 py-4 resize-none focus:border-green-500 focus:outline-none sm:text-lg"></textarea></div><button onclick="submitReflection()" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white font-black text-xl py-5 rounded-2xl shadow-lg hover:scale-[1.02] transition-transform duration-300">領取農場結業證書！</button></div></div>
     
     <!-- ==================== 11. 證書 ==================== -->
-    <div id="view-certificate" class="view-section max-w-2xl mx-auto pt-10 px-4 pb-20 text-center relative"><button onclick="goToHome()" class="absolute top-4 left-4 bg-white border-2 border-green-500 text-green-600 px-4 py-1.5 rounded-full text-sm font-bold shadow hover:bg-green-50 z-10 flex items-center gap-1">首頁</button><div class="bg-white rounded-2xl shadow-2xl p-3 border-[10px] border-yellow-400 relative overflow-hidden mt-10"><div class="border-[6px] border-double border-yellow-300 p-8 sm:p-12 bg-yellow-50 h-full flex flex-col items-center justify-center"><div class="text-7xl sm:text-8xl mb-6">🏆</div><h1 class="text-4xl sm:text-5xl font-black text-yellow-700 mb-8 tracking-widest">結業證書</h1><p class="text-xl font-bold text-gray-700 mb-3">茲證明</p><h2 class="text-3xl sm:text-4xl font-black text-green-700 border-b-4 border-green-500 px-10 pb-2 mb-8" id="cert-name">載入中...</h2><p class="text-lg sm:text-xl font-bold text-gray-600 mb-8 leading-relaxed">成功完成科學農場任務！<br>具備優良探究精神，特頒此證。</p><h3 class="text-2xl sm:text-3xl font-black text-orange-600">🎖️ 小小植物救援員</h3><div class="mt-10 flex justify-center items-center gap-8 sm:gap-12 w-full border-t-2 border-yellow-200 pt-6"><div class="text-center"><div class="text-base text-gray-400 font-bold mb-1">前測</div><div class="text-4xl font-black text-gray-500" id="cert-pre">0</div></div><div class="text-center"><div class="text-3xl text-green-500">➡️</div></div><div class="text-center"><div class="text-base text-green-600 font-bold mb-1">後測</div><div class="text-4xl font-black text-green-600" id="cert-post">0</div></div></div></div></div><div class="mt-10 bg-white p-6 sm:p-8 rounded-2xl shadow-md border border-green-100 text-left"><h4 class="text-green-700 font-black text-xl mb-3">📝 反思語錄：</h4><p class="text-base sm:text-lg font-bold text-gray-600 italic bg-gray-50 p-4 sm:p-5 rounded-xl border-l-8 border-green-400 leading-relaxed" id="cert-ref-text"></p></div></div>
+    <div id="view-certificate" class="view-section max-w-2xl mx-auto pt-10 px-4 pb-20 text-center relative"><button onclick="goToHome()" class="absolute top-4 left-4 bg-white border-2 border-green-500 text-green-600 px-4 py-1.5 rounded-full text-sm font-bold shadow hover:bg-green-50 z-10 flex items-center gap-1">首頁</button><div class="bg-white rounded-2xl shadow-2xl p-3 border-[10px] border-yellow-400 relative overflow-hidden mt-10"><div class="border-[6px] border-double border-yellow-300 p-8 sm:p-12 bg-yellow-50 h-full flex flex-col items-center justify-center"><div class="text-7xl sm:text-8xl mb-6">🏆</div><h1 class="text-4xl sm:text-5xl font-black text-yellow-700 mb-8 tracking-widest">結業證書</h1><p class="text-xl font-bold text-gray-700 mb-3">茲證明</p><h2 class="text-3xl sm:text-4xl font-black text-green-700 border-b-4 border-green-500 px-10 pb-2 mb-8" id="cert-name">載入中...</h2><p class="text-lg sm:text-xl font-bold text-gray-600 mb-8 leading-relaxed">成功完成科學農場任務！<br>具備優良探究精神，特頒此證。</p><h3 class="text-2xl sm:text-3xl font-black text-orange-600">🎖️ 小小植物救援員</h3>
+        <div class="mt-8 flex justify-center gap-8 w-full border-t border-yellow-200 pt-4 hidden" id="score-container"><div id="cert-pre"></div><div id="cert-post"></div></div>
+        <p class="text-lg sm:text-xl font-bold text-green-700 mt-6 bg-green-50 p-4 sm:p-6 rounded-2xl border-2 border-green-200 leading-relaxed shadow-inner">你會先找線索，再想方法，真是一位細心的小小植物救援員！</p>
+        </div></div><div class="mt-10 bg-white p-6 sm:p-8 rounded-2xl shadow-md border border-green-100 text-left"><h4 class="text-green-700 font-black text-xl mb-3">📝 反思語錄：</h4><p class="text-base sm:text-lg font-bold text-gray-600 italic bg-gray-50 p-4 sm:p-5 rounded-xl border-l-8 border-green-400 leading-relaxed" id="cert-ref-text"></p></div></div>
 
     <!-- ==================== Firebase 雲端資料庫設定區 ==================== -->
     <script type="module">
@@ -342,23 +429,15 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        let firebaseConfig;
-        let appId;
-
-        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-            firebaseConfig = JSON.parse(__firebase_config);
-            appId = typeof __app_id !== 'undefined' ? __app_id : 'science-farm-v1';
-        } else {
-            firebaseConfig = {
-                apiKey: "AIzaSyAJtQda3WUcafD2BI9AggSemagz-Kyd3ek",
-                authDomain: "science-class-c0337.firebaseapp.com",
-                projectId: "science-class-c0337",
-                storageBucket: "science-class-c0337.firebasestorage.app",
-                messagingSenderId: "713843814869",
-                appId: "1:713843814869:web:62be2b82afaaeff0ae8d5c"
-            };
-            appId = "science-farm-v1";
-        }
+        const firebaseConfig = {
+            apiKey: "AIzaSyAJtQda3WUcafD2BI9AggSemagz-Kyd3ek",
+            authDomain: "science-class-c0337.firebaseapp.com",
+            projectId: "science-class-c0337",
+            storageBucket: "science-class-c0337.firebasestorage.app",
+            messagingSenderId: "713843814869",
+            appId: "1:713843814869:web:62be2b82afaaeff0ae8d5c"
+        };
+        const appId = "science-farm-v1";
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -369,16 +448,7 @@
 
         const initAuth = async () => {
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    try {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } catch (tokenError) {
-                        console.warn("自訂 Token 登入失敗，改為嘗試匿名登入...", tokenError);
-                        await signInAnonymously(auth);
-                    }
-                } else {
-                    await signInAnonymously(auth);
-                }
+                await signInAnonymously(auth);
             } catch (error) {
                 console.error("Firebase 登入初始化失敗：", error);
                 const statusEl = document.getElementById('cloud-indicator');
@@ -504,35 +574,35 @@
     <script>
         function escapeHTML(str) { if (typeof str !== 'string' && typeof str !== 'number') return str; return String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)); }
         function escapeCSV(value) { if (value === null || value === undefined) return '""'; return `"${String(value).replace(/"/g, '""')}"`; }
-        function getGroupAssign(seat) { const s = parseInt(seat, 10); if(s<=6) return 1; if(s<=12) return 2; if(s<=17) return 3; if(s<=22) return 4; if(s<=27) return 5; return Math.ceil(s/6)||1; }
+        function getGroupAssign(seat) { const s = parseInt(seat, 10); if(s<=5) return 1; if(s<=10) return 2; if(s<=15) return 3; if(s<=20) return 4; if(s<=25) return 5; return 1; }
 
         window.usersList = []; window.groupsList = []; window.allDiaries = []; window.allPeerReviews = []; window.allTeacherNotes = [];
         window.globalSettings = { maxUnlockedLevel: 1 }; 
-        window.userData = { name: '', seat: '', group: 1, classCode: '311', progress: 0, pretest: {score: null, answers: []}, firstPretestScore: null, rescueData: [], rescueCompletedAt: null, posttest: {score: null, answers: []}, firstPosttestScore: null, reflection: null };
-        window.groupData = { classCode: '311', group: 1, diary: [], carePlan: null, peerReviews: [] };
+        window.userData = { name: '', seat: '', group: 1, classCode: '307', progress: 0, pretest: {score: null, answers: []}, firstPretestScore: null, rescueData: [], rescueCompletedAt: null, posttest: {score: null, answers: []}, firstPosttestScore: null, reflection: null };
+        window.groupData = { classCode: '307', group: 1, diary: [], carePlan: null, peerReviews: [] };
 
         let currentEditingDiaryId = null; let currentPhotoBase64 = null; 
         let dashAvgChartInstance = null; let dashCorrectChartInstance = null; let dashHeightChartInstance = null; let dashDiaryChartInstance = null; let heightChartInstance = null; let leafChartInstance = null;
 
         const questions = [
-            { q: "小白菜需要什麼條件才能健康長大？", options: ["(A) 陽光、空氣、適量的水、土壤", "(B) 只要每天固定澆水，不需要看土壤", "(C) 只要有肥料，不需要陽光", "(D) 只要放在室內，不需要觀察環境"], answer: 0 }, 
-            { q: "橘咪咪覺得植物渴了，幫小白菜澆了滿滿一盆水。你覺得「水是不是澆越多越好」？", options: ["(A) 是，水越多長得越快", "(B) 不是，水太多植物的根可能會無法呼吸而爛掉", "(C) 是，只要盆栽底部有洞就不怕水多", "(D) 不是，植物完全不需要喝水"], answer: 1 }, 
-            { q: "如果把一盆植物一直放在沒有陽光、黑漆漆的室內，它可能會發生什麼事？", options: ["(A) 葉子會變得更翠綠", "(B) 會長得特別高大強壯", "(C) 葉子可能會變黃，莖變細長軟弱", "(D) 不會有任何改變"], answer: 2 }, 
-            { q: "白奶油發現盆栽的土壤摸起來濕答答的，但葉子卻垂下來了。第一步應該怎麼做比較好？", options: ["(A) 馬上再澆一大桶水", "(B) 把植物拔出來看一看", "(C) 先暫停澆水，因為可能是水太多爛根了", "(D) 拿吹風機把泥土吹乾"], answer: 2 }, 
-            { q: "為了證明我們種的小白菜真的有「長大」，科學小偵探可以記錄哪些資料呢？", options: ["(A) 定期量植物的高度、算葉片的數量並拍照", "(B) 記錄自己今天吃了什麼早餐", "(C) 憑感覺用眼睛看哪盆比較高", "(D) 每天數天空中有幾朵雲"], answer: 0 }
+            { q: "植物長大需要哪些好朋友？", options: ["(A) 陽光、空氣、水和土", "(B) 只要每天澆水就好", "(C) 只要有肥料就好", "(D) 放在室內不用管它"], answer: 0 }, 
+            { q: "一直幫小白菜澆很多水，會發生什麼事？", options: ["(A) 是，水越多長得越快", "(B) 水太多會讓植物生病", "(C) 是，植物很喜歡泡在水裡", "(D) 植物完全不用喝水"], answer: 1 }, 
+            { q: "如果把盆栽放在很暗的地方，它會變成怎樣？", options: ["(A) 葉子會長得又大又綠", "(B) 會長得特別高壯", "(C) 葉子變黃，長得很瘦小", "(D) 完全不會變"], answer: 2 }, 
+            { q: "發現小白菜的葉子破了好多洞，可能是什麼原因？", options: ["(A) 水澆太多了", "(B) 曬太多太陽", "(C) 有菜蟲在吃葉子", "(D) 土太乾了"], answer: 2 }, 
+            { q: "要怎麼知道小白菜真的有長大？", options: ["(A) 幫它拍照、量高度和數葉子", "(B) 用眼睛看哪盆比較高", "(C) 畫一張它很開心的圖", "(D) 每天記下天空有幾朵雲"], answer: 0 }
         ];
         const posttestQuestions = [
-            { q: "小白菜的葉子開始變黃，第一步該怎麼做？", options: ["(A) 馬上加很多肥料", "(B) 先觀察土壤濕度和日照位置", "(C) 每天澆更多水", "(D) 把所有葉子剪掉"], answer: 1 }, 
-            { q: "如果連續下雨好幾天，放在外面的盆栽裡積滿了水，我們應該怎麼辦？", options: ["(A) 把水倒掉，暫時不要再澆水", "(B) 繼續每天澆水", "(C) 拿肥料倒進去", "(D) 用土把水蓋住"], answer: 0 }, 
-            { q: "小花覺得放室內比較不會有蟲，就把盆栽長期放客廳，兩週後植物可能會變怎樣？", options: ["(A) 葉子長得又綠又大", "(B) 依然維持原狀", "(C) 因為缺乏陽光，長得瘦弱且葉子變黃", "(D) 結出甜美的果實"], answer: 2 }, 
-            { q: "觀察植物時，發現葉子上有好多破洞，這代表植物可能遇到什麼問題？", options: ["(A) 水澆太多了", "(B) 曬太陽曬太久了", "(C) 有菜蟲或其他昆蟲在啃食", "(D) 泥土太乾了"], answer: 2 }, 
-            { q: "期末報告要證明「我們的照顧方法有效」，哪種紀錄方式最有說服力？", options: ["(A) 憑感覺說出哪一盆比較漂亮", "(B) 呈現每週量測的高度數據和對比照片", "(C) 畫一張植物很開心的圖", "(D) 寫下每天澆水的次數"], answer: 1 }
+            { q: "小白菜的葉子開始變黃，第一步該怎麼做？", options: ["(A) 馬上加很多肥料", "(B) 先觀察土和放的位置", "(C) 每天澆更多水", "(D) 把所有葉子剪掉"], answer: 1 }, 
+            { q: "如果連續下雨好幾天，盆栽裡積滿了水，我們應該怎麼辦？", options: ["(A) 把水倒掉，先別澆水", "(B) 繼續每天澆水", "(C) 拿肥料倒進去", "(D) 用土把水蓋住"], answer: 0 }, 
+            { q: "小花把盆栽放在照不到太陽的客廳，放了一段時間後，植物可能會變怎樣？", options: ["(A) 葉子長得又綠又大", "(B) 還是和原本一樣", "(C) 葉子變黃，長得瘦瘦弱弱的", "(D) 會開出漂亮的花"], answer: 2 }, 
+            { q: "看到葉子上有小破洞，旁邊還有黑色小點點，可能發生了什麼事？", options: ["(A) 土太乾了", "(B) 光線不夠", "(C) 有菜蟲在吃葉子", "(D) 水澆太多了"], answer: 2 }, 
+            { q: "想和別組分享我們的照顧方法，哪一種資料最能幫助他們？", options: ["(A) 憑感覺說哪一盆比較高", "(B) 植物照片、量到的高度、葉片數和我們做的事", "(C) 畫一張植物很開心的圖", "(D) 寫下每天的天氣好不好"], answer: 1 }
         ];
 
         const rescuePlants = [
-            { id: 1, name: "一號小白菜", image: "edge/cabbage-dry.png", clues: { leaf: "葉子垂垂的，整株植物軟趴趴的。", soil: "土壤看起來白白的、摸起來乾巴巴的。", env: "放在陽光充足的窗台邊。" }, correctAction: "適量澆水", misconception: "沒發現土壤乾巴巴就是缺水，誤以為是日照問題喔！" }, 
-            { id: 2, name: "二號小白菜", image: "edge/cabbage-pest.png", clues: { leaf: "葉子綠油油的，但是上面有好多破洞！", soil: "土壤濕潤，剛剛才澆過水。", env: "放在通風良好的菜園裡，旁邊有小蝴蝶飛舞。" }, correctAction: "抓蟲", misconception: "葉子破洞是因為有菜蟲或毛毛蟲在啃食，不是缺水喔！" }, 
-            { id: 3, name: "三號小白菜", image: "edge/cabbage-low-light.png", clues: { leaf: "葉子黃黃的，長得特別瘦小。", soil: "土壤濕度剛好。", env: "放在陰暗的書桌底下，完全照不到太陽。" }, correctAction: "移到陽光充足處", misconception: "植物需要陽光進行光合作用，放陰暗處會長不好喔！" }
+            { id: 1, name: "一號小白菜", image: "edge/cabbage-dry.png", clues: { leaf: "葉子垂垂的，整株植物軟趴趴的。", soil: "土看起來白白的、摸起來乾巴巴的。", env: "放在陽光很強的窗台邊。" }, correctAction: "澆一點水", misconception: "沒發現土乾乾的就是缺水，誤以為是陽光的問題喔！" }, 
+            { id: 2, name: "二號小白菜", image: "edge/cabbage-pest.png", clues: { leaf: "葉子綠油油的，但是上面有好多破洞！", soil: "土摸起來濕濕的，剛剛才澆過水。", env: "放在通風的菜園裡，旁邊有小蝴蝶飛來飛去。" }, correctAction: "找找有沒有菜蟲", misconception: "葉子破洞是因為有菜蟲在吃，不是缺水喔！" }, 
+            { id: 3, name: "三號小白菜", image: "edge/cabbage-low-light.png", clues: { leaf: "葉子黃黃的，長得很瘦小。", soil: "土摸起來剛剛好。", env: "放在很暗的書桌底下，完全沒有太陽。" }, correctAction: "換到有光的地方", misconception: "植物需要陽光才能長大，放在太暗的地方會長不好喔！" }
         ];
 
         let currentQuestionIndex = 0; let currentRescueIndex = 0; let selectedRescueAction = "";
@@ -546,14 +616,8 @@
         function closeConfirmModal() { document.getElementById('custom-confirm-modal').classList.add('hidden'); document.getElementById('custom-confirm-modal').classList.remove('flex'); }
         
         async function saveData() {
-            if (!window.isCloudReady) {
-                throw new Error('雲端尚未完成連線，請稍候再試。');
-            }
-
-            if (typeof window.saveDataCloud !== 'function') {
-                throw new Error('找不到雲端儲存函式 saveDataCloud。');
-            }
-
+            if (!window.isCloudReady) throw new Error('雲端尚未完成連線，請稍候再試。');
+            if (typeof window.saveDataCloud !== 'function') throw new Error('找不到雲端儲存函式 saveDataCloud。');
             await window.saveDataCloud();
         }
 
@@ -562,7 +626,7 @@
             const rawSeat = document.getElementById('input-seat').value.trim();
             const seatNumber = Number(rawSeat);
             
-            if (!Number.isInteger(seatNumber) || seatNumber < 1 || seatNumber > 27) { showModal('座號不正確', '請輸入 1 到 27 之間的座號喔！'); return; }
+            if (!Number.isInteger(seatNumber) || seatNumber < 1 || seatNumber > 25) { showModal('座號不正確', '請輸入 1 到 25 之間的座號喔！'); return; }
             if (!window.isCloudReady) { showModal('連線中', '正在與雲端農場連線中，請稍候幾秒再試！'); return; }
 
             const seat = String(seatNumber); const groupNum = getGroupAssign(seat); const name = `${seat}號`;
@@ -570,10 +634,8 @@
             showModal('登入中', `自動分配至：第 ${groupNum} 組\n資料讀取中...`);
             try {
                 await window.loadUserDataCloud(classCode, name, seat, groupNum); 
-                closeModal();
-                localStorage.setItem('farmLastLogin', JSON.stringify({seat})); 
-                updateMapUI(); 
-                switchView('view-map');
+                closeModal(); localStorage.setItem('farmLastLogin', JSON.stringify({seat})); 
+                updateMapUI(); switchView('view-map');
             } catch(error) {
                 closeModal(); showModal('登入失敗', '與雲端連線發生錯誤，請確認網路後重試！'); console.error(error);
             }
@@ -591,11 +653,8 @@
             levels.forEach(([cardId, statusId, iconId, message]) => {
                 const card = document.getElementById(cardId);
                 card.className = 'bg-gray-50 p-6 sm:p-8 rounded-2xl shadow border-l-8 border-gray-300 flex items-center justify-between opacity-70 transition-transform duration-300';
-                card.removeAttribute('onclick');
-                document.getElementById(statusId).innerText = message;
-                document.getElementById(statusId).className = 'text-sm sm:text-base text-gray-400 font-bold mt-1';
-                const icon = document.getElementById(iconId);
-                icon.innerText = '🔒'; icon.classList.add('grayscale');
+                card.removeAttribute('onclick'); document.getElementById(statusId).innerText = message; document.getElementById(statusId).className = 'text-sm sm:text-base text-gray-400 font-bold mt-1';
+                const icon = document.getElementById(iconId); icon.innerText = '🔒'; icon.classList.add('grayscale');
             });
         }
 
@@ -625,18 +684,18 @@
                 if(maxLevel >= 4) { lvl4.className = 'bg-white p-6 sm:p-8 rounded-2xl shadow border-l-8 border-purple-400 flex items-center justify-between cursor-pointer hover:bg-purple-50 transition-transform duration-300 hover:scale-[1.02]'; lvl4.setAttribute('onclick', 'startCarePlan()'); document.getElementById('level-4-status').innerText = window.groupData.carePlan ? '計畫已建立' : '擬定小組計畫'; document.getElementById('level-4-status').className = window.groupData.carePlan ? 'text-sm sm:text-base font-bold text-purple-600 mt-1' : 'text-sm sm:text-base font-bold text-gray-500 mt-1'; document.getElementById('level-4-icon').innerText = '📋'; document.getElementById('level-4-icon').classList.remove('grayscale'); } 
                 else { lvl4.setAttribute('onclick', 'showModal("提示", "老師目前尚未開放此關卡喔！")'); document.getElementById('level-4-status').innerText = '老師尚未開放'; }
             }
-            if (window.groupData.carePlan && window.groupData.carePlan.result) totalProgress += 20;
+            if (window.groupData.carePlan && window.groupData.carePlan.rescueTip) totalProgress += 20;
 
             const lvl5 = document.getElementById('level-5-card');
             const reviewsGiven = (window.allPeerReviews || []).filter(review => review.classCode === window.userData.classCode && review.fromGroup === window.userData.group);
             const hasIndividualPrerequisites = window.userData.pretest && window.userData.pretest.score !== null && window.userData.rescueCompletedAt !== null;
-            const canDoPosttest = hasIndividualPrerequisites && window.groupData.carePlan && window.groupData.carePlan.result && reviewsGiven.length >= 1;
+            const canDoPosttest = hasIndividualPrerequisites && window.groupData.carePlan && window.groupData.carePlan.rescueTip && reviewsGiven.length >= 1;
             
             if (canDoPosttest) {
                 if(maxLevel >= 5) { lvl5.className = 'bg-white p-6 sm:p-8 rounded-2xl shadow border-l-8 border-yellow-400 flex items-center justify-between cursor-pointer hover:bg-yellow-50 transition-transform duration-300 hover:scale-[1.02]'; lvl5.setAttribute('onclick', window.userData.reflection ? 'showCertificate()' : 'startPosttest()'); document.getElementById('level-5-status').innerText = window.userData.reflection ? `已完成 (${window.userData.posttest.score}分)` : '挑戰最終任務'; document.getElementById('level-5-status').className = window.userData.reflection ? 'text-sm sm:text-base font-bold text-yellow-600 mt-1' : 'text-sm sm:text-base font-bold text-gray-500 mt-1'; document.getElementById('level-5-icon').innerText = '🏆'; document.getElementById('level-5-icon').classList.remove('grayscale'); } 
                 else { lvl5.setAttribute('onclick', 'showModal("提示", "老師目前尚未開放此關卡喔！")'); document.getElementById('level-5-status').innerText = '老師尚未開放'; }
             } else {
-                lvl5.setAttribute('onclick', 'showModal("提示", "第五關解鎖條件：\\n1. 個人完成前測與救援任務\\n2. 小組至少寫一篇日誌\\n3. 完成計畫的「第二階段觀察結果」\\n4. 小組至少主動送出一則互評給同學")');
+                lvl5.setAttribute('onclick', 'showModal("提示", "第五關解鎖條件：\\n1. 個人完成前測與救援任務\\n2. 小組至少寫一篇日誌\\n3. 完成計畫第二階段的「給下一組的小撇步」\\n4. 小組至少主動送出一則互評給同學")');
             }
             if (window.userData.reflection) totalProgress += 20;
 
@@ -655,11 +714,8 @@
         }
         async function finishPretest() { 
             if (window.userData.firstPretestScore === null) window.userData.firstPretestScore = window.userData.pretest.score; 
-            try {
-                await saveData(); 
-                document.getElementById('score-text').innerText = window.userData.pretest.score; 
-                switchView('view-result'); 
-            } catch(e) { showModal('同步失敗', '資料尚未儲存，請確認網路後再試一次。'); console.error(e); }
+            try { await saveData(); document.getElementById('score-text').innerText = window.userData.pretest.score; switchView('view-result'); } 
+            catch(e) { showModal('儲存失敗', '哎呀，沒有存成功。請檢查網路後再試一次喔！'); console.error(e); }
         }
 
         let currentPostQIndex = 0;
@@ -675,29 +731,26 @@
         async function finishPosttest() { 
             if (window.userData.firstPosttestScore === null) window.userData.firstPosttestScore = window.userData.posttest.score; 
             document.getElementById('ref-before').value = ''; document.getElementById('ref-after').value = ''; 
-            try { await saveData(); switchView('view-reflection'); } catch(e) { showModal('同步失敗', '資料尚未儲存，請確認網路後再試一次。'); console.error(e); }
+            try { await saveData(); switchView('view-reflection'); } catch(e) { showModal('儲存失敗', '哎呀，沒有存成功。請檢查網路後再試一次喔！'); console.error(e); }
         }
         
         async function submitReflection() { 
             const before = document.getElementById('ref-before').value.trim(); const after = document.getElementById('ref-after').value.trim(); 
             if(!before || !after) { showModal("提示", "科學家，請完成你的反思喔！"); return; } 
             window.userData.reflection = { before, after }; 
-            try { await saveData(); showCertificate(); } catch(e) { showModal('同步失敗', '資料尚未儲存，請確認網路後再試一次。'); console.error(e); }
+            try { await saveData(); showCertificate(); } catch(e) { showModal('儲存失敗', '哎呀，沒有存成功。請檢查網路後再試一次喔！'); console.error(e); }
         }
         
         function showCertificate() { document.getElementById('cert-name').innerText = `${escapeHTML(window.userData.name)}`; document.getElementById('cert-pre').innerText = window.userData.pretest.score; document.getElementById('cert-post').innerText = window.userData.posttest.score; document.getElementById('cert-ref-text').innerText = `「我原本以為 ${escapeHTML(window.userData.reflection.before)}，現在我知道 ${escapeHTML(window.userData.reflection.after)}」`; switchView('view-certificate'); }
 
-        // --- 救援任務 ---
+        // --- 救援任務 (圖像觀察版) ---
         function startRescue() { currentRescueIndex = 0; if (!window.userData.rescueData) window.userData.rescueData = []; loadRescuePlant(); switchView('view-rescue'); }
         function loadRescuePlant() { 
             const plant = rescuePlants[currentRescueIndex]; 
             document.getElementById('current-rescue-num').innerText = currentRescueIndex + 1; 
             document.getElementById('rescue-plant-name').innerText = plant.name; 
-            document.getElementById('rescue-plant-image').src = plant.image; 
-            document.getElementById('rescue-plant-image').alt = plant.name; 
-            
-            document.getElementById('clue-display').innerText = "請點擊上方按鈕開始觀察。"; 
-            document.getElementById('rescue-obs').value = ""; document.getElementById('rescue-reason').value = ""; selectedRescueAction = ""; 
+            document.getElementById('rescue-plant-image').src = plant.image; document.getElementById('rescue-plant-image').alt = plant.name; 
+            document.getElementById('clue-display').innerText = "請點擊上方按鈕開始觀察。"; document.getElementById('rescue-obs').value = ""; document.getElementById('rescue-reason').value = ""; selectedRescueAction = ""; 
             document.querySelectorAll('.action-btn').forEach(btn => btn.classList.remove('ring-4', 'ring-offset-2', 'bg-gray-100'));
             observedClues = { leaf: false, soil: false, env: false };
             ['leaf', 'soil', 'env'].forEach(id => document.getElementById(`btn-clue-${id}`).classList.remove('bg-green-200', 'border-green-400'));
@@ -707,32 +760,24 @@
             document.getElementById('clue-display').innerText = rescuePlants[currentRescueIndex].clues[type]; 
         }
         function chooseAction(action, btnId) { 
-            if(!observedClues.leaf || !observedClues.soil || !observedClues.env) { showModal('等一下！', '橘咪咪園長說：科學家必須先找齊「葉子」、「土壤」和「環境」三個線索，才能下決定喵！'); return; }
+            if(!observedClues.leaf || !observedClues.soil || !observedClues.env) { showModal('等一下！', '橘咪咪園長說：科學家必須先找齊三個線索，才能下決定喵！'); return; }
             selectedRescueAction = action; document.querySelectorAll('.action-btn').forEach(btn => btn.classList.remove('ring-4', 'ring-offset-2', 'bg-gray-100')); document.getElementById(btnId).classList.add('ring-4', 'ring-offset-2', 'bg-gray-100'); 
         }
         async function submitRescue() {
-            if(!observedClues.leaf || !observedClues.soil || !observedClues.env) { showModal('等一下！', '橘咪咪園長說：請先找齊三個觀察線索！'); return; }
+            if(!observedClues.leaf || !observedClues.soil || !observedClues.env) { showModal('等一下！', '橘咪咪園長說：請先看三個地方喔！'); return; }
             const obs = document.getElementById('rescue-obs').value.trim(); const reason = document.getElementById('rescue-reason').value.trim();
             if (!selectedRescueAction) return showModal('等一下！', '請選擇要幫小白菜做什麼行動！'); if (!obs || !reason) return showModal('等一下！', '請填寫觀察到的現象與理由喵～');
             const plant = rescuePlants[currentRescueIndex]; const isCorrect = selectedRescueAction === plant.correctAction;
             window.userData.rescueData.push({ plantId: plant.id, action: selectedRescueAction, isCorrect: isCorrect, observation: obs, reason: reason, completedAt: new Date().toISOString() });
             
             try {
-                if (!isCorrect) { 
-                    await saveData();
-                    showModal('再觀察一下喔！', `你選錯了，請再看一次線索！\n\n💡 橘咪咪提示：${plant.misconception}`); return; 
-                }
+                if (!isCorrect) { await saveData(); showModal('再看看線索喔！', `你的方法還沒有對準這盆小白菜的問題。\n請再看看葉子、土和放的位置。`); return; }
                 currentRescueIndex++;
-                if (currentRescueIndex < rescuePlants.length) { 
-                    await saveData(); showModal('答對了！', '太棒了！對症下藥才能讓小白菜恢復健康！請接續救援下一盆。'); loadRescuePlant(); 
-                } else { 
-                    window.userData.rescueCompletedAt = new Date().toLocaleString(); 
-                    await saveData(); showModal('任務完成！', '你真是厲害的小小植物救援員！'); goToMap(); 
-                }
+                if (currentRescueIndex < rescuePlants.length) { await saveData(); showModal('你找到重點了！', '你先看線索，再想方法，做得很好！請接著看下一盆。'); loadRescuePlant(); } 
+                else { window.userData.rescueCompletedAt = new Date().toLocaleString(); await saveData(); showModal('任務完成！', '你真是細心的小小植物救援員！'); goToMap(); }
             } catch(e) {
-                window.userData.rescueData.pop();
-                if (currentRescueIndex >= rescuePlants.length) { currentRescueIndex--; window.userData.rescueCompletedAt = null; }
-                showModal('同步失敗', '資料尚未儲存，請確認網路後再試一次。'); console.error(e);
+                window.userData.rescueData.pop(); if (currentRescueIndex >= rescuePlants.length) { currentRescueIndex--; window.userData.rescueCompletedAt = null; }
+                showModal('儲存失敗', '哎呀，沒有存成功。請檢查網路後再試一次喔！'); console.error(e);
             }
         }
 
@@ -755,7 +800,7 @@
                     if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } 
                     canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); 
                     const base64Str = canvas.toDataURL('image/jpeg', 0.4); 
-                    if (base64Str.length > 700000) { showModal("圖片太大", "壓縮後的圖片仍超過限制 (約700KB)。請重新選擇較單純或更小的照片！"); removePhoto(); return; }
+                    if (base64Str.length > 700000) { showModal("圖片太大", "壓縮後的圖片有點太大。請換一張照片喔！"); removePhoto(); return; }
                     currentPhotoBase64 = base64Str; document.getElementById('d-photo-preview').src = currentPhotoBase64; document.getElementById('photo-preview-container').classList.remove('hidden'); document.querySelector('.file-upload-label').classList.add('hidden'); 
                 }; img.src = e.target.result; 
             }; reader.readAsDataURL(file); 
@@ -768,15 +813,15 @@
             
             const otherDiaries = (window.groupData.diary || []).filter(d => d.id !== currentEditingDiaryId);
             const existingPhotosCount = otherDiaries.filter(d => d.photo).length;
-            if (currentPhotoBase64 && existingPhotosCount >= 5) { showModal("照片數量已滿", "本組已累積 5 張觀察照片。請改用文字紀錄，或先請老師確認是否刪除舊照片。"); return; }
+            if (currentPhotoBase64 && existingPhotosCount >= 5) { showModal("照片數量滿囉", "本組已經有 5 張觀察照片。請先用文字記錄就好喔！"); return; }
 
             const entryData = { id: currentEditingDiaryId || Date.now().toString(), groupId: `${window.userData.classCode}_G${window.userData.group}`, classCode: window.userData.classCode, group: window.userData.group, author: window.userData.name, date, height: parseFloat(height), leaves: parseInt(leaves, 10), soil, sun, action, observation: obs, nextStep, photo: currentPhotoBase64 }; 
             
             if(window.saveDiaryEntryCloud) {
-                window.saveDiaryEntryCloud(entryData).then(() => { showModal("同步成功", "紀錄已經儲存到雲端農場囉！"); cancelDiaryForm(); }).catch(e => { console.error(e); showModal("同步失敗", "資料尚未儲存，請確認網路後再試一次！"); });
+                window.saveDiaryEntryCloud(entryData).then(() => { showModal("儲存成功", "紀錄已經存好囉！"); cancelDiaryForm(); }).catch(e => { console.error(e); showModal("儲存失敗", "哎呀，沒有存成功。請檢查網路後再試一次喔！"); });
             }
         }
-        function deleteDiary(id) { showConfirm("確定要刪除嗎？", "這筆紀錄會從小組雲端永久刪除喔！", async () => { if(window.deleteDiaryEntryCloud) { try { await window.deleteDiaryEntryCloud(id); showModal("刪除成功", "紀錄已刪除。"); } catch(e) { showModal('刪除失敗', '網路不穩，請確認網路後再試一次。'); console.error(e); } } }); }
+        function deleteDiary(id) { showConfirm("確定要刪除嗎？", "刪除後就找不回來囉！", async () => { if(window.deleteDiaryEntryCloud) { try { await window.deleteDiaryEntryCloud(id); showModal("刪除成功", "紀錄已刪除。"); } catch(e) { showModal('刪除失敗', '網路不穩，請確認網路後再試一次。'); console.error(e); } } }); }
         
         function renderDiaryList() { 
             const container = document.getElementById('diary-cards-container'); container.innerHTML = ''; 
@@ -784,7 +829,7 @@
             document.getElementById('empty-diary-msg').classList.add('hidden'); 
             for (let i = window.groupData.diary.length - 1; i >= 0; i--) { 
                 const entry = window.groupData.diary[i]; const card = document.createElement('div'); card.className = "bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-gray-200 relative"; let photoHTML = ''; if (entry.photo) { photoHTML = `<img src="${entry.photo}" class="w-full h-40 sm:h-56 object-cover rounded-xl mb-4 border border-gray-100">`; } 
-                card.innerHTML = ` ${photoHTML} <div class="flex justify-between items-start mb-3"> <div> <span class="bg-green-100 text-green-700 text-sm font-bold px-3 py-1.5 rounded-lg">${escapeHTML(entry.date)}</span> <span class="text-sm sm:text-base font-bold text-gray-500 ml-3">✍️ 紀錄者: ${escapeHTML(entry.author || '組員')}</span> </div> <div class="flex gap-2"> <button onclick="openDiaryForm('${escapeHTML(entry.id)}')" class="text-blue-500 bg-blue-50 p-2 sm:p-3 rounded-xl hover:bg-blue-100 transition shadow-sm text-lg" title="編輯">✏️</button> <button onclick="deleteDiary('${escapeHTML(entry.id)}')" class="text-red-500 bg-red-50 p-2 sm:p-3 rounded-xl hover:bg-red-100 transition shadow-sm text-lg" title="刪除">🗑️</button> </div> </div> <div class="grid grid-cols-2 gap-3 text-sm sm:text-base font-bold text-gray-700 mb-4 bg-gray-50 p-3 sm:p-4 rounded-xl border border-gray-100"> <div>📏 高度: <span class="text-green-600">${escapeHTML(entry.height)} cm</span></div> <div>🍃 葉片: <span class="text-green-600">${escapeHTML(entry.leaves)} 片</span></div> <div>💧 土壤: ${escapeHTML(entry.soil)}</div> <div>☀️ 位置: ${escapeHTML(entry.sun)}</div> </div> <div class="text-base sm:text-lg text-gray-700 mb-2"><strong class="text-orange-600">觀察發現：</strong>${escapeHTML(entry.observation)}</div> ${entry.action ? `<div class="text-sm sm:text-base text-gray-600 mb-2"><strong>做的事：</strong>${escapeHTML(entry.action)}</div>` : ''} ${entry.nextStep ? `<div class="text-sm sm:text-base text-gray-600"><strong>下次確認：</strong>${escapeHTML(entry.nextStep)}</div>` : ''} `; 
+                card.innerHTML = ` ${photoHTML} <div class="flex justify-between items-start mb-3"> <div> <span class="bg-green-100 text-green-700 text-sm font-bold px-3 py-1.5 rounded-lg">${escapeHTML(entry.date)}</span> <span class="text-sm sm:text-base font-bold text-gray-500 ml-3">✍️ 紀錄者: ${escapeHTML(entry.author || '組員')}</span> </div> <div class="flex gap-2"> <button onclick="openDiaryForm('${escapeHTML(entry.id)}')" class="text-blue-500 bg-blue-50 p-2 sm:p-3 rounded-xl hover:bg-blue-100 transition shadow-sm text-lg" title="編輯">✏️</button> <button onclick="deleteDiary('${escapeHTML(entry.id)}')" class="text-red-500 bg-red-50 p-2 sm:p-3 rounded-xl hover:bg-red-100 transition shadow-sm text-lg" title="刪除">🗑️</button> </div> </div> <div class="grid grid-cols-2 gap-3 text-sm sm:text-base font-bold text-gray-700 mb-4 bg-gray-50 p-3 sm:p-4 rounded-xl border border-gray-100"> <div>📏 高度: <span class="text-green-600">${escapeHTML(entry.height)} cm</span></div> <div>🍃 葉片: <span class="text-green-600">${escapeHTML(entry.leaves)} 片</span></div> <div>💧 土: ${escapeHTML(entry.soil)}</div> <div>☀️ 位置: ${escapeHTML(entry.sun)}</div> </div> <div class="text-base sm:text-lg text-gray-700 mb-2"><strong class="text-orange-600">我們看到：</strong>${escapeHTML(entry.observation)}</div> ${entry.action ? `<div class="text-sm sm:text-base text-gray-600 mb-2"><strong>我們做的：</strong>${escapeHTML(entry.action)}</div>` : ''} ${entry.nextStep ? `<div class="text-sm sm:text-base text-gray-600"><strong>下次想看：</strong>${escapeHTML(entry.nextStep)}</div>` : ''} `; 
                 container.appendChild(card); 
             } 
         }
@@ -801,45 +846,103 @@
             entriesWithPhotos.forEach(entry => { const item = document.createElement('div'); item.className = "relative pl-6 sm:pl-8"; item.innerHTML = ` <div class="absolute w-5 h-5 bg-orange-500 rounded-full -left-[10px] sm:-left-[12px] top-1 border-4 border-white shadow"></div> <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow"> <img src="${entry.photo}" class="w-full h-56 sm:h-72 object-cover"> <div class="p-4 sm:p-5"> <span class="text-sm font-bold text-gray-500">${escapeHTML(entry.date)}</span> <p class="font-bold text-gray-800 text-base sm:text-lg mt-2">${escapeHTML(entry.observation)}</p> </div> </div> `; container.appendChild(item); }); 
         }
 
-        // --- 計畫與互評 ---
+        // --- 計畫與互評 (Mini-PBL 新版) ---
         function startCarePlan() { 
             switchView('view-careplan'); switchCarePlanTab('plan-tab'); 
-            document.getElementById('careplan-title').innerText = `第 ${window.userData.group} 組 的照護方案`;
-            document.getElementById('cp-problem').value = ''; document.getElementById('cp-hypothesis').value = ''; document.getElementById('cp-evidence').value = ''; document.getElementById('cp-method').value = ''; document.getElementById('cp-result').value = ''; const cpReviseChecked = document.querySelector(`input[name="cp-revise"]:checked`); if (cpReviseChecked) cpReviseChecked.checked = false; document.getElementById('cp-revise-reason').value = ''; document.getElementById('cp-final-outcome').value = '';
+            document.getElementById('careplan-title').innerText = `第 ${window.userData.group} 組的小白菜救援任務`;
             
+            // 清空所有欄位與 Checkboxes
+            document.getElementById('cp-problem').value = ''; document.getElementById('cp-needToKnow').value = ''; document.getElementById('cp-hypothesis').value = ''; document.getElementById('cp-evidence').value = ''; document.getElementById('cp-method').value = ''; 
+            document.getElementById('cp-peerSuggestion').value = ''; document.getElementById('cp-revisedPlan').value = ''; document.getElementById('cp-revisionReason').value = ''; document.getElementById('cp-rescueTip').value = ''; 
+            const checkboxes = document.querySelectorAll('#cp-evidence-checkboxes input[type="checkbox"]'); checkboxes.forEach(cb => cb.checked = false);
+            
+            // 讀取資料
             if(window.groupData.carePlan) { 
-                document.getElementById('cp-problem').value = window.groupData.carePlan.problem || ''; document.getElementById('cp-hypothesis').value = window.groupData.carePlan.hypothesis || ''; document.getElementById('cp-evidence').value = window.groupData.carePlan.evidence || ''; document.getElementById('cp-method').value = window.groupData.carePlan.method || ''; document.getElementById('cp-result').value = window.groupData.carePlan.result || ''; if(window.groupData.carePlan.revise) { document.querySelector(`input[name="cp-revise"][value="${window.groupData.carePlan.revise}"]`).checked = true; } document.getElementById('cp-revise-reason').value = window.groupData.carePlan.reviseReason || ''; document.getElementById('cp-final-outcome').value = window.groupData.carePlan.finalOutcome || ''; 
+                const cp = window.groupData.carePlan;
+                document.getElementById('cp-problem').value = cp.problem || ''; 
+                document.getElementById('cp-needToKnow').value = cp.needToKnow || ''; 
+                document.getElementById('cp-hypothesis').value = cp.hypothesis || ''; 
+                document.getElementById('cp-evidence').value = cp.evidence || ''; 
+                document.getElementById('cp-method').value = cp.method || ''; 
+                document.getElementById('cp-peerSuggestion').value = cp.peerSuggestion || ''; 
+                document.getElementById('cp-revisedPlan').value = cp.revisedPlan || ''; 
+                document.getElementById('cp-revisionReason').value = cp.revisionReason || ''; 
+                document.getElementById('cp-rescueTip').value = cp.rescueTip || ''; 
+                
+                if (cp.evidenceCheckboxes && Array.isArray(cp.evidenceCheckboxes)) {
+                    checkboxes.forEach(cb => { if (cp.evidenceCheckboxes.includes(cb.value)) cb.checked = true; });
+                }
             } 
             
             const prGroupSelect = document.getElementById('pr-group'); prGroupSelect.innerHTML = '<option value="">請選擇要回饋的小組...</option>'; for(let i = 1; i <= 5; i++) { if(i !== window.userData.group) prGroupSelect.innerHTML += `<option value="${i}">第 ${i} 組</option>`; }
             renderPeerReviews(); 
         }
         function switchCarePlanTab(tabId) { document.querySelectorAll('.careplan-panel').forEach(el => el.classList.add('hidden')); document.getElementById(tabId).classList.remove('hidden'); document.getElementById('tab-btn-plan').className = "flex-1 py-3 rounded-xl font-bold text-sm sm:text-base text-gray-500 hover:bg-gray-50 transition"; document.getElementById('tab-btn-peer').className = "flex-1 py-3 rounded-xl font-bold text-sm sm:text-base text-gray-500 hover:bg-gray-50 transition"; const activeBtn = tabId === 'plan-tab' ? 'tab-btn-plan' : 'tab-btn-peer'; document.getElementById(activeBtn).className = "flex-1 py-3 rounded-xl font-bold text-sm sm:text-base bg-purple-100 text-purple-700 transition shadow-inner"; }
+        
         function saveCarePlan() { 
-            const problem = document.getElementById('cp-problem').value.trim(); const hypothesis = document.getElementById('cp-hypothesis').value.trim(); const evidence = document.getElementById('cp-evidence').value.trim(); const method = document.getElementById('cp-method').value.trim(); const result = document.getElementById('cp-result').value.trim(); const reviseRadio = document.querySelector('input[name="cp-revise"]:checked'); const revise = reviseRadio ? reviseRadio.value : ''; const reviseReason = document.getElementById('cp-revise-reason').value.trim(); const finalOutcome = document.getElementById('cp-final-outcome').value.trim();
-            if(!problem || !hypothesis || !evidence || !method) { showModal("提示", "第一階段計畫請完整填寫喔！"); return; } 
+            const problem = document.getElementById('cp-problem').value.trim(); const needToKnow = document.getElementById('cp-needToKnow').value.trim(); const hypothesis = document.getElementById('cp-hypothesis').value.trim(); 
+            const evidence = document.getElementById('cp-evidence').value.trim(); const method = document.getElementById('cp-method').value.trim(); 
+            const peerSuggestion = document.getElementById('cp-peerSuggestion').value.trim(); const revisedPlan = document.getElementById('cp-revisedPlan').value.trim(); const revisionReason = document.getElementById('cp-revisionReason').value.trim(); const rescueTip = document.getElementById('cp-rescueTip').value.trim();
+            
+            const checkedBoxes = document.querySelectorAll('#cp-evidence-checkboxes input[type="checkbox"]:checked');
+            const evidenceCheckboxes = Array.from(checkedBoxes).map(cb => cb.value);
+
+            if(!problem || !hypothesis || !evidence || !method || evidenceCheckboxes.length === 0) { showModal("提示", "第一階段的格子請都填完，還要記得勾線索喔！"); return; } 
+            
             if(window.saveGroupCarePlanCloud) { 
-                window.saveGroupCarePlanCloud({ problem, hypothesis, evidence, method, result, revise, reviseReason, finalOutcome }).then(()=>{ showModal("雲端同步成功", "小組計畫已成功更新！"); }).catch(e => { console.error(e); showModal("同步失敗", "資料尚未儲存，請確認網路後再試一次！"); }); 
+                window.saveGroupCarePlanCloud({ problem, needToKnow, hypothesis, evidenceCheckboxes, evidence, method, peerSuggestion, revisedPlan, revisionReason, rescueTip })
+                    .then(()=>{ showModal("儲存成功", "小組計畫已經存好囉！"); })
+                    .catch(e => { console.error(e); showModal("儲存失敗", "哎呀，沒有存成功。請檢查網路後再試一次喔！"); }); 
             }
         }
+
+        // --- 產生摘要指南 ---
+        function generateRescueGuide() {
+            if (!window.groupData.carePlan) { showModal('提示', '請先填寫並儲存小組計畫，才能看救援指南喔！'); return; }
+            
+            const cp = window.groupData.carePlan;
+            document.getElementById('guide-title').innerText = `第 ${window.userData.group} 組的小白菜救援指南`;
+            document.getElementById('guide-problem').innerText = cp.problem || '還沒寫喔';
+            document.getElementById('guide-evidence').innerText = cp.evidence || '還沒寫喔';
+            
+            const cbContainer = document.getElementById('guide-checkboxes');
+            cbContainer.innerHTML = '';
+            if (cp.evidenceCheckboxes && cp.evidenceCheckboxes.length > 0) {
+                cp.evidenceCheckboxes.forEach(val => {
+                    cbContainer.innerHTML += `<span class="bg-green-100 text-green-700 text-xs sm:text-sm px-3 py-1.5 rounded-lg font-bold border border-green-200">${escapeHTML(val)}</span>`;
+                });
+            }
+
+            const finalMethod = cp.revisedPlan ? cp.revisedPlan : (cp.method || '還沒寫喔');
+            document.getElementById('guide-method').innerText = finalMethod;
+            document.getElementById('guide-tip').innerText = cp.rescueTip || '還沒寫喔';
+
+            document.getElementById('guide-modal').classList.remove('hidden');
+            document.getElementById('guide-modal').classList.add('flex');
+        }
+        function closeGuideModal() {
+            document.getElementById('guide-modal').classList.add('hidden');
+            document.getElementById('guide-modal').classList.remove('flex');
+        }
+
         async function savePeerReview() { 
             const targetGroupNum = parseInt(document.getElementById('pr-group').value, 10); const q1 = document.getElementById('pr-q1').value.trim(); const q2 = document.getElementById('pr-q2').value.trim(); const q3 = document.getElementById('pr-q3').value.trim(); 
-            if(!targetGroupNum || !q1 || !q2 || !q3) { showModal("提示", "請完整選擇目標組別並填寫回饋喔！"); return; } 
-            showModal("發送中", "正在將回饋傳送給同學...");
+            if(!targetGroupNum || !q1 || !q2 || !q3) { showModal("提示", "請選一組同學，並把三個格子都填完喔！"); return; } 
+            showModal("發送中", "正在把回饋送給同學...");
             const reviewData = { id: Date.now().toString(), classCode: window.userData.classCode, targetGroupId: `${window.userData.classCode}_G${targetGroupNum}`, targetGroupNum: targetGroupNum, fromGroup: window.userData.group, fromName: window.userData.name, q1, q2, q3, date: new Date().toLocaleDateString() }; 
             if(window.savePeerReviewToCloud) { 
                 try { await window.savePeerReviewToCloud(targetGroupNum, reviewData); closeModal(); showModal("送出成功", `你已成功將回饋送給第 ${targetGroupNum} 組！`); document.getElementById('pr-group').value = ''; document.getElementById('pr-q1').value = ''; document.getElementById('pr-q2').value = ''; document.getElementById('pr-q3').value = ''; } 
-                catch(e) { showModal('同步失敗', '資料尚未儲存，請確認網路後再試一次。'); console.error(e); }
+                catch(e) { showModal('儲存失敗', '哎呀，沒有存成功。請檢查網路後再試一次喔！'); console.error(e); }
             }
         }
         function renderPeerReviews() { 
             const container = document.getElementById('peer-review-list'); container.innerHTML = ''; document.getElementById('peer-review-title').innerText = `收到的回饋 (第 ${window.userData.group} 組)：`;
             if(!window.groupData.peerReviews || window.groupData.peerReviews.length === 0) { container.innerHTML = '<p class="text-gray-400 text-base px-2">目前還沒有收到其他組別的回饋喔！</p>'; return; }
-            window.groupData.peerReviews.forEach(pr => { const card = document.createElement('div'); card.className = "bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 text-base sm:text-lg font-bold text-gray-700"; card.innerHTML = ` <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-3"> <span class="text-blue-600">來自：第 ${escapeHTML(pr.fromGroup)} 組 (${escapeHTML(pr.fromName)})</span> <span class="text-sm text-gray-400">${escapeHTML(pr.date)}</span> </div> <p class="mb-2">1. 證據：<span class="font-normal">${escapeHTML(pr.q1)}</span></p> <p class="mb-2">2. 方法：<span class="font-normal">${escapeHTML(pr.q2)}</span></p> <p>3. 提醒：<span class="font-normal">${escapeHTML(pr.q3)}</span></p> `; container.appendChild(card); }); 
+            window.groupData.peerReviews.forEach(pr => { const card = document.createElement('div'); card.className = "bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 text-base sm:text-lg font-bold text-gray-700"; card.innerHTML = ` <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-3"> <span class="text-blue-600">來自：第 ${escapeHTML(pr.fromGroup)} 組 (${escapeHTML(pr.fromName)})</span> <span class="text-xs text-gray-400">${escapeHTML(pr.date)}</span> </div> <p class="mb-2">1. 證據是：<span class="font-normal">${escapeHTML(pr.q1)}</span></p> <p class="mb-2">2. 做得好的地方：<span class="font-normal">${escapeHTML(pr.q2)}</span></p> <p>3. 提醒你們看：<span class="font-normal">${escapeHTML(pr.q3)}</span></p> `; container.appendChild(card); }); 
         }
 
         // --- 教師儀表板 ---
-        function promptTeacherPassword() { const pwd = prompt("請輸入教師專區密碼:"); if (pwd === "1227") { openTeacherDashboard(); } else if (pwd !== null) { alert("密碼錯誤！"); } }
+        function promptTeacherPassword() { const pwd = prompt("請輸入教師專區密碼:"); if (pwd === "1227") { openTeacherDashboard(); } else if (pwd !== null) { alert("密碼錯誤！\n(註: 正式環境應改用 Firebase Authentication 搭配 Firestore Security Rules)"); } }
         function changeUnlockLevel() { 
             window.globalSettings.maxUnlockedLevel = parseInt(document.getElementById('teacher-unlock-level').value, 10); 
             if (window.saveGlobalSettingsCloud) { window.saveGlobalSettingsCloud(window.globalSettings).then(() => showModal("設定完成", `已同步至全班設備`)).catch(e => { console.error(e); showModal("同步失敗", "設定未能存至雲端，請確認網路！"); }); }
@@ -876,7 +979,7 @@
             
             const groupsMap = {}; 
             for(let i=1; i<=5; i++) {
-                const groupId = `311_G${i}`;
+                const groupId = `307_G${i}`;
                 groupsMap[i] = { group: i, carePlan: (window.groupsList.find(g => g.groupId === groupId) || {}).carePlan, diary: window.allDiaries ? window.allDiaries.filter(d => d.groupId === groupId).sort((a,b)=>new Date(a.date)-new Date(b.date)) : [], peerReviews: window.allPeerReviews ? window.allPeerReviews.filter(p => p.targetGroupId === groupId) : [] };
             }
 
