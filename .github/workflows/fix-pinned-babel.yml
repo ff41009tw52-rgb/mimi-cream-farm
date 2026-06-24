@@ -1,9 +1,9 @@
 name: Apply compatible Babel version
 
 on:
-  push:
+  pull_request:
     branches:
-      - fix-pinned-babel
+      - main
 
 permissions:
   contents: write
@@ -17,6 +17,7 @@ jobs:
       - name: Check out feature branch
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.head_ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pin Babel to a compatible version
