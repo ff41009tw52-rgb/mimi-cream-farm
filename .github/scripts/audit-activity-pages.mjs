@@ -3,6 +3,7 @@ import path from 'node:path';
 import { chromium } from 'playwright';
 
 const baseUrl = process.env.BASE_URL || 'https://ff41009tw52-rgb.github.io/mimi-cream-farm/';
+const pinnedBabelVersion = process.env.PINNED_BABEL_VERSION || '';
 const indexHtml = fs.readFileSync('index.html', 'utf8');
 const links = [...indexHtml.matchAll(/<a\s+href="([^"#?]+\.html)"[^>]*class="open-btn"/g)]
   .map((match) => match[1]);
@@ -19,6 +20,12 @@ for (const filename of pages) {
   const consoleErrors = [];
   const failedRequests = [];
   const resourceResponses = [];
+
+  if (pinnedBabelVersion) {
+    await page.route('https://unpkg.com/@babel/standalone/babel.min.js', (route) => {
+      route.continue({ url: `https://unpkg.com/@babel/standalone@${pinnedBabelVersion}/babel.min.js` });
+    });
+  }
 
   page.on('pageerror', (error) => {
     pageErrors.push({ message: error.message, stack: error.stack || '' });
@@ -44,9 +51,9 @@ for (const filename of pages) {
   let navigationError = null;
 
   try {
-    const response = await page.goto(url, { waitUntil: 'networkidle', timeout: 45000 });
+    const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
     responseStatus = response?.status() ?? null;
-    await page.waitForTimeout(1200);
+    await page.waitForTimeout(2500);
   } catch (error) {
     navigationError = error.message;
   }
@@ -103,6 +110,7 @@ await browser.close();
 const failed = results.filter((item) => item.issues.length || item.consoleErrors.length || item.failedRequests.length);
 const report = {
   baseUrl,
+  pinnedBabelVersion: pinnedBabelVersion || null,
   totalPages: results.length,
   pagesWithProblems: failed.length,
   failed,
