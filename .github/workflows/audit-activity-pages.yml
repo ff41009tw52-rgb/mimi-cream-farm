@@ -1,0 +1,39 @@
+name: Audit activity pages
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Playwright and Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Open every homepage activity in a browser
+        run: node .github/scripts/audit-activity-pages.mjs
+
+      - name: Upload audit report and failure screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: activity-page-audit
+          path: artifacts/page-audit
+          if-no-files-found: warn
