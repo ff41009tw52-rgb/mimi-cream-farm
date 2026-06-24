@@ -18,14 +18,25 @@ for (const filename of pages) {
   const pageErrors = [];
   const consoleErrors = [];
   const failedRequests = [];
+  const resourceResponses = [];
 
-  page.on('pageerror', (error) => pageErrors.push(error.message));
+  page.on('pageerror', (error) => {
+    pageErrors.push({ message: error.message, stack: error.stack || '' });
+  });
   page.on('console', (message) => {
-    if (message.type() === 'error') consoleErrors.push(message.text());
+    if (message.type() === 'error') {
+      consoleErrors.push({ text: message.text(), location: message.location() });
+    }
   });
   page.on('requestfailed', (request) => {
     const failure = request.failure();
     failedRequests.push(`${request.url()} :: ${failure?.errorText || 'unknown error'}`);
+  });
+  page.on('response', (response) => {
+    const url = response.url();
+    if (/(tailwindcss|unpkg\.com|react-dom|babel)/i.test(url)) {
+      resourceResponses.push({ url, status: response.status(), contentType: response.headers()['content-type'] || '' });
+    }
   });
 
   const url = new URL(filename, baseUrl).href;
@@ -58,7 +69,7 @@ for (const filename of pages) {
   const issues = [];
   if (navigationError) issues.push(`navigation error: ${navigationError}`);
   if (responseStatus && responseStatus >= 400) issues.push(`HTTP ${responseStatus}`);
-  if (pageErrors.length) issues.push(...pageErrors.map((message) => `page error: ${message}`));
+  if (pageErrors.length) issues.push(...pageErrors.map((error) => `page error: ${error.message}`));
   if (view.rootExists && view.rootChildCount === 0) issues.push('empty #root: React content did not render');
   if (/^(🏡\s*)?回到?農場首頁$|^🐾\s*回農場$/.test(view.bodyText)) {
     issues.push('only home button is visible');
@@ -76,6 +87,7 @@ for (const filename of pages) {
     pageErrors,
     consoleErrors,
     failedRequests,
+    resourceResponses,
     issues,
   };
   results.push(item);
@@ -103,8 +115,8 @@ console.log(`AUDIT_PROBLEMS=${failed.length}`);
 for (const item of failed) {
   console.log(`\n[${item.filename}]`);
   for (const issue of item.issues) console.log(`ISSUE: ${issue}`);
-  for (const issue of item.pageErrors) console.log(`PAGE_ERROR: ${issue}`);
-  for (const issue of item.consoleErrors.slice(0, 5)) console.log(`CONSOLE_ERROR: ${issue}`);
+  for (const issue of item.pageErrors) console.log(`PAGE_ERROR: ${issue.message}`);
+  for (const issue of item.consoleErrors.slice(0, 5)) console.log(`CONSOLE_ERROR: ${issue.text}`);
   for (const issue of item.failedRequests.slice(0, 5)) console.log(`REQUEST_FAILED: ${issue}`);
 }
 
