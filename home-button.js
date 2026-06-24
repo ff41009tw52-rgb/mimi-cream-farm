@@ -2,6 +2,13 @@
   const buttonId = 'farm-home-button';
   if (document.getElementById(buttonId)) return;
 
+  const hasExistingHomeLink = Array.from(document.querySelectorAll('a[href]')).some((link) => {
+    const destination = new URL(link.getAttribute('href'), window.location.href);
+    const label = (link.textContent || '').replace(/\s+/g, '');
+    return destination.pathname.endsWith('/index.html') && /回到?農場首頁/.test(label);
+  });
+  if (hasExistingHomeLink) return;
+
   const style = document.createElement('style');
   style.textContent = `
     #${buttonId} {
