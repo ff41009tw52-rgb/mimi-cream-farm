@@ -81,6 +81,7 @@ jobs:
               return {
                 buttonCount: document.querySelectorAll('#farm-home-button').length,
                 legacyHomeLinkCount: homeLinks.length,
+                legacyHomeLabels: homeLinks.map((link) => (link.textContent || '').replace(/\s+/g, '')),
                 text,
                 backgroundImage: style?.backgroundImage || '',
                 left: style?.left || '',
@@ -99,6 +100,7 @@ jobs:
           }
 
           await browser.close();
+          fs.writeFileSync('/tmp/home-button-audit/audit.json', JSON.stringify({ checkedPages: pages, problems }, null, 2));
           console.log(`CHECKED_PAGES=${pages.length}`);
           if (problems.length) {
             console.error(JSON.stringify(problems, null, 2));
@@ -107,6 +109,14 @@ jobs:
           console.log('Every checked page has exactly one cute 回農場 button.');
           NODE
           node /tmp/home-button-audit/verify.mjs
+
+      - name: Upload home button audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: home-button-audit
+          path: /tmp/home-button-audit/audit.json
+          if-no-files-found: warn
 
       - name: Commit only the completed website changes
         run: |
