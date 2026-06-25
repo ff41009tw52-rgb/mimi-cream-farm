@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import re
-import shutil
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -38,16 +37,13 @@ def included(path: Path) -> bool:
     return not any(part in EXCLUDED for part in path.parts)
 
 
+def token_pattern(value: str) -> re.Pattern[str]:
+    return re.compile(r'(?<![A-Za-z0-9_./-])' + re.escape(value) + r'(?![A-Za-z0-9_./-])')
+
+
 def replace_token(content: str, old: str, new: str) -> str:
     # Avoid converting the final part of longer names, e.g. 25.html when changing 5.html.
-    pattern = re.compile(r'(?<![A-Za-z0-9_./-])' + re.escape(old) + r'(?![A-Za-z0-9_./-])')
-    return pattern.sub(new, content)
-
-
-def replace_root_image_token(content: str, old: str, new: str) -> str:
-    # Do not re-prefix values that are already in picture/.
-    pattern = re.compile(r'(?<![A-Za-z0-9_./-])' + re.escape(old) + r'(?![A-Za-z0-9_./-])')
-    return pattern.sub(new, content)
+    return token_pattern(old).sub(new, content)
 
 
 def text_files():
@@ -119,11 +115,11 @@ def main() -> None:
             if '/' in old:
                 content = content.replace(old, new)
             else:
-                content = replace_root_image_token(content, old, new)
+                content = replace_token(content, old, new)
 
         if path.name == 'ai-web-tutorial.html':
             for number in range(1, 11):
-                content = replace_root_image_token(content, f'{number}.jpg', f'picture/{number}.jpg')
+                content = replace_token(content, f'{number}.jpg', f'picture/{number}.jpg')
 
         content = content.replace('https://www.transparenttextures.com/patterns/cubes.png', 'picture/cubes.png')
 
@@ -153,12 +149,13 @@ def main() -> None:
         raise SystemExit('edge directory still exists after refactor.')
 
     # Check public text files for obsolete page links and paths.
-    forbidden = list(PAGE_MAP) + ['edge/']
     for path in text_files():
         content = path.read_text(encoding='utf-8', errors='strict')
-        for old in forbidden:
-            if old in content:
-                raise SystemExit(f'Obsolete reference {old!r} remains in {path.relative_to(ROOT)}')
+        for old in PAGE_MAP:
+            if token_pattern(old).search(content):
+                raise SystemExit(f'Obsolete page reference {old!r} remains in {path.relative_to(ROOT)}')
+        if 'edge/' in content:
+            raise SystemExit(f'Obsolete edge/ reference remains in {path.relative_to(ROOT)}')
 
     # Validate local HTML/image references in HTML/CSS/JS/manifest files.
     attr_pattern = re.compile(r'(?:href|src)\s*=\s*[\"\']([^\"\']+)[\"\']', re.I)
