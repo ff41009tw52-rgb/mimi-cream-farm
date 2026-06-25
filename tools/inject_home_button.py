@@ -20,9 +20,11 @@ for path in sorted(ROOT.glob('*.html')):
         flags=re.IGNORECASE,
     )
     match = re.search(r'</body\s*>', content, flags=re.IGNORECASE)
-    if not match:
-        raise SystemExit(f'Cannot find </body> in {path.name}')
-    content = content[:match.start()] + f'    {SCRIPT_TAG}\n' + content[match.start():]
+    if match:
+        content = content[:match.start()] + f'    {SCRIPT_TAG}\n' + content[match.start():]
+    else:
+        # A few older pages have no closing body tag; browsers still parse a final script correctly.
+        content = content.rstrip() + f'\n    {SCRIPT_TAG}\n'
 
     if content != original:
         path.write_text(content, encoding='utf-8')
