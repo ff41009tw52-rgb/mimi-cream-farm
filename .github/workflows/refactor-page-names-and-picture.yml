@@ -21,7 +21,13 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Rename activities and move images
-        run: python3 tools/apply_site_rename.py
+        run: |
+          mkdir -p artifacts/refactor-diagnostics
+          set +e
+          python3 tools/apply_site_rename.py > artifacts/refactor-diagnostics/rename.log 2>&1
+          status=$?
+          cat artifacts/refactor-diagnostics/rename.log
+          exit $status
 
       - name: Set up isolated browser test tools
         run: |
@@ -95,6 +101,14 @@ jobs:
           console.log('All standardized pages loaded without blank views or broken local assets.');
           NODE
           node /tmp/site-rename-audit/verify.mjs
+
+      - name: Upload refactor diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: refactor-diagnostics
+          path: artifacts/refactor-diagnostics
+          if-no-files-found: warn
 
       - name: Commit only completed website changes
         run: |
