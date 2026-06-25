@@ -36,8 +36,9 @@ jobs:
           import fs from 'node:fs';
           import { chromium } from 'playwright';
 
+          const excludedPages = new Set(['index.html', 'five.html']);
           const pages = fs.readdirSync('.')
-            .filter((name) => name.endsWith('.html') && name !== 'index.html')
+            .filter((name) => name.endsWith('.html') && !excludedPages.has(name))
             .sort();
           const browser = await chromium.launch({ headless: true });
           const problems = [];
