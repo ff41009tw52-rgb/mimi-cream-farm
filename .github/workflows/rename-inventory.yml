@@ -1,0 +1,25 @@
+name: Generate file rename inventory
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out candidate branch
+        uses: actions/checkout@v4
+
+      - name: Build page and image inventory
+        run: python3 .github/scripts/build-rename-inventory.py
+
+      - name: Upload inventory report
+        uses: actions/upload-artifact@v4
+        with:
+          name: rename-inventory
+          path: artifacts/rename-inventory
