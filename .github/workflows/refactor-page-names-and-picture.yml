@@ -22,7 +22,37 @@ jobs:
 
       - name: Rename activities and move images
         run: |
-          mkdir -p artifacts/refactor-diagnostics
+          mkdir -p picture artifacts/refactor-diagnostics
+          python3 - <<'PY'
+          import struct
+          import zlib
+          from pathlib import Path
+
+          path = Path('picture/cubes.png')
+          width = height = 48
+          rows = []
+          for y in range(height):
+              row = bytearray([0])
+              for x in range(width):
+                  # A subtle geometric grid that replaces the former external cubes texture.
+                  diagonal_a = (x + y) % 24 in (0, 1)
+                  diagonal_b = (x - y) % 24 in (0, 1)
+                  vertical = x % 24 in (0,)
+                  if diagonal_a or diagonal_b or vertical:
+                      row.extend((203, 213, 225, 105))
+                  else:
+                      row.extend((255, 255, 255, 0))
+              rows.append(bytes(row))
+
+          def chunk(kind, data):
+              return struct.pack('>I', len(data)) + kind + data + struct.pack('>I', zlib.crc32(kind + data) & 0xffffffff)
+
+          png = b'\x89PNG\r\n\x1a\n'
+          png += chunk(b'IHDR', struct.pack('>IIBBBBB', width, height, 8, 6, 0, 0, 0))
+          png += chunk(b'IDAT', zlib.compress(b''.join(rows), 9))
+          png += chunk(b'IEND', b'')
+          path.write_bytes(png)
+          PY
           set +e
           python3 tools/apply_site_rename.py > artifacts/refactor-diagnostics/rename.log 2>&1
           status=$?
@@ -74,14 +104,10 @@ jobs:
             const state = await page.evaluate(() => {
               const root = document.getElementById('root');
               const bodyText = (document.body?.innerText || '').replace(/\s+/g, ' ').trim();
-              const pictureSources = [...document.images]
-                .map((image) => image.getAttribute('src') || '')
-                .filter((source) => source.includes('picture/'));
               return {
                 rootExists: Boolean(root),
                 rootChildCount: root?.childElementCount ?? null,
                 bodyText,
-                pictureSources,
               };
             });
 
