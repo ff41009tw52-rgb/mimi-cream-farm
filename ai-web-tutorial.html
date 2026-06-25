@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>零基礎 AI 網頁製作教學 - 教師專屬指南</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- 引入 FontAwesome 圖示 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            blue: '#2563EB',
+                            light: '#EFF6FF',
+                            orange: '#F97316'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-size: 18px; background-color: #f8fafc; }
+        .step-number { background: linear-gradient(135deg, #2563EB, #3B82F6); }
+        .highlight-box { border-left: 6px solid #F97316; }
+        /* 隱藏未啟用的步驟 */
+        .step-content { display: none; animation: fadeIn 0.4s ease-in-out; }
+        .step-content.active { display: block; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 圖片優化樣式，避免圖片過大 */
+        .tutorial-img {
+            max-height: 320px;
+            width: auto;
+            max-width: 100%;
+            object-fit: contain;
+            margin: 0 auto;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            /* 調整動畫曲線讓放大更順暢 */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: zoom-in;
+            /* 加入相對定位與基礎層級，為放大覆蓋做準備 */
+            position: relative;
+            z-index: 10;
+            background-color: white;
+        }
+        /* 滑鼠移入圖片時大幅放大，讓老師看清楚內容 */
+        .tutorial-img:hover {
+            transform: scale(1.8); /* 放大到 1.8 倍 */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4); /* 加深陰影產生浮動感 */
+            z-index: 100; /* 確保放大時覆蓋在其他文字與區塊之上 */
+        }
+    </style>
+</head>
+<body class="text-gray-800 font-sans antialiased leading-relaxed flex flex-col min-h-screen">
+
+    <!-- 頂部標題與進度條 -->
+    <header class="bg-white shadow-sm fixed w-full z-50 top-0 border-b border-gray-200">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center text-brand-blue">
+                <i class="fa-solid fa-chalkboard-user text-3xl mr-3"></i>
+                <span class="font-bold text-2xl">教師專屬 AI 教具製作指南</span>
+            </div>
+            
+            <!-- 進度顯示 -->
+            <div class="flex items-center w-full sm:w-1/3">
+                <span class="text-sm font-bold text-gray-500 mr-3 whitespace-nowrap" id="progress-text">步驟 1 / 6</span>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-brand-blue h-2.5 rounded-full transition-all duration-300" style="width: 16.6%"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要內容區 (預留上方 header 空間) -->
+    <main class="max-w-4xl mx-auto px-4 pt-32 pb-28 flex-grow w-full">
+
+        <!-- 第 1 步：設定 Gemini -->
+        <section id="step-1" class="step-content active bg-white p-8 md:p-10 rounded-2xl shadow-sm border border-gray-200">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl md:text-4xl font-black text-gray-900 mb-4">歡迎！讓我們開始製作互動教具</h1>
+                <p class="text-xl text-gray-600">跟著圖文說明一步步做，把課本變成有趣的網頁！</p>
+            </div>
+
+            <div class="flex items-center mb-6 border-t pt-8">
+                <div class="step-number w-14 h-14 rounded-full text-white flex items-center justify-center text-2xl font-bold mr-4 shadow-lg shrink-0">1</div>
+                <h2 class="text-3xl font-bold text-gray-900">開啟並設定 Gemini 工具</h2>
+            </div>
+            
+            <div class="mb-6 bg-gray-50 p-4 rounded-xl text-center">
+                <img src="picture/1.jpg" alt="設定Canvas與Pro模型" class="tutorial-img">
+            </div>
+
+            <div class="space-y-4 text-lg text-gray-700">
+                <p>在開始對話前，我們要先讓 Gemini 準備好「網頁製作」的工具：</p>
+                <div class="flex items-start p-4 bg-blue-50 rounded-lg">
+                    <div class="bg-brand-blue text-white w-8 h-8 rounded-full flex items-center justify-center font-bold mr-4 flex-shrink-0">1</div>
+                    <div class="pt-1">點擊輸入框旁邊的 <strong>「＋ 工具」</strong>，選擇 <strong>「Canvas」</strong>。（這樣生成的網頁才能在右側直接預覽喔！）</div>
+                </div>
+                <div class="flex items-start p-4 bg-blue-50 rounded-lg">
+                    <div class="bg-brand-blue text-white w-8 h-8 rounded-full flex items-center justify-center font-bold mr-4 flex-shrink-0">2</div>
+                    <div class="pt-1">看右邊的思考模式下拉選單，如果可以的話請調整成 <strong>「Pro」</strong>。如果無法選擇 Pro，調整成「思考型」也可以。</div>
+                </div>
+            </div>
+            
+            <div class="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-center font-bold">
+                <i class="fa-regular fa-lightbulb mr-2"></i> 設定好了嗎？請點擊右下角的「下一步」繼續！
+            </div>
+        </section>
+
+        <!-- 第 2 步：截圖與貼上 -->
+        <section id="step-2" class="step-content bg-white p-8 md:p-10 rounded-2xl shadow-sm border border-gray-200">
+            <div class="flex items-center mb-6">
+                <div class="step-number w-14 h-14 rounded-full text-white flex items-center justify-center text-2xl font-bold mr-4 shadow-lg shrink-0">2</div>
+                <h2 class="text-3xl font-bold text-gray-900">把課本變成 AI 的眼睛</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                <div class="bg-gray-50 p-3 rounded-xl flex flex-col justify-center">
+                    <img src="picture/4.jpg" alt="擷取電子書畫面" class="tutorial-img !max-h-48 mb-2">
+                    <p class="text-center text-sm text-gray-500 font-bold">擷取電子書</p>
+                </div>
+                <div class="bg-gray-50 p-3 rounded-xl flex flex-col justify-center">
+                    <img src="picture/5.jpg" alt="貼上到對話框" class="tutorial-img !max-h-48 mb-2">
+                    <p class="text-center text-sm text-gray-500 font-bold">貼上圖片</p>
+                </div>
+            </div>
+
+            <div class="space-y-4 text-lg text-gray-700">
+                <p>直接讓 AI 「看見」課本排版與圖形，溝通效率會比純文字高出數倍！</p>
+                <ol class="list-decimal list-inside space-y-4 ml-2">
+                    <li class="pl-2">開啟您的數位電子書或教學 PDF 檔案。</li>
+                    <li class="pl-2">使用 Windows 內建的「剪取工具」（鍵盤同時按下：<code class="bg-gray-200 px-2 py-1 rounded text-sm">Win + Shift + S</code>），將您想要數位化的單元內容截圖下來。</li>
+                    <li class="pl-2">對選取的圖片按下<strong>「複製」</strong>。</li>
+                    <li class="pl-2">回到 Gemini，在指令區按右鍵選擇<strong>「貼上」</strong> (或按 <code class="bg-gray-200 px-2 py-1 rounded text-sm">Ctrl + V</code>)，即可將圖片上傳給 AI。</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- 第 3 步：寫下需求 -->
+        <section id="step-3" class="step-content bg-white p-8 md:p-10 rounded-2xl shadow-sm border border-gray-200">
+            <div class="flex items-center mb-6">
+                <div class="step-number w-14 h-14 rounded-full text-white flex items-center justify-center text-2xl font-bold mr-4 shadow-lg shrink-0">3</div>
+                <h2 class="text-3xl font-bold text-gray-900">向 AI 許願與反覆修改</h2>
+            </div>
+            
+            <div class="mb-6 bg-gray-50 p-4 rounded-xl text-center">
+                <img src="picture/6.jpg" alt="輸入提示詞指令" class="tutorial-img">
+            </div>
+            
+            <div class="space-y-5 text-lg text-gray-700">
+                <p>圖片貼上後，文字就可以打上您的教學需求。</p>
+                
+                <div class="highlight-box bg-orange-50 p-6 rounded-xl relative">
+                    <button onclick="copyPrompt()" class="absolute top-4 right-4 bg-orange-200 hover:bg-orange-300 text-orange-900 px-3 py-1.5 rounded-lg text-sm font-bold transition flex items-center shadow-sm">
+                        <i class="fa-regular fa-copy mr-1"></i> 一鍵複製
+                    </button>
+                    <h4 class="font-bold text-xl mb-3 text-orange-800"><i class="fa-solid fa-key mr-2"></i>必備的三個關鍵字</h4>
+                    <p class="mb-4 pr-24">我通常會打上：<strong>年級</strong>、<strong>可操作</strong>、<strong>製作網頁</strong>。</p>
+                    <div id="prompt-text" class="text-base bg-white p-4 rounded border border-orange-200 text-gray-700 font-mono shadow-inner select-all leading-relaxed">幫我製作一個五年級可操作的網站，任意三角形的三個角平移後可以拼成一個平角</div>
+                </div>
+
+                <div class="flex items-start p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div class="text-green-600 text-2xl mr-3"><i class="fa-solid fa-comments"></i></div>
+                    <div>
+                        <strong class="text-green-800 block mb-1">不滿意？直接叫他改！</strong>
+                        <p class="text-base text-green-700">做完之後通常會不太滿意，這是正常的！您可以繼續跟 AI 談細節修改，例如說：「字體大一點」、「幫我加上角度的數字」，讓他越改越符合您的需求。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 第 4 步：複製程式碼 -->
+        <section id="step-4" class="step-content bg-white p-8 md:p-10 rounded-2xl shadow-sm border border-gray-200">
+            <div class="flex items-center mb-6">
+                <div class="step-number w-14 h-14 rounded-full text-white flex items-center justify-center text-2xl font-bold mr-4 shadow-lg shrink-0">4</div>
+                <h2 class="text-3xl font-bold text-gray-900">打包帶走：複製程式碼</h2>
+            </div>
+
+            <div class="mb-6 bg-gray-50 p-4 rounded-xl text-center">
+                <img src="picture/8.jpg" alt="複製Canvas右上角內容" class="tutorial-img">
+            </div>
+            
+            <div class="space-y-4 text-lg text-gray-700">
+                <p>當 AI 幫您把網頁做好了（在右側 Canvas 可以點擊預覽來測試），我們要將生成的程式碼直接做成網頁檔案。</p>
+                
+                <ol class="list-decimal list-inside space-y-4 ml-2 mt-4 font-medium">
+                    <li class="pl-2">請看畫面右上角，找到一個名叫 <strong>「共用」</strong> 的按鈕點下去。</li>
+                    <li class="pl-2">在跳出來的選單中，點選最下方的 <strong>「複製內容」</strong>。</li>
+                </ol>
+                <p class="mt-4 text-gray-500 text-base"><i class="fa-solid fa-circle-info mr-1"></i> 按下後，一整包的網頁程式碼就已經悄悄複製到您的滑鼠裡囉！</p>
+            </div>
+        </section>
+
+        <!-- 第 5 步：存檔秘訣 -->
+        <section id="step-5" class="step-content bg-white p-8 md:p-10 rounded-2xl shadow-sm border-2 border-brand-blue relative overflow-hidden">
+            <div class="absolute top-0 right-0 bg-brand-blue text-white px-6 py-2 font-bold rounded-bl-2xl shadow">
+                最關鍵的一步
+            </div>
+            <div class="flex items-center mb-6 pt-4">
+                <div class="step-number w-14 h-14 rounded-full text-white flex items-center justify-center text-2xl font-bold mr-4 shadow-lg shrink-0">5</div>
+                <h2 class="text-3xl font-bold text-gray-900">神奇的存檔術 (變身網頁)</h2>
+            </div>
+            
+            <div class="mb-6 bg-gray-50 p-4 rounded-xl text-center">
+                <img src="picture/9.jpg" alt="記事本另存新檔設定" class="tutorial-img">
+            </div>
+
+            <div class="space-y-4 text-lg text-gray-800">
+                <p class="mb-4">現在我們要用 Windows 內建的「記事本」來施展魔法：</p>
+                <div class="bg-blue-50 p-5 rounded-lg border border-blue-100 space-y-3">
+                    <p>1. 在電腦桌面產生一個 <strong>記事本</strong> (文字文件) 並打開。</p>
+                    <p>2. 將剛剛複製的內容 <strong>「貼上」</strong> 到裡面。</p>
+                    <p>3. 點選左上角的「檔案」 > <strong>「另存新檔」</strong>。</p>
+                    <p>4. <strong class="text-red-600">注意！</strong> 檔案名稱隨意，但後面一定要自己打上 <code class="bg-yellow-200 px-2 py-1 rounded text-red-700 font-bold">.html</code> （例如：180.html）。</p>
+                    <p>5. 存檔類型一定要點開選單，改成 <strong>「所有檔案」</strong>，然後按下存檔。</p>
+                </div>
+                
+                <div class="mt-4 p-4 bg-red-50 text-red-800 border-l-4 border-red-500 rounded-r-lg text-base">
+                    <i class="fa-solid fa-triangle-exclamation mr-2"></i> <strong>常見問題防雷：</strong><br>
+                    如果存檔後，桌面上的圖示還是「記事本」的圖案，代表失敗了喔！請重新檢查第 4、5 點，確認結尾有加上 <code>.html</code> 且有選取「所有檔案」。
+                </div>
+            </div>
+        </section>
+
+        <!-- 第 6 步：完成與分享 -->
+        <section id="step-6" class="step-content bg-white p-8 md:p-10 rounded-2xl shadow-sm border border-gray-200">
+            <div class="flex items-center mb-6">
+                <div class="step-number w-14 h-14 rounded-full text-white flex items-center justify-center text-2xl font-bold mr-4 shadow-lg shrink-0">6</div>
+                <h2 class="text-3xl font-bold text-gray-900">完成測試與分享給學生</h2>
+            </div>
+            
+            <div class="mb-6 bg-gray-50 p-4 rounded-xl text-center">
+                <img src="picture/10.jpg" alt="成功在瀏覽器開啟網頁" class="tutorial-img">
+            </div>
+
+            <div class="space-y-5 text-lg text-gray-700">
+                <p>存檔成功後，您的桌面上就會出現一個網頁檔案（圖示通常是 Chrome 或 Edge 瀏覽器的形狀）。</p>
+                <p><strong>連續點擊兩下</strong>，就可以在這台電腦上開啟，並且親自滑鼠拖曳、操作剛剛生成的互動教具了！</p>
+                
+                <div class="mt-6 highlight-box bg-orange-50 p-6 rounded-xl">
+                    <h4 class="font-bold text-xl mb-2 text-orange-800"><i class="fa-solid fa-chalkboard mr-2"></i>帶到教室上課的方法</h4>
+                    <p>若要在教室的班級電腦開啟，非常簡單：</p>
+                    <ul class="list-disc list-inside mt-2 space-y-2 text-gray-800 font-medium">
+                        <li>將這個檔案存到 <strong>USB 隨身碟</strong> 或上傳到雲端硬碟。</li>
+                        <li>到教室後，把檔案複製到教室電腦的桌面上。</li>
+                        <li>點擊兩下即可使用（<span class="text-green-600">就算教室沒有網路也能跑喔！</span>）</li>
+                    </ul>
+                </div>
+                
+                <div class="mt-8 text-center">
+                    <button onclick="changeStep(1 - currentStep)" class="text-brand-blue font-bold hover:underline">
+                        <i class="fa-solid fa-rotate-left mr-1"></i> 回到第一步重看一次
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 底部固定導覽列 (按鈕區) -->
+    <footer class="bg-white border-t border-gray-200 fixed bottom-0 w-full z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+            <button id="btn-prev" onclick="changeStep(-1)" class="px-6 py-3 rounded-lg font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fa-solid fa-arrow-left mr-2"></i> 上一步
+            </button>
+            
+            <button id="btn-next" onclick="changeStep(1)" class="px-8 py-3 rounded-lg font-bold text-white bg-brand-blue hover:bg-blue-700 shadow-md transition transform hover:scale-105 active:scale-95">
+                下一步 <i class="fa-solid fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+    </footer>
+
+    <!-- 客製化精美彈出視窗 (Modal) -->
+    <div id="custom-modal" class="fixed inset-0 z-[100] hidden items-center justify-center">
+        <!-- 黑色半透明遮罩 -->
+        <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity opacity-0 duration-300" id="modal-backdrop" onclick="closeModal()"></div>
+        <!-- 視窗內容框 -->
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="modal-content">
+            <div class="text-center">
+                <!-- 動態替換的圖示區塊 -->
+                <div id="modal-icon" class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
+                    <i class="fa-solid fa-check text-3xl text-green-600"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-3" id="modal-title">提示</h3>
+                <p class="text-gray-600 text-lg mb-8 whitespace-pre-wrap leading-relaxed" id="modal-message">訊息內容</p>
+                <button onclick="closeModal()" class="w-full bg-brand-blue hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-md text-lg">
+                    確定
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript 邏輯 (負責控制步驟切換與視窗) -->
+    <script>
+        let currentStep = 1;
+        const totalSteps = 6; 
+
+        // 控制彈出視窗 (Modal) 的功能
+        function showModal(title, message, type = 'success') {
+            const modal = document.getElementById('custom-modal');
+            const backdrop = document.getElementById('modal-backdrop');
+            const content = document.getElementById('modal-content');
+            const titleEl = document.getElementById('modal-title');
+            const messageEl = document.getElementById('modal-message');
+            const iconEl = document.getElementById('modal-icon');
+
+            titleEl.innerText = title;
+            messageEl.innerText = message;
+
+            // 根據不同情境設定圖示與顏色
+            if (type === 'success') {
+                iconEl.innerHTML = '<i class="fa-solid fa-check text-3xl text-green-600"></i>';
+                iconEl.className = 'mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6';
+            } else if (type === 'celebrate') {
+                iconEl.innerHTML = '<i class="fa-solid fa-trophy text-3xl text-yellow-600"></i>';
+                iconEl.className = 'mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 mb-6';
+            } else if (type === 'error') {
+                iconEl.innerHTML = '<i class="fa-solid fa-xmark text-3xl text-red-600"></i>';
+                iconEl.className = 'mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-6';
+            }
+
+            // 顯示視窗並加入動畫
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // 使用微小延遲讓 transition 動畫生效
+            setTimeout(() => {
+                backdrop.classList.remove('opacity-0');
+                backdrop.classList.add('opacity-100');
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('custom-modal');
+            const backdrop = document.getElementById('modal-backdrop');
+            const content = document.getElementById('modal-content');
+
+            // 隱藏動畫
+            backdrop.classList.remove('opacity-100');
+            backdrop.classList.add('opacity-0');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+
+            // 等待動畫結束後隱藏 DOM
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300); 
+        }
+
+        function updateUI() {
+            // 隱藏所有步驟，顯示當前步驟
+            for (let i = 1; i <= totalSteps; i++) {
+                const stepElement = document.getElementById(`step-${i}`);
+                if (i === currentStep) {
+                    stepElement.classList.add('active');
+                } else {
+                    stepElement.classList.remove('active');
+                }
+            }
+
+            // 更新進度條與文字
+            const progressPercentage = (currentStep / totalSteps) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercentage}%`;
+            document.getElementById('progress-text').innerText = `步驟 ${currentStep} / ${totalSteps}`;
+
+            // 控制按鈕狀態
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+
+            // 第一步時停用「上一步」按鈕
+            btnPrev.disabled = currentStep === 1;
+
+            // 最後一步時改變「下一步」按鈕的文字
+            if (currentStep === totalSteps) {
+                btnNext.innerHTML = '完成教學 <i class="fa-solid fa-check ml-2"></i>';
+                btnNext.classList.remove('bg-brand-blue', 'hover:bg-blue-700');
+                btnNext.classList.add('bg-green-600', 'hover:bg-green-700');
+            } else {
+                btnNext.innerHTML = '下一步 <i class="fa-solid fa-arrow-right ml-2"></i>';
+                btnNext.classList.add('bg-brand-blue', 'hover:bg-blue-700');
+                btnNext.classList.remove('bg-green-600', 'hover:bg-green-700');
+            }
+            
+            // 每次切換自動滾動到最上方
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function changeStep(direction) {
+            // 計算下一步的數字，並確保不會小於 1 或大於總步數
+            const newStep = currentStep + direction;
+            if (newStep >= 1 && newStep <= totalSteps) {
+                currentStep = newStep;
+                updateUI();
+            } else if (newStep > totalSteps) {
+                // 使用自訂的 Modal 替代原本的 alert()
+                showModal("教學完成！🎉", "恭喜老師！您已經看完了所有製作步驟。\n\n準備好去把課本變成魔法教具了嗎？", "celebrate");
+            }
+        }
+
+        // 一鍵複製指令功能 (修復 Canvas 環境權限問題)
+        function copyPrompt() {
+            const textToCopy = document.getElementById('prompt-text').innerText;
+            
+            try {
+                // 建立一個臨時的 textarea 元素來實現傳統複製，避免 iframe 阻擋 Clipboard API
+                const textArea = document.createElement("textarea");
+                textArea.value = textToCopy;
+                
+                // 設定不可見屬性避免畫面滾動或跳動
+                textArea.style.position = "fixed";
+                textArea.style.top = "0";
+                textArea.style.left = "0";
+                textArea.style.width = "2em";
+                textArea.style.height = "2em";
+                textArea.style.padding = "0";
+                textArea.style.border = "none";
+                textArea.style.outline = "none";
+                textArea.style.boxShadow = "none";
+                textArea.style.background = "transparent";
+                
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                if (successful) {
+                    showModal("複製成功！", "指令已經複製成功！\n\n您可以直接到 Gemini 的對話框按「貼上」了。", "success");
+                } else {
+                    throw new Error("execCommand copy failed");
+                }
+            } catch (err) {
+                console.error('複製失敗', err);
+                showModal("複製失敗", "無法自動複製，請手動選取文字複製。", "error");
+            }
+        }
+
+        // 支援鍵盤左右方向鍵切換步驟
+        document.addEventListener('keydown', function(event) {
+            // 確保沒有在輸入框內才觸發，避免影響正常打字
+            if (event.target.tagName !== 'INPUT' && event.target.tagName !== 'TEXTAREA') {
+                if (event.key === 'ArrowRight') {
+                    if(!document.getElementById('btn-next').disabled) changeStep(1);
+                } else if (event.key === 'ArrowLeft') {
+                    if(!document.getElementById('btn-prev').disabled) changeStep(-1);
+                }
+            }
+        });
+
+        // 網頁載入後初始化 UI
+        window.onload = updateUI;
+    </script>
+</body>
+</html>

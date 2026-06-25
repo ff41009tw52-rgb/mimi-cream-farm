@@ -272,7 +272,7 @@
         </div>
 
         <div class="mt-12 flex items-end gap-4 max-w-lg mx-auto">
-            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-green-300 flex-shrink-0 bg-gray-100 shadow-md"><img src="Christmascream.jpg" alt="白奶油" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100/eee/999?text=Cream'"></div>
+            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-green-300 flex-shrink-0 bg-gray-100 shadow-md"><img src="picture/Christmascream.jpg" alt="白奶油" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100/eee/999?text=Cream'"></div>
             <div class="flex-1"><div class="chat-bubble chat-bubble-outline text-sm sm:text-base font-bold text-gray-700 p-4">白奶油園長：小組任務要一起完成喔！你們寫的內容，組員都看得到。</div></div>
         </div>
     </div>
@@ -281,7 +281,7 @@
     <div id="view-pretest" class="view-section max-w-2xl mx-auto pt-6 px-4 pb-20 relative"><button onclick="goToMap()" class="absolute top-4 left-4 bg-white border-2 border-green-500 text-green-600 px-4 py-1.5 rounded-full text-sm font-bold shadow hover:bg-green-50 z-10 flex items-center gap-1">返回</button>
         <div class="text-center mt-10 mb-8"><h2 class="text-2xl sm:text-3xl font-bold text-green-800">🌱 生長大考驗</h2><p class="text-base text-gray-500 mt-2 font-bold">第 <span id="current-q-num" class="text-green-600">1</span> / 5 題</p></div>
         <div class="bg-white rounded-3xl shadow-lg p-6 sm:p-10 border-2 border-green-100 mb-8"><h3 class="text-xl sm:text-2xl font-bold text-gray-800 mb-8 leading-relaxed" id="question-text">載入中...</h3><div class="space-y-4" id="options-container"></div></div>
-        <div class="mt-8 flex items-end gap-4 max-w-lg mx-auto"><div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-orange-300 flex-shrink-0 bg-orange-50 shadow-md"><img src="Christmasmimi.jpg" alt="橘咪咪" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100/fcd34d/d97706?text=Mimi'"></div><div class="flex-1"><div class="chat-bubble chat-bubble-orange chat-bubble-orange-outline text-sm sm:text-base font-bold text-gray-700 p-4">橘咪咪園長：仔細回想自然課本的內容，你一定可以做到的喵！</div></div></div>
+        <div class="mt-8 flex items-end gap-4 max-w-lg mx-auto"><div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-orange-300 flex-shrink-0 bg-orange-50 shadow-md"><img src="picture/Christmasmimi.jpg" alt="橘咪咪" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100/fcd34d/d97706?text=Mimi'"></div><div class="flex-1"><div class="chat-bubble chat-bubble-orange chat-bubble-orange-outline text-sm sm:text-base font-bold text-gray-700 p-4">橘咪咪園長：仔細回想自然課本的內容，你一定可以做到的喵！</div></div></div>
     </div>
     
     <!-- ==================== 5. 測驗結算 ==================== -->
@@ -300,7 +300,7 @@
         <div class="bg-white rounded-3xl shadow-md p-5 sm:p-8 border border-gray-100 mb-6"><p class="font-black text-lg text-gray-700 mb-4">步驟 2. 選擇你要做的行動：</p><div class="grid grid-cols-2 sm:grid-cols-4 gap-3"><button id="action-1" onclick="chooseAction('澆一點水', 'action-1')" class="action-btn bg-white border-2 border-blue-300 text-blue-700 rounded-xl py-3 sm:py-4 text-base font-bold hover:bg-blue-50 transition-colors">💧 澆一點水</button><button id="action-2" onclick="chooseAction('先別澆水', 'action-2')" class="action-btn bg-white border-2 border-red-300 text-red-700 rounded-xl py-3 sm:py-4 text-base font-bold hover:bg-red-50 transition-colors">🚫 先別澆水</button><button id="action-3" onclick="chooseAction('換到有光的地方', 'action-3')" class="action-btn bg-white border-2 border-orange-300 text-orange-700 rounded-xl py-3 sm:py-4 text-base font-bold hover:bg-orange-50 transition-colors">☀️ 換到有光的地方</button><button id="action-5" onclick="chooseAction('找找有沒有菜蟲', 'action-5')" class="action-btn bg-white border-2 border-green-300 text-green-700 rounded-xl py-3 sm:py-4 text-base font-bold hover:bg-green-50 transition-colors">🐛 找找有沒有菜蟲</button></div></div>
         <div class="bg-white rounded-3xl shadow-md p-5 sm:p-8 border border-gray-100 mb-8"><p class="font-black text-lg text-gray-700 mb-4">步驟 3. 把你的想法說一說</p><div class="space-y-4 text-gray-700 font-bold text-base sm:text-lg"><div class="flex items-center gap-3 flex-wrap"><span>我看到</span><input type="text" id="rescue-obs" class="flex-1 min-w-[150px] border-b-2 border-green-500 bg-green-50 px-3 py-2 rounded focus:outline-none focus:bg-green-100 transition-colors" placeholder="例: 土乾乾的、葉子有洞"></div><div class="flex items-center gap-3 flex-wrap"><span>所以我想先</span><input type="text" id="rescue-reason" class="flex-1 min-w-[150px] border-b-2 border-green-500 bg-green-50 px-3 py-2 rounded focus:outline-none focus:bg-green-100 transition-colors" placeholder="例: 澆一點水、找找有沒有菜蟲"></div></div></div>
         <button onclick="submitRescue()" class="w-full bg-blue-500 text-white font-bold py-4 px-4 rounded-xl shadow-lg hover:scale-[1.02] transition-transform duration-300 text-lg sm:text-xl">送出決定！</button>
-        <div class="mt-10 flex items-end gap-4 max-w-lg mx-auto"><div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-4 border-orange-300 flex-shrink-0 bg-orange-50 shadow-md"><img src="Christmasmimi.jpg" onerror="this.src='https://placehold.co/100/fcd34d/d97706?text=Mimi'"></div><div class="flex-1"><div class="chat-bubble chat-bubble-orange chat-bubble-orange-outline text-xs font-bold text-gray-700 p-3 sm:p-4">橘咪咪園長：先把葉子、土和放的位置都看過，再選方法喔！</div></div></div>
+        <div class="mt-10 flex items-end gap-4 max-w-lg mx-auto"><div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-4 border-orange-300 flex-shrink-0 bg-orange-50 shadow-md"><img src="picture/Christmasmimi.jpg" onerror="this.src='https://placehold.co/100/fcd34d/d97706?text=Mimi'"></div><div class="flex-1"><div class="chat-bubble chat-bubble-orange chat-bubble-orange-outline text-xs font-bold text-gray-700 p-3 sm:p-4">橘咪咪園長：先把葉子、土和放的位置都看過，再選方法喔！</div></div></div>
     </div>
 
     <!-- ==================== 7. 小組日誌 ==================== -->
@@ -475,7 +475,7 @@
 
     <!-- ==================== 9. 後測 ==================== -->
     <div id="view-posttest" class="view-section max-w-2xl mx-auto pt-6 px-4 pb-20 relative"><button onclick="goToMap()" class="absolute top-4 left-4 bg-white border-2 border-yellow-500 text-yellow-600 px-4 py-1.5 rounded-full text-sm font-bold shadow hover:bg-green-50 z-10 flex items-center gap-1">返回</button><div class="text-center mt-10 mb-8"><h2 class="text-2xl sm:text-3xl font-bold text-yellow-600">🏆 守護員挑戰</h2><p class="text-base text-gray-500 mt-2 font-bold">第 <span id="current-postq-num" class="text-yellow-600">1</span> / 5 題</p></div><div class="bg-white rounded-3xl shadow-lg p-6 sm:p-10 border-2 border-yellow-200 mb-8"><h3 class="text-xl sm:text-2xl font-bold text-gray-800 mb-8 leading-relaxed" id="postquestion-text">載入中...</h3><div class="space-y-4" id="postoptions-container"></div></div>
-        <div class="mt-8 flex items-end gap-4 max-w-lg mx-auto"><div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-orange-300 flex-shrink-0 bg-orange-50 shadow-md"><img src="Christmasmimi.jpg" onerror="this.src='https://placehold.co/100/fcd34d/d97706?text=Mimi'"></div><div class="flex-1"><div class="chat-bubble chat-bubble-orange chat-bubble-orange-outline text-sm sm:text-base font-bold text-gray-700 p-4">橘咪咪園長：這是最後的挑戰，展現你的學習成果吧！</div></div></div>
+        <div class="mt-8 flex items-end gap-4 max-w-lg mx-auto"><div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-orange-300 flex-shrink-0 bg-orange-50 shadow-md"><img src="picture/Christmasmimi.jpg" onerror="this.src='https://placehold.co/100/fcd34d/d97706?text=Mimi'"></div><div class="flex-1"><div class="chat-bubble chat-bubble-orange chat-bubble-orange-outline text-sm sm:text-base font-bold text-gray-700 p-4">橘咪咪園長：這是最後的挑戰，展現你的學習成果吧！</div></div></div>
     </div>
     
     <!-- ==================== 10. 反思 ==================== -->
@@ -685,9 +685,9 @@
 
         // 將 Emoji 替換為圖片，移除「改善通風」與第四盆
         const rescuePlants = [
-            { id: 1, name: "一號小白菜", image: "edge/cabbage-dry.png", clues: { leaf: "葉子垂垂的，整株植物軟趴趴的。", soil: "土看起來白白的、摸起來乾巴巴的。", env: "放在陽光很強的窗台邊。" }, correctAction: "澆一點水", misconception: "沒發現土乾乾的就是缺水，誤以為是陽光的問題喔！" }, 
-            { id: 2, name: "二號小白菜", image: "edge/cabbage-pest.png", clues: { leaf: "葉子綠油油的，但是上面有好多破洞！", soil: "土摸起來濕濕的，剛剛才澆過水。", env: "放在通風的菜園裡，旁邊有小蝴蝶飛來飛去。" }, correctAction: "找找有沒有菜蟲", misconception: "葉子破洞是因為有菜蟲在吃，不是缺水喔！" }, 
-            { id: 3, name: "三號小白菜", image: "edge/cabbage-low-light.png", clues: { leaf: "葉子黃黃的，長得很瘦小。", soil: "土摸起來剛剛好。", env: "放在很暗的書桌底下，完全沒有太陽。" }, correctAction: "換到有光的地方", misconception: "植物需要陽光才能長大，放在太暗的地方會長不好喔！" }
+            { id: 1, name: "一號小白菜", image: "picture/cabbage-dry.png", clues: { leaf: "葉子垂垂的，整株植物軟趴趴的。", soil: "土看起來白白的、摸起來乾巴巴的。", env: "放在陽光很強的窗台邊。" }, correctAction: "澆一點水", misconception: "沒發現土乾乾的就是缺水，誤以為是陽光的問題喔！" }, 
+            { id: 2, name: "二號小白菜", image: "picture/cabbage-pest.png", clues: { leaf: "葉子綠油油的，但是上面有好多破洞！", soil: "土摸起來濕濕的，剛剛才澆過水。", env: "放在通風的菜園裡，旁邊有小蝴蝶飛來飛去。" }, correctAction: "找找有沒有菜蟲", misconception: "葉子破洞是因為有菜蟲在吃，不是缺水喔！" }, 
+            { id: 3, name: "三號小白菜", image: "picture/cabbage-low-light.png", clues: { leaf: "葉子黃黃的，長得很瘦小。", soil: "土摸起來剛剛好。", env: "放在很暗的書桌底下，完全沒有太陽。" }, correctAction: "換到有光的地方", misconception: "植物需要陽光才能長大，放在太暗的地方會長不好喔！" }
         ];
 
         let currentQuestionIndex = 0; let currentRescueIndex = 0; let selectedRescueAction = "";
