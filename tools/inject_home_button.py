@@ -3,16 +3,17 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT_TAG = '<script src="home-button.js"></script>'
+SKIP_PAGES = {'index.html', 'five.html'}
 
 changed = []
 for path in sorted(ROOT.glob('*.html')):
-    if path.name == 'index.html':
+    if path.name in SKIP_PAGES:
         continue
 
     content = path.read_text(encoding='utf-8')
     original = content
 
-    # Keep exactly one shared navigation script at the end of each root page.
+    # Keep exactly one shared navigation script at the end of each complete public page.
     content = re.sub(
         r'\s*<script\s+src=["\']home-button\.js["\']\s*></script>',
         '',
@@ -20,11 +21,9 @@ for path in sorted(ROOT.glob('*.html')):
         flags=re.IGNORECASE,
     )
     match = re.search(r'</body\s*>', content, flags=re.IGNORECASE)
-    if match:
-        content = content[:match.start()] + f'    {SCRIPT_TAG}\n' + content[match.start():]
-    else:
-        # A few older pages have no closing body tag; browsers still parse a final script correctly.
-        content = content.rstrip() + f'\n    {SCRIPT_TAG}\n'
+    if not match:
+        raise SystemExit(f'Cannot find </body> in {path.name}')
+    content = content[:match.start()] + f'    {SCRIPT_TAG}\n' + content[match.start():]
 
     if content != original:
         path.write_text(content, encoding='utf-8')
