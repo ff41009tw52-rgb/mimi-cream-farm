@@ -1,0 +1,109 @@
+name: Verify page naming and picture refactor
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Rename activities and move images
+        run: python3 tools/apply_site_rename.py
+
+      - name: Set up isolated browser test tools
+        run: |
+          mkdir -p /tmp/site-rename-audit
+          npm install --prefix /tmp/site-rename-audit playwright@1.55.0
+          npx --prefix /tmp/site-rename-audit playwright install --with-deps chromium
+
+      - name: Open all standardized pages in Chromium
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/static-server.log 2>&1 &
+          cat > /tmp/site-rename-audit/verify.mjs <<'NODE'
+          import { chromium } from 'playwright';
+
+          const pages = [
+            'index.html', 'feedback.html', 'five.html', 'SV.html', 'ai-web-tutorial.html',
+            ...Array.from({ length: 40 }, (_, index) => `${String(index + 1).padStart(2, '0')}.html`),
+          ];
+          const browser = await chromium.launch({ headless: true });
+          const problems = [];
+
+          for (const filename of pages) {
+            const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
+            const pageErrors = [];
+            const brokenLocalAssets = [];
+            page.on('pageerror', (error) => pageErrors.push(error.message));
+            page.on('response', (response) => {
+              const url = response.url();
+              if (url.startsWith('http://127.0.0.1:4173/') && response.status() >= 400) {
+                brokenLocalAssets.push(`${response.status()} ${url}`);
+              }
+            });
+
+            let navigationError = null;
+            try {
+              const response = await page.goto(`http://127.0.0.1:4173/${filename}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+              if (!response || response.status() >= 400) {
+                navigationError = `HTTP ${response?.status() || 'no response'}`;
+              }
+              await page.waitForTimeout(2200);
+            } catch (error) {
+              navigationError = error.message;
+            }
+
+            const state = await page.evaluate(() => {
+              const root = document.getElementById('root');
+              const bodyText = (document.body?.innerText || '').replace(/\s+/g, ' ').trim();
+              const pictureSources = [...document.images]
+                .map((image) => image.getAttribute('src') || '')
+                .filter((source) => source.includes('picture/'));
+              return {
+                rootExists: Boolean(root),
+                rootChildCount: root?.childElementCount ?? null,
+                bodyText,
+                pictureSources,
+              };
+            });
+
+            const onlyHomeButton = /^(🏡\s*)?回到?農場首頁$|^🐾\s*回農場$/.test(state.bodyText);
+            if (navigationError || pageErrors.length || brokenLocalAssets.length || (state.rootExists && state.rootChildCount === 0) || onlyHomeButton) {
+              problems.push({ filename, navigationError, pageErrors, brokenLocalAssets, state });
+            }
+            await page.close();
+          }
+
+          await browser.close();
+          console.log(`CHECKED_PAGES=${pages.length}`);
+          if (problems.length) {
+            console.error(JSON.stringify(problems, null, 2));
+            process.exit(1);
+          }
+          console.log('All standardized pages loaded without blank views or broken local assets.');
+          NODE
+          node /tmp/site-rename-audit/verify.mjs
+
+      - name: Commit only completed website changes
+        run: |
+          git rm -f tools/apply_site_rename.py .github/workflows/refactor-page-names-and-picture.yml
+          rmdir tools 2>/dev/null || true
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "refactor: standardize page names and picture assets"
+          git push
