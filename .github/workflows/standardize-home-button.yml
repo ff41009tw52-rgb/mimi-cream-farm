@@ -1,0 +1,121 @@
+name: Verify single cute farm home button
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add the shared button to all root pages
+        run: python3 tools/inject_home_button.py
+
+      - name: Install isolated browser test tools
+        run: |
+          mkdir -p /tmp/home-button-audit
+          npm install --prefix /tmp/home-button-audit playwright@1.55.0
+          npx --prefix /tmp/home-button-audit playwright install --with-deps chromium
+
+      - name: Check one cute home button on every page
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/static-server.log 2>&1 &
+          cat > /tmp/home-button-audit/verify.mjs <<'NODE'
+          import fs from 'node:fs';
+          import { chromium } from 'playwright';
+
+          const pages = fs.readdirSync('.')
+            .filter((name) => name.endsWith('.html') && name !== 'index.html')
+            .sort();
+          const browser = await chromium.launch({ headless: true });
+          const problems = [];
+
+          for (const filename of pages) {
+            const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
+            const pageErrors = [];
+            page.on('pageerror', (error) => pageErrors.push(error.message));
+
+            let navigationError = null;
+            try {
+              const response = await page.goto(`http://127.0.0.1:4173/${filename}`, {
+                waitUntil: 'domcontentloaded',
+                timeout: 30000,
+              });
+              if (!response || response.status() >= 400) {
+                navigationError = `HTTP ${response?.status() || 'no response'}`;
+              }
+              await page.waitForTimeout(2300);
+            } catch (error) {
+              navigationError = error.message;
+            }
+
+            const state = await page.evaluate(() => {
+              const button = document.getElementById('farm-home-button');
+              const homeUrl = new URL('index.html', document.baseURI);
+              const homeDirectory = homeUrl.pathname.replace(/index\.html$/i, '');
+              const homeLinks = [...document.querySelectorAll('a[href]')].filter((link) => {
+                if (link.id === 'farm-home-button') return false;
+                try {
+                  const destination = new URL(link.getAttribute('href'), document.baseURI);
+                  return destination.origin === homeUrl.origin && (
+                    destination.pathname === homeUrl.pathname || destination.pathname === homeDirectory
+                  );
+                } catch {
+                  return false;
+                }
+              });
+              const text = (button?.textContent || '').replace(/\s+/g, '');
+              const style = button ? getComputedStyle(button) : null;
+              return {
+                buttonCount: document.querySelectorAll('#farm-home-button').length,
+                legacyHomeLinkCount: homeLinks.length,
+                text,
+                backgroundImage: style?.backgroundImage || '',
+                left: style?.left || '',
+                top: style?.top || '',
+              };
+            });
+
+            const validStyle = state.backgroundImage.includes('gradient') && state.left !== 'auto' && state.top !== 'auto';
+            if (
+              navigationError || pageErrors.length || state.buttonCount !== 1 ||
+              state.legacyHomeLinkCount !== 0 || state.text !== '🐾回農場' || !validStyle
+            ) {
+              problems.push({ filename, navigationError, pageErrors, state });
+            }
+            await page.close();
+          }
+
+          await browser.close();
+          console.log(`CHECKED_PAGES=${pages.length}`);
+          if (problems.length) {
+            console.error(JSON.stringify(problems, null, 2));
+            process.exit(1);
+          }
+          console.log('Every checked page has exactly one cute 回農場 button.');
+          NODE
+          node /tmp/home-button-audit/verify.mjs
+
+      - name: Commit only the completed website changes
+        run: |
+          git rm -f tools/inject_home_button.py .github/workflows/standardize-home-button.yml
+          rmdir tools 2>/dev/null || true
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+          git add home-button.js *.html
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "fix: standardize one cute farm home button"
+          git push
