@@ -3,6 +3,7 @@
   const styleId = 'farm-home-button-style';
 
   const homeUrl = new URL('index.html', document.baseURI);
+  const homeOnRight = document.body?.dataset.farmHomePosition === 'right';
   const isFarmHomeUrl = (value) => {
     if (!value) return false;
     try {
@@ -46,7 +47,7 @@
       #${buttonId} {
         position: fixed;
         top: 16px;
-        left: 16px;
+        ${homeOnRight ? 'right: 16px; left: auto;' : 'left: 16px; right: auto;'}
         z-index: 2147483647;
         display: inline-flex;
         align-items: center;
@@ -88,7 +89,7 @@
       @media (max-width: 600px) {
         #${buttonId} {
           top: 10px;
-          left: 10px;
+          ${homeOnRight ? 'right: 10px; left: auto;' : 'left: 10px; right: auto;'}
           min-height: 44px;
           padding: 9px 16px;
           font-size: 16px;

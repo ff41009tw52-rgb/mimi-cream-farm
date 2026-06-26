@@ -196,6 +196,25 @@
         .plunger-group:active {
             cursor: grabbing;
         }
+        .plunger-group.locked {
+            cursor: not-allowed;
+            filter: saturate(.75);
+        }
+        .plunger-group.locked::after {
+            content: '固定在 20 mL';
+            position: absolute;
+            left: 50%;
+            bottom: -30px;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #fff3cd;
+            color: #8a5700;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: 0 2px 6px rgba(0,0,0,.12);
+        }
 
         .rod {
             width: 18px;
@@ -537,6 +556,7 @@
 
         function setMission(s) {
             step = s;
+            plunger.classList.toggle('locked', s === 2);
             missionBox.style.borderLeftColor = '';
             targetLine.style.display = 'none';
 
@@ -546,6 +566,7 @@
                 showTargetLine(20);
             } 
             else if (s === 2) {
+                updatePlungerPos(20);
                 missionTitle.innerText = "步驟 2：堵住出口";
                 missionDesc.innerText = "點擊下方的「橡皮塞」，讓它移動過來堵住針頭。";
                 missionBox.style.borderLeftColor = varColor('warning');
@@ -632,6 +653,8 @@
         plunger.addEventListener('touchstart', startDrag, {passive: false});
 
         function startDrag(e) {
+            // 步驟 2 要先固定 20 mL 並安裝橡皮塞，不能再拖動活塞。
+            if (step === 2) return;
             if(step === 4 || step === 5) return;
 
             isDragging = true;
@@ -715,6 +738,11 @@
             setMission(1);
 
             if(!animationFrame) renderParticles();
+        }
+
+        if (location.hostname === '127.0.0.1' || location.hostname === 'localhost') {
+            window.__setMission07 = setMission;
+            window.__updatePlungerPos07 = updatePlungerPos;
         }
 
         init();
