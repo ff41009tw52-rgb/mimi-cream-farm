@@ -1,0 +1,167 @@
+name: Verify layout and animation fixes
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-test:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out pull request branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Apply requested fixes
+        run: |
+          python3 tools/patch_03_05_07.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('03.html')
+          s = p.read_text(encoding='utf-8').replace('width: min(100% - 32px, 1024px);', 'width: min(calc(100% - 32px), 1024px);')
+          p.write_text(s, encoding='utf-8')
+          p = Path('05.html')
+          s = p.read_text(encoding='utf-8').replace('targetStep === 4 ? 4500 : 1800', 'targetStep === 4 ? 14000 : 1800')
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Install Chromium test tools
+        run: |
+          mkdir -p /tmp/layout-animation-test
+          npm install --prefix /tmp/layout-animation-test playwright@1.55.0
+          npx --prefix /tmp/layout-animation-test playwright install --with-deps chromium
+
+      - name: Test 03 layout, 05 replay, and 07 syringe lock
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/static-server.log 2>&1 &
+          cat > /tmp/layout-animation-test/verify.mjs <<'NODE'
+          import fs from 'node:fs';
+          import { chromium } from 'playwright';
+
+          const browser = await chromium.launch({ headless: true });
+          const problems = [];
+          const report = {};
+
+          const page03 = await browser.newPage({ viewport: { width: 1366, height: 900 } });
+          const errors03 = [];
+          page03.on('pageerror', error => errors03.push(error.message));
+          await page03.goto('http://127.0.0.1:4173/03.html', { waitUntil: 'domcontentloaded', timeout: 30000 });
+          await page03.waitForTimeout(1300);
+          report.page03 = await page03.evaluate(() => {
+            const guide = document.querySelector('.mission-guide-03');
+            const summary = guide?.querySelector('summary');
+            const title = document.querySelector('h1');
+            const home = document.getElementById('farm-home-button');
+            const guideStyle = guide ? getComputedStyle(guide).position : null;
+            const titleRect = title?.getBoundingClientRect();
+            const homeRect = home?.getBoundingClientRect();
+            return {
+              guideTag: guide?.tagName,
+              closedByDefault: guide ? !guide.open : false,
+              guidePosition: guideStyle,
+              summaryText: summary?.textContent,
+              titleBelowHome: Boolean(titleRect && homeRect && titleRect.top >= homeRect.bottom + 10),
+            };
+          });
+          if (errors03.length || report.page03.guideTag !== 'DETAILS' || !report.page03.closedByDefault || report.page03.guidePosition !== 'static' || !report.page03.titleBelowHome) {
+            problems.push({ page: '03.html', errors: errors03, result: report.page03 });
+          }
+          await page03.screenshot({ path: '/tmp/layout-animation-test/03-layout.png', fullPage: true });
+          await page03.close();
+
+          const page05 = await browser.newPage({ viewport: { width: 1366, height: 900 } });
+          const errors05 = [];
+          page05.on('pageerror', error => errors05.push(error.message));
+          await page05.goto('http://127.0.0.1:4173/05.html', { waitUntil: 'domcontentloaded', timeout: 30000 });
+          await page05.waitForTimeout(800);
+          report.page05 = await page05.evaluate(async () => {
+            const home = document.getElementById('farm-home-button');
+            const homeRect = home?.getBoundingClientRect();
+            window.__prepareReplay05(1);
+            const before = window.__getSandLabState05();
+            await new Promise(resolve => setTimeout(resolve, 450));
+            const waterAfterReplay = window.__getSandLabState05();
+            window.__prepareReplay05(4);
+            await new Promise(resolve => setTimeout(resolve, 3800));
+            const filterReplay = window.__getSandLabState05();
+            return {
+              homeRight: Boolean(homeRect && (window.innerWidth - homeRect.right) <= 20),
+              stepOne: before.step,
+              waterAtStart: before.waterVolume,
+              waterAfterReplay: waterAfterReplay.waterVolume,
+              filterStep: filterReplay.step,
+              angleDuringFilter: filterReplay.beakerAngle,
+              sandSpawned: filterReplay.sandSpawned,
+              pageHomeSetting: filterReplay.homeOnRight,
+            };
+          });
+          if (errors05.length || !report.page05.homeRight || !report.page05.pageHomeSetting || report.page05.stepOne !== 1 || report.page05.waterAtStart !== 0 || report.page05.waterAfterReplay <= 0 || report.page05.filterStep !== 4 || report.page05.angleDuringFilter >= -1 || report.page05.sandSpawned < 15) {
+            problems.push({ page: '05.html', errors: errors05, result: report.page05 });
+          }
+          await page05.screenshot({ path: '/tmp/layout-animation-test/05-replay.png', fullPage: true });
+          await page05.close();
+
+          const page07 = await browser.newPage({ viewport: { width: 1366, height: 900 } });
+          const errors07 = [];
+          page07.on('pageerror', error => errors07.push(error.message));
+          await page07.goto('http://127.0.0.1:4173/07.html', { waitUntil: 'domcontentloaded', timeout: 30000 });
+          await page07.waitForTimeout(700);
+          report.page07 = await page07.evaluate(() => {
+            window.__updatePlungerPos07(11);
+            window.__setMission07(2);
+            const plunger = document.getElementById('plunger');
+            const beforeTop = plunger.style.top;
+            plunger.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientY: 150 }));
+            document.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientY: 520 }));
+            document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, clientY: 520 }));
+            return {
+              beforeTop,
+              afterTop: plunger.style.top,
+              locked: plunger.classList.contains('locked'),
+              volume: document.getElementById('volumeValue')?.textContent,
+              mission: document.getElementById('missionTitle')?.textContent,
+            };
+          });
+          if (errors07.length || !report.page07.locked || report.page07.beforeTop !== report.page07.afterTop || report.page07.volume !== '20 mL' || report.page07.mission !== '步驟 2：堵住出口') {
+            problems.push({ page: '07.html', errors: errors07, result: report.page07 });
+          }
+          await page07.screenshot({ path: '/tmp/layout-animation-test/07-locked.png', fullPage: true });
+          await page07.close();
+
+          await browser.close();
+          fs.writeFileSync('/tmp/layout-animation-test/report.json', JSON.stringify({ report, problems }, null, 2));
+          if (problems.length) {
+            console.error(JSON.stringify(problems, null, 2));
+            process.exit(1);
+          }
+          console.log('All requested layout, replay, and syringe lock checks passed.');
+          NODE
+          node /tmp/layout-animation-test/verify.mjs
+
+      - name: Upload screenshots and verification report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: layout-animation-verification
+          path: /tmp/layout-animation-test
+          if-no-files-found: warn
+
+      - name: Commit only the verified website fixes
+        run: |
+          git rm -f tools/patch_03_05_07.py .github/workflows/verify-03-05-07-layout.yml
+          rmdir tools 2>/dev/null || true
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+          git add 03.html 05.html 07.html home-button.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "fix: prevent guide overlap and improve replay controls"
+          git push
