@@ -1,0 +1,91 @@
+name: Finalize 05 pour flow
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  verify-and-commit:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build repaired page
+        run: |
+          python3 tools/patch_05_pour_flow_v2.py
+          python3 tools/repair_05_particle_branch.py
+
+      - name: Install Chromium
+        run: |
+          mkdir -p /tmp/pour-flow-final
+          npm install --prefix /tmp/pour-flow-final playwright@1.55.0
+          npx --prefix /tmp/pour-flow-final playwright install --with-deps chromium
+
+      - name: Run visual-state browser test
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/static-server.log 2>&1 &
+          cat > /tmp/pour-flow-final/verify.mjs <<'NODE'
+          import fs from 'node:fs';
+          import { chromium } from 'playwright';
+          const browser = await chromium.launch({ headless: true });
+          const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
+          const errors = [];
+          page.on('pageerror', error => errors.push(error.message));
+          await page.goto('http://127.0.0.1:4173/05.html', { waitUntil: 'domcontentloaded', timeout: 30000 });
+          await page.waitForTimeout(800);
+          const initial = await page.evaluate(() => {
+            const home = document.getElementById('farm-home-button')?.getBoundingClientRect();
+            return { helper: typeof window.__prepareReplay05 === 'function', homeRight: Boolean(home && window.innerWidth - home.right <= 20), setting: document.body.dataset.farmHomePosition };
+          });
+          await page.evaluate(() => window.__prepareReplay05(4));
+          await page.waitForTimeout(2800);
+          const during = await page.evaluate(() => window.__getSandLabState05());
+          await page.screenshot({ path: '/tmp/pour-flow-final/05-during-pour.png', fullPage: true });
+          await page.waitForTimeout(22000);
+          const final = await page.evaluate(() => ({ ...window.__getSandLabState05(), resultVisible: document.getElementById('finalResultCard').classList.contains('show') }));
+          await page.screenshot({ path: '/tmp/pour-flow-final/05-final.png', fullPage: true });
+          await page.evaluate(() => window.__prepareReplay05(4));
+          await page.waitForTimeout(2800);
+          const replay = await page.evaluate(() => window.__getSandLabState05());
+          await page.screenshot({ path: '/tmp/pour-flow-final/05-replay.png', fullPage: true });
+          await browser.close();
+          const report = { initial, during, final, replay, errors };
+          fs.writeFileSync('/tmp/pour-flow-final/report.json', JSON.stringify(report, null, 2));
+          const failed = errors.length || !initial.helper || !initial.homeRight || initial.setting !== 'right' ||
+            during.step !== 4 || during.waterVolume >= 84 || during.waterVolume <= 20 ||
+            during.sourceSandVisible < 100 || during.sourceSandVisible >= 300 ||
+            during.sandDeposited < 8 || during.pileMaximum <= 0 ||
+            final.step !== 5 || !final.resultVisible || final.sandDeposited < 100 || final.pileMaximum < 20 ||
+            replay.step !== 4 || replay.waterVolume >= 84 || replay.waterVolume <= 20 ||
+            replay.sourceSandVisible < 100 || replay.sandDeposited < 8 || replay.pileMaximum <= 0;
+          if (failed) { console.error(JSON.stringify(report, null, 2)); process.exit(1); }
+          NODE
+          node /tmp/pour-flow-final/verify.mjs
+
+      - name: Upload test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 05-pour-flow-final-verification
+          path: /tmp/pour-flow-final
+          if-no-files-found: warn
+
+      - name: Keep only verified 05 page change
+        run: |
+          git rm -f tools/patch_05_pour_flow_v2.py tools/repair_05_particle_branch.py .github/workflows/verify-05-pour-flow-v2.yml .github/workflows/debug-05-pour-flow.yml .github/workflows/finalize-05-pour-flow.yml
+          rmdir tools 2>/dev/null || true
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+          git add 05.html
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "fix: keep water and sand visible while pouring"
+          git push
