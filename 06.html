@@ -198,6 +198,7 @@
             }
         }
 
+.cat-quote{margin-top:14px;padding:12px;border-radius:14px;background:#fff8e1;border:2px dashed #ffb74d;font-weight:bold;color:#5d4037;display:none}.char-card{cursor:pointer}.char-card.active .cat-quote{display:block}
     </style>
 </head>
 <body>
@@ -212,40 +213,40 @@
         <div class="characters-grid">
             
             <article class="char-card mimi-theme">
-                <div class="mimi-header">橘咪咪 (Mimi)</div>
+                <div class="mimi-header">橘咪咪：觀察小隊長</div>
                 <!-- 橘咪咪的圖片 -->
                 <img src="picture/Christmasmimi.jpg" alt="橘咪咪的照片" class="char-img">
                 
                 <div class="card-body">
                     <div class="tags">
                         <span class="tag mimi-tag">#小橘貓</span>
-                        <span class="tag mimi-tag">#貪吃鬼</span>
+                        <span class="tag mimi-tag">#會發現問題</span>
                         <span class="tag mimi-tag">#挑食美食家</span>
                     </div>
                     <p class="description">
                         這是一隻個性超級和善的小橘貓，平時對誰都好，是農場裡的暖男擔當。
                         <br><br>
                         <strong>但是！</strong>只要遇到好吃的食物，他的眼神就會變了！雖然貪吃，但他可是非常挑惕的，只吃最好的。而且一旦發現美食，絕對不會放過給任何人（就算是白奶油也別想搶！）。
-                    </p>
+                    </p><div class="cat-quote">點我：我先觀察，再把發現告訴大家！</div>
                 </div>
             </article>
 
             <article class="char-card cream-theme">
-                <div class="cream-header">白奶油 (Cream)</div>
+                <div class="cream-header">白奶油：問題發明家</div>
                 <!-- 白奶油的圖片 -->
                 <img src="picture/Christmascream.jpg" alt="白奶油的照片" class="char-img">
 
                 <div class="card-body">
                     <div class="tags">
                         <span class="tag cream-tag">#火焰色布偶</span>
-                        <span class="tag cream-tag">#傲嬌任性</span>
+                        <span class="tag cream-tag">#愛提問</span>
                         <span class="tag cream-tag">#吃不胖體質</span>
                     </div>
                     <p class="description">
                         擁有美麗火焰色的布偶貓，性格任性又傲嬌，覺得自己是農場裡最可愛的存在（實際上也是）。
                         <br><br>
                         最喜歡做的事就是<strong>搶橘咪咪的食物</strong>，神奇的是，不管怎麼搶、怎麼吃，他永遠都比橘咪咪還要瘦！雖然看起來精明，但其實常常會不小心做出笨笨的事情，讓人好氣又好笑。
-                    </p>
+                    </p><div class="cat-quote">點我：我有一個問題！讓我們動手試試看！</div>
                 </div>
             </article>
 
@@ -258,9 +259,10 @@
 
     <!-- 右下角懸浮按鈕：連結到 10.html -->
     <a href="10.html" class="floating-owner-btn">
-        👨‍🏫 貓咪主人介紹
+        👨‍🏫 認識農場老師
     </a>
 
+<script>document.querySelectorAll('.char-card').forEach(c=>c.addEventListener('click',()=>c.classList.toggle('active')));</script>
     <script src="home-button.js"></script>
 </body>
 </html>

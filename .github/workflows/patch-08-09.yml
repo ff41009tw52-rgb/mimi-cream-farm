@@ -1,0 +1,191 @@
+name: Patch circuit and badge logic
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Patch 08 and 09
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('08.html')
+          s = p.read_text(encoding='utf-8')
+          start = s.index('// --- 核心邏輯 ---')
+          end = s.index('            return (', start)
+          logic = '''            // --- 核心邏輯 ---
+            const runSimulation = () => {
+                setErrorMsg('');
+                setLitBulbIds(new Set());
+                setBrightness(0);
+                const node = (id, terminal) => id + ':' + terminal;
+                const makeGraph = (skipBulbId) => {
+                    const graph = {};
+                    const addNode = (key) => { if (!graph[key]) graph[key] = []; };
+                    const connect = (a, b) => { addNode(a); addNode(b); graph[a].push(b); graph[b].push(a); };
+                    components.forEach(component => {
+                        if (component.type === COMPONENT_TYPES.BATTERY) {
+                            addNode(node(component.id, 'pos'));
+                            addNode(node(component.id, 'neg'));
+                        } else {
+                            addNode(node(component.id, 'thread'));
+                            addNode(node(component.id, 'tip'));
+                        }
+                    });
+                    wires.forEach(wire => connect(node(wire.start.compId, wire.start.pointType), node(wire.end.compId, wire.end.pointType)));
+                    components.filter(component => component.type === COMPONENT_TYPES.BULB && component.id !== skipBulbId)
+                        .forEach(bulb => connect(node(bulb.id, 'thread'), node(bulb.id, 'tip')));
+                    return graph;
+                };
+                const reachable = (graph, startNode) => {
+                    const seen = new Set([startNode]);
+                    const queue = [startNode];
+                    while (queue.length) {
+                        const current = queue.shift();
+                        (graph[current] || []).forEach(next => { if (!seen.has(next)) { seen.add(next); queue.push(next); } });
+                    }
+                    return seen;
+                };
+                const batteries = components.filter(component => component.type === COMPONENT_TYPES.BATTERY);
+                const bulbs = components.filter(component => component.type === COMPONENT_TYPES.BULB);
+                if (batteries.length === 0) { setErrorMsg('需要電池才能供電！'); setIsSwitchOn(false); return; }
+                const litBulbs = new Set();
+                batteries.forEach(battery => {
+                    bulbs.forEach(bulb => {
+                        const graph = makeGraph(bulb.id);
+                        const fromPositive = reachable(graph, node(battery.id, 'pos'));
+                        const fromNegative = reachable(graph, node(battery.id, 'neg'));
+                        const thread = node(bulb.id, 'thread');
+                        const tip = node(bulb.id, 'tip');
+                        if ((fromPositive.has(thread) && fromNegative.has(tip)) || (fromPositive.has(tip) && fromNegative.has(thread))) litBulbs.add(bulb.id);
+                    });
+                });
+                const wireOnlyGraph = makeGraph('__skip_all_bulbs__');
+                const directShort = batteries.some(battery => reachable(wireOnlyGraph, node(battery.id, 'pos')).has(node(battery.id, 'neg')));
+                if (litBulbs.size > 0) {
+                    setLitBulbIds(litBulbs);
+                    setBrightness(batteries.length >= 2 ? 2 : 1);
+                    setErrorMsg('電路形成完整圈圈！' + litBulbs.size + ' 顆燈泡發光。');
+                } else if (directShort) {
+                    setErrorMsg('電池正負極被電線直接連起來了，請讓電流先經過燈泡。');
+                } else {
+                    setErrorMsg('電源已開啟，但每一顆燈泡都還沒有形成完整迴路。');
+                }
+            };
+
+'''
+          s = s[:start] + logic + s[end:]
+          p.write_text(s, encoding='utf-8')
+
+          p = Path('09.html')
+          s = p.read_text(encoding='utf-8').replace('🏆 分數: 0 / 100', '🏅 任務徽章: 0 / 3')
+          a = s.index('    changeMission: function() {')
+          b = s.index('    spawnItem: function() {', a)
+          mission = '''    changeMission: function() {
+        const remaining = this.missions.filter(mission => !this.state.completedBadges.has(mission.type));
+        if (remaining.length === 0) { this.showResult(true, 'pass'); return; }
+        let choices = remaining.filter(mission => !this.state.currentMission || mission.type !== this.state.currentMission.type);
+        if (choices.length === 0) choices = remaining;
+        const newMission = choices[Math.floor(Math.random() * choices.length)];
+        this.state.currentMission = newMission;
+        this.state.missionItemsCollected = 0;
+        this.state.currentMissionTarget = 2;
+        const missionEl = document.getElementById('current-mission');
+        document.getElementById('mission-text').textContent = newMission.text + '（0/2）';
+        missionEl.style.backgroundColor = newMission.color;
+        missionEl.style.borderColor = newMission.borderColor;
+        missionEl.style.transform = 'scale(1.15)';
+        setTimeout(() => missionEl.style.transform = 'scale(1)', 250);
+    },
+
+'''
+          s = s[:a] + mission + s[b:]
+          a = s.index('    handleCollection: function(item) {')
+          b = s.index('    showResult: function(', a)
+          collection = '''    handleCollection: function(item) {
+        const isCorrect = item.data.type === this.state.currentMission.type;
+        if (isCorrect) {
+            this.state.score += 1;
+            this.state.missionItemsCollected += 1;
+            const progress = this.state.missionItemsCollected;
+            if (progress >= this.state.currentMissionTarget) {
+                const badgeNames = { acid: '酸性小達人', base: '鹼性小達人', neutral: '中性小達人' };
+                this.state.completedBadges.add(this.state.currentMission.type);
+                this.showFloatingText('獲得：' + badgeNames[this.state.currentMission.type] + '！', '#2ecc71', this.player.x);
+                this.updateUI();
+                if (this.state.completedBadges.size >= 3) { this.showResult(true, 'pass'); return; }
+                setTimeout(() => this.changeMission(), 450);
+            } else {
+                this.showFloatingText('答對！再收集 ' + (this.state.currentMissionTarget - progress) + ' 個。', '#2ecc71', this.player.x);
+                document.getElementById('mission-text').textContent = this.state.currentMission.text + '（' + progress + '/2）';
+            }
+        } else {
+            this.state.lives -= 1;
+            this.showFloatingText('挑戰機會 -1', '#e74c3c', this.player.x);
+            this.canvas.style.transform = 'translateX(5px)';
+            setTimeout(() => this.canvas.style.transform = 'translateX(0)', 50);
+            if (this.state.lives <= 0) this.showResult(false, 'fail');
+        }
+        this.updateUI();
+    },
+
+'''
+          s = s[:a] + collection + s[b:]
+          a = s.index('    showResult: function(')
+          b = s.index('    updateUI: function()', a)
+          result = '''    showResult: function(isWin, type) {
+        this.state.isPlaying = false;
+        const titleEl = document.getElementById('result-title');
+        const msgEl = document.getElementById('result-msg');
+        const scoreEl = document.getElementById('final-score');
+        const screen = document.getElementById('result-screen');
+        const badge = (type, label) => (this.state.completedBadges.has(type) ? '✅ ' : '⬜ ') + label;
+        scoreEl.textContent = this.state.completedBadges.size + ' / 3';
+        screen.classList.remove('hidden');
+        if (isWin) {
+            titleEl.textContent = '🎉 三個任務徽章都完成了！';
+            titleEl.style.color = '#2ecc71';
+            msgEl.innerHTML = '<span style="color:#f1c40f">白奶油博士：</span>「你成功分辨酸性、鹼性和中性溶液！」<br><br>' + badge('acid', '酸性小達人') + '<br>' + badge('base', '鹼性小達人') + '<br>' + badge('neutral', '中性小達人') + '<br><br><span style="color:#e67e22">橘咪咪：</span>「科學小達人，分類任務成功！」';
+        } else {
+            titleEl.textContent = '再挑戰一次';
+            titleEl.style.color = '#e67e22';
+            msgEl.innerHTML = '<span style="color:#e67e22">橘咪咪：</span>「先看清楚白奶油博士要收集哪一類溶液，再試一次！」<br><br>' + badge('acid', '酸性小達人') + '<br>' + badge('base', '鹼性小達人') + '<br>' + badge('neutral', '中性小達人');
+        }
+    },
+
+'''
+          s = s[:a] + result + s[b:]
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Verify required logic
+        run: |
+          grep -q "const makeGraph" 08.html
+          grep -q "每一顆燈泡都還沒有形成完整迴路" 08.html
+          grep -q "const remaining = this.missions.filter" 09.html
+          grep -q "三個任務徽章都完成了" 09.html
+
+      - name: Commit tested changes
+        run: |
+          rm -f .github/workflows/patch-08-09.yml tools/trigger-08-09.txt
+          rmdir tools 2>/dev/null || true
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+          git add -A
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "fix: complete circuit and badge game logic"
+          git push

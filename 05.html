@@ -167,6 +167,7 @@
             .cat-container.speaking { transform: scale(1.1); }
         }
 
+.thinking-box{background:#fff8e1;border:2px dashed #ffb74d;padding:10px;border-radius:12px;margin:10px 0 14px;color:#5d4037}.final-result-card{position:absolute;top:20px;right:20px;max-width:300px;background:rgba(255,255,255,.95);border:3px solid #ffcc80;border-radius:16px;padding:12px;z-index:25;color:#4e342e;display:none}.final-result-card.show{display:block}#replay-step-btn{background:linear-gradient(135deg,#8bc34a,#689f38)}
     </style>
 </head>
 <body>
@@ -185,9 +186,11 @@
             <span id="s-title" class="step-title">步驟 1：觀察混合物</span>
             <div id="s-desc" class="step-desc">觀察燒杯內的物質，可以看到深色的沙子和白色的食鹽混合在一起。</div>
         </div>
+        <div class="thinking-box"><b>停下來想一想</b><div id="thinkingQuestion">沙子和食鹽混在一起時，可以用哪一個特性來分開？</div></div>
 
         <div class="controls">
             <button id="main-btn">開始實驗：加水</button>
+            <button id="replay-step-btn" type="button">重看這一步</button>
             <button id="reset-btn" style="background: #6c757d; display: none;">重新開始</button>
         </div>
 
@@ -219,6 +222,7 @@
         </div>
     </div>
 
+<div class="final-result-card" id="finalResultCard"><h3>✅ 分離成功</h3><ul><li>濾紙上留下：沙子</li><li>杯子裡得到：食鹽水</li><li>成功原因：食鹽可溶於水，沙子不易溶於水。</li></ul></div>
     <canvas id="canvas"></canvas>
 
     <script>
@@ -265,6 +269,9 @@
         const titleEl = document.getElementById('s-title');
         const descEl = document.getElementById('s-desc');
         const mainBtn = document.getElementById('main-btn');
+        const replayStepBtn = document.getElementById('replay-step-btn');
+        const thinkingQuestionEl = document.getElementById('thinkingQuestion');
+        const finalResultCard = document.getElementById('finalResultCard');
         const resetBtn = document.getElementById('reset-btn');
         const dots = document.querySelectorAll('.step-dot');
 
@@ -279,7 +286,7 @@
             { // Step 0
                 speaker: 'mimi',
                 name: '橘咪咪',
-                text: '這杯子裡黑黑白白的是什麼？是黑糖粉和白糖粉嗎？能不能讓我舔一口？🤤'
+                text: '這杯裡有沙子和食鹽混在一起，我們要怎麼把它們分開呢？🤔'
             },
             { // Step 1 (加水)
                 speaker: 'cream',
@@ -304,7 +311,7 @@
             { // Step 5 (完成)
                 speaker: 'cream',
                 name: '白奶油',
-                text: '看！濾紙上留下的固體是沙子，流下去的液體是食鹽水。這就是過濾法！✨'
+                text: '看！濾紙上留下沙子，流下去的是食鹽水。再把水蒸發，就能讓食鹽重新出現。✨'
             }
         ];
 
@@ -593,7 +600,7 @@
 
             if (step === 4 && beakerA.isPouring && !topIsAlmostEmpty && !bottomIsFull) {
                 const spoutPos = getSpoutTipWorldPos(beakerA);
-                let flowRate = 2; 
+                let flowRate = 4; 
 
                 for(let k=0; k < flowRate; k++) {
                     filterSetup.fallingParticles.push({
@@ -818,7 +825,7 @@
                 let bottomIsFull = filterSetup.beakerBWaterLevel >= MAX_BOTTOM_LEVEL;
 
                 if (beakerA.isPouring && beakerA.waterVolume > 0.5 && !bottomIsFull) {
-                    let drainRate = 0.015;
+                    let drainRate = 0.03;
                     if (drainRate < 0.005) drainRate = 0.005; 
                     beakerA.waterVolume -= drainRate; 
                     
@@ -865,7 +872,7 @@
 
         const stepsData = [
             { t: "步驟 1：觀察混合物", d: "燒杯中有大量的沙子（棕色）與食鹽（白色）混合物，約佔杯身 1/3。", btn: "加入清水" },
-            { t: "步驟 2：加水溶解", d: "水柱準確注入燒杯中，準備溶解食鹽。", btn: "開始攪拌" },
+            { t: "步驟 2：加水溶解", d: "水柱準確注入燒杯中，準備溶解食鹽。", btn: "開始攪拌", q:"加水後，哪一種物質溶進水裡？" },
             { t: "步驟 3：攪拌加速溶解", d: "玻璃棒深入底部攪拌。食鹽溶解消失，沙子沉澱。", btn: "準備篩網" },
             { t: "步驟 4：準備過濾", d: "裝置移至中央。準備過濾。", btn: "倒入混合液" },
             { t: "步驟 5：過濾分離", d: "沙子平整地堆積在篩網上，食鹽水濾出。", btn: "完成實驗" },
@@ -873,7 +880,7 @@
         ];
 
         function updateUI(s) {
-            const data = stepsData[s]; titleEl.textContent = data.t; descEl.textContent = data.d;
+            const data = stepsData[s]; titleEl.textContent = data.t; descEl.textContent = data.d; thinkingQuestionEl.textContent = data.q || data.d; if(finalResultCard) finalResultCard.classList.toggle('show',s===5);
             if (s === 5) { mainBtn.style.display = 'none'; resetBtn.style.display = 'block'; }
             else { mainBtn.textContent = data.btn; mainBtn.style.display = 'block'; resetBtn.style.display = 'none'; }
             dots.forEach((d, i) => { if(i < 4) d.className = i === Math.min(s, 3) ? 'step-dot active' : 'step-dot'; });
@@ -889,6 +896,7 @@
                 if (step === 4) { mainBtn.disabled = true; autoStepTimer = setTimeout(() => { step = 5; updateUI(5); autoStepTimer = null; }, 25000); }
             }
         });
+        replayStepBtn.addEventListener('click',()=>{thinkingQuestionEl.textContent='重看提示：'+(stepsData[Math.min(step,5)].q||stepsData[Math.min(step,5)].d);});
         resetBtn.addEventListener('click', () => resetExperiment());
         init();
     </script>
