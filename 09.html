@@ -204,6 +204,34 @@
             line-height: 1.8;
         }
         #final-score { font-size: 72px; font-weight: 800; color: #f1c40f; margin: 15px 0; text-shadow: 0 0 15px rgba(241, 196, 15, 0.6); }
+
+        #badge-tracker {
+            position: absolute;
+            top: 160px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            pointer-events: none;
+        }
+        .badge-chip {
+            background: rgba(0, 0, 0, 0.66);
+            border: 2px solid rgba(255,255,255,0.35);
+            border-radius: 999px;
+            color: #d7dde5;
+            font-size: 15px;
+            font-weight: 700;
+            padding: 7px 11px;
+            transition: transform .2s ease, background .2s ease, color .2s ease;
+        }
+        .badge-chip.earned {
+            background: #fff4b8;
+            border-color: #f1c40f;
+            color: #7a4b00;
+            transform: translateY(-2px) scale(1.04);
+        }
+
     </style>
 </head>
 <body>
@@ -215,7 +243,7 @@
     
     <div id="ui-layer">
         <div class="hud-top">
-            <div class="stat-box" id="score-display">🏆 分數: 0 / 100</div>
+            <div class="stat-box" id="score-display">🏅 任務徽章: 0 / 3</div>
             <div class="stat-box" id="lives-display">🎯 挑戰機會: 3 次</div>
         </div>
         <div class="mission-container">
@@ -223,6 +251,12 @@
                 <span class="mission-label">白奶油博士的指令</span>
                 <span id="mission-text">準備開始...</span>
             </div>
+        </div>
+
+        <div id="badge-tracker" aria-label="任務徽章進度">
+            <span class="badge-chip" id="badge-acid">⬜ 酸性小達人</span>
+            <span class="badge-chip" id="badge-base">⬜ 鹼性小達人</span>
+            <span class="badge-chip" id="badge-neutral">⬜ 中性小達人</span>
         </div>
     </div>
 
@@ -315,6 +349,7 @@ const game = {
         this.state.isPlaying = true;
         this.state.missionItemsCollected = 0;
         this.state.completedBadges = new Set();
+        this.state.currentMission = null;
         
         this.changeMission(); 
         this.updateUI();
@@ -348,24 +383,26 @@ const game = {
     },
 
     changeMission: function() {
-        let newMission;
-        do {
-            newMission = this.missions[Math.floor(Math.random() * this.missions.length)];
-        } while (this.state.currentMission && newMission.type === this.state.currentMission.type);
+        const remaining = this.missions.filter(mission => !this.state.completedBadges.has(mission.type));
+        if (remaining.length === 0) {
+            this.showResult(true, 'pass');
+            return;
+        }
 
+        let choices = remaining.filter(mission => !this.state.currentMission || mission.type !== this.state.currentMission.type);
+        if (choices.length === 0) choices = remaining;
+
+        const newMission = choices[Math.floor(Math.random() * choices.length)];
         this.state.currentMission = newMission;
         this.state.missionItemsCollected = 0;
-        this.state.currentMissionTarget = Math.floor(Math.random() * 2) + 2; 
+        this.state.currentMissionTarget = 2;
 
         const missionEl = document.getElementById('current-mission');
-        const textEl = document.getElementById('mission-text');
-        
-        textEl.textContent = newMission.text;
+        document.getElementById('mission-text').textContent = `${newMission.text}（0/${this.state.currentMissionTarget}）`;
         missionEl.style.backgroundColor = newMission.color;
         missionEl.style.borderColor = newMission.borderColor;
-        
-        missionEl.style.transform = "scale(1.15)";
-        setTimeout(() => missionEl.style.transform = "scale(1)", 250);
+        missionEl.style.transform = 'scale(1.15)';
+        setTimeout(() => missionEl.style.transform = 'scale(1)', 250);
     },
 
     spawnItem: function() {
@@ -411,10 +448,10 @@ const game = {
             if (this.player.x + this.player.width > this.canvas.width) this.player.x = this.canvas.width - this.player.width;
         }
 
-        // 調整難度曲線，因為滿分變成100，所以稍微提早一點點加速
+        // 每獲得一枚徽章，掉落速度稍微加快。
         let spawnRate = 60;
-        if (this.state.score > 20) spawnRate = 50; 
-        if (this.state.score > 60) spawnRate = 45; 
+        if (this.state.completedBadges.size >= 1) spawnRate = 52;
+        if (this.state.completedBadges.size >= 2) spawnRate = 46;
         
         if (this.state.frameCount % spawnRate === 0 && this.state.items.length < 4) {
             this.spawnItem();
@@ -449,30 +486,36 @@ const game = {
 
     handleCollection: function(item) {
         const isCorrect = item.data.type === this.state.currentMission.type;
-        
+
         if (isCorrect) {
             this.state.score += 1;
-            this.state.missionItemsCollected++;
-            this.showFloatingText('徽章進度 +1', '#2ecc71', this.player.x);
-            
-            this.state.completedBadges.add(this.state.currentMission.type);
-            if (this.state.completedBadges.size >= this.state.targetScore) {
-                this.showResult(true, "pass");
-                return;
-            }
+            this.state.missionItemsCollected += 1;
+            const progress = this.state.missionItemsCollected;
+            const needed = this.state.currentMissionTarget;
 
-            if (this.state.missionItemsCollected >= this.state.currentMissionTarget) {
-                 this.changeMission();
-            }
+            if (progress >= needed) {
+                const badgeNames = { acid: '酸性小達人', base: '鹼性小達人', neutral: '中性小達人' };
+                this.state.completedBadges.add(this.state.currentMission.type);
+                this.showFloatingText(`獲得：${badgeNames[this.state.currentMission.type]}！`, '#2ecc71', this.player.x);
+                this.updateUI();
 
+                if (this.state.completedBadges.size >= this.state.targetScore) {
+                    this.showResult(true, 'pass');
+                    return;
+                }
+
+                setTimeout(() => this.changeMission(), 450);
+            } else {
+                this.showFloatingText(`答對！再收集 ${needed - progress} 個。`, '#2ecc71', this.player.x);
+                document.getElementById('mission-text').textContent = `${this.state.currentMission.text}（${progress}/${needed}）`;
+            }
         } else {
-            this.state.lives--;
-            this.showFloatingText("-1 ❤️", "#e74c3c", this.player.x);
-            this.canvas.style.transform = "translateX(5px)";
-            setTimeout(() => this.canvas.style.transform = "translateX(0)", 50);
-
+            this.state.lives -= 1;
+            this.showFloatingText('挑戰機會 -1', '#e74c3c', this.player.x);
+            this.canvas.style.transform = 'translateX(5px)';
+            setTimeout(() => this.canvas.style.transform = 'translateX(0)', 50);
             if (this.state.lives <= 0) {
-                this.showResult(false, "fail");
+                this.showResult(false, 'fail');
             }
         }
         this.updateUI();
@@ -480,44 +523,49 @@ const game = {
 
     showResult: function(isWin, type) {
         this.state.isPlaying = false;
-        
         const titleEl = document.getElementById('result-title');
         const msgEl = document.getElementById('result-msg');
         const scoreEl = document.getElementById('final-score');
         const screen = document.getElementById('result-screen');
-        
+        const badge = (type, label) => `${this.state.completedBadges.has(type) ? '✅' : '⬜'} ${label}`;
+
         scoreEl.textContent = `${this.state.completedBadges.size} / 3`;
         screen.classList.remove('hidden');
 
-        // 修改：更新評價分數區間
-        if (this.state.score >= 100) { // 100分 (滿分)
-            titleEl.textContent = "🎉 完美實驗！";
-            titleEl.style.color = "#2ecc71";
+        if (isWin) {
+            titleEl.textContent = '🎉 三個任務徽章都完成了！';
+            titleEl.style.color = '#2ecc71';
             msgEl.innerHTML = `
-                <span style="color:#f1c40f">白奶油博士：</span>「完美同步！各項數值都達到了理論巔峰，這是一次教科書級別的實驗！」<br><br>
-                <span style="color:#e67e22">橘咪咪：</span>「檢測不到任何誤差！您簡直就是精密的代名詞！」
+                <span style="color:#f1c40f">白奶油博士：</span>「你成功分辨酸性、鹼性和中性溶液！」<br><br>
+                ${badge('acid', '酸性小達人')}<br>
+                ${badge('base', '鹼性小達人')}<br>
+                ${badge('neutral', '中性小達人')}<br><br>
+                <span style="color:#e67e22">橘咪咪：</span>「科學小達人，分類任務成功！」
             `;
-        } else if (this.state.score >= 50) { // 50 ~ 99分
-            titleEl.textContent = "數據穩定";
-            titleEl.style.color = "#3498db";
+        } else {
+            titleEl.textContent = '再挑戰一次';
+            titleEl.style.color = '#e67e22';
             msgEl.innerHTML = `
-                <span style="color:#f1c40f">白奶油博士：</span>「樣本採集成功。雖然有些微雜訊，但整體表現相當優異。」<br><br>
-                <span style="color:#e67e22">橘咪咪：</span>「數據正在上傳中～做得好！下次我們一定能捕捉到那最後的 1%！」
-            `;
-        } else { // 0 ~ 49分
-            titleEl.textContent = "需要校正";
-            titleEl.style.color = "#e74c3c";
-            msgEl.innerHTML = `
-                <span style="color:#e67e22">橘咪咪：</span>「嗚嗚……系統發出警報了，數據好像不太對勁……」<br><br>
-                <span style="color:#f1c40f">白奶油博士：</span>「冷靜點，變數控制失誤常有的事。讓我們重新校準儀器，再來一次。」
+                <span style="color:#e67e22">橘咪咪：</span>「先看清楚白奶油博士要收集哪一類溶液，再試一次！」<br><br>
+                ${badge('acid', '酸性小達人')}<br>
+                ${badge('base', '鹼性小達人')}<br>
+                ${badge('neutral', '中性小達人')}
             `;
         }
     },
 
     updateUI: function() {
         document.getElementById('score-display').textContent = `🏅 任務徽章: ${this.state.completedBadges.size} / 3`;
-        let hearts = "";
-        for(let i=0; i<this.state.lives; i++) hearts += "❤️";
+        const badgeLabels = { acid: '酸性小達人', base: '鹼性小達人', neutral: '中性小達人' };
+        Object.entries(badgeLabels).forEach(([type, label]) => {
+            const chip = document.getElementById(`badge-${type}`);
+            if (!chip) return;
+            const earned = this.state.completedBadges.has(type);
+            chip.textContent = `${earned ? '✅' : '⬜'} ${label}`;
+            chip.classList.toggle('earned', earned);
+        });
+        let hearts = '';
+        for (let i = 0; i < this.state.lives; i++) hearts += '❤️';
         document.getElementById('lives-display').textContent = `挑戰機會: ${this.state.lives} 次 ${hearts}`;
     },
 
