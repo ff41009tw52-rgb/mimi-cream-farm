@@ -25,43 +25,27 @@ jobs:
           python3 tools/patch_05_sand_animation.py
           python3 - <<'PY'
           from pathlib import Path
-          import re
           p = Path('05.html')
           s = p.read_text(encoding='utf-8')
           s = s.replace('beakerA.waterVolume - 0.075', 'beakerA.waterVolume - 0.11')
           s = s.replace('filterSetup.beakerBWaterLevel + 0.035', 'filterSetup.beakerBWaterLevel + 0.055')
           s = s.replace("const source = beakerA.particles.find(p => p.type === 'sand' && p.alpha > 0);\n            if (source) source.alpha = 0;", "for (let i = 0; i < 3; i++) {\n                const source = beakerA.particles.find(p => p.type === 'sand' && p.alpha > 0);\n                if (source) source.alpha = 0;\n            }")
-          old = r'''                    if (step === 4 && b.angle < -0.5) {
-                        if (Math.random() < 0.3) { p.x -= 2; p.y -= 1; }
-                        
-                        if (p.x > rightWallX) p.x = rightWallX;
-                        if (p.y > bottomWallY) p.y = bottomWallY;
-
-                        if (p.x < leftWallX) {
-                            if (p.y > spoutOpeningY) {
-                                p.x = leftWallX; 
-                            } else {
-                                if (p.x < leftWallX - 25) {
-                                    if (b.isPouring) p.alpha = 0; 
-                                    else p.x = leftWallX - 25; 
-                                }
-                            }
-                        }
-                        
-                        // Source sand is removed only when it becomes a visible falling grain.
-                        // This prevents it from disappearing before it reaches the filter.
-                    } else {'''
-          new = r'''                    if (step === 4 && b.angle < -0.5) {
+          start_marker = 'if (step === 4 && b.angle < -0.5) {'
+          start = s.find(start_marker)
+          if start < 0:
+              raise RuntimeError('Could not find tipped-beaker particle start')
+          end = s.find('                    } else {', start)
+          if end < 0:
+              raise RuntimeError('Could not find tipped-beaker particle end')
+          replacement = '''if (step === 4 && b.angle < -0.5) {
                         // The source particles stay inside the tipped beaker. Visible flowing sand
                         // is created separately and travels to the filter, so no brown particles fly left.
                         if (p.x < leftWallX) p.x = leftWallX;
                         if (p.x > rightWallX) p.x = rightWallX;
                         if (p.y < -h/2 + 4) p.y = -h/2 + 4;
                         if (p.y > bottomWallY) p.y = bottomWallY;
-                    } else {'''
-          if old not in s:
-              raise RuntimeError('Could not find the original tipped-beaker particle branch')
-          s = s.replace(old, new, 1)
+'''
+          s = s[:start] + replacement + s[end:]
           p.write_text(s, encoding='utf-8')
           PY
 
@@ -77,52 +61,31 @@ jobs:
           cat > /tmp/sand-animation-test/verify.mjs <<'NODE'
           import fs from 'node:fs';
           import { chromium } from 'playwright';
-
           const browser = await chromium.launch({ headless: true });
           const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
           const pageErrors = [];
           page.on('pageerror', error => pageErrors.push(error.message));
           await page.goto('http://127.0.0.1:4173/05.html', { waitUntil: 'domcontentloaded', timeout: 30000 });
           await page.waitForTimeout(900);
-
           const initial = await page.evaluate(() => {
             const home = document.getElementById('farm-home-button')?.getBoundingClientRect();
-            return {
-              helperReady: typeof window.__prepareReplay05 === 'function',
-              homeRight: Boolean(home && window.innerWidth - home.right <= 20),
-              homeSetting: document.body.dataset.farmHomePosition,
-            };
+            return { helperReady: typeof window.__prepareReplay05 === 'function', homeRight: Boolean(home && window.innerWidth - home.right <= 20), homeSetting: document.body.dataset.farmHomePosition };
           });
-
           await page.evaluate(() => window.__prepareReplay05(4));
           await page.waitForTimeout(7500);
           const mid = await page.evaluate(() => window.__getSandLabState05());
           await page.waitForTimeout(11000);
-          const final = await page.evaluate(() => ({
-            ...window.__getSandLabState05(),
-            resultVisible: document.getElementById('finalResultCard').classList.contains('show'),
-            title: document.getElementById('s-title').textContent,
-          }));
+          const final = await page.evaluate(() => ({ ...window.__getSandLabState05(), resultVisible: document.getElementById('finalResultCard').classList.contains('show'), title: document.getElementById('s-title').textContent }));
           await page.screenshot({ path: '/tmp/sand-animation-test/05-final.png', fullPage: true });
-
           await page.evaluate(() => window.__prepareReplay05(4));
           await page.waitForTimeout(2500);
           const replay = await page.evaluate(() => window.__getSandLabState05());
           await page.screenshot({ path: '/tmp/sand-animation-test/05-replay.png', fullPage: true });
           await browser.close();
-
           const report = { initial, mid, final, replay, pageErrors };
           fs.writeFileSync('/tmp/sand-animation-test/report.json', JSON.stringify(report, null, 2));
-
-          const failed =
-            pageErrors.length || !initial.helperReady || !initial.homeRight || initial.homeSetting !== 'right' ||
-            mid.step !== 4 || mid.sandDeposited < 35 || mid.pileMaximum < 0.5 ||
-            final.step !== 5 || !final.resultVisible || final.sandDeposited < 112 || final.pileMaximum < 20 ||
-            replay.step !== 4 || replay.sandDeposited < 3 || replay.pileMaximum < 0.4;
-          if (failed) {
-            console.error(JSON.stringify(report, null, 2));
-            process.exit(1);
-          }
+          const failed = pageErrors.length || !initial.helperReady || !initial.homeRight || initial.homeSetting !== 'right' || mid.step !== 4 || mid.sandDeposited < 35 || mid.pileMaximum < 0.5 || final.step !== 5 || !final.resultVisible || final.sandDeposited < 112 || final.pileMaximum < 20 || replay.step !== 4 || replay.sandDeposited < 3 || replay.pileMaximum < 0.4;
+          if (failed) { console.error(JSON.stringify(report, null, 2)); process.exit(1); }
           console.log('Filtering retains a visible sand pile and replay restarts the animation.');
           NODE
           node /tmp/sand-animation-test/verify.mjs
