@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>橘咪咪與白奶油的實驗室 V13</title>
+    <title>酸鹼分類接接樂</title>
     <style>
         body {
             margin: 0;
@@ -216,7 +216,7 @@
     <div id="ui-layer">
         <div class="hud-top">
             <div class="stat-box" id="score-display">🏆 分數: 0 / 100</div>
-            <div class="stat-box" id="lives-display">❤️ 生命: 3</div>
+            <div class="stat-box" id="lives-display">🎯 挑戰機會: 3 次</div>
         </div>
         <div class="mission-container">
             <div id="current-mission">
@@ -228,7 +228,7 @@
 
     <!-- 開始畫面 -->
     <div id="start-screen" class="overlay-screen">
-        <h1>🐱 橘咪咪與白奶油的實驗室</h1>
+        <h1>🧪 酸鹼分類接接樂</h1>
         <p>請用滑鼠或手指控制橘咪咪，<br>接住白奶油博士指定的藥品！</p>
         
         <div class="legend">
@@ -236,7 +236,8 @@
             <div><span class="dot" style="background:#3498db"></span> 小蘇打 = <b style="color:#99ccff">鹼性</b></div>
             <div><span class="dot" style="background:#f1c40f"></span> 砂糖 / <span class="dot" style="background:#ecf0f1"></span> 食鹽 = <b style="color:#ffffcc">中性</b></div>
         </div>
-        <p style="color: #f1c40f; font-weight: bold; font-size: 22px;">目標：100分 完美通關！</p>
+        <div style="font-size:20px;color:#fff;line-height:1.8;background:rgba(0,0,0,.25);padding:12px 18px;border-radius:14px;">🏅 酸性小達人　🏅 鹼性小達人　🏅 中性小達人</div>
+        <p style="color: #f1c40f; font-weight: bold; font-size: 22px;">目標：完成酸性、鹼性、中性三個任務徽章！</p>
 
         <button onclick="game.start()">開始整理</button>
     </div>
@@ -511,10 +512,10 @@ const game = {
     },
 
     updateUI: function() {
-        document.getElementById('score-display').textContent = `🏆 分數: ${this.state.score} / ${this.state.targetScore}`;
+        document.getElementById('score-display').textContent = `🏅 任務徽章: ${Math.min(3, Math.floor(this.state.score/30))} / 3`;
         let hearts = "";
         for(let i=0; i<this.state.lives; i++) hearts += "❤️";
-        document.getElementById('lives-display').textContent = `生命: ${hearts}`;
+        document.getElementById('lives-display').textContent = `挑戰機會: ${this.state.lives} 次 ${hearts}`;
     },
 
     showFloatingText: function(text, color, x) {

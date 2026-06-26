@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: '微軟正黑體', sans-serif;
-            background-color: #444444; /* 改為灰色背景 */
+            background:linear-gradient(135deg,#241033 0%,#33215f 55%,#15234f 100%);
             color: #fff;
             margin: 0;
             display: flex;
@@ -288,6 +288,7 @@
             box-shadow: none;
         }
 
+.record-panel{width:min(900px,calc(100% - 32px));background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.24);border-radius:18px;padding:14px;margin:6px auto 20px}.record-table{width:100%;border-collapse:collapse;color:white;background:rgba(0,0,0,.18)}.record-table th,.record-table td{border:1px solid rgba(255,255,255,.2);padding:8px;text-align:center}.record-conclusion{margin-top:10px;color:#fef3c7;font-weight:700;text-align:center}
     </style>
 </head>
 <body>
@@ -302,7 +303,7 @@
         <button id="btn-butterfly" class="toggle-btn" onclick="setIndicator('butterfly')">🔵 蝶豆花汁液</button>
     </div>
 
-    <div class="instructions">請拖曳滴管，滴入下方燒杯中觀察顏色變化。</div>
+    <div class="instructions">選擇指示劑後，拖曳滴管到燒杯中，觀察並記錄顏色變化。</div>
 
     <div class="lab-area">
         <div class="dropper-bottle" id="dropperBottle">
@@ -317,6 +318,7 @@
         </div>
     </div>
 
+<section class="record-panel"><h2>📝 變色紀錄表</h2><table class="record-table"><thead><tr><th>液體</th><th>高麗菜汁顏色</th><th>蝶豆花顏色</th></tr></thead><tbody><tr data-liquid="檸檬汁"><td>檸檬汁</td><td data-indicator="cabbage">尚未觀察</td><td data-indicator="butterfly">尚未觀察</td></tr><tr data-liquid="食鹽水"><td>食鹽水</td><td data-indicator="cabbage">尚未觀察</td><td data-indicator="butterfly">尚未觀察</td></tr><tr data-liquid="小蘇打水"><td>小蘇打水</td><td data-indicator="cabbage">尚未觀察</td><td data-indicator="butterfly">尚未觀察</td></tr><tr data-liquid="清水"><td>清水</td><td data-indicator="cabbage">尚未觀察</td><td data-indicator="butterfly">尚未觀察</td></tr></tbody></table><div class="record-conclusion">結論：不同液體會讓天然色素變成不同顏色，所以可以幫助我們分辨酸性、鹼性和中性。</div></section>
     <button class="reset-btn" onclick="initLab()">重新實驗 (Reset)</button>
 
     <script>
@@ -348,11 +350,10 @@
 
         // 定義溶液性質
         const solutions = [
-            { name: '醋', id: 'vinegar', type: 'acid', originalColor: 'rgba(255, 245, 230, 0.2)' },
-            { name: '小蘇打水', id: 'soda', type: 'base', originalColor: 'rgba(255, 255, 255, 0.15)' },
+            { name: '檸檬汁', id: 'lemon', type: 'acid', originalColor: 'rgba(255, 245, 210, 0.18)' },
             { name: '食鹽水', id: 'salt', type: 'neutral', originalColor: 'rgba(255, 255, 255, 0.15)' },
-            { name: '檸檬酸', id: 'lemon', type: 'strong_acid', originalColor: 'rgba(255, 255, 255, 0.15)' },
-            { name: '糖水', id: 'sugar', type: 'neutral', originalColor: 'rgba(255, 240, 200, 0.1)' }
+            { name: '小蘇打水', id: 'soda', type: 'base', originalColor: 'rgba(255, 255, 255, 0.15)' },
+            { name: '清水', id: 'water', type: 'neutral', originalColor: 'rgba(230, 245, 255, 0.16)' }
         ];
 
         let currentIndicatorKey = 'cabbage';
@@ -401,6 +402,7 @@
                 beaker.className = 'beaker';
                 beaker.dataset.id = sol.id;
                 beaker.dataset.type = sol.type; // 存儲酸鹼類型
+                beaker.dataset.name = sol.name;
                 beaker.dataset.filled = 'false';
 
                 const liquid = document.createElement('div');
@@ -559,8 +561,12 @@
                 resultTag.innerText = reactionData.text;
                 resultTag.style.color = reactionData.color;
                 resultTag.classList.add('show');
+                updateRecord(beaker.dataset.name,currentIndicatorKey,reactionData.text);
             };
         }
+
+
+        function updateRecord(liquidName,indicatorKey,resultText){const row=document.querySelector(`tr[data-liquid="${liquidName}"]`);if(!row)return;const cell=row.querySelector(`td[data-indicator="${indicatorKey}"]`);if(!cell)return;cell.textContent=resultText.replace(/\s*\(.+?\)/,'');cell.style.fontWeight='bold';cell.style.background='rgba(255,255,255,.14)';}
 
         // 初始化
         setIndicator('cabbage'); // 預設高麗菜

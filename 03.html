@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>電流磁效應虛擬實驗室</title>
+    <title>電流磁效應任務實驗室</title>
     
     <!-- React & ReactDOM -->
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
@@ -50,6 +50,9 @@
         .animate-flow-sn { animation: flow-sn 1.5s infinite linear; }
         .animate-flow-we { animation: flow-we 1.5s infinite linear; }
         .animate-flow-ew { animation: flow-ew 1.5s infinite linear; }
+
+        .mission-guide-03{position:fixed;right:18px;bottom:18px;z-index:80;width:min(360px,calc(100vw - 36px));background:rgba(255,255,255,.96);border:3px solid #38bdf8;border-radius:22px;box-shadow:0 12px 28px rgba(15,23,42,.22);padding:16px;color:#0f172a;font-family:"Microsoft JhengHei",sans-serif}.mission-guide-03 h2{margin:0 0 8px;color:#0369a1}.mission-guide-03 ol{margin:0 0 10px 1.2em;padding:0;line-height:1.6}.mission-guide-03 button{border:0;border-radius:999px;padding:6px 10px;margin:4px;background:#0284c7;color:white;font-weight:700}.mission-guide-03 table{width:100%;border-collapse:collapse;font-size:.9rem}.mission-guide-03 th,.mission-guide-03 td{border:1px solid #bae6fd;padding:5px;text-align:center}.mission-guide-03 th{background:#f0f9ff}.mission-guide-03 .conclusion{margin-top:10px;background:#ecfeff;padding:8px;border-radius:12px;font-weight:700;color:#155e75}@media(max-width:760px){.mission-guide-03{position:static;width:auto;margin:14px}}
+
     </style>
 </head>
 <body>
@@ -57,6 +60,7 @@
   🐾 回農場
 </a>
     <div id="root"></div>
+    <section class="mission-guide-03"><h2>🧭 電流磁效應任務</h2><ol><li>先觀察：沒有通電時，指南針會不會轉？</li><li>打開電源：觀察指南針偏轉。</li><li>反轉電流：比較偏轉方向。</li><li>移動導線位置：觀察導線在上方或下方的差異。</li></ol><strong>先猜猜看：</strong> 電流方向改變後，指南針會怎麼轉？<br><button data-predict="same">方向一樣</button><button data-predict="opposite">方向相反</button><div id="prediction-feedback-03"></div><table><thead><tr><th>操作</th><th>指南針變化</th></tr></thead><tbody><tr><td>通電</td><td>會偏轉</td></tr><tr><td>反轉電流</td><td>方向相反</td></tr><tr><td>移動導線</td><td>偏轉情形改變</td></tr></tbody></table><div class="conclusion">結論：通電的導線周圍會產生磁力，電流方向改變，指南針偏轉方向也會改變。</div></section>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
@@ -478,6 +482,7 @@
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
+<script>document.addEventListener('click',e=>{const b=e.target.closest('[data-predict]');if(!b)return;const f=document.getElementById('prediction-feedback-03');f.textContent=b.dataset.predict==='opposite'?'✅ 好預測！反轉電流後方向會相反。':'再想想：電流方向改變，磁場方向也會改變喔！';});</script>
     <script src="home-button.js"></script>
 </body>
 

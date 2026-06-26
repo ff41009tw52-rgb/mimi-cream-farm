@@ -23,6 +23,7 @@
         }
         /* 防止選取文字 */
         .no-select { user-select: none; -webkit-user-select: none; }
+.guided-card-08{position:fixed;left:14px;bottom:14px;z-index:60;width:min(390px,calc(100vw - 28px));background:rgba(255,255,255,.96);border:3px solid #fbbf24;border-radius:18px;padding:12px;box-shadow:0 10px 24px rgba(0,0,0,.18);font-family:"Microsoft JhengHei";color:#334155}.guided-card-08 h2{margin:0 0 6px;color:#b45309}.guided-card-08 ol{margin:0 0 6px 1.2em}.guided-card-08 .explain{background:#fffbeb;border-radius:12px;padding:8px;font-weight:700;color:#92400e}
     </style>
 </head>
 <body>
@@ -31,6 +32,7 @@
     </a>
 
     <div id="root"></div>
+<section class="guided-card-08"><h2>💡 跟著做模式</h2><ol><li>先把電池的＋端連到燈泡下面的小圓點。</li><li>再把燈泡旁邊的金屬螺紋連回電池－端。</li><li>打開電源，觀察燈泡是否亮起。</li></ol><div class="explain">成功亮燈的原因：電流走成一個完整的圈圈。</div></section>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
@@ -309,7 +311,7 @@
             const addBulb = () => {
                 if (isSwitchOn) togglePower();
                 if (components.filter(c => c.type === COMPONENT_TYPES.BULB).length >= 5) {
-                    setErrorMsg('最多只能使用五顆燈泡喔！');
+                    setErrorMsg('最多只能使用五顆燈泡喔！每顆燈泡都要有自己的完整迴路才會亮。');
                     return;
                 }
                 const offset = components.filter(c => c.type === COMPONENT_TYPES.BULB).length * 60; 
@@ -438,7 +440,7 @@
                     if (brightnessLevel === 2) {
                         setErrorMsg(`電源已開啟！${successfulPathBulbs.size}顆燈泡發光 (高亮度)！`);
                     } else {
-                        setErrorMsg(`電源已開啟！${successfulPathBulbs.size}顆燈泡發光。`);
+                        setErrorMsg(`電路形成完整圈圈！${successfulPathBulbs.size} 顆燈泡發光。`);
                     }
                 } else {
                     setErrorMsg('電源已開啟，但未形成完整迴路。');
@@ -499,7 +501,7 @@
                         {showControls ? (
                             <>
                             <p>💡 拖曳元件移動位置</p>
-                            <p>🔌 按住接點並拖曳來拉電線</p>
+                            <p>🔌 先連電池＋端，再連燈泡下面的小圓點與金屬螺紋</p>
                             <p>↻ 使用上方紫色圓點旋轉元件</p>
                             </>
                         ) : (
