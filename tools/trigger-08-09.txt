@@ -1,1 +1,1 @@
-synchronize
+final sync event
