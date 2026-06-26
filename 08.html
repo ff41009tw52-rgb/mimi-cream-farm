@@ -353,95 +353,97 @@
                 setLitBulbIds(new Set());
                 setBrightness(0);
 
-                const adj = {};
-                
-                components.forEach(c => {
-                    if (c.type === COMPONENT_TYPES.BATTERY) {
-                        adj[`${c.id}:pos`] = [];
-                        adj[`${c.id}:neg`] = [];
-                    } else {
-                        adj[`${c.id}:thread`] = [];
-                        adj[`${c.id}:tip`] = [];
-                    }
-                });
-
-                wires.forEach(w => {
-                    const u = `${w.start.compId}:${w.start.pointType}`;
-                    const v = `${w.end.compId}:${w.end.pointType}`;
-                    if (adj[u]) adj[u].push(v);
-                    if (adj[v]) adj[v].push(u);
-                });
-
                 const batteries = components.filter(c => c.type === COMPONENT_TYPES.BATTERY);
-                
+                const bulbs = components.filter(c => c.type === COMPONENT_TYPES.BULB);
                 if (batteries.length === 0) {
                     setErrorMsg('需要電池才能供電！');
                     setIsSwitchOn(false);
                     return;
                 }
+                if (bulbs.length === 0) {
+                    setErrorMsg('請先放入並連接至少一顆燈泡。');
+                    setIsSwitchOn(false);
+                    return;
+                }
 
-                const successfulPathBulbs = new Set();
+                const wireGraph = new Map();
+                const addNode = (node) => {
+                    if (!wireGraph.has(node)) wireGraph.set(node, new Set());
+                };
+                const addWire = (a, b) => {
+                    addNode(a); addNode(b);
+                    wireGraph.get(a).add(b);
+                    wireGraph.get(b).add(a);
+                };
 
-                const findPath = (current, targetNegNodes, pathVisited, pathBulbs) => {
-                    pathVisited.add(current);
-                    if (targetNegNodes.has(current)) return true;
+                components.forEach(component => {
+                    if (component.type === COMPONENT_TYPES.BATTERY) {
+                        addNode(`${component.id}:pos`);
+                        addNode(`${component.id}:neg`);
+                    } else {
+                        addNode(`${component.id}:tip`);
+                        addNode(`${component.id}:thread`);
+                    }
+                });
+                wires.forEach(wire => addWire(
+                    `${wire.start.compId}:${wire.start.pointType}`,
+                    `${wire.end.compId}:${wire.end.pointType}`
+                ));
 
-                    const [compId, pointType] = current.split(':');
-                    const comp = components.find(c => c.id === compId);
+                const firstBattery = batteries[0];
+                const sourcePos = `${firstBattery.id}:pos`;
+                const sourceNeg = `${firstBattery.id}:neg`;
 
-                    let nextNodes = [];
-                    if (adj[current]) {
-                        adj[current].forEach(neighbor => {
-                            if (!pathVisited.has(neighbor)) nextNodes.push(neighbor);
+                const hasPath = (start, target, excludedBulbId = null, wireOnly = false) => {
+                    const queue = [start];
+                    const visited = new Set([start]);
+                    while (queue.length) {
+                        const current = queue.shift();
+                        if (current === target) return true;
+                        const nextNodes = new Set(wireGraph.get(current) || []);
+                        if (!wireOnly) {
+                            const [componentId, terminal] = current.split(':');
+                            const component = components.find(item => item.id === componentId);
+                            if (component?.type === COMPONENT_TYPES.BULB && component.id !== excludedBulbId) {
+                                nextNodes.add(`${componentId}:${terminal === 'tip' ? 'thread' : 'tip'}`);
+                            }
+                        }
+                        nextNodes.forEach(next => {
+                            if (!visited.has(next)) {
+                                visited.add(next);
+                                queue.push(next);
+                            }
                         });
-                    }
-
-                    if (comp && comp.type === COMPONENT_TYPES.BULB) {
-                        const otherPoint = pointType === 'tip' ? 'thread' : 'tip';
-                        const internalNode = `${compId}:${otherPoint}`;
-                        if (!pathVisited.has(internalNode)) nextNodes.push(internalNode);
-                    }
-                    
-                    if (comp && comp.type === COMPONENT_TYPES.BATTERY && pointType === 'neg') {
-                        const posNode = `${compId}:pos`;
-                        if (!pathVisited.has(posNode)) nextNodes.push(posNode);
-                    }
-
-                    for (const nextNode of nextNodes) {
-                        const newPathBulbs = new Set(pathBulbs);
-                        const [nextId, nextType] = nextNode.split(':');
-                        const nextComp = components.find(c => c.id === nextId);
-                        
-                        if (nextComp.type === COMPONENT_TYPES.BULB && compId === nextId) {
-                            newPathBulbs.add(nextId);
-                        }
-
-                        if (findPath(nextNode, targetNegNodes, new Set(pathVisited), newPathBulbs)) {
-                            newPathBulbs.forEach(b => successfulPathBulbs.add(b));
-                            return true;
-                        }
                     }
                     return false;
                 };
 
-                const allNegNodes = new Set(batteries.map(b => `${b.id}:neg`));
+                if (hasPath(sourcePos, sourceNeg, null, true)) {
+                    setErrorMsg('電池正、負極直接相連，這是短路。請讓電流先通過燈泡！');
+                    setIsSwitchOn(false);
+                    return;
+                }
 
-                batteries.forEach(bat => {
-                    findPath(`${bat.id}:pos`, allNegNodes, new Set(), new Set());
+                const lit = new Set();
+                bulbs.forEach(bulb => {
+                    const tip = `${bulb.id}:tip`;
+                    const thread = `${bulb.id}:thread`;
+                    const tipToPositive = hasPath(tip, sourcePos, bulb.id);
+                    const tipToNegative = hasPath(tip, sourceNeg, bulb.id);
+                    const threadToPositive = hasPath(thread, sourcePos, bulb.id);
+                    const threadToNegative = hasPath(thread, sourceNeg, bulb.id);
+                    if ((tipToPositive && threadToNegative) || (tipToNegative && threadToPositive)) {
+                        lit.add(bulb.id);
+                    }
                 });
 
-                if (successfulPathBulbs.size > 0) {
-                    setLitBulbIds(successfulPathBulbs);
-                    const brightnessLevel = batteries.length >= 2 ? 2 : 1;
-                    setBrightness(brightnessLevel);
-
-                    if (brightnessLevel === 2) {
-                        setErrorMsg(`電源已開啟！${successfulPathBulbs.size}顆燈泡發光 (高亮度)！`);
-                    } else {
-                        setErrorMsg(`電源已開啟！${successfulPathBulbs.size}顆燈泡發光。`);
-                    }
+                if (lit.size > 0) {
+                    setLitBulbIds(lit);
+                    setBrightness(1);
+                    const extraBatteryNote = batteries.length > 1 ? ' 目前以第一顆電池作為電源判斷。' : '';
+                    setErrorMsg(`電流形成完整迴路！${lit.size}顆燈泡發亮。${extraBatteryNote}`);
                 } else {
-                    setErrorMsg('電源已開啟，但未形成完整迴路。');
+                    setErrorMsg('電源已開啟，但燈泡的兩個接點還沒有分別連到電池正、負極。');
                 }
             };
 
@@ -470,6 +472,12 @@
 
                             <button onClick={addBattery} className="flex items-center gap-1 px-4 py-2 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition font-bold"><Plus size={18} /> 電池</button>
                             <button onClick={addBulb} className="flex items-center gap-1 px-4 py-2 bg-yellow-100 text-yellow-700 rounded-full hover:bg-yellow-200 transition font-bold"><Lightbulb size={18} /> 燈泡</button>
+                            <button onClick={() => {
+                                if (isSwitchOn) togglePower();
+                                setWires(previous => previous.slice(0, -1));
+                                setLitBulbIds(new Set());
+                                setErrorMsg('已復原上一條電線。');
+                            }} className="flex items-center gap-1 px-4 py-2 bg-amber-100 text-amber-800 rounded-full hover:bg-amber-200 transition font-bold">↶ 上一步</button>
                             <button onClick={resetBoard} className="flex items-center gap-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition font-bold"><RotateCcw size={18} /> 重置</button>
                             
                             <button 
@@ -707,6 +715,7 @@
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<CircuitGame />);
     </script>
+    <script src="learning-refresh.js"></script>
     <script src="home-button.js"></script>
 </body>
 </html>

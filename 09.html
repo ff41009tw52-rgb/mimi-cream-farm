@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>橘咪咪與白奶油的實驗室 V13</title>
+    <title>酸鹼分類接接樂</title>
     <style>
         body {
             margin: 0;
@@ -215,8 +215,8 @@
     
     <div id="ui-layer">
         <div class="hud-top">
-            <div class="stat-box" id="score-display">🏆 分數: 0 / 100</div>
-            <div class="stat-box" id="lives-display">❤️ 生命: 3</div>
+            <div class="stat-box" id="score-display">🏅 任務徽章：0 / 3</div>
+            <div class="stat-box" id="lives-display">🧪 挑戰機會：3 次</div>
         </div>
         <div class="mission-container">
             <div id="current-mission">
@@ -228,7 +228,7 @@
 
     <!-- 開始畫面 -->
     <div id="start-screen" class="overlay-screen">
-        <h1>🐱 橘咪咪與白奶油的實驗室</h1>
+        <h1>🧪 白奶油博士的溶液分類任務</h1>
         <p>請用滑鼠或手指控制橘咪咪，<br>接住白奶油博士指定的藥品！</p>
         
         <div class="legend">
@@ -236,7 +236,7 @@
             <div><span class="dot" style="background:#3498db"></span> 小蘇打 = <b style="color:#99ccff">鹼性</b></div>
             <div><span class="dot" style="background:#f1c40f"></span> 砂糖 / <span class="dot" style="background:#ecf0f1"></span> 食鹽 = <b style="color:#ffffcc">中性</b></div>
         </div>
-        <p style="color: #f1c40f; font-weight: bold; font-size: 22px;">目標：100分 完美通關！</p>
+        <p style="color: #f1c40f; font-weight: bold; font-size: 22px;">目標：完成酸性、鹼性、中性三枚任務徽章！</p>
 
         <button onclick="game.start()">開始整理</button>
     </div>
@@ -245,7 +245,7 @@
     <div id="result-screen" class="overlay-screen hidden">
         <h1 id="result-title">標題</h1>
         <div id="result-msg">訊息</div>
-        <div style="margin-top: 15px; font-size: 20px; color: #fff;">本次得分</div>
+        <div style="margin-top: 15px; font-size: 20px; color: #fff;">獲得徽章</div>
         <div id="final-score">0</div>
         <button onclick="game.start()">再玩一次</button>
     </div>
@@ -267,7 +267,7 @@ const game = {
         currentMission: null,
         missionItemsCollected: 0, 
         currentMissionTarget: 2, 
-        targetScore: 100 // 修改：目標分數改為 100
+        badges: { acid: false, base: false, neutral: false }
     },
     config: {
         width: 600,
@@ -307,6 +307,7 @@ const game = {
         document.getElementById('result-screen').classList.add('hidden');
         
         this.state.score = 0;
+        this.state.badges = { acid: false, base: false, neutral: false };
         this.state.lives = 3;
         this.state.items = [];
         this.state.frameCount = 0;
@@ -345,24 +346,27 @@ const game = {
     },
 
     changeMission: function() {
+        const availableMissions = this.missions.filter(mission => !this.state.badges[mission.type]);
+        if (availableMissions.length === 0) {
+            this.showResult(true, 'badges');
+            return;
+        }
         let newMission;
         do {
-            newMission = this.missions[Math.floor(Math.random() * this.missions.length)];
-        } while (this.state.currentMission && newMission.type === this.state.currentMission.type);
+            newMission = availableMissions[Math.floor(Math.random() * availableMissions.length)];
+        } while (availableMissions.length > 1 && this.state.currentMission && newMission.type === this.state.currentMission.type);
 
         this.state.currentMission = newMission;
         this.state.missionItemsCollected = 0;
-        this.state.currentMissionTarget = Math.floor(Math.random() * 2) + 2; 
+        this.state.currentMissionTarget = 2;
 
         const missionEl = document.getElementById('current-mission');
         const textEl = document.getElementById('mission-text');
-        
         textEl.textContent = newMission.text;
         missionEl.style.backgroundColor = newMission.color;
         missionEl.style.borderColor = newMission.borderColor;
-        
-        missionEl.style.transform = "scale(1.15)";
-        setTimeout(() => missionEl.style.transform = "scale(1)", 250);
+        missionEl.style.transform = 'scale(1.15)';
+        setTimeout(() => missionEl.style.transform = 'scale(1)', 250);
     },
 
     spawnItem: function() {
@@ -448,22 +452,24 @@ const game = {
         const isCorrect = item.data.type === this.state.currentMission.type;
         
         if (isCorrect) {
-            this.state.score += 10;
             this.state.missionItemsCollected++;
-            this.showFloatingText("+10", "#2ecc71", this.player.x);
-            
-            if (this.state.score >= this.state.targetScore) {
-                this.showResult(true, "pass");
-                return;
-            }
+            this.showFloatingText('✓ 正確', '#2ecc71', this.player.x);
 
             if (this.state.missionItemsCollected >= this.state.currentMissionTarget) {
-                 this.changeMission();
+                const completedType = this.state.currentMission.type;
+                this.state.badges[completedType] = true;
+                const labels = { acid: '酸性小達人', base: '鹼性小達人', neutral: '中性小達人' };
+                this.showFloatingText(`🏅 ${labels[completedType]}`, '#f1c40f', this.player.x);
+                if (Object.values(this.state.badges).every(Boolean)) {
+                    this.showResult(true, 'badges');
+                    return;
+                }
+                this.changeMission();
             }
 
         } else {
             this.state.lives--;
-            this.showFloatingText("-1 ❤️", "#e74c3c", this.player.x);
+            this.showFloatingText('-1 次', '#e74c3c', this.player.x);
             this.canvas.style.transform = "translateX(5px)";
             setTimeout(() => this.canvas.style.transform = "translateX(0)", 50);
 
@@ -476,45 +482,36 @@ const game = {
 
     showResult: function(isWin, type) {
         this.state.isPlaying = false;
-        
         const titleEl = document.getElementById('result-title');
         const msgEl = document.getElementById('result-msg');
         const scoreEl = document.getElementById('final-score');
         const screen = document.getElementById('result-screen');
-        
-        scoreEl.textContent = this.state.score;
+        const earned = Object.values(this.state.badges).filter(Boolean).length;
+        scoreEl.textContent = `${earned} / 3`;
         screen.classList.remove('hidden');
 
-        // 修改：更新評價分數區間
-        if (this.state.score >= 100) { // 100分 (滿分)
-            titleEl.textContent = "🎉 完美實驗！";
-            titleEl.style.color = "#2ecc71";
-            msgEl.innerHTML = `
-                <span style="color:#f1c40f">白奶油博士：</span>「完美同步！各項數值都達到了理論巔峰，這是一次教科書級別的實驗！」<br><br>
-                <span style="color:#e67e22">橘咪咪：</span>「檢測不到任何誤差！您簡直就是精密的代名詞！」
-            `;
-        } else if (this.state.score >= 50) { // 50 ~ 99分
-            titleEl.textContent = "數據穩定";
-            titleEl.style.color = "#3498db";
-            msgEl.innerHTML = `
-                <span style="color:#f1c40f">白奶油博士：</span>「樣本採集成功。雖然有些微雜訊，但整體表現相當優異。」<br><br>
-                <span style="color:#e67e22">橘咪咪：</span>「數據正在上傳中～做得好！下次我們一定能捕捉到那最後的 1%！」
-            `;
-        } else { // 0 ~ 49分
-            titleEl.textContent = "需要校正";
-            titleEl.style.color = "#e74c3c";
-            msgEl.innerHTML = `
-                <span style="color:#e67e22">橘咪咪：</span>「嗚嗚……系統發出警報了，數據好像不太對勁……」<br><br>
-                <span style="color:#f1c40f">白奶油博士：</span>「冷靜點，變數控制失誤常有的事。讓我們重新校準儀器，再來一次。」
-            `;
+        if (isWin) {
+            titleEl.textContent = '🎉 三枚徽章完成！';
+            titleEl.style.color = '#2ecc71';
+            msgEl.innerHTML = '<span style="color:#f1c40f">白奶油博士：</span>「你已經能分辨酸性、鹼性和中性溶液了！」<br><br><span style="color:#e67e22">橘咪咪：</span>「酸性小達人、鹼性小達人、中性小達人，全都被你收下了！」';
+        } else {
+            titleEl.textContent = '再試一次！';
+            titleEl.style.color = '#e74c3c';
+            msgEl.innerHTML = '<span style="color:#e67e22">橘咪咪：</span>「別急，我們先看清楚這次要收集的是哪一種溶液。」<br><br><span style="color:#f1c40f">白奶油博士：</span>「記住：檸檬汁和醋是酸性，小蘇打是鹼性，食鹽水和糖水是中性。」';
         }
     },
 
     updateUI: function() {
-        document.getElementById('score-display').textContent = `🏆 分數: ${this.state.score} / ${this.state.targetScore}`;
-        let hearts = "";
-        for(let i=0; i<this.state.lives; i++) hearts += "❤️";
-        document.getElementById('lives-display').textContent = `生命: ${hearts}`;
+        const badgeLabels = [
+            ['acid', '酸性小達人'],
+            ['base', '鹼性小達人'],
+            ['neutral', '中性小達人']
+        ];
+        const earned = badgeLabels.filter(([type]) => this.state.badges[type]).length;
+        const badgeText = badgeLabels.map(([type, label]) => this.state.badges[type] ? `🏅 ${label}` : `○ ${label}`).join('  ');
+        document.getElementById('score-display').textContent = `🏅 任務徽章：${earned} / 3`;
+        document.getElementById('score-display').title = badgeText;
+        document.getElementById('lives-display').textContent = `🧪 挑戰機會：${this.state.lives} 次`;
     },
 
     showFloatingText: function(text, color, x) {
@@ -888,6 +885,7 @@ const game = {
 game.init();
 
 </script>
+    <script src="learning-refresh.js"></script>
     <script src="home-button.js"></script>
 </body>
 

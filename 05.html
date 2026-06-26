@@ -279,7 +279,7 @@
             { // Step 0
                 speaker: 'mimi',
                 name: '橘咪咪',
-                text: '這杯子裡黑黑白白的是什麼？是黑糖粉和白糖粉嗎？能不能讓我舔一口？🤤'
+                text: '這杯子裡黑黑白白的是什麼？是沙子和食鹽嗎？我們可以把它們分開嗎？🔎'
             },
             { // Step 1 (加水)
                 speaker: 'cream',
@@ -304,7 +304,7 @@
             { // Step 5 (完成)
                 speaker: 'cream',
                 name: '白奶油',
-                text: '看！濾紙上留下的固體是沙子，流下去的液體是食鹽水。這就是過濾法！✨'
+                text: '看！濾紙上留下的是沙子，流下去的是食鹽水。想拿回食鹽，下一步還要讓水慢慢蒸發喔！✨'
             }
         ];
 
@@ -520,7 +520,9 @@
                     }
                     
                     if (step === 4 && b.angle < -0.5) {
-                        if (Math.random() < 0.3) { p.x -= 2; p.y -= 1; }
+                        const flowSpeed = p.type === 'sand' ? 1.35 : 0.8;
+                            p.x -= flowSpeed + Math.random() * 0.35;
+                            p.y -= p.type === 'sand' ? 0.55 + Math.random() * 0.25 : 0.2;
                         
                         if (p.x > rightWallX) p.x = rightWallX;
                         if (p.y > bottomWallY) p.y = bottomWallY;
@@ -537,7 +539,7 @@
                         }
                         
                         if (p.x < leftWallX && p.y < spoutOpeningY && b.isPouring) {
-                             if (p.type === 'sand' && Math.random() < 0.15) p.alpha = 0; 
+                             if (p.type === 'sand') p.alpha = Math.max(0, p.alpha - 0.018); 
                         }
                     } else {
                         if (p.x < leftWallX) p.x = leftWallX;
@@ -566,8 +568,8 @@
         }
 
         function smoothSandPile() {
-            const threshold = 1.0; const transferRate = 0.4; 
-            for (let pass = 0; pass < 2; pass++) { 
+            const threshold = 0.55; const transferRate = 0.18; 
+            for (let pass = 0; pass < 5; pass++) { 
                 for (let i = 0; i < filterSetup.pileHeights.length - 1; i++) {
                     let diff = filterSetup.pileHeights[i] - filterSetup.pileHeights[i+1];
                     if (diff > threshold) {
@@ -593,7 +595,7 @@
 
             if (step === 4 && beakerA.isPouring && !topIsAlmostEmpty && !bottomIsFull) {
                 const spoutPos = getSpoutTipWorldPos(beakerA);
-                let flowRate = 2; 
+                let flowRate = 3; 
 
                 for(let k=0; k < flowRate; k++) {
                     filterSetup.fallingParticles.push({
@@ -611,8 +613,8 @@
                 
                 let shouldPourSand = filterSetup.beakerBWaterLevel < MAX_BOTTOM_LEVEL - 5;
 
-                if (sandLeft && Math.random() < 0.9 && shouldPourSand) {
-                    let count = Math.floor(Math.random() * 3) + 2; 
+                if (sandLeft && shouldPourSand) {
+                    let count = Math.random() < 0.62 ? 1 : 2; 
                     for(let i=0; i<count; i++) {
                         filterSetup.fallingParticles.push({
                             type: 'sand',
@@ -658,7 +660,7 @@
                             
                             let idx = Math.floor(relativeX);
                             if (idx >= 10 && idx < filterSetup.pileHeights.length - 10) { 
-                                filterSetup.pileHeights[idx] += 3.0; 
+                                filterSetup.pileHeights[idx] += 1.75; 
                             }
                             filterSetup.fallingParticles.splice(i, 1);
                         }
@@ -892,6 +894,7 @@
         resetBtn.addEventListener('click', () => resetExperiment());
         init();
     </script>
+    <script src="learning-refresh.js"></script>
     <script src="home-button.js"></script>
 </body>
 </html>
