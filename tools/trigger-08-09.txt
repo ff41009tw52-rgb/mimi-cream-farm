@@ -1,1 +1,1 @@
-workflow trigger once
+sync event
