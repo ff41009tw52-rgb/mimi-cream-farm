@@ -49,6 +49,7 @@ jobs:
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/static-server.log 2>&1 &
           cat > /tmp/learning-refresh-audit/verify.mjs <<'NODE'
+          import fs from 'node:fs';
           import { chromium } from 'playwright';
 
           const checks = {
@@ -76,9 +77,9 @@ jobs:
             });
             let navigationError = null;
             try {
-              await page.goto(`http://127.0.0.1:4173/${filename}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-              await page.waitForSelector(selector, { timeout: 12000 });
-              await page.waitForTimeout(1200);
+              await page.goto(`http://127.0.0.1:4173/${filename}`, { waitUntil: 'domcontentloaded', timeout: 12000 });
+              await page.waitForSelector(selector, { timeout: 6000 });
+              await page.waitForTimeout(600);
             } catch (error) {
               navigationError = error.message;
             }
@@ -96,7 +97,7 @@ jobs:
             await page.close();
           }
           await browser.close();
-          await Bun.write('/tmp/learning-refresh-audit/report.json', JSON.stringify({ problems, screenshots }, null, 2));
+          fs.writeFileSync('/tmp/learning-refresh-audit/report.json', JSON.stringify({ problems, screenshots }, null, 2));
           if (problems.length) {
             console.error(JSON.stringify(problems, null, 2));
             process.exit(1);
