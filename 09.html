@@ -267,8 +267,9 @@ const game = {
         items: [],
         currentMission: null,
         missionItemsCollected: 0, 
-        currentMissionTarget: 2, 
-        targetScore: 100 // 修改：目標分數改為 100
+        currentMissionTarget: 2,
+        completedBadges: new Set(), 
+        targetScore: 3, // 三個任務徽章
     },
     config: {
         width: 600,
@@ -313,6 +314,7 @@ const game = {
         this.state.frameCount = 0;
         this.state.isPlaying = true;
         this.state.missionItemsCollected = 0;
+        this.state.completedBadges = new Set();
         
         this.changeMission(); 
         this.updateUI();
@@ -449,11 +451,12 @@ const game = {
         const isCorrect = item.data.type === this.state.currentMission.type;
         
         if (isCorrect) {
-            this.state.score += 10;
+            this.state.score += 1;
             this.state.missionItemsCollected++;
-            this.showFloatingText("+10", "#2ecc71", this.player.x);
+            this.showFloatingText('徽章進度 +1', '#2ecc71', this.player.x);
             
-            if (this.state.score >= this.state.targetScore) {
+            this.state.completedBadges.add(this.state.currentMission.type);
+            if (this.state.completedBadges.size >= this.state.targetScore) {
                 this.showResult(true, "pass");
                 return;
             }
@@ -483,7 +486,7 @@ const game = {
         const scoreEl = document.getElementById('final-score');
         const screen = document.getElementById('result-screen');
         
-        scoreEl.textContent = this.state.score;
+        scoreEl.textContent = `${this.state.completedBadges.size} / 3`;
         screen.classList.remove('hidden');
 
         // 修改：更新評價分數區間
@@ -512,7 +515,7 @@ const game = {
     },
 
     updateUI: function() {
-        document.getElementById('score-display').textContent = `🏅 任務徽章: ${Math.min(3, Math.floor(this.state.score/30))} / 3`;
+        document.getElementById('score-display').textContent = `🏅 任務徽章: ${this.state.completedBadges.size} / 3`;
         let hearts = "";
         for(let i=0; i<this.state.lives; i++) hearts += "❤️";
         document.getElementById('lives-display').textContent = `挑戰機會: ${this.state.lives} 次 ${hearts}`;
