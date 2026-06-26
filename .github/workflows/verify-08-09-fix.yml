@@ -33,17 +33,20 @@ jobs:
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/static-server.log 2>&1 &
           cat > /tmp/circuit-badge-test/verify.mjs <<'NODE'
+          import fs from 'node:fs';
           import { chromium } from 'playwright';
 
           const browser = await chromium.launch({ headless: true });
           const problems = [];
+          let circuits = null;
+          let badges = null;
 
           const check08 = await browser.newPage({ viewport: { width: 1366, height: 900 } });
           const errors08 = [];
           check08.on('pageerror', error => errors08.push(error.message));
           await check08.goto('http://127.0.0.1:4173/08.html', { waitUntil: 'domcontentloaded', timeout: 30000 });
           await check08.waitForTimeout(1800);
-          const circuits = await check08.evaluate(() => {
+          circuits = await check08.evaluate(() => {
             const evaluateCircuit = window.__evaluateCircuit08;
             if (!evaluateCircuit) return { missingEvaluator: true };
             const battery = { id: 'bat-1', type: 'battery' };
@@ -51,16 +54,17 @@ jobs:
             const bulb2 = { id: 'bulb-2', type: 'bulb' };
             const wire = (a, at, b, bt) => ({ start: { compId: a, pointType: at }, end: { compId: b, pointType: bt } });
             const ids = result => [...result.litBulbIds].sort().join(',');
+            const shortResult = evaluateCircuit([battery, bulb1], [wire('bat-1','pos','bat-1','neg')]);
             return {
               single: ids(evaluateCircuit([battery, bulb1], [wire('bat-1','pos','bulb-1','tip'), wire('bat-1','neg','bulb-1','thread')])),
               unconnectedExtra: ids(evaluateCircuit([battery, bulb1, bulb2], [wire('bat-1','pos','bulb-1','tip'), wire('bat-1','neg','bulb-1','thread')])),
               incompleteExtra: ids(evaluateCircuit([battery, bulb1, bulb2], [wire('bat-1','pos','bulb-1','tip'), wire('bat-1','neg','bulb-1','thread'), wire('bat-1','pos','bulb-2','tip')])),
               parallel: ids(evaluateCircuit([battery, bulb1, bulb2], [wire('bat-1','pos','bulb-1','tip'), wire('bat-1','neg','bulb-1','thread'), wire('bat-1','pos','bulb-2','tip'), wire('bat-1','neg','bulb-2','thread')])),
               series: ids(evaluateCircuit([battery, bulb1, bulb2], [wire('bat-1','pos','bulb-1','tip'), wire('bulb-1','thread','bulb-2','tip'), wire('bulb-2','thread','bat-1','neg')])),
-              short: evaluateCircuit([battery, bulb1], [wire('bat-1','pos','bat-1','neg')]),
+              short: { lit: ids(shortResult), directShort: shortResult.directShort },
             };
           });
-          if (errors08.length || circuits.missingEvaluator || circuits.single !== 'bulb-1' || circuits.unconnectedExtra !== 'bulb-1' || circuits.incompleteExtra !== 'bulb-1' || circuits.parallel !== 'bulb-1,bulb-2' || circuits.series !== 'bulb-1,bulb-2' || circuits.short.litBulbIds.size !== 0 || circuits.short.directShort !== true) {
+          if (errors08.length || circuits.missingEvaluator || circuits.single !== 'bulb-1' || circuits.unconnectedExtra !== 'bulb-1' || circuits.incompleteExtra !== 'bulb-1' || circuits.parallel !== 'bulb-1,bulb-2' || circuits.series !== 'bulb-1,bulb-2' || circuits.short.lit !== '' || circuits.short.directShort !== true) {
             problems.push({ page: '08.html', errors: errors08, circuits });
           }
           await check08.close();
@@ -70,7 +74,7 @@ jobs:
           check09.on('pageerror', error => errors09.push(error.message));
           await check09.goto('http://127.0.0.1:4173/09.html', { waitUntil: 'domcontentloaded', timeout: 30000 });
           await check09.waitForTimeout(800);
-          const badges = await check09.evaluate(() => {
+          badges = await check09.evaluate(() => {
             const originalChangeMission = game.changeMission;
             const originalShowResult = game.showResult;
             const originalFloat = game.showFloatingText;
@@ -102,6 +106,7 @@ jobs:
               game.handleCollection(item(type));
             }
             const earnedAll = [...game.state.completedBadges].sort();
+            const winCalls = [...resultCalls];
             resetFor('acid');
             game.handleCollection(item('base'));
             const wrong = { lives: game.state.lives, badges: [...game.state.completedBadges], progress: game.state.missionItemsCollected };
@@ -109,14 +114,15 @@ jobs:
             game.showResult = originalShowResult;
             game.showFloatingText = originalFloat;
             game.updateUI = originalUpdate;
-            return { afterOne, afterTwo, earnedAll, resultCalls, wrong };
+            return { afterOne, afterTwo, earnedAll, winCalls, wrong };
           });
-          if (errors09.length || badges.afterOne.progress !== 1 || badges.afterOne.badges.length !== 0 || badges.afterTwo.badges.join(',') !== 'acid' || badges.earnedAll.join(',') !== 'acid,base,neutral' || !badges.resultCalls.includes(true) || badges.wrong.lives !== 2 || badges.wrong.badges.length !== 0 || badges.wrong.progress !== 0) {
+          if (errors09.length || badges.afterOne.progress !== 1 || badges.afterOne.badges.length !== 0 || badges.afterTwo.badges.join(',') !== 'acid' || badges.earnedAll.join(',') !== 'acid,base,neutral' || !badges.winCalls.includes(true) || badges.wrong.lives !== 2 || badges.wrong.badges.length !== 0 || badges.wrong.progress !== 0) {
             problems.push({ page: '09.html', errors: errors09, badges });
           }
           await check09.close();
 
           await browser.close();
+          fs.writeFileSync('/tmp/circuit-badge-test/results.json', JSON.stringify({ circuits, badges, problems }, null, 2));
           if (problems.length) {
             console.error(JSON.stringify(problems, null, 2));
             process.exit(1);
@@ -125,9 +131,17 @@ jobs:
           NODE
           node /tmp/circuit-badge-test/verify.mjs
 
+      - name: Upload verification report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: circuit-badge-verification
+          path: /tmp/circuit-badge-test/results.json
+          if-no-files-found: warn
+
       - name: Commit only the verified website fixes
         run: |
-          git rm -f tools/patch_08_09.py .github/workflows/verify-08-09-fix.yml
+          git rm -f tools/patch_08_09.py .github/workflows/verify-08-09-fix.yml tools/trigger-verify-08-09.txt
           rmdir tools 2>/dev/null || true
           rmdir .github/workflows 2>/dev/null || true
           rmdir .github 2>/dev/null || true
