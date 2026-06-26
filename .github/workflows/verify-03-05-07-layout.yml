@@ -28,8 +28,13 @@ jobs:
           p = Path('03.html')
           s = p.read_text(encoding='utf-8').replace('width: min(100% - 32px, 1024px);', 'width: min(calc(100% - 32px), 1024px);')
           p.write_text(s, encoding='utf-8')
+
           p = Path('05.html')
-          s = p.read_text(encoding='utf-8').replace('targetStep === 4 ? 4500 : 1800', 'targetStep === 4 ? 14000 : 1800')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('targetStep === 4 ? 4500 : 1800', 'targetStep === 4 ? 14000 : 1800')
+          s = s.replace('for (let k = 0; k < 3; k++) filterSetup.fallingParticles.push(createStreamParticle(\'water\'));', 'for (let k = 0; k < 2; k++) filterSetup.fallingParticles.push(createStreamParticle(\'water\'));')
+          s = s.replace('const sandCount = Math.random() < 0.72 ? 2 : 1;', 'const sandCount = Math.random() < 0.5 ? 1 : 0;')
+          s = s.replace('filterSetup.beakerBWaterLevel + 0.24', 'filterSetup.beakerBWaterLevel + 0.06')
           p.write_text(s, encoding='utf-8')
           PY
 
