@@ -350,84 +350,125 @@
             };
 
             // --- 核心邏輯 ---
-  const runSimulation = () => {
-      setErrorMsg('');
-      setLitBulbIds(new Set());
-      setBrightness(0);
+            const evaluateCircuit = (currentComponents, currentWires) => {
+                const node = (componentId, terminal) => `${componentId}:${terminal}`;
+                const batteries = currentComponents.filter(component => component.type === COMPONENT_TYPES.BATTERY);
+                const bulbs = currentComponents.filter(component => component.type === COMPONENT_TYPES.BULB);
 
-      const adj = {};
-      components.forEach(c => {
-          if (c.type === COMPONENT_TYPES.BATTERY) {
-              adj[`${c.id}:pos`] = [];
-              adj[`${c.id}:neg`] = [];
-          } else {
-              adj[`${c.id}:thread`] = [];
-              adj[`${c.id}:tip`] = [];
-          }
-      });
+                const buildGraph = ({ openBulbId = null, includeBulbConnections = true } = {}) => {
+                    const graph = {};
+                    const addNode = (key) => { if (!graph[key]) graph[key] = []; };
+                    const connect = (left, right) => {
+                        addNode(left);
+                        addNode(right);
+                        graph[left].push(right);
+                        graph[right].push(left);
+                    };
 
-      wires.forEach(w => {
-          const u = `${w.start.compId}:${w.start.pointType}`;
-          const v = `${w.end.compId}:${w.end.pointType}`;
-          if (adj[u]) adj[u].push(v);
-          if (adj[v]) adj[v].push(u);
-      });
+                    currentComponents.forEach(component => {
+                        if (component.type === COMPONENT_TYPES.BATTERY) {
+                            addNode(node(component.id, 'pos'));
+                            addNode(node(component.id, 'neg'));
+                        } else {
+                            addNode(node(component.id, 'thread'));
+                            addNode(node(component.id, 'tip'));
+                        }
+                    });
 
-      // 燈泡內部可以導通；電池正負極不直接互通，避免多燈泡時錯誤亮燈。
-      components.filter(c => c.type === COMPONENT_TYPES.BULB).forEach(bulb => {
-          adj[`${bulb.id}:thread`].push(`${bulb.id}:tip`);
-          adj[`${bulb.id}:tip`].push(`${bulb.id}:thread`);
-      });
+                    currentWires.forEach(wire => {
+                        connect(
+                            node(wire.start.compId, wire.start.pointType),
+                            node(wire.end.compId, wire.end.pointType)
+                        );
+                    });
 
-      const batteries = components.filter(c => c.type === COMPONENT_TYPES.BATTERY);
-      if (batteries.length === 0) {
-          setErrorMsg('需要電池才能供電！');
-          setIsSwitchOn(false);
-          return;
-      }
+                    if (includeBulbConnections) {
+                        bulbs
+                            .filter(bulb => bulb.id !== openBulbId)
+                            .forEach(bulb => connect(node(bulb.id, 'thread'), node(bulb.id, 'tip')));
+                    }
+                    return graph;
+                };
 
-      const reachableFrom = (start) => {
-          const seen = new Set([start]);
-          const stack = [start];
-          while (stack.length) {
-              const node = stack.pop();
-              (adj[node] || []).forEach(next => {
-                  if (!seen.has(next)) {
-                      seen.add(next);
-                      stack.push(next);
-                  }
-              });
-          }
-          return seen;
-      };
+                const reachable = (graph, startNode) => {
+                    const seen = new Set([startNode]);
+                    const queue = [startNode];
+                    while (queue.length) {
+                        const current = queue.shift();
+                        (graph[current] || []).forEach(next => {
+                            if (!seen.has(next)) {
+                                seen.add(next);
+                                queue.push(next);
+                            }
+                        });
+                    }
+                    return seen;
+                };
 
-      const lit = new Set();
-      let shortCircuit = false;
-      batteries.forEach(battery => {
-          const fromPos = reachableFrom(`${battery.id}:pos`);
-          const fromNeg = reachableFrom(`${battery.id}:neg`);
-          if (fromPos.has(`${battery.id}:neg`) || fromNeg.has(`${battery.id}:pos`)) {
-              shortCircuit = true;
-          }
-          components.filter(c => c.type === COMPONENT_TYPES.BULB).forEach(bulb => {
-              const thread = `${bulb.id}:thread`;
-              const tip = `${bulb.id}:tip`;
-              const connectedAcross = (fromPos.has(thread) && fromNeg.has(tip)) || (fromPos.has(tip) && fromNeg.has(thread));
-              if (connectedAcross) lit.add(bulb.id);
-          });
-      });
+                const wireOnlyGraph = buildGraph({ includeBulbConnections: false });
+                const directShort = batteries.some(battery =>
+                    reachable(wireOnlyGraph, node(battery.id, 'pos')).has(node(battery.id, 'neg'))
+                );
 
-      if (lit.size > 0) {
-          setLitBulbIds(lit);
-          const brightnessLevel = batteries.length >= 2 ? 2 : 1;
-          setBrightness(brightnessLevel);
-          setErrorMsg(`電路形成完整圈圈！${lit.size} 顆燈泡發光。`);
-      } else {
-          setErrorMsg(shortCircuit ? '電池正負極可能直接相連，請讓電流經過燈泡。' : '電源已開啟，但未形成完整迴路。');
-      }
-  };
+                // A direct wire short circuit takes priority over lighting bulbs.
+                if (directShort) {
+                    return { litBulbIds: new Set(), directShort: true };
+                }
 
-  return (
+                const litBulbIds = new Set();
+                batteries.forEach(battery => {
+                    bulbs.forEach(bulb => {
+                        // Keep the tested bulb open. Its two terminals must be reached from
+                        // opposite battery terminals through the rest of the circuit.
+                        const graph = buildGraph({ openBulbId: bulb.id });
+                        const fromPositive = reachable(graph, node(battery.id, 'pos'));
+                        const fromNegative = reachable(graph, node(battery.id, 'neg'));
+                        const thread = node(bulb.id, 'thread');
+                        const tip = node(bulb.id, 'tip');
+                        const completesCircuit =
+                            (fromPositive.has(thread) && fromNegative.has(tip)) ||
+                            (fromPositive.has(tip) && fromNegative.has(thread));
+                        if (completesCircuit) litBulbIds.add(bulb.id);
+                    });
+                });
+
+                return { litBulbIds, directShort: false };
+            };
+
+            // Available only on local test servers; it is used by automated circuit cases.
+            if (location.hostname === '127.0.0.1' || location.hostname === 'localhost') {
+                window.__evaluateCircuit08 = evaluateCircuit;
+            }
+
+            const runSimulation = () => {
+                setErrorMsg('');
+                setLitBulbIds(new Set());
+                setBrightness(0);
+
+                const result = evaluateCircuit(components, wires);
+                const batteryCount = components.filter(component => component.type === COMPONENT_TYPES.BATTERY).length;
+
+                if (batteryCount === 0) {
+                    setErrorMsg('需要電池才能供電！');
+                    setIsSwitchOn(false);
+                    return;
+                }
+
+                if (result.directShort) {
+                    setErrorMsg('電池正負極被電線直接連起來了，請讓電流先經過燈泡。');
+                    return;
+                }
+
+                if (result.litBulbIds.size > 0) {
+                    setLitBulbIds(result.litBulbIds);
+                    setBrightness(batteryCount >= 2 ? 2 : 1);
+                    setErrorMsg(`電路形成完整圈圈！${result.litBulbIds.size} 顆燈泡發光。`);
+                } else {
+                    setErrorMsg('電源已開啟，但每一顆燈泡都還沒有形成完整迴路。');
+                }
+            };
+
+            return (
                 <div 
                     className="flex flex-col items-center min-h-screen bg-amber-50 font-sans no-select overflow-hidden"
                     onMouseMove={handleMouseMove}
