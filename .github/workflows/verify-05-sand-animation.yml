@@ -1,0 +1,116 @@
+name: Verify sand retention and replay
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-test:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out pull request branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Apply animation repair
+        run: |
+          python3 tools/patch_05_sand_animation.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('05.html')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('beakerA.waterVolume - 0.075', 'beakerA.waterVolume - 0.11')
+          s = s.replace('filterSetup.beakerBWaterLevel + 0.035', 'filterSetup.beakerBWaterLevel + 0.055')
+          s = s.replace("const source = beakerA.particles.find(p => p.type === 'sand' && p.alpha > 0);\n            if (source) source.alpha = 0;", "for (let i = 0; i < 3; i++) {\n                const source = beakerA.particles.find(p => p.type === 'sand' && p.alpha > 0);\n                if (source) source.alpha = 0;\n            }")
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Install Chromium test tools
+        run: |
+          mkdir -p /tmp/sand-animation-test
+          npm install --prefix /tmp/sand-animation-test playwright@1.55.0
+          npx --prefix /tmp/sand-animation-test playwright install --with-deps chromium
+
+      - name: Test filtering completion and replay
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/static-server.log 2>&1 &
+          cat > /tmp/sand-animation-test/verify.mjs <<'NODE'
+          import fs from 'node:fs';
+          import { chromium } from 'playwright';
+
+          const browser = await chromium.launch({ headless: true });
+          const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
+          const pageErrors = [];
+          page.on('pageerror', error => pageErrors.push(error.message));
+          await page.goto('http://127.0.0.1:4173/05.html', { waitUntil: 'domcontentloaded', timeout: 30000 });
+          await page.waitForTimeout(900);
+
+          const initial = await page.evaluate(() => {
+            const home = document.getElementById('farm-home-button')?.getBoundingClientRect();
+            return {
+              helperReady: typeof window.__prepareReplay05 === 'function',
+              homeRight: Boolean(home && window.innerWidth - home.right <= 20),
+              homeSetting: document.body.dataset.farmHomePosition,
+            };
+          });
+
+          await page.evaluate(() => window.__prepareReplay05(4));
+          await page.waitForTimeout(7500);
+          const mid = await page.evaluate(() => window.__getSandLabState05());
+          await page.waitForTimeout(11000);
+          const final = await page.evaluate(() => ({
+            ...window.__getSandLabState05(),
+            resultVisible: document.getElementById('finalResultCard').classList.contains('show'),
+            title: document.getElementById('s-title').textContent,
+          }));
+          await page.screenshot({ path: '/tmp/sand-animation-test/05-final.png', fullPage: true });
+
+          await page.evaluate(() => window.__prepareReplay05(4));
+          await page.waitForTimeout(2500);
+          const replay = await page.evaluate(() => window.__getSandLabState05());
+          await page.screenshot({ path: '/tmp/sand-animation-test/05-replay.png', fullPage: true });
+          await browser.close();
+
+          const report = { initial, mid, final, replay, pageErrors };
+          fs.writeFileSync('/tmp/sand-animation-test/report.json', JSON.stringify(report, null, 2));
+
+          const failed =
+            pageErrors.length || !initial.helperReady || !initial.homeRight || initial.homeSetting !== 'right' ||
+            mid.step !== 4 || mid.sandDeposited < 35 || mid.pileMaximum < 5 ||
+            final.step !== 5 || !final.resultVisible || final.sandDeposited < 112 || final.pileMaximum < 20 ||
+            replay.step !== 4 || replay.sandDeposited < 10 || replay.pileMaximum < 3;
+          if (failed) {
+            console.error(JSON.stringify(report, null, 2));
+            process.exit(1);
+          }
+          console.log('Filtering retains a visible sand pile and replay restarts the animation.');
+          NODE
+          node /tmp/sand-animation-test/verify.mjs
+
+      - name: Upload visual test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sand-animation-verification
+          path: /tmp/sand-animation-test
+          if-no-files-found: warn
+
+      - name: Commit only the verified page repair
+        run: |
+          git rm -f tools/patch_05_sand_animation.py .github/workflows/verify-05-sand-animation.yml
+          rmdir tools 2>/dev/null || true
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+          git add 05.html
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "fix: retain sand during filtering animation"
+          git push
