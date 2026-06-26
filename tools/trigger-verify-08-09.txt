@@ -1,1 +1,1 @@
-Open the pull request to run the verification workflow.
+Run the updated circuit and badge verification workflow.
