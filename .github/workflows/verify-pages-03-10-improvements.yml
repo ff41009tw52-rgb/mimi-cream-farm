@@ -1,0 +1,95 @@
+name: Verify pages 03-10 improvements
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Apply requested page improvements
+        run: python3 tools/apply_pages_03_10_improvements.py
+
+      - name: Install isolated browser tools
+        run: |
+          mkdir -p /tmp/pages0310-audit
+          npm install --prefix /tmp/pages0310-audit playwright@1.55.0
+          npx --prefix /tmp/pages0310-audit playwright install --with-deps chromium
+
+      - name: Open pages 03-10 in Chromium
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/static-server.log 2>&1 &
+          cat > /tmp/pages0310-audit/verify.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          const pages = ['03.html','04.html','05.html','06.html','07.html','08.html','09.html','10.html'];
+          const requiredText = {
+            '03.html': ['電流磁效應任務', '先猜猜看', '結論：通電的導線周圍會產生磁力'],
+            '04.html': ['變色紀錄表', '檸檬汁', '不同液體會讓天然色素變成不同顏色'],
+            '05.html': ['停下來想一想', '分離成功', '重看這一步'],
+            '06.html': ['觀察小隊長', '問題發明家', '認識農場老師'],
+            '07.html': ['現在空氣體積', '空氣擠得多不多', '空間變小時'],
+            '08.html': ['跟著做模式', '完整的圈圈'],
+            '09.html': ['酸鹼分類接接樂', '挑戰機會', '任務徽章'],
+            '10.html': ['老師的科學小屋', '我們會先觀察', '老師的小驚喜', '開始今天的科學任務'],
+          };
+          const browser = await chromium.launch({ headless: true });
+          const problems = [];
+          for (const filename of pages) {
+            const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
+            const pageErrors = [];
+            const failedLocal = [];
+            page.on('pageerror', (error) => pageErrors.push(error.message));
+            page.on('response', (response) => {
+              if (response.url().startsWith('http://127.0.0.1:4173/') && response.status() >= 400) {
+                failedLocal.push(`${response.status()} ${response.url()}`);
+              }
+            });
+            let navError = null;
+            try {
+              const response = await page.goto(`http://127.0.0.1:4173/${filename}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+              if (!response || response.status() >= 400) navError = `HTTP ${response?.status() || 'no response'}`;
+              await page.waitForTimeout(2200);
+            } catch (error) {
+              navError = error.message;
+            }
+            const text = await page.evaluate(() => (document.body?.innerText || '').replace(/\s+/g, ' ').trim()).catch(() => '');
+            const missingText = requiredText[filename].filter((needle) => !text.includes(needle));
+            if (navError || pageErrors.length || failedLocal.length || missingText.length) {
+              problems.push({ filename, navError, pageErrors, failedLocal, missingText, text: text.slice(0, 500) });
+            }
+            await page.close();
+          }
+          await browser.close();
+          console.log(`CHECKED_PAGES=${pages.length}`);
+          if (problems.length) {
+            console.error(JSON.stringify(problems, null, 2));
+            process.exit(1);
+          }
+          console.log('Pages 03-10 loaded and required learning elements were found.');
+          NODE
+          node /tmp/pages0310-audit/verify.mjs
+
+      - name: Commit completed website changes
+        run: |
+          git rm -f tools/apply_pages_03_10_improvements.py .github/workflows/verify-pages-03-10-improvements.yml
+          rmdir tools 2>/dev/null || true
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+          git add 03.html 04.html 05.html 06.html 07.html 08.html 09.html 10.html
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "feat: improve science activities pages 03 to 10"
+          git push
