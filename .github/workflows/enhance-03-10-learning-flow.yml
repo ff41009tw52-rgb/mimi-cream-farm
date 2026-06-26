@@ -1,0 +1,126 @@
+name: Verify learning upgrades for pages 03 to 10
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Apply verified page upgrades
+        run: python3 tools/apply_learning_refresh.py
+
+      - name: Run static checks for logic and wording
+        run: |
+          test -f learning-refresh.js
+          grep -q '檸檬汁' 04.html
+          grep -q '清水' 04.html
+          grep -q 'window.getAirLabState' 07.html
+          grep -q 'excludedBulbId' 08.html
+          ! grep -q 'successfulPathBulbs' 08.html
+          grep -q '任務徽章' 09.html
+          ! grep -q 'targetScore' 09.html
+          grep -q '老師的科學小屋' 10.html
+          grep -q '開始今天的科學任務' 10.html
+          for page in 03 04 05 06 07 08 09 10; do
+            test "$(grep -c 'learning-refresh.js' ${page}.html)" -eq 1
+          done
+
+      - name: Install isolated browser test tools
+        run: |
+          mkdir -p /tmp/learning-refresh-audit
+          npm install --prefix /tmp/learning-refresh-audit playwright@1.55.0
+          npx --prefix /tmp/learning-refresh-audit playwright install --with-deps chromium
+
+      - name: Open and inspect every upgraded page
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/static-server.log 2>&1 &
+          cat > /tmp/learning-refresh-audit/verify.mjs <<'NODE'
+          import { chromium } from 'playwright';
+
+          const checks = {
+            '03.html': '#magnet-learning-guide',
+            '04.html': '#indicator-record-card',
+            '05.html': '#separation-thinking-card',
+            '06.html': '#farm-role-note',
+            '07.html': '#air-lab-learning-card',
+            '08.html': '#circuit-guide',
+            '09.html': '#badge-mission-note',
+            '10.html': '#teacher-promise-list',
+          };
+          const browser = await chromium.launch({ headless: true });
+          const problems = [];
+          const screenshots = [];
+          for (const [filename, selector] of Object.entries(checks)) {
+            const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
+            const pageErrors = [];
+            const failedLocalResources = [];
+            page.on('pageerror', error => pageErrors.push(error.message));
+            page.on('response', response => {
+              if (response.url().startsWith('http://127.0.0.1:4173/') && response.status() >= 400) {
+                failedLocalResources.push(`${response.status()} ${response.url()}`);
+              }
+            });
+            let navigationError = null;
+            try {
+              await page.goto(`http://127.0.0.1:4173/${filename}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+              await page.waitForSelector(selector, { timeout: 12000 });
+              await page.waitForTimeout(1200);
+            } catch (error) {
+              navigationError = error.message;
+            }
+            const state = await page.evaluate((expected) => ({
+              enhancementPresent: Boolean(document.querySelector(expected)),
+              homeButtonCount: document.querySelectorAll('#farm-home-button').length,
+              rootChildCount: document.getElementById('root')?.childElementCount ?? null,
+              bodyText: (document.body.innerText || '').replace(/\s+/g, ' ').slice(0, 300),
+            }), selector).catch(() => ({ enhancementPresent: false, homeButtonCount: 0, rootChildCount: null, bodyText: '' }));
+            if (navigationError || pageErrors.length || failedLocalResources.length || !state.enhancementPresent || state.homeButtonCount !== 1 || (state.rootChildCount === 0 && ['03.html', '08.html'].includes(filename))) {
+              problems.push({ filename, navigationError, pageErrors, failedLocalResources, state });
+              await page.screenshot({ path: `/tmp/learning-refresh-audit/${filename}.png`, fullPage: true }).catch(() => {});
+              screenshots.push(`/tmp/learning-refresh-audit/${filename}.png`);
+            }
+            await page.close();
+          }
+          await browser.close();
+          await Bun.write('/tmp/learning-refresh-audit/report.json', JSON.stringify({ problems, screenshots }, null, 2));
+          if (problems.length) {
+            console.error(JSON.stringify(problems, null, 2));
+            process.exit(1);
+          }
+          console.log('All upgraded pages loaded and showed their learning enhancements.');
+          NODE
+          node /tmp/learning-refresh-audit/verify.mjs
+
+      - name: Upload browser audit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: learning-refresh-audit
+          path: /tmp/learning-refresh-audit
+          if-no-files-found: warn
+
+      - name: Commit only the completed website changes
+        run: |
+          git rm -f tools/apply_learning_refresh.py .github/workflows/enhance-03-10-learning-flow.yml
+          rmdir tools 2>/dev/null || true
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+          git add 03.html 04.html 05.html 06.html 07.html 08.html 09.html 10.html learning-refresh.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "feat: improve learning flow for pages 03 to 10"
+          git push
