@@ -1,1 +1,1 @@
-last sync
+workflow trigger once
