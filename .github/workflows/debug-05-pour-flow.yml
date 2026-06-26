@@ -1,0 +1,35 @@
+name: Capture 05 pour debug
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Apply repair and extract inline script
+        run: |
+          python3 tools/patch_05_pour_flow_v2.py
+          python3 - <<'PY'
+          from pathlib import Path
+          page = Path('05.html').read_text(encoding='utf-8')
+          start = page.index('    <script>') + len('    <script>')
+          end = page.rindex('    </script>')
+          Path('/tmp/05-inline.js').write_text(page[start:end], encoding='utf-8')
+          PY
+          node --check /tmp/05-inline.js > /tmp/05-node-check.txt 2>&1 || true
+      - name: Upload generated page and parser result
+        uses: actions/upload-artifact@v4
+        with:
+          name: 05-pour-debug
+          path: |
+            05.html
+            /tmp/05-inline.js
+            /tmp/05-node-check.txt
