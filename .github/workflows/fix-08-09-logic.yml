@@ -1,0 +1,159 @@
+name: Patch 08 and 09 logic
+
+on:
+  push:
+    branches:
+      - improve-pages-03-10
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Patch logic
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path('08.html')
+          s = p.read_text(encoding='utf-8')
+          m = re.search(r"            // --- 核心邏輯 ---\n            const runSimulation = \(\) => \{.*?\n            \};\n\n            return \(", s, re.S)
+          if not m:
+              raise SystemExit('runSimulation block not found in 08.html')
+          new = '''            // --- 核心邏輯 ---
+            const runSimulation = () => {
+                setErrorMsg('');
+                setLitBulbIds(new Set());
+                setBrightness(0);
+
+                const adj = {};
+                components.forEach(c => {
+                    if (c.type === COMPONENT_TYPES.BATTERY) {
+                        adj[`${c.id}:pos`] = [];
+                        adj[`${c.id}:neg`] = [];
+                    } else {
+                        adj[`${c.id}:thread`] = [];
+                        adj[`${c.id}:tip`] = [];
+                    }
+                });
+
+                wires.forEach(w => {
+                    const u = `${w.start.compId}:${w.start.pointType}`;
+                    const v = `${w.end.compId}:${w.end.pointType}`;
+                    if (adj[u]) adj[u].push(v);
+                    if (adj[v]) adj[v].push(u);
+                });
+
+                // 燈泡內部可以導通；電池正負極不直接互通，避免多燈泡時錯誤亮燈。
+                components.filter(c => c.type === COMPONENT_TYPES.BULB).forEach(bulb => {
+                    adj[`${bulb.id}:thread`].push(`${bulb.id}:tip`);
+                    adj[`${bulb.id}:tip`].push(`${bulb.id}:thread`);
+                });
+
+                const batteries = components.filter(c => c.type === COMPONENT_TYPES.BATTERY);
+                if (batteries.length === 0) {
+                    setErrorMsg('需要電池才能供電！');
+                    setIsSwitchOn(false);
+                    return;
+                }
+
+                const reachableFrom = (start) => {
+                    const seen = new Set([start]);
+                    const stack = [start];
+                    while (stack.length) {
+                        const node = stack.pop();
+                        (adj[node] || []).forEach(next => {
+                            if (!seen.has(next)) {
+                                seen.add(next);
+                                stack.push(next);
+                            }
+                        });
+                    }
+                    return seen;
+                };
+
+                const lit = new Set();
+                let shortCircuit = false;
+                batteries.forEach(battery => {
+                    const fromPos = reachableFrom(`${battery.id}:pos`);
+                    const fromNeg = reachableFrom(`${battery.id}:neg`);
+                    if (fromPos.has(`${battery.id}:neg`) || fromNeg.has(`${battery.id}:pos`)) {
+                        shortCircuit = true;
+                    }
+                    components.filter(c => c.type === COMPONENT_TYPES.BULB).forEach(bulb => {
+                        const thread = `${bulb.id}:thread`;
+                        const tip = `${bulb.id}:tip`;
+                        const connectedAcross = (fromPos.has(thread) && fromNeg.has(tip)) || (fromPos.has(tip) && fromNeg.has(thread));
+                        if (connectedAcross) lit.add(bulb.id);
+                    });
+                });
+
+                if (lit.size > 0) {
+                    setLitBulbIds(lit);
+                    const brightnessLevel = batteries.length >= 2 ? 2 : 1;
+                    setBrightness(brightnessLevel);
+                    setErrorMsg(`電路形成完整圈圈！${lit.size} 顆燈泡發光。`);
+                } else {
+                    setErrorMsg(shortCircuit ? '電池正負極可能直接相連，請讓電流經過燈泡。' : '電源已開啟，但未形成完整迴路。');
+                }
+            };
+
+            return ('''
+          s = s[:m.start()] + new + s[m.end():]
+          p.write_text(s, encoding='utf-8')
+
+          p = Path('09.html')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('targetScore: 100 // 修改：目標分數改為 100', 'targetScore: 3, // 三個任務徽章')
+          s = s.replace('currentMissionTarget: 2,', 'currentMissionTarget: 2,\n        completedBadges: new Set(),')
+          s = s.replace('this.state.missionItemsCollected = 0;\n        \n        this.changeMission();', 'this.state.missionItemsCollected = 0;\n        this.state.completedBadges = new Set();\n        \n        this.changeMission();')
+          s = s.replace('this.state.score += 10;', 'this.state.score += 1;')
+          s = s.replace('this.showFloatingText("+10", "#2ecc71", this.player.x);', "this.showFloatingText('徽章進度 +1', '#2ecc71', this.player.x);")
+          s = s.replace('if (this.state.score >= this.state.targetScore) {', "this.state.completedBadges.add(this.state.currentMission.type);\n            if (this.state.completedBadges.size >= this.state.targetScore) {")
+          s = s.replace('scoreEl.textContent = this.state.score;', "scoreEl.textContent = `${this.state.completedBadges.size} / 3`;")
+          s = s.replace("document.getElementById('score-display').textContent = `🏅 任務徽章: ${Math.min(3, Math.floor(this.state.score/30))} / 3`;", "document.getElementById('score-display').textContent = `🏅 任務徽章: ${this.state.completedBadges.size} / 3`;")
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Quick browser check
+        run: |
+          mkdir -p /tmp/logic-check
+          npm install --prefix /tmp/logic-check playwright@1.55.0
+          npx --prefix /tmp/logic-check playwright install --with-deps chromium
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/server.log 2>&1 &
+          cat > /tmp/logic-check/check.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          const browser = await chromium.launch({ headless: true });
+          for (const file of ['08.html','09.html']) {
+            const page = await browser.newPage();
+            const errors = [];
+            page.on('pageerror', e => errors.push(e.message));
+            await page.goto(`http://127.0.0.1:4173/${file}`, { waitUntil:'domcontentloaded', timeout:30000 });
+            await page.waitForTimeout(1500);
+            const text = await page.evaluate(() => document.body.innerText);
+            if (errors.length) throw new Error(file + ': ' + errors.join('\n'));
+            if (file === '08.html' && !text.includes('跟著做模式')) throw new Error('08 missing guide');
+            if (file === '09.html' && !text.includes('任務徽章')) throw new Error('09 missing badges');
+            await page.close();
+          }
+          await browser.close();
+          NODE
+          node /tmp/logic-check/check.mjs
+
+      - name: Commit patch
+        run: |
+          rm -f .github/workflows/fix-08-09-logic.yml
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add 08.html 09.html .github/workflows/fix-08-09-logic.yml
+          git commit -m "fix: improve circuit and badge logic"
+          git push
