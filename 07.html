@@ -710,10 +710,14 @@
 
             if(!animationFrame) renderParticles();
         }
-
+        window.getAirLabState = () => ({
+            volume: currentVol,
+            isBlocked,
+            step
+        });
         init();
-
     </script>
+    <script src="learning-refresh.js"></script>
     <script src="home-button.js"></script>
 </body>
 
