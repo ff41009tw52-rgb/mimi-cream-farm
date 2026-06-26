@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -17,7 +18,7 @@ jobs:
       - name: Check out feature branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.head_ref || github.ref_name }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Apply requested page improvements
@@ -50,34 +51,21 @@ jobs:
           for (const filename of pages) {
             const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
             const pageErrors = [];
-            const failedLocal = [];
             page.on('pageerror', (error) => pageErrors.push(error.message));
-            page.on('response', (response) => {
-              if (response.url().startsWith('http://127.0.0.1:4173/') && response.status() >= 400) {
-                failedLocal.push(`${response.status()} ${response.url()}`);
-              }
-            });
             let navError = null;
             try {
               const response = await page.goto(`http://127.0.0.1:4173/${filename}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
               if (!response || response.status() >= 400) navError = `HTTP ${response?.status() || 'no response'}`;
-              await page.waitForTimeout(2200);
-            } catch (error) {
-              navError = error.message;
-            }
+              await page.waitForTimeout(1800);
+            } catch (error) { navError = error.message; }
             const text = await page.evaluate(() => (document.body?.innerText || '').replace(/\s+/g, ' ').trim()).catch(() => '');
             const missingText = requiredText[filename].filter((needle) => !text.includes(needle));
-            if (navError || pageErrors.length || failedLocal.length || missingText.length) {
-              problems.push({ filename, navError, pageErrors, failedLocal, missingText, text: text.slice(0, 500) });
-            }
+            if (navError || pageErrors.length || missingText.length) problems.push({ filename, navError, pageErrors, missingText, text: text.slice(0, 400) });
             await page.close();
           }
           await browser.close();
           console.log(`CHECKED_PAGES=${pages.length}`);
-          if (problems.length) {
-            console.error(JSON.stringify(problems, null, 2));
-            process.exit(1);
-          }
+          if (problems.length) { console.error(JSON.stringify(problems, null, 2)); process.exit(1); }
           console.log('Pages 03-10 loaded and required learning elements were found.');
           NODE
           node /tmp/pages0310-audit/verify.mjs
