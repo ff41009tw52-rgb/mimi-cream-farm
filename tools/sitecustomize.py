@@ -14,6 +14,7 @@ def _patched_write_text(self, data, *args, **kwargs):
             "const source = beakerA.particles.find(p => p.type === 'sand' && p.alpha > 0);\n            if (source) source.alpha = 0;",
             "for (let i = 0; i < 3; i++) {\n                const source = beakerA.particles.find(p => p.type === 'sand' && p.alpha > 0);\n                if (source) source.alpha = 0;\n            }"
         )
+        data = data.replace('filterSetup.pileHeights[index] += 1.2;', 'filterSetup.pileHeights[index] += 1.55;')
         start = data.find('if (step === 4 && b.angle < -0.5) {')
         end = data.find('                    } else {', start) if start >= 0 else -1
         if start < 0 or end < 0:
