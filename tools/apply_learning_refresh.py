@@ -125,9 +125,9 @@ write('05.html', page05)
 
 # 07: expose the existing simulation state to the shared display without changing the mechanics.
 page07 = read('07.html')
-page07 = replace_once(
+page07 = regex_once(
     page07,
-    '        init();\n    </script>',
+    r"(?m)^(\s*)init\(\);\s*\n(\s*)</script>",
     """        window.getAirLabState = () => ({
             volume: currentVol,
             isBlocked,
@@ -160,7 +160,6 @@ new_run_simulation = """            const runSimulation = () => {
                     return;
                 }
 
-                // Wires are the external conductors. A bulb becomes a conductor only when we test a path through another bulb.
                 const wireGraph = new Map();
                 const addNode = (node) => {
                     if (!wireGraph.has(node)) wireGraph.set(node, new Set());
@@ -213,7 +212,6 @@ new_run_simulation = """            const runSimulation = () => {
                     return false;
                 };
 
-                // A direct wire-only path from + to - is a short circuit; do not light any bulb in that case.
                 if (hasPath(sourcePos, sourceNeg, null, true)) {
                     setErrorMsg('電池正、負極直接相連，這是短路。請讓電流先通過燈泡！');
                     setIsSwitchOn(false);
