@@ -1,1 +1,1 @@
-sync trigger
+patch run trigger
