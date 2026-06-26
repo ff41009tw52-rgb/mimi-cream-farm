@@ -51,7 +51,39 @@
         .animate-flow-we { animation: flow-we 1.5s infinite linear; }
         .animate-flow-ew { animation: flow-ew 1.5s infinite linear; }
 
-        .mission-guide-03{position:fixed;right:18px;bottom:18px;z-index:80;width:min(360px,calc(100vw - 36px));background:rgba(255,255,255,.96);border:3px solid #38bdf8;border-radius:22px;box-shadow:0 12px 28px rgba(15,23,42,.22);padding:16px;color:#0f172a;font-family:"Microsoft JhengHei",sans-serif}.mission-guide-03 h2{margin:0 0 8px;color:#0369a1}.mission-guide-03 ol{margin:0 0 10px 1.2em;padding:0;line-height:1.6}.mission-guide-03 button{border:0;border-radius:999px;padding:6px 10px;margin:4px;background:#0284c7;color:white;font-weight:700}.mission-guide-03 table{width:100%;border-collapse:collapse;font-size:.9rem}.mission-guide-03 th,.mission-guide-03 td{border:1px solid #bae6fd;padding:5px;text-align:center}.mission-guide-03 th{background:#f0f9ff}.mission-guide-03 .conclusion{margin-top:10px;background:#ecfeff;padding:8px;border-radius:12px;font-weight:700;color:#155e75}@media(max-width:760px){.mission-guide-03{position:static;width:auto;margin:14px}}
+        /* 教學提示採文件流排版；不以固定浮窗遮住實驗內容。 */
+        .mission-guide-03 {
+            position: static;
+            width: min(calc(100% - 32px), 1024px);
+            margin: 0 auto 32px;
+            background: rgba(255,255,255,.98);
+            border: 3px solid #38bdf8;
+            border-radius: 22px;
+            box-shadow: 0 10px 24px rgba(15,23,42,.14);
+            color: #0f172a;
+            font-family: "Microsoft JhengHei", sans-serif;
+        }
+        .mission-guide-03 summary {
+            cursor: pointer;
+            list-style: none;
+            padding: 14px 18px;
+            color: #0369a1;
+            font-size: 1.08rem;
+            font-weight: 800;
+        }
+        .mission-guide-03 summary::-webkit-details-marker { display: none; }
+        .mission-guide-03 summary::after { content: '＋'; float: right; font-size: 1.35rem; line-height: .9; }
+        .mission-guide-03[open] summary { border-bottom: 1px solid #bae6fd; }
+        .mission-guide-03[open] summary::after { content: '－'; }
+        .mission-guide-03 .mission-guide-content { padding: 0 18px 18px; }
+        .mission-guide-03 h2 { margin: 14px 0 8px; font-size: 1.22rem; color: #0369a1; }
+        .mission-guide-03 ol { margin: 0 0 10px 1.2em; padding: 0; line-height: 1.65; }
+        .mission-guide-03 button { border: 0; border-radius: 999px; padding: 7px 12px; margin: 5px 5px 0 0; background: #0284c7; color: white; font-weight: 700; cursor: pointer; }
+        .mission-guide-03 table { width: 100%; border-collapse: collapse; font-size: .92rem; margin-top: 10px; }
+        .mission-guide-03 th, .mission-guide-03 td { border: 1px solid #bae6fd; padding: 6px; text-align: center; }
+        .mission-guide-03 th { background: #f0f9ff; }
+        .mission-guide-03 .conclusion { margin-top: 12px; background: #ecfeff; padding: 10px; border-radius: 12px; font-weight: 700; color: #155e75; }
+        @media (max-width: 760px) { .mission-guide-03 { width: calc(100% - 24px); margin-bottom: 22px; } }
 
     </style>
 </head>
@@ -60,7 +92,17 @@
   🐾 回農場
 </a>
     <div id="root"></div>
-    <section class="mission-guide-03"><h2>🧭 電流磁效應任務</h2><ol><li>先觀察：沒有通電時，指南針會不會轉？</li><li>打開電源：觀察指南針偏轉。</li><li>反轉電流：比較偏轉方向。</li><li>移動導線位置：觀察導線在上方或下方的差異。</li></ol><strong>先猜猜看：</strong> 電流方向改變後，指南針會怎麼轉？<br><button data-predict="same">方向一樣</button><button data-predict="opposite">方向相反</button><div id="prediction-feedback-03"></div><table><thead><tr><th>操作</th><th>指南針變化</th></tr></thead><tbody><tr><td>通電</td><td>會偏轉</td></tr><tr><td>反轉電流</td><td>方向相反</td></tr><tr><td>移動導線</td><td>偏轉情形改變</td></tr></tbody></table><div class="conclusion">結論：通電的導線周圍會產生磁力，電流方向改變，指南針偏轉方向也會改變。</div></section>
+    <details class="mission-guide-03">
+        <summary>🧭 打開電流磁效應任務提示</summary>
+        <div class="mission-guide-content">
+            <h2>電流磁效應任務</h2>
+            <ol><li>先觀察：沒有通電時，指南針會不會轉？</li><li>打開電源：觀察指南針偏轉。</li><li>反轉電流：比較偏轉方向。</li><li>移動導線位置：觀察導線在上方或下方的差異。</li></ol>
+            <strong>先猜猜看：</strong> 電流方向改變後，指南針會怎麼轉？<br>
+            <button data-predict="same">方向一樣</button><button data-predict="opposite">方向相反</button><div id="prediction-feedback-03" aria-live="polite"></div>
+            <table><thead><tr><th>操作</th><th>指南針變化</th></tr></thead><tbody><tr><td>通電</td><td>會偏轉</td></tr><tr><td>反轉電流</td><td>方向相反</td></tr><tr><td>移動導線</td><td>偏轉情形改變</td></tr></tbody></table>
+            <div class="conclusion">結論：通電的導線周圍會產生磁力，電流方向改變，指南針偏轉方向也會改變。</div>
+        </div>
+    </details>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
@@ -348,7 +390,7 @@
             };
 
             return (
-                <div className="min-h-screen p-4 md:p-8 max-w-5xl mx-auto">
+                <div className="min-h-screen px-4 pb-8 pt-24 md:px-8 md:pb-10 md:pt-24 max-w-5xl mx-auto">
                     <header className="mb-8 text-center">
                         <h1 className="text-3xl font-bold text-slate-800 flex items-center justify-center gap-3">
                             <Zap className="text-yellow-500 fill-current" />
