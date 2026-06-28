@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>橘咪咪與白奶油的科學農場 (雲端小組協作版)</title>
+    <title>橘咪咪與白奶油的科學農場</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -108,7 +108,7 @@
             <div class="space-y-6 text-left max-w-sm mx-auto">
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">🏫 班級：</label>
-                    <select id="input-class" class="w-full px-5 py-4 rounded-xl border-2 border-gray-200 bg-white text-gray-700 font-bold focus:outline-none focus:border-green-500 text-center sm:text-lg shadow-inner cursor-pointer">
+                    <select id="input-class" onchange="handleClassChange()" class="w-full px-5 py-4 rounded-xl border-2 border-gray-200 bg-white text-gray-700 font-bold focus:outline-none focus:border-green-500 text-center sm:text-lg shadow-inner cursor-pointer">
                         <option value="307">307班</option>
                         <option value="308">308班</option>
                         <option value="309">309班</option>
@@ -119,7 +119,7 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">🧑 座號 (1~25)：</label>
+                    <label id="home-seat-label" class="block text-sm font-bold text-gray-700 mb-2">🧑 座號 (1~25)：</label>
                     <input type="number" id="input-seat" class="w-full px-5 py-4 rounded-xl border-2 border-gray-200 focus:border-green-500 focus:outline-none font-bold text-center text-xl tracking-wider shadow-inner" placeholder="請輸入座號" min="1" max="25">
                 </div>
                 <p class="text-sm text-gray-500 font-bold text-center mt-2 bg-green-50 py-2 rounded-lg">* 請先選班級，再輸入座號，就會到自己的小組囉！</p>
@@ -272,7 +272,7 @@
         </div>
 
         <div class="mt-12 flex items-end gap-4 max-w-lg mx-auto">
-            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-green-300 flex-shrink-0 bg-gray-100 shadow-md"><img src="picture/Christmascream.jpg" alt="白奶油" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100/eee/999?text=Cream'"></div>
+            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-green-300 flex-shrink-0 bg-gray-100 shadow-md"><img src="Christmascream.jpg" alt="白奶油" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100/eee/999?text=Cream'"></div>
             <div class="flex-1"><div class="chat-bubble chat-bubble-outline text-sm sm:text-base font-bold text-gray-700 p-4">白奶油園長：小組任務要一起完成喔！你們寫的內容，組員都看得到。</div></div>
         </div>
     </div>
@@ -281,7 +281,7 @@
     <div id="view-pretest" class="view-section max-w-2xl mx-auto pt-6 px-4 pb-20 relative"><button onclick="goToMap()" class="absolute top-4 left-4 bg-white border-2 border-green-500 text-green-600 px-4 py-1.5 rounded-full text-sm font-bold shadow hover:bg-green-50 z-10 flex items-center gap-1">返回</button>
         <div class="text-center mt-10 mb-8"><h2 class="text-2xl sm:text-3xl font-bold text-green-800">🌱 生長大考驗</h2><p class="text-base text-gray-500 mt-2 font-bold">第 <span id="current-q-num" class="text-green-600">1</span> / 5 題</p></div>
         <div class="bg-white rounded-3xl shadow-lg p-6 sm:p-10 border-2 border-green-100 mb-8"><h3 class="text-xl sm:text-2xl font-bold text-gray-800 mb-8 leading-relaxed" id="question-text">載入中...</h3><div class="space-y-4" id="options-container"></div></div>
-        <div class="mt-8 flex items-end gap-4 max-w-lg mx-auto"><div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-orange-300 flex-shrink-0 bg-orange-50 shadow-md"><img src="picture/Christmasmimi.jpg" alt="橘咪咪" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100/fcd34d/d97706?text=Mimi'"></div><div class="flex-1"><div class="chat-bubble chat-bubble-orange chat-bubble-orange-outline text-sm sm:text-base font-bold text-gray-700 p-4">橘咪咪園長：仔細回想自然課本的內容，你一定可以做到的喵！</div></div></div>
+        <div class="mt-8 flex items-end gap-4 max-w-lg mx-auto"><div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-orange-300 flex-shrink-0 bg-orange-50 shadow-md"><img src="Christmasmimi.jpg" alt="橘咪咪" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100/fcd34d/d97706?text=Mimi'"></div><div class="flex-1"><div class="chat-bubble chat-bubble-orange chat-bubble-orange-outline text-sm sm:text-base font-bold text-gray-700 p-4">橘咪咪園長：仔細回想自然課本的內容，你一定可以做到的喵！</div></div></div>
     </div>
     
     <!-- ==================== 5. 測驗結算 ==================== -->
@@ -300,7 +300,7 @@
         <div class="bg-white rounded-3xl shadow-md p-5 sm:p-8 border border-gray-100 mb-6"><p class="font-black text-lg text-gray-700 mb-4">步驟 2. 選擇你要做的行動：</p><div class="grid grid-cols-2 sm:grid-cols-4 gap-3"><button id="action-1" onclick="chooseAction('澆一點水', 'action-1')" class="action-btn bg-white border-2 border-blue-300 text-blue-700 rounded-xl py-3 sm:py-4 text-base font-bold hover:bg-blue-50 transition-colors">💧 澆一點水</button><button id="action-2" onclick="chooseAction('先別澆水', 'action-2')" class="action-btn bg-white border-2 border-red-300 text-red-700 rounded-xl py-3 sm:py-4 text-base font-bold hover:bg-red-50 transition-colors">🚫 先別澆水</button><button id="action-3" onclick="chooseAction('換到有光的地方', 'action-3')" class="action-btn bg-white border-2 border-orange-300 text-orange-700 rounded-xl py-3 sm:py-4 text-base font-bold hover:bg-orange-50 transition-colors">☀️ 換到有光的地方</button><button id="action-5" onclick="chooseAction('找找有沒有菜蟲', 'action-5')" class="action-btn bg-white border-2 border-green-300 text-green-700 rounded-xl py-3 sm:py-4 text-base font-bold hover:bg-green-50 transition-colors">🐛 找找有沒有菜蟲</button></div></div>
         <div class="bg-white rounded-3xl shadow-md p-5 sm:p-8 border border-gray-100 mb-8"><p class="font-black text-lg text-gray-700 mb-4">步驟 3. 把你的想法說一說</p><div class="space-y-4 text-gray-700 font-bold text-base sm:text-lg"><div class="flex items-center gap-3 flex-wrap"><span>我看到</span><input type="text" id="rescue-obs" class="flex-1 min-w-[150px] border-b-2 border-green-500 bg-green-50 px-3 py-2 rounded focus:outline-none focus:bg-green-100 transition-colors" placeholder="例: 土乾乾的、葉子有洞"></div><div class="flex items-center gap-3 flex-wrap"><span>所以我想先</span><input type="text" id="rescue-reason" class="flex-1 min-w-[150px] border-b-2 border-green-500 bg-green-50 px-3 py-2 rounded focus:outline-none focus:bg-green-100 transition-colors" placeholder="例: 澆一點水、找找有沒有菜蟲"></div></div></div>
         <button onclick="submitRescue()" class="w-full bg-blue-500 text-white font-bold py-4 px-4 rounded-xl shadow-lg hover:scale-[1.02] transition-transform duration-300 text-lg sm:text-xl">送出決定！</button>
-        <div class="mt-10 flex items-end gap-4 max-w-lg mx-auto"><div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-4 border-orange-300 flex-shrink-0 bg-orange-50 shadow-md"><img src="picture/Christmasmimi.jpg" onerror="this.src='https://placehold.co/100/fcd34d/d97706?text=Mimi'"></div><div class="flex-1"><div class="chat-bubble chat-bubble-orange chat-bubble-orange-outline text-xs font-bold text-gray-700 p-3 sm:p-4">橘咪咪園長：先把葉子、土和放的位置都看過，再選方法喔！</div></div></div>
+        <div class="mt-10 flex items-end gap-4 max-w-lg mx-auto"><div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-4 border-orange-300 flex-shrink-0 bg-orange-50 shadow-md"><img src="Christmasmimi.jpg" onerror="this.src='https://placehold.co/100/fcd34d/d97706?text=Mimi'"></div><div class="flex-1"><div class="chat-bubble chat-bubble-orange chat-bubble-orange-outline text-xs font-bold text-gray-700 p-3 sm:p-4">橘咪咪園長：先把葉子、土和放的位置都看過，再選方法喔！</div></div></div>
     </div>
 
     <!-- ==================== 7. 小組日誌 ==================== -->
@@ -475,7 +475,7 @@
 
     <!-- ==================== 9. 後測 ==================== -->
     <div id="view-posttest" class="view-section max-w-2xl mx-auto pt-6 px-4 pb-20 relative"><button onclick="goToMap()" class="absolute top-4 left-4 bg-white border-2 border-yellow-500 text-yellow-600 px-4 py-1.5 rounded-full text-sm font-bold shadow hover:bg-green-50 z-10 flex items-center gap-1">返回</button><div class="text-center mt-10 mb-8"><h2 class="text-2xl sm:text-3xl font-bold text-yellow-600">🏆 守護員挑戰</h2><p class="text-base text-gray-500 mt-2 font-bold">第 <span id="current-postq-num" class="text-yellow-600">1</span> / 5 題</p></div><div class="bg-white rounded-3xl shadow-lg p-6 sm:p-10 border-2 border-yellow-200 mb-8"><h3 class="text-xl sm:text-2xl font-bold text-gray-800 mb-8 leading-relaxed" id="postquestion-text">載入中...</h3><div class="space-y-4" id="postoptions-container"></div></div>
-        <div class="mt-8 flex items-end gap-4 max-w-lg mx-auto"><div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-orange-300 flex-shrink-0 bg-orange-50 shadow-md"><img src="picture/Christmasmimi.jpg" onerror="this.src='https://placehold.co/100/fcd34d/d97706?text=Mimi'"></div><div class="flex-1"><div class="chat-bubble chat-bubble-orange chat-bubble-orange-outline text-sm sm:text-base font-bold text-gray-700 p-4">橘咪咪園長：這是最後的挑戰，展現你的學習成果吧！</div></div></div>
+        <div class="mt-8 flex items-end gap-4 max-w-lg mx-auto"><div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-orange-300 flex-shrink-0 bg-orange-50 shadow-md"><img src="Christmasmimi.jpg" onerror="this.src='https://placehold.co/100/fcd34d/d97706?text=Mimi'"></div><div class="flex-1"><div class="chat-bubble chat-bubble-orange chat-bubble-orange-outline text-sm sm:text-base font-bold text-gray-700 p-4">橘咪咪園長：這是最後的挑戰，展現你的學習成果吧！</div></div></div>
     </div>
     
     <!-- ==================== 10. 反思 ==================== -->
@@ -492,23 +492,15 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        let firebaseConfig;
-        let appId;
-
-        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-            firebaseConfig = JSON.parse(__firebase_config);
-            appId = typeof __app_id !== 'undefined' ? __app_id : 'science-farm-v1';
-        } else {
-            firebaseConfig = {
-                apiKey: "AIzaSyAJtQda3WUcafD2BI9AggSemagz-Kyd3ek",
-                authDomain: "science-class-c0337.firebaseapp.com",
-                projectId: "science-class-c0337",
-                storageBucket: "science-class-c0337.firebasestorage.app",
-                messagingSenderId: "713843814869",
-                appId: "1:713843814869:web:62be2b82afaaeff0ae8d5c"
-            };
-            appId = "science-farm-v1";
-        }
+        let firebaseConfig = {
+            apiKey: "AIzaSyAJtQda3WUcafD2BI9AggSemagz-Kyd3ek",
+            authDomain: "science-class-c0337.firebaseapp.com",
+            projectId: "science-class-c0337",
+            storageBucket: "science-class-c0337.firebasestorage.app",
+            messagingSenderId: "713843814869",
+            appId: "1:713843814869:web:62be2b82afaaeff0ae8d5c"
+        };
+        let appId = "science-farm-v1";
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -519,24 +511,11 @@
 
         const initAuth = async () => {
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    try {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } catch (tokenError) {
-                        console.warn("自訂 Token 登入失敗，改為嘗試匿名登入...", tokenError);
-                        await signInAnonymously(auth);
-                    }
-                } else {
-                    await signInAnonymously(auth);
-                }
+                await signInAnonymously(auth);
             } catch (error) {
                 console.error("Firebase 登入初始化失敗：", error);
                 const statusEl = document.getElementById('cloud-indicator');
-                if(statusEl) {
-                    statusEl.innerText = "☁️ 連線錯誤";
-                    statusEl.style.backgroundColor = "#fee2e2";
-                    statusEl.style.color = "#991b1b";
-                }
+                if(statusEl) { statusEl.innerText = "☁️ 連線錯誤"; statusEl.style.backgroundColor = "#fee2e2"; statusEl.style.color = "#991b1b"; }
             }
         };
 
@@ -656,7 +635,41 @@
     <script>
         function escapeHTML(str) { if (typeof str !== 'string' && typeof str !== 'number') return str; return String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)); }
         function escapeCSV(value) { if (value === null || value === undefined) return '""'; return `"${String(value).replace(/"/g, '""')}"`; }
-        function getGroupAssign(seat) { const s = parseInt(seat, 10); if(s<=5) return 1; if(s<=10) return 2; if(s<=15) return 3; if(s<=20) return 4; if(s<=25) return 5; return 1; }
+        
+        const classGroupSettings = {
+            "307": { maxSeat: 25, groupCount: 5, customGroups: null },
+            "308": { maxSeat: 25, groupCount: 5, customGroups: null },
+            "309": { 
+                maxSeat: 26, 
+                groupCount: 6, 
+                customGroups: {
+                    1: [7, 9, 22, 25],
+                    2: [2, 5, 16, 24, 26],
+                    3: [8, 12, 20, 21],
+                    4: [3, 4, 11, 14, 15],
+                    5: [6, 17, 18, 19],
+                    6: [1, 10, 13, 23]
+                }
+            },
+            "310": { maxSeat: 25, groupCount: 5, customGroups: null },
+            "311": { maxSeat: 25, groupCount: 5, customGroups: null },
+            "312": { maxSeat: 25, groupCount: 5, customGroups: null },
+            "313": { maxSeat: 25, groupCount: 5, customGroups: null }
+        };
+
+        function getGroupAssign(classCode, seat) { 
+            const s = parseInt(seat, 10); 
+            const settings = classGroupSettings[classCode];
+            if (!settings) return 1;
+
+            if (settings.customGroups) {
+                for (const [groupNum, seats] of Object.entries(settings.customGroups)) {
+                    if (seats.includes(s)) return Number(groupNum);
+                }
+            }
+
+            if(s<=5) return 1; if(s<=10) return 2; if(s<=15) return 3; if(s<=20) return 4; if(s<=settings.maxSeat) return 5; return 1; 
+        }
 
         window.usersList = []; window.groupsList = []; window.allDiaries = []; window.allPeerReviews = []; window.allTeacherNotes = [];
         window.globalSettings = { maxUnlockedLevel: 1 }; 
@@ -685,9 +698,9 @@
 
         // 將 Emoji 替換為圖片，移除「改善通風」與第四盆
         const rescuePlants = [
-            { id: 1, name: "一號小白菜", image: "picture/cabbage-dry.png", clues: { leaf: "葉子垂垂的，整株植物軟趴趴的。", soil: "土看起來白白的、摸起來乾巴巴的。", env: "放在陽光很強的窗台邊。" }, correctAction: "澆一點水", misconception: "沒發現土乾乾的就是缺水，誤以為是陽光的問題喔！" }, 
-            { id: 2, name: "二號小白菜", image: "picture/cabbage-pest.png", clues: { leaf: "葉子綠油油的，但是上面有好多破洞！", soil: "土摸起來濕濕的，剛剛才澆過水。", env: "放在通風的菜園裡，旁邊有小蝴蝶飛來飛去。" }, correctAction: "找找有沒有菜蟲", misconception: "葉子破洞是因為有菜蟲在吃，不是缺水喔！" }, 
-            { id: 3, name: "三號小白菜", image: "picture/cabbage-low-light.png", clues: { leaf: "葉子黃黃的，長得很瘦小。", soil: "土摸起來剛剛好。", env: "放在很暗的書桌底下，完全沒有太陽。" }, correctAction: "換到有光的地方", misconception: "植物需要陽光才能長大，放在太暗的地方會長不好喔！" }
+            { id: 1, name: "一號小白菜", image: "edge/cabbage-dry.png", clues: { leaf: "葉子垂垂的，整株植物軟趴趴的。", soil: "土看起來白白的、摸起來乾巴巴的。", env: "放在陽光很強的窗台邊。" }, correctAction: "澆一點水", misconception: "沒發現土乾乾的就是缺水，誤以為是陽光的問題喔！" }, 
+            { id: 2, name: "二號小白菜", image: "edge/cabbage-pest.png", clues: { leaf: "葉子綠油油的，但是上面有好多破洞！", soil: "土摸起來濕濕的，剛剛才澆過水。", env: "放在通風的菜園裡，旁邊有小蝴蝶飛來飛去。" }, correctAction: "找找有沒有菜蟲", misconception: "葉子破洞是因為有菜蟲在吃，不是缺水喔！" }, 
+            { id: 3, name: "三號小白菜", image: "edge/cabbage-low-light.png", clues: { leaf: "葉子黃黃的，長得很瘦小。", soil: "土摸起來剛剛好。", env: "放在很暗的書桌底下，完全沒有太陽。" }, correctAction: "換到有光的地方", misconception: "植物需要陽光才能長大，放在太暗的地方會長不好喔！" }
         ];
 
         let currentQuestionIndex = 0; let currentRescueIndex = 0; let selectedRescueAction = "";
@@ -697,10 +710,22 @@
             const lastLogin = localStorage.getItem('farmLastLogin'); 
             if (lastLogin) { 
                 const parsed = JSON.parse(lastLogin); 
-                document.getElementById('input-seat').value = parsed.seat || ''; 
                 if(parsed.classCode) document.getElementById('input-class').value = parsed.classCode;
-            } 
+                handleClassChange();
+                document.getElementById('input-seat').value = parsed.seat || ''; 
+            } else {
+                handleClassChange();
+            }
         };
+
+        function handleClassChange() {
+            const classCode = document.getElementById('input-class').value;
+            const settings = classGroupSettings[classCode] || classGroupSettings['307'];
+            const seatInput = document.getElementById('input-seat');
+            seatInput.max = settings.maxSeat;
+            seatInput.placeholder = `請輸入座號 (1~${settings.maxSeat})`;
+            document.getElementById('home-seat-label').innerText = `🧑 座號 (1~${settings.maxSeat})：`;
+        }
         
         function switchView(viewId) { document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); document.getElementById(viewId).classList.add('active'); window.scrollTo(0,0); }
         function showModal(title, message) { document.getElementById('modal-title').innerText = title; document.getElementById('modal-message').innerText = message; document.getElementById('custom-modal').classList.remove('hidden'); document.getElementById('custom-modal').classList.add('flex'); }
@@ -718,11 +743,15 @@
             const classCode = document.getElementById('input-class').value;
             const rawSeat = document.getElementById('input-seat').value.trim();
             const seatNumber = Number(rawSeat);
+            const settings = classGroupSettings[classCode] || classGroupSettings['307'];
             
-            if (!Number.isInteger(seatNumber) || seatNumber < 1 || seatNumber > 25) { showModal('座號不正確', '請輸入 1 到 25 之間的座號喔！'); return; }
+            if (!Number.isInteger(seatNumber) || seatNumber < 1 || seatNumber > settings.maxSeat) { 
+                showModal('座號不正確', `請輸入 1 到 ${settings.maxSeat} 之間的座號喔！`); 
+                return; 
+            }
             if (!window.isCloudReady) { showModal('連線中', '正在與雲端農場連線中，請稍候幾秒再試！'); return; }
 
-            const seat = String(seatNumber); const groupNum = getGroupAssign(seat); const name = `${seat}號`;
+            const seat = String(seatNumber); const groupNum = getGroupAssign(classCode, seat); const name = `${seat}號`;
 
             showModal('登入中', `自動分配至：第 ${groupNum} 組\n資料讀取中...`);
             try {
@@ -1001,7 +1030,12 @@
                 if (cp.evidenceCheckboxes && Array.isArray(cp.evidenceCheckboxes)) { checkboxes.forEach(cb => { if (cp.evidenceCheckboxes.includes(cb.value)) cb.checked = true; }); }
             } 
             
-            const prGroupSelect = document.getElementById('pr-group'); prGroupSelect.innerHTML = '<option value="">請選擇要回饋的小組...</option>'; for(let i = 1; i <= 5; i++) { if(i !== window.userData.group) prGroupSelect.innerHTML += `<option value="${i}">第 ${i} 組</option>`; }
+            const groupCount = classGroupSettings[window.userData.classCode]?.groupCount || 5;
+            const prGroupSelect = document.getElementById('pr-group'); 
+            prGroupSelect.innerHTML = '<option value="">請選擇要回饋的小組...</option>'; 
+            for(let i = 1; i <= groupCount; i++) { 
+                if(i !== window.userData.group) prGroupSelect.innerHTML += `<option value="${i}">第 ${i} 組</option>`; 
+            }
             
             window.currentReviewScores = { problem: 0, clue: 0, method: 0 };
             updateStars(1, 0); updateStars(2, 0); updateStars(3, 0);
@@ -1170,7 +1204,9 @@
             const ptbody = document.getElementById('dash-peer-table'); ptbody.innerHTML = '';
             
             const groupsMap = {}; 
-            for(let i=1; i<=5; i++) {
+            const groupCount = classGroupSettings[clz]?.groupCount || 5;
+
+            for(let i=1; i<=groupCount; i++) {
                 const groupId = `${clz}_G${i}`;
                 groupsMap[i] = { 
                     group: i, 
@@ -1197,7 +1233,7 @@
             });
 
             // 星等互評統計表
-            for(let i=1; i<=5; i++) {
+            for(let i=1; i<=groupCount; i++) {
                 const prs = groupsMap[i].peerReviews.filter(p => p.problemScore !== undefined); // 只算新版
                 const count = prs.length;
                 let probAvg = 0, clueAvg = 0, methAvg = 0, totalAvg = 0;
@@ -1230,8 +1266,15 @@
             const preRates = preCorrects.map(c => preCount > 0 ? Math.round((c/preCount)*100) : 0); const postRates = postCorrects.map(c => postCount > 0 ? Math.round((c/postCount)*100) : 0);
             if (dashCorrectChartInstance) dashCorrectChartInstance.destroy(); dashCorrectChartInstance = new Chart(document.getElementById('dash-chart-correct-rate'), { type: 'bar', data: { labels: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5'], datasets: [ { label: '前測答對率(%)', data: preRates, backgroundColor: 'rgba(34, 197, 94, 0.6)', borderColor: '#16a34a', borderWidth: 1, borderRadius: 6 }, { label: '後測答對率(%)', data: postRates, backgroundColor: 'rgba(168, 85, 247, 0.6)', borderColor: '#9333ea', borderWidth: 1, borderRadius: 6 } ] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } } });
 
-            let groupLabels = ['第一組', '第二組', '第三組', '第四組', '第五組']; let groupHeights = [0, 0, 0, 0, 0]; let groupDiaryCounts = [0, 0, 0, 0, 0]; let groupPeerCounts = [0, 0, 0, 0, 0];
-            for(let i=1; i<=5; i++) { 
+            let groupLabels = []; let groupHeights = []; let groupDiaryCounts = []; let groupPeerCounts = [];
+            for(let i=1; i<=groupCount; i++) {
+                groupLabels.push(`第${i}組`);
+                groupHeights.push(0);
+                groupDiaryCounts.push(0);
+                groupPeerCounts.push(0);
+            }
+
+            for(let i=1; i<=groupCount; i++) { 
                 const g = groupsMap[i]; 
                 if(g) { 
                     groupDiaryCounts[i-1] = g.diary ? g.diary.length : 0; groupPeerCounts[i-1] = g.peerReviews ? g.peerReviews.length : 0; 
@@ -1276,6 +1319,5 @@
             downloadCSV(csv, `科學農場_${clz}_小組互評資料.csv`);
         }
     </script>
-    <script src="home-button.js"></script>
 </body>
 </html>
