@@ -11,7 +11,7 @@
 <script>
 const sourceUrl='https://raw.githubusercontent.com/ff41009tw52-rgb/mimi-cream-farm/3281db76110cf7f2c56f58bbd64834b1889054db/40.html';
 fetch(sourceUrl).then(r=>r.text()).then(html=>{
-html=html.replaceAll('edge/cabbage-dry.png','./picture/cabbage-dry.png').replaceAll('edge/cabbage-low-light.png','./picture/cabbage-low-light.png').replaceAll('edge/cabbage-pest.png','./picture/cabbage-pest.png').replaceAll('./assets/illustrations/cream.svg','./picture/Christmascream.jpg').replaceAll('./assets/illustrations/mimi.svg','./picture/Christmasmimi.jpg');
+html=html.replaceAll('edge/cabbage-dry.png','./picture/cabbage-dry.png').replaceAll('edge/cabbage-low-light.png','./picture/cabbage-low-light.png').replaceAll('edge/cabbage-pest.png','./picture/cabbage-pest.png').replaceAll('Christmascream.jpg','./picture/Christmascream.jpg').replaceAll('Christmasmimi.jpg','./picture/Christmasmimi.jpg').replaceAll('./assets/illustrations/cream.svg','./picture/Christmascream.jpg').replaceAll('./assets/illustrations/mimi.svg','./picture/Christmasmimi.jpg');
 document.open();document.write(html);document.close();
 }).catch(()=>{document.body.innerHTML='<div class="box"><h1>暫時無法載入網站</h1><p>請重新整理後再試一次。</p></div>'});
 </script>
