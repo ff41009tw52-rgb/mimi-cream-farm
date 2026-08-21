@@ -138,6 +138,7 @@
                     <img
                         src={item.image}
                         alt={item.name}
+                        decoding="async"
                         className={`${sizeClass} object-contain drop-shadow-sm ${className}`}
                         onError={(e) => {
                             e.currentTarget.style.display = 'none';
