@@ -229,6 +229,7 @@ body[data-farm-home-position="right"] #farm-home-button{left:auto!important;righ
 
 <div class="final-result-card" id="finalResultCard"><h3>✅ 分離成功</h3><ul><li>濾紙上留下：沙子</li><li>杯子裡得到：食鹽水</li><li>成功原因：食鹽可溶於水，沙子不易溶於水。</li></ul></div>
     <canvas id="canvas"></canvas>
+    <pre id="debug-state-05" style="display:none"></pre>
 
     <script>
         const canvas = document.getElementById('canvas');
@@ -245,6 +246,10 @@ body[data-farm-home-position="right"] #farm-home-button{left:auto!important;righ
         let stepElapsed = 0;
         let sandSpawned = 0;
         const MAX_BOTTOM_LEVEL = 90; 
+        const INITIAL_SAND_COUNT = 300;
+        const INITIAL_SALT_COUNT = 250;
+        const STEP1_FINAL_WATER_VOLUME = 85;
+        const DESTINATION_WATER_SCALE = MAX_BOTTOM_LEVEL / STEP1_FINAL_WATER_VOLUME;
         
         // --- 顏色定義 ---
         const SAND_COLOR = '#5D4037';
@@ -310,8 +315,8 @@ body[data-farm-home-position="right"] #farm-home-button{left:auto!important;righ
             lastDropBurst: false,
             active: false
         };
-        const POUR_TARGET_SAND = 180;
         const POUR_DURATION = 8.6;
+        const debugStateEl = document.getElementById('debug-state-05');
 
         const titleEl = document.getElementById('s-title');
         const descEl = document.getElementById('s-desc');
@@ -452,7 +457,7 @@ body[data-farm-home-position="right"] #farm-home-button{left:auto!important;righ
             const fillHeight = beakerA.h / 3; 
             const bottomY = beakerA.h / 2;
 
-            for(let i=0; i<300; i++) {
+            for(let i=0; i<INITIAL_SAND_COUNT; i++) {
                 beakerA.particles.push({
                     type: 'sand',
                     x: (Math.random() - 0.5) * (beakerA.w - 30),
@@ -465,7 +470,7 @@ body[data-farm-home-position="right"] #farm-home-button{left:auto!important;righ
                     carried: false
                 });
             }
-            for(let i=0; i<250; i++) {
+            for(let i=0; i<INITIAL_SALT_COUNT; i++) {
                 beakerA.particles.push({
                     type: 'salt',
                     x: (Math.random() - 0.5) * (beakerA.w - 30),
@@ -545,7 +550,9 @@ body[data-farm-home-position="right"] #farm-home-button{left:auto!important;righ
                 ctx.rotate(-b.angle); 
                 let localSurfaceY = surfaceWorldY - b.y;
 
-                const ripple = (step === 1 || step === 2 || step === 4) ? 1.2 : 0.35;
+                let ripple = 0.35;
+                if (step === 1 || step === 4) ripple = 1.2;
+                if (step === 2) ripple = lerp(0.35, 1.2, 1 - smoothstep(2.9, 4.25, stepElapsed));
                 ctx.fillStyle = WATER_COLOR;
                 ctx.beginPath();
                 ctx.moveTo(-300, localSurfaceY);
@@ -614,9 +621,11 @@ body[data-farm-home-position="right"] #farm-home-button{left:auto!important;righ
             ctx.restore();
         }
 
-        function smoothSandPile() {
-            const threshold = 1.0; const transferRate = 0.4; 
-            for (let pass = 0; pass < 2; pass++) { 
+        function smoothSandPile(dt) {
+            const threshold = 1.0;
+            const passes = 2;
+            const transferRate = 1 - Math.pow(0.0008, dt / passes);
+            for (let pass = 0; pass < passes; pass++) {
                 for (let i = 0; i < filterSetup.pileHeights.length - 1; i++) {
                     let diff = filterSetup.pileHeights[i] - filterSetup.pileHeights[i+1];
                     if (diff > threshold) {
@@ -673,7 +682,7 @@ body[data-farm-home-position="right"] #farm-home-button{left:auto!important;righ
             ctx.restore();
         }
 
-        function createFallingParticle(type, start, strength) {
+        function createFallingParticle(type, start, strength, grainCount = 1) {
             const sieveY = filterSetup.y - filterSetup.beakerBSize.h + 40;
             const targetX = filterSetup.x + (Math.random() - 0.5) * (type === 'sand' ? 42 : 24);
             const flight = type === 'sand' ? 0.82 + Math.random() * 0.16 : 0.58 + Math.random() * 0.12;
@@ -685,50 +694,69 @@ body[data-farm-home-position="right"] #farm-home-button{left:auto!important;righ
                 vx: (targetX - start.x) / flight + (Math.random() - 0.5) * (type === 'sand' ? 22 : 12),
                 vy: (sieveY - 3 - start.y - 0.5 * gravity * flight * flight) / flight,
                 gravity,
-                r: type === 'sand' ? 2.1 + Math.random() * 1.6 : 1.7 + Math.random() * 1.0,
-                alpha: type === 'sand' ? 1 : 0.46 + strength * 0.28
+                r: type === 'sand' ? 1.8 + grainCount * 0.5 + Math.random() * 0.9 : 1.7 + Math.random() * 1.0,
+                alpha: type === 'sand' ? 1 : 0.46 + strength * 0.28,
+                grainCount
             };
         }
 
-        function depositSand(worldX) {
+        function depositSand(worldX, grainCount = 1) {
             const r = filterSetup.sieveRadius;
             const rawIndex = Math.round(worldX - (filterSetup.x - r));
             const index = clamp(rawIndex, 8, filterSetup.pileHeights.length - 9);
             const centerBias = 1 - Math.min(1, Math.abs(index - r) / r);
-            filterSetup.pileHeights[index] += 2.1 + centerBias * 2.4;
-            if (index > 0) filterSetup.pileHeights[index - 1] += 0.75;
-            if (index < filterSetup.pileHeights.length - 1) filterSetup.pileHeights[index + 1] += 0.75;
-            pourState.retainedSandCount += 1;
+            filterSetup.pileHeights[index] += (1.1 + centerBias * 1.5) * grainCount;
+            if (index > 0) filterSetup.pileHeights[index - 1] += 0.35 * grainCount;
+            if (index < filterSetup.pileHeights.length - 1) filterSetup.pileHeights[index + 1] += 0.35 * grainCount;
+            pourState.retainedSandCount += grainCount;
         }
 
-        function releaseSourceSand() {
-            let best = null;
-            let bestScore = Infinity;
-            for (let i = pourState.sourceSandCursor; i < beakerA.particles.length; i++) {
+        function getSourceSandVisibleCount() {
+            let count = 0;
+            for (let i = 0; i < beakerA.particles.length; i++) {
                 const p = beakerA.particles[i];
-                if (p.type !== 'sand' || p.alpha <= 0 || p.carried) continue;
-                const score = Math.hypot(p.x + 58, p.y + 58);
-                if (score < bestScore) {
-                    bestScore = score;
-                    best = p;
-                }
+                if (p.type === 'sand' && p.alpha > 0 && !p.carried) count++;
             }
-            if (!best) {
-                for (let i = 0; i < beakerA.particles.length; i++) {
+            return count;
+        }
+
+        function releaseSourceSandBatch(maxGrains) {
+            let released = 0;
+            while (released < maxGrains) {
+                let best = null;
+                let bestIndex = -1;
+                let bestScore = Infinity;
+                for (let i = pourState.sourceSandCursor; i < beakerA.particles.length; i++) {
                     const p = beakerA.particles[i];
-                    if (p.type === 'sand' && p.alpha > 0 && !p.carried) {
+                    if (p.type !== 'sand' || p.alpha <= 0 || p.carried) continue;
+                    const score = Math.hypot(p.x + 58, p.y + 58);
+                    if (score < bestScore) {
+                        bestScore = score;
                         best = p;
-                        break;
+                        bestIndex = i;
                     }
                 }
+                if (!best) {
+                    for (let i = 0; i < beakerA.particles.length; i++) {
+                        const p = beakerA.particles[i];
+                        if (p.type === 'sand' && p.alpha > 0 && !p.carried) {
+                            best = p;
+                            bestIndex = i;
+                            break;
+                        }
+                    }
+                }
+                if (!best) break;
+                best.alpha = 0;
+                best.carried = true;
+                pourState.sourceSandCursor = Math.max(0, bestIndex - 12);
+                released++;
             }
-            if (!best) return false;
-            best.alpha = 0;
-            best.carried = true;
-            return true;
+            return released;
         }
 
         function updateFallingParticles(dt) {
+            if (filterSetup.fallingParticles.length === 0 && step !== 4) return;
             const sieveY = filterSetup.y - filterSetup.beakerBSize.h + 40;
             const sieveX = filterSetup.x;
             for (let i = filterSetup.fallingParticles.length - 1; i >= 0; i--) {
@@ -740,10 +768,8 @@ body[data-farm-home-position="right"] #farm-home-button{left:auto!important;righ
 
                 if (p.y >= sieveY) {
                     if (Math.abs(p.x - sieveX) <= filterSetup.sieveRadius) {
-                        if (p.type === 'water') {
-                            filterSetup.beakerBWaterLevel = Math.min(MAX_BOTTOM_LEVEL, filterSetup.beakerBWaterLevel + 0.18 + pourState.flowStrength * 0.1);
-                        } else {
-                            depositSand(p.x);
+                        if (p.type === 'sand') {
+                            depositSand(p.x, p.grainCount || 1);
                         }
                         filterSetup.fallingParticles.splice(i, 1);
                     } else if (p.y > canvas.height + 30) {
@@ -751,7 +777,7 @@ body[data-farm-home-position="right"] #farm-home-button{left:auto!important;righ
                     }
                 }
             }
-            smoothSandPile();
+            smoothSandPile(dt);
         }
 
         function drawFallingParticles(ctx) {
@@ -973,8 +999,9 @@ body[data-farm-home-position="right"] #farm-home-button{left:auto!important;righ
             jug.flowStrength = pourMid;
             jug.flow = jug.flowStrength > 0.04;
 
-            if (jug.flowStrength > 0.03 && beakerA.waterVolume < beakerA.maxVolume) {
-                beakerA.waterVolume = Math.min(beakerA.maxVolume, beakerA.waterVolume + 30 * jug.flowStrength * dt);
+            if (jug.flowStrength > 0.03) {
+                const fillProgress = smoothstep(1.0, 3.65, stepElapsed);
+                beakerA.waterVolume = Math.min(STEP1_FINAL_WATER_VOLUME, STEP1_FINAL_WATER_VOLUME * fillProgress);
                 jug.dropCarry += dt * (2 + jug.flowStrength * 8);
                 while (jug.dropCarry >= 1) {
                     spawnJugDroplet(jug.flowStrength);
@@ -984,6 +1011,7 @@ body[data-farm-home-position="right"] #farm-home-button{left:auto!important;righ
             updateJugDroplets(dt);
 
             if (stepElapsed >= 4.15) {
+                beakerA.waterVolume = STEP1_FINAL_WATER_VOLUME;
                 jug.flowStrength = 0;
                 jug.flow = false;
                 jug.returned = true;
@@ -994,13 +1022,13 @@ body[data-farm-home-position="right"] #farm-home-button{left:auto!important;righ
 
         function updateStep2(dt) {
             rod.visible = true;
-            rod.moving = true;
-            const stirT = clamp(stepElapsed / 3.8, 0, 1);
-            const spin = animationClock * 4.1;
+            const stirIntensity = 1 - smoothstep(2.8, 4.15, stepElapsed);
+            rod.moving = stirIntensity > 0.02;
+            const spin = animationClock * (2.2 + stirIntensity * 2.3);
             rod.x = beakerA.x;
             rod.y = beakerA.y - 70;
-            rod.offsetX = Math.sin(spin) * 26;
-            rod.offsetY = Math.cos(spin) * 8;
+            rod.offsetX = Math.sin(spin) * 26 * stirIntensity;
+            rod.offsetY = Math.cos(spin) * 8 * stirIntensity;
 
             const waterDepth = (beakerA.waterVolume / 100) * (beakerA.h * 0.9);
             const surfaceLocalY = beakerA.h / 2 - waterDepth + 4;
@@ -1010,7 +1038,7 @@ body[data-farm-home-position="right"] #farm-home-button{left:auto!important;righ
                 const dx = p.x;
                 const dy = p.y - 12;
                 const radius = Math.max(10, Math.hypot(dx, dy));
-                const swirl = (p.type === 'salt' ? 2.0 : 1.2) * (1 - stirT * 0.15);
+                const swirl = (p.type === 'salt' ? 2.0 : 1.2) * stirIntensity;
                 const tangentX = -dy / radius;
                 const tangentY = dx / radius;
                 p.x += tangentX * swirl * dt * 60;
@@ -1018,22 +1046,28 @@ body[data-farm-home-position="right"] #farm-home-button{left:auto!important;righ
 
                 if (p.type === 'salt') {
                     p.alpha = Math.max(0, p.alpha - dt / 3.15);
-                    p.y += Math.sin(animationClock * 2.7 + p.seed) * 4 * dt;
+                    p.y += Math.sin(animationClock * 2.7 + p.seed) * 4 * dt * stirIntensity;
                 } else {
-                    const lift = Math.sin(animationClock * 2.0 + p.seed) * 10 * (1 - stirT);
+                    const lift = Math.sin(animationClock * 2.0 + p.seed) * 10 * stirIntensity;
                     const settleTarget = p.settledY + lift;
-                    p.y += (settleTarget - p.y) * dt * 1.25;
+                    p.y += (settleTarget - p.y) * dt * (1.25 + (1 - stirIntensity) * 1.8);
                 }
 
                 p.x = clamp(p.x, -beakerA.w / 2 + 11, beakerA.w / 2 - 11);
                 p.y = clamp(p.y, surfaceLocalY, beakerA.h / 2 - 6);
             }
 
-            if (stepElapsed >= 3.9) {
+            if (stepElapsed >= 4.2) {
+                rod.moving = false;
+                rod.offsetX = 0;
+                rod.offsetY = 0;
                 for (let i = 0; i < beakerA.particles.length; i++) {
                     const p = beakerA.particles[i];
                     if (p.type === 'salt') p.alpha = 0;
-                    if (p.type === 'sand') p.y += (beakerA.h / 2 - 14 - p.y) * dt * 2.3;
+                    if (p.type === 'sand') {
+                        p.y += (p.settledY - p.y) * dt * 4.4;
+                        p.x = clamp(p.x, -beakerA.w / 2 + 11, beakerA.w / 2 - 11);
+                    }
                 }
                 finishAnimationStep();
             }
@@ -1088,7 +1122,7 @@ body[data-farm-home-position="right"] #farm-home-button{left:auto!important;righ
                 const drainStrength = Math.max(0.22, pourState.flowStrength);
                 const drain = (beakerA.maxVolume / POUR_DURATION) * 1.32 * drainStrength * dt;
                 beakerA.waterVolume = Math.max(0, beakerA.waterVolume - drain);
-                filterSetup.beakerBWaterLevel = Math.min(MAX_BOTTOM_LEVEL, filterSetup.beakerBWaterLevel + drain * 0.92);
+                filterSetup.beakerBWaterLevel = Math.min(MAX_BOTTOM_LEVEL, filterSetup.beakerBWaterLevel + drain * DESTINATION_WATER_SCALE);
                 moveSourceSandTowardLip(dt, pourState.flowStrength);
 
                 const spout = getSpoutTipWorldPos(beakerA);
@@ -1097,22 +1131,23 @@ body[data-farm-home-position="right"] #farm-home-button{left:auto!important;righ
                     filterSetup.fallingParticles.push(createFallingParticle('water', spout, pourState.flowStrength));
                     pourState.waterCarry -= 1;
                 }
-
-                const sandRate = pourState.flowStrength * smoothstep(1.35, 2.45, stepElapsed) * smoothstep(0.07, 0.55, remainingRatio) * 24;
-                pourState.sandCarry += sandRate * dt;
-                while (pourState.sandCarry >= 1 && sandSpawned < POUR_TARGET_SAND && filterSetup.fallingParticles.length < 58) {
-                    if (releaseSourceSand()) {
-                        filterSetup.fallingParticles.push(createFallingParticle('sand', spout, pourState.flowStrength));
-                        sandSpawned++;
-                    }
-                    pourState.sandCarry -= 1;
-                }
             }
 
-            if (remainingRatio < 0.16) {
-                for (let i = 0; i < beakerA.particles.length; i++) {
-                    const p = beakerA.particles[i];
-                    if (p.type === 'sand' && p.alpha > 0) p.alpha = Math.max(0, p.alpha - dt * 1.4);
+            const sourceSandVisible = getSourceSandVisibleCount();
+            if (ready > 0.4 && sourceSandVisible > 0) {
+                const spout = getSpoutTipWorldPos(beakerA);
+                const wetSandRate = pourState.flowStrength * smoothstep(1.25, 2.35, stepElapsed) * smoothstep(0.05, 0.55, remainingRatio) * 44;
+                const tailSandRate = beakerA.waterVolume <= 0.15 ? 86 : 0;
+                const sandRate = Math.max(wetSandRate, tailSandRate);
+                const grainsPerCluster = beakerA.waterVolume <= 0.15 ? 3 : 2;
+                moveSourceSandTowardLip(dt, Math.max(pourState.flowStrength, 0.58));
+                pourState.sandCarry += sandRate * dt;
+                while (pourState.sandCarry >= 1 && filterSetup.fallingParticles.length < 72) {
+                    const released = releaseSourceSandBatch(Math.min(grainsPerCluster, Math.floor(pourState.sandCarry)));
+                    if (released <= 0) break;
+                    filterSetup.fallingParticles.push(createFallingParticle('sand', spout, Math.max(pourState.flowStrength, 0.35), released));
+                    sandSpawned += released;
+                    pourState.sandCarry -= released;
                 }
             }
 
@@ -1125,11 +1160,17 @@ body[data-farm-home-position="right"] #farm-home-button{left:auto!important;righ
             updateFallingParticles(dt);
             const activeSand = filterSetup.fallingParticles.some(p => p.type === 'sand');
             const activeWater = filterSetup.fallingParticles.some(p => p.type === 'water');
-            if (beakerA.waterVolume <= 0.15 && !activeSand && !activeWater) {
+            const allSandReleased = getSourceSandVisibleCount() === 0 && sandSpawned >= INITIAL_SAND_COUNT;
+            const allSandDeposited = pourState.retainedSandCount >= INITIAL_SAND_COUNT && !activeSand;
+            if (beakerA.waterVolume <= 0.15 && allSandReleased && allSandDeposited && !activeWater) {
                 pourState.finishHold += dt;
                 pourState.flowStrength = 0;
                 beakerA.isPouring = false;
-                if (pourState.finishHold >= 0.65) beginStep(5);
+                if (pourState.finishHold >= 0.65) {
+                    beakerA.waterVolume = 0;
+                    filterSetup.beakerBWaterLevel = Math.min(MAX_BOTTOM_LEVEL, STEP1_FINAL_WATER_VOLUME * DESTINATION_WATER_SCALE);
+                    beginStep(5);
+                }
             } else {
                 pourState.finishHold = 0;
             }
@@ -1160,6 +1201,7 @@ body[data-farm-home-position="right"] #farm-home-button{left:auto!important;righ
             ctx.strokeStyle = '#ccc'; ctx.beginPath(); ctx.moveTo(0, height * 0.65 + 100); ctx.lineTo(width, height * 0.65 + 100); ctx.stroke();
             
             update(dt);
+            updateDebugState();
             if (step >= 3) drawFilterSetup(ctx);
             drawBeaker(ctx, beakerA, true); 
             if (step === 1) drawJug(ctx);
@@ -1186,6 +1228,26 @@ body[data-farm-home-position="right"] #farm-home-button{left:auto!important;righ
             setDialogue(s);
         }
 
+        function readDebugState() {
+            return {
+                step,
+                sourceSandVisible: getSourceSandVisibleCount(),
+                fallingSand: filterSetup.fallingParticles.filter(p => p.type === 'sand').length,
+                sandSpawned,
+                sandDeposited: pourState.retainedSandCount,
+                waterVolume: beakerA.waterVolume,
+                beakerBWaterLevel: filterSetup.beakerBWaterLevel,
+                flowStrength: pourState.flowStrength,
+                homeOnRight: document.body.dataset.farmHomePosition === 'right'
+            };
+        }
+
+        function updateDebugState() {
+            if (!debugStateEl) return;
+            const state = readDebugState();
+            debugStateEl.textContent = JSON.stringify(state);
+        }
+
         function prepareReplayStep(targetStep) {
             if (autoStepTimer) clearTimeout(autoStepTimer);
             if (replayTimer) clearTimeout(replayTimer);
@@ -1193,7 +1255,7 @@ body[data-farm-home-position="right"] #farm-home-button{left:auto!important;righ
             if (targetStep === 0) return;
 
             if (targetStep >= 2) {
-                beakerA.waterVolume = beakerA.maxVolume;
+                beakerA.waterVolume = STEP1_FINAL_WATER_VOLUME;
                 jug.visible = false;
                 jug.flow = false;
                 jug.flowDone = true;
@@ -1235,17 +1297,7 @@ body[data-farm-home-position="right"] #farm-home-button{left:auto!important;righ
 
         if (location.hostname === '127.0.0.1' || location.hostname === 'localhost') {
             const prepareReplayHook = prepareReplayStep;
-            const readStateHook = () => ({
-                step,
-                waterVolume: beakerA.waterVolume,
-                beakerAngle: beakerA.angle,
-                fallingSand: filterSetup.fallingParticles.filter(p => p.type === 'sand').length,
-                sandSpawned,
-                sandDeposited: pourState.retainedSandCount,
-                pileMaximum: Math.max(...filterSetup.pileHeights),
-                flowStrength: pourState.flowStrength,
-                homeOnRight: document.body.dataset.farmHomePosition === 'right'
-            });
+            const readStateHook = readDebugState;
             try {
                 window.__prepareReplay05 = prepareReplayHook;
                 window.__getSandLabState05 = readStateHook;
