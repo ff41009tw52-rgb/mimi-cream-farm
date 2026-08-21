@@ -157,7 +157,7 @@
         <!-- 操作按鈕區 -->
         <div class="mt-6 flex gap-4 h-16 items-center">
             <button id="actionBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition hover:scale-105 text-lg animate-bounce" onclick="nextStep()">
-                開始實驗
+                🌱 放置 A、B 盆栽
             </button>
             <button id="waterBtn" class="hidden bg-blue-400 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition hover:scale-105 text-lg flex items-center gap-2" onclick="waterPlants()">
                 <span>💧</span> 澆水 (<span id="waterCountText">0</span>/3)
@@ -284,20 +284,40 @@
         window.addEventListener('DOMContentLoaded', initPlants);
         // ------------------------------------
 
+        const dialogue = {
+            initial: initialDialogue,
+            coverBox: {
+                mimi: "接著只把 B 盆栽罩進側邊有開口的紙箱，A 盆栽保持原樣。這樣我們就能比較光線方向不同時，植物會怎麼生長。",
+                cream: "只留一個小洞讓光進去？哼，本喵已經有點猜到 B 會往哪邊長了……才不是偷看答案！"
+            },
+            waterSetup: {
+                mimi: "接下來連續三天，A、B 都要澆一樣多的水，其他條件也盡量相同。這樣最後看到的差別，才比較可能和光線方向有關。",
+                cream: "一樣多、一樣多……知道啦！本喵來監督。你要是多澆一滴，我就……我就去吃你的點心！"
+            },
+            openBox: {
+                mimi: "三天到了！先別急著下結論，我們把 B 的紙箱拿開，仔細比較 A、B 的生長方向。",
+                cream: "終於！快打開快打開——本喵只是很有科學精神，才不是沒耐心！"
+            },
+            final: {
+                mimi: "你看！A 盆栽大致向上長，B 盆栽卻朝紙箱開口、有光的方向彎曲。看來光線的方向真的影響了植物莖的生長方向。",
+                cream: "哼哼，本喵就知道！當光主要從一側照來時，植物的莖常會朝有光的方向彎曲生長，這種現象叫做『向光性』。這次可不是我亂猜的喔！"
+            }
+        };
+
         const stepsData = [
             {
-                mimi: "先把 A、B 兩盆剛發芽的植物放好。兩盆一開始要盡量一樣，等等比較結果才公平喔！",
-                cream: "A 這邊、B 那邊……擺好啦！這麼簡單的事當然難不倒本喵。咦？我剛剛是不是把 A、B 念反了？",
-                btnText: "🌱 放盆栽",
+                dialogue: dialogue.initial,
+                btnText: "🌱 放置 A、B 盆栽",
+                nextStep: 1,
                 action: () => {
                     ui.zoneA.classList.remove('opacity-50');
                     ui.zoneB.classList.remove('opacity-50');
                 }
             },
             {
-                mimi: "接著只把 B 盆栽罩進側邊有開口的紙箱，A 盆栽保持原樣。這樣我們就能比較光線方向不同時，植物會怎麼生長。",
-                cream: "只留一個小洞讓光進去？哼，本喵已經有點猜到 B 會往哪邊長了……才不是偷看答案！",
-                btnText: "📦 蓋紙箱",
+                dialogue: dialogue.coverBox,
+                btnText: "📦 替 B 盆栽蓋上紙箱",
+                nextStep: 2,
                 action: () => {
                     ui.boxB.classList.remove('hidden');
                     ui.boxB.animate([
@@ -307,56 +327,56 @@
                 }
             },
             {
-                mimi: "接下來連續三天，A、B 都要澆一樣多的水，其他條件也盡量相同。這樣最後看到的差別，才比較可能和光線方向有關。",
-                cream: "一樣多、一樣多……知道啦！本喵來監督。你要是多澆一滴，我就……我就去吃你的點心！",
-                btnText: "", 
+                dialogue: dialogue.waterSetup,
+                btnText: "💧 開始三天澆水",
+                nextStep: 3,
+                renderAfterAction: false,
                 action: () => {
                     ui.actionBtn.classList.add('hidden');
                     ui.waterBtn.classList.remove('hidden');
                 }
             },
             {
-                mimi: "三天到了！先別急著下結論，我們把 B 的紙箱拿開，仔細比較 A、B 的生長方向。",
-                cream: "終於！快打開快打開——本喵只是很有科學精神，才不是沒耐心！",
+                dialogue: dialogue.openBox,
                 btnText: "✨ 打開紙箱",
+                nextStep: 4,
                 action: () => {
-                    ui.actionBtn.classList.remove('hidden');
                     ui.waterBtn.classList.add('hidden');
-                }
-            },
-            {
-                mimi: "你看！A 盆栽大致向上長，B 盆栽卻朝紙箱開口、有光的方向彎曲。看來光線的方向真的影響了植物莖的生長方向。",
-                cream: "哼哼，本喵就知道！當光主要從一側照來時，植物的莖常會朝有光的方向彎曲生長，這種現象叫做『向光性』。這次可不是我亂猜的喔！",
-                btnText: "🔄 再玩一次",
-                action: () => {
                     ui.boxB.style.opacity = '0';
                     setTimeout(() => ui.boxB.classList.add('hidden'), 500);
                 }
+            },
+            {
+                dialogue: dialogue.final,
+                btnText: "🔄 再玩一次",
+                action: resetGame
             }
         ];
 
-        function nextStep() {
-            if (currentStep >= stepsData.length) {
-                resetGame();
-                return;
-            }
-
+        function renderStep({ bounce = false } = {}) {
             const step = stepsData[currentStep];
-            
-            ui.mimiText.innerHTML = step.mimi;
-            ui.creamText.innerHTML = step.cream;
+            if (!step) return;
+
+            ui.mimiText.innerHTML = step.dialogue.mimi;
+            ui.creamText.innerHTML = step.dialogue.cream;
+            ui.actionBtn.innerHTML = step.btnText;
+            ui.actionBtn.classList.remove('hidden');
+            ui.waterBtn.classList.add('hidden');
+            ui.actionBtn.classList.toggle('animate-bounce', bounce);
+        }
+
+        function nextStep() {
+            const step = stepsData[currentStep];
+            if (!step) return;
             
             if (step.action) step.action();
-            
-            if (step.btnText === "") {
-                ui.actionBtn.classList.add('hidden');
-            } else {
-                ui.actionBtn.classList.remove('hidden');
-                ui.actionBtn.innerHTML = step.btnText;
-                ui.actionBtn.classList.remove('animate-bounce');
-            }
 
-            currentStep++;
+            if (step.action === resetGame) return;
+
+            currentStep = step.nextStep ?? currentStep + 1;
+            if (step.renderAfterAction !== false) {
+                renderStep();
+            }
         }
 
         function waterPlants() {
@@ -377,7 +397,8 @@
                 ui.waterBtn.disabled = true;
                 ui.waterBtn.classList.add('opacity-50', 'cursor-not-allowed');
                 setTimeout(() => {
-                    nextStep();
+                    currentStep = 3;
+                    renderStep();
                 }, 1000);
             } else if (waterCount === 1) {
                 ui.mimiText.innerHTML = "第 1 天完成！兩盆都澆了一樣多的水。先別急著猜答案，繼續觀察它們的變化吧！";
@@ -417,11 +438,7 @@
             ui.waterBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             ui.waterBtn.classList.add('hidden');
             
-            ui.mimiText.innerHTML = initialDialogue.mimi;
-            ui.creamText.innerHTML = initialDialogue.cream;
-            
-            ui.actionBtn.innerHTML = "開始實驗";
-            ui.actionBtn.classList.add('animate-bounce');
+            renderStep({ bounce: true });
         }
     </script>
     <script src="home-button.js"></script>
