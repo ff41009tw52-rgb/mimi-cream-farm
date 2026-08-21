@@ -15,6 +15,14 @@
         }
 
         /* 盆栽與植物生長動畫 */
+        .plant-svg {
+            visibility: hidden;
+        }
+
+        .plant-svg.is-ready {
+            visibility: visible;
+        }
+
         .stem-path {
             transition: stroke-dashoffset 2s ease-in-out;
         }
@@ -22,6 +30,11 @@
         /* 葉子群組現在在 SVG 內部，直接套用 transform 動畫 */
         .leaf-group {
             transition: transform 2s ease-in-out;
+        }
+
+        .plant-no-transition .stem-path,
+        .plant-no-transition .leaf-group {
+            transition: none !important;
         }
         
         /* 水滴動畫 */
@@ -87,7 +100,7 @@
                     <!-- 植物 A (直直生長，加高生長空間) -->
                     <div class="relative w-24 h-40 md:w-32 md:h-48 z-10 -mb-2">
                         <!-- 將葉子放入 SVG 內，確保座標同步不分離 -->
-                        <svg class="absolute bottom-0 w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="xMidYMax meet">
+                        <svg class="plant-svg plant-no-transition absolute bottom-0 w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="xMidYMax meet">
                             <!-- 直立莖 (長得較矮) -->
                             <path id="stemA" class="stem-path" d="M 50 100 Q 50 60 50 20" stroke="#15803d" stroke-width="4" fill="transparent" stroke-linecap="round"/>
                             <!-- 葉子群組 (起點為 0,0 方便直接平移) -->
@@ -118,7 +131,7 @@
                     <!-- 植物 B (向光彎曲，加高生長空間) -->
                     <div class="relative w-24 h-40 md:w-32 md:h-48 z-10 -mb-2">
                         <!-- 將葉子放入 SVG 內，確保座標同步不分離 -->
-                        <svg class="absolute bottom-0 w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="xMidYMax meet">
+                        <svg class="plant-svg plant-no-transition absolute bottom-0 w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="xMidYMax meet">
                             <!-- 曲線朝右方開口彎曲，高度變矮且平緩 -->
                             <path id="stemB" class="stem-path" d="M 50 100 Q 50 50 115 35" stroke="#15803d" stroke-width="4" fill="transparent" stroke-linecap="round"/>
                             <!-- 葉子群組 -->
@@ -144,7 +157,7 @@
         <!-- 操作按鈕區 -->
         <div class="mt-6 flex gap-4 h-16 items-center">
             <button id="actionBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition hover:scale-105 text-lg animate-bounce" onclick="nextStep()">
-                開始實驗
+                🌱 放置 A、B 盆栽
             </button>
             <button id="waterBtn" class="hidden bg-blue-400 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition hover:scale-105 text-lg flex items-center gap-2" onclick="waterPlants()">
                 <span>💧</span> 澆水 (<span id="waterCountText">0</span>/3)
@@ -160,7 +173,7 @@
             <div class="flex items-end gap-4 w-full md:w-1/2">
                 <img src="picture/Christmasmimi.jpg" alt="橘咪咪" class="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-orange-300 object-cover shadow-md" onerror="this.src='https://placehold.co/100x100/ffa500/ffffff?text=Mimi'">
                 <div class="bg-white border-2 border-orange-200 p-3 rounded-2xl rounded-bl-none shadow-sm speech-bubble relative flex-grow">
-                    <p id="mimiText" class="text-gray-700 font-medium text-sm md:text-base">喵～歡迎來到科學農場！你觀察過窗臺上的植物嗎？它們好像都會彎彎的！今天我們來做個實驗吧！</p>
+                    <p id="mimiText" class="text-gray-700 font-medium text-sm md:text-base">今天來做植物向光性實驗！先說好，實驗要認真做，點心也要好好保管……尤其是奶油在旁邊的時候。</p>
                 </div>
             </div>
 
@@ -168,7 +181,7 @@
             <div class="flex items-end gap-4 w-full md:w-1/2 flex-row-reverse md:flex-row">
                 <img src="picture/Christmascream.jpg" alt="白奶油" class="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-gray-300 object-cover shadow-md" onerror="this.src='https://placehold.co/100x100/dddddd/555555?text=Cream'">
                 <div class="bg-white border-2 border-gray-200 p-3 rounded-2xl rounded-br-none md:rounded-br-2xl md:rounded-bl-none shadow-sm speech-bubble speech-bubble-right md:speech-bubble relative flex-grow text-right md:text-left">
-                    <p id="creamText" class="text-gray-700 font-medium text-sm md:text-base">哼，本喵才不想曬太陽呢。聽說植物需要陽光，我們來看看是不是真的。先點擊「開始實驗」吧！</p>
+                    <p id="creamText" class="text-gray-700 font-medium text-sm md:text-base">哼！誰要搶你的點心啊？……我只是幫你確認好不好吃。快開始吧，本喵倒要看看植物會不會自己朝光那邊長。</p>
                 </div>
             </div>
         </div>
@@ -178,6 +191,11 @@
     <script>
         let currentStep = 0;
         let waterCount = 0;
+
+        const initialDialogue = {
+            mimi: "今天來做植物向光性實驗！先說好，實驗要認真做，點心也要好好保管……尤其是奶油在旁邊的時候。",
+            cream: "哼！誰要搶你的點心啊？……我只是幫你確認好不好吃。快開始吧，本喵倒要看看植物會不會自己朝光那邊長。"
+        };
 
         const ui = {
             mimiText: document.getElementById('mimiText'),
@@ -191,7 +209,13 @@
         };
 
         // --- 真實植物生長路徑計算邏輯 ---
-        function initPlants() {
+        function setPlantTransitionsEnabled(enabled) {
+            document.querySelectorAll('.plant-svg').forEach(svg => {
+                svg.classList.toggle('plant-no-transition', !enabled);
+            });
+        }
+
+        function prepareStemPaths() {
             ['stemA', 'stemB'].forEach(id => {
                 const stem = document.getElementById(id);
                 if(stem) {
@@ -200,8 +224,33 @@
                     stem.style.strokeDashoffset = len;
                 }
             });
+        }
+
+        function setInitialPlantState({ hideUntilReady = false } = {}) {
+            setPlantTransitionsEnabled(false);
+
+            const plantSvgs = document.querySelectorAll('.plant-svg');
+            if (hideUntilReady) {
+                plantSvgs.forEach(svg => svg.classList.remove('is-ready'));
+            }
+
+            prepareStemPaths();
             updatePlant('stemA', 'leafA', 0);
             updatePlant('stemB', 'leafB', 0);
+
+            // Force this instant state to settle before re-enabling growth transitions.
+            plantSvgs.forEach(svg => svg.getBoundingClientRect());
+            if (hideUntilReady) {
+                plantSvgs.forEach(svg => svg.classList.add('is-ready'));
+            }
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => setPlantTransitionsEnabled(true));
+            });
+        }
+
+        function initPlants() {
+            setInitialPlantState({ hideUntilReady: true });
         }
 
         function updatePlant(stemId, leafId, progress) {
@@ -235,20 +284,40 @@
         window.addEventListener('DOMContentLoaded', initPlants);
         // ------------------------------------
 
+        const dialogue = {
+            initial: initialDialogue,
+            coverBox: {
+                mimi: "接著只把 B 盆栽罩進側邊有開口的紙箱，A 盆栽保持原樣。這樣我們就能比較光線方向不同時，植物會怎麼生長。",
+                cream: "只留一個小洞讓光進去？哼，本喵已經有點猜到 B 會往哪邊長了……才不是偷看答案！"
+            },
+            waterSetup: {
+                mimi: "接下來連續三天，A、B 都要澆一樣多的水，其他條件也盡量相同。這樣最後看到的差別，才比較可能和光線方向有關。",
+                cream: "一樣多、一樣多……知道啦！本喵來監督。你要是多澆一滴，我就……我就去吃你的點心！"
+            },
+            openBox: {
+                mimi: "三天到了！先別急著下結論，我們把 B 的紙箱拿開，仔細比較 A、B 的生長方向。",
+                cream: "終於！快打開快打開——本喵只是很有科學精神，才不是沒耐心！"
+            },
+            final: {
+                mimi: "你看！A 盆栽大致向上長，B 盆栽卻朝紙箱開口、有光的方向彎曲。看來光線的方向真的影響了植物莖的生長方向。",
+                cream: "哼哼，本喵就知道！當光主要從一側照來時，植物的莖常會朝有光的方向彎曲生長，這種現象叫做『向光性』。這次可不是我亂猜的喔！"
+            }
+        };
+
         const stepsData = [
             {
-                mimi: "首先，我們準備了兩盆剛發芽的蔬菜，標示為 A 和 B。請幫忙把它們放到陽光下！",
-                cream: "別弄髒我的肉球，你自己點擊「放盆栽」把它們擺好！",
-                btnText: "🌱 放盆栽",
+                dialogue: dialogue.initial,
+                btnText: "🌱 放置 A、B 盆栽",
+                nextStep: 1,
                 action: () => {
                     ui.zoneA.classList.remove('opacity-50');
                     ui.zoneB.classList.remove('opacity-50');
                 }
             },
             {
-                mimi: "接著，我們要設計「實驗變因」。請把 B 盆栽蓋上一個旁邊有開口的紙箱。A 盆栽保持原樣，當作對照組喔！",
-                cream: "快點把紙箱蓋上去啦，本喵想看它在暗暗的箱子裡會變成怎樣！",
-                btnText: "📦 蓋紙箱",
+                dialogue: dialogue.coverBox,
+                btnText: "📦 替 B 盆栽蓋上紙箱",
+                nextStep: 2,
                 action: () => {
                     ui.boxB.classList.remove('hidden');
                     ui.boxB.animate([
@@ -258,56 +327,56 @@
                 }
             },
             {
-                mimi: "實驗過程要注意！每天都要幫兩盆植物澆一樣多的水，而且紙箱的方向不能改變喔！",
-                cream: "要澆水就快點，連續澆三天，不要讓植物渴死了！",
-                btnText: "", 
+                dialogue: dialogue.waterSetup,
+                btnText: "💧 開始三天澆水",
+                nextStep: 3,
+                renderAfterAction: false,
                 action: () => {
                     ui.actionBtn.classList.add('hidden');
                     ui.waterBtn.classList.remove('hidden');
                 }
             },
             {
-                mimi: "三天過去了！時間到！我們把 B 的紙箱拿開吧！看看發生了什麼事？",
-                cream: "終於結束了！快點打開箱子，本喵要看結果！",
+                dialogue: dialogue.openBox,
                 btnText: "✨ 打開紙箱",
+                nextStep: 4,
                 action: () => {
-                    ui.actionBtn.classList.remove('hidden');
                     ui.waterBtn.classList.add('hidden');
-                }
-            },
-            {
-                mimi: "哇！A 盆栽直直往上長，但 B 盆栽怎麼彎腰朝著洞口生長了？",
-                cream: "廢話！因為 B 旁邊的紙箱只有洞口有光，植物為了生存行光合作用，就會往光的方向長！這就叫「向光性」，懂了嗎？",
-                btnText: "🔄 再玩一次",
-                action: () => {
                     ui.boxB.style.opacity = '0';
                     setTimeout(() => ui.boxB.classList.add('hidden'), 500);
                 }
+            },
+            {
+                dialogue: dialogue.final,
+                btnText: "🔄 再玩一次",
+                action: resetGame
             }
         ];
 
-        function nextStep() {
-            if (currentStep >= stepsData.length) {
-                resetGame();
-                return;
-            }
-
+        function renderStep({ bounce = false } = {}) {
             const step = stepsData[currentStep];
-            
-            ui.mimiText.innerHTML = step.mimi;
-            ui.creamText.innerHTML = step.cream;
+            if (!step) return;
+
+            ui.mimiText.innerHTML = step.dialogue.mimi;
+            ui.creamText.innerHTML = step.dialogue.cream;
+            ui.actionBtn.innerHTML = step.btnText;
+            ui.actionBtn.classList.remove('hidden');
+            ui.waterBtn.classList.add('hidden');
+            ui.actionBtn.classList.toggle('animate-bounce', bounce);
+        }
+
+        function nextStep() {
+            const step = stepsData[currentStep];
+            if (!step) return;
             
             if (step.action) step.action();
-            
-            if (step.btnText === "") {
-                ui.actionBtn.classList.add('hidden');
-            } else {
-                ui.actionBtn.classList.remove('hidden');
-                ui.actionBtn.innerHTML = step.btnText;
-                ui.actionBtn.classList.remove('animate-bounce');
-            }
 
-            currentStep++;
+            if (step.action === resetGame) return;
+
+            currentStep = step.nextStep ?? currentStep + 1;
+            if (step.renderAfterAction !== false) {
+                renderStep();
+            }
         }
 
         function waterPlants() {
@@ -328,11 +397,15 @@
                 ui.waterBtn.disabled = true;
                 ui.waterBtn.classList.add('opacity-50', 'cursor-not-allowed');
                 setTimeout(() => {
-                    nextStep();
+                    currentStep = 3;
+                    renderStep();
                 }, 1000);
+            } else if (waterCount === 1) {
+                ui.mimiText.innerHTML = "第 1 天完成！兩盆都澆了一樣多的水。先別急著猜答案，繼續觀察它們的變化吧！";
+                ui.creamText.innerHTML = "哼，本喵才沒有急。只是 B 盆栽躲在箱子裡，看起來很可疑而已。";
             } else {
-                ui.mimiText.innerHTML = `第 ${waterCount} 天澆水完成！植物有在吸收水分長大喔！`;
-                ui.creamText.innerHTML = waterCount === 2 ? "還差一天，快點啦！" : "咕嚕咕嚕... 喝飽了沒？";
+                ui.mimiText.innerHTML = "第 2 天完成！今天也給了兩盆一樣多的水。再觀察一天，我們就能比較結果了。";
+                ui.creamText.innerHTML = "還有一天喔？好慢……那本喵先去看看你的點心有沒有『安全』。";
             }
         }
 
@@ -356,8 +429,7 @@
             ui.zoneA.classList.add('opacity-50');
             ui.zoneB.classList.add('opacity-50');
             
-            updatePlant('stemA', 'leafA', 0);
-            updatePlant('stemB', 'leafB', 0);
+            setInitialPlantState();
             
             ui.boxB.classList.add('hidden');
             ui.boxB.style.opacity = '1';
@@ -366,11 +438,7 @@
             ui.waterBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             ui.waterBtn.classList.add('hidden');
             
-            ui.mimiText.innerHTML = "喵～歡迎來到科學農場！你觀察過窗臺上的植物嗎？它們好像都會彎彎的！今天我們來做個實驗吧！";
-            ui.creamText.innerHTML = "哼，本喵才不想曬太陽呢。聽說植物需要陽光，我們來看看是不是真的。先點擊「開始實驗」吧！";
-            
-            ui.actionBtn.innerHTML = "開始實驗";
-            ui.actionBtn.classList.add('animate-bounce');
+            renderStep({ bounce: true });
         }
     </script>
     <script src="home-button.js"></script>
