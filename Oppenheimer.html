@@ -1,5 +1,50 @@
-import React, { useState, useEffect } from 'react';
-import { Archive, ChevronRight, Menu, X } from 'lucide-react';
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="J. Robert Oppenheimer 生平、學術成就與歷史檔案數位展覽" />
+  <meta name="theme-color" content="#161819" />
+  <title>奧本海默｜生平與成就</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    html { scroll-behavior: smooth; }
+    body { min-width: 320px; }
+    button { cursor: pointer; }
+  </style>
+</head>
+<body>
+  <noscript>此網站需要 JavaScript 才能正常顯示。</noscript>
+  <div id="root"></div>
+  <script type="text/babel" data-presets="react">
+const { useState } = React;
+
+function ChevronRight({ size = 16, className = '' }) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+  );
+}
+
+function Menu({ size = 24, className = '' }) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  );
+}
+
+function X({ size = 24, className = '' }) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M18 6 6 18M6 6l12 12" />
+    </svg>
+  );
+}
 
 const globalCss = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600&family=Noto+Serif+TC:wght@400;500;600;700;900&family=Noto+Sans+TC:wght@300;400;500;600&display=swap');
@@ -25,12 +70,10 @@ const globalCss = `
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Font Families */
   .font-serif-custom { font-family: 'Noto Serif TC', 'Cormorant Garamond', serif; }
   .font-sans-custom { font-family: 'Noto Sans TC', 'Inter', sans-serif; }
   .font-mono-custom { font-family: 'IBM Plex Mono', monospace; }
 
-  /* Utility Backgrounds */
   .bg-noise {
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
   }
@@ -46,7 +89,7 @@ const globalCss = `
   }
 `;
 
-export default function App() {
+function App() {
   const [activeSection, setActiveSection] = useState('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -81,23 +124,14 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col font-sans-custom selection:bg-[var(--accent)] selection:text-white">
       <style dangerouslySetInnerHTML={{ __html: globalCss }} />
-      
-      { }
       <nav className="sticky top-0 z-50 bg-[var(--bg-dark)] border-b border-[var(--border-dark)] h-[68px]">
         <div className="max-w-[1400px] mx-auto px-6 h-full flex items-center justify-between">
-          
-          {/* Logo Area */}
           <div className="flex items-baseline gap-6">
-            <div className="font-serif-custom text-xl tracking-[0.15em] text-[var(--text-light)]">
-              OPPENHEIMER
-            </div>
-            <div className="hidden sm:block font-mono-custom text-[10px] tracking-widest text-[var(--text-muted-light)] uppercase">
-              Archive Ref. JRO-1945
-            </div>
+            <div className="font-serif-custom text-xl tracking-[0.15em] text-[var(--text-light)]">OPPENHEIMER</div>
+            <div className="hidden lg:block font-mono-custom text-[10px] tracking-widest text-[var(--text-muted-light)] uppercase">Archive Ref. JRO-1945</div>
           </div>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-5 xl:gap-8">
             {navItems.map((item) => (
               <button
                 key={item.id}
@@ -113,19 +147,14 @@ export default function App() {
             ))}
           </div>
 
-          {/* Mobile Menu Toggle */}
-          <button 
-            className="md:hidden text-[var(--text-light)]"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
+          <button className="lg:hidden text-[var(--text-light)]" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="切換選單">
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </nav>
 
-      { }
       {isMenuOpen && (
-        <div className="md:hidden fixed top-[68px] left-0 w-full bg-[var(--bg-dark)] border-b border-[var(--border-dark)] z-40 p-4 flex flex-col gap-4 shadow-2xl">
+        <div className="lg:hidden fixed top-[68px] left-0 w-full bg-[var(--bg-dark)] border-b border-[var(--border-dark)] z-40 p-4 flex flex-col gap-4 shadow-2xl">
           {navItems.map((item) => (
             <button
               key={item.id}
@@ -142,10 +171,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Main Content Area */}
-      <main className="flex-grow bg-[var(--bg-dark)] relative">
-        {renderContent()}
-      </main>
+      <main className="flex-grow bg-[var(--bg-dark)] relative">{renderContent()}</main>
     </div>
   );
 }
@@ -153,49 +179,33 @@ export default function App() {
 function HomeSection({ onNavigate }) {
   return (
     <div className="relative min-h-[calc(100vh-68px)] flex flex-col overflow-hidden bg-[var(--bg-dark)]">
-      {/* Background Noise & Math Text */}
       <div className="absolute inset-0 bg-noise opacity-80 pointer-events-none z-10"></div>
-      
-      {/* Abstract Math Formulas (Very Faint) */}
       <div className="math-bg text-[120px] top-[10%] -left-[5%] rotate-[-15deg]">iℏ ∂ψ/∂t = Ĥψ</div>
       <div className="math-bg text-[80px] bottom-[20%] right-[10%] rotate-[10deg]">E = mc²</div>
       <div className="math-bg text-[180px] top-[40%] right-[30%] opacity-50">∫</div>
 
-      {/* Hero Layout: 60/40 Split */}
       <div className="max-w-[1400px] mx-auto w-full px-6 flex-grow flex flex-col lg:flex-row relative z-20">
-        
-        {/* Left Column: Text & Metadata (60%) */}
         <div className="w-full lg:w-[60%] flex flex-col justify-center pt-16 pb-12 lg:py-0 lg:pr-16 relative">
-          
-          { }
           <div className="flex flex-col gap-4 border-b border-[var(--border-dark)] pb-6 mb-12 w-full max-w-lg">
             <div className="font-mono-custom text-xs text-[var(--text-muted-light)] flex flex-col gap-2 tracking-[0.1em]">
               <div className="flex"><span className="w-24 opacity-60 shrink-0">FILE NO.</span> <span>40-1904-67</span></div>
               <div className="flex"><span className="w-24 opacity-60 shrink-0">SUBJECT</span> <span>BIOGRAPHICAL DOSSIER</span></div>
             </div>
-            
-            {/* Classification Stamp */}
-            <div className="font-mono-custom text-[var(--classified)] text-sm font-bold tracking-[0.2em] border-2 border-[var(--classified)] px-3 py-1.5 w-fit uppercase -rotate-2 mt-2 mix-blend-screen opacity-90">
-              TOP SECRET // RESTRICTED DATA
-            </div>
+            <div className="font-mono-custom text-[var(--classified)] text-sm font-bold tracking-[0.2em] border-2 border-[var(--classified)] px-3 py-1.5 w-fit uppercase -rotate-2 mt-2 mix-blend-screen opacity-90">TOP SECRET // RESTRICTED DATA</div>
           </div>
 
-          { }
           <div className="mb-10">
             <h1 className="font-serif-custom text-5xl sm:text-6xl md:text-7xl lg:text-[84px] leading-[1.1] text-[var(--text-light)] font-medium mb-3 tracking-wide">
               J・羅伯特・<br />奧本海默
             </h1>
-            <div className="font-serif-custom text-[var(--text-muted-light)] text-xl sm:text-2xl tracking-[0.25em] uppercase mb-8 ml-1">
-              J. Robert Oppenheimer
-            </div>
-            
+            <div className="font-serif-custom text-[var(--text-muted-light)] text-xl sm:text-2xl tracking-[0.25em] uppercase mb-8 ml-1">J. Robert Oppenheimer</div>
+
             <div className="flex items-center gap-4 text-[var(--accent)] font-serif-custom text-2xl mb-8">
               <span>1904</span>
               <span className="w-12 h-[1px] bg-[var(--accent)] opacity-50"></span>
               <span>1967</span>
             </div>
 
-            {/* Roles */}
             <div className="border-l-2 border-[var(--accent)] pl-5 py-1 mb-8">
               <h2 className="font-serif-custom text-[var(--text-muted-light)] text-lg sm:text-xl tracking-wider leading-relaxed">
                 理論物理學家<br />
@@ -204,39 +214,29 @@ function HomeSection({ onNavigate }) {
               </h2>
             </div>
 
-            {/* Description */}
-            <p className="font-sans-custom text-[var(--text-light)] text-base sm:text-lg leading-relaxed max-w-xl opacity-90 tracking-wide font-light">
+            <p className="font-sans-custom text-[var(--text-light)] text-base sm:text-lg leading-[1.9] max-w-xl opacity-90 tracking-[0.01em] font-normal">
               美國理論物理學家，在第二次世界大戰期間領導洛斯阿拉莫斯實驗室的科學研究，並在曼哈頓計畫中扮演核心角色。他的科學工作與人生選擇，深刻改變了二十世紀的歷史進程。
             </p>
           </div>
         </div>
 
-        { }
         <div className="w-full lg:w-[40%] h-[400px] lg:h-auto relative lg:absolute right-0 top-0 bottom-0 overflow-hidden hidden sm:block">
-          <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-[var(--bg-dark)] via-[var(--bg-dark)]/80 to-transparent z-10 lg:w-[30%]"></div>
+          <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-[var(--bg-dark)] via-[var(--bg-dark)]/80 to-transparent z-10 lg:w-[48%]"></div>
           <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-dark)] via-transparent to-transparent z-10"></div>
-          
-          <div className="absolute inset-0 bg-zinc-800 grayscale mix-blend-luminosity opacity-40">
-            <img 
-              src="https://images.unsplash.com/photo-1487823521639-650058b75e9b?auto=format&fit=crop&q=80&w=1200" 
-              alt="Historical reference" 
-              className="w-full h-full object-cover object-center lg:object-right"
+          <div className="absolute inset-0 bg-zinc-800 grayscale contrast-125 opacity-80">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/8/85/Oppenheimer_%28cropped%29.jpg"
+              alt="J. Robert Oppenheimer portrait, 1944"
+              className="w-full h-full object-cover object-[58%_22%] lg:object-[58%_22%]"
             />
           </div>
         </div>
       </div>
 
-      {/* Intro Transition Block (Dark to Light Paper) */}
       <div className="w-full bg-[var(--bg-paper)] mt-auto relative z-20 border-t border-[var(--border-dark)] py-12 px-6">
         <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
-          <p className="font-serif-custom text-2xl md:text-3xl text-[var(--text-dark)] leading-relaxed font-medium max-w-3xl">
-            「一位處於二十世紀最具影響力的科學與政治事件中心的物理學家。」
-          </p>
-          
-          <button 
-            onClick={onNavigate}
-            className="group border border-[var(--text-dark)] hover:bg-[var(--text-dark)] hover:text-[var(--bg-paper)] text-[var(--text-dark)] px-8 py-3 font-mono-custom text-sm tracking-widest uppercase transition-colors duration-300 flex items-center justify-center gap-3 shrink-0"
-          >
+          <p className="font-serif-custom text-2xl md:text-3xl text-[var(--text-dark)] leading-relaxed font-medium max-w-3xl">「一位處於二十世紀最具影響力的科學與政治事件中心的物理學家。」</p>
+          <button onClick={onNavigate} className="group border border-[var(--text-dark)] hover:bg-[var(--text-dark)] hover:text-[var(--bg-paper)] text-[var(--text-dark)] px-8 py-3 font-mono-custom text-sm tracking-widest uppercase transition-colors duration-300 flex items-center justify-center gap-3 shrink-0">
             檢視歷史檔案 <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
@@ -261,19 +261,16 @@ function TimelineSection() {
   return (
     <div className="bg-[var(--bg-paper)] text-[var(--text-dark)] min-h-screen py-20 relative">
       <div className="absolute inset-0 bg-noise opacity-30 pointer-events-none"></div>
-      
       <div className="max-w-4xl mx-auto px-6 relative z-10">
         <div className="mb-20 border-b border-[var(--border-dark)] pb-8 pt-4">
           <h2 className="font-serif-custom text-4xl md:text-5xl font-bold mb-4 tracking-wide">01 // 生平紀事</h2>
           <p className="font-mono-custom text-[var(--text-muted-dark)] tracking-[0.15em] uppercase text-xs">Historical Timeline (1904-1967)</p>
         </div>
-        
-        { }
+
         <div className="relative border-l border-[var(--border-dark)] ml-4 md:ml-8 space-y-16 pb-12">
           {events.map((event, index) => (
             <div key={index} className="relative pl-10 md:pl-16 group">
               <div className="absolute w-3 h-3 bg-[var(--bg-paper)] border-2 border-[var(--text-dark)] rounded-none -left-[6.5px] top-2 transition-all duration-300 group-hover:bg-[var(--accent)] group-hover:border-[var(--accent)]"></div>
-              
               <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-8 mb-4">
                 <span className="font-serif-custom text-[var(--accent)] font-semibold text-xl md:text-2xl w-36 shrink-0">{event.year}</span>
                 <div>
@@ -281,11 +278,8 @@ function TimelineSection() {
                   <h4 className="font-mono-custom text-xs text-[var(--text-muted-dark)] tracking-[0.15em] uppercase">{event.subTitle}</h4>
                 </div>
               </div>
-              
               <div className="bg-[var(--bg-paper-alt)] border border-[var(--border-light)] p-6 shadow-sm relative">
-                <p className="font-sans-custom text-[var(--text-dark)] leading-relaxed text-sm md:text-base">
-                  {event.desc}
-                </p>
+                <p className="font-sans-custom text-[var(--text-dark)] leading-relaxed text-sm md:text-base">{event.desc}</p>
               </div>
             </div>
           ))}
@@ -308,9 +302,7 @@ function AchievementsSection() {
   return (
     <div className="bg-[var(--bg-paper)] text-[var(--text-dark)] min-h-screen py-20 relative">
       <div className="absolute inset-0 bg-noise opacity-30 pointer-events-none"></div>
-      
       <div className="max-w-[1200px] mx-auto px-6 relative z-10">
-        { }
         <div className="mb-16 border-b border-[var(--border-dark)] pb-8 pt-4 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <h2 className="font-serif-custom text-4xl md:text-5xl font-bold mb-4 tracking-wide">02 // 學術與成就</h2>
@@ -331,9 +323,7 @@ function AchievementsSection() {
                 <h3 className="font-serif-custom text-2xl font-bold text-[var(--text-dark)] leading-tight mb-2 tracking-wide">{item.title}</h3>
                 <h4 className="font-mono-custom text-[10px] text-[var(--text-muted-dark)] tracking-[0.15em] uppercase">{item.subTitle}</h4>
               </div>
-              <p className="font-sans-custom text-[var(--text-dark)] text-sm leading-relaxed mt-auto opacity-90">
-                {item.desc}
-              </p>
+              <p className="font-sans-custom text-[var(--text-dark)] text-sm leading-relaxed mt-auto opacity-90">{item.desc}</p>
             </div>
           ))}
         </div>
@@ -346,22 +336,16 @@ function LegacySection() {
   return (
     <div className="bg-[var(--bg-paper)] text-[var(--text-dark)] min-h-screen pt-12 pb-24 relative border-t border-[var(--border-dark)]">
       <div className="absolute inset-0 bg-noise opacity-[0.25] pointer-events-none"></div>
-      
       <div className="max-w-[1200px] mx-auto px-6 relative z-10">
-        
-        { }
         <div className="flex justify-between items-end mb-12 border-b border-[var(--border-dark)] pb-6">
           <div className="font-mono-custom text-[10px] text-[var(--text-muted-dark)] tracking-widest uppercase flex gap-6">
             <span>Archive Section 03</span>
             <span className="hidden sm:inline">Declassified Records</span>
           </div>
-          <div className="font-mono-custom text-[10px] text-[var(--text-muted-dark)] tracking-widest uppercase">
-            REF: US-AEC-1954
-          </div>
+          <div className="font-mono-custom text-[10px] text-[var(--text-muted-dark)] tracking-widest uppercase">REF: US-AEC-1954</div>
         </div>
 
         <div className="max-w-5xl mx-auto space-y-16">
-          
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
             <div>
               <p className="font-serif-custom text-[var(--accent)] text-2xl md:text-3xl font-semibold mb-2">1954</p>
@@ -370,10 +354,8 @@ function LegacySection() {
             </div>
           </div>
 
-          { }
           <div className="bg-[var(--bg-paper-alt)] border border-[var(--border-dark)] p-8 md:p-12 relative shadow-sm">
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10 pb-6 border-b border-[var(--border-light)]">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10 pb-6 border-b lg:pr-56 border-[var(--border-light)]">
               <div className="flex flex-col gap-1">
                 <span className="font-mono-custom text-[9px] text-[var(--text-muted-dark)] tracking-widest opacity-80">CASE FILE</span>
                 <span className="font-mono-custom text-xs tracking-widest font-semibold">AEC-IN RE JRO</span>
@@ -395,33 +377,30 @@ function LegacySection() {
             <div className="absolute top-10 right-8 md:right-12 font-mono-custom text-[var(--classified)] border-[3px] border-[var(--classified)] px-4 py-1.5 text-xs md:text-sm font-bold transform rotate-[-4deg] tracking-[0.2em] mix-blend-multiply opacity-[0.85]" style={{ maskImage: 'radial-gradient(ellipse at center, rgba(0,0,0,1) 50%, rgba(0,0,0,0.4) 100%)', WebkitMaskImage: 'radial-gradient(ellipse at center, rgba(0,0,0,1) 50%, rgba(0,0,0,0.4) 100%)' }}>
               CLEARANCE REVOKED
             </div>
-            
+
             <div className="font-sans-custom text-[var(--text-dark)] leading-[1.8] space-y-6 text-sm md:text-base opacity-90 max-w-3xl">
-              <p>
-                冷戰初期，美國國內陷入麥卡錫主義的反共恐慌。奧本海默因早年與左翼人士有交集，以及對美國核武政策的異議（特別是反對研發破壞力更大的氫彈），引起了軍方與部分政治高層的質疑。
-              </p>
-              <p>
-                1954年，美國原子能委員會（AEC）對其進行了長達數週的秘密安全聽證會。儘管沒有明確證據表明他對國家不忠，但聽證會的程序與公平性長期受到歷史學家爭議。最終，美國政府正式撤銷了他的安全許可，這不僅終結了他在政府機關的影響力，也成為冷戰時期科學界與國家安全關係產生裂痕的標誌性事件。
-              </p>
+              <p>冷戰初期，美國國內陷入麥卡錫主義的反共恐慌。奧本海默因早年與左翼人士有交集，以及對美國核武政策的異議（特別是反對研發破壞力更大的氫彈），引起了軍方與部分政治高層的質疑。</p>
+              <p>1954年，美國原子能委員會（AEC）對其進行了長達數週的秘密安全聽證會。儘管沒有明確證據表明他對國家不忠，但聽證會的程序與公平性長期受到歷史學家爭議。最終，美國政府正式撤銷了他的安全許可，這不僅終結了他在政府機關的影響力，也成為冷戰時期科學界與國家安全關係產生裂痕的標誌性事件。</p>
             </div>
           </div>
 
-          { }
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 pt-8">
-            
             <div className="lg:col-span-5 flex flex-col gap-10">
               <div className="relative p-3 bg-white border border-[var(--border-light)] shadow-sm transform -rotate-1">
-                <div className="w-full aspect-[4/3] overflow-hidden bg-[#e0dcd0] relative">
-                  <div className="absolute inset-0 bg-amber-900/10 mix-blend-multiply z-10 pointer-events-none"></div>
-                  <img 
-                    src="https://images.unsplash.com/photo-1541807084-5c52b6b3adef?q=80&w=800&auto=format&fit=crop" 
-                    alt="Historical hearing context" 
-                    className="w-full h-full object-cover grayscale contrast-125 sepia-[.20] mix-blend-multiply opacity-90"
-                  />
+                <div className="w-full aspect-[4/3] overflow-hidden bg-[#ded8ca] relative flex items-center justify-center p-8">
+                  <div className="absolute inset-0 bg-noise opacity-60 pointer-events-none"></div>
+                  <div className="relative z-10 w-full h-full border border-[var(--border-dark)] p-6 flex flex-col justify-between bg-[var(--bg-paper)]/70">
+                    <div className="font-mono-custom text-[10px] tracking-[0.18em] text-[var(--text-muted-dark)]">U.S. ATOMIC ENERGY COMMISSION</div>
+                    <div>
+                      <div className="font-mono-custom text-[10px] tracking-[0.18em] text-[var(--classified)] mb-3">PERSONNEL SECURITY BOARD / 1954</div>
+                      <div className="font-serif-custom text-2xl md:text-3xl font-semibold leading-tight text-[var(--text-dark)]">IN THE MATTER OF<br/>J. ROBERT OPPENHEIMER</div>
+                    </div>
+                    <div className="font-mono-custom text-[9px] tracking-[0.16em] text-[var(--text-muted-dark)]">ARCHIVAL DOCUMENT DISPLAY / SOURCE IMAGE TO BE ADDED</div>
+                  </div>
                 </div>
                 <div className="mt-3 flex justify-between items-center px-1">
-                  <span className="font-mono-custom text-[9px] text-[var(--text-muted-dark)] tracking-widest">FIG 1. / AEC HEARING</span>
-                  <span className="font-mono-custom text-[9px] text-[var(--text-muted-dark)] tracking-widest">WASHINGTON D.C. 1954</span>
+                  <span className="font-mono-custom text-[9px] text-[var(--text-muted-dark)] tracking-widest">FIG 1. / AEC RECORD</span>
+                  <span className="font-mono-custom text-[9px] text-[var(--text-muted-dark)] tracking-widest">PERSONNEL SECURITY BOARD / 1954</span>
                 </div>
               </div>
 
@@ -435,7 +414,6 @@ function LegacySection() {
               </div>
             </div>
 
-            { }
             <div className="lg:col-span-7 flex flex-col gap-12">
               <div className="relative pl-8 md:pl-10 py-2 border-l-2 border-[var(--accent)] bg-[var(--bg-paper-alt)]/50 pr-6">
                 <span className="absolute -left-5 -top-6 text-[80px] leading-none text-[var(--border-dark)] font-serif-custom opacity-40 select-none">“</span>
@@ -448,12 +426,10 @@ function LegacySection() {
                 <div className="mb-8 pb-2 border-b border-[var(--border-dark)]">
                   <h3 className="font-serif-custom text-2xl font-bold tracking-wide">歷史評價與平反</h3>
                 </div>
-                
                 <div className="flex flex-col space-y-6">
                   <div className="relative pl-8">
                     <div className="absolute w-2.5 h-2.5 bg-[var(--classified)] -left-[5px] top-2 border border-[var(--bg-paper)] outline outline-1 outline-[var(--classified)]"></div>
-                    <div className="absolute w-[1px] bg-[var(--border-dark)] ㄇeft-0 top-6 bottom-[-32px] border-l border-dashed border-[var(--border-dark)]"></div>
-                    
+                    <div className="absolute w-[1px] bg-[var(--border-dark)] left-0 top-6 bottom-[-32px] border-l border-dashed border-[var(--border-dark)]"></div>
                     <span className="font-serif-custom text-[var(--classified)] text-2xl font-bold block mb-1">1954</span>
                     <h4 className="font-mono-custom text-xs tracking-widest uppercase mb-3 font-semibold text-[var(--text-dark)]">Security Clearance Revoked</h4>
                     <p className="font-sans-custom text-[var(--text-dark)] opacity-90 leading-[1.7] text-sm max-w-xl">
@@ -463,7 +439,6 @@ function LegacySection() {
 
                   <div className="relative pl-8 pt-2">
                     <div className="absolute w-2.5 h-2.5 bg-[var(--accent)] -left-[5px] top-4 border border-[var(--bg-paper)] outline outline-1 outline-[var(--accent)]"></div>
-                    
                     <span className="font-serif-custom text-[var(--accent)] text-2xl font-bold block mb-1">2022</span>
                     <h4 className="font-mono-custom text-xs tracking-widest uppercase mb-3 font-semibold text-[var(--text-dark)]">1954 Decision Vacated</h4>
                     <p className="font-sans-custom text-[var(--text-dark)] opacity-90 leading-[1.7] text-sm max-w-xl">
@@ -472,20 +447,21 @@ function LegacySection() {
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
         </div>
-        
-        { }
+
         <footer className="mt-32 border-t border-[var(--border-dark)] pt-12 pb-8 flex flex-col items-center text-center relative z-10">
           <div className="font-serif-custom text-2xl tracking-widest mb-4">OPPENHEIMER</div>
           <p className="font-sans-custom text-[var(--text-muted-dark)] text-sm tracking-wide mb-6">Historical Archive & Biographical Record</p>
-          <div className="font-mono-custom text-[10px] text-[var(--text-muted-dark)] tracking-[0.2em] uppercase">
-            © 2026 / DECLASSIFIED MATERIAL
-          </div>
+          <div className="font-mono-custom text-[10px] text-[var(--text-muted-dark)] tracking-[0.2em] uppercase">© 2026 / DECLASSIFIED MATERIAL</div>
         </footer>
       </div>
     </div>
   );
 }
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
