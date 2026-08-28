@@ -1,0 +1,46 @@
+name: Patch Oppenheimer dialogue scope
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-oppenheimer-scope.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Broaden dialogue scope filter
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('Oppenheimer.html')
+          text = path.read_text(encoding='utf-8')
+          start = text.index('const TOPIC_TERMS=')
+          end = text.index('function escapeHtml', start)
+
+          replacement = r'''const TOPIC_TERMS=['奧本海默','oppenheimer','曼哈頓','manhattan','洛斯阿拉莫斯','los alamos','trinity','三位一體','原子彈','原爆','atomic bomb','核武','核武器','氫彈','hydrogen bomb','安全聽證','1954','玻恩','born-oppenheimer','量子','quantum','理論物理','theoretical physics','黑洞','black hole','重力坍縮','gravitational collapse','中子星','neutron star','費米','fermi','麥卡錫','mccarthy','史特勞斯','strauss','葛洛夫斯','groves','二戰','第二次世界大戰','world war','冷戰','cold war','核能','原子能','berkeley','柏克萊','harvard','哈佛','哥廷根','göttingen','caltech','加州理工','princeton','普林斯頓','愛因斯坦','einstein','project y','費米獎','fermi award','科學倫理','科學責任','廣島','長崎','納粹','核政策','軍備控制','原子能委員會','aec'];const BIOGRAPHICAL_TERMS=['生平','出生','童年','小時候','年輕','求學','學校','家庭','父母','父親','母親','兄弟','妻子','婚姻','感情','孩子','家人','朋友','同事','老師','學生','個性','性格','興趣','喜歡','討厭','害怕','感受','心情','想法','看法','人生','選擇','工作','研究','教授','主任','關係','交往','政治立場','宗教','信仰','文學','詩','梵文','薄伽梵歌'];const OFF_TOPIC_TERMS=['微積分','積分題','微分題','數學題','解方程','python','javascript','寫程式','程式碼','今天天氣','天氣預報','股價','股票','匯率','食譜','料理','餐廳推薦','購物','商品推薦','遊戲攻略','翻譯這段','幫我翻譯','寫履歷','寫情書','球賽','nba','人工智慧怎麼用','ai怎麼用'];function isRelevantQuestion(message,history){const normalized=String(message).trim().toLowerCase();const hasStrongTopic=TOPIC_TERMS.some(term=>normalized.includes(term));if(hasStrongTopic)return true;if(OFF_TOPIC_TERMS.some(term=>normalized.includes(term)))return false;if(/^(你|您的|你的)/.test(normalized)&&BIOGRAPHICAL_TERMS.some(term=>normalized.includes(term)))return true;if(/^(你|您的|你的).{0,18}(為什麼|為何|如何|怎麼|何時|哪裡|是否|有沒有|認為|覺得|看待|加入|反對|支持|研究|工作|求學|後悔|負責|擔心|害怕|選擇|決定)/.test(normalized))return true;if(/(科學家|科學|研究者|物理學家).{0,18}(責任|負責|倫理|道德|良知|發明|武器|戰爭)/.test(normalized))return true;if(/(責任|倫理|道德|良知|後悔).{0,18}(科學|科學家|發明|核武|原子彈|戰爭)/.test(normalized))return true;if(/(戰爭|軍備|國家安全|政府|政治|戰後).{0,18}(科學|核武|原子彈|科學家|奧本海默)/.test(normalized))return true;if(Array.isArray(history)&&history.length>0&&/^(為什麼|為何|那|那你|所以|然後|之後|後來|當時|這件事|那件事|他|他們|可以再|能再|再說|詳細|什麼意思|意思是|那麼|可是|但是|如果|怎麼說|你呢)/.test(normalized))return true;return false}function appendScopeRejection(question){appendEntry('system','ARCHIVE QUERY REJECTED\nOUTSIDE INTERVIEW SCOPE\n\n本訪談可詢問 J. Robert Oppenheimer 的生平與人際關係、物理研究、二戰與曼哈頓計畫、核武歷史、戰後政策、安全聽證，以及科學家的責任與倫理。');console.info('Local scope filter blocked request; Gemini API was not called:',question)}'''
+
+          path.write_text(text[:start] + replacement + text[end:], encoding='utf-8')
+          PY
+
+      - name: Commit patch
+        shell: bash
+        run: |
+          if git diff --quiet -- Oppenheimer.html; then
+            echo 'No changes needed.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Oppenheimer.html
+          git commit -m 'Broaden Oppenheimer dialogue scope filter'
+          git push
