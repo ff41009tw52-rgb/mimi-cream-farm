@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>電流磁效應任務實驗室</title>
+    <link rel="stylesheet" href="farm-ui.css">
     
     <!-- React & ReactDOM -->
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
@@ -88,9 +89,6 @@
     </style>
 </head>
 <body>
-    <a href="index.html" style="position: fixed; top: 15px; left: 15px; z-index: 9999; background: #FF8C42; color: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: bold; box-shadow: 2px 2px 10px rgba(0,0,0,0.2); font-family: sans-serif; border: 2px solid white;">
-  🐾 回農場
-</a>
     <div id="root"></div>
     <details class="mission-guide-03">
         <summary>🧭 打開電流磁效應任務提示</summary>
@@ -525,7 +523,7 @@
         root.render(<App />);
     </script>
 <script>document.addEventListener('click',e=>{const b=e.target.closest('[data-predict]');if(!b)return;const f=document.getElementById('prediction-feedback-03');f.textContent=b.dataset.predict==='opposite'?'✅ 好預測！反轉電流後方向會相反。':'再想想：電流方向改變，磁場方向也會改變喔！';});</script>
-    <script src="home-button.js"></script>
+    <script src="farm-ui.js"></script>
 </body>
 
 </html>
