@@ -1,0 +1,92 @@
+:root {
+  --farm-ui-home-bg-start: #ffa66b;
+  --farm-ui-home-bg-end: #ff8c42;
+  --farm-ui-home-border: #ffffff;
+  --farm-ui-home-text: #ffffff;
+  --farm-ui-focus: #2d7a2d;
+}
+
+#farm-home-button {
+  position: fixed;
+  top: max(16px, env(safe-area-inset-top));
+  left: max(16px, env(safe-area-inset-left));
+  right: auto;
+  z-index: 2147483647;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 10px 20px;
+  box-sizing: border-box;
+  border: 3px solid var(--farm-ui-home-border);
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    var(--farm-ui-home-bg-start) 0%,
+    var(--farm-ui-home-bg-end) 100%
+  );
+  color: var(--farm-ui-home-text);
+  box-shadow:
+    0 5px 12px rgba(76, 45, 25, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.38);
+  font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  text-shadow: 0 1px 1px rgba(110, 53, 16, 0.3);
+  touch-action: manipulation;
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+#farm-home-button[data-position="right"] {
+  right: max(16px, env(safe-area-inset-right));
+  left: auto;
+}
+
+#farm-home-button:hover {
+  filter: brightness(1.05);
+  transform: translateY(-2px);
+}
+
+#farm-home-button:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+#farm-home-button:focus-visible {
+  outline: 4px solid var(--farm-ui-focus);
+  outline-offset: 3px;
+}
+
+#farm-home-button .farm-ui-home-paw {
+  font-size: 20px;
+  line-height: 1;
+  filter: saturate(0.85);
+}
+
+@media (max-width: 600px) {
+  #farm-home-button {
+    top: max(10px, env(safe-area-inset-top));
+    left: max(10px, env(safe-area-inset-left));
+    min-height: 44px;
+    padding: 9px 16px;
+    font-size: 16px;
+  }
+
+  #farm-home-button[data-position="right"] {
+    right: max(10px, env(safe-area-inset-right));
+    left: auto;
+  }
+
+  #farm-home-button .farm-ui-home-paw {
+    font-size: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #farm-home-button {
+    transition: none;
+  }
+}
