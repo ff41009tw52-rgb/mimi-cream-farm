@@ -160,11 +160,38 @@
 
         /* 手機版適配 */
         @media (max-width: 600px) {
-            #ui-container { width: calc(100% - 40px); top: 10px; left: 20px; padding: 15px; }
+            body { background: linear-gradient(180deg, #eef7fb 0%, #f8f9fa 100%); }
+            #ui-container {
+                width: calc(100% - 24px);
+                top: 66px;
+                left: 12px;
+                padding: 12px;
+                box-sizing: border-box;
+            }
+            #ui-container h1 { margin-bottom: 8px; font-size: 1.05rem; }
+            #ui-container h1 span { font-size: 1.2rem; }
+            .step-indicator { margin-bottom: 8px; padding-bottom: 7px; }
+            .instruction-box { min-height: 0; margin-bottom: 8px; }
+            .step-title { font-size: 1rem; }
+            .step-desc { font-size: 0.78rem; line-height: 1.4; }
+            .controls { gap: 6px; }
+            .controls button { min-height: 44px; padding: 8px; font-size: 15px; }
+            .legend {
+                display: flex;
+                justify-content: space-between;
+                gap: 6px;
+                margin-top: 8px;
+                padding: 7px;
+                font-size: 0.68rem;
+            }
+            .legend-row { margin: 0; white-space: nowrap; }
+            .dot { margin-right: 4px; }
             #dialogue-area { width: 100%; bottom: 0; padding: 10px; box-sizing: border-box; background: rgba(255,255,255,0.8); backdrop-filter: blur(5px); height: auto; align-items: center; }
             .cat-container { width: 60px; height: 60px; }
             .cat-avatar { width: 50px; height: 50px; left: 5px; }
-            .bubble-box { margin: 0 10px; min-height: 60px; padding: 10px 15px; font-size: 0.9rem; }
+            .bubble-box { margin: 0 6px; min-height: 54px; padding: 9px 11px; }
+            .dialogue-text { font-size: 0.78rem; line-height: 1.4; }
+            .speaker-tag { font-size: 0.72rem; }
             .cat-container.speaking { transform: scale(1.1); }
         }
 
@@ -337,14 +364,23 @@
         function resize() {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
-            if (step === 0) resetPositions();
+            resetPositions();
+        }
+
+        function stageCenterY() {
+            return width <= 600 ? height * 0.57 : height * 0.65;
         }
 
         function resetPositions() {
-            beakerA.x = width * 0.45; 
-            beakerA.y = height * 0.65; //稍微往上提一點，避開對話框
-            filterSetup.x = width * 0.8;
-            filterSetup.y = height * 0.65;
+            const mobile = width <= 600;
+            beakerA.w = mobile ? 118 : 150;
+            beakerA.h = mobile ? 158 : 200;
+            filterSetup.sieveRadius = mobile ? 48 : 60;
+            filterSetup.beakerBSize = mobile ? { w: 110, h: 130 } : { w: 140, h: 160 };
+            beakerA.x = mobile ? width * 0.5 : width * 0.45;
+            beakerA.y = stageCenterY();
+            filterSetup.x = mobile ? width * 0.38 : width * 0.8;
+            filterSetup.y = stageCenterY();
         }
 
         function resetExperiment() {
@@ -783,7 +819,7 @@
 
         function update() {
             if (step === 1) { 
-                jug.visible = true; jug.x = beakerA.x + 50; jug.y = beakerA.y - 200; 
+                jug.visible = true; jug.x = beakerA.x + (width <= 600 ? 42 : 50); jug.y = beakerA.y - (width <= 600 ? 155 : 200);
                 if (!jug.returned) {
                     if (jug.angle > -0.8 && !jug.flowDone) jug.angle -= 0.05;
                     else if (!jug.flowDone) { 
@@ -801,11 +837,14 @@
             } else rod.visible = false;
 
             if (step === 3) { 
-                filterSetup.x += (width * 0.5 - filterSetup.x) * 0.05;
-                filterSetup.y += (height * 0.65 - filterSetup.y) * 0.05; // 同步調整高度
+                const mobile = width <= 600;
+                const filterTargetX = mobile ? width * 0.38 : width * 0.5;
+                const centerY = stageCenterY();
+                filterSetup.x += (filterTargetX - filterSetup.x) * 0.05;
+                filterSetup.y += (centerY - filterSetup.y) * 0.05;
                 
-                const targetBeakerX = filterSetup.x + 105; 
-                const targetBeakerY = (height * 0.65 - 350); // 同步調整高度
+                const targetBeakerX = filterSetup.x + (mobile ? 86 : 105);
+                const targetBeakerY = centerY - (mobile ? 245 : 350);
                 
                 beakerA.x += (targetBeakerX - beakerA.x) * 0.05;
                 beakerA.y += (targetBeakerY - beakerA.y) * 0.05;
