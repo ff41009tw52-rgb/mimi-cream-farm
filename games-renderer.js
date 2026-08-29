@@ -78,7 +78,8 @@
     const status = document.getElementById('filter-status');
     if (!status) return;
 
-    const label = selectedGrade === 'all' ? '全部' : `${selectedGrade}年級`;
+    const gradeLabels = { '3': '三年級', '4': '四年級', '5': '五年級', '6': '六年級' };
+    const label = selectedGrade === 'all' ? '全部' : gradeLabels[selectedGrade] || `${selectedGrade}年級`;
     status.textContent = `目前顯示${label} ${visibleCount} 個遊戲。`;
   };
 

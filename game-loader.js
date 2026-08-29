@@ -7,6 +7,7 @@
   const loadingText = document.getElementById('loading-text');
   const errorPanel = document.getElementById('error-panel');
   const errorText = document.getElementById('error-text');
+  const skipLink = document.getElementById('skip-link');
 
   const normalizeGameNumber = (value) => {
     const trimmed = String(value || '').trim();
@@ -18,11 +19,12 @@
     shell?.setAttribute('aria-busy', 'false');
     if (loadingPanel) loadingPanel.hidden = true;
     if (frame) frame.hidden = true;
+    if (skipLink) skipLink.hidden = true;
     if (errorText) errorText.textContent = message;
     if (errorPanel) errorPanel.hidden = false;
   };
 
-  if (!shell || !frame || !loadingPanel || !loadingText || !errorPanel || !errorText) {
+  if (!shell || !frame || !loadingPanel || !loadingText || !errorPanel || !errorText || !skipLink) {
     return;
   }
 
