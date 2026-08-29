@@ -1,0 +1,115 @@
+:root {
+  color-scheme: light;
+  --loader-bg: #fff9e6;
+  --loader-text: #5d4037;
+  --loader-accent: #2f6f2f;
+  --loader-card: #ffffff;
+  --loader-border: #ffad60;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#game-shell,
+#game-frame {
+  width: 100%;
+  height: 100%;
+}
+
+html,
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
+  background: var(--loader-bg);
+  color: var(--loader-text);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.skip-link {
+  position: fixed;
+  top: max(8px, env(safe-area-inset-top));
+  left: 50%;
+  z-index: 2147483647;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #1f5d1f;
+  font-weight: 800;
+  text-decoration: none;
+  transform: translate(-50%, -180%);
+}
+
+.skip-link:focus {
+  outline: 4px solid var(--loader-accent);
+  outline-offset: 3px;
+  transform: translate(-50%, 0);
+}
+
+#game-shell {
+  display: grid;
+  place-items: center;
+}
+
+.loader-panel,
+.error-panel,
+.noscript-panel {
+  width: min(92vw, 520px);
+  padding: 28px;
+  border: 4px solid var(--loader-border);
+  border-radius: 24px;
+  background: var(--loader-card);
+  box-shadow: 0 10px 30px rgba(93, 64, 55, 0.16);
+  text-align: center;
+}
+
+.loader-panel h1,
+.error-panel h1,
+.noscript-panel h1 {
+  margin: 0 0 12px;
+  font-size: clamp(1.35rem, 4vw, 1.8rem);
+}
+
+.loader-panel p,
+.error-panel p,
+.noscript-panel p {
+  margin: 0;
+  line-height: 1.7;
+}
+
+.home-link {
+  display: inline-flex;
+  min-height: 48px;
+  margin-top: 20px;
+  padding: 12px 20px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--loader-accent);
+  color: #ffffff;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.home-link:focus-visible {
+  outline: 4px solid #ff8c42;
+  outline-offset: 3px;
+}
+
+#game-frame {
+  display: block;
+  border: 0;
+  background: #ffffff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skip-link {
+    transition: none;
+  }
+}

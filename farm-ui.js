@@ -83,6 +83,7 @@
     }
 
     button.href = getHomeUrl().href;
+    button.target = '_top';
     button.dataset.position = HOME_POSITIONS.has(position) ? position : 'left';
     button.setAttribute('aria-label', ariaLabel);
     button.querySelector('.farm-ui-home-label').textContent = label;
@@ -113,7 +114,7 @@
   };
 
   window.FarmUI = Object.freeze({
-    version: '0.2.0',
+    version: '0.3.0',
     init,
     mountHomeButton,
     removeLegacyHomeControls,

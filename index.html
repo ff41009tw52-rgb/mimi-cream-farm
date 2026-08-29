@@ -188,6 +188,26 @@
             box-shadow: 0 4px 10px rgba(118, 185, 71, 0.4);
         }
 
+        .filter-btn:focus-visible,
+        .open-btn:focus-visible,
+        .owner-link:focus-visible,
+        .feedback-float-btn:focus-visible {
+            outline: 4px solid #1F5D1F;
+            outline-offset: 4px;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
         /* --- 農場田地網格 --- */
         .farm-grid {
             display: grid;
@@ -344,9 +364,9 @@
     <header>
         <img src="picture/welcome-cats.JPG" alt="歡迎光臨" class="deco-img header-cat" onerror="this.style.display='none'">
         <h1>
-            <i class="fas fa-cat cat-orange"></i> 
+            <i class="fas fa-cat cat-orange" aria-hidden="true"></i>
             橘咪咪與白奶油的科學農場 
-            <i class="fas fa-cat cat-ragdoll"></i>
+            <i class="fas fa-cat cat-ragdoll" aria-hidden="true"></i>
         </h1>
         <div class="subtitle">
             這裡種的不是胡蘿蔔，而是充滿智慧的科學知識！請點選下方農地開始學習。
@@ -360,7 +380,7 @@
                     <img src="picture/mimi-solo.JPG" alt="橘咪咪園長" onerror="this.src='https://via.placeholder.com/120x120?text=🐱'">
                 </div>
             </a>
-            <div class="owner-name"><i class="fas fa-paw cat-orange"></i> 橘咪咪園長</div>
+            <div class="owner-name"><i class="fas fa-paw cat-orange" aria-hidden="true"></i> 橘咪咪園長</div>
         </div>
         <div class="owner-avatar">
             <a href="06.html" class="owner-link" title="點擊查看白奶油的介紹">
@@ -368,19 +388,21 @@
                     <img src="picture/cream-solo.JPG" alt="白奶油園長" onerror="this.src='https://via.placeholder.com/120x120?text=🐾'">
                 </div>
             </a>
-            <div class="owner-name"><i class="fas fa-paw cat-ragdoll"></i> 白奶油園長</div>
+            <div class="owner-name"><i class="fas fa-paw cat-ragdoll" aria-hidden="true"></i> 白奶油園長</div>
         </div>
     </div>
 
     <div class="container">
         <!-- 過濾導覽列 -->
-        <div class="filter-nav">
-            <button class="filter-btn active" data-filter="all">全部遊戲</button>
-            <button class="filter-btn" data-filter="3">三年級</button>
-            <button class="filter-btn" data-filter="4">四年級</button>
-            <button class="filter-btn" data-filter="5">五年級</button>
-            <button class="filter-btn" data-filter="6">六年級</button>
+        <div class="filter-nav" role="group" aria-label="依年級篩選遊戲">
+            <button class="filter-btn active" data-filter="all" aria-controls="game-grid">全部遊戲</button>
+            <button class="filter-btn" data-filter="3" aria-controls="game-grid">三年級</button>
+            <button class="filter-btn" data-filter="4" aria-controls="game-grid">四年級</button>
+            <button class="filter-btn" data-filter="5" aria-controls="game-grid">五年級</button>
+            <button class="filter-btn" data-filter="6" aria-controls="game-grid">六年級</button>
         </div>
+
+        <p id="filter-status" class="sr-only" aria-live="polite"></p>
 
         <div class="farm-grid" id="game-grid">
             <noscript>
@@ -395,7 +417,7 @@
     </footer>
 
     <a href="feedback.html" class="feedback-float-btn" title="有問題請找我們">
-        <i class="fas fa-comment-dots"></i> 回報問題
+        <i class="fas fa-comment-dots" aria-hidden="true"></i> 回報問題
     </a>
 
     <script src="games-data.js"></script>

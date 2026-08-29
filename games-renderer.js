@@ -30,7 +30,9 @@
     body.className = 'card-body';
 
     const title = document.createElement('h3');
+    title.id = `${game.id}-title`;
     title.textContent = game.title;
+    card.setAttribute('aria-labelledby', title.id);
 
     const description = document.createElement('p');
     description.className = 'desc';
@@ -40,6 +42,10 @@
     const link = document.createElement('a');
     link.href = game.url;
     link.className = 'open-btn';
+    link.setAttribute(
+      'aria-label',
+      `${game.actionLabel}：${String(game.title).replace(/^[^A-Za-z0-9\u3400-\u9fff]+/, '')}`
+    );
     link.append(document.createTextNode(`${game.actionLabel} `), createIcon(game.actionIcon));
 
     card.append(header, body, link);
@@ -63,6 +69,17 @@
     const fragment = document.createDocumentFragment();
     games.forEach((game) => fragment.appendChild(createGameCard(game)));
     grid.replaceChildren(fragment);
+
+    const status = document.getElementById('filter-status');
+    if (status) status.textContent = `目前顯示全部 ${games.length} 個遊戲。`;
+  };
+
+  const updateFilterStatus = (selectedGrade, visibleCount) => {
+    const status = document.getElementById('filter-status');
+    if (!status) return;
+
+    const label = selectedGrade === 'all' ? '全部' : `${selectedGrade}年級`;
+    status.textContent = `目前顯示${label} ${visibleCount} 個遊戲。`;
   };
 
   const setupGradeFilters = () => {
@@ -80,11 +97,14 @@
         button.setAttribute('aria-pressed', 'true');
 
         const selectedGrade = button.dataset.filter;
+        let visibleCount = 0;
         document.querySelectorAll('#game-grid .science-card').forEach((card) => {
           const grades = (card.dataset.grades || '').split(',').filter(Boolean);
           const shouldShow = selectedGrade === 'all' || grades.includes(selectedGrade);
           card.classList.toggle('hidden', !shouldShow);
+          if (shouldShow) visibleCount += 1;
         });
+        updateFilterStatus(selectedGrade, visibleCount);
       });
     });
   };

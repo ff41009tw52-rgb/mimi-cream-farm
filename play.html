@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fff9e6">
+  <title>載入遊戲｜橘咪咪與白奶油的科學農場</title>
+  <link rel="stylesheet" href="game-loader.css">
+</head>
+<body>
+  <a class="skip-link" href="#game-frame">跳到遊戲內容</a>
+
+  <main id="game-shell" aria-busy="true">
+    <section id="loading-panel" class="loader-panel" role="status" aria-live="polite">
+      <h1>科學遊戲準備中</h1>
+      <p id="loading-text">正在載入遊戲…</p>
+    </section>
+
+    <section id="error-panel" class="error-panel" role="alert" hidden>
+      <h1>找不到這個遊戲</h1>
+      <p id="error-text">請回到農場重新選擇遊戲。</p>
+      <a class="home-link" href="index.html">回農場首頁</a>
+    </section>
+
+    <iframe
+      id="game-frame"
+      title="科學農場互動遊戲"
+      allow="fullscreen"
+      referrerpolicy="strict-origin-when-cross-origin"
+      hidden
+    ></iframe>
+
+    <noscript>
+      <section class="noscript-panel">
+        <h1>需要啟用 JavaScript</h1>
+        <p>請啟用瀏覽器的 JavaScript，再回到農場選擇遊戲。</p>
+        <a class="home-link" href="index.html">回農場首頁</a>
+      </section>
+    </noscript>
+  </main>
+
+  <script src="games-data.js"></script>
+  <script src="game-loader.js"></script>
+</body>
+</html>

@@ -305,11 +305,26 @@
     }
   ];
 
+  const getGameNumber = (game) => {
+    if (game.gameNumber) return String(game.gameNumber).padStart(2, '0');
+
+    const match = String(game.url || '').match(/(?:^|\/)(\d{1,2})\.html(?:[?#].*)?$/i);
+    return match ? match[1].padStart(2, '0') : '';
+  };
+
   window.FARM_GAMES = Object.freeze(
-    games.map((game) => Object.freeze({
-      id: game.id || `game-${game.url.replace(/\.html(?:[?#].*)?$/i, '')}`,
-      ...game,
-      grades: Object.freeze([...game.grades])
-    }))
+    games.map((game) => {
+      const gameNumber = getGameNumber(game);
+      const legacyUrl = game.legacyUrl || game.url;
+
+      return Object.freeze({
+        ...game,
+        id: game.id || `game-${gameNumber}`,
+        gameNumber,
+        legacyUrl,
+        url: gameNumber ? `play.html?game=${encodeURIComponent(gameNumber)}` : legacyUrl,
+        grades: Object.freeze([...game.grades])
+      });
+    })
   );
 })();
