@@ -306,8 +306,8 @@
   ];
 
   window.FARM_GAMES = Object.freeze(
-    games.map((game, index) => Object.freeze({
-      id: `game-${String(index + 1).padStart(2, '0')}`,
+    games.map((game) => Object.freeze({
+      id: game.id || `game-${game.url.replace(/\.html(?:[?#].*)?$/i, '')}`,
       ...game,
       grades: Object.freeze([...game.grades])
     }))

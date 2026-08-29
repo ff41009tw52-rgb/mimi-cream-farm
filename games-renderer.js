@@ -13,6 +13,7 @@
   const createGameCard = (game) => {
     const card = document.createElement('div');
     card.className = 'science-card';
+    card.setAttribute('role', 'listitem');
     card.dataset.grades = game.grades.join(',');
     if (game.subject) card.dataset.subject = game.subject;
     card.dataset.gameId = game.id;
@@ -52,9 +53,13 @@
     const games = getGames();
     if (!games.length) {
       console.warn('[Science Farm] No game data found. Check that games-data.js loads before games-renderer.js.');
+      const message = document.createElement('p');
+      message.textContent = '遊戲清單暫時無法載入，請重新整理頁面。';
+      grid.replaceChildren(message);
       return;
     }
 
+    grid.setAttribute('role', 'list');
     const fragment = document.createDocumentFragment();
     games.forEach((game) => fragment.appendChild(createGameCard(game)));
     grid.replaceChildren(fragment);
@@ -65,9 +70,14 @@
     if (!filterButtons.length) return;
 
     filterButtons.forEach((button) => {
+      button.setAttribute('aria-pressed', button.classList.contains('active') ? 'true' : 'false');
       button.addEventListener('click', () => {
-        filterButtons.forEach((item) => item.classList.remove('active'));
+        filterButtons.forEach((item) => {
+          item.classList.remove('active');
+          item.setAttribute('aria-pressed', 'false');
+        });
         button.classList.add('active');
+        button.setAttribute('aria-pressed', 'true');
 
         const selectedGrade = button.dataset.filter;
         document.querySelectorAll('#game-grid .science-card').forEach((card) => {
