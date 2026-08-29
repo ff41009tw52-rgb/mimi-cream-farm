@@ -260,6 +260,11 @@
         if (saved) setSaveExists(true);
       }, []);
 
+      useEffect(() => {
+        document.body.dataset.farmHomeHidden = isGameStarted ? 'true' : 'false';
+        return () => { delete document.body.dataset.farmHomeHidden; };
+      }, [isGameStarted]);
+
       const removeFlyingCrop = useCallback((id) => {
         setFlyingCrops(prev => prev.filter(c => c.id !== id));
       }, []);

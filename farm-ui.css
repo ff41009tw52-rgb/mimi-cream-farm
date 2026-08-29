@@ -41,6 +41,10 @@
   transition: transform 0.18s ease, filter 0.18s ease;
 }
 
+body[data-farm-home-hidden="true"] #farm-home-button {
+  display: none !important;
+}
+
 #farm-home-button[data-position="right"] {
   right: max(16px, env(safe-area-inset-right));
   left: auto;
