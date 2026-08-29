@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>物質分類大挑戰</title>
+    <link rel="stylesheet" href="farm-ui.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* 防止行動裝置在拖曳時觸發滾動或重新整理 */
@@ -270,10 +271,7 @@
     <!-- ----------------------------- -->
 
     <!-- 頂部資訊列 -->
-    <div class="absolute top-0 left-0 w-full p-4 flex justify-between items-center z-20">
-        <a href="index.html" class="bg-white/90 hover:bg-white text-orange-600 px-4 py-2 rounded-full font-bold shadow-sm flex items-center gap-2 transition-all border border-orange-100">
-            🏠 回農場首頁
-        </a>
+    <div class="absolute top-0 left-0 w-full p-4 flex justify-end items-center z-20">
         <div class="flex gap-4">
             <div class="bg-white/90 px-4 py-2 rounded-full font-bold text-gray-700 shadow-sm border border-gray-100">
                 分數: <span id="score" class="text-orange-500">0</span>
@@ -666,6 +664,6 @@
         document.addEventListener('contextmenu', event => event.preventDefault());
 
     </script>
-    <script src="home-button.js"></script>
+    <script src="farm-ui.js"></script>
 </body>
 </html>
