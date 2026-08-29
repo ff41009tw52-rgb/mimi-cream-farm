@@ -3,6 +3,7 @@
 
   const HOME_BUTTON_ID = 'farm-home-button';
   const HOME_SELECTOR = 'a[href], button[onclick], [role="button"][onclick]';
+  const HOME_POSITIONS = new Set(['left', 'center', 'right']);
   const state = { observer: null };
 
   const getHomeUrl = () => new URL('index.html', document.baseURI);
@@ -82,7 +83,7 @@
     }
 
     button.href = getHomeUrl().href;
-    button.dataset.position = position === 'right' ? 'right' : 'left';
+    button.dataset.position = HOME_POSITIONS.has(position) ? position : 'left';
     button.setAttribute('aria-label', ariaLabel);
     button.querySelector('.farm-ui-home-label').textContent = label;
     return button;
@@ -112,7 +113,7 @@
   };
 
   window.FarmUI = Object.freeze({
-    version: '0.1.0',
+    version: '0.2.0',
     init,
     mountHomeButton,
     removeLegacyHomeControls,

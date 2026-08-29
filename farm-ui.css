@@ -46,13 +46,27 @@
   left: auto;
 }
 
+#farm-home-button[data-position="center"] {
+  right: auto;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
 #farm-home-button:hover {
   filter: brightness(1.05);
   transform: translateY(-2px);
 }
 
+#farm-home-button[data-position="center"]:hover {
+  transform: translateX(-50%) translateY(-2px);
+}
+
 #farm-home-button:active {
   transform: translateY(1px) scale(0.98);
+}
+
+#farm-home-button[data-position="center"]:active {
+  transform: translateX(-50%) translateY(1px) scale(0.98);
 }
 
 #farm-home-button:focus-visible {
