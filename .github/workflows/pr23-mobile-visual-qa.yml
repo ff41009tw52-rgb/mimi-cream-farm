@@ -1,0 +1,194 @@
+name: PR23 mobile visual QA
+
+on:
+  push:
+    branches:
+      - qa/pr23-mobile-visual
+
+permissions:
+  contents: read
+
+jobs:
+  mobile-visual-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout QA branch
+        uses: actions/checkout@v4
+
+      - name: Set up Chrome
+        id: chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: Install Playwright core
+        run: npm install --no-save playwright-core@1.55.0
+
+      - name: Start local static server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/pr23-http.log 2>&1 &
+          echo $! > /tmp/pr23-http.pid
+          sleep 2
+          curl -f http://127.0.0.1:4173/play.html >/dev/null
+
+      - name: Capture P1 mobile routes
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          mkdir -p qa-artifacts
+          cat > /tmp/pr23-qa.js <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const { chromium } = require('playwright-core');
+
+          const games = ['01','04','07','08','09','12','16','17','21','30','40'];
+          const viewports = [
+            { name: 'iphone-se-ish', width: 375, height: 812 },
+            { name: 'iphone-modern-ish', width: 390, height: 844 },
+          ];
+
+          (async () => {
+            const browser = await chromium.launch({
+              headless: true,
+              executablePath: process.env.CHROME_PATH,
+              args: ['--no-sandbox', '--disable-dev-shm-usage'],
+            });
+            const report = [];
+
+            for (const viewport of viewports) {
+              const dir = path.join('qa-artifacts', viewport.name);
+              fs.mkdirSync(dir, { recursive: true });
+
+              for (const game of games) {
+                const context = await browser.newContext({
+                  viewport: { width: viewport.width, height: viewport.height },
+                  screen: { width: viewport.width, height: viewport.height },
+                  isMobile: true,
+                  hasTouch: true,
+                  deviceScaleFactor: 1,
+                  locale: 'zh-TW',
+                });
+                const page = await context.newPage();
+                const consoleErrors = [];
+                const pageErrors = [];
+                const failedRequests = [];
+
+                page.on('console', (msg) => {
+                  if (msg.type() === 'error') consoleErrors.push(msg.text());
+                });
+                page.on('pageerror', (err) => pageErrors.push(String(err)));
+                page.on('requestfailed', (request) => {
+                  failedRequests.push({ url: request.url(), error: request.failure()?.errorText || 'failed' });
+                });
+
+                const url = `http://127.0.0.1:4173/play.html?game=${game}`;
+                let navigationError = '';
+                try {
+                  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 20000 });
+                  await page.waitForFunction(() => document.querySelector('#game-shell')?.getAttribute('aria-busy') === 'false', { timeout: 20000 });
+                  await page.waitForTimeout(2500);
+                } catch (error) {
+                  navigationError = String(error);
+                }
+
+                const parentState = await page.evaluate(() => {
+                  const shell = document.querySelector('#game-shell');
+                  const loading = document.querySelector('#loading-panel');
+                  const errorPanel = document.querySelector('#error-panel');
+                  const gameContent = document.querySelector('#game-content');
+                  const legacyFrame = document.querySelector('#game-frame');
+                  return {
+                    title: document.title,
+                    ariaBusy: shell?.getAttribute('aria-busy') || null,
+                    loadingHidden: loading?.hidden ?? null,
+                    errorHidden: errorPanel?.hidden ?? null,
+                    errorText: document.querySelector('#error-text')?.textContent || '',
+                    gameContentHidden: gameContent?.hidden ?? null,
+                    legacyFrameHidden: legacyFrame?.hidden ?? null,
+                    bodyScrollWidth: document.documentElement.scrollWidth,
+                    bodyClientWidth: document.documentElement.clientWidth,
+                    bodyScrollHeight: document.documentElement.scrollHeight,
+                    bodyClientHeight: document.documentElement.clientHeight,
+                  };
+                });
+
+                const frameStates = [];
+                for (const frame of page.frames().slice(1)) {
+                  try {
+                    const state = await frame.evaluate(() => ({
+                      url: location.href,
+                      title: document.title,
+                      readyState: document.readyState,
+                      scrollWidth: document.documentElement.scrollWidth,
+                      clientWidth: document.documentElement.clientWidth,
+                      scrollHeight: document.documentElement.scrollHeight,
+                      clientHeight: document.documentElement.clientHeight,
+                      bodyTextStart: (document.body?.innerText || '').replace(/\s+/g, ' ').slice(0, 180),
+                    }));
+                    frameStates.push(state);
+                  } catch (error) {
+                    frameStates.push({ error: String(error), url: frame.url() });
+                  }
+                }
+
+                const screenshotPath = path.join(dir, `game-${game}.png`);
+                await page.screenshot({ path: screenshotPath, fullPage: false });
+
+                report.push({
+                  game,
+                  viewport,
+                  url,
+                  navigationError,
+                  parentState,
+                  frameStates,
+                  consoleErrors,
+                  pageErrors,
+                  failedRequests: failedRequests.slice(0, 20),
+                  screenshotPath,
+                });
+                await context.close();
+              }
+            }
+
+            fs.writeFileSync('qa-artifacts/report.json', JSON.stringify(report, null, 2));
+            const lines = ['# PR #23 P1 mobile visual QA', ''];
+            for (const item of report) {
+              const p = item.parentState;
+              const inner = item.frameStates[0] || {};
+              const moduleMode = p.gameContentHidden === false && p.legacyFrameHidden === true;
+              const overflow = Number(inner.scrollWidth || 0) > Number(inner.clientWidth || 0) + 2;
+              lines.push(`## ${item.game} — ${item.viewport.width}×${item.viewport.height}`);
+              lines.push(`- mode: ${moduleMode ? 'module' : 'legacy-or-error'}`);
+              lines.push(`- title: ${p.title}`);
+              lines.push(`- parent aria-busy: ${p.ariaBusy}`);
+              lines.push(`- error panel hidden: ${p.errorHidden}`);
+              lines.push(`- inner frame: ${inner.url || 'none'}`);
+              lines.push(`- inner viewport: ${inner.clientWidth || '?'}×${inner.clientHeight || '?'}; scroll: ${inner.scrollWidth || '?'}×${inner.scrollHeight || '?'}`);
+              lines.push(`- horizontal overflow: ${overflow ? 'YES' : 'no'}`);
+              lines.push(`- console errors: ${item.consoleErrors.length}; page errors: ${item.pageErrors.length}; failed requests: ${item.failedRequests.length}`);
+              if (item.navigationError) lines.push(`- navigation error: ${item.navigationError}`);
+              lines.push(`- screenshot: ${item.screenshotPath}`);
+              lines.push('');
+            }
+            fs.writeFileSync('qa-artifacts/report.md', lines.join('\n'));
+            await browser.close();
+          })().catch((error) => {
+            console.error(error);
+            process.exit(1);
+          });
+          NODE
+          node /tmp/pr23-qa.js
+
+      - name: Print report
+        if: always()
+        run: cat qa-artifacts/report.md || true
+
+      - name: Upload screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr23-p1-mobile-visual-qa
+          path: qa-artifacts
+          if-no-files-found: error
+          retention-days: 7
