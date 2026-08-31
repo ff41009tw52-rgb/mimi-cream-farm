@@ -281,6 +281,7 @@
       title: '⚙️ 槓桿與輪軸對對碰2',
       description: '昀帶來了全新的力學進階挑戰！這次有更多不一樣的農場工具，快來測試你的力學知識，看看能不能全部配對成功！',
       url: '18.html',
+      moduleUrl: 'games/18/index.js',
       actionLabel: '進階配對',
       actionIcon: 'fas fa-tools'
     },
