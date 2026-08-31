@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="game-loader.css">
 </head>
 <body>
-  <a id="skip-link" class="skip-link" href="#game-frame">跳到遊戲內容</a>
+  <a id="skip-link" class="skip-link" href="#game-content">跳到遊戲內容</a>
 
   <main id="game-shell" aria-busy="true">
     <section id="loading-panel" class="loader-panel" role="status" aria-live="polite">
@@ -21,6 +21,14 @@
       <p id="error-text">請回到農場重新選擇遊戲。</p>
       <a class="home-link" href="index.html">回農場首頁</a>
     </section>
+
+    <section
+      id="game-content"
+      class="game-content"
+      tabindex="-1"
+      aria-label="科學農場互動遊戲"
+      hidden
+    ></section>
 
     <iframe
       id="game-frame"
