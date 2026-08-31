@@ -54,6 +54,7 @@
       title: '⚖️ 改變施力臂與抗力臂',
       description: '白奶油想偷搬整袋超重的貓草，卻推不動！橘咪咪請來洪老師傳授「槓桿魔法」。改變施力臂與抗力臂的長度，竟然能讓胖貓咪也變成大力士？',
       url: '30.html',
+      moduleUrl: 'games/30/index.js',
       actionLabel: '進行實驗',
       actionIcon: 'fas fa-weight-hanging'
     },
@@ -64,6 +65,7 @@
       title: '🪲 獨角仙飼養大師',
       description: '白奶油對著光蠟樹上的獨角仙狂揮貓拳！橘咪咪趕緊請澔哥老師來救援。快來學習從卵到成蟲的飼養祕訣，跟著澔哥佈置完美的甲蟲豪宅，別讓白奶油搞破壞啦！',
       url: '31.html',
+      moduleUrl: 'games/31/index.js',
       actionLabel: '佈置蟲箱',
       actionIcon: 'fas fa-leaf'
     },
@@ -96,6 +98,7 @@
       title: '⚙️ 操作動滑輪',
       description: '白奶油坐在籃子裡耍賴不走，橘咪咪只好請昀老師在穀倉架設滑輪組來吊起這隻胖貓！想知道怎麼操作動滑輪最省力嗎？快來拉拉看！',
       url: '35.html',
+      moduleUrl: 'games/35/index.js',
       actionLabel: '拉動滑輪',
       actionIcon: 'fas fa-arrow-up'
     },
@@ -128,6 +131,7 @@
       title: '💎 魔法水晶保衛戰',
       description: '農場的魔法水晶受到攻擊啦！快運用「水的三態變化」來防禦！無論是堅硬的冰塊牆、沖刷敵人的水流，還是高溫的水蒸氣，幫白奶油建立最堅固的防線吧！',
       url: '24.html',
+      moduleUrl: 'games/24/index.js',
       actionLabel: '保衛水晶',
       actionIcon: 'fas fa-shield-alt'
     },
@@ -149,6 +153,7 @@
       title: '🧊 小水滴結冰記：溫度的神祕魔法',
       description: '冬天到了，白奶油的洗臉水竟然變成了硬邦邦的冰塊！跟著小水滴一起體驗從液體變成固體的奇妙旅程，了解溫度是如何改變物質的！',
       url: '21.html',
+      moduleUrl: 'games/21/index.js',
       actionLabel: '施展冰魔法',
       actionIcon: 'fas fa-snowflake'
     },
@@ -181,6 +186,7 @@
       title: '🚀 特性分類 (進階)',
       description: '白奶油發現了更深奧的分類學問！適合已經了解基礎概念的小小科學家挑戰。',
       url: '02.html',
+      moduleUrl: 'games/02/index.js',
       actionLabel: '進階觀測',
       actionIcon: 'fas fa-search-plus'
     },
@@ -191,6 +197,7 @@
       title: '⚡ 電流磁效應',
       description: '不可思議的電與磁！與橘咪咪一起來探索電流如何產生磁場',
       url: '03.html',
+      moduleUrl: 'games/03/index.js',
       actionLabel: '探索電磁',
       actionIcon: 'fas fa-magnet'
     },
@@ -201,6 +208,7 @@
       title: '🧂 鹽巴沙子分離術',
       description: '糟糕！橘咪咪把鹽巴混進沙坑了。快運用「溶解、過濾、結晶」的科學方法，幫白奶油把乾淨的鹽巴變回來！',
       url: '05.html',
+      moduleUrl: 'games/05/index.js',
       actionLabel: '施展分離術',
       actionIcon: 'fas fa-magic'
     },
@@ -222,6 +230,7 @@
       title: '🔌 奇妙的電路實驗',
       description: '天黑了，橘咪咪在農場倉庫找到了一些電池跟電線，她想知道怎麼做才能讓燈泡發光？一起來動手接通電路吧！',
       url: '08.html',
+      moduleUrl: 'games/08/index.js',
       actionLabel: '點亮燈泡',
       actionIcon: 'fas fa-lightbulb'
     },
@@ -232,6 +241,7 @@
       title: '🎮 酸鹼接接樂',
       description: '反應力大考驗！請依照白奶油的指令，移動橘咪咪接住正確的溶液。小心別接到錯的喔！',
       url: '09.html',
+      moduleUrl: 'games/09/index.js',
       actionLabel: '挑戰反應力',
       actionIcon: 'fas fa-stopwatch'
     },
@@ -253,6 +263,7 @@
       title: '🏝️ 四季農莊：島嶼物語',
       description: '橘咪咪和白奶油發現了一個神祕島嶼！這裡的四季變化對植物有什麼影響？快跟著他們一起探索不同季節最適合種植的作物吧！',
       url: '12.html',
+      moduleUrl: 'games/12/index.js',
       actionLabel: '出發探索',
       actionIcon: 'fas fa-compass'
     },
@@ -263,6 +274,7 @@
       title: '🌱 播種小達人',
       description: '來挑戰種植小白菜與番茄吧！學習「撒播」與「點播」的技巧，並用正確的方式幫幼苗覆土與澆水，成為優秀的小農夫！',
       url: '14.html',
+      moduleUrl: 'games/14/index.js',
       actionLabel: '動手播種',
       actionIcon: 'fas fa-seedling'
     },
