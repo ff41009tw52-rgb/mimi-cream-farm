@@ -2,127 +2,137 @@ const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright-core');
 
-const VIEWPORT = { width: 375, height: 812 };
-const results = [];
-const safeText = (value) => String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, 400);
-
-async function loadGame(browser, game, options = {}) {
-  const context = await browser.newContext({ viewport: VIEWPORT, screen: VIEWPORT, isMobile: true, hasTouch: true, deviceScaleFactor: 1, locale: 'zh-TW' });
-  const page = await context.newPage();
-  let blockedRaw = 0;
-  if (options.blockRaw) {
-    await page.route('**/*', async route => {
-      const url = route.request().url();
-      if (url.startsWith('https://raw.githubusercontent.com/')) {
-        blockedRaw += 1;
-        await route.abort('blockedbyclient');
-      } else {
-        await route.continue();
-      }
-    });
-  }
-  const errors = [];
-  page.on('pageerror', e => errors.push('page: ' + e));
-  page.on('console', msg => { if (msg.type() === 'error') errors.push('console: ' + msg.text()); });
-  await page.goto(`http://127.0.0.1:4173/play.html?game=${game}`, { waitUntil: 'domcontentloaded', timeout: 20000 });
-  await page.waitForFunction(() => document.querySelector('#game-shell')?.getAttribute('aria-busy') === 'false', { timeout: 20000 });
-  await page.waitForTimeout(2200);
-  const frame = page.frames().find(f => f.url() === 'about:srcdoc');
-  if (!frame) throw new Error(`game ${game}: srcdoc frame not found`);
-  return { context, page, frame, errors, getBlockedRaw: () => blockedRaw };
-}
-
-async function touchDragTo(page, source, endX, endY, steps = 14) {
-  const sourceBox = await source.boundingBox();
-  if (!sourceBox) throw new Error('source has no box');
-  const startX = sourceBox.x + sourceBox.width / 2;
-  const startY = sourceBox.y + sourceBox.height / 2;
-  const cdp = await page.context().newCDPSession(page);
-  const point = (x, y) => ({ x, y, id: 1, radiusX: 4, radiusY: 4, force: 1 });
-  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point(startX, startY)] });
-  for (let i = 1; i <= steps; i += 1) {
-    const t = i / steps;
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [point(startX + (endX - startX) * t, startY + (endY - startY) * t)] });
-    await new Promise(resolve => setTimeout(resolve, 40));
-  }
-  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-  await new Promise(resolve => setTimeout(resolve, 650));
-}
-
-async function capture(page, name) {
-  const file = path.join('qa-interaction', `${name}.png`);
-  await page.screenshot({ path: file, fullPage: false });
-  return file;
-}
+const games = ['02','03','11','14','15','18','19','20','22','24','25','26','27','28','31','32','33','35'];
+const viewports = [
+  { name: 'iphone-se-ish', width: 375, height: 812 },
+  { name: 'iphone-modern-ish', width: 390, height: 844 },
+];
 
 (async () => {
   fs.mkdirSync('qa-interaction', { recursive: true });
-  const browser = await chromium.launch({ headless: true, executablePath: process.env.CHROME_PATH, args: ['--no-sandbox','--disable-dev-shm-usage'] });
+  const browser = await chromium.launch({
+    headless: true,
+    executablePath: process.env.CHROME_PATH,
+    args: ['--no-sandbox', '--disable-dev-shm-usage'],
+  });
+  const report = [];
 
-  // 04: endpoint is deliberately above the beaker center because endDrag tests the bottom of the dragged dropper clone.
-  {
-    let s;
-    try {
-      s = await loadGame(browser, '04');
-      const source = s.frame.locator('#dropperBottle');
-      const beaker = s.frame.locator('.beaker').first();
-      const b = await beaker.boundingBox();
-      if (!b) throw new Error('beaker box missing');
-      const before = await s.frame.locator('.result-tag.show').count();
-      await touchDragTo(s.page, source, b.x + b.width / 2, b.y - 38);
-      const after = await s.frame.locator('.result-tag.show').count();
-      const rows = await s.frame.locator('.record-table tbody tr').allInnerTexts().catch(() => []);
-      const shot = await capture(s.page, '04-retest');
-      results.push({ game: '04', ok: after > before, before, after, rows, beakerBox: b, screenshot: shot, errors: s.errors });
-    } catch (e) { results.push({ game: '04', ok: false, error: String(e), errors: s?.errors || [] }); }
-    finally { if (s) await s.context.close(); }
-  }
+  for (const viewport of viewports) {
+    const dir = path.join('qa-interaction', viewport.name);
+    fs.mkdirSync(dir, { recursive: true });
 
-  // 17: click the interactive parent card, not the pointer-events-none text child.
-  {
-    let s;
-    try {
-      s = await loadGame(browser, '17');
-      await s.frame.getByRole('button', { name: /我認識它們了，開始挑戰/ }).click();
-      await s.page.waitForTimeout(250);
-      const plantCard = s.frame.getByText('台灣萍蓬草', { exact: true }).last().locator('..');
-      await plantCard.click();
-      await s.frame.locator('[data-zone="floating-leaved"]').click();
-      await s.page.waitForTimeout(300);
-      const text = safeText(await s.frame.locator('body').innerText());
-      const shot = await capture(s.page, '17-retest');
-      results.push({ game: '17', ok: text.includes('答對') || text.includes('紅寶石') || text.includes('特有種'), evidence: text, screenshot: shot, errors: s.errors });
-    } catch (e) { results.push({ game: '17', ok: false, error: String(e), errors: s?.errors || [] }); }
-    finally { if (s) await s.context.close(); }
-  }
+    for (const game of games) {
+      const context = await browser.newContext({
+        viewport: { width: viewport.width, height: viewport.height },
+        screen: { width: viewport.width, height: viewport.height },
+        isMobile: true,
+        hasTouch: true,
+        deviceScaleFactor: 1,
+        locale: 'zh-TW',
+      });
+      const page = await context.newPage();
+      const consoleErrors = [];
+      const pageErrors = [];
+      const failedRequests = [];
+      page.on('console', msg => { if (msg.type() === 'error') consoleErrors.push(msg.text()); });
+      page.on('pageerror', err => pageErrors.push(String(err)));
+      page.on('requestfailed', request => failedRequests.push({ url: request.url(), error: request.failure()?.errorText || 'failed' }));
 
-  // 40: prove whether the wrapper really depends on GitHub Raw by blocking that host exactly.
-  {
-    let s;
-    try {
-      s = await loadGame(browser, '40', { blockRaw: true });
-      await s.page.waitForTimeout(500);
-      const text = safeText(await s.frame.locator('body').innerText());
-      const blockedRaw = s.getBlockedRaw();
-      const shot = await capture(s.page, '40-raw-blocked-retest');
-      results.push({ game: '40-blocked', ok: blockedRaw > 0 && text.includes('暫時無法載入網站'), blockedRaw, evidence: text, screenshot: shot, errors: s.errors });
-    } catch (e) { results.push({ game: '40-blocked', ok: false, error: String(e), blockedRaw: s?.getBlockedRaw?.() || 0, errors: s?.errors || [] }); }
-    finally { if (s) await s.context.close(); }
-  }
+      let navigationError = '';
+      try {
+        await page.goto(`http://127.0.0.1:4173/play.html?game=${game}`, { waitUntil: 'domcontentloaded', timeout: 20000 });
+        await page.waitForFunction(() => document.querySelector('#game-shell')?.getAttribute('aria-busy') === 'false', { timeout: 20000 });
+        await page.waitForTimeout(2200);
+      } catch (error) {
+        navigationError = String(error);
+      }
 
-  fs.writeFileSync('qa-interaction/report.json', JSON.stringify(results, null, 2));
-  const lines = ['# PR #23 targeted P1 retest', ''];
-  for (const r of results) {
-    lines.push(`## ${r.game}`);
-    lines.push(`- result: ${r.ok ? 'PASS' : 'FAIL / RISK'}`);
-    for (const [k,v] of Object.entries(r)) {
-      if (['game','ok','screenshot','errors'].includes(k)) continue;
-      lines.push(`- ${k}: ${typeof v === 'object' ? JSON.stringify(v) : v}`);
+      const parent = await page.evaluate(() => {
+        const shell = document.querySelector('#game-shell');
+        const content = document.querySelector('#game-content');
+        const legacy = document.querySelector('#game-frame');
+        const errorPanel = document.querySelector('#error-panel');
+        const rect = content?.getBoundingClientRect();
+        return {
+          title: document.title,
+          ariaBusy: shell?.getAttribute('aria-busy') || null,
+          gameContentHidden: content?.hidden ?? null,
+          legacyFrameHidden: legacy?.hidden ?? null,
+          errorHidden: errorPanel?.hidden ?? null,
+          errorText: document.querySelector('#error-text')?.textContent || '',
+          pageScrollWidth: document.documentElement.scrollWidth,
+          pageClientWidth: document.documentElement.clientWidth,
+          contentScrollWidth: content?.scrollWidth || 0,
+          contentClientWidth: content?.clientWidth || 0,
+          contentHeight: rect?.height || 0,
+          textStart: (content?.innerText || '').replace(/\s+/g, ' ').slice(0, 220),
+        };
+      });
+
+      const srcdocFrame = page.frames().find(frame => frame.url() === 'about:srcdoc');
+      let inner = null;
+      if (srcdocFrame) {
+        try {
+          inner = await srcdocFrame.evaluate(() => ({
+            title: document.title,
+            readyState: document.readyState,
+            scrollWidth: document.documentElement.scrollWidth,
+            clientWidth: document.documentElement.clientWidth,
+            scrollHeight: document.documentElement.scrollHeight,
+            clientHeight: document.documentElement.clientHeight,
+            bodyTextStart: (document.body?.innerText || '').replace(/\s+/g, ' ').slice(0, 220),
+          }));
+        } catch (error) {
+          inner = { error: String(error) };
+        }
+      }
+
+      const isModule = parent.gameContentHidden === false && parent.legacyFrameHidden === true && parent.errorHidden === true;
+      const isNative = isModule && !srcdocFrame;
+      const horizontalOverflow = srcdocFrame
+        ? Number(inner?.scrollWidth || 0) > Number(inner?.clientWidth || 0) + 2
+        : Number(parent.contentScrollWidth || 0) > Number(parent.contentClientWidth || 0) + 2;
+      const blankContent = srcdocFrame
+        ? !(inner?.bodyTextStart || '').trim()
+        : !(parent.textStart || '').trim();
+
+      const screenshotPath = path.join(dir, `game-${game}.png`);
+      await page.screenshot({ path: screenshotPath, fullPage: false });
+
+      report.push({
+        game,
+        viewport,
+        navigationError,
+        isModule,
+        isNative,
+        horizontalOverflow,
+        blankContent,
+        parent,
+        inner,
+        consoleErrors,
+        pageErrors,
+        failedRequests: failedRequests.slice(0, 30),
+        screenshotPath,
+      });
+      await context.close();
     }
-    lines.push(`- runtime errors: ${(r.errors || []).length}`);
-    if (r.screenshot) lines.push(`- screenshot: ${r.screenshot}`);
+  }
+
+  fs.writeFileSync('qa-interaction/report.json', JSON.stringify(report, null, 2));
+  const lines = ['# PR #23 P2 + native mobile visual QA', ''];
+  for (const r of report) {
+    lines.push(`## ${r.game} — ${r.viewport.width}×${r.viewport.height}`);
+    lines.push(`- module: ${r.isModule ? 'yes' : 'NO'}`);
+    lines.push(`- mode: ${r.isNative ? 'native module' : 'safe-wrapper srcdoc'}`);
+    lines.push(`- horizontal overflow: ${r.horizontalOverflow ? 'YES' : 'no'}`);
+    lines.push(`- blank content: ${r.blankContent ? 'YES' : 'no'}`);
+    if (r.inner) lines.push(`- inner viewport/scroll: ${r.inner.clientWidth || '?'}×${r.inner.clientHeight || '?'} / ${r.inner.scrollWidth || '?'}×${r.inner.scrollHeight || '?'}`);
+    lines.push(`- parent content width: ${r.parent.contentClientWidth}/${r.parent.contentScrollWidth}`);
+    lines.push(`- console errors: ${r.consoleErrors.length}; page errors: ${r.pageErrors.length}; failed requests: ${r.failedRequests.length}`);
+    if (r.navigationError) lines.push(`- navigation error: ${r.navigationError}`);
+    lines.push(`- screenshot: ${r.screenshotPath}`);
     lines.push('');
   }
   fs.writeFileSync('qa-interaction/report.md', lines.join('\n'));
   await browser.close();
-})().catch(e => { console.error(e); process.exit(1); });
+})().catch(error => { console.error(error); process.exit(1); });
