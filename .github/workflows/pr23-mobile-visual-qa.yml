@@ -1,4 +1,4 @@
-name: PR23 P1 interaction QA
+name: PR23 P2 mobile visual QA
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  interaction:
+  p2-visual:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -31,7 +31,7 @@ jobs:
           sleep 2
           curl -f http://127.0.0.1:4173/play.html >/dev/null
 
-      - name: Run interaction QA
+      - name: Run P2 visual QA
         env:
           CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
         run: node qa/pr23-interaction.js
@@ -44,7 +44,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pr23-p1-interaction-qa
+          name: pr23-p2-mobile-visual-qa
           path: qa-interaction
           if-no-files-found: error
           retention-days: 7
