@@ -37,7 +37,7 @@ jobs:
           CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
         run: |
           mkdir -p qa-artifacts
-          cat > /tmp/pr23-qa.js <<'NODE'
+          cat > pr23-qa.js <<'NODE'
           const fs = require('fs');
           const path = require('path');
           const { chromium } = require('playwright-core');
@@ -178,7 +178,7 @@ jobs:
             process.exit(1);
           });
           NODE
-          node /tmp/pr23-qa.js
+          node pr23-qa.js
 
       - name: Print report
         if: always()
