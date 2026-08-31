@@ -80,6 +80,7 @@
       title: '💪 手臂運動原理互動教學',
       description: '為了能多吃幾口罐罐，白奶油決定跟著凱老師練肌肉！動手操作這組超酷的手臂模型，看看二頭肌和三頭肌是怎麼合作讓手臂彎曲的，給白奶油一點特訓吧！',
       url: '33.html',
+      moduleUrl: 'games/33/index.js',
       actionLabel: '伸展手臂',
       actionIcon: 'fas fa-dumbbell'
     },
