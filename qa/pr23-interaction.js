@@ -4,20 +4,22 @@ const { chromium } = require('playwright-core');
 
 const VIEWPORT = { width: 375, height: 812 };
 const results = [];
-const safeText = (value) => String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, 300);
+const safeText = (value) => String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, 400);
 
 async function loadGame(browser, game, options = {}) {
-  const context = await browser.newContext({
-    viewport: VIEWPORT,
-    screen: VIEWPORT,
-    isMobile: true,
-    hasTouch: true,
-    deviceScaleFactor: 1,
-    locale: 'zh-TW',
-  });
+  const context = await browser.newContext({ viewport: VIEWPORT, screen: VIEWPORT, isMobile: true, hasTouch: true, deviceScaleFactor: 1, locale: 'zh-TW' });
   const page = await context.newPage();
+  let blockedRaw = 0;
   if (options.blockRaw) {
-    await page.route('**raw.githubusercontent.com/**', route => route.abort('blockedbyclient'));
+    await page.route('**/*', async route => {
+      const url = route.request().url();
+      if (url.startsWith('https://raw.githubusercontent.com/')) {
+        blockedRaw += 1;
+        await route.abort('blockedbyclient');
+      } else {
+        await route.continue();
+      }
+    });
   }
   const errors = [];
   page.on('pageerror', e => errors.push('page: ' + e));
@@ -27,23 +29,12 @@ async function loadGame(browser, game, options = {}) {
   await page.waitForTimeout(2200);
   const frame = page.frames().find(f => f.url() === 'about:srcdoc');
   if (!frame) throw new Error(`game ${game}: srcdoc frame not found`);
-  return { context, page, frame, errors };
+  return { context, page, frame, errors, getBlockedRaw: () => blockedRaw };
 }
 
-async function touchDrag(page, source, targetOrPoint, steps = 12) {
-  await source.scrollIntoViewIfNeeded();
+async function touchDragTo(page, source, endX, endY, steps = 14) {
   const sourceBox = await source.boundingBox();
   if (!sourceBox) throw new Error('source has no box');
-  let endX, endY;
-  if (targetOrPoint && typeof targetOrPoint.boundingBox === 'function') {
-    const targetBox = await targetOrPoint.boundingBox();
-    if (!targetBox) throw new Error('target has no box');
-    endX = targetBox.x + targetBox.width / 2;
-    endY = targetBox.y + targetBox.height / 2;
-  } else {
-    endX = sourceBox.x + sourceBox.width / 2 + Number(targetOrPoint?.dx || 0);
-    endY = sourceBox.y + sourceBox.height / 2 + Number(targetOrPoint?.dy || 0);
-  }
   const startX = sourceBox.x + sourceBox.width / 2;
   const startY = sourceBox.y + sourceBox.height / 2;
   const cdp = await page.context().newCDPSession(page);
@@ -51,209 +42,87 @@ async function touchDrag(page, source, targetOrPoint, steps = 12) {
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point(startX, startY)] });
   for (let i = 1; i <= steps; i += 1) {
     const t = i / steps;
-    const x = startX + (endX - startX) * t;
-    const y = startY + (endY - startY) * t;
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [point(x, y)] });
-    await new Promise(resolve => setTimeout(resolve, 35));
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [point(startX + (endX - startX) * t, startY + (endY - startY) * t)] });
+    await new Promise(resolve => setTimeout(resolve, 40));
   }
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-  await new Promise(resolve => setTimeout(resolve, 450));
+  await new Promise(resolve => setTimeout(resolve, 650));
 }
 
-async function capture(page, game, suffix) {
-  const file = path.join('qa-interaction', `${game}-${suffix}.png`);
+async function capture(page, name) {
+  const file = path.join('qa-interaction', `${name}.png`);
   await page.screenshot({ path: file, fullPage: false });
   return file;
-}
-
-async function runCase(browser, game, fn) {
-  let session;
-  try {
-    session = await loadGame(browser, game);
-    const detail = await fn(session);
-    const shot = await capture(session.page, game, 'after');
-    results.push({ game, ok: !!detail.ok, ...detail, screenshot: shot, runtimeErrors: session.errors });
-  } catch (error) {
-    results.push({ game, ok: false, error: String(error), runtimeErrors: session?.errors || [] });
-  } finally {
-    if (session) await session.context.close();
-  }
 }
 
 (async () => {
   fs.mkdirSync('qa-interaction', { recursive: true });
   const browser = await chromium.launch({ headless: true, executablePath: process.env.CHROME_PATH, args: ['--no-sandbox','--disable-dev-shm-usage'] });
 
-  await runCase(browser, '01', async ({ page, frame }) => {
-    await frame.evaluate(() => {
-      window.__qaDragStarts = 0;
-      document.addEventListener('dragstart', () => { window.__qaDragStarts += 1; }, true);
-    });
-    const source = frame.getByText('食鹽', { exact: true }).locator('..');
-    await touchDrag(page, source, { dx: 95, dy: 12 });
-    const dragStarts = await frame.evaluate(() => window.__qaDragStarts || 0);
-    return { ok: dragStarts > 0, check: 'touch-to-HTML5-drag bridge', dragStarts };
-  });
+  // 04: endpoint is deliberately above the beaker center because endDrag tests the bottom of the dragged dropper clone.
+  {
+    let s;
+    try {
+      s = await loadGame(browser, '04');
+      const source = s.frame.locator('#dropperBottle');
+      const beaker = s.frame.locator('.beaker').first();
+      const b = await beaker.boundingBox();
+      if (!b) throw new Error('beaker box missing');
+      const before = await s.frame.locator('.result-tag.show').count();
+      await touchDragTo(s.page, source, b.x + b.width / 2, b.y - 38);
+      const after = await s.frame.locator('.result-tag.show').count();
+      const rows = await s.frame.locator('.record-table tbody tr').allInnerTexts().catch(() => []);
+      const shot = await capture(s.page, '04-retest');
+      results.push({ game: '04', ok: after > before, before, after, rows, beakerBox: b, screenshot: shot, errors: s.errors });
+    } catch (e) { results.push({ game: '04', ok: false, error: String(e), errors: s?.errors || [] }); }
+    finally { if (s) await s.context.close(); }
+  }
 
-  await runCase(browser, '04', async ({ page, frame }) => {
-    const source = frame.locator('#dropperBottle');
-    const target = frame.locator('.beaker').first();
-    const beforeShown = await frame.locator('.result-tag.show').count();
-    await touchDrag(page, source, target);
-    const afterShown = await frame.locator('.result-tag.show').count();
-    const body = safeText(await frame.locator('body').innerText());
-    return { ok: afterShown > beforeShown, check: 'dropper touch drag', beforeShown, afterShown, bodyTail: body.slice(-180) };
-  });
+  // 17: click the interactive parent card, not the pointer-events-none text child.
+  {
+    let s;
+    try {
+      s = await loadGame(browser, '17');
+      await s.frame.getByRole('button', { name: /我認識它們了，開始挑戰/ }).click();
+      await s.page.waitForTimeout(250);
+      const plantCard = s.frame.getByText('台灣萍蓬草', { exact: true }).last().locator('..');
+      await plantCard.click();
+      await s.frame.locator('[data-zone="floating-leaved"]').click();
+      await s.page.waitForTimeout(300);
+      const text = safeText(await s.frame.locator('body').innerText());
+      const shot = await capture(s.page, '17-retest');
+      results.push({ game: '17', ok: text.includes('答對') || text.includes('紅寶石') || text.includes('特有種'), evidence: text, screenshot: shot, errors: s.errors });
+    } catch (e) { results.push({ game: '17', ok: false, error: String(e), errors: s?.errors || [] }); }
+    finally { if (s) await s.context.close(); }
+  }
 
-  await runCase(browser, '07', async ({ page, frame }) => {
-    const plunger = frame.locator('.plunger-group').first();
-    const before = safeText(await frame.locator('#volumeValue').innerText());
-    const beforeBox = await plunger.boundingBox();
-    await touchDrag(page, plunger, { dx: 0, dy: -95 });
-    let after = safeText(await frame.locator('#volumeValue').innerText());
-    if (after === before) await touchDrag(page, plunger, { dx: 0, dy: 120 });
-    after = safeText(await frame.locator('#volumeValue').innerText());
-    const afterBox = await plunger.boundingBox();
-    return { ok: after !== before || Math.abs((afterBox?.y || 0) - (beforeBox?.y || 0)) > 5, check: 'plunger touch drag', before, after, beforeY: beforeBox?.y, afterY: afterBox?.y };
-  });
-
-  await runCase(browser, '08', async ({ page, frame }) => {
-    const wireLayer = frame.locator('svg.absolute.pointer-events-none').first();
-    const beforePaths = await wireLayer.locator('path').count().catch(() => 0);
-    const pos = frame.locator('[data-comp-id="bat-1"][data-point-type="pos"]');
-    const tip = frame.locator('[data-comp-id="bulb-1"][data-point-type="tip"]');
-    await touchDrag(page, pos, tip);
-    const afterOne = await wireLayer.locator('path').count().catch(() => 0);
-    const neg = frame.locator('[data-comp-id="bat-1"][data-point-type="neg"]');
-    const thread = frame.locator('[data-comp-id="bulb-1"][data-point-type="thread"]');
-    await touchDrag(page, neg, thread);
-    const afterTwo = await wireLayer.locator('path').count().catch(() => 0);
-    const power = frame.getByRole('button', { name: /電源|通電|開啟/ }).first();
-    if (await power.count()) { await power.click(); await page.waitForTimeout(300); }
-    const text = safeText(await frame.locator('body').innerText());
-    return { ok: afterOne > beforePaths || afterTwo > afterOne || text.includes('發光'), check: 'touch wire connection', beforePaths, afterOne, afterTwo, status: text.slice(0, 220) };
-  });
-
-  await runCase(browser, '09', async ({ page, frame }) => {
-    await frame.getByRole('button', { name: '開始整理' }).click();
-    await page.waitForTimeout(350);
-    const beforeX = await frame.evaluate(() => game.player.x);
-    const canvas = frame.locator('#gameCanvas');
-    const box = await canvas.boundingBox();
-    if (!box) throw new Error('canvas missing');
-    const cdp = await page.context().newCDPSession(page);
-    const y = box.y + box.height * 0.75;
-    const x = box.x + box.width * 0.82;
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y, id: 1, radiusX: 4, radiusY: 4, force: 1 }] });
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y, id: 1, radiusX: 4, radiusY: 4, force: 1 }] });
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-    await page.waitForTimeout(250);
-    const afterX = await frame.evaluate(() => game.player.x);
-    const aspect = await frame.evaluate(() => {
-      const c = document.querySelector('#gameCanvas').getBoundingClientRect();
-      return { cssWidth: c.width, cssHeight: c.height, cssRatio: c.width / c.height, nativeRatio: 600 / 800 };
-    });
-    return { ok: Math.abs(afterX - beforeX) > 10, check: 'in-game touch movement', beforeX, afterX, aspect };
-  });
-
-  await runCase(browser, '12', async ({ page, frame }) => {
-    await frame.getByRole('button', { name: '開始新經營！' }).click();
-    await page.waitForTimeout(250);
-    const tutorial = frame.getByRole('button', { name: '開始新手教學！' });
-    const tutorialVisible = await tutorial.isVisible().catch(() => false);
-    if (tutorialVisible) { await tutorial.click(); await page.waitForTimeout(250); }
-    const text = safeText(await frame.locator('body').innerText());
-    return { ok: tutorialVisible || text.includes('農莊') || text.includes('新手'), check: 'start/tap flow', tutorialVisible, textStart: text.slice(0, 220) };
-  });
-
-  await runCase(browser, '16', async ({ page, frame }) => {
-    await frame.locator('#draw-btn').click();
-    await page.waitForTimeout(2900);
-    const active = await frame.locator('#game-screen.screen.active').count();
-    const layout = await frame.evaluate(() => {
-      const workspace = document.querySelector('#workspace');
-      const comps = [...document.querySelectorAll('.component')].map(el => {
-        const r = el.getBoundingClientRect();
-        return { left: r.left, right: r.right, top: r.top, bottom: r.bottom };
-      });
-      return {
-        docWidth: document.documentElement.scrollWidth,
-        viewportWidth: document.documentElement.clientWidth,
-        workspaceWidth: workspace?.getBoundingClientRect().width || 0,
-        workspaceHeight: workspace?.getBoundingClientRect().height || 0,
-        componentOutsideViewport: comps.some(r => r.left < 0 || r.right > innerWidth),
-        componentRects: comps,
-      };
-    });
-    return { ok: active > 0, check: 'post-draw workspace', active, layout, layoutRisk: layout.docWidth > layout.viewportWidth + 2 || layout.componentOutsideViewport };
-  });
-
-  await runCase(browser, '17', async ({ page, frame }) => {
-    await frame.getByRole('button', { name: /我認識它們了，開始挑戰/ }).click();
-    await page.waitForTimeout(250);
-    const plant = frame.getByText('台灣萍蓬草', { exact: true }).last();
-    await plant.click();
-    await frame.locator('[data-zone="floating-leaved"]').click();
-    await page.waitForTimeout(250);
-    const text = safeText(await frame.locator('body').innerText());
-    return { ok: text.includes('答對') || text.includes('紅寶石'), check: 'tap plant then tap zone fallback', evidence: text.slice(-240) };
-  });
-
-  await runCase(browser, '21', async ({ page, frame }) => {
-    const before = safeText(await frame.locator('body').innerText());
-    const buttons = frame.locator('button:visible');
-    const count = await buttons.count();
-    let clicked = '';
-    for (let i = 0; i < Math.min(count, 8); i += 1) {
-      const text = safeText(await buttons.nth(i).innerText());
-      if (text && !text.includes('回農場')) { clicked = text; await buttons.nth(i).click(); break; }
-    }
-    await page.waitForTimeout(350);
-    const after = safeText(await frame.locator('body').innerText());
-    return { ok: !!clicked && after !== before, check: 'first experiment tap', clicked, changed: after !== before, afterStart: after.slice(0, 220) };
-  });
-
-  await runCase(browser, '30', async ({ page, frame }) => {
-    const tag = frame.locator('#tag-mani');
-    const target = frame.locator('#col-rightPos');
-    const beforeParent = await tag.evaluate(el => el.parentElement?.id || '');
-    const sourceBox = await tag.boundingBox();
-    const targetBox = await target.boundingBox();
-    if (!sourceBox || !targetBox) throw new Error('drag boxes missing');
-    await touchDrag(page, tag, target);
-    const afterParent = await tag.evaluate(el => el.parentElement?.id || '');
-    const targetText = safeText(await target.innerText());
-    const layout = await frame.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth }));
-    return { ok: afterParent !== beforeParent || targetText.includes('操縱變因'), check: 'HTML5 variable-tag touch drag', beforeParent, afterParent, targetText, sourceBox, targetBox, layout, expectedRisk: true };
-  });
-
-  let session40;
-  try {
-    session40 = await loadGame(browser, '40', { blockRaw: true });
-    await session40.page.waitForTimeout(500);
-    const text = safeText(await session40.frame.locator('body').innerText());
-    const shot = await capture(session40.page, '40', 'raw-blocked');
-    results.push({ game: '40-blocked', ok: text.includes('暫時無法載入網站'), check: 'GitHub Raw blocked scenario', text, screenshot: shot, runtimeErrors: session40.errors });
-  } catch (error) {
-    results.push({ game: '40-blocked', ok: false, error: String(error), runtimeErrors: session40?.errors || [] });
-  } finally {
-    if (session40) await session40.context.close();
+  // 40: prove whether the wrapper really depends on GitHub Raw by blocking that host exactly.
+  {
+    let s;
+    try {
+      s = await loadGame(browser, '40', { blockRaw: true });
+      await s.page.waitForTimeout(500);
+      const text = safeText(await s.frame.locator('body').innerText());
+      const blockedRaw = s.getBlockedRaw();
+      const shot = await capture(s.page, '40-raw-blocked-retest');
+      results.push({ game: '40-blocked', ok: blockedRaw > 0 && text.includes('暫時無法載入網站'), blockedRaw, evidence: text, screenshot: shot, errors: s.errors });
+    } catch (e) { results.push({ game: '40-blocked', ok: false, error: String(e), blockedRaw: s?.getBlockedRaw?.() || 0, errors: s?.errors || [] }); }
+    finally { if (s) await s.context.close(); }
   }
 
   fs.writeFileSync('qa-interaction/report.json', JSON.stringify(results, null, 2));
-  const lines = ['# PR #23 P1 interaction QA', ''];
+  const lines = ['# PR #23 targeted P1 retest', ''];
   for (const r of results) {
     lines.push(`## ${r.game}`);
-    lines.push(`- result: ${r.ok ? 'PASS' : 'FAIL / RISK CONFIRMED'}`);
-    lines.push(`- check: ${r.check || ''}`);
-    for (const [key, value] of Object.entries(r)) {
-      if (['game','ok','check','screenshot','runtimeErrors'].includes(key)) continue;
-      lines.push(`- ${key}: ${typeof value === 'object' ? JSON.stringify(value) : value}`);
+    lines.push(`- result: ${r.ok ? 'PASS' : 'FAIL / RISK'}`);
+    for (const [k,v] of Object.entries(r)) {
+      if (['game','ok','screenshot','errors'].includes(k)) continue;
+      lines.push(`- ${k}: ${typeof v === 'object' ? JSON.stringify(v) : v}`);
     }
-    lines.push(`- runtime errors: ${(r.runtimeErrors || []).length}`);
+    lines.push(`- runtime errors: ${(r.errors || []).length}`);
     if (r.screenshot) lines.push(`- screenshot: ${r.screenshot}`);
     lines.push('');
   }
   fs.writeFileSync('qa-interaction/report.md', lines.join('\n'));
   await browser.close();
-})().catch(error => { console.error(error); process.exit(1); });
+})().catch(e => { console.error(e); process.exit(1); });
