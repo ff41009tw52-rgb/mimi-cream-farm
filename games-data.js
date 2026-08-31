@@ -10,6 +10,7 @@
       title: '🥬 小白菜救援隊',
       description: '小白菜出現成長危機！快觀察陽光、水分與照顧方式，找出讓小白菜恢復健康的方法，完成農場救援任務！',
       url: '40.html',
+      moduleUrl: 'games/40/index.js',
       actionLabel: '展開救援',
       actionIcon: 'fas fa-leaf'
     },
@@ -20,6 +21,7 @@
       title: '🦴 觀察肌肉與骨骼的連動',
       description: '橘咪咪輕鬆跳上屋頂，白奶油卻在底下胖到跳不起來！「那是因為你不懂骨骼和肌肉的連動啦！」快來觀察身體運動的祕密，順便幫白奶油想想減肥對策吧！',
       url: '26.html',
+      moduleUrl: 'games/26/index.js',
       actionLabel: '觀察連動',
       actionIcon: 'fas fa-search-plus'
     },
@@ -30,6 +32,7 @@
       title: '💧 虹吸現象互動實驗',
       description: '白奶油的專屬魚缸髒了，但他不想弄濕爪子換水。「交給我吧！」橘咪咪拿出一根水管，利用神奇的「虹吸現象」，讓水自動往高處爬再流下來！快來動手試試！',
       url: '27.html',
+      moduleUrl: 'games/27/index.js',
       actionLabel: '啟動水流',
       actionIcon: 'fas fa-hand-holding-water'
     },
@@ -40,6 +43,7 @@
       title: '🌡️ 氣溫的測量',
       description: '「熱死本喵了...」白奶油趴在走廊上融化。橘咪咪推了推眼鏡：「到底有幾度？我們請涵老師來教你正確讀取溫度計！」快來測量氣溫，幫白奶油找最涼爽的地方！',
       url: '28.html',
+      moduleUrl: 'games/28/index.js',
       actionLabel: '測量氣溫',
       actionIcon: 'fas fa-temperature-high'
     },
@@ -70,6 +74,7 @@
       title: '🐟 鬥魚行為觀察實驗',
       description: '白奶油看著駿老師生態缸裡的鬥魚，流著口水問：「牠為什麼在對著鏡子生氣？」橘咪咪敲了敲牠的頭：「別想著吃！快來觀察鬥魚有趣的展鰭行為，紀錄牠的戰鬥姿勢！」',
       url: '32.html',
+      moduleUrl: 'games/32/index.js',
       actionLabel: '觀察鬥魚',
       actionIcon: 'fas fa-eye'
     },
@@ -101,6 +106,7 @@
       title: '🐾 動物猜謎大會(需自製動物圖卡)',
       description: '橘咪咪和白奶油在農場裡發現了許多神祕的動物足跡！你能根據牠們的外型特徵和生活習性，猜出是哪位動物朋友來訪嗎？',
       url: '25.html',
+      moduleUrl: 'games/25/index.js',
       actionLabel: '尋找線索',
       actionIcon: 'fas fa-search'
     },
@@ -111,6 +117,7 @@
       title: '🔄 物質分類大挑戰',
       description: '橘咪咪把巧克力、水和生雞蛋拿去加熱了！等它們冷卻後，誰能變回原來的樣子呢？快來幫白奶油分類這些奇妙的物質變化吧！',
       url: '22.html',
+      moduleUrl: 'games/22/index.js',
       actionLabel: '開始分類',
       actionIcon: 'fas fa-undo-alt'
     },
@@ -131,6 +138,7 @@
       title: '🌿 植物向光性：尋找陽光大冒險',
       description: '橘咪咪發現窗邊的小豆苗歪著頭在看什麼？原來植物也會「追星」！快來幫助小植物繞過障礙物，朝著暖洋洋的太陽生長吧！',
       url: '20.html',
+      moduleUrl: 'games/20/index.js',
       actionLabel: '尋找陽光',
       actionIcon: 'fas fa-sun'
     },
@@ -151,6 +159,7 @@
       title: '🧪 酸鹼滴定',
       description: '就像農場土壤需要酸鹼平衡一樣，讓我們來學習如何知道溶液的酸鹼！',
       url: '04.html',
+      moduleUrl: 'games/04/index.js',
       actionLabel: '開始滴定',
       actionIcon: 'fas fa-eye-dropper'
     },
@@ -161,6 +170,7 @@
       title: '📦 特性分類 (基礎)',
       description: '橘咪咪把農具分類整理好了！這份簡報將帶你認識物質的基本特性與分類方法。',
       url: '01.html',
+      moduleUrl: 'games/01/index.js',
       actionLabel: '幫忙整理',
       actionIcon: 'fas fa-box-open'
     },
@@ -201,6 +211,7 @@
       title: '💉 空氣壓縮大挑戰',
       description: '白奶油發現針筒裡的空氣像是裝了彈簧！用力壓下去它還會彈回來。快來試試看壓縮針筒，看你能把空氣壓得多扁呢？',
       url: '07.html',
+      moduleUrl: 'games/07/index.js',
       actionLabel: '用力壓縮',
       actionIcon: 'fas fa-compress-alt'
     },
@@ -231,6 +242,7 @@
       title: '🥕 蔬菜身世之謎',
       description: '橘咪咪在收成時把蔬菜全搞混了！哪些是根莖類？哪些是葉菜類？快來玩分類遊戲，幫白奶油整理出正確的晚餐食材！',
       url: '11.html',
+      moduleUrl: 'games/11/index.js',
       actionLabel: '挑選晚餐',
       actionIcon: 'fas fa-shopping-basket'
     },
@@ -261,6 +273,7 @@
       title: '⭐ 尋找北極星',
       description: '夜空中的指北針！跟著橘咪咪一起觀察四季星空的變化，學習如何透過北斗七星與仙后座找到指引方向的北極星吧！',
       url: '19.html',
+      moduleUrl: 'games/19/index.js',
       actionLabel: '觀測星空',
       actionIcon: 'fas fa-binoculars'
     },
@@ -271,6 +284,7 @@
       title: '⚖️ 槓桿與輪軸對對碰',
       description: '農場裡的省力小祕密！橘咪咪發現只要找對支點，就能輕鬆搬起巨大的南瓜。快來跟白奶油挑戰對對碰，找出生活中的槓桿與輪軸吧！',
       url: '15.html',
+      moduleUrl: 'games/15/index.js',
       actionLabel: '開始配對',
       actionIcon: 'fas fa-puzzle-piece'
     },
@@ -292,6 +306,7 @@
       title: '🔌 電路接線挑戰賽',
       description: '橘咪咪的燈泡又不亮了！快跟著澔哥一起挑戰更複雜的電路接線，找出讓所有燈泡發光的正確接法吧！',
       url: '16.html',
+      moduleUrl: 'games/16/index.js',
       actionLabel: '接通電路',
       actionIcon: 'fas fa-plug'
     },
@@ -302,6 +317,7 @@
       title: '💧 水生植物到新家',
       description: '生態池種了新植物，請幫白奶油把水生植物們搬到適合它們的新家，一起認識漂浮、沉水與挺水植物！',
       url: '17.html',
+      moduleUrl: 'games/17/index.js',
       actionLabel: '佈置新家',
       actionIcon: 'fas fa-leaf'
     }
