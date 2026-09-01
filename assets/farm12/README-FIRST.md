@@ -1,1 +1,0 @@
-Milestone 1: asset structure and data manifest only. Runtime 12.html remains unchanged until the first visual pilot is ready.
