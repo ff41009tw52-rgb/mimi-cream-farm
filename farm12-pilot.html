@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Farm 12 視覺素材 Pilot</title>
+  <style>
+    :root {
+      --soil:#9a4b14;
+      --soil-dark:#5c2506;
+      --cream:#fff8e8;
+      --green:#237a3b;
+      --green-dark:#155628;
+      --gold:#f6c344;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;
+      background:linear-gradient(#bdeeff 0 28%,#8fda6e 28% 100%);
+      min-height:100vh;
+      color:#3d2a19;
+    }
+    .wrap{max-width:1100px;margin:auto;padding:22px 16px 42px}
+    .top{
+      background:rgba(255,248,232,.96);
+      border:4px solid #7a3b12;
+      border-radius:24px;
+      padding:16px 20px;
+      box-shadow:0 12px 28px rgba(74,43,14,.22);
+      margin-bottom:18px;
+    }
+    h1{margin:0;font-size:clamp(24px,4vw,40px);color:#63300e}
+    .sub{margin-top:8px;line-height:1.7;font-weight:700;color:#6a553f}
+    .safe{display:inline-block;margin-top:8px;padding:6px 10px;border-radius:999px;background:#daf4df;color:#16602e;font-weight:900}
+    .controls{
+      display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+      background:rgba(255,255,255,.88);border-radius:18px;padding:12px 14px;margin-bottom:18px;
+    }
+    .controls label{font-weight:900}
+    input[type="range"]{width:min(330px,62vw)}
+    .pct{min-width:48px;font-weight:900;color:#176331}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .card{
+      background:rgba(255,248,232,.96);border:3px solid #7f491b;border-radius:22px;padding:14px;
+      box-shadow:0 8px 20px rgba(75,45,20,.2);
+    }
+    .title{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:22px;font-weight:950}
+    .tag{font-size:12px;padding:5px 8px;border-radius:999px;background:#e8f5df;color:#2e6c2d}
+    .tag.legend{background:#fff0b9;color:#925500}
+    .field{
+      position:relative;height:250px;margin:12px 0 8px;border-radius:22px;
+      background:
+        radial-gradient(circle at 20% 22%,rgba(255,255,255,.14) 0 3px,transparent 4px),
+        radial-gradient(circle at 70% 56%,rgba(255,255,255,.12) 0 2px,transparent 3px),
+        linear-gradient(145deg,#ad571a,#77300d);
+      border:5px solid var(--soil-dark);overflow:hidden;display:grid;place-items:center;
+    }
+    .field::after{content:"";position:absolute;left:15%;right:15%;bottom:11px;height:6px;border-radius:50%;background:rgba(46,15,3,.26);filter:blur(2px)}
+    .sprite{
+      --x:0px;--y:0px;
+      width:112px;height:112px;
+      background-image:url('assets/farm12/pilot/pilot-atlas.webp');
+      background-repeat:no-repeat;
+      background-size:336px 224px;
+      background-position:var(--x) var(--y);
+      image-rendering:auto;
+      transform:scale(var(--scale,1));
+      transform-origin:center bottom;
+      filter:drop-shadow(0 8px 6px rgba(34,20,5,.24));
+      z-index:2;
+      transition:transform .25s ease,filter .25s ease;
+    }
+    .legendary .sprite{
+      filter:drop-shadow(0 0 7px #fff7ad) drop-shadow(0 0 18px #ffb000);
+      animation:legendPulse 1.4s ease-in-out infinite alternate;
+    }
+    @keyframes legendPulse{from{transform:scale(calc(var(--scale,1) * .96))}to{transform:scale(calc(var(--scale,1) * 1.06))}}
+    .stage{font-weight:950;text-align:center;font-size:16px;color:#5d3619}
+    .progress{height:12px;border-radius:99px;background:#e4d5b9;overflow:hidden;margin-top:8px}
+    .progress>i{display:block;height:100%;background:linear-gradient(90deg,#62b741,#f2bd34);width:0%;transition:width .25s ease}
+    .desc{margin-top:10px;font-size:13px;line-height:1.55;color:#6a5845}
+    .checks{margin-top:18px;background:rgba(255,255,255,.92);border-radius:18px;padding:14px 16px}
+    .checks b{color:#5f310f}
+    .checks ul{margin:8px 0 0;padding-left:22px;line-height:1.8}
+    .note{margin-top:16px;padding:12px 14px;background:#fff1ca;border-left:5px solid #efb131;border-radius:10px;font-weight:700;line-height:1.7}
+    @media(max-width:760px){
+      .grid{grid-template-columns:1fr}
+      .field{height:215px}
+      .sprite{width:112px;height:112px}
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="top">
+      <h1>🌱 Farm 12 視覺素材測試版</h1>
+      <div class="sub">這是獨立 Pilot 頁面，只測試圖片比例、生長階段與傳說植物特效；不修改正式 <code>12.html</code> 的遊戲邏輯。</div>
+      <span class="safe">✓ main 不變　✓ farm12-visual-assets 不變</span>
+    </section>
+
+    <section class="controls">
+      <label for="growth">模擬生長進度</label>
+      <input id="growth" type="range" min="0" max="100" value="20" step="1" />
+      <span class="pct" id="pct">20%</span>
+      <button id="early">幼苗</button>
+      <button id="middle">成熟前</button>
+      <button id="done">成熟</button>
+    </section>
+
+    <section class="grid">
+      <article class="card" data-crop="bokchoy">
+        <div class="title">青江菜 <span class="tag">短期二階段</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">確認幼苗與成熟株在田格內的辨識度、大小與透明背景效果。</div>
+      </article>
+
+      <article class="card" data-crop="guava">
+        <div class="title">芭樂 <span class="tag">長期三階段</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">確認「幼苗 → 開花／幼果 → 成熟」切換是否自然，避免突然從 🌱 跳成水果。</div>
+      </article>
+
+      <article class="card legendary" data-crop="golden">
+        <div class="title">黃金仙桃 <span class="tag legend">傳說植物</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">此 Pilot 先測試成熟圖 + CSS 金色光暈／脈動；傳說幼苗尚未納入正式替換。</div>
+      </article>
+    </section>
+
+    <section class="checks">
+      <b>請測試時特別看：</b>
+      <ul>
+        <li>植物是否太大、太小、被裁切，或與土壤格比例不自然。</li>
+        <li>青江菜幼苗與成熟株是否容易區分。</li>
+        <li>芭樂三階段是否有連續成長感。</li>
+        <li>黃金仙桃的傳說光效是否夠明顯，但不遮住植物本體。</li>
+        <li>手機直式畫面是否仍清楚、不卡版。</li>
+      </ul>
+    </section>
+
+    <div class="note">此頁面通過後，才會把相同 renderer 接到測試分支中的真實農田；再經你確認後才合併回 <code>farm12-visual-assets</code>。正式 <code>main</code> 最後才會考慮更新。</div>
+  </main>
+
+  <script>
+    const atlas = {
+      // Atlas cell: 56x56, rendered at 2x. Coordinates below therefore use 112 px steps.
+      bokchoy: {
+        seedling: {x:0,y:0,label:'幼苗'},
+        mature: {x:-112,y:0,label:'成熟'}
+      },
+      guava: {
+        seedling: {x:-224,y:0,label:'幼苗'},
+        pre: {x:0,y:-112,label:'開花／幼果期'},
+        mature: {x:-112,y:-112,label:'成熟'}
+      },
+      golden: {
+        mature: {x:-224,y:-112,label:'傳說成熟'}
+      }
+    };
+
+    const range = document.getElementById('growth');
+    const pct = document.getElementById('pct');
+
+    function stateFor(crop,p){
+      if(crop==='bokchoy') return p >= 100 ? 'mature' : 'seedling';
+      if(crop==='guava') return p >= 100 ? 'mature' : (p >= 38 ? 'pre' : 'seedling');
+      return 'mature';
+    }
+
+    function render(){
+      const p = Number(range.value);
+      pct.textContent = p + '%';
+      document.querySelectorAll('.card').forEach(card=>{
+        const crop = card.dataset.crop;
+        const key = stateFor(crop,p);
+        const s = atlas[crop][key];
+        const sprite = card.querySelector('.sprite');
+        sprite.style.setProperty('--x',s.x+'px');
+        sprite.style.setProperty('--y',s.y+'px');
+        sprite.style.setProperty('--scale', p >= 100 ? '1.08' : (p >= 38 ? '1' : '.82'));
+        card.querySelector('.stage').textContent = crop==='golden' ? '傳說成熟示意（光效測試）' : s.label;
+        card.querySelector('.progress i').style.width = p + '%';
+      });
+    }
+
+    range.addEventListener('input',render);
+    document.getElementById('early').onclick=()=>{range.value=20;render()};
+    document.getElementById('middle').onclick=()=>{range.value=60;render()};
+    document.getElementById('done').onclick=()=>{range.value=100;render()};
+    render();
+  </script>
+</body>
+</html>
