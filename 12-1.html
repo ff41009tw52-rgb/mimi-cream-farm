@@ -25,7 +25,7 @@
   <div class="version-bar">
     <div class="version-left">
       <span class="badge">12-1 新版</span>
-      <span class="version-note">視覺改版測試：青江菜、芭樂、黃金仙桃｜測試起始資金 5000｜與原版存檔分離</span>
+      <span class="version-note">視覺改版測試：青江菜、芭樂、黃金仙桃｜測試資金最低 5000｜與原版存檔分離</span>
     </div>
     <div class="version-links">
       <a href="12.html" target="_blank" rel="noopener">開啟原版 12</a>
@@ -54,12 +54,20 @@
       html = html.split('farm_tycoon_save_v2').join('farm_tycoon_save_v2_12_1');
       html = html.replace('<title>四季農莊：島嶼物語</title>', '<title>四季農莊：島嶼物語｜12-1 新版</title>');
 
-      // 12-1 專用測試設定：新遊戲起始資金提高至 5000，方便自由驗證商店、種植與收成流程。
+      // 新遊戲直接從 5000 開始。
       html = replaceOnce(
         html,
         'const [gold, setGold] = useState(100);',
         'const [gold, setGold] = useState(5000);',
         '12-1 測試起始資金'
+      );
+
+      // 舊的 12-1 測試存檔若低於 5000，載入時自動補到 5000；高於 5000 則保留原金額。
+      html = replaceOnce(
+        html,
+        'setGold(state.gold);',
+        'setGold(Math.max(5000, Number(state.gold) || 0));',
+        '12-1 載入存檔測試資金'
       );
 
       const artCss = [
@@ -147,8 +155,7 @@
         '收成飛行圖片'
       );
 
-      // 在新版內標記版本，方便測試時辨識。
-      html = html.replace('<div id="root"></div>', '<div id="root"></div><div style="position:fixed;right:8px;bottom:8px;z-index:9998;background:rgba(21,94,53,.9);color:white;border-radius:999px;padding:5px 9px;font:700 11px Microsoft JhengHei,sans-serif;pointer-events:none">12-1 視覺新版・測試資金 5000</div>');
+      html = html.replace('<div id="root"></div>', '<div id="root"></div><div style="position:fixed;right:8px;bottom:8px;z-index:9998;background:rgba(21,94,53,.9);color:white;border-radius:999px;padding:5px 9px;font:700 11px Microsoft JhengHei,sans-serif;pointer-events:none">12-1 視覺新版・測試資金最低 5000</div>');
 
       frame.srcdoc = html;
       frame.addEventListener('load', () => { loading.style.display = 'none'; }, {once:true});
