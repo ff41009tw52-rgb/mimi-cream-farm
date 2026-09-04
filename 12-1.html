@@ -25,7 +25,7 @@
   <div class="version-bar">
     <div class="version-left">
       <span class="badge">12-1 新版</span>
-      <span class="version-note">視覺改版測試：短期幼苗 5 種、一般三階段 7 種、傳說作物 4 種｜測試資金最低 30000｜與原版存檔分離</span>
+      <span class="version-note">視覺改版測試：短期二階段 5 種、一般三階段 7 種、傳說作物 4 種｜測試資金最低 30000｜與原版存檔分離</span>
     </div>
     <div class="version-links">
       <a href="12.html" target="_blank" rel="noopener">開啟原版 12</a>
@@ -98,16 +98,16 @@
       const cropArtCode = [
         '    // --- 12-1 新版：已核准的專屬作物圖片流程 ---',
         '    const FARM12_PILOT_SPRITES = {',
-        "      sweetpotatoleaf: { seedling: { src: 'assets/farm12/crops/seedling/sweetpotatoleaf.webp' } },",
+        "      sweetpotatoleaf: { seedling: { src: 'assets/farm12/crops/seedling/sweetpotatoleaf.webp' }, mature: { src: 'assets/farm12/crops/mature/sweetpotatoleaf.webp' } },",
         "      bokchoy: { seedling: { src: 'assets/farm12/pilot/bokchoy-just-germinated.webp' }, mature: ['50%','0%'] },",
         "      guava: { seedling: ['100%','0%'], pre: ['0%','100%'], mature: ['50%','100%'] },",
-        "      waterspinach: { seedling: { src: 'assets/farm12/crops/seedling/waterspinach.webp' } },",
+        "      waterspinach: { seedling: { src: 'assets/farm12/crops/seedling/waterspinach.webp' }, mature: { src: 'assets/farm12/crops/mature/waterspinach.webp' } },",
         "      loofah: { seedling: { src: 'assets/farm12/crops/seedling/loofah.webp' }, pre: { src: 'assets/farm12/crops/pre-mature/loofah.webp' }, mature: { src: 'assets/farm12/crops/mature/loofah.webp' } },",
         "      mango: { seedling: { src: 'assets/farm12/crops/seedling/mango.webp' }, pre: { src: 'assets/farm12/crops/pre-mature/mango.webp' }, mature: { src: 'assets/farm12/crops/mature/mango.webp' } },",
-        "      waterbamboo: { seedling: { src: 'assets/farm12/crops/seedling/waterbamboo.webp' } },",
+        "      waterbamboo: { seedling: { src: 'assets/farm12/crops/seedling/waterbamboo.webp' }, mature: { src: 'assets/farm12/crops/mature/waterbamboo.webp' } },",
         "      taro: { seedling: { src: 'assets/farm12/crops/seedling/taro.webp' }, pre: { src: 'assets/farm12/crops/pre-mature/taro.webp' }, mature: { src: 'assets/farm12/crops/mature/taro.webp' } },",
         "      pomelo: { seedling: { src: 'assets/farm12/crops/seedling/pomelo.webp' }, pre: { src: 'assets/farm12/crops/pre-mature/pomelo.webp' }, mature: { src: 'assets/farm12/crops/mature/pomelo.webp' } },",
-        "      whiteradish: { seedling: { src: 'assets/farm12/crops/seedling/whiteradish.webp' } },",
+        "      whiteradish: { seedling: { src: 'assets/farm12/crops/seedling/whiteradish.webp' }, mature: { src: 'assets/farm12/crops/mature/whiteradish.webp' } },",
         "      cabbage: { seedling: { src: 'assets/farm12/crops/seedling/cabbage.webp' }, pre: { src: 'assets/farm12/crops/pre-mature/cabbage.webp' }, mature: { src: 'assets/farm12/crops/mature/cabbage.webp' } },",
         "      strawberry: { seedling: { src: 'assets/farm12/crops/seedling/strawberry.webp' }, pre: { src: 'assets/farm12/crops/pre-mature/strawberry.webp' }, mature: { src: 'assets/farm12/crops/mature/strawberry.webp' } },",
         "      golden_peach: { seedling: { src: 'assets/farm12/crops/legendary/golden_peach-seedling.webp' }, pre: { src: 'assets/farm12/crops/legendary/golden_peach-pre-mature.webp' }, mature: { src: 'assets/farm12/crops/legendary/golden_peach.webp' } },",
