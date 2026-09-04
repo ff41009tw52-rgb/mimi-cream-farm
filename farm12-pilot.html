@@ -143,6 +143,38 @@
         <div class="desc">確認「紅褐嫩葉幼苗 → 花序與綠色幼果 → 黃紅成熟果」的連續成長感。</div>
       </article>
 
+      <article class="card" data-crop="taro">
+        <div class="title">芋頭 <span class="tag">長期三階段</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">確認「心形初葉幼苗 → 大葉與球莖膨大 → 成熟芋頭」的地下作物成長感。</div>
+      </article>
+
+      <article class="card" data-crop="cabbage">
+        <div class="title">高麗菜 <span class="tag">長期三階段</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">確認「子葉幼苗 → 葉片展開並開始結球 → 緊實成熟葉球」三階段清楚可辨。</div>
+      </article>
+
+      <article class="card" data-crop="strawberry">
+        <div class="title">草莓 <span class="tag">長期三階段</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">確認「早期三出葉 → 白花與綠色幼果 → 紅色成熟果」的顏色與形態轉換。</div>
+      </article>
+
+      <article class="card" data-crop="pomelo">
+        <div class="title">文旦 <span class="tag">長期三階段</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">確認「柑橘幼樹 → 白花與小綠果 → 黃綠成熟文旦」具有連續成長感。</div>
+      </article>
+
       <article class="card legendary" data-crop="golden">
         <div class="title">黃金仙桃 <span class="tag legend">傳說植物</span></div>
         <div class="field"><div class="sprite"></div></div>
@@ -185,7 +217,7 @@
       <ul>
         <li>植物是否太大、太小、被裁切，或與土壤格比例不自然。</li>
         <li>青江菜幼苗與成熟株是否容易區分。</li>
-        <li>芭樂三階段是否有連續成長感。</li>
+        <li>七種長期作物的三階段是否有連續成長感。</li>
         <li>黃金仙桃的傳說光效是否夠明顯，但不遮住植物本體。</li>
         <li>手機直式畫面是否仍清楚、不卡版。</li>
       </ul>
@@ -232,6 +264,26 @@
         pre: {url:'assets/farm12/crops/pre-mature/mango.webp',label:'開花／幼果期'},
         mature: {url:'assets/farm12/crops/mature/mango.webp',label:'成熟'}
       },
+      taro: {
+        seedling: {url:'assets/farm12/crops/seedling/taro.webp',label:'幼苗'},
+        pre: {url:'assets/farm12/crops/pre-mature/taro.webp',label:'大葉／球莖膨大期'},
+        mature: {url:'assets/farm12/crops/mature/taro.webp',label:'成熟'}
+      },
+      cabbage: {
+        seedling: {url:'assets/farm12/crops/seedling/cabbage.webp',label:'幼苗'},
+        pre: {url:'assets/farm12/crops/pre-mature/cabbage.webp',label:'開始結球期'},
+        mature: {url:'assets/farm12/crops/mature/cabbage.webp',label:'成熟'}
+      },
+      strawberry: {
+        seedling: {url:'assets/farm12/crops/seedling/strawberry.webp',label:'幼苗'},
+        pre: {url:'assets/farm12/crops/pre-mature/strawberry.webp',label:'白花／綠色幼果期'},
+        mature: {url:'assets/farm12/crops/mature/strawberry.webp',label:'成熟'}
+      },
+      pomelo: {
+        seedling: {url:'assets/farm12/crops/seedling/pomelo.webp',label:'幼苗'},
+        pre: {url:'assets/farm12/crops/pre-mature/pomelo.webp',label:'白花／綠色幼果期'},
+        mature: {url:'assets/farm12/crops/mature/pomelo.webp',label:'成熟'}
+      },
       golden: {
         mature: {x:-224,y:-112,label:'傳說成熟'}
       }
@@ -243,7 +295,7 @@
     function stateFor(crop,p){
       if(crop==='bokchoy') return p >= 100 ? 'mature' : 'seedling';
       if(['sweetpotatoleaf','waterspinach','waterbamboo','whiteradish'].includes(crop)) return p >= 100 ? 'mature' : 'seedling';
-      if(['guava','loofah','mango'].includes(crop)) return p >= 100 ? 'mature' : (p >= 38 ? 'pre' : 'seedling');
+      if(['guava','loofah','mango','taro','cabbage','strawberry','pomelo'].includes(crop)) return p >= 100 ? 'mature' : (p >= 38 ? 'pre' : 'seedling');
       return 'mature';
     }
 

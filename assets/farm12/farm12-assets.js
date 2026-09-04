@@ -49,14 +49,14 @@ window.FARM12_ASSETS = {
     },
     taro: {
       mature: 'assets/farm12/crops/mature/taro.webp',
-      seedling: null,
-      preMature: null,
+      seedling: 'assets/farm12/crops/seedling/taro.webp',
+      preMature: 'assets/farm12/crops/pre-mature/taro.webp',
       legendary: false
     },
     pomelo: {
       mature: 'assets/farm12/crops/mature/pomelo.webp',
-      seedling: null,
-      preMature: null,
+      seedling: 'assets/farm12/crops/seedling/pomelo.webp',
+      preMature: 'assets/farm12/crops/pre-mature/pomelo.webp',
       legendary: false
     },
     whiteradish: {
@@ -67,14 +67,14 @@ window.FARM12_ASSETS = {
     },
     cabbage: {
       mature: 'assets/farm12/crops/mature/cabbage.webp',
-      seedling: null,
-      preMature: null,
+      seedling: 'assets/farm12/crops/seedling/cabbage.webp',
+      preMature: 'assets/farm12/crops/pre-mature/cabbage.webp',
       legendary: false
     },
     strawberry: {
       mature: 'assets/farm12/crops/mature/strawberry.webp',
-      seedling: null,
-      preMature: null,
+      seedling: 'assets/farm12/crops/seedling/strawberry.webp',
+      preMature: 'assets/farm12/crops/pre-mature/strawberry.webp',
       legendary: false
     },
     golden_peach: {

@@ -25,7 +25,7 @@
   <div class="version-bar">
     <div class="version-left">
       <span class="badge">12-1 新版</span>
-      <span class="version-note">視覺改版測試：短期幼苗 5 種、三階段作物 3 種、黃金仙桃｜測試資金最低 30000｜與原版存檔分離</span>
+      <span class="version-note">視覺改版測試：短期幼苗 5 種、三階段作物 7 種、黃金仙桃｜測試資金最低 30000｜與原版存檔分離</span>
     </div>
     <div class="version-links">
       <a href="12.html" target="_blank" rel="noopener">開啟原版 12</a>
@@ -89,7 +89,7 @@
       html = html.replace('</head>', artCss + '</head>');
 
       const cropArtCode = [
-        '    // --- 12-1 新版：代表性作物與第二批專屬幼苗圖片流程 ---',
+        '    // --- 12-1 新版：已核准的專屬作物圖片流程 ---',
         '    const FARM12_PILOT_SPRITES = {',
         "      sweetpotatoleaf: { seedling: { src: 'assets/farm12/crops/seedling/sweetpotatoleaf.webp' } },",
         "      bokchoy: { seedling: { src: 'assets/farm12/pilot/bokchoy-just-germinated.webp' }, mature: ['50%','0%'] },",
@@ -98,7 +98,11 @@
         "      loofah: { seedling: { src: 'assets/farm12/crops/seedling/loofah.webp' }, pre: { src: 'assets/farm12/crops/pre-mature/loofah.webp' }, mature: { src: 'assets/farm12/crops/mature/loofah.webp' } },",
         "      mango: { seedling: { src: 'assets/farm12/crops/seedling/mango.webp' }, pre: { src: 'assets/farm12/crops/pre-mature/mango.webp' }, mature: { src: 'assets/farm12/crops/mature/mango.webp' } },",
         "      waterbamboo: { seedling: { src: 'assets/farm12/crops/seedling/waterbamboo.webp' } },",
+        "      taro: { seedling: { src: 'assets/farm12/crops/seedling/taro.webp' }, pre: { src: 'assets/farm12/crops/pre-mature/taro.webp' }, mature: { src: 'assets/farm12/crops/mature/taro.webp' } },",
+        "      pomelo: { seedling: { src: 'assets/farm12/crops/seedling/pomelo.webp' }, pre: { src: 'assets/farm12/crops/pre-mature/pomelo.webp' }, mature: { src: 'assets/farm12/crops/mature/pomelo.webp' } },",
         "      whiteradish: { seedling: { src: 'assets/farm12/crops/seedling/whiteradish.webp' } },",
+        "      cabbage: { seedling: { src: 'assets/farm12/crops/seedling/cabbage.webp' }, pre: { src: 'assets/farm12/crops/pre-mature/cabbage.webp' }, mature: { src: 'assets/farm12/crops/mature/cabbage.webp' } },",
+        "      strawberry: { seedling: { src: 'assets/farm12/crops/seedling/strawberry.webp' }, pre: { src: 'assets/farm12/crops/pre-mature/strawberry.webp' }, mature: { src: 'assets/farm12/crops/mature/strawberry.webp' } },",
         "      golden_peach: { mature: ['100%','100%'] }",
         '    };',
         '',
