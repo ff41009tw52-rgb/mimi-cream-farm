@@ -127,6 +127,22 @@
         <div class="desc">確認「幼苗 → 開花／幼果 → 成熟」切換是否自然，避免突然從 🌱 跳成水果。</div>
       </article>
 
+      <article class="card" data-crop="loofah">
+        <div class="title">絲瓜 <span class="tag">長期三階段</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">確認「子葉幼苗 → 黃花與小幼果 → 可收成絲瓜」三階段能清楚區分。</div>
+      </article>
+
+      <article class="card" data-crop="mango">
+        <div class="title">芒果 <span class="tag">長期三階段</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">確認「紅褐嫩葉幼苗 → 花序與綠色幼果 → 黃紅成熟果」的連續成長感。</div>
+      </article>
+
       <article class="card legendary" data-crop="golden">
         <div class="title">黃金仙桃 <span class="tag legend">傳說植物</span></div>
         <div class="field"><div class="sprite"></div></div>
@@ -206,6 +222,16 @@
         pre: {x:0,y:-112,label:'開花／幼果期'},
         mature: {x:-112,y:-112,label:'成熟'}
       },
+      loofah: {
+        seedling: {url:'assets/farm12/crops/seedling/loofah.webp',label:'幼苗'},
+        pre: {url:'assets/farm12/crops/pre-mature/loofah.webp',label:'開花／幼果期'},
+        mature: {url:'assets/farm12/crops/mature/loofah.webp',label:'成熟'}
+      },
+      mango: {
+        seedling: {url:'assets/farm12/crops/seedling/mango.webp',label:'幼苗'},
+        pre: {url:'assets/farm12/crops/pre-mature/mango.webp',label:'開花／幼果期'},
+        mature: {url:'assets/farm12/crops/mature/mango.webp',label:'成熟'}
+      },
       golden: {
         mature: {x:-224,y:-112,label:'傳說成熟'}
       }
@@ -217,7 +243,7 @@
     function stateFor(crop,p){
       if(crop==='bokchoy') return p >= 100 ? 'mature' : 'seedling';
       if(['sweetpotatoleaf','waterspinach','waterbamboo','whiteradish'].includes(crop)) return p >= 100 ? 'mature' : 'seedling';
-      if(crop==='guava') return p >= 100 ? 'mature' : (p >= 38 ? 'pre' : 'seedling');
+      if(['guava','loofah','mango'].includes(crop)) return p >= 100 ? 'mature' : (p >= 38 ? 'pre' : 'seedling');
       return 'mature';
     }
 
