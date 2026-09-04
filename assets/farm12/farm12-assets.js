@@ -79,26 +79,26 @@ window.FARM12_ASSETS = {
     },
     golden_peach: {
       mature: 'assets/farm12/crops/legendary/golden_peach.webp',
-      seedling: null,
-      preMature: null,
+      seedling: 'assets/farm12/crops/legendary/golden_peach-seedling.webp',
+      preMature: 'assets/farm12/crops/legendary/golden_peach-pre-mature.webp',
       legendary: true
     },
     crystal_melon: {
       mature: 'assets/farm12/crops/legendary/crystal_melon.webp',
-      seedling: null,
-      preMature: null,
+      seedling: 'assets/farm12/crops/legendary/crystal_melon-seedling.webp',
+      preMature: 'assets/farm12/crops/legendary/crystal_melon-pre-mature.webp',
       legendary: true
     },
     giant_pumpkin: {
       mature: 'assets/farm12/crops/legendary/giant_pumpkin.webp',
-      seedling: null,
-      preMature: null,
+      seedling: 'assets/farm12/crops/legendary/giant_pumpkin-seedling.webp',
+      preMature: 'assets/farm12/crops/legendary/giant_pumpkin-pre-mature.webp',
       legendary: true
     },
     white_strawberry: {
       mature: 'assets/farm12/crops/legendary/white_strawberry.webp',
-      seedling: null,
-      preMature: null,
+      seedling: 'assets/farm12/crops/legendary/white_strawberry-seedling.webp',
+      preMature: 'assets/farm12/crops/legendary/white_strawberry-pre-mature.webp',
       legendary: true
     }
   },

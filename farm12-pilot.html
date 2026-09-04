@@ -73,10 +73,10 @@
     }
     .sprite.single-asset{background-size:contain;background-position:center}
     .sprite.emoji-fallback{display:grid;place-items:center;background-image:none;font-size:72px}
-    .legendary .sprite{
-      filter:drop-shadow(0 0 7px #fff7ad) drop-shadow(0 0 18px #ffb000);
-      animation:legendPulse 1.4s ease-in-out infinite alternate;
-    }
+    .legendary .sprite{animation:legendPulse 1.55s ease-in-out infinite alternate}
+    .legendary.stage-seedling .sprite{filter:drop-shadow(0 0 4px rgba(255,247,173,.65)) drop-shadow(0 0 8px rgba(255,176,0,.42))}
+    .legendary.stage-pre .sprite{filter:drop-shadow(0 0 6px rgba(255,247,173,.88)) drop-shadow(0 0 13px rgba(255,176,0,.7))}
+    .legendary.stage-mature .sprite{filter:drop-shadow(0 0 7px #fff7ad) drop-shadow(0 0 18px #ffb000)}
     @keyframes legendPulse{from{transform:scale(calc(var(--scale,1) * .96))}to{transform:scale(calc(var(--scale,1) * 1.06))}}
     .stage{font-weight:950;text-align:center;font-size:16px;color:#5d3619}
     .progress{height:12px;border-radius:99px;background:#e4d5b9;overflow:hidden;margin-top:8px}
@@ -175,12 +175,36 @@
         <div class="desc">確認「柑橘幼樹 → 白花與小綠果 → 黃綠成熟文旦」具有連續成長感。</div>
       </article>
 
-      <article class="card legendary" data-crop="golden">
+      <article class="card legendary" data-crop="golden_peach">
         <div class="title">黃金仙桃 <span class="tag legend">傳說植物</span></div>
         <div class="field"><div class="sprite"></div></div>
         <div class="stage"></div>
         <div class="progress"><i></i></div>
-        <div class="desc">此 Pilot 先測試成熟圖 + CSS 金色光暈／脈動；傳說幼苗尚未納入正式替換。</div>
+        <div class="desc">確認「金紋幼樹 → 桃花與金綠幼果 → 黃金成熟仙桃」的魔法強度逐步增加。</div>
+      </article>
+
+      <article class="card legendary" data-crop="crystal_melon">
+        <div class="title">水晶寶石西瓜 <span class="tag legend">傳說植物</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">確認「水晶紋幼苗 → 黃花與幼瓜 → 完整寶石西瓜」仍保留西瓜植物形態。</div>
+      </article>
+
+      <article class="card legendary" data-crop="giant_pumpkin">
+        <div class="title">巨無霸南瓜 <span class="tag legend">傳說植物</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">確認成熟階段為明顯金橘發光巨型南瓜，而不是普通南瓜放大。</div>
+      </article>
+
+      <article class="card legendary" data-crop="white_strawberry">
+        <div class="title">初雪白草莓 <span class="tag legend">傳說植物</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">確認「霜紋幼苗 → 白花與淡色幼果 → 珍珠白成熟果」的雪系成長感。</div>
       </article>
 
       <article class="card" data-crop="sweetpotatoleaf">
@@ -218,7 +242,7 @@
         <li>植物是否太大、太小、被裁切，或與土壤格比例不自然。</li>
         <li>青江菜幼苗與成熟株是否容易區分。</li>
         <li>七種長期作物的三階段是否有連續成長感。</li>
-        <li>黃金仙桃的傳說光效是否夠明顯，但不遮住植物本體。</li>
+        <li>四種傳說作物的光效是否隨階段增強，但不遮住植物本體。</li>
         <li>手機直式畫面是否仍清楚、不卡版。</li>
       </ul>
     </section>
@@ -284,8 +308,25 @@
         pre: {url:'assets/farm12/crops/pre-mature/pomelo.webp',label:'白花／綠色幼果期'},
         mature: {url:'assets/farm12/crops/mature/pomelo.webp',label:'成熟'}
       },
-      golden: {
-        mature: {x:-224,y:-112,label:'傳說成熟'}
+      golden_peach: {
+        seedling: {url:'assets/farm12/crops/legendary/golden_peach-seedling.webp',label:'金紋幼苗'},
+        pre: {url:'assets/farm12/crops/legendary/golden_peach-pre-mature.webp',label:'桃花／金綠幼果期'},
+        mature: {url:'assets/farm12/crops/legendary/golden_peach.webp',label:'傳說成熟'}
+      },
+      crystal_melon: {
+        seedling: {url:'assets/farm12/crops/legendary/crystal_melon-seedling.webp',label:'水晶紋幼苗'},
+        pre: {url:'assets/farm12/crops/legendary/crystal_melon-pre-mature.webp',label:'黃花／寶石幼瓜期'},
+        mature: {url:'assets/farm12/crops/legendary/crystal_melon.webp',label:'傳說成熟'}
+      },
+      giant_pumpkin: {
+        seedling: {url:'assets/farm12/crops/legendary/giant_pumpkin-seedling.webp',label:'金紋幼苗'},
+        pre: {url:'assets/farm12/crops/legendary/giant_pumpkin-pre-mature.webp',label:'黃花／金橘幼果期'},
+        mature: {url:'assets/farm12/crops/legendary/giant_pumpkin.webp',label:'傳說成熟'}
+      },
+      white_strawberry: {
+        seedling: {url:'assets/farm12/crops/legendary/white_strawberry-seedling.webp',label:'霜紋幼苗'},
+        pre: {url:'assets/farm12/crops/legendary/white_strawberry-pre-mature.webp',label:'白花／淡色幼果期'},
+        mature: {url:'assets/farm12/crops/legendary/white_strawberry.webp',label:'傳說成熟'}
       }
     };
 
@@ -296,6 +337,7 @@
       if(crop==='bokchoy') return p >= 100 ? 'mature' : 'seedling';
       if(['sweetpotatoleaf','waterspinach','waterbamboo','whiteradish'].includes(crop)) return p >= 100 ? 'mature' : 'seedling';
       if(['guava','loofah','mango','taro','cabbage','strawberry','pomelo'].includes(crop)) return p >= 100 ? 'mature' : (p >= 38 ? 'pre' : 'seedling');
+      if(['golden_peach','crystal_melon','giant_pumpkin','white_strawberry'].includes(crop)) return p >= 100 ? 'mature' : (p >= 38 ? 'pre' : 'seedling');
       return 'mature';
     }
 
@@ -307,6 +349,9 @@
         const key = stateFor(crop,p);
         const s = atlas[crop][key];
         const sprite = card.querySelector('.sprite');
+        card.classList.toggle('stage-seedling',key==='seedling');
+        card.classList.toggle('stage-pre',key==='pre');
+        card.classList.toggle('stage-mature',key==='mature');
         sprite.classList.toggle('single-asset',Boolean(s.url));
         sprite.classList.toggle('emoji-fallback',Boolean(s.emoji));
         sprite.style.backgroundImage = s.url ? `url('${s.url}')` : '';
@@ -314,7 +359,7 @@
         sprite.style.setProperty('--x',(s.x || 0)+'px');
         sprite.style.setProperty('--y',(s.y || 0)+'px');
         sprite.style.setProperty('--scale', p >= 100 ? '1.08' : (p >= 38 ? '1' : '.82'));
-        card.querySelector('.stage').textContent = crop==='golden' ? '傳說成熟示意（光效測試）' : s.label;
+        card.querySelector('.stage').textContent = s.label;
         card.querySelector('.progress i').style.width = p + '%';
       });
     }

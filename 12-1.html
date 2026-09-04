@@ -25,7 +25,7 @@
   <div class="version-bar">
     <div class="version-left">
       <span class="badge">12-1 新版</span>
-      <span class="version-note">視覺改版測試：短期幼苗 5 種、三階段作物 7 種、黃金仙桃｜測試資金最低 30000｜與原版存檔分離</span>
+      <span class="version-note">視覺改版測試：短期幼苗 5 種、一般三階段 7 種、傳說作物 4 種｜測試資金最低 30000｜與原版存檔分離</span>
     </div>
     <div class="version-links">
       <a href="12.html" target="_blank" rel="noopener">開啟原版 12</a>
@@ -81,8 +81,15 @@
         '.farm12-art-wrap.farm12-seedbag .farm12-art{width:24px;height:24px}',
         '.farm12-art-wrap.farm12-flying{width:64px;height:64px}',
         '.farm12-art-wrap.farm12-flying .farm12-art{width:64px;height:64px}',
-        '.farm12-art-wrap.farm12-legendary .farm12-art{filter:drop-shadow(0 0 5px #fff7ac) drop-shadow(0 0 13px #ffb000);animation:farm12LegendPulse 1.35s ease-in-out infinite alternate}',
+        '.farm12-art-wrap.farm12-legendary{position:relative}',
+        '.farm12-art-wrap.farm12-legendary .farm12-art{animation:farm12LegendPulse 1.55s ease-in-out infinite alternate}',
+        '.farm12-art-wrap.farm12-legendary-seedling .farm12-art{filter:drop-shadow(0 0 3px rgba(255,247,172,.6)) drop-shadow(0 0 6px rgba(255,176,0,.42))}',
+        '.farm12-art-wrap.farm12-legendary-pre .farm12-art{filter:drop-shadow(0 0 5px rgba(255,247,172,.85)) drop-shadow(0 0 10px rgba(255,176,0,.68))}',
+        '.farm12-art-wrap.farm12-legendary-mature .farm12-art{filter:drop-shadow(0 0 6px #fff7ac) drop-shadow(0 0 15px #ffb000)}',
+        '.farm12-art-wrap.farm12-legendary::after{content:"";position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;box-shadow:-13px -9px 0 #fff7ac,15px -17px 0 #fff;animation:farm12LegendSparkle 1.8s ease-in-out infinite;pointer-events:none}',
+        '.farm12-art-wrap.farm12-legendary-seedling::after{opacity:.25}.farm12-art-wrap.farm12-legendary-pre::after{opacity:.55}.farm12-art-wrap.farm12-legendary-mature::after{opacity:1}',
         '@keyframes farm12LegendPulse{from{transform:scale(.96)}to{transform:scale(1.08)}}',
+        '@keyframes farm12LegendSparkle{0%,100%{transform:scale(.7);opacity:.25}50%{transform:scale(1.25);opacity:1}}',
         '@media(min-width:768px){.farm12-art-wrap.farm12-field{width:78px;height:78px}.farm12-art-wrap.farm12-field .farm12-art{width:78px;height:78px}}',
         '</style>'
       ].join('');
@@ -103,7 +110,10 @@
         "      whiteradish: { seedling: { src: 'assets/farm12/crops/seedling/whiteradish.webp' } },",
         "      cabbage: { seedling: { src: 'assets/farm12/crops/seedling/cabbage.webp' }, pre: { src: 'assets/farm12/crops/pre-mature/cabbage.webp' }, mature: { src: 'assets/farm12/crops/mature/cabbage.webp' } },",
         "      strawberry: { seedling: { src: 'assets/farm12/crops/seedling/strawberry.webp' }, pre: { src: 'assets/farm12/crops/pre-mature/strawberry.webp' }, mature: { src: 'assets/farm12/crops/mature/strawberry.webp' } },",
-        "      golden_peach: { mature: ['100%','100%'] }",
+        "      golden_peach: { seedling: { src: 'assets/farm12/crops/legendary/golden_peach-seedling.webp' }, pre: { src: 'assets/farm12/crops/legendary/golden_peach-pre-mature.webp' }, mature: { src: 'assets/farm12/crops/legendary/golden_peach.webp' } },",
+        "      crystal_melon: { seedling: { src: 'assets/farm12/crops/legendary/crystal_melon-seedling.webp' }, pre: { src: 'assets/farm12/crops/legendary/crystal_melon-pre-mature.webp' }, mature: { src: 'assets/farm12/crops/legendary/crystal_melon.webp' } },",
+        "      giant_pumpkin: { seedling: { src: 'assets/farm12/crops/legendary/giant_pumpkin-seedling.webp' }, pre: { src: 'assets/farm12/crops/legendary/giant_pumpkin-pre-mature.webp' }, mature: { src: 'assets/farm12/crops/legendary/giant_pumpkin.webp' } },",
+        "      white_strawberry: { seedling: { src: 'assets/farm12/crops/legendary/white_strawberry-seedling.webp' }, pre: { src: 'assets/farm12/crops/legendary/white_strawberry-pre-mature.webp' }, mature: { src: 'assets/farm12/crops/legendary/white_strawberry.webp' } }",
         '    };',
         '',
         "    const CropArt = ({ crop, growth = 0, fallback = '🌱', mode = 'field' }) => {",
@@ -114,11 +124,10 @@
         '      const mature = growth >= crop.days;',
         "      let stage = mature ? 'mature' : 'seedling';",
         "      if (!mature && sprites.pre && growth / crop.days >= 0.38) stage = 'pre';",
-        "      if (crop.id === 'golden_peach' && !mature) return <span className={mode === 'seedbag' ? 'text-[12px] leading-none drop-shadow-md z-10' : 'text-4xl md:text-6xl scale-50 opacity-40'}>{fallback}</span>;",
         '      const pos = sprites[stage];',
         '      if (!pos) return <span className={fallbackClass}>{fallback}</span>;',
-        "      const legendary = crop.id === 'golden_peach' && mature;",
-        "      const cls = 'farm12-art-wrap farm12-' + mode + (legendary ? ' farm12-legendary' : '');",
+        "      const legendary = ['golden_peach','crystal_melon','giant_pumpkin','white_strawberry'].includes(crop.id);",
+        "      const cls = 'farm12-art-wrap farm12-' + mode + (legendary ? ' farm12-legendary farm12-legendary-' + stage : '');",
         "      const artClass = 'farm12-art' + (pos.src ? ' farm12-art-image' : '');",
         "      const artStyle = pos.src ? { backgroundImage: 'url(' + pos.src + ')' } : {'--farm12-x': pos[0], '--farm12-y': pos[1]};",
         "      return <span className={cls} title={crop.name + '・' + (stage === 'pre' ? '開花幼果期' : stage === 'mature' ? '成熟' : '幼苗')}><span className={artClass} style={artStyle} /></span>;",
