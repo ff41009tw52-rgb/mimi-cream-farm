@@ -25,7 +25,7 @@
   <div class="version-bar">
     <div class="version-left">
       <span class="badge">12-1 新版</span>
-      <span class="version-note">視覺改版測試：青江菜、芭樂、黃金仙桃｜測試資金最低 30000｜與原版存檔分離</span>
+      <span class="version-note">視覺改版測試：短期專屬幼苗 5 種、芭樂、黃金仙桃｜測試資金最低 30000｜與原版存檔分離</span>
     </div>
     <div class="version-links">
       <a href="12.html" target="_blank" rel="noopener">開啟原版 12</a>
@@ -89,23 +89,28 @@
       html = html.replace('</head>', artCss + '</head>');
 
       const cropArtCode = [
-        '    // --- 12-1 新版：三種代表性作物圖片流程 ---',
+        '    // --- 12-1 新版：代表性作物與第二批專屬幼苗圖片流程 ---',
         '    const FARM12_PILOT_SPRITES = {',
+        "      sweetpotatoleaf: { seedling: { src: 'assets/farm12/crops/seedling/sweetpotatoleaf.webp' } },",
         "      bokchoy: { seedling: { src: 'assets/farm12/pilot/bokchoy-just-germinated.webp' }, mature: ['50%','0%'] },",
         "      guava: { seedling: ['100%','0%'], pre: ['0%','100%'], mature: ['50%','100%'] },",
+        "      waterspinach: { seedling: { src: 'assets/farm12/crops/seedling/waterspinach.webp' } },",
+        "      waterbamboo: { seedling: { src: 'assets/farm12/crops/seedling/waterbamboo.webp' } },",
+        "      whiteradish: { seedling: { src: 'assets/farm12/crops/seedling/whiteradish.webp' } },",
         "      golden_peach: { mature: ['100%','100%'] }",
         '    };',
         '',
         "    const CropArt = ({ crop, growth = 0, fallback = '🌱', mode = 'field' }) => {",
         '      if (!crop) return <span>{fallback}</span>;',
         '      const sprites = FARM12_PILOT_SPRITES[crop.id];',
-        '      if (!sprites) return <span className={mode === \'seedbag\' ? \'text-[12px] leading-none drop-shadow-md z-10\' : \'text-4xl md:text-6xl transition-all\'}>{fallback}</span>;',
+        "      const fallbackClass = mode === 'seedbag' ? 'text-[12px] leading-none drop-shadow-md z-10' : 'text-4xl md:text-6xl transition-all';",
+        '      if (!sprites) return <span className={fallbackClass}>{fallback}</span>;',
         '      const mature = growth >= crop.days;',
         "      let stage = mature ? 'mature' : 'seedling';",
         "      if (crop.id === 'guava' && !mature && growth / crop.days >= 0.38) stage = 'pre';",
         "      if (crop.id === 'golden_peach' && !mature) return <span className={mode === 'seedbag' ? 'text-[12px] leading-none drop-shadow-md z-10' : 'text-4xl md:text-6xl scale-50 opacity-40'}>{fallback}</span>;",
         '      const pos = sprites[stage];',
-        '      if (!pos) return <span>{fallback}</span>;',
+        '      if (!pos) return <span className={fallbackClass}>{fallback}</span>;',
         "      const legendary = crop.id === 'golden_peach' && mature;",
         "      const cls = 'farm12-art-wrap farm12-' + mode + (legendary ? ' farm12-legendary' : '');",
         "      const artClass = 'farm12-art' + (pos.src ? ' farm12-art-image' : '');",
