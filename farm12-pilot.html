@@ -71,6 +71,7 @@
       z-index:2;
       transition:transform .25s ease,filter .25s ease;
     }
+    .sprite.single-asset{background-size:contain;background-position:center}
     .legendary .sprite{
       filter:drop-shadow(0 0 7px #fff7ad) drop-shadow(0 0 18px #ffb000);
       animation:legendPulse 1.4s ease-in-out infinite alternate;
@@ -114,7 +115,7 @@
         <div class="field"><div class="sprite"></div></div>
         <div class="stage"></div>
         <div class="progress"><i></i></div>
-        <div class="desc">確認幼苗與成熟株在田格內的辨識度、大小與透明背景效果。</div>
+        <div class="desc">確認「剛發芽幼苗 → 成熟株」在田格內的辨識度、大小與透明背景效果。</div>
       </article>
 
       <article class="card" data-crop="guava">
@@ -152,7 +153,7 @@
     const atlas = {
       // Atlas cell: 56x56, rendered at 2x. Coordinates below therefore use 112 px steps.
       bokchoy: {
-        seedling: {x:0,y:0,label:'幼苗'},
+        seedling: {url:'assets/farm12/pilot/bokchoy-just-germinated.webp',label:'剛發芽幼苗'},
         mature: {x:-112,y:0,label:'成熟'}
       },
       guava: {
@@ -182,8 +183,10 @@
         const key = stateFor(crop,p);
         const s = atlas[crop][key];
         const sprite = card.querySelector('.sprite');
-        sprite.style.setProperty('--x',s.x+'px');
-        sprite.style.setProperty('--y',s.y+'px');
+        sprite.classList.toggle('single-asset',Boolean(s.url));
+        sprite.style.backgroundImage = s.url ? `url('${s.url}')` : '';
+        sprite.style.setProperty('--x',(s.x || 0)+'px');
+        sprite.style.setProperty('--y',(s.y || 0)+'px');
         sprite.style.setProperty('--scale', p >= 100 ? '1.08' : (p >= 38 ? '1' : '.82'));
         card.querySelector('.stage').textContent = crop==='golden' ? '傳說成熟示意（光效測試）' : s.label;
         card.querySelector('.progress i').style.width = p + '%';

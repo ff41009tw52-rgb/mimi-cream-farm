@@ -25,7 +25,7 @@
   <div class="version-bar">
     <div class="version-left">
       <span class="badge">12-1 新版</span>
-      <span class="version-note">視覺改版測試：青江菜、芭樂、黃金仙桃｜測試資金最低 5000｜與原版存檔分離</span>
+      <span class="version-note">視覺改版測試：青江菜、芭樂、黃金仙桃｜測試資金最低 30000｜與原版存檔分離</span>
     </div>
     <div class="version-links">
       <a href="12.html" target="_blank" rel="noopener">開啟原版 12</a>
@@ -54,19 +54,19 @@
       html = html.split('farm_tycoon_save_v2').join('farm_tycoon_save_v2_12_1');
       html = html.replace('<title>四季農莊：島嶼物語</title>', '<title>四季農莊：島嶼物語｜12-1 新版</title>');
 
-      // 新遊戲直接從 5000 開始。
+      // 新遊戲直接從 30000 開始。
       html = replaceOnce(
         html,
         'const [gold, setGold] = useState(100);',
-        'const [gold, setGold] = useState(5000);',
+        'const [gold, setGold] = useState(30000);',
         '12-1 測試起始資金'
       );
 
-      // 舊的 12-1 測試存檔若低於 5000，載入時自動補到 5000；高於 5000 則保留原金額。
+      // 舊的 12-1 測試存檔若低於 30000，載入時自動補到 30000；高於 30000 則保留原金額。
       html = replaceOnce(
         html,
         'setGold(state.gold);',
-        'setGold(Math.max(5000, Number(state.gold) || 0));',
+        'setGold(Math.max(30000, Number(state.gold) || 0));',
         '12-1 載入存檔測試資金'
       );
 
@@ -74,6 +74,7 @@
         '<style>',
         '.farm12-art-wrap{display:inline-grid;place-items:center;vertical-align:middle;transition:transform .25s ease,filter .25s ease}',
         '.farm12-art{display:block;width:54px;height:54px;background-image:url(\'assets/farm12/pilot/pilot-atlas.webp\');background-repeat:no-repeat;background-size:300% 200%;background-position:var(--farm12-x) var(--farm12-y);filter:drop-shadow(0 5px 4px rgba(50,24,5,.25))}',
+        '.farm12-art.farm12-art-image{background-size:contain;background-position:center}',
         '.farm12-art-wrap.farm12-field{width:56px;height:56px}',
         '.farm12-art-wrap.farm12-field .farm12-art{width:56px;height:56px}',
         '.farm12-art-wrap.farm12-seedbag{width:24px;height:24px;position:relative;z-index:2}',
@@ -90,7 +91,7 @@
       const cropArtCode = [
         '    // --- 12-1 新版：三種代表性作物圖片流程 ---',
         '    const FARM12_PILOT_SPRITES = {',
-        "      bokchoy: { seedling: ['0%','0%'], mature: ['50%','0%'] },",
+        "      bokchoy: { seedling: { src: 'assets/farm12/pilot/bokchoy-just-germinated.webp' }, mature: ['50%','0%'] },",
         "      guava: { seedling: ['100%','0%'], pre: ['0%','100%'], mature: ['50%','100%'] },",
         "      golden_peach: { mature: ['100%','100%'] }",
         '    };',
@@ -107,7 +108,9 @@
         '      if (!pos) return <span>{fallback}</span>;',
         "      const legendary = crop.id === 'golden_peach' && mature;",
         "      const cls = 'farm12-art-wrap farm12-' + mode + (legendary ? ' farm12-legendary' : '');",
-        "      return <span className={cls} title={crop.name + '・' + (stage === 'pre' ? '開花幼果期' : stage === 'mature' ? '成熟' : '幼苗')}><span className=\"farm12-art\" style={{'--farm12-x': pos[0], '--farm12-y': pos[1]}} /></span>;",
+        "      const artClass = 'farm12-art' + (pos.src ? ' farm12-art-image' : '');",
+        "      const artStyle = pos.src ? { backgroundImage: 'url(' + pos.src + ')' } : {'--farm12-x': pos[0], '--farm12-y': pos[1]};",
+        "      return <span className={cls} title={crop.name + '・' + (stage === 'pre' ? '開花幼果期' : stage === 'mature' ? '成熟' : '幼苗')}><span className={artClass} style={artStyle} /></span>;",
         '    };',
         ''
       ].join('\n');
@@ -155,7 +158,7 @@
         '收成飛行圖片'
       );
 
-      html = html.replace('<div id="root"></div>', '<div id="root"></div><div style="position:fixed;right:8px;bottom:8px;z-index:9998;background:rgba(21,94,53,.9);color:white;border-radius:999px;padding:5px 9px;font:700 11px Microsoft JhengHei,sans-serif;pointer-events:none">12-1 視覺新版・測試資金最低 5000</div>');
+      html = html.replace('<div id="root"></div>', '<div id="root"></div><div style="position:fixed;right:8px;bottom:8px;z-index:9998;background:rgba(21,94,53,.9);color:white;border-radius:999px;padding:5px 9px;font:700 11px Microsoft JhengHei,sans-serif;pointer-events:none">12-1 視覺新版・測試資金最低 30000</div>');
 
       frame.srcdoc = html;
       frame.addEventListener('load', () => { loading.style.display = 'none'; }, {once:true});
