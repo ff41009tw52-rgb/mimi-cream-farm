@@ -25,11 +25,10 @@
   <div class="version-bar">
     <div class="version-left">
       <span class="badge">12-1 新版</span>
-      <span class="version-note">視覺改版測試：短期二階段 5 種、一般三階段 7 種、傳說作物 4 種｜測試資金最低 30000｜與原版存檔分離</span>
+      <span class="version-note">視覺改版測試：全作物種子各 1 包｜測試資金最低 100000｜與原版存檔分離</span>
     </div>
     <div class="version-links">
       <a href="12.html" target="_blank" rel="noopener">開啟原版 12</a>
-      <a href="farm12-pilot.html" target="_blank" rel="noopener">素材 Pilot</a>
     </div>
   </div>
   <iframe id="game" title="四季農莊 12-1 新版"></iframe>
@@ -54,20 +53,36 @@
       html = html.split('farm_tycoon_save_v2').join('farm_tycoon_save_v2_12_1');
       html = html.replace('<title>四季農莊：島嶼物語</title>', '<title>四季農莊：島嶼物語｜12-1 新版</title>');
 
-      // 新遊戲直接從 30000 開始。
+      // 新遊戲直接從 100000 開始。
       html = replaceOnce(
         html,
         'const [gold, setGold] = useState(100);',
-        'const [gold, setGold] = useState(30000);',
+        'const [gold, setGold] = useState(100000);',
         '12-1 測試起始資金'
       );
 
-      // 舊的 12-1 測試存檔若低於 30000，載入時自動補到 30000；高於 30000 則保留原金額。
+      // 舊的 12-1 測試存檔若低於 100000，載入時自動補到 100000；高於 100000 則保留原金額。
       html = replaceOnce(
         html,
         'setGold(state.gold);',
-        'setGold(Math.max(30000, Number(state.gold) || 0));',
+        'setGold(Math.max(100000, Number(state.gold) || 0));',
         '12-1 載入存檔測試資金'
+      );
+
+      // 新遊戲的背包直接放入每一種作物種子各 1 包。
+      html = replaceOnce(
+        html,
+        'scissors: 10, chili: 10, seeds: {}, crops: {}',
+        'scissors: 10, chili: 10, seeds: Object.fromEntries(Object.values(CROPS).flat().filter(Boolean).map(crop => [crop.id, 1])), crops: {}',
+        '12-1 全作物測試種子'
+      );
+
+      // 載入舊測試存檔時保留原數量，但缺少或歸零的作物種子補到 1 包。
+      html = replaceOnce(
+        html,
+        'setInventory({ ...state.inventory, crops: state.inventory.crops || {} });',
+        'setInventory({ ...state.inventory, seeds: { ...(state.inventory?.seeds || {}), ...Object.fromEntries(Object.values(CROPS).flat().filter(Boolean).map(crop => [crop.id, Math.max(1, Number(state.inventory?.seeds?.[crop.id]) || 0)])) }, crops: state.inventory?.crops || {} });',
+        '12-1 載入存檔補齊全作物種子'
       );
 
       const artCss = [
@@ -178,7 +193,7 @@
         '收成飛行圖片'
       );
 
-      html = html.replace('<div id="root"></div>', '<div id="root"></div><div style="position:fixed;right:8px;bottom:8px;z-index:9998;background:rgba(21,94,53,.9);color:white;border-radius:999px;padding:5px 9px;font:700 11px Microsoft JhengHei,sans-serif;pointer-events:none">12-1 視覺新版・測試資金最低 30000</div>');
+      html = html.replace('<div id="root"></div>', '<div id="root"></div><div style="position:fixed;right:8px;bottom:8px;z-index:9998;background:rgba(21,94,53,.9);color:white;border-radius:999px;padding:5px 9px;font:700 11px Microsoft JhengHei,sans-serif;pointer-events:none">12-1 視覺新版・資金 100000・全種子各 1</div>');
 
       frame.srcdoc = html;
       frame.addEventListener('load', () => { loading.style.display = 'none'; }, {once:true});
