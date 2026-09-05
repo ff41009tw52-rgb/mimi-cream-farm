@@ -141,8 +141,11 @@
         .de-stats p span { color: var(--color-sky); font-weight: 700; }
         .de-btns { display: flex; gap: 1rem; }
 
-        /* 開發測試用 */
-        .dev-btn-home { position: absolute; top: 1rem; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.6); color: white; border: 1px solid rgba(255,255,255,0.5); padding: 0.4rem 1.2rem; border-radius: 999px; font-size: 0.9rem; cursor: pointer; z-index: 20; pointer-events: auto; }
+        /* 開發測試用：上一部 / 回首頁 */
+        .dev-nav { position: absolute; top: 1rem; left: 50%; transform: translateX(-50%); display: flex; gap: 0.5rem; z-index: 20; pointer-events: auto; }
+        .dev-btn-home, .dev-btn-back { background: rgba(0, 0, 0, 0.6); color: white; border: 1px solid rgba(255,255,255,0.5); padding: 0.4rem 1rem; border-radius: 999px; font-size: 0.9rem; cursor: pointer; pointer-events: auto; white-space: nowrap; }
+        .dev-btn-home:hover, .dev-btn-back:hover { background: rgba(20, 83, 45, 0.9); }
+        .dev-btn-back:disabled { opacity: 0.35; cursor: not-allowed; }
 
     </style>
 </head>
@@ -177,7 +180,10 @@
             <!-- HUD -->
             <div class="hud-container">
                 <div class="hud-item"><span style="font-size: 1.2em;">🕒</span> 星期三 <span id="hud-time">07:45</span> <span id="hud-location" style="font-size: 0.8em; margin-left:8px; opacity:0.8;">民安國小</span></div>
-                <button id="btn-back-home" class="dev-btn-home">↺ 回首頁測試</button>
+                <div class="dev-nav">
+                    <button id="btn-back-step" class="dev-btn-back" disabled>← 回到上一步</button>
+                    <button id="btn-back-home" class="dev-btn-home">↺ 回首頁測試</button>
+                </div>
                 <div class="hud-item"><span style="font-size: 1.2em;">🌿</span> 香草園探索度 <span id="hud-exploration">0%</span></div>
             </div>
 
@@ -431,6 +437,7 @@
                     screenHome: document.getElementById('screen-home'),
                     screenGame: document.getElementById('screen-game'),
                     btnStart: document.getElementById('btn-start'),
+                    btnBackStep: document.getElementById('btn-back-step'),
                     btnBackHome: document.getElementById('btn-back-home'),
                     bgImage: document.getElementById('main-bg-image'),
                     bgPlaceholder: document.getElementById('bg-placeholder'),
@@ -457,6 +464,10 @@
                 this.isShowingChoices = false;
                 this.isProcessingEvent = false; 
                 this.currentBgPath = "";
+
+                // 測試用「回到上一步」歷史紀錄
+                this.history = [];
+                this.tempResponseCounter = 0;
                 
                 // 遊戲狀態紀錄
                 this.gameState = {
@@ -477,8 +488,14 @@
                     this.startGame();
                 });
 
+                this.dom.btnBackStep.addEventListener('click', () => {
+                    this.goBackOneStep();
+                });
+
                 this.dom.btnBackHome.addEventListener('click', () => {
                     this.resetGameUI();
+                    this.history = [];
+                    this.updateBackButton();
                     this.dom.screenGame.classList.remove('active');
                     this.dom.screenHome.classList.add('active');
                 });
@@ -519,32 +536,133 @@
                 this.resetGameUI();
                 // 初始化狀態
                 this.gameState = { credibility: 0, exploration: 0, observation: 0, unlockedChars: new Set(), questsCompleted: 0 };
+                this.history = [];
+                this.tempResponseCounter = 0;
+                this.currentNodeId = null;
+                this.currentBgPath = "";
                 this.dom.hudTime.innerHTML = '07:45';
                 this.dom.hudLocation.innerHTML = '民安國小';
                 this.dom.hudExploration.innerHTML = '0%';
+                this.updateBackButton();
                 
-                this.loadNode(STORY_DATA.initialScene);
+                this.loadNode(STORY_DATA.initialScene, { skipHistory: true });
             }
 
-            loadNode(nodeId) {
+            cloneGameState() {
+                return {
+                    credibility: this.gameState.credibility,
+                    exploration: this.gameState.exploration,
+                    observation: this.gameState.observation,
+                    unlockedChars: new Set(this.gameState.unlockedChars),
+                    questsCompleted: this.gameState.questsCompleted
+                };
+            }
+
+            pushHistorySnapshot() {
+                if (!this.currentNodeId || !STORY_DATA.nodes[this.currentNodeId]) return;
+
+                this.history.push({
+                    nodeId: this.currentNodeId,
+                    gameState: this.cloneGameState(),
+                    hudTime: this.dom.hudTime.innerText,
+                    hudLocation: this.dom.hudLocation.innerText,
+                    hudExploration: this.dom.hudExploration.innerText,
+                    currentBgPath: this.currentBgPath,
+                    bgImageSrc: this.dom.bgImage.getAttribute('src') || '',
+                    bgImageDisplay: this.dom.bgImage.style.display,
+                    bgPlaceholderDisplay: this.dom.bgPlaceholder.style.display,
+                    bgPlaceholderHTML: this.dom.bgPlaceholder.innerHTML
+                });
+
+                // 避免長時間測試造成紀錄無限增加
+                if (this.history.length > 200) this.history.shift();
+                this.updateBackButton();
+            }
+
+            updateBackButton() {
+                if (!this.dom.btnBackStep) return;
+                this.dom.btnBackStep.disabled = this.history.length === 0;
+            }
+
+            restoreBackgroundSnapshot(snapshot) {
+                this.currentBgPath = snapshot.currentBgPath || '';
+                this.dom.bgImage.src = snapshot.bgImageSrc || '';
+                this.dom.bgImage.style.display = snapshot.bgImageDisplay || 'block';
+                this.dom.bgPlaceholder.style.display = snapshot.bgPlaceholderDisplay || 'none';
+                this.dom.bgPlaceholder.innerHTML = snapshot.bgPlaceholderHTML || '';
+                document.querySelector('.game-bg-layer').style.opacity = 1;
+            }
+
+            goBackOneStep() {
+                if (this.history.length === 0) return;
+
+                clearInterval(this.typeInterval);
+                this.isTyping = false;
+                this.isShowingChoices = false;
+                this.isProcessingEvent = false;
+                this.dom.choicesContainer.classList.remove('show');
+                this.dom.systemOverlay.classList.remove('active');
+                this.dom.videoPlaceholder.classList.remove('active');
+                this.dom.badEndScreen.classList.remove('active');
+                this.dom.demoEndScreen.classList.remove('active');
+                this.dom.screenGame.classList.remove('effect-fadeout', 'effect-darken');
+                this.dom.dialogueBox.parentElement.style.display = 'block';
+
+                const snapshot = this.history.pop();
+                this.gameState = {
+                    credibility: snapshot.gameState.credibility,
+                    exploration: snapshot.gameState.exploration,
+                    observation: snapshot.gameState.observation,
+                    unlockedChars: new Set(snapshot.gameState.unlockedChars),
+                    questsCompleted: snapshot.gameState.questsCompleted
+                };
+                this.dom.hudTime.innerText = snapshot.hudTime;
+                this.dom.hudLocation.innerText = snapshot.hudLocation;
+                this.dom.hudExploration.innerText = snapshot.hudExploration;
+                this.restoreBackgroundSnapshot(snapshot);
+
+                this.loadNode(snapshot.nodeId, {
+                    skipHistory: true,
+                    skipSideEffects: true,
+                    skipEffects: true,
+                    skipBackground: true
+                });
+                this.updateBackButton();
+            }
+
+            loadNode(nodeId, options = {}) {
+                const {
+                    skipHistory = false,
+                    skipSideEffects = false,
+                    skipEffects = false,
+                    skipBackground = false
+                } = options;
+
                 if (!nodeId || !STORY_DATA.nodes[nodeId]) {
                     console.error(`Story node [${nodeId}] not found.`);
                     return;
                 }
 
+                if (!skipHistory && this.currentNodeId && this.currentNodeId !== nodeId) {
+                    this.pushHistorySnapshot();
+                }
+
                 const node = STORY_DATA.nodes[nodeId];
                 this.currentNodeId = nodeId;
                 this.isProcessingEvent = false;
+                this.updateBackButton();
                 
                 // 特殊節點處理
                 if (node.type === 'bad_end') { this.showBadEnd(); return; }
                 if (node.type === 'demo_end') { this.showDemoEnd(); return; }
 
                 // 背景切換與特效
-                if (node.sceneImage) this.updateBackground(node.sceneImage, node.fallbackImage);
-                if (node.effect === "flash-dark") this.triggerScreenEffect('flash-dark');
-                if (node.effect === "fade-out") this.triggerScreenEffect('fade-out');
-                if (node.effect === "darken") this.triggerScreenEffect('darken'); 
+                if (!skipBackground && node.sceneImage) this.updateBackground(node.sceneImage, node.fallbackImage);
+                if (!skipEffects) {
+                    if (node.effect === "flash-dark") this.triggerScreenEffect('flash-dark');
+                    if (node.effect === "fade-out") this.triggerScreenEffect('fade-out');
+                    if (node.effect === "darken") this.triggerScreenEffect('darken');
+                }
                 
                 // HUD 更新
                 if (node.updateTime) this.dom.hudTime.innerText = node.updateTime;
@@ -557,32 +675,34 @@
                     case "video_placeholder": this.showVideoPlaceholder(node); break;
                 }
                 
-                // 事件處理
-                if (node.toast) this.showToast(node.toast);
-                if (node.characterUnlock && !this.gameState.unlockedChars.has(node.characterUnlock)) {
-                    this.gameState.unlockedChars.add(node.characterUnlock);
-                    this.showToast({ title: "【人物資料更新】", message: node.characterUnlock, duration: 2500 });
-                }
-                if (node.regionUnlock) {
-                    this.showSystemOverlay({ title: "【新區域解鎖】", text: node.regionUnlock, duration: 2000, next: node.next, isAuto: true });
-                }
-                if (node.missionUpdate) this.showMissionOverlay(node.missionUpdate, false);
-                if (node.missionComplete) {
-                    this.gameState.questsCompleted++;
-                    this.showMissionOverlay(node.missionComplete, true);
-                }
-                
-                // 狀態變數增減
-                if (node.addObservation) {
-                    this.gameState.observation += node.addObservation;
-                    this.showToast({ title: "【系統】", message: `觀察力 +${node.addObservation}`, duration: 2000 });
-                }
-                if (node.addExploration) {
-                    this.gameState.exploration += node.addExploration;
-                    this.dom.hudExploration.innerText = `${this.gameState.exploration}%`;
-                    setTimeout(() => {
-                        this.showToast({ title: "【系統】", message: `香草園探索度 +${node.addExploration}%`, duration: 2500 });
-                    }, 500); // 稍微錯開 Toast
+                // 事件處理 / 狀態變數增減
+                // 回到上一步時略過副作用，避免 Toast、解鎖、探索度等重複累加
+                if (!skipSideEffects) {
+                    if (node.toast) this.showToast(node.toast);
+                    if (node.characterUnlock && !this.gameState.unlockedChars.has(node.characterUnlock)) {
+                        this.gameState.unlockedChars.add(node.characterUnlock);
+                        this.showToast({ title: "【人物資料更新】", message: node.characterUnlock, duration: 2500 });
+                    }
+                    if (node.regionUnlock) {
+                        this.showSystemOverlay({ title: "【新區域解鎖】", text: node.regionUnlock, duration: 2000, next: node.next, isAuto: true });
+                    }
+                    if (node.missionUpdate) this.showMissionOverlay(node.missionUpdate, false);
+                    if (node.missionComplete) {
+                        this.gameState.questsCompleted++;
+                        this.showMissionOverlay(node.missionComplete, true);
+                    }
+                    
+                    if (node.addObservation) {
+                        this.gameState.observation += node.addObservation;
+                        this.showToast({ title: "【系統】", message: `觀察力 +${node.addObservation}`, duration: 2000 });
+                    }
+                    if (node.addExploration) {
+                        this.gameState.exploration += node.addExploration;
+                        this.dom.hudExploration.innerText = `${this.gameState.exploration}%`;
+                        setTimeout(() => {
+                            this.showToast({ title: "【系統】", message: `香草園探索度 +${node.addExploration}%`, duration: 2500 });
+                        }, 500); // 稍微錯開 Toast
+                    }
                 }
             }
 
@@ -734,6 +854,9 @@
             handleChoiceSelection(choice, clickedBtn, event) {
                 event.stopPropagation(); 
                 if (!this.isShowingChoices) return;
+
+                // 選擇前先保存目前節點與狀態，方便「回到上一步」真正回到選擇前
+                this.pushHistorySnapshot();
                 this.isShowingChoices = false;
                 
                 if (choice.credibilityChange) {
@@ -751,11 +874,11 @@
                 setTimeout(() => {
                     this.dom.choicesContainer.classList.remove('show');
                     if (choice.response) {
-                        this.showDialogue(choice.response);
-                        STORY_DATA.nodes["_tempResponse"] = choice.response;
-                        this.currentNodeId = "_tempResponse";
+                        const tempId = `_tempResponse_${++this.tempResponseCounter}`;
+                        STORY_DATA.nodes[tempId] = choice.response;
+                        this.loadNode(tempId, { skipHistory: true });
                     } else if (choice.next) {
-                        this.loadNode(choice.next);
+                        this.loadNode(choice.next, { skipHistory: true });
                     }
                 }, 350);
             }
