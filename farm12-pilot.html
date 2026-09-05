@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Farm 12 視覺素材 Pilot</title>
+  <style>
+    :root {
+      --soil:#9a4b14;
+      --soil-dark:#5c2506;
+      --cream:#fff8e8;
+      --green:#237a3b;
+      --green-dark:#155628;
+      --gold:#f6c344;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;
+      background:linear-gradient(#bdeeff 0 28%,#8fda6e 28% 100%);
+      min-height:100vh;
+      color:#3d2a19;
+    }
+    .wrap{max-width:1100px;margin:auto;padding:22px 16px 42px}
+    .top{
+      background:rgba(255,248,232,.96);
+      border:4px solid #7a3b12;
+      border-radius:24px;
+      padding:16px 20px;
+      box-shadow:0 12px 28px rgba(74,43,14,.22);
+      margin-bottom:18px;
+    }
+    h1{margin:0;font-size:clamp(24px,4vw,40px);color:#63300e}
+    .sub{margin-top:8px;line-height:1.7;font-weight:700;color:#6a553f}
+    .safe{display:inline-block;margin-top:8px;padding:6px 10px;border-radius:999px;background:#daf4df;color:#16602e;font-weight:900}
+    .controls{
+      display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+      background:rgba(255,255,255,.88);border-radius:18px;padding:12px 14px;margin-bottom:18px;
+    }
+    .controls label{font-weight:900}
+    input[type="range"]{width:min(330px,62vw)}
+    .pct{min-width:48px;font-weight:900;color:#176331}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .card{
+      background:rgba(255,248,232,.96);border:3px solid #7f491b;border-radius:22px;padding:14px;
+      box-shadow:0 8px 20px rgba(75,45,20,.2);
+    }
+    .title{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:22px;font-weight:950}
+    .tag{font-size:12px;padding:5px 8px;border-radius:999px;background:#e8f5df;color:#2e6c2d}
+    .tag.legend{background:#fff0b9;color:#925500}
+    .field{
+      position:relative;height:250px;margin:12px 0 8px;border-radius:22px;
+      background:
+        radial-gradient(circle at 20% 22%,rgba(255,255,255,.14) 0 3px,transparent 4px),
+        radial-gradient(circle at 70% 56%,rgba(255,255,255,.12) 0 2px,transparent 3px),
+        linear-gradient(145deg,#ad571a,#77300d);
+      border:5px solid var(--soil-dark);overflow:hidden;display:grid;place-items:center;
+    }
+    .field::after{content:"";position:absolute;left:15%;right:15%;bottom:11px;height:6px;border-radius:50%;background:rgba(46,15,3,.26);filter:blur(2px)}
+    .sprite{
+      --x:0px;--y:0px;
+      width:112px;height:112px;
+      background-image:none;
+      background-repeat:no-repeat;
+      background-size:336px 224px;
+      background-position:var(--x) var(--y);
+      image-rendering:auto;
+      transform:scale(var(--scale,1));
+      transform-origin:center bottom;
+      filter:drop-shadow(0 8px 6px rgba(34,20,5,.24));
+      z-index:2;
+      transition:transform .25s ease,filter .25s ease;
+    }
+    .sprite.single-asset{background-size:contain;background-position:center}
+    .sprite.emoji-fallback{display:grid;place-items:center;background-image:none;font-size:72px}
+    .legendary .sprite{animation:legendPulse 1.55s ease-in-out infinite alternate}
+    .legendary.stage-seedling .sprite{filter:drop-shadow(0 0 4px rgba(255,247,173,.65)) drop-shadow(0 0 8px rgba(255,176,0,.42))}
+    .legendary.stage-pre .sprite{filter:drop-shadow(0 0 6px rgba(255,247,173,.88)) drop-shadow(0 0 13px rgba(255,176,0,.7))}
+    .legendary.stage-mature .sprite{filter:drop-shadow(0 0 7px #fff7ad) drop-shadow(0 0 18px #ffb000)}
+    @keyframes legendPulse{from{transform:scale(calc(var(--scale,1) * .96))}to{transform:scale(calc(var(--scale,1) * 1.06))}}
+    .stage{font-weight:950;text-align:center;font-size:16px;color:#5d3619}
+    .progress{height:12px;border-radius:99px;background:#e4d5b9;overflow:hidden;margin-top:8px}
+    .progress>i{display:block;height:100%;background:linear-gradient(90deg,#62b741,#f2bd34);width:0%;transition:width .25s ease}
+    .desc{margin-top:10px;font-size:13px;line-height:1.55;color:#6a5845}
+    .checks{margin-top:18px;background:rgba(255,255,255,.92);border-radius:18px;padding:14px 16px}
+    .checks b{color:#5f310f}
+    .checks ul{margin:8px 0 0;padding-left:22px;line-height:1.8}
+    .note{margin-top:16px;padding:12px 14px;background:#fff1ca;border-left:5px solid #efb131;border-radius:10px;font-weight:700;line-height:1.7}
+    @media(max-width:760px){
+      .grid{grid-template-columns:1fr}
+      .field{height:215px}
+      .sprite{width:112px;height:112px}
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="top">
+      <h1>🌱 Farm 12 視覺素材測試版</h1>
+      <div class="sub">這是獨立 Pilot 頁面，只測試圖片比例、生長階段與傳說植物特效；不修改正式 <code>12.html</code> 的遊戲邏輯。</div>
+      <span class="safe">✓ main 不變　✓ farm12-visual-assets 不變</span>
+    </section>
+
+    <section class="controls">
+      <label for="growth">模擬生長進度</label>
+      <input id="growth" type="range" min="0" max="100" value="20" step="1" />
+      <span class="pct" id="pct">20%</span>
+      <button id="early">幼苗</button>
+      <button id="middle">成熟前</button>
+      <button id="done">成熟</button>
+    </section>
+
+    <section class="grid">
+      <article class="card" data-crop="bokchoy">
+        <div class="title">青江菜 <span class="tag">短期二階段</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">確認「剛發芽幼苗 → 成熟株」在田格內的辨識度、大小與透明背景效果。</div>
+      </article>
+
+      <article class="card" data-crop="guava">
+        <div class="title">芭樂 <span class="tag">長期三階段</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">確認「幼苗 → 開花／幼果 → 成熟」切換是否自然，避免突然從 🌱 跳成水果。</div>
+      </article>
+
+      <article class="card" data-crop="loofah">
+        <div class="title">絲瓜 <span class="tag">長期三階段</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">確認「子葉幼苗 → 黃花與小幼果 → 可收成絲瓜」三階段能清楚區分。</div>
+      </article>
+
+      <article class="card" data-crop="mango">
+        <div class="title">芒果 <span class="tag">長期三階段</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">確認「紅褐嫩葉幼苗 → 花序與綠色幼果 → 黃紅成熟果」的連續成長感。</div>
+      </article>
+
+      <article class="card" data-crop="taro">
+        <div class="title">芋頭 <span class="tag">長期三階段</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">確認「心形初葉幼苗 → 大葉與球莖膨大 → 成熟芋頭」的地下作物成長感。</div>
+      </article>
+
+      <article class="card" data-crop="cabbage">
+        <div class="title">高麗菜 <span class="tag">長期三階段</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">確認「子葉幼苗 → 葉片展開並開始結球 → 緊實成熟葉球」三階段清楚可辨。</div>
+      </article>
+
+      <article class="card" data-crop="strawberry">
+        <div class="title">草莓 <span class="tag">長期三階段</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">確認「早期三出葉 → 白花與綠色幼果 → 紅色成熟果」的顏色與形態轉換。</div>
+      </article>
+
+      <article class="card" data-crop="pomelo">
+        <div class="title">文旦 <span class="tag">長期三階段</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">確認「柑橘幼樹 → 白花與小綠果 → 黃綠成熟文旦」具有連續成長感。</div>
+      </article>
+
+      <article class="card legendary" data-crop="golden_peach">
+        <div class="title">黃金仙桃 <span class="tag legend">傳說植物</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">確認「金紋幼樹 → 桃花與金綠幼果 → 黃金成熟仙桃」的魔法強度逐步增加。</div>
+      </article>
+
+      <article class="card legendary" data-crop="crystal_melon">
+        <div class="title">水晶寶石西瓜 <span class="tag legend">傳說植物</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">確認「水晶紋幼苗 → 黃花與幼瓜 → 完整寶石西瓜」仍保留西瓜植物形態。</div>
+      </article>
+
+      <article class="card legendary" data-crop="giant_pumpkin">
+        <div class="title">巨無霸南瓜 <span class="tag legend">傳說植物</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">確認成熟階段為明顯金橘發光巨型南瓜，而不是普通南瓜放大。</div>
+      </article>
+
+      <article class="card legendary" data-crop="white_strawberry">
+        <div class="title">初雪白草莓 <span class="tag legend">傳說植物</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div>
+        <div class="progress"><i></i></div>
+        <div class="desc">確認「霜紋幼苗 → 白花與淡色幼果 → 珍珠白成熟果」的雪系成長感。</div>
+      </article>
+
+      <article class="card" data-crop="sweetpotatoleaf">
+        <div class="title">地瓜葉 <span class="tag">短期二階段</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div><div class="progress"><i></i></div>
+        <div class="desc">確認「幼嫩扦插新芽 → 心形葉片繁茂藤叢」能清楚表現可收成的地瓜葉。</div>
+      </article>
+
+      <article class="card" data-crop="waterspinach">
+        <div class="title">空心菜 <span class="tag">短期二階段</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div><div class="progress"><i></i></div>
+        <div class="desc">確認「細長幼莖與初生真葉 → 狹長葉與中空莖繁茂株叢」容易區分。</div>
+      </article>
+
+      <article class="card" data-crop="waterbamboo">
+        <div class="title">筊白筍 <span class="tag">短期二階段</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div><div class="progress"><i></i></div>
+        <div class="desc">確認「早期禾本科嫩芽 → 基部形成膨大白色可食莖」不會被看成普通竹子。</div>
+      </article>
+
+      <article class="card" data-crop="whiteradish">
+        <div class="title">白蘿蔔 <span class="tag">短期二階段</span></div>
+        <div class="field"><div class="sprite"></div></div>
+        <div class="stage"></div><div class="progress"><i></i></div>
+        <div class="desc">確認「子葉與最初鋸齒真葉 → 大型白色膨大根與成熟葉叢」清楚可辨。</div>
+      </article>
+    </section>
+
+    <section class="checks">
+      <b>請測試時特別看：</b>
+      <ul>
+        <li>植物是否太大、太小、被裁切，或與土壤格比例不自然。</li>
+        <li>青江菜幼苗與成熟株是否容易區分。</li>
+        <li>五種短期作物的幼苗與成熟株是否都有明顯差異。</li>
+        <li>七種長期作物的三階段是否有連續成長感。</li>
+        <li>四種傳說作物的光效是否隨階段增強，但不遮住植物本體。</li>
+        <li>手機直式畫面是否仍清楚、不卡版。</li>
+      </ul>
+    </section>
+
+    <div class="note">此頁面通過後，才會把相同 renderer 接到測試分支中的真實農田；再經你確認後才合併回 <code>farm12-visual-assets</code>。正式 <code>main</code> 最後才會考慮更新。</div>
+  </main>
+
+  <script>
+    const atlas = {
+      // All crop stages use independent images; approved atlas art is preserved by lossless extraction.
+      bokchoy: {
+        seedling: {url:'assets/farm12/pilot/bokchoy-just-germinated.webp',label:'剛發芽幼苗'},
+        mature: {url:'assets/farm12/crops/mature/bokchoy.webp',label:'成熟'}
+      },
+      sweetpotatoleaf: {
+        seedling: {url:'assets/farm12/crops/seedling/sweetpotatoleaf.webp',label:'專屬幼苗'},
+        mature: {url:'assets/farm12/crops/mature/sweetpotatoleaf.webp',label:'成熟'}
+      },
+      waterspinach: {
+        seedling: {url:'assets/farm12/crops/seedling/waterspinach.webp',label:'專屬幼苗'},
+        mature: {url:'assets/farm12/crops/mature/waterspinach.webp',label:'成熟'}
+      },
+      waterbamboo: {
+        seedling: {url:'assets/farm12/crops/seedling/waterbamboo.webp',label:'專屬幼苗'},
+        mature: {url:'assets/farm12/crops/mature/waterbamboo.webp',label:'成熟'}
+      },
+      whiteradish: {
+        seedling: {url:'assets/farm12/crops/seedling/whiteradish.webp',label:'專屬幼苗'},
+        mature: {url:'assets/farm12/crops/mature/whiteradish.webp',label:'成熟'}
+      },
+      guava: {
+        seedling: {url:'assets/farm12/crops/seedling/guava.webp',label:'幼苗'},
+        pre: {url:'assets/farm12/crops/pre-mature/guava.webp',label:'開花／幼果期'},
+        mature: {url:'assets/farm12/crops/mature/guava.webp',label:'成熟'}
+      },
+      loofah: {
+        seedling: {url:'assets/farm12/crops/seedling/loofah.webp',label:'幼苗'},
+        pre: {url:'assets/farm12/crops/pre-mature/loofah.webp',label:'開花／幼果期'},
+        mature: {url:'assets/farm12/crops/mature/loofah.webp',label:'成熟'}
+      },
+      mango: {
+        seedling: {url:'assets/farm12/crops/seedling/mango.webp',label:'幼苗'},
+        pre: {url:'assets/farm12/crops/pre-mature/mango.webp',label:'開花／幼果期'},
+        mature: {url:'assets/farm12/crops/mature/mango.webp',label:'成熟'}
+      },
+      taro: {
+        seedling: {url:'assets/farm12/crops/seedling/taro.webp',label:'幼苗'},
+        pre: {url:'assets/farm12/crops/pre-mature/taro.webp',label:'大葉／球莖膨大期'},
+        mature: {url:'assets/farm12/crops/mature/taro.webp',label:'成熟'}
+      },
+      cabbage: {
+        seedling: {url:'assets/farm12/crops/seedling/cabbage.webp',label:'幼苗'},
+        pre: {url:'assets/farm12/crops/pre-mature/cabbage.webp',label:'開始結球期'},
+        mature: {url:'assets/farm12/crops/mature/cabbage.webp',label:'成熟'}
+      },
+      strawberry: {
+        seedling: {url:'assets/farm12/crops/seedling/strawberry.webp',label:'幼苗'},
+        pre: {url:'assets/farm12/crops/pre-mature/strawberry.webp',label:'白花／綠色幼果期'},
+        mature: {url:'assets/farm12/crops/mature/strawberry.webp',label:'成熟'}
+      },
+      pomelo: {
+        seedling: {url:'assets/farm12/crops/seedling/pomelo.webp',label:'幼苗'},
+        pre: {url:'assets/farm12/crops/pre-mature/pomelo.webp',label:'白花／綠色幼果期'},
+        mature: {url:'assets/farm12/crops/mature/pomelo.webp',label:'成熟'}
+      },
+      golden_peach: {
+        seedling: {url:'assets/farm12/crops/legendary/golden_peach-seedling.webp',label:'金紋幼苗'},
+        pre: {url:'assets/farm12/crops/legendary/golden_peach-pre-mature.webp',label:'桃花／金綠幼果期'},
+        mature: {url:'assets/farm12/crops/legendary/golden_peach.webp',label:'傳說成熟'}
+      },
+      crystal_melon: {
+        seedling: {url:'assets/farm12/crops/legendary/crystal_melon-seedling.webp',label:'水晶紋幼苗'},
+        pre: {url:'assets/farm12/crops/legendary/crystal_melon-pre-mature.webp',label:'黃花／寶石幼瓜期'},
+        mature: {url:'assets/farm12/crops/legendary/crystal_melon.webp',label:'傳說成熟'}
+      },
+      giant_pumpkin: {
+        seedling: {url:'assets/farm12/crops/legendary/giant_pumpkin-seedling.webp',label:'金紋幼苗'},
+        pre: {url:'assets/farm12/crops/legendary/giant_pumpkin-pre-mature.webp',label:'黃花／金橘幼果期'},
+        mature: {url:'assets/farm12/crops/legendary/giant_pumpkin.webp',label:'傳說成熟'}
+      },
+      white_strawberry: {
+        seedling: {url:'assets/farm12/crops/legendary/white_strawberry-seedling.webp',label:'霜紋幼苗'},
+        pre: {url:'assets/farm12/crops/legendary/white_strawberry-pre-mature.webp',label:'白花／淡色幼果期'},
+        mature: {url:'assets/farm12/crops/legendary/white_strawberry.webp',label:'傳說成熟'}
+      }
+    };
+
+    const range = document.getElementById('growth');
+    const pct = document.getElementById('pct');
+
+    function stateFor(crop,p){
+      if(crop==='bokchoy') return p >= 100 ? 'mature' : 'seedling';
+      if(['sweetpotatoleaf','waterspinach','waterbamboo','whiteradish'].includes(crop)) return p >= 100 ? 'mature' : 'seedling';
+      if(['guava','loofah','mango','taro','cabbage','strawberry','pomelo'].includes(crop)) return p >= 100 ? 'mature' : (p >= 38 ? 'pre' : 'seedling');
+      if(['golden_peach','crystal_melon','giant_pumpkin','white_strawberry'].includes(crop)) return p >= 100 ? 'mature' : (p >= 38 ? 'pre' : 'seedling');
+      return 'mature';
+    }
+
+    function render(){
+      const p = Number(range.value);
+      pct.textContent = p + '%';
+      document.querySelectorAll('.card').forEach(card=>{
+        const crop = card.dataset.crop;
+        const key = stateFor(crop,p);
+        const s = atlas[crop][key];
+        const sprite = card.querySelector('.sprite');
+        card.classList.toggle('stage-seedling',key==='seedling');
+        card.classList.toggle('stage-pre',key==='pre');
+        card.classList.toggle('stage-mature',key==='mature');
+        sprite.classList.toggle('single-asset',Boolean(s.url));
+        sprite.classList.toggle('emoji-fallback',Boolean(s.emoji));
+        sprite.style.backgroundImage = s.url ? `url('${s.url}')` : '';
+        sprite.textContent = s.emoji || '';
+        sprite.style.setProperty('--x',(s.x || 0)+'px');
+        sprite.style.setProperty('--y',(s.y || 0)+'px');
+        sprite.style.setProperty('--scale', p >= 100 ? '1.08' : (p >= 38 ? '1' : '.82'));
+        card.querySelector('.stage').textContent = s.label;
+        card.querySelector('.progress i').style.width = p + '%';
+      });
+    }
+
+    range.addEventListener('input',render);
+    document.getElementById('early').onclick=()=>{range.value=20;render()};
+    document.getElementById('middle').onclick=()=>{range.value=60;render()};
+    document.getElementById('done').onclick=()=>{range.value=100;render()};
+    render();
+  </script>
+</body>
+</html>

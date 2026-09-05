@@ -13,7 +13,7 @@ window.FARM12_ASSETS = {
     },
     bokchoy: {
       mature: 'assets/farm12/crops/mature/bokchoy.webp',
-      seedling: 'assets/farm12/crops/seedling/bokchoy.webp',
+      seedling: 'assets/farm12/pilot/bokchoy-just-germinated.webp',
       preMature: null,
       legendary: false
     },
@@ -49,14 +49,14 @@ window.FARM12_ASSETS = {
     },
     taro: {
       mature: 'assets/farm12/crops/mature/taro.webp',
-      seedling: null,
-      preMature: null,
+      seedling: 'assets/farm12/crops/seedling/taro.webp',
+      preMature: 'assets/farm12/crops/pre-mature/taro.webp',
       legendary: false
     },
     pomelo: {
       mature: 'assets/farm12/crops/mature/pomelo.webp',
-      seedling: null,
-      preMature: null,
+      seedling: 'assets/farm12/crops/seedling/pomelo.webp',
+      preMature: 'assets/farm12/crops/pre-mature/pomelo.webp',
       legendary: false
     },
     whiteradish: {
@@ -67,38 +67,38 @@ window.FARM12_ASSETS = {
     },
     cabbage: {
       mature: 'assets/farm12/crops/mature/cabbage.webp',
-      seedling: null,
-      preMature: null,
+      seedling: 'assets/farm12/crops/seedling/cabbage.webp',
+      preMature: 'assets/farm12/crops/pre-mature/cabbage.webp',
       legendary: false
     },
     strawberry: {
       mature: 'assets/farm12/crops/mature/strawberry.webp',
-      seedling: null,
-      preMature: null,
+      seedling: 'assets/farm12/crops/seedling/strawberry.webp',
+      preMature: 'assets/farm12/crops/pre-mature/strawberry.webp',
       legendary: false
     },
     golden_peach: {
       mature: 'assets/farm12/crops/legendary/golden_peach.webp',
-      seedling: null,
-      preMature: null,
+      seedling: 'assets/farm12/crops/legendary/golden_peach-seedling.webp',
+      preMature: 'assets/farm12/crops/legendary/golden_peach-pre-mature.webp',
       legendary: true
     },
     crystal_melon: {
       mature: 'assets/farm12/crops/legendary/crystal_melon.webp',
-      seedling: null,
-      preMature: null,
+      seedling: 'assets/farm12/crops/legendary/crystal_melon-seedling.webp',
+      preMature: 'assets/farm12/crops/legendary/crystal_melon-pre-mature.webp',
       legendary: true
     },
     giant_pumpkin: {
       mature: 'assets/farm12/crops/legendary/giant_pumpkin.webp',
-      seedling: null,
-      preMature: null,
+      seedling: 'assets/farm12/crops/legendary/giant_pumpkin-seedling.webp',
+      preMature: 'assets/farm12/crops/legendary/giant_pumpkin-pre-mature.webp',
       legendary: true
     },
     white_strawberry: {
       mature: 'assets/farm12/crops/legendary/white_strawberry.webp',
-      seedling: null,
-      preMature: null,
+      seedling: 'assets/farm12/crops/legendary/white_strawberry-seedling.webp',
+      preMature: 'assets/farm12/crops/legendary/white_strawberry-pre-mature.webp',
       legendary: true
     }
   },
