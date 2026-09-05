@@ -37,7 +37,7 @@
         .screen.active { opacity: 1; pointer-events: auto; }
 
         /* ================= 首頁 ================= */
-        .home-bg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; background: linear-gradient(135deg, #7dd3fc, #d9f99d); }
+        .home-bg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
         .bg-image { width: 100%; height: 100%; object-fit: cover; object-position: center; }
         .home-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(125, 211, 252, 0.6) 0%, rgba(217, 249, 157, 0.6) 100%); z-index: 2; }
         .ui-layer { position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 800px; padding: 0 2rem; }
@@ -153,7 +153,7 @@
         <!-- ==================== 首頁 ==================== -->
         <div id="screen-home" class="screen active">
             <div class="home-bg-layer">
-                <img class="bg-image" src="picture/herb-game/scene-00-minan-school-cover.jpg" alt="民安國小" onerror="this.style.display='none'">
+                <img class="bg-image" src="image_451bd6.jpg" alt="民安國小">
             </div>
             <div class="home-overlay"></div>
             <svg class="leaf-decoration leaf-1" style="--rot: -15deg;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C12 2 4 4 4 12C4 20 12 22 12 22C12 22 20 20 20 12C20 4 12 2 12 2Z" fill="#65a30d" stroke="#3f6212" stroke-width="1"/><path d="M12 22V12" stroke="#3f6212" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -240,7 +240,7 @@
                 // ==========================================
                 // Scene 01: 校門口
                 // ==========================================
-                "scene01_01": { type: "dialogue", sceneImage: "picture/herb-game/scene-01-school-gate.jpg", fallbackImage: "picture/herb-game/scene-00-minan-school-cover.jpg", speaker: "我", speakerType: "player", text: "今天也是普通的一天。", next: "scene01_02" },
+                "scene01_01": { type: "dialogue", sceneImage: "image_451bd6.jpg", speaker: "我", speakerType: "player", text: "今天也是普通的一天。", next: "scene01_02" },
                 "scene01_02": { type: "dialogue", speaker: "我", speakerType: "player", text: "書包有帶。", next: "scene01_03" },
                 "scene01_03": { type: "dialogue", speaker: "我", speakerType: "player", text: "水壺有帶。", next: "scene01_04" },
                 "scene01_04": { type: "dialogue", speaker: "我", speakerType: "player", text: "總覺得……", next: "scene01_05" },
@@ -256,7 +256,7 @@
                 // ==========================================
                 // Scene 02: 進入校園步道
                 // ==========================================
-                "scene02_01": { type: "dialogue", sceneImage: "picture/herb-game/scene-02-campus-walkway.jpg", speaker: "我", speakerType: "player", text: "應該真的沒有忘記什麼吧……", next: "scene02_02" },
+                "scene02_01": { type: "dialogue", sceneImage: "PLACEHOLDER_SCENE_02", speaker: "我", speakerType: "player", text: "應該真的沒有忘記什麼吧……", next: "scene02_02" },
                 "scene02_02": { type: "dialogue", speaker: "我", speakerType: "player", text: "……", next: "scene02_03" },
                 "scene02_03": { type: "dialogue", speaker: "我", speakerType: "player", text: "等等。", effect: "flash-dark", next: "scene02_04" },
                 "scene02_04": { type: "dialogue", speaker: "我", speakerType: "player", text: "今天……", next: "scene02_05" },
@@ -288,7 +288,7 @@
                 // ==========================================
                 // Scene 05: 抵達集合地點 (正式照片)
                 // ==========================================
-                "scene05_01": { type: "dialogue", sceneImage: "picture/herb-game/scene-05-gather-arrival.jpg", speaker: "我", speakerType: "player", text: "……", next: "scene05_02" },
+                "scene05_01": { type: "dialogue", sceneImage: "assets/images/demo/scene-05-gather-arrival.jpg", fallbackImage: "image_4539e4.jpg", speaker: "我", speakerType: "player", text: "……", next: "scene05_02" },
                 "scene05_02": { type: "dialogue", speaker: "我", speakerType: "player", text: "已經開始了。", next: "scene05_03" },
                 "scene05_03": { type: "dialogue", speaker: "我", speakerType: "player", text: "而且……", next: "scene05_04" },
                 "scene05_04": { type: "dialogue", speaker: "我", speakerType: "player", text: "我好像是最後一個。", toast: { title: "【狀態更新】", message: "遲到", duration: 2000 }, updateTime: "07:48", next: "scene06_01" },
@@ -311,7 +311,7 @@
                 // ==========================================
                 // Scene 07: 加入老師說明 (正式照片)
                 // ==========================================
-                "scene07_01": { type: "dialogue", sceneImage: "picture/herb-game/scene-07-gather-briefing.jpg", speaker: "我", speakerType: "player", text: "看起來……", next: "scene07_02" },
+                "scene07_01": { type: "dialogue", sceneImage: "assets/images/demo/scene-07-gather-briefing.jpg", fallbackImage: "image_453a04.jpg", speaker: "我", speakerType: "player", text: "看起來……", next: "scene07_02" },
                 "scene07_02": { type: "dialogue", speaker: "我", speakerType: "player", text: "老師正在說明今天的活動。", next: "scene08_01" },
 
                 // ==========================================
@@ -366,7 +366,7 @@
                 // ==========================================
                 // Scene 12: 抵達香草園 (新區域解鎖)
                 // ==========================================
-                "scene12_01": { type: "dialogue", sceneImage: "picture/herb-game/scene-12-herb-garden-wide.jpg", fallbackImage: "PLACEHOLDER_SCENE_12", updateLocation: "香草園", speaker: "系統", speakerType: "system", text: "到達香草園。", regionUnlock: "香草園", next: "scene13_01" },
+                "scene12_01": { type: "dialogue", sceneImage: "assets/images/demo/scene-12-herb-garden-wide.jpg", fallbackImage: "PLACEHOLDER_SCENE_12", updateLocation: "香草園", speaker: "系統", speakerType: "system", text: "到達香草園。", regionUnlock: "香草園", next: "scene13_01" },
                 
                 // ==========================================
                 // Scene 13: 第一次香草園說明
@@ -386,8 +386,8 @@
                 "scene14_02": {
                     type: "dialogue", speaker: "許恒維老師", speakerType: "npc", text: "你覺得哪一邊才是現在應該處理的？",
                     choices: [
-                        { id: "A", text: "左邊", isCorrect: true, response: { speaker: "許恒維老師", speakerType: "npc", text: "沒錯。", next: "scene16_01" } },
-                        { id: "B", text: "右邊", isCorrect: false, response: { speaker: "許恒維老師", speakerType: "npc", text: "再看仔細一點。", next: "scene14_wrong" } },
+                        { id: "A", text: "左邊", isCorrect: false, response: { speaker: "許恒維老師", speakerType: "npc", text: "再看仔細一點。", next: "scene14_wrong" } },
+                        { id: "B", text: "右邊", isCorrect: true, response: { speaker: "許恒維老師", speakerType: "npc", text: "沒錯。", next: "scene16_01" } },
                         { id: "C", text: "全部拔掉最快", isBadEnd: true, response: { speaker: "陳冠瑋老師", speakerType: "npc", text: "等等——", next: "bad_end_01" } }
                     ]
                 },
