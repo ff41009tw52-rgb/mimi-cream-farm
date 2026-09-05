@@ -60,7 +60,7 @@
     .sprite{
       --x:0px;--y:0px;
       width:112px;height:112px;
-      background-image:url('assets/farm12/pilot/pilot-atlas.webp');
+      background-image:none;
       background-repeat:no-repeat;
       background-size:336px 224px;
       background-position:var(--x) var(--y);
@@ -253,10 +253,10 @@
 
   <script>
     const atlas = {
-      // Atlas cell: 56x56, rendered at 2x. Coordinates below therefore use 112 px steps.
+      // All crop stages use independent images; approved atlas art is preserved by lossless extraction.
       bokchoy: {
         seedling: {url:'assets/farm12/pilot/bokchoy-just-germinated.webp',label:'剛發芽幼苗'},
-        mature: {x:-112,y:0,label:'成熟'}
+        mature: {url:'assets/farm12/crops/mature/bokchoy.webp',label:'成熟'}
       },
       sweetpotatoleaf: {
         seedling: {url:'assets/farm12/crops/seedling/sweetpotatoleaf.webp',label:'專屬幼苗'},
@@ -275,9 +275,9 @@
         mature: {url:'assets/farm12/crops/mature/whiteradish.webp',label:'成熟'}
       },
       guava: {
-        seedling: {x:-224,y:0,label:'幼苗'},
-        pre: {x:0,y:-112,label:'開花／幼果期'},
-        mature: {x:-112,y:-112,label:'成熟'}
+        seedling: {url:'assets/farm12/crops/seedling/guava.webp',label:'幼苗'},
+        pre: {url:'assets/farm12/crops/pre-mature/guava.webp',label:'開花／幼果期'},
+        mature: {url:'assets/farm12/crops/mature/guava.webp',label:'成熟'}
       },
       loofah: {
         seedling: {url:'assets/farm12/crops/seedling/loofah.webp',label:'幼苗'},

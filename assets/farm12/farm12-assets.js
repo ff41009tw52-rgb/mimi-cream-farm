@@ -13,7 +13,7 @@ window.FARM12_ASSETS = {
     },
     bokchoy: {
       mature: 'assets/farm12/crops/mature/bokchoy.webp',
-      seedling: 'assets/farm12/crops/seedling/bokchoy.webp',
+      seedling: 'assets/farm12/pilot/bokchoy-just-germinated.webp',
       preMature: null,
       legendary: false
     },
