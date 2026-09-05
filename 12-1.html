@@ -179,6 +179,27 @@
       ].join('\n');
       html = replaceOnce(html, oldSlot, newSlot, '農田生長圖片');
 
+      const oldPlotSummaryArt = [
+        '                        <div className={`text-4xl md:text-5xl group-hover:scale-110 transition-transform z-20 ${isGiantPumpkin && matureCount === plantedCount ? \'animate-pulse\' : \'\'}`}>',
+        '                          {plantedCount > 0 ? (',
+        "                            isGiantPumpkin ? '🎃' : (matureCount === plantedCount ? '✨' : '🌿')",
+        "                          ) : '🕳️'}",
+        '                        </div>'
+      ].join('\n');
+      const newPlotSummaryArt = [
+        '                        <div className={`text-4xl md:text-5xl group-hover:scale-110 transition-transform z-20 ${isGiantPumpkin && matureCount === plantedCount ? \'animate-pulse\' : \'\'}`}>',
+        '                          {plantedCount > 0 ? (',
+        '                            <CropArt',
+        '                              crop={plot.slots.find(slot => slot?.crop)?.crop}',
+        '                              growth={plot.slots.find(slot => slot?.crop)?.growth || 0}',
+        "                              fallback={plot.slots.find(slot => slot?.crop)?.crop?.icon || '🌱'}",
+        '                              mode="field"',
+        '                            />',
+        "                          ) : '🕳️'}",
+        '                        </div>'
+      ].join('\n');
+      html = replaceOnce(html, oldPlotSummaryArt, newPlotSummaryArt, '農田總覽實際作物圖片');
+
       html = replaceOnce(
         html,
         'setFlyingCrops(prev => [...prev, { id: newId, icon: crop.icon, startX, startY, endX, endY }]);',
