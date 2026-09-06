@@ -1,0 +1,28 @@
+name: Run trial right portrait patch
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch herbgame
+        run: python3 .github/scripts/patch_trial_right_portrait.py
+      - name: Commit patch
+        run: |
+          git config user.name "ff41009tw52-rgb"
+          git config user.email "ff41009tw52@gmail.com"
+          git add herbgame.html
+          git commit -m "Move trial teacher portrait right and map all three reactions"
+          git push
+      - name: Cleanup temporary patch files
+        run: |
+          git pull --rebase
+          rm -f .github/scripts/patch_trial_right_portrait.py
+          rm -f .github/workflows/run-trial-right-portrait-patch.yml
+          git add -A
+          git commit -m "Remove temporary trial portrait patch files"
+          git push
