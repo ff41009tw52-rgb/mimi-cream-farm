@@ -1,0 +1,20 @@
+name: Audit herbgame image quality
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/audit-herbgame-images.yml'
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect herbgame image dimensions and sizes
+        shell: bash
+        run: |
+          echo '=== HERBGAME IMAGE AUDIT ==='
+          find picture/herb-game -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) -print0 | sort -z | while IFS= read -r -d '' f; do
+            echo "--- $f"
+            stat -c 'bytes=%s' "$f"
+            file "$f"
+          done
