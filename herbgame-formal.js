@@ -23,7 +23,7 @@
   }
 
   function repairReleaseJs(jsText){
-    // 2026-09-06 正式版部署修正：TEMP_SCENE_IMAGES 必須先於 CAMPUS_LOCATIONS 宣告。
+    // TEMP_SCENE_IMAGES 必須先於 CAMPUS_LOCATIONS 宣告。
     const tempToken='const TEMP_SCENE_IMAGES = {';
     const campusToken='const CAMPUS_LOCATIONS = [';
     const tempStart=jsText.indexOf(tempToken);
@@ -63,6 +63,13 @@
     jsText=jsText.replaceAll(
       'picture/herb-game/characters/chen-guanwei-normal.jpg',
       'picture/herb-game/chen-guanwei-normal.png'
+    );
+
+    // 正式版是「非同步抓取→解壓→eval」後才執行。
+    // 此時 DOMContentLoaded 通常早已觸發，原本只監聽該事件會導致 GameEngine 永遠不建立，開始按鈕完全無反應。
+    jsText=jsText.replace(
+      /window\.addEventListener\(\s*['"]DOMContentLoaded['"]\s*,\s*\(\)\s*=>\s*\{\s*window\.gameEngine\s*=\s*new\s+GameEngine\(\)\s*;\s*\}\s*\)\s*;/s,
+      `(()=>{\n  const bootGame=()=>{\n    if(!window.gameEngine) window.gameEngine=new GameEngine();\n  };\n  if(document.readyState==='loading'){\n    document.addEventListener('DOMContentLoaded',bootGame,{once:true});\n  }else{\n    bootGame();\n  }\n})();`
     );
 
     return jsText;
