@@ -79,12 +79,14 @@
         .dialogue-wrapper { overflow: visible; }
         .speaker-portrait {
             position: absolute;
-            left: 50%;
-            bottom: calc(100% + 1.5vh);
-            transform: translateX(-50%);
-            width: clamp(260px, 30vw, 430px);
-            max-height: 54vh;
+            left: auto;
+            right: -6vw;
+            bottom: calc(100% - 1vh);
+            transform: none;
+            width: clamp(220px, 22vw, 340px);
+            max-height: 52vh;
             object-fit: contain;
+            object-position: bottom center;
             z-index: 12;
             pointer-events: none;
             background: transparent;
@@ -96,9 +98,10 @@
         .speaker-portrait.hidden { display: none; }
         @media (max-width: 768px) {
             .speaker-portrait {
-                width: clamp(230px, 52vw, 340px);
-                max-height: 50vh;
-                bottom: calc(100% + 1vh);
+                right: -3vw;
+                width: clamp(170px, 35vw, 250px);
+                max-height: 44vh;
+                bottom: calc(100% - 0.5vh);
             }
         }
         .dialogue-box { position: relative; width: 100%; height: 100%; background: rgba(20, 83, 45, 0.85); backdrop-filter: blur(8px); border: 3px solid rgba(255, 255, 255, 0.6); border-radius: 16px; padding: 2rem 2.5rem 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; cursor: pointer; }
@@ -362,20 +365,20 @@
                 "scene09_02": { type: "dialogue", speaker: "我", speakerType: "player", text: "……", next: "scene09_03" },
                 "scene09_03": { type: "dialogue", speaker: "我", speakerType: "player", text: "老師該不會已經發現……", next: "scene09_04" },
                 "scene09_04": { type: "dialogue", speaker: "我", speakerType: "player", text: "我是剛剛才來的吧？", next: "scene09_05" },
-                "scene09_05": { type: "dialogue", speaker: "陳冠瑋老師", speakerType: "npc", text: "那邊那位同學。", next: "scene09_06" },
+                "scene09_05": { type: "dialogue", speaker: "陳冠瑋老師", speakerType: "npc", text: "那邊那位同學。", portrait: "picture/herb-game/chen-guanwei-normal.png", next: "scene09_06" },
                 "scene09_06": { type: "dialogue", speaker: "我", speakerType: "player", text: "……？", next: "scene09_07" },
                 "scene09_07": {
-                    type: "dialogue", speaker: "陳冠瑋老師", speakerType: "npc", text: "你是不是剛到？",
+                    type: "dialogue", speaker: "陳冠瑋老師", speakerType: "npc", text: "你是不是剛到？", portrait: "picture/herb-game/chen-guanwei-normal.png",
                     choices: [
-                        { id: "A", text: "沒有啊，我一直都在", credibilityChange: -5, response: { speaker: "陳冠瑋老師", speakerType: "npc", text: "是嗎？", next: "scene09_07_A2" } },
-                        { id: "B", text: "對不起，我忘記今天星期三了", credibilityChange: 5, response: { speaker: "陳冠瑋老師", speakerType: "npc", text: "至少你有趕過來。", next: "scene09_07_B2" } },
-                        { id: "C", text: "老師，我只是去巡視校園", credibilityChange: -10, response: { speaker: "陳冠瑋老師", speakerType: "npc", text: "……巡視校園？", next: "scene09_07_C2" } }
+                        { id: "A", text: "沒有啊，我一直都在", credibilityChange: -5, response: { speaker: "陳冠瑋老師", speakerType: "npc", text: "是嗎？", portrait: "picture/herb-game/chen-guanwei-thinking.png", next: "scene09_07_A2" } },
+                        { id: "B", text: "對不起，我忘記今天星期三了", credibilityChange: 5, response: { speaker: "陳冠瑋老師", speakerType: "npc", text: "至少你有趕過來。", portrait: "picture/herb-game/chen-guanwei-surprised.png", next: "scene09_07_B2" } },
+                        { id: "C", text: "老師，我只是去巡視校園", credibilityChange: -10, response: { speaker: "陳冠瑋老師", speakerType: "npc", text: "……巡視校園？", portrait: "picture/herb-game/chen-guanwei-thinking.png", next: "scene09_07_C2" } }
                     ]
                 },
                 "scene09_07_A2": { type: "dialogue", speaker: "我", speakerType: "player", text: "糟糕，他好像不相信。", next: "scene09_end" },
                 "scene09_07_B2": { type: "dialogue", speaker: "我", speakerType: "player", text: "對不起……", next: "scene09_end" },
-                "scene09_07_C2": { type: "dialogue", speaker: "陳冠瑋老師", speakerType: "npc", text: "好。", next: "scene09_07_C3" },
-                "scene09_07_C3": { type: "dialogue", speaker: "陳冠瑋老師", speakerType: "npc", text: "那你等等就順便巡視一下香草園。", next: "scene09_end" },
+                "scene09_07_C2": { type: "dialogue", speaker: "陳冠瑋老師", speakerType: "npc", text: "好。", portrait: "picture/herb-game/chen-guanwei-thinking.png", next: "scene09_07_C3" },
+                "scene09_07_C3": { type: "dialogue", speaker: "陳冠瑋老師", speakerType: "npc", text: "那你等等就順便巡視一下香草園。", portrait: "picture/herb-game/chen-guanwei-thinking.png", next: "scene09_end" },
                 "scene09_end": { 
                     type: "dialogue", speaker: "許恒維老師", speakerType: "npc", text: "既然人都到了，我們就準備去香草園吧。", 
                     missionUpdate: { title: "【主線任務更新】", name: "前往香草園", objectives: ["□ 前往香草園", "□ 認識環境", "□ 了解基本整理方式"] }, 
@@ -420,7 +423,7 @@
                     choices: [
                         { id: "A", text: "左邊", isCorrect: false, response: { speaker: "許恒維老師", speakerType: "npc", text: "再看仔細一點。", next: "scene14_wrong" } },
                         { id: "B", text: "右邊", isCorrect: true, response: { speaker: "許恒維老師", speakerType: "npc", text: "沒錯。", next: "scene16_01" } },
-                        { id: "C", text: "全部拔掉最快", isBadEnd: true, response: { speaker: "陳冠瑋老師", speakerType: "npc", text: "等等——", next: "bad_end_01" } }
+                        { id: "C", text: "全部拔掉最快", isBadEnd: true, response: { speaker: "陳冠瑋老師", speakerType: "npc", text: "等等——", portrait: "picture/herb-game/chen-guanwei-surprised.png", next: "bad_end_01" } }
                     ]
                 },
                 "scene14_wrong": { type: "dialogue", speaker: "我", speakerType: "player", text: "好像真的不太一樣……", toast: { title: "【系統】", message: "觀察力練習中", duration: 2000 }, next: "scene14_02" }, // 答錯回到選擇
@@ -795,40 +798,8 @@
                 }
             }
             getPortraitForNode(node) {
-                if (!node || !node.speaker) return null;
-                const text = node.text || "";
-
-                // 只在需要強化情緒的橋段顯示冠瑋老師人物圖。
-                // normal：開始質疑主角
-                // thinking：玩家選到扣分／可疑回答後
-                // surprised：玩家選到加分／誠實回答後
-                if (node.speaker === "陳冠瑋老師") {
-                    const normalTexts = [
-                        "那邊那位同學。",
-                        "你是不是剛到？"
-                    ];
-                    const thinkingTexts = [
-                        "是嗎？",
-                        "……巡視校園？",
-                        "好。",
-                        "那你等等就順便巡視一下香草園。"
-                    ];
-                    const surprisedTexts = [
-                        "至少你有趕過來。",
-                        "等等——"
-                    ];
-
-                    if (normalTexts.some(t => text.includes(t))) {
-                        return "picture/herb-game/chen-guanwei-normal.png";
-                    }
-                    if (thinkingTexts.some(t => text.includes(t))) {
-                        return "picture/herb-game/chen-guanwei-thinking.png";
-                    }
-                    if (surprisedTexts.some(t => text.includes(t))) {
-                        return "picture/herb-game/chen-guanwei-surprised.png";
-                    }
-                }
-                return null;
+                if (!node || node.speaker !== "陳冠瑋老師") return null;
+                return node.portrait || null;
             }
 
             updateSpeakerPortrait(node) {
