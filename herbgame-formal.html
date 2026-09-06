@@ -167,6 +167,17 @@
         .member-avatar-slot { width:92px; min-height:92px; border-radius:18px; border:2px dashed #cbd5e1; background:linear-gradient(180deg,#f8fafc 0%,#eef2f7 100%); display:flex; align-items:center; justify-content:center; text-align:center; color:#64748b; font-weight:900; line-height:1.25; padding:.5rem; box-sizing:border-box; }
         .member-avatar-slot.locked { color:#94a3b8; }
         .member-avatar-slot small { display:block; font-size:.8rem; font-weight:800; opacity:.9; }
+        .member-avatar-img {
+            width:100%;
+            height:100%;
+            min-height:88px;
+            object-fit:contain;
+            object-position:center bottom;
+            display:block;
+            border-radius:14px;
+            background:transparent;
+            image-rendering:auto;
+        }
         .member-main { min-width:0; }
         .member-name { font-size: 1.2rem; font-weight: 900; color: var(--color-dark-green); margin-bottom: 0.35rem; }
         .member-desc { color: #475569; line-height: 1.6; font-weight: 600; }
@@ -506,6 +517,8 @@
                 description: "重視快樂學習，鼓勵大家勇敢思考、合作創新，也提醒大家關心身邊的人。每天早上常能看到他在校門口熱情地和大家打招呼。"
             },
             "陳冠瑋老師": { id:"teacher_chen", name:"陳冠瑋老師", relationshipType:"trust",
+                avatar: "picture/herb-game/chen-guanwei-thinking.png",
+                avatarFallback: "https://raw.githubusercontent.com/ff41009tw52-rgb/mimi-cream-farm/main/picture/herb-game/chen-guanwei-thinking.png",
                 description: "香草服務隊的活動引導老師，負責帶領大家完成任務、處理現場狀況，也常在關鍵時刻提醒大家不要做出太驚人的事情。"
             },
             "許恒維老師": { id:"teacher_xu", name:"許恒維老師", relationshipType:"trust",
@@ -819,6 +832,8 @@
                 GITHUB_HERB_RAW + "scene-14-herb-vs-weed.jpg",
             "picture/herb-game/campus-map-base.png":
                 GITHUB_HERB_RAW + "campus-map-base.png",
+            "picture/herb-game/chen-guanwei-thinking.png":
+                GITHUB_HERB_RAW + "chen-guanwei-thinking.png",
 
             // 尚未有正式圖：不要先要求一個不存在的 GitHub 路徑再等 404，
             // 直接交給固定網路圖片。
@@ -1607,7 +1622,15 @@
                     const unlocked = this.gameState.unlockedChars.has(name);
                     const trust = this.gameState.trustByMember[name] ?? 10;
                     const trustMax = this.gameState.trustMaxByMember?.[name] ?? (name === "校長" ? 100 : 50);
-                    return `<div class="member-card ${unlocked ? '' : 'locked'}"><div class="member-card-layout"><div class="member-avatar-slot ${unlocked ? '' : 'locked'}">${unlocked ? '人物頭像<br><small>待放入</small>' : '？？<br><small>未解鎖</small>'}</div><div class="member-main"><div class="member-name">${unlocked ? name : '？？？'}<span class="member-type-badge">信任度</span></div><div class="member-desc">${unlocked ? info.description : '尚未解鎖。'}</div>${unlocked ? `<div class="member-trust"><span>信任度</span><span class="member-trust-value">${trust} / ${trustMax}</span></div>` : ''}</div></div></div>`;
+                    const avatarHtml = unlocked && info.avatar
+                        ? `<img class="member-avatar-img"
+                               src="${info.avatar}"
+                               alt="${name}"
+                               referrerpolicy="no-referrer"
+                               onerror="if(!this.dataset.rawTried && '${info.avatarFallback || ''}'){this.dataset.rawTried='1';this.src='${info.avatarFallback || ''}';}else{this.style.display='none';this.parentElement.innerHTML='人物頭像<br><small>載入失敗</small>';}" />`
+                        : (unlocked ? '人物頭像<br><small>待放入</small>' : '？？<br><small>未解鎖</small>');
+
+                    return `<div class="member-card ${unlocked ? '' : 'locked'}"><div class="member-card-layout"><div class="member-avatar-slot ${unlocked ? '' : 'locked'}">${avatarHtml}</div><div class="member-main"><div class="member-name">${unlocked ? name : '？？？'}<span class="member-type-badge">信任度</span></div><div class="member-desc">${unlocked ? info.description : '尚未解鎖。'}</div>${unlocked ? `<div class="member-trust"><span>信任度</span><span class="member-trust-value">${trust} / ${trustMax}</span></div>` : ''}</div></div></div>`;
                 }).join('');
                 const studentCards = STUDENT_ORDER.map(id => {
                     const info=STUDENT_INFO[id], unlocked=this.gameState.unlockedStudents.has(id), relation=this.gameState.studentRelations[id] || {bond:0,status:"未認識",completedEvents:[]};
