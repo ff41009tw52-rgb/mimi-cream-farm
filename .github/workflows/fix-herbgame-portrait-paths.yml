@@ -1,0 +1,41 @@
+name: Fix herbgame portrait paths
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-herbgame-portrait-paths.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fix trial portrait paths
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('herbgame.html')
+          s = p.read_text(encoding='utf-8')
+          old = 'picture/herb-game/characters/chen-guanwei-'
+          new = 'picture/herb-game/chen-guanwei-'
+          count = s.count(old)
+          if count == 0:
+              raise SystemExit('Expected old portrait paths were not found in herbgame.html')
+          s = s.replace(old, new)
+          p.write_text(s, encoding='utf-8')
+          print(f'Replaced {count} portrait path occurrence(s).')
+          PY
+          git config user.name "ff41009tw52-rgb"
+          git config user.email "ff41009tw52@gmail.com"
+          git add herbgame.html
+          git commit -m "Fix trial herbgame portrait image paths"
+          git push
+      - name: Remove one-shot workflow
+        shell: bash
+        run: |
+          git pull --rebase
+          rm -f .github/workflows/fix-herbgame-portrait-paths.yml
+          git add -A
+          git commit -m "Remove temporary herbgame portrait path workflow"
+          git push
