@@ -9,6 +9,24 @@
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone@7.26.10/babel.min.js"></script>
+  <link rel="preload" as="image" type="image/webp" href="assets/farm12/ui/raster/question.webp">
+  <link rel="preload" as="image" type="image/webp" href="assets/farm12/ui/raster/sun.webp">
+  <link rel="preload" as="image" type="image/webp" href="assets/farm12/ui/raster/rain.webp">
+  <link rel="preload" as="image" type="image/webp" href="assets/farm12/ui/raster/storm.webp">
+  <link rel="preload" as="image" type="image/webp" href="assets/farm12/ui/raster/inbox.webp">
+  <link rel="preload" as="image" type="image/webp" href="assets/farm12/tools/watering-can.webp">
+  <link rel="preload" as="image" type="image/webp" href="assets/farm12/tools/sprinkler.webp">
+  <link rel="preload" as="image" type="image/webp" href="assets/farm12/tools/pruning-shears.webp">
+  <link rel="preload" as="image" type="image/webp" href="assets/farm12/tools/chili-spray.webp">
+  <link rel="preload" as="image" type="image/webp" href="assets/farm12/crops/seedling/sweetpotatoleaf.webp">
+  <style>
+    .farm12-action-fx{position:fixed;z-index:9997;width:86px;height:86px;display:grid;place-items:center;pointer-events:none;transform:translate(-50%,-50%);animation:farm12ActionPop .72s cubic-bezier(.18,.9,.3,1) both}
+    .farm12-action-fx::after{content:"";position:absolute;inset:5px;border-radius:50%;border:4px solid rgba(255,255,255,.9);box-shadow:0 0 0 8px rgba(250,204,21,.28);animation:farm12ActionRing .72s ease-out both}
+    .farm12-item-fx{width:70px;height:70px;position:relative;z-index:2;filter:drop-shadow(0 8px 7px rgba(15,23,42,.35))}
+    @keyframes farm12ActionPop{0%{opacity:0;transform:translate(-50%,-35%) scale(.35) rotate(-8deg)}35%{opacity:1;transform:translate(-50%,-55%) scale(1.15) rotate(4deg)}100%{opacity:0;transform:translate(-50%,-92%) scale(.85) rotate(0)}}
+    @keyframes farm12ActionRing{0%{opacity:0;transform:scale(.45)}35%{opacity:1}100%{opacity:0;transform:scale(1.45)}}
+    @media(prefers-reduced-motion:reduce){.farm12-action-fx,.farm12-action-fx::after{animation-duration:.01ms!important}}
+  </style>
 <style>.farm12-art-wrap{display:inline-grid;place-items:center;vertical-align:middle;transition:transform .25s ease,filter .25s ease}.farm12-art{display:block;width:54px;height:54px;object-fit:contain;filter:drop-shadow(0 5px 4px rgba(50,24,5,.25))}.farm12-art-wrap.farm12-field{width:56px;height:56px}.farm12-art-wrap.farm12-field .farm12-art{width:56px;height:56px}.farm12-art-wrap.farm12-seedbag{width:24px;height:24px;position:relative;z-index:2}.farm12-art-wrap.farm12-seedbag .farm12-art{width:24px;height:24px}.farm12-art-wrap.farm12-flying{width:64px;height:64px}.farm12-art-wrap.farm12-flying .farm12-art{width:64px;height:64px}.farm12-art-wrap.farm12-shop{width:42px;height:42px;flex:0 0 42px}.farm12-art-wrap.farm12-shop .farm12-art{width:42px;height:42px}.farm12-art-wrap.farm12-sell{width:48px;height:48px;flex:0 0 48px}.farm12-art-wrap.farm12-sell .farm12-art{width:48px;height:48px}.farm12-art-wrap.farm12-gallery{width:72px;height:72px;flex:0 0 72px}.farm12-art-wrap.farm12-gallery .farm12-art{width:72px;height:72px}.farm12-art-wrap.farm12-quest{width:42px;height:42px}.farm12-art-wrap.farm12-quest .farm12-art{width:42px;height:42px}.farm12-status-art{display:inline-block;object-fit:contain;vertical-align:middle;filter:drop-shadow(0 4px 3px rgba(36,20,6,.24))}.farm12-status-small{width:20px;height:20px}.farm12-status-summary{width:52px;height:52px}.farm12-status-dialog{width:76px;height:76px}.farm12-item-art{display:inline-block;width:40px;height:40px;object-fit:contain;vertical-align:middle;flex:0 0 auto;filter:drop-shadow(0 4px 3px rgba(36,20,6,.2))}.farm12-item-tool{width:42px;height:42px}.farm12-item-shop{width:48px;height:48px}.farm12-item-inline{width:22px;height:22px}.farm12-item-action{width:24px;height:24px;margin-right:4px}.farm12-ui-icon{display:inline-block;width:1.15em;height:1.15em;object-fit:contain;vertical-align:-.2em;flex:0 0 auto;filter:drop-shadow(0 2px 2px rgba(36,20,6,.16))}.farm12-version-switch{position:fixed;right:8px;bottom:8px;z-index:9998;display:flex;align-items:center;gap:7px;background:rgba(21,94,53,.94);color:white;border-radius:999px;padding:6px 10px;font:700 11px Microsoft JhengHei,sans-serif;box-shadow:0 4px 14px rgba(15,23,42,.25)}.farm12-version-switch a{color:#155e35;background:white;border-radius:999px;padding:5px 8px;text-decoration:none;white-space:nowrap}@media(pointer:coarse){button,a,input{min-height:44px;touch-action:manipulation}}@media(max-width:639px){.farm12-version-switch{left:8px;right:8px;bottom:6px;justify-content:space-between}.farm12-item-shop{width:42px;height:42px}}.farm12-art-wrap.farm12-legendary{position:relative}.farm12-art-wrap.farm12-legendary .farm12-art{animation:farm12LegendPulse 1.55s ease-in-out infinite alternate}.farm12-art-wrap.farm12-legendary-seedling .farm12-art{filter:drop-shadow(0 0 3px rgba(255,247,172,.6)) drop-shadow(0 0 6px rgba(255,176,0,.42))}.farm12-art-wrap.farm12-legendary-pre .farm12-art{filter:drop-shadow(0 0 5px rgba(255,247,172,.85)) drop-shadow(0 0 10px rgba(255,176,0,.68))}.farm12-art-wrap.farm12-legendary-mature .farm12-art{filter:drop-shadow(0 0 6px #fff7ac) drop-shadow(0 0 15px #ffb000)}.farm12-art-wrap.farm12-legendary::after{content:"";position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;box-shadow:-13px -9px 0 #fff7ac,15px -17px 0 #fff;animation:farm12LegendSparkle 1.8s ease-in-out infinite;pointer-events:none}.farm12-art-wrap.farm12-legendary-seedling::after{opacity:.25}.farm12-art-wrap.farm12-legendary-pre::after{opacity:.55}.farm12-art-wrap.farm12-legendary-mature::after{opacity:1}@keyframes farm12LegendPulse{from{transform:scale(.96)}to{transform:scale(1.08)}}@keyframes farm12LegendSparkle{0%,100%{transform:scale(.7);opacity:.25}50%{transform:scale(1.25);opacity:1}}@media(min-width:768px){.farm12-art-wrap.farm12-field{width:78px;height:78px}.farm12-art-wrap.farm12-field .farm12-art{width:78px;height:78px}}</style></head>
 <body class="bg-slate-900 overflow-x-hidden">
 
@@ -417,10 +435,33 @@
       const [message, setMessage] = useState("歡迎來到 四季農莊！");
       const [showModal, setShowModal] = useState(null);
       const [saveExists, setSaveExists] = useState(false);
+      const [actionFx, setActionFx] = useState(null);
+      const actionFxTimer = useRef(null);
+
+      const triggerActionFx = useCallback((type, point) => {
+        const itemMap = {
+          water: day >= 20 ? 'sprinkler' : 'wateringCan',
+          weed: 'weed',
+          chili: 'chili',
+          fert_leaf: 'fert_leaf',
+          fert_root: 'fert_root',
+          fert_fruit: 'fert_fruit',
+          net: 'net',
+          windbreak: 'windbreak'
+        };
+        const item = itemMap[type];
+        if (!item) return;
+        const x = Number.isFinite(point?.clientX) ? point.clientX : window.innerWidth / 2;
+        const y = Number.isFinite(point?.clientY) ? point.clientY : window.innerHeight / 2;
+        window.clearTimeout(actionFxTimer.current);
+        setActionFx({ id: Date.now(), item, x, y });
+        actionFxTimer.current = window.setTimeout(() => setActionFx(null), 760);
+      }, [day]);
 
       useEffect(() => {
         const saved = localStorage.getItem('farm_tycoon_save_v2_12_1');
         if (saved) setSaveExists(true);
+        return () => window.clearTimeout(actionFxTimer.current);
       }, []);
 
       const removeFlyingCrop = useCallback((id) => {
@@ -736,7 +777,8 @@
         if (nextDayNum % 100 === 0 && nextDayNum <= 300) setShowModal('contest');
       };
 
-      const handleSlotClick = (plotId, slotId) => {
+      const handleSlotClick = (plotId, slotId, clickPoint) => {
+        const actionPoint = clickPoint ? { clientX: clickPoint.clientX, clientY: clickPoint.clientY } : null;
         setPlots(prev => {
           const newPlots = JSON.parse(JSON.stringify(prev));
           const targetPlot = newPlots[plotId];
@@ -761,6 +803,7 @@
                 return prev;
               }
               playEffect('water');
+              triggerActionFx('water', actionPoint);
               setMessage(`💦 灑水完成！第 ${plotId + 1} 區的作物皆已吸滿水分！`);
             } else {
               if (targetSlot.crop && !targetSlot.isWatered) {
@@ -772,6 +815,7 @@
                 return prev;
               }
               playEffect('water');
+              triggerActionFx('water', actionPoint);
               setMessage(`💧 已為該格作物澆水！`);
             }
           }
@@ -787,6 +831,7 @@
               targetPlot.slots.forEach(s => s.hasWeed = false);
               setInventory(inv => ({ ...inv, scissors: inv.scissors - 1 }));
               playEffect('weed');
+              triggerActionFx('weed', actionPoint);
               setMessage(`✨ 割除巨無霸南瓜周圍的雜草成功！(剪刀剩餘 ${inventory.scissors - 1} 次)`);
             } else {
               if (!targetSlot.hasWeed) return prev;
@@ -797,6 +842,7 @@
               targetSlot.hasWeed = false;
               setInventory(inv => ({ ...inv, scissors: inv.scissors - 1 }));
               playEffect('weed');
+              triggerActionFx('weed', actionPoint);
               setMessage(`✨ 割除雜草成功！(剪刀剩餘 ${inventory.scissors - 1} 次)`);
             }
           }
@@ -812,6 +858,7 @@
               targetPlot.slots.forEach(s => s.hasBug = false);
               setInventory(inv => ({ ...inv, chili: inv.chili - 1 }));
               playEffect('water');
+              triggerActionFx('chili', actionPoint);
               setMessage(`✨ 成功驅除巨無霸南瓜上的害蟲！(剩餘 ${inventory.chili - 1} 次)`);
             } else {
               if (!targetSlot.hasBug) return prev;
@@ -822,6 +869,7 @@
               targetSlot.hasBug = false;
               setInventory(inv => ({ ...inv, chili: inv.chili - 1 }));
               playEffect('water');
+              triggerActionFx('chili', actionPoint);
               setMessage(`✨ 噴灑辣椒水驅蟲成功！(剩餘 ${inventory.chili - 1} 次)`);
             }
           }
@@ -876,6 +924,7 @@
 
             setInventory(inv => ({ ...inv, [selectedTool]: Math.max(0, inv[selectedTool] - 1) }));
             playEffect('water');
+            triggerActionFx(selectedTool, actionPoint);
             setMessage(`✨ 施打${fertName}成功！第 ${plotId + 1} 區對應屬性的作物生長進度縮短了 1 天。${netBrokeMsg}`);
 
             // 進階肥料教學完成檢查 (不限順序)
@@ -982,7 +1031,7 @@
         }
       };
 
-      const applyNet = (plotId) => {
+      const applyNet = (plotId, clickPoint) => {
         const hasMature = plots[plotId].slots.some(s => s.crop && s.growth >= s.crop.days);
         if (hasMature) {
           setMessage("此區塊已有作物成熟，空間不足以架設防蟲網！");
@@ -992,6 +1041,7 @@
         if (inventory.nets > 0 && !plots[plotId].isNetted) {
           setPlots(prev => prev.map(p => p.id === plotId ? { ...p, isNetted: true } : p));
           setInventory(inv => ({ ...inv, nets: Math.max(0, inv.nets - 1) }));
+          triggerActionFx('net', clickPoint);
           setMessage(`第 ${plotId + 1} 區已經罩上防蟲紗網，蟲子飛不進來了！`);
 
           // 進階防蟲網教學完成檢查 (不限順序)
@@ -1001,10 +1051,11 @@
         }
       };
 
-      const applyWindbreak = (plotId) => {
+      const applyWindbreak = (plotId, clickPoint) => {
         if (inventory.windbreaks > 0 && !plots[plotId].isWindbreaked) {
           setPlots(prev => prev.map(p => p.id === plotId ? { ...p, isWindbreaked: true } : p));
           setInventory(inv => ({ ...inv, windbreaks: Math.max(0, inv.windbreaks - 1) }));
+          triggerActionFx('windbreak', clickPoint);
           setMessage(`第 ${plotId + 1} 區已經架設防風網，能抵禦強風侵襲！`);
         }
       };
@@ -1069,6 +1120,17 @@
           {flyingCrops.map(fc => (
             <FlyingCropComponent key={fc.id} data={fc} onRemove={removeFlyingCrop} />
           ))}
+
+          {actionFx && (
+            <div
+              key={actionFx.id}
+              className="farm12-action-fx"
+              style={{ left: `${actionFx.x}px`, top: `${actionFx.y}px` }}
+              aria-hidden="true"
+            >
+              <Farm12ItemArt item={actionFx.item} mode="fx" />
+            </div>
+          )}
 
           {/* --- 新手教學：步驟浮動提示框 (強制隱藏於彈窗開啟時) --- */}
           {tutorialStep > 1 && !currentEvent && !showModal && !showShop && !showQuestModal && (
@@ -1421,12 +1483,12 @@
                       <span className="font-black text-slate-400 uppercase text-[10px] md:text-xs tracking-widest mr-1 md:mr-2">第 {activePlot + 1} 區管理中</span>
 
                       {inventory.nets > 0 && !plots[activePlot].isNetted && (
-                        <button onClick={() => applyNet(activePlot)} className={`bg-blue-600 text-white text-[9px] md:text-[10px] px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl font-black hover:bg-blue-700 transition-all ${(tutorialStep >= 7 && !flags.tutNet) ? 'ring-4 ring-yellow-400 animate-pulse' : ''}`}><Farm12ItemArt item="net" mode="action" />部署防蟲網</button>
+                        <button onClick={(e) => applyNet(activePlot, e)} className={`bg-blue-600 text-white text-[9px] md:text-[10px] px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl font-black hover:bg-blue-700 transition-all ${(tutorialStep >= 7 && !flags.tutNet) ? 'ring-4 ring-yellow-400 animate-pulse' : ''}`}><Farm12ItemArt item="net" mode="action" />部署防蟲網</button>
                       )}
                       {plots[activePlot].isNetted && <span className="bg-blue-100 text-blue-600 text-[9px] md:text-[10px] px-2 py-1.5 md:px-2 md:py-2 rounded-lg md:rounded-xl font-black"><Farm12ItemArt item="net" mode="inline" />防蟲中</span>}
 
                       {inventory.windbreaks > 0 && !plots[activePlot].isWindbreaked && (
-                        <button onClick={() => applyWindbreak(activePlot)} className="bg-emerald-600 text-white text-[9px] md:text-[10px] px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl font-black hover:bg-emerald-700 transition-all"><Farm12ItemArt item="windbreak" mode="action" />架設防風網</button>
+                        <button onClick={(e) => applyWindbreak(activePlot, e)} className="bg-emerald-600 text-white text-[9px] md:text-[10px] px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl font-black hover:bg-emerald-700 transition-all"><Farm12ItemArt item="windbreak" mode="action" />架設防風網</button>
                       )}
                       {plots[activePlot].isWindbreaked && <span className="bg-emerald-100 text-emerald-700 text-[9px] md:text-[10px] px-2 py-1.5 md:px-2 md:py-2 rounded-lg md:rounded-xl font-black"><Farm12ItemArt item="windbreak" mode="inline" />防風中</span>}
                     </div>
@@ -1439,7 +1501,7 @@
                            if (plots[activePlot].slots[0].crop && plots[activePlot].slots[0].growth >= plots[activePlot].slots[0].crop.days) {
                               handleHarvestClick(e, activePlot, 0, plots[activePlot].slots[0].crop, true);
                            } else {
-                              handleSlotClick(activePlot, 0);
+                              handleSlotClick(activePlot, 0, e);
                            }
                         }}
                         className={`flex-1 w-full rounded-xl md:rounded-[2rem] border-4 flex flex-col items-center justify-center relative transition-all active:scale-[0.98] cursor-pointer overflow-hidden ${
@@ -1491,7 +1553,7 @@
                              if (slot.crop && slot.growth >= slot.crop.days) {
                                  handleHarvestClick(e, activePlot, slot.id, slot.crop, false);
                              } else {
-                                 handleSlotClick(activePlot, slot.id);
+                                 handleSlotClick(activePlot, slot.id, e);
                              }
                           }}
                           className={`aspect-square rounded-xl md:rounded-[1.5rem] border-2 md:border-4 flex flex-col items-center justify-center relative transition-all active:scale-95 cursor-pointer ${

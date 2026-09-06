@@ -1,9 +1,21 @@
-// Farm 12 visual asset Source-of-Truth.
-// This file is intentionally data-only. 12.html will consume it in a later step.
-// `null` means that stage is not yet available and the renderer must fall back safely.
+// Farm 12 visual-edition asset Source-of-Truth and integrity-check manifest.
+// This file is intentionally data-only; scripts/check-farm12-assets.mjs validates it.
+// `null` means that stage is not available and the renderer must fall back safely.
 
 window.FARM12_ASSETS = {
-  version: 1,
+  version: 2,
+  critical: [
+    'assets/farm12/ui/raster/question.webp',
+    'assets/farm12/ui/raster/sun.webp',
+    'assets/farm12/ui/raster/rain.webp',
+    'assets/farm12/ui/raster/storm.webp',
+    'assets/farm12/ui/raster/inbox.webp',
+    'assets/farm12/tools/watering-can.webp',
+    'assets/farm12/tools/sprinkler.webp',
+    'assets/farm12/tools/pruning-shears.webp',
+    'assets/farm12/tools/chili-spray.webp',
+    'assets/farm12/crops/seedling/sweetpotatoleaf.webp'
+  ],
   crops: {
     sweetpotatoleaf: {
       mature: 'assets/farm12/crops/mature/sweetpotatoleaf.webp',
@@ -108,9 +120,57 @@ window.FARM12_ASSETS = {
     pruningShears: 'assets/farm12/tools/pruning-shears.webp',
     chiliSpray: 'assets/farm12/tools/chili-spray.webp'
   },
+  fertilizer: {
+    leaf: 'assets/farm12/fertilizer/nitrogen.webp',
+    root: 'assets/farm12/fertilizer/phosphorus.webp',
+    fruit: 'assets/farm12/fertilizer/potassium.webp'
+  },
+  protection: {
+    insectNet: 'assets/farm12/protection/insect-net.webp',
+    windbreak: 'assets/farm12/protection/windbreak.webp'
+  },
   field: {
-    caterpillar: 'assets/farm12/pests/caterpillar.webp',
-    weed: 'assets/farm12/pests/weed.webp'
+    caterpillar: 'assets/farm12/pests/pest-caterpillar.webp',
+    weed: 'assets/farm12/field/weed-field.webp'
+  },
+  ui: {
+    announcement: 'assets/farm12/ui/raster/announcement.webp',
+    book: 'assets/farm12/ui/raster/book.webp',
+    cart: 'assets/farm12/ui/raster/cart.webp',
+    celebrate: 'assets/farm12/ui/raster/celebrate.webp',
+    checkEmpty: 'assets/farm12/ui/raster/check-empty.webp',
+    check: 'assets/farm12/ui/raster/check.webp',
+    close: 'assets/farm12/ui/raster/close.webp',
+    education: 'assets/farm12/ui/raster/education.webp',
+    farmer: 'assets/farm12/ui/raster/farmer.webp',
+    folder: 'assets/farm12/ui/raster/folder.webp',
+    gift: 'assets/farm12/ui/raster/gift.webp',
+    grave: 'assets/farm12/ui/raster/grave.webp',
+    hourglass: 'assets/farm12/ui/raster/hourglass.webp',
+    idea: 'assets/farm12/ui/raster/idea.webp',
+    inbox: 'assets/farm12/ui/raster/inbox.webp',
+    lock: 'assets/farm12/ui/raster/lock.webp',
+    medal: 'assets/farm12/ui/raster/medal.webp',
+    moon: 'assets/farm12/ui/raster/moon.webp',
+    question: 'assets/farm12/ui/raster/question.webp',
+    rain: 'assets/farm12/ui/raster/rain.webp',
+    sad: 'assets/farm12/ui/raster/sad.webp',
+    save: 'assets/farm12/ui/raster/save.webp',
+    school: 'assets/farm12/ui/raster/school.webp',
+    shield: 'assets/farm12/ui/raster/shield.webp',
+    soil: 'assets/farm12/ui/raster/soil.webp',
+    sparkle: 'assets/farm12/ui/raster/sparkle.webp',
+    storm: 'assets/farm12/ui/raster/storm.webp',
+    sun: 'assets/farm12/ui/raster/sun.webp',
+    tractor: 'assets/farm12/ui/raster/tractor.webp',
+    warning: 'assets/farm12/ui/raster/warning.webp',
+    water: 'assets/farm12/ui/raster/water.webp',
+    weather: 'assets/farm12/ui/raster/weather.webp',
+    wilt: 'assets/farm12/ui/raster/wilt.webp'
+  },
+  legacy: {
+    pilotAtlas: 'assets/farm12/pilot/pilot-atlas.webp',
+    svgSprite: 'assets/farm12/ui/farm12-icons.svg'
   }
 };
 
