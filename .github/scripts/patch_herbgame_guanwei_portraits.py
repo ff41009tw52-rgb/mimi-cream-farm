@@ -1,0 +1,116 @@
+from pathlib import Path
+
+path = Path("herbgame.html")
+text = path.read_text(encoding="utf-8")
+
+
+def replace_once(old: str, new: str, label: str) -> None:
+    global text
+    if new in text:
+        return
+    if old not in text:
+        raise SystemExit(f"Patch target not found: {label}")
+    text = text.replace(old, new, 1)
+
+
+css_old = "        .dialogue-wrapper { position: absolute; bottom: 3%; left: 50%; transform: translateX(-50%); width: 92%; max-width: 1200px; height: 22%; min-height: 140px; z-index: 10; }"
+css_new = css_old + """
+        .speaker-portrait {
+            position: absolute;
+            left: 1.25rem;
+            bottom: calc(100% - 5px);
+            width: clamp(120px, 15vw, 175px);
+            max-height: 225px;
+            object-fit: contain;
+            z-index: 16;
+            pointer-events: none;
+            background: rgba(255,255,255,0.98);
+            border: 3px solid rgba(255,255,255,0.92);
+            border-bottom: 0;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.32);
+            transition: opacity 0.18s ease, transform 0.18s ease;
+        }
+        .speaker-portrait.hidden { display: none; }
+        .dialogue-wrapper.has-portrait .choices-container { width: min(68%, 760px); left: 60%; }
+        @media (max-width: 768px) {
+            .speaker-portrait { left: 0.35rem; width: 112px; max-height: 165px; bottom: calc(100% - 3px); }
+            .dialogue-wrapper.has-portrait .choices-container { width: 72%; left: 62%; }
+        }"""
+replace_once(css_old, css_new, "portrait CSS")
+
+html_old = "                <div class=\"choices-container\" id=\"choices-container\"></div>\n                \n                <div class=\"dialogue-box\" id=\"dialogue-box\">"
+html_new = "                <div class=\"choices-container\" id=\"choices-container\"></div>\n                <img class=\"speaker-portrait hidden\" id=\"speaker-portrait\" alt=\"陳冠瑋老師人物立繪\">\n                \n                <div class=\"dialogue-box\" id=\"dialogue-box\">"
+replace_once(html_old, html_new, "portrait image element")
+
+dom_old = "                    dialogueText: document.getElementById('dialogue-text'),\n                    continueIcon: document.getElementById('continue-icon'),"
+dom_new = "                    dialogueText: document.getElementById('dialogue-text'),\n                    speakerPortrait: document.getElementById('speaker-portrait'),\n                    continueIcon: document.getElementById('continue-icon'),"
+replace_once(dom_old, dom_new, "portrait DOM reference")
+
+method_marker = "            showDialogue(node) {"
+method_block = '''            getPortraitForNode(node) {
+                if (!node || node.speaker !== "陳冠瑋老師") return null;
+
+                const text = node.text || "";
+                const surprisedTexts = ["等等——"];
+                const thinkingTexts = [
+                    "那邊那位同學。",
+                    "你是不是剛到？",
+                    "是嗎？",
+                    "至少你有趕過來。",
+                    "……巡視校園？",
+                    "好。",
+                    "那你等等就順便巡視一下香草園。"
+                ];
+
+                if (surprisedTexts.some(t => text.includes(t))) {
+                    return "picture/herb-game/characters/chen-guanwei-surprised.jpg";
+                }
+                if (thinkingTexts.some(t => text.includes(t))) {
+                    return "picture/herb-game/characters/chen-guanwei-thinking.jpg";
+                }
+                return "picture/herb-game/characters/chen-guanwei-normal.jpg";
+            }
+
+            updateSpeakerPortrait(node) {
+                const portraitEl = this.dom.speakerPortrait;
+                const wrapperEl = this.dom.dialogueBox.parentElement;
+                const portraitPath = this.getPortraitForNode(node);
+
+                if (portraitPath) {
+                    portraitEl.src = portraitPath;
+                    portraitEl.classList.remove('hidden');
+                    wrapperEl.classList.add('has-portrait');
+                } else {
+                    portraitEl.removeAttribute('src');
+                    portraitEl.classList.add('hidden');
+                    wrapperEl.classList.remove('has-portrait');
+                }
+            }
+
+'''
+if "            getPortraitForNode(node) {" not in text:
+    if method_marker not in text:
+        raise SystemExit("Patch target not found: showDialogue method")
+    text = text.replace(method_marker, method_block + method_marker, 1)
+
+call_old = "                this.isShowingChoices = false;\n                this.currentFullText = node.text;\n                \n                const charEl = this.dom.charName;"
+call_new = "                this.isShowingChoices = false;\n                this.currentFullText = node.text;\n                this.updateSpeakerPortrait(node);\n                \n                const charEl = this.dom.charName;"
+replace_once(call_old, call_new, "portrait render call")
+
+path.write_text(text, encoding="utf-8")
+
+required = [
+    "speaker-portrait",
+    "getPortraitForNode(node)",
+    "chen-guanwei-normal.jpg",
+    "chen-guanwei-thinking.jpg",
+    "chen-guanwei-surprised.jpg",
+    'text: "左邊", isCorrect: false',
+    'text: "右邊", isCorrect: true',
+]
+for item in required:
+    if item not in text:
+        raise SystemExit(f"Validation failed: {item}")
+
+print("herbgame portrait patch completed")
