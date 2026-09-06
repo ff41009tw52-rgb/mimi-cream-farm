@@ -96,6 +96,18 @@
         '.farm12-art-wrap.farm12-seedbag .farm12-art{width:24px;height:24px}',
         '.farm12-art-wrap.farm12-flying{width:64px;height:64px}',
         '.farm12-art-wrap.farm12-flying .farm12-art{width:64px;height:64px}',
+        '.farm12-art-wrap.farm12-shop{width:42px;height:42px;flex:0 0 42px}',
+        '.farm12-art-wrap.farm12-shop .farm12-art{width:42px;height:42px}',
+        '.farm12-art-wrap.farm12-sell{width:48px;height:48px;flex:0 0 48px}',
+        '.farm12-art-wrap.farm12-sell .farm12-art{width:48px;height:48px}',
+        '.farm12-art-wrap.farm12-gallery{width:72px;height:72px;flex:0 0 72px}',
+        '.farm12-art-wrap.farm12-gallery .farm12-art{width:72px;height:72px}',
+        '.farm12-art-wrap.farm12-quest{width:42px;height:42px}',
+        '.farm12-art-wrap.farm12-quest .farm12-art{width:42px;height:42px}',
+        '.farm12-status-art{display:inline-block;object-fit:contain;vertical-align:middle;filter:drop-shadow(0 4px 3px rgba(36,20,6,.24))}',
+        '.farm12-status-small{width:20px;height:20px}',
+        '.farm12-status-summary{width:52px;height:52px}',
+        '.farm12-status-dialog{width:76px;height:76px}',
         '.farm12-art-wrap.farm12-legendary{position:relative}',
         '.farm12-art-wrap.farm12-legendary .farm12-art{animation:farm12LegendPulse 1.55s ease-in-out infinite alternate}',
         '.farm12-art-wrap.farm12-legendary-seedling .farm12-art{filter:drop-shadow(0 0 3px rgba(255,247,172,.6)) drop-shadow(0 0 6px rgba(255,176,0,.42))}',
@@ -146,6 +158,17 @@
         "      const artClass = 'farm12-art' + (pos.src ? ' farm12-art-image' : '');",
         "      const artStyle = pos.src ? { backgroundImage: 'url(' + pos.src + ')' } : {'--farm12-x': pos[0], '--farm12-y': pos[1]};",
         "      return <span className={cls} title={crop.name + '・' + (stage === 'pre' ? '開花幼果期' : stage === 'mature' ? '成熟' : '幼苗')}><span className={artClass} style={artStyle} /></span>;",
+        '    };',
+        '',
+        '    const FARM12_STATUS_SPRITES = {',
+        "      pest: { src: 'assets/farm12/pests/pest-caterpillar.webp', label: '菜蟲' },",
+        "      weed: { src: 'assets/farm12/field/weed-field.webp', label: '田間雜草' }",
+        '    };',
+        '',
+        "    const Farm12StatusArt = ({ type, mode = 'small', className = '' }) => {",
+        '      const asset = FARM12_STATUS_SPRITES[type];',
+        '      if (!asset) return null;',
+        "      return <img src={asset.src} alt={asset.label} title={asset.label} loading=\"lazy\" className={'farm12-status-art farm12-status-' + mode + ' ' + className} />;",
         '    };',
         ''
       ].join('\n');
@@ -212,6 +235,83 @@
         '            {data.icon}',
         '            <CropArt crop={{ id: data.cropId, name: data.cropName || \'作物\', days: 1, icon: data.icon }} growth={1} mode="flying" fallback={data.icon} />',
         '收成飛行圖片'
+      );
+
+      html = replaceOnce(
+        html,
+        '<div className="font-black text-base md:text-lg text-left">{crop.icon} {crop.name}</div>',
+        '<div className="font-black text-base md:text-lg text-left flex items-center gap-2"><CropArt crop={crop} growth={crop.days} mode="shop" fallback={crop.icon} /><span>{crop.name}</span></div>',
+        '商店作物圖片'
+      );
+
+      html = replaceOnce(
+        html,
+        '<div className="text-3xl md:text-4xl">{crop.icon}</div>',
+        '<CropArt crop={crop} growth={crop.days} mode="sell" fallback={crop.icon} />',
+        '出售清單作物圖片'
+      );
+
+      html = replaceOnce(
+        html,
+        "                                    {isUnlocked ? crop.icon : '❓'}",
+        "                                    {isUnlocked ? <CropArt crop={crop} growth={crop.days} mode=\"gallery\" fallback={crop.icon} /> : '❓'}",
+        '圖鑑作物圖片'
+      );
+
+      html = replaceOnce(
+        html,
+        '<span className="text-red-600 text-sm md:text-base">{currentEvent.data?.crop?.icon} {currentEvent.data?.crop?.name}</span>',
+        '<span className="text-red-600 text-sm md:text-base inline-flex items-center gap-1"><CropArt crop={currentEvent.data?.crop} growth={currentEvent.data?.crop?.days || 0} mode="quest" fallback={currentEvent.data?.crop?.icon} /> {currentEvent.data?.crop?.name}</span>',
+        '學校任務通知作物圖片'
+      );
+
+      html = replaceOnce(
+        html,
+        '<span className="mx-1">{schoolQuest.crop.icon}</span>{schoolQuest.crop.name}。',
+        '<span className="mx-1 inline-flex items-center gap-1"><CropArt crop={schoolQuest.crop} growth={schoolQuest.crop.days} mode="quest" fallback={schoolQuest.crop.icon} />{schoolQuest.crop.name}</span>。',
+        '學校任務交付作物圖片'
+      );
+
+      html = replaceOnce(
+        html,
+        '{plots[activePlot].slots.some(s => s.hasBug) && <span className="animate-bounce text-3xl md:text-5xl drop-shadow-md">🐛</span>}',
+        '{plots[activePlot].slots.some(s => s.hasBug) && <Farm12StatusArt type="pest" mode="summary" className="animate-bounce" />}',
+        '農田總覽菜蟲圖片'
+      );
+
+      html = replaceOnce(
+        html,
+        '{plots[activePlot].slots.some(s => s.hasWeed) && <span className="animate-pulse w-8 h-8 md:w-12 md:h-12 drop-shadow-md inline-block"><WeedIcon className="w-full h-full" /></span>}',
+        '{plots[activePlot].slots.some(s => s.hasWeed) && <Farm12StatusArt type="weed" mode="summary" className="animate-pulse" />}',
+        '農田總覽雜草圖片'
+      );
+
+      html = replaceOnce(
+        html,
+        '{slot.hasBug && <span className="animate-bounce text-[14px] md:text-lg drop-shadow-md">🐛</span>}',
+        '{slot.hasBug && <Farm12StatusArt type="pest" mode="small" className="animate-bounce" />}',
+        '田格菜蟲圖片'
+      );
+
+      html = replaceOnce(
+        html,
+        '{slot.hasWeed && <span className="animate-pulse w-[14px] md:w-[18px] h-[14px] md:h-[18px] drop-shadow-md"><WeedIcon className="w-full h-full" /></span>}',
+        '{slot.hasWeed && <Farm12StatusArt type="weed" mode="small" className="animate-pulse" />}',
+        '田格雜草圖片'
+      );
+
+      html = replaceOnce(
+        html,
+        '<div className="text-5xl md:text-6xl mb-4 text-center">🐛</div>',
+        '<div className="mb-4 text-center"><Farm12StatusArt type="pest" mode="dialog" /></div>',
+        '菜蟲教學圖片'
+      );
+
+      html = replaceOnce(
+        html,
+        '<div className="w-16 h-16 mx-auto mb-4 drop-shadow-md"><WeedIcon className="w-full h-full" /></div>',
+        '<div className="mx-auto mb-4 text-center"><Farm12StatusArt type="weed" mode="dialog" /></div>',
+        '雜草教學圖片'
       );
 
       html = html.replace('<div id="root"></div>', '<div id="root"></div><div style="position:fixed;right:8px;bottom:8px;z-index:9998;background:rgba(21,94,53,.9);color:white;border-radius:999px;padding:5px 9px;font:700 11px Microsoft JhengHei,sans-serif;pointer-events:none">12-1 視覺新版・資金 100000・全種子各 1</div>');
