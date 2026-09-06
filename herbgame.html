@@ -78,25 +78,27 @@
         .dialogue-wrapper { position: absolute; bottom: 3%; left: 50%; transform: translateX(-50%); width: 92%; max-width: 1200px; height: 22%; min-height: 140px; z-index: 10; }
         .speaker-portrait {
             position: absolute;
-            left: 1.25rem;
-            bottom: calc(100% - 5px);
-            width: clamp(170px, 22vw, 260px);
-            max-height: 330px;
+            left: 50%;
+            bottom: calc(100% + 1.5vh);
+            transform: translateX(-50%);
+            width: clamp(260px, 30vw, 430px);
+            max-height: 54vh;
             object-fit: contain;
-            z-index: 16;
+            z-index: 12;
             pointer-events: none;
-            background: rgba(255,255,255,0.98);
-            border: 3px solid rgba(255,255,255,0.92);
-            border-bottom: 0;
-            border-radius: 20px 20px 0 0;
-            box-shadow: 0 10px 24px rgba(0,0,0,0.32);
+            background: transparent;
+            border: 0;
+            border-radius: 24px;
+            box-shadow: 0 16px 36px rgba(0,0,0,0.32);
             transition: opacity 0.18s ease, transform 0.18s ease;
         }
         .speaker-portrait.hidden { display: none; }
-        .dialogue-wrapper.has-portrait .choices-container { width: min(62%, 720px); left: 64%; }
         @media (max-width: 768px) {
-            .speaker-portrait { left: 0.2rem; width: 155px; max-height: 230px; bottom: calc(100% - 3px); }
-            .dialogue-wrapper.has-portrait .choices-container { width: 65%; left: 66%; }
+            .speaker-portrait {
+                width: clamp(230px, 52vw, 340px);
+                max-height: 50vh;
+                bottom: calc(100% + 1vh);
+            }
         }
         .dialogue-box { position: relative; width: 100%; height: 100%; background: rgba(20, 83, 45, 0.85); backdrop-filter: blur(8px); border: 3px solid rgba(255, 255, 255, 0.6); border-radius: 16px; padding: 2rem 2.5rem 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; cursor: pointer; }
         .character-name { position: absolute; top: -20px; left: 2rem; background-color: var(--color-grass); color: white; font-size: clamp(1.2rem, 2.5vw, 1.5rem); font-weight: 900; padding: 0.4rem 1.5rem; border-radius: 12px; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); letter-spacing: 0.05em; transition: background-color 0.3s; }
@@ -215,7 +217,7 @@
             <!-- 對話區 -->
             <div class="dialogue-wrapper">
                 <div class="choices-container" id="choices-container"></div>
-                <img class="speaker-portrait hidden" id="speaker-portrait" alt="陳冠瑋老師人物立繪">
+                <img class="speaker-portrait hidden" id="speaker-portrait" alt="陳冠瑋老師質疑主角人物立繪">
                 
                 <div class="dialogue-box" id="dialogue-box">
                     <div class="character-name" id="char-name"></div>
@@ -793,42 +795,35 @@
             }
 
             getPortraitForNode(node) {
-                if (!node || node.speaker !== "陳冠瑋老師") return null;
+                if (!node) return null;
 
+                // 角色圖只在「老師質疑主角」的事件段落顯示。
                 const text = node.text || "";
-                const surprisedTexts = ["等等——"];
-                const thinkingTexts = [
+                const interrogationTexts = [
                     "那邊那位同學。",
+                    "……？",
                     "你是不是剛到？",
                     "是嗎？",
-                    "至少你有趕過來。",
-                    "……巡視校園？",
-                    "好。",
-                    "那你等等就順便巡視一下香草園。"
+                    "……巡視校園？"
                 ];
 
-                if (surprisedTexts.some(t => text.includes(t))) {
-                    return "picture/herb-game/characters/chen-guanwei-surprised.jpg?v=20260906-portrait-fix";
+                if (interrogationTexts.some(t => text.includes(t))) {
+                    // 使用已確認能正常載入的嚴肅／叉腰照片。
+                    return "picture/herb-game/characters/chen-guanwei-normal.jpg?v=20260906-interrogation-center-v2";
                 }
-                if (thinkingTexts.some(t => text.includes(t))) {
-                    return "picture/herb-game/characters/chen-guanwei-thinking.jpg?v=20260906-portrait-fix";
-                }
-                return "picture/herb-game/characters/chen-guanwei-normal.jpg?v=20260906-portrait-fix";
+                return null;
             }
 
             updateSpeakerPortrait(node) {
                 const portraitEl = this.dom.speakerPortrait;
-                const wrapperEl = this.dom.dialogueBox.parentElement;
                 const portraitPath = this.getPortraitForNode(node);
 
                 if (portraitPath) {
                     portraitEl.src = portraitPath;
                     portraitEl.classList.remove('hidden');
-                    wrapperEl.classList.add('has-portrait');
                 } else {
                     portraitEl.removeAttribute('src');
                     portraitEl.classList.add('hidden');
-                    wrapperEl.classList.remove('has-portrait');
                 }
             }
 
