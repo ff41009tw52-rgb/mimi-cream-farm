@@ -1,5 +1,6 @@
 name: One-shot herbgame Guanwei portraits
 
+# Trigger after workflow registration
 on:
   push:
     branches: [main]
