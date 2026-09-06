@@ -1,0 +1,104 @@
+
+        .video-placeholder-bg.active { opacity:1; pointer-events:auto; }
+        .vp-bg-anim { position: absolute; top:0; left:0; width:200%; height:100%; background: linear-gradient(90deg, #1e293b 0%, #334155 50%, #1e293b 100%); animation: slide-bg 4s linear infinite; z-index: 1;}
+        @keyframes slide-bg { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .vp-content { text-align: center; color: white; width: 60%; position: relative; z-index: 2; }
+        .vp-content h2 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; margin-bottom: 1rem; }
+        .vp-content p { font-size: 1.2rem; margin-bottom: 2rem; color: #cbd5e1;}
+        .vp-progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 3px; overflow: hidden; position: relative; }
+        .vp-progress-fill { position: absolute; top:0; left:0; height:100%; background: var(--color-grass); width: 0%; animation: load-progress linear forwards; }
+        .video-placeholder-bg.active .vp-progress-fill { animation-duration: 4s; }
+        @keyframes load-progress { 0% { width: 0%; } 100% { width: 100%; } }
+
+
+        /* ================= 目前章節結束 ================= */
+        #demo-end-screen { position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(135deg, #0f172a, #1e293b); z-index: 100; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 1s; color: white; }
+        #demo-end-screen.active { opacity:1; pointer-events:auto; }
+        .de-logo { color: var(--color-cream); font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; margin-bottom: 0.5rem; }
+        .de-title { color: var(--color-yellow); font-size: clamp(3rem, 6vw, 5rem); font-weight: 900; margin-bottom: 2rem; letter-spacing: 0.2em; text-shadow: 0 0 20px rgba(250,204,21,0.5); }
+        .de-stats { background: rgba(0,0,0,0.4); padding: 2rem 4rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 2rem; text-align: left; }
+        .de-stats p { font-size: 1.5rem; margin: 0.5rem 0; color: #e2e8f0; display: flex; justify-content: space-between; gap: 2rem;}
+        .de-stats p span { color: var(--color-sky); font-weight: 700; }
+        .de-btns { display: flex; gap: 1rem; }
+
+        /* 開發測試用：上一部 / 回首頁 */
+        .dev-nav { position: absolute; top: 1rem; left: 50%; transform: translateX(-50%); display: flex; gap: 0.5rem; z-index: 20; pointer-events: auto; }
+        .dev-btn-home, .dev-btn-back { background: rgba(0, 0, 0, 0.6); color: white; border: 1px solid rgba(255,255,255,0.5); padding: 0.4rem 1rem; border-radius: 999px; font-size: 0.9rem; cursor: pointer; pointer-events: auto; white-space: nowrap; }
+        .dev-btn-home:hover, .dev-btn-back:hover { background: rgba(20, 83, 45, 0.9); }
+        .dev-btn-back:disabled { opacity: 0.35; cursor: not-allowed; }
+
+
+        /* ================= 正式版操作面板 ================= */
+        .game-panel-btn { background: rgba(255,255,255,0.88); color: var(--color-dark-green); border: 1px solid rgba(255,255,255,0.95); padding: 0.4rem 1rem; border-radius: 999px; font-size: 0.9rem; font-weight: 900; cursor: pointer; pointer-events: auto; white-space: nowrap; }
+        .game-panel-btn:hover { background: #fff; }
+        .player-panel { position: absolute; inset: 0; z-index: 80; background: rgba(2, 6, 23, 0.72); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+        .player-panel.active { opacity: 1; pointer-events: auto; }
+        .player-panel-card { width: min(880px, 90vw); max-height: 82vh; overflow: hidden; background: rgba(248, 250, 252, 0.97); border: 3px solid rgba(255,255,255,0.95); border-radius: 22px; box-shadow: 0 20px 60px rgba(0,0,0,0.45); display: flex; flex-direction: column; }
+        .player-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.4rem; background: var(--color-dark-green); color: white; }
+        .player-panel-header h2 { margin: 0; font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 900; }
+        .player-panel-close { border: 0; background: rgba(255,255,255,0.16); color: white; width: 44px; height: 44px; border-radius: 50%; font-size: 1.4rem; cursor: pointer; }
+        .player-panel-tabs { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid #cbd5e1; background: #f8fafc; }
+        .player-panel-tab { padding: 0.9rem; border: 0; background: transparent; color: #475569; font-size: 1.05rem; font-weight: 900; cursor: pointer; }
+        .player-panel-tab.active { color: var(--color-dark-green); background: #ecfccb; box-shadow: inset 0 -4px 0 var(--color-grass); }
+        .player-panel-body { padding: 1.2rem 1.4rem 1.5rem; overflow-y: auto; min-height: 320px; }
+        .panel-section.hidden { display: none; }
+        .stat-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.9rem; }
+        .stat-card { background: white; border: 1px solid #dbeafe; border-radius: 16px; padding: 1rem 1.2rem; box-shadow: 0 4px 12px rgba(15,23,42,0.08); }
+        .stat-label { font-size: 0.95rem; color: #64748b; font-weight: 700; }
+        .stat-value { margin-top: 0.3rem; font-size: clamp(1.5rem, 3vw, 2.1rem); font-weight: 900; color: var(--color-dark-green); }
+        .stat-note { margin-top: 1rem; padding: 0.9rem 1rem; border-radius: 14px; background: #f0fdf4; color: #365314; line-height: 1.7; font-weight: 700; }
+        .member-list { display: grid; gap: 0.8rem; }
+        .member-card { background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1rem 1.2rem; }
+        .member-card.locked { opacity: 0.55; filter: grayscale(0.4); }
+        .member-card-layout { display:grid; grid-template-columns:92px 1fr; gap:1rem; align-items:start; }
+        .member-avatar-slot { width:92px; min-height:92px; border-radius:18px; border:2px dashed #cbd5e1; background:linear-gradient(180deg,#f8fafc 0%,#eef2f7 100%); display:flex; align-items:center; justify-content:center; text-align:center; color:#64748b; font-weight:900; line-height:1.25; padding:.5rem; box-sizing:border-box; }
+        .member-avatar-slot.locked { color:#94a3b8; }
+        .member-avatar-slot small { display:block; font-size:.8rem; font-weight:800; opacity:.9; }
+        .member-main { min-width:0; }
+        .member-name { font-size: 1.2rem; font-weight: 900; color: var(--color-dark-green); margin-bottom: 0.35rem; }
+        .member-desc { color: #475569; line-height: 1.6; font-weight: 600; }
+        .member-trust { margin-top: 0.75rem; padding: 0.55rem 0.8rem; border-radius: 10px; background: #f0fdf4; color: #365314; font-weight: 900; display: flex; justify-content: space-between; align-items: center; }
+        .member-trust-value { color: #15803d; font-size: 1.15rem; }
+
+        /* ================= 正式版開場簡介 ================= */
+        .intro-screen-bg { position:absolute; inset:0; z-index:1; background:linear-gradient(135deg,#d1fae5,#e0f2fe 48%,#fef3c7); }
+        .intro-screen-bg::after { content:''; position:absolute; inset:0; background:rgba(255,255,255,0.26); }
+        .intro-card { position:relative; z-index:10; width:min(980px,92vw); max-height:86vh; overflow:auto; background:rgba(255,255,255,0.94); border:3px solid rgba(255,255,255,0.98); border-radius:24px; box-shadow:0 18px 60px rgba(15,23,42,0.28); padding:clamp(1.4rem,3vw,2.4rem); color:#334155; }
+        .intro-card h2 { color:var(--color-dark-green); font-size:clamp(1.6rem,3vw,2.2rem); font-weight:900; margin:0 0 0.8rem; }
+        .intro-card p { font-size:clamp(1rem,2vw,1.25rem); line-height:1.9; font-weight:600; margin:0.55rem 0; }
+        .intro-divider { height:1px; background:#dbeafe; margin:1.4rem 0; }
+        .intro-actions { display:flex; justify-content:center; gap:0.8rem; margin-top:1.5rem; flex-wrap:wrap; }
+        .intro-secondary { border:2px solid #94a3b8; background:white; color:#475569; padding:0.8rem 1.4rem; border-radius:999px; font-size:1rem; font-weight:900; cursor:pointer; }
+
+        /* ================= 目前任務 ================= */
+        .task-card { background:white; border:1px solid #dbeafe; border-radius:16px; padding:1.1rem 1.2rem; box-shadow:0 4px 12px rgba(15,23,42,0.08); }
+        .task-title { font-size:1.2rem; font-weight:900; color:var(--color-dark-green); margin-bottom:0.7rem; }
+        .task-objective { padding:0.45rem 0; color:#475569; font-weight:700; line-height:1.5; }
+        .task-objective.done { color:#15803d; }
+        .task-empty { padding:2rem; text-align:center; color:#64748b; font-weight:700; }
+
+        /* ================= 香草圖鑑 ================= */
+        .herb-book-grid { display:grid; gap:1.2rem; }
+        .herb-zone-card { background:white; border:1px solid #dbeafe; border-radius:18px; overflow:hidden; box-shadow:0 5px 18px rgba(15,23,42,0.08); }
+        .herb-zone-copy { padding:1rem 1.2rem 0.8rem; }
+        .herb-zone-copy h3 { margin:0 0 0.4rem; color:var(--color-dark-green); font-size:1.3rem; font-weight:900; }
+        .herb-zone-copy p { margin:0; color:#475569; line-height:1.7; font-weight:600; }
+        .herb-zone-image-wrap { position:relative; background:#ecfdf5; aspect-ratio:4/3; overflow:hidden; }
+        .herb-zone-image { width:100%; height:100%; object-fit:contain; display:block; background:#f8fafc; }
+        .herb-zone-fallback { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:1rem; text-align:center; color:#64748b; font-weight:800; background:#ecfdf5; }
+        .herb-book-note { margin-top:1rem; padding:0.85rem 1rem; border-radius:14px; background:#eff6ff; color:#1e3a8a; line-height:1.7; font-weight:700; }
+
+        @media (max-width: 700px) {
+            .stat-grid { grid-template-columns: 1fr; }
+            .player-panel-card { width: 94vw; max-height: 88vh; }
+            .dev-nav { gap: 0.3rem; }
+            .dev-btn-home, .dev-btn-back, .game-panel-btn { padding: 0.35rem 0.65rem; font-size: 0.78rem; }
+        }
+
+    
+        /* ================= 校園自由探索地圖 ================= */
+        .campus-map-layer { position:absolute; inset:0; z-index:8; background:#dff5ff; opacity:0; pointer-events:none; transition:opacity .35s ease; overflow:hidden; }
+        .campus-map-layer.active { opacity:1; pointer-events:auto; }
+        .campus-map-stage { position:absolute; inset:0; overflow:hidden; }
+        .campus-map-image { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center; user-select:none; -webkit-user-drag:none; }
+        .map-topbar { position:absolute; z-index:4; top:5.2rem; left:50%; transform:translateX(-50%); min-width:min(720px,88vw); padding:.75rem 1.25rem; border-radius:16px; background:rgba(255,255,255,.88); backdrop-filter:blur(10px); box-shadow:0 8px 28px rgba(15,23,42,.18); text-align:center; color:#14532d; border:2px solid rgba(255,255,255,.95); }
