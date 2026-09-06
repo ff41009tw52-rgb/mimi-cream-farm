@@ -923,7 +923,7 @@
                     this.dom.choicesContainer.classList.remove('show');
                     if (choice.response) {
                         const tempId = `_tempResponse_${++this.tempResponseCounter}`;
-                        STORY_DATA.nodes[tempId] = choice.response;
+                        STORY_DATA.nodes[tempId] = { type: "dialogue", ...choice.response };
                         this.loadNode(tempId, { skipHistory: true });
                     } else if (choice.next) {
                         this.loadNode(choice.next, { skipHistory: true });
