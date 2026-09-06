@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>《天啊！我被香草包圍了》</title>
+    <!-- 引入 Noto Sans TC 字體 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="herbgame-formal.css">
+</head>
+<body>
+
+    <div id="game-container">
+        
+        <!-- ==================== 首頁 ==================== -->
+        <div id="screen-home" class="screen active">
+            <div class="home-bg-layer">
+                <img class="bg-image" src="picture/herb-game/scene-00-minan-school-cover.jpg" alt="民安國小" onerror="this.style.display='none'">
+            </div>
+            <div class="home-overlay"></div>
+            <svg class="leaf-decoration leaf-1" style="--rot: -15deg;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C12 2 4 4 4 12C4 20 12 22 12 22C12 22 20 20 20 12C20 4 12 2 12 2Z" fill="#65a30d" stroke="#3f6212" stroke-width="1"/><path d="M12 22V12" stroke="#3f6212" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <svg class="leaf-decoration leaf-2" style="--rot: 25deg;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 4C20 4 12 2 6 8C0 14 4 22 4 22C4 22 12 24 18 18C24 12 20 4 20 4Z" fill="#84cc16" stroke="#4d7c0f" stroke-width="1"/><path d="M4 22L14 12" stroke="#4d7c0f" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <div class="ui-layer">
+                <h1 class="game-logo"><span class="title-small">天啊！</span><br><span class="title-large">我被香草包圍了</span></h1>
+                <button id="btn-start" class="btn-start">開始遊戲</button>
+            </div>
+        </div>
+
+        <!-- ==================== 正式版遊戲簡介 ==================== -->
+        <div id="screen-intro" class="screen">
+            <div class="intro-screen-bg"></div>
+            <div class="intro-card">
+                <h2>遊戲簡介</h2>
+                <p>在民安國小，香草園服務隊每個星期三都會前往香草園，進行環境整理與照護。</p>
+                <p>你即將扮演服務隊中的一員。你原本有些害羞、內向，對香草園的一切也還在慢慢熟悉。</p>
+                <p>在這個學期裡，你需要鼓起勇氣認識同學與老師，學習與大家互動、合作，也一步一步認識香草園裡的植物與相關知識。</p>
+                <p><strong>而今天……似乎剛好又是星期三。</strong></p>
+                <div class="intro-divider"></div>
+                <h2>遊戲目標</h2>
+                <p>在模擬上學生活的過程中，利用下課時間探索校園，逐步認識香草園服務隊的同學、老師與校園環境。</p>
+                <p>這個學期裡，你會和 <strong>11 位香草服務隊同學</strong>一起認識、照顧<strong>12 種香草植物</strong>。同學之間的羈絆、教師與校長的信任，以及你自己的勇氣，都會影響之後能遇到的事件與選擇。</p>
+                <div class="intro-actions">
+                    <button id="btn-intro-back" class="intro-secondary">回到標題</button>
+                    <button id="btn-intro-start" class="btn-start" style="font-size:1.25rem; padding:0.8rem 2rem;">開始我的星期三</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 主遊戲畫面 ==================== -->
+        <div id="screen-game" class="screen">
+            
+            <!-- 場景背景 -->
+            <div class="game-bg-layer">
+                <div class="bg-placeholder" id="bg-placeholder"></div>
+                <img class="bg-image" id="main-bg-image" style="position: relative; z-index: 1;" src="" alt="場景">
+            </div>
+
+            <!-- HUD -->
+            <div class="hud-container">
+                <div class="hud-item"><span style="font-size: 1.2em;">🕒</span> 第1週・星期三 <span id="hud-time">07:45</span> <span id="hud-location" style="font-size: 0.8em; margin-left:8px; opacity:0.8;">民安國小</span></div>
+                <div class="dev-nav">
+                    <button id="btn-back-step" class="dev-btn-back" disabled>← 回到上一步</button>
+                    <button id="btn-open-panel" class="game-panel-btn">☰ 操作面板</button>
+                    <button id="btn-back-home" class="dev-btn-home">↺ 回首頁</button>
+                </div>
+            </div>
+
+            <!-- Toast 容器 -->
+            <div id="toast-container"></div>
+
+            <!-- 對話區 -->
+            <div class="dialogue-wrapper">
+                <div class="choices-container" id="choices-container"></div>
+                
+                <div class="dialogue-box" id="dialogue-box">
+                    <div class="character-name" id="char-name"></div>
+                    <div class="dialogue-text" id="dialogue-text"></div>
+                    <div class="continue-indicator" id="continue-icon">▼</div>
+                </div>
+            </div>
+
+
+            <!-- 正式版操作面板：人物屬性 / 成員介紹 -->
+            <div class="player-panel" id="player-panel">
+                <div class="player-panel-card">
+                    <div class="player-panel-header">
+                        <h2>操作面板</h2>
+                        <button id="btn-close-panel" class="player-panel-close" aria-label="關閉">×</button>
+                    </div>
+                    <div class="player-panel-tabs">
+                        <button class="player-panel-tab active" data-panel-tab="stats">人物屬性</button>
+                        <button class="player-panel-tab" data-panel-tab="tasks">目前任務</button>
+                        <button class="player-panel-tab" data-panel-tab="members">成員介紹</button>
+                        <button class="player-panel-tab" data-panel-tab="herbs">香草圖鑑</button>
+                    </div>
+                    <div class="player-panel-body">
+                        <div id="panel-stats" class="panel-section">
+                            <div class="stat-grid">
+                                <div class="stat-card">
+                                    <div class="stat-label">勇氣值</div>
+                                    <div class="stat-value" id="panel-bravery">0</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">觀察力</div>
+                                    <div class="stat-value" id="panel-observation">0</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">植物圖鑑完成</div>
+                                    <div class="stat-value" id="panel-plants">0 / 12</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">已認識同學</div>
+                                    <div class="stat-value" id="panel-characters">0 / 11</div>
+                                </div>
+                            </div>
+                            <div class="stat-note">
+                                勇氣值範圍為 0～100；一般活動完成時基本增加 2，主動向校長問早增加 1。觀察力來自仔細觀察與判斷。每位人物的信任度獨立計算，初始皆為 10；一般角色目前上限為 50，校長上限為 100。老師與校長使用「信任度」，學生使用「羈絆度」。關係資料請到「成員介紹」查看；植物名稱與學習進度請到「香草圖鑑」查看；任務進度請到「目前任務」查看。
+                            </div>
+                        </div>
+                        <div id="panel-tasks" class="panel-section hidden">
+                            <div id="current-task-card"></div>
+                        </div>
+                        <div id="panel-members" class="panel-section hidden">
+                            <div class="member-list" id="member-list"></div>
+                        </div>
+                        <div id="panel-herbs" class="panel-section hidden">
+                            <div class="herb-book-grid">
+                                <article class="herb-zone-card">
+                                    <div class="herb-zone-copy">
+                                        <h3>異國風情香草區</h3>
+                                        <p>收錄薑黃、左手香、檸檬香茅與斑蘭葉。從香氣、葉形與生活應用開始，認識不同風味的香草植物。</p>
+                                    </div>
+                                    <div class="herb-zone-image-wrap">
+                                        <div class="herb-zone-fallback">圖片尚未載入<br>picture/herb-game/herb-book-exotic-zone.svg</div>
+                                        <img class="herb-zone-image" src="picture/herb-game/herb-book-exotic-zone.svg" alt="異國風情香草區植物圖鑑" onload="this.previousElementSibling.style.display='none'" onerror="this.style.display='none'">
+                                    </div>
+                                </article>
+                                <article class="herb-zone-card">
+                                    <div class="herb-zone-copy">
+                                        <h3>在地原生香草區</h3>
+                                        <p>收錄艾草、魚腥草、刺蔥與月桃。這些植物和在地生活文化關係密切，觀察時可留意葉形、氣味與枝幹特徵。</p>
+                                    </div>
+                                    <div class="herb-zone-image-wrap">
+                                        <div class="herb-zone-fallback">圖片尚未載入<br>picture/herb-game/herb-book-native-zone.svg</div>
+                                        <img class="herb-zone-image" src="picture/herb-game/herb-book-native-zone.svg" alt="在地原生香草區植物圖鑑" onload="this.previousElementSibling.style.display='none'" onerror="this.style.display='none'">
+                                    </div>
+                                </article>
+                                <article class="herb-zone-card">
+                                    <div class="herb-zone-copy">
+                                        <h3>歐式浪漫香草區</h3>
+                                        <p>收錄澳洲茶樹、迷迭香、薄荷與芳香萬壽菊。這一區的植物香氣鮮明，常見於芳香、料理、茶飲或觀賞應用。</p>
+                                    </div>
+                                    <div class="herb-zone-image-wrap">
+                                        <div class="herb-zone-fallback">圖片尚未載入<br>picture/herb-game/herb-book-european-zone.svg</div>
+                                        <img class="herb-zone-image" src="picture/herb-game/herb-book-european-zone.svg" alt="歐式浪漫香草區植物圖鑑" onload="this.previousElementSibling.style.display='none'" onerror="this.style.display='none'">
+                                    </div>
+                                </article>
+                            </div>
+                            <div class="herb-book-note">植物卡只代表「知道名稱與配對」，不等於完整認識。外觀、辨認方式、香氣、用途、注意事項與觀察紀錄會隨後續事件逐步補完。</div>
+                            <div class="herb-progress-list" id="herb-progress-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- 第1週星期三：上午下課自由探索地圖 -->
+            <div class="campus-map-layer" id="campus-map-layer">
+                <div class="campus-map-stage">
+                    <img id="campus-map-image" class="campus-map-image" src="" data-src="picture/herb-game/campus-map-base.svg" alt="民安國小校園地圖">
+                    <div class="map-topbar">
+                        <strong>上午下課｜想去哪裡看看？</strong>
+                        <small>可前往的地點已標示在地圖上；滑鼠移過去會微微發亮，平板可直接點選。</small>
+                    </div>
+                    <div id="campus-hotspots"></div>
+                    <aside class="map-info-panel" id="map-info-panel">
+                        <button class="map-info-close" id="map-info-close" aria-label="關閉地點介紹">×</button>
+                        <div class="map-location-kicker">校園自由探索</div>
+                        <h2 class="map-location-title" id="map-location-title">選擇地點</h2>
+                        <p class="map-location-desc" id="map-location-desc">點選地圖上的地點查看介紹。</p>
+                        <div class="map-location-hint" id="map-location-hint">第1週星期三有 1 次自由活動。</div>
+                        <button class="map-go-btn" id="map-go-btn" type="button">選擇這裡</button>
+                        <div class="map-selected-box" id="map-selected-box" style="display:none;"></div>
+                    </aside>
+                </div>
+            </div>
+
+            <!-- 遊戲內平板研究介面 -->
+            <div class="research-tablet-layer" id="research-tablet-layer">
+                <div class="research-tablet">
+                    <div class="research-tablet-head"><div><h2>平板研究｜迷迭香</h2><p>第一次練習：先選一個你想查的方向。</p></div></div>
+                    <div class="research-options" id="research-options"></div>
+                    <div class="research-result" id="research-result"></div>
+                    <button class="research-continue" id="research-continue" type="button">完成第一次查詢</button>
+                </div>
+            </div>
+
+            <!-- 全螢幕系統 Overlay -->
+            <div class="system-overlay-bg" id="system-overlay"></div>
+            
+            <!-- 影片過場 Placeholder -->
+            <div class="video-placeholder-bg" id="video-placeholder"></div>
+
+        </div>
+
+        <!-- ==================== 第1週星期三結束畫面 ==================== -->
+        <div id="demo-end-screen">
+            <h2 class="de-logo">《天啊！我被香草包圍了》</h2>
+            <h1 class="de-title" style="letter-spacing:0.12em;">第1週・星期三結束</h1>
+            <div class="de-summary-grid">
+                <div class="de-summary-row"><span>勇氣值</span><span id="de-bravery">0</span></div>
+                <div class="de-summary-row"><span>觀察力</span><span id="de-observation">0</span></div>
+                <div class="de-summary-row"><span>已認識同學</span><span id="de-students">0 / 11</span></div>
+                <div class="de-summary-row"><span>我的植物</span><span>迷迭香</span></div>
+                <div class="de-summary-row"><span>陳冠瑋老師信任度</span><span id="de-chen-trust">10 / 50</span></div>
+                <div class="de-summary-row"><span>許恒維老師信任度</span><span id="de-xu-trust">10 / 50</span></div>
+                <div class="de-summary-row"><span>小琳羈絆度</span><span id="de-mint-bond">0%</span></div>
+                <div class="de-summary-row"><span>其他學生</span><span>初識</span></div>
+            </div>
+            <div class="de-long-task">長期任務｜《我的香草夥伴》・迷迭香</div>
+            <p style="margin-bottom: 1.4rem; color: #94a3b8; letter-spacing: 0.12em;">下一次星期三下午特別活動：下下個星期三</p>
+            <div class="de-btns">
+                <button id="btn-de-restart" class="btn-start" style="font-size: 1.5rem; background: var(--color-player); border-color: var(--color-sky);">重新開始</button>
+                <button id="btn-de-home" class="btn-start" style="font-size: 1.5rem; background: transparent; color: white;">回到首頁</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ==================== JavaScript 整合區 ==================== -->
+    
+    <script src="herbgame-formal.js"></script>
+</body>
+</html>
