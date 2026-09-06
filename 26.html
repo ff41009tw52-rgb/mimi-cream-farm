@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>手臂肌肉動一動 - 科學農場</title>
+    <link rel="stylesheet" href="farm-ui.css">
     <!-- 引入 Tailwind CSS 作為快速排版與設計樣式 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -41,13 +42,7 @@
 
     <!-- 頂部導覽列 -->
     <header class="bg-emerald-500 text-white p-4 flex flex-wrap items-center justify-between shadow-md gap-4">
-        <!-- 左上角：回農場首頁按鈕 -->
-        <a href="index.html" class="flex items-center gap-2 bg-white text-emerald-600 hover:text-emerald-800 px-4 py-2 rounded-full font-bold shadow-sm hover:shadow-md transition duration-200">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-            </svg>
-            回農場首頁
-        </a>
+        <div class="hidden md:block w-36" aria-hidden="true"></div>
         <h1 class="text-xl md:text-2xl font-black tracking-wider flex-1 text-center">💪 手臂肌肉動一動</h1>
         <div class="hidden md:block w-36"></div> <!-- 佔位符以保持標題置中 -->
     </header>
@@ -281,6 +276,6 @@
             }
         }
     </script>
-    <script src="home-button.js"></script>
+    <script src="farm-ui.js"></script>
 </body>
 </html>

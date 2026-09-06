@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>空氣壓縮實驗：波以耳定律挑戰</title>
+    <link rel="stylesheet" href="farm-ui.css">
     <style>
         :root {
             --primary-color: #3498db;
@@ -336,27 +337,61 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+.dashboard-07{position:fixed;top:18px;right:18px;z-index:40;display:grid;gap:8px;width:min(300px,calc(100vw - 36px))}.metric-card,.prediction-card,.conclusion-card{background:rgba(255,255,255,.94);border-radius:14px;padding:10px 14px;box-shadow:0 6px 16px rgba(0,0,0,.15);color:var(--text-color);font-weight:700}.metric-card span{color:#1565c0;font-size:1.2rem}.prediction-card button{margin:6px 6px 0 0;border:0;border-radius:999px;padding:6px 10px;color:#fff;background:#3498db;font-weight:700}.conclusion-card{display:none}.conclusion-card.show{display:block}.target-line.near{background-color:var(--warning-color)}.target-line.success{background-color:var(--success-color)}
+
         @media (max-width: 600px) {
+            body {
+                display: block;
+                height: auto;
+                min-height: 100dvh;
+                overflow-x: hidden;
+                overflow-y: auto;
+            }
             .main-container {
                 flex-direction: column;
                 transform: translateY(0);
-                gap: 20px;
+                width: 100%;
+                height: auto;
+                gap: 8px;
+                padding-bottom: 28px;
             }
             .left-panel {
-                width: 90%;
+                width: calc(100% - 24px);
+                gap: 8px;
             }
+            h1 { font-size: 1.3rem; text-align: center; }
+            .mission-box { min-height: 0; padding: 12px 14px; }
+            .mission-text { font-size: 1rem; margin-bottom: 4px; }
+            .mission-sub { font-size: 0.86rem; line-height: 1.4; }
             .stage {
-                height: 450px;
+                height: 390px;
+                padding-bottom: 0;
+                transform: scale(.82);
+                transform-origin: top center;
             }
+            .dashboard-07 {
+                position: relative;
+                top: auto;
+                right: auto;
+                width: calc(100% - 24px);
+                margin: 68px 12px 10px;
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+            }
+            .metric-card, .prediction-card, .conclusion-card {
+                padding: 8px 10px;
+                border-radius: 10px;
+                font-size: 0.78rem;
+                line-height: 1.35;
+            }
+            .metric-card span { display: block; font-size: 1rem; }
+            .prediction-card, .conclusion-card { grid-column: 1 / -1; }
+            .prediction-card button { min-height: 36px; margin-top: 5px; padding: 5px 10px; }
         }
-.dashboard-07{position:fixed;top:18px;right:18px;z-index:40;display:grid;gap:8px;width:min(300px,calc(100vw - 36px))}.metric-card,.prediction-card,.conclusion-card{background:rgba(255,255,255,.94);border-radius:14px;padding:10px 14px;box-shadow:0 6px 16px rgba(0,0,0,.15);color:var(--text-color);font-weight:700}.metric-card span{color:#1565c0;font-size:1.2rem}.prediction-card button{margin:6px 6px 0 0;border:0;border-radius:999px;padding:6px 10px;color:#fff;background:#3498db;font-weight:700}.conclusion-card{display:none}.conclusion-card.show{display:block}.target-line.near{background-color:var(--warning-color)}.target-line.success{background-color:var(--success-color)}
     </style>
 </head>
 <body>
 <aside class="dashboard-07"><div class="metric-card">現在空氣體積：<span id="volumeValue">0 mL</span></div><div class="metric-card">空氣擠得多不多：<span id="crowdingValue">鬆鬆的</span></div><div class="prediction-card">預測：把活塞往下壓時，空氣粒子會變得比較分散，還是比較擠？<br><button onclick="answerPrediction07('分散')">比較分散</button><button onclick="answerPrediction07('擠')">比較擠</button><div id="predictionFeedback07"></div></div><div class="conclusion-card" id="conclusion07">結論：空間變小時，空氣粒子會靠得更近、跑得更快。</div></aside>
-<a href="index.html" style="position: fixed; top: 15px; left: 15px; z-index: 9999; background: #FF8C42; color: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: bold; box-shadow: 2px 2px 10px rgba(0,0,0,0.2); font-family: sans-serif; border: 2px solid white;">
-  🐾 回農場
-</a>
     <div class="main-container">
         <!-- 左側面板：任務與按鈕 -->
         <div class="left-panel">
@@ -748,8 +783,7 @@
         init();
 
     </script>
-    <script src="home-button.js"></script>
+    <script src="farm-ui.js"></script>
 </body>
 
 </html>
-

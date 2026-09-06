@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>小妍這一組：操作動滑輪</title>
+    <link rel="stylesheet" href="farm-ui.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
@@ -39,7 +40,7 @@
         }
     </style>
 </head>
-<body class="h-screen flex flex-col">
+<body class="h-screen flex flex-col" data-farm-home-position="center">
 
     <!-- Header -->
     <header class="bg-orange-400 text-white p-3 md:p-4 shadow-md flex items-center justify-between shrink-0">
@@ -651,6 +652,6 @@
         setTimeout(resizeCanvas, 100);
 
     </script>
-    <script src="home-button.js"></script>
+    <script src="farm-ui.js"></script>
 </body>
 </html>

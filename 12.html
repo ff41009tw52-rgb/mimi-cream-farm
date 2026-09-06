@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>四季農莊：島嶼物語</title>
+  <link rel="stylesheet" href="farm-ui.css">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -258,6 +259,11 @@
         const saved = localStorage.getItem('farm_tycoon_save_v2');
         if (saved) setSaveExists(true);
       }, []);
+
+      useEffect(() => {
+        document.body.dataset.farmHomeHidden = isGameStarted ? 'true' : 'false';
+        return () => { delete document.body.dataset.farmHomeHidden; };
+      }, [isGameStarted]);
 
       const removeFlyingCrop = useCallback((id) => {
         setFlyingCrops(prev => prev.filter(c => c.id !== id));
@@ -2029,6 +2035,6 @@
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
   </script>
-    <script src="home-button.js"></script>
+    <script src="farm-ui.js"></script>
 </body>
 </html>

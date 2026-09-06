@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Q版電路小實驗 (手機觸控版)</title>
+    <link rel="stylesheet" href="farm-ui.css">
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -24,13 +25,49 @@
         /* 防止選取文字 */
         .no-select { user-select: none; -webkit-user-select: none; }
 .guided-card-08{position:fixed;left:14px;bottom:14px;z-index:60;width:min(390px,calc(100vw - 28px));background:rgba(255,255,255,.96);border:3px solid #fbbf24;border-radius:18px;padding:12px;box-shadow:0 10px 24px rgba(0,0,0,.18);font-family:"Microsoft JhengHei";color:#334155}.guided-card-08 h2{margin:0 0 6px;color:#b45309}.guided-card-08 ol{margin:0 0 6px 1.2em}.guided-card-08 .explain{background:#fffbeb;border-radius:12px;padding:8px;font-weight:700;color:#92400e}
+
+        @media (max-width: 600px) {
+            .circuit-header {
+                margin-top: 62px !important;
+                padding: 10px 12px !important;
+                gap: 8px !important;
+            }
+            .circuit-header h1 { width: 100%; font-size: 1.25rem !important; }
+            .circuit-toolbar {
+                display: grid !important;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                width: 100%;
+                gap: 6px !important;
+            }
+            .circuit-toolbar button {
+                min-width: 0 !important;
+                min-height: 44px;
+                padding: 7px 4px !important;
+                justify-content: center;
+                font-size: 0.78rem !important;
+            }
+            .circuit-toolbar .power-button { grid-column: span 2; }
+            .circuit-status { margin-top: 8px !important; padding: 6px 10px !important; font-size: 0.82rem !important; }
+            .guided-card-08 {
+                left: 10px;
+                bottom: 10px;
+                width: calc(100vw - 20px);
+                max-height: 142px;
+                overflow-y: auto;
+                box-sizing: border-box;
+                padding: 9px 10px;
+                border-width: 2px;
+                border-radius: 14px;
+                font-size: 0.76rem;
+                line-height: 1.35;
+            }
+            .guided-card-08 h2 { font-size: 0.95rem; }
+            .guided-card-08 ol { margin-bottom: 4px; }
+            .guided-card-08 .explain { padding: 5px 7px; }
+        }
     </style>
 </head>
 <body>
-    <a href="index.html" style="position: fixed; top: 15px; left: 15px; z-index: 9999; background: #FF8C42; color: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: bold; box-shadow: 2px 2px 10px rgba(0,0,0,0.2); font-family: sans-serif; border: 2px solid white;">
-        🐾 回農場
-    </a>
-
     <div id="root"></div>
 <section class="guided-card-08"><h2>💡 跟著做模式</h2><ol><li>先把電池的＋端連到燈泡下面的小圓點。</li><li>再把燈泡旁邊的金屬螺紋連回電池－端。</li><li>打開電源，觀察燈泡是否亮起。</li></ol><div class="explain">成功亮燈的原因：電流走成一個完整的圈圈。</div></section>
 
@@ -58,13 +95,18 @@
             BULB: 'bulb'
         };
 
-        const INITIAL_COMPONENTS = [
+        const DESKTOP_COMPONENTS = [
             { id: 'bulb-1', type: COMPONENT_TYPES.BULB, x: 400, y: 150, rotation: 0 },
             { id: 'bat-1', type: COMPONENT_TYPES.BATTERY, x: 250, y: 350, rotation: 0 },
         ];
 
+        const createInitialComponents = () => window.innerWidth <= 600 ? [
+            { id: 'bulb-1', type: COMPONENT_TYPES.BULB, x: Math.max(210, window.innerWidth - 120), y: 70, rotation: 0 },
+            { id: 'bat-1', type: COMPONENT_TYPES.BATTERY, x: 24, y: 240, rotation: 0 },
+        ] : DESKTOP_COMPONENTS.map(component => ({ ...component }));
+
         function CircuitGame() {
-            const [components, setComponents] = useState(INITIAL_COMPONENTS);
+            const [components, setComponents] = useState(createInitialComponents);
             const [wires, setWires] = useState([]);
             
             const [isDrawing, setIsDrawing] = useState(false);
@@ -151,7 +193,11 @@
                 if (draggingCompId) {
                     setComponents(prev => prev.map(c => {
                         if (c.id === draggingCompId) {
-                            return { ...c, x: x - dragOffset.x, y: y - dragOffset.y };
+                            const width = c.type === COMPONENT_TYPES.BATTERY ? 140 : 80;
+                            const height = c.type === COMPONENT_TYPES.BATTERY ? 60 : 140;
+                            const nextX = Math.max(0, Math.min(x - dragOffset.x, containerRect.width - width));
+                            const nextY = Math.max(0, Math.min(y - dragOffset.y, containerRect.height - height));
+                            return { ...c, x: nextX, y: nextY };
                         }
                         return c;
                     }));
@@ -320,7 +366,7 @@
             };
 
             const resetBoard = () => {
-                setComponents(INITIAL_COMPONENTS);
+                setComponents(createInitialComponents());
                 setWires([]);
                 setLitBulbIds(new Set());
                 setBrightness(0);
@@ -476,13 +522,13 @@
                     onTouchMove={handleMouseMove}    // 手指移動 = 滑鼠移動
                     onTouchEnd={handleGlobalMouseUp} // 手指放開 = 判斷是否連線
                 >
-                    <div className="w-full bg-white shadow-md p-4 flex justify-between items-center z-10 gap-4 flex-wrap mt-14">
+                    <div className="circuit-header w-full bg-white shadow-md p-4 flex justify-between items-center z-10 gap-4 flex-wrap mt-14">
                         <h1 className="text-2xl font-bold text-slate-700 flex items-center gap-2 mr-auto">
                             <Zap className="text-yellow-500 fill-yellow-500" />
                             Q版電路小實驗
                         </h1>
                         
-                        <div className="flex gap-2">
+                        <div className="circuit-toolbar flex gap-2">
                             <button 
                                 onClick={() => setShowControls(!showControls)}
                                 className={`flex items-center gap-1 px-4 py-2 rounded-full transition font-bold ${showControls ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : 'bg-gray-200 text-gray-500 hover:bg-gray-300'}`}
@@ -497,7 +543,7 @@
                             
                             <button 
                                 onClick={togglePower} 
-                                className={`flex items-center gap-1 px-6 py-2 text-white rounded-full transition shadow-lg transform active:scale-95 font-bold text-lg min-w-[140px] justify-center
+                                className={`power-button flex items-center gap-1 px-6 py-2 text-white rounded-full transition shadow-lg transform active:scale-95 font-bold text-lg min-w-[140px] justify-center
                                 ${isSwitchOn ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}
                                 `}
                             >
@@ -507,7 +553,7 @@
                         </div>
                     </div>
 
-                    <div className={`mt-4 px-6 py-2 rounded-lg text-lg font-bold transition-all duration-300 ${
+                    <div className={`circuit-status mt-4 px-6 py-2 rounded-lg text-lg font-bold transition-all duration-300 ${
                         litBulbIds.size > 0 ? 'bg-yellow-100 text-yellow-800 border-2 border-yellow-400' : 
                         errorMsg ? (isSwitchOn ? 'bg-orange-100 text-orange-800' : 'bg-slate-200 text-slate-700') : 'bg-transparent text-transparent'
                     }`}>
@@ -730,6 +776,6 @@
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<CircuitGame />);
     </script>
-    <script src="home-button.js"></script>
+    <script src="farm-ui.js"></script>
 </body>
 </html>
