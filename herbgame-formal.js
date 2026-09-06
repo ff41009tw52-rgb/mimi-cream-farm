@@ -1,5 +1,5 @@
 (async()=>{
-  const manifest={"css":["herbgame-formal-css-01.b64"],"js":["herbgame-formal-core-01.b64","herbgame-formal-core-02.b64"]};
+  const manifest={"css":["herbgame-formal-css-01.b64"],"js":["herbgame-formal-release-01.b64","herbgame-formal-release-02.b64"]};
   async function joinFiles(files){
     const parts=[];
     for(const f of files){ const r=await fetch(f,{cache:'no-store'}); if(!r.ok) throw new Error(`載入失敗: ${f}`); parts.push(await r.text()); }
