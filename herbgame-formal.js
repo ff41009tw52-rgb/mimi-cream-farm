@@ -59,6 +59,16 @@
       jsText=jsText.slice(0,newCampusStart)+block+'\n\n        '+jsText.slice(newCampusStart);
     }
 
+    // GitHub 正式版校園地圖統一使用已存在的 campus-map-base.png。
+    jsText=jsText.replaceAll(
+      'picture/herb-game/campus-map-base.svg',
+      'picture/herb-game/campus-map-base.png'
+    );
+    jsText=jsText.replaceAll(
+      'picture/herb-game/ChatGPT Image 2026年9月6日 下午08_29_44.png',
+      'picture/herb-game/campus-map-base.png'
+    );
+
     // 修正目前 GitHub 已存在的陳老師頭像實際路徑。
     jsText=jsText.replaceAll(
       'picture/herb-game/characters/chen-guanwei-normal.jpg',
@@ -66,7 +76,7 @@
     );
 
     // 正式版是「非同步抓取→解壓→eval」後才執行。
-    // 此時 DOMContentLoaded 通常早已觸發，原本只監聽該事件會導致 GameEngine 永遠不建立，開始按鈕完全無反應。
+    // 此時 DOMContentLoaded 通常早已觸發，原本只監聽該事件會導致 GameEngine 永遠不建立。
     jsText=jsText.replace(
       /window\.addEventListener\(\s*['"]DOMContentLoaded['"]\s*,\s*\(\)\s*=>\s*\{\s*window\.gameEngine\s*=\s*new\s+GameEngine\(\)\s*;\s*\}\s*\)\s*;/s,
       `(()=>{\n  const bootGame=()=>{\n    if(!window.gameEngine) window.gameEngine=new GameEngine();\n  };\n  if(document.readyState==='loading'){\n    document.addEventListener('DOMContentLoaded',bootGame,{once:true});\n  }else{\n    bootGame();\n  }\n})();`
@@ -83,6 +93,16 @@
 
     let jsText=await gunzipBase64(await joinFiles(manifest.js));
     jsText=repairReleaseJs(jsText);
+
+    // HTML 目前仍保留舊 data-src，執行前直接改成 GitHub 內正式 PNG。
+    const campusMapImage=document.getElementById('campus-map-image');
+    if(campusMapImage){
+      campusMapImage.dataset.src='picture/herb-game/campus-map-base.png';
+      if(campusMapImage.src && campusMapImage.src.includes('campus-map-base.svg')){
+        campusMapImage.src='picture/herb-game/campus-map-base.png';
+      }
+    }
+
     (0,eval)(jsText);
   }catch(err){
     console.error(err);
