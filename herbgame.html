@@ -3,14 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>《天啊！我被香草包圍了》</title>
+    <title>《天啊！我被香草包圍了》- 遊戲體驗</title>
     <!-- 引入 Noto Sans TC 字體 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
     <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="herbgame.css">
+    <style>
+        :root {
+            --color-grass: #65a30d;
+            --color-sky: #38bdf8;
+            --color-yellow: #facc15;
+            --color-cream: #fbf8f1;
+            --color-dark-green: #14532d;
+            --color-player: #0284c7;
+            --color-system: #475569;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #000;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+
+        #game-container { position: relative; width: 100vw; height: 100vh; overflow: hidden; background-color: #000; }
+
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
+        .screen.active { opacity: 1; pointer-events: auto; }
+
+        /* ================= 首頁 ================= */
+        .home-bg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; background: linear-gradient(135deg, #7dd3fc, #d9f99d); }
+        .bg-image { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+        .home-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(125, 211, 252, 0.6) 0%, rgba(217, 249, 157, 0.6) 100%); z-index: 2; }
+        .ui-layer { position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 800px; padding: 0 2rem; }
+        .game-logo { text-align: center; line-height: 1.2; margin-bottom: 3rem; text-shadow: 3px 3px 0 var(--color-dark-green), -3px 3px 0 var(--color-dark-green), 3px -3px 0 var(--color-dark-green), -3px -3px 0 var(--color-dark-green), 0px 6px 0 var(--color-dark-green), 0px 8px 15px rgba(0,0,0,0.5); transform: rotate(-2deg); }
+        .title-small { font-size: clamp(2rem, 5vw, 3rem); color: var(--color-yellow); display: inline-block; margin-bottom: 0.5rem; transform: translateX(-15%); }
+        .title-large { font-size: clamp(3rem, 8vw, 5.5rem); color: var(--color-cream); display: block; letter-spacing: 0.05em; }
+        .btn-start { background-color: var(--color-grass); color: white; font-size: clamp(1.5rem, 4vw, 2.5rem); font-weight: 900; padding: 1rem 3rem; border-radius: 999px; border: 4px solid white; box-shadow: 0 8px 0 #3f6212, 0 15px 20px rgba(0,0,0,0.3); cursor: pointer; transition: all 0.1s ease; letter-spacing: 0.1em; text-shadow: 2px 2px 0 rgba(0,0,0,0.3); }
+        .btn-start:active { transform: translateY(8px); box-shadow: 0 0px 0 #3f6212, 0 5px 10px rgba(0,0,0,0.3); }
+        .demo-subtitle { margin-top: 2rem; font-size: clamp(1rem, 2.5vw, 1.25rem); color: #fff; background: rgba(0,0,0,0.6); padding: 0.5rem 1.5rem; border-radius: 999px; letter-spacing: 0.05em; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.2); }
+        
+        .leaf-decoration { position: absolute; z-index: 3; opacity: 0.9; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2)); animation: float 6s ease-in-out infinite; }
+        .leaf-1 { top: 10%; left: 15%; transform: rotate(-15deg); width: 8vw; max-width: 80px; animation-delay: 0s; }
+        .leaf-2 { top: 20%; right: 10%; transform: rotate(25deg) scaleX(-1); width: 10vw; max-width: 100px; animation-delay: -2s; }
+        .leaf-3 { bottom: 15%; left: 8%; transform: rotate(45deg); width: 12vw; max-width: 120px; animation-delay: -4s; }
+        .leaf-4 { bottom: 10%; right: 15%; transform: rotate(-30deg); width: 9vw; max-width: 90px; animation-delay: -1s; }
+        @keyframes float { 0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)); } 50% { transform: translateY(-20px) rotate(calc(var(--rot, 0deg) + 5deg)); } }
+
+        /* ================= 主畫面 ================= */
+        .game-bg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; transition: opacity 0.3s ease; }
+        .bg-placeholder { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1e293b, #334155); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.5); font-size: 2rem; font-weight: 700; text-align: center; z-index: 0; }
+        /* 背景些微動態感 */
+        #main-bg-image { animation: none; transform-origin: center; transform: none; }
+        @keyframes slow-pan { 0% { transform: none; } 100% { transform: none; } }
+        
+        /* 畫面變暗特效 */
+        .effect-darken::after { content: ''; position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index: 5; pointer-events:none; transition: opacity 0.8s ease; opacity: 1; }
+        #screen-game:not(.effect-darken)::after { opacity: 0; }
+        
+        /* 全黑 Fade 特效 */
+        .effect-fadeout::after { content: ''; position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,1); z-index: 50; pointer-events:auto; transition: opacity 1.5s ease; opacity: 1; }
+        #screen-game:not(.effect-fadeout)::after { opacity: 0; pointer-events:none;}
+
+        .hud-container { position: absolute; top: 0; left: 0; width: 100%; padding: 1rem 1.5rem; z-index: 10; display: flex; justify-content: space-between; pointer-events: none; }
+        @media (orientation: portrait) { .hud-container { top: 2.5rem; } }
+        .hud-item { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(8px); padding: 0.5rem 1rem; border-radius: 999px; font-size: clamp(0.9rem, 2vw, 1.1rem); font-weight: 700; color: var(--color-dark-green); border: 2px solid rgba(255, 255, 255, 0.9); box-shadow: 0 4px 6px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; }
+
+        /* ================= 對話框 ================= */
+        .dialogue-wrapper { position: absolute; bottom: 3%; left: 50%; transform: translateX(-50%); width: 92%; max-width: 1200px; height: 22%; min-height: 140px; z-index: 10; }
+        .dialogue-wrapper { overflow: visible; }
+        .speaker-portrait {
+            position: absolute;
+            left: 50%;
+            bottom: calc(100% + 1.5vh);
+            transform: translateX(-50%);
+            width: clamp(260px, 30vw, 430px);
+            max-height: 54vh;
+            object-fit: contain;
+            z-index: 12;
+            pointer-events: none;
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+            box-shadow: none;
+            transition: opacity 0.18s ease, transform 0.18s ease;
+        }
+        .speaker-portrait.hidden { display: none; }
+        @media (max-width: 768px) {
+            .speaker-portrait {
+                width: clamp(230px, 52vw, 340px);
+                max-height: 50vh;
+                bottom: calc(100% + 1vh);
+            }
+        }
+        .dialogue-box { position: relative; width: 100%; height: 100%; background: rgba(20, 83, 45, 0.85); backdrop-filter: blur(8px); border: 3px solid rgba(255, 255, 255, 0.6); border-radius: 16px; padding: 2rem 2.5rem 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; cursor: pointer; }
+        .character-name { position: absolute; top: -20px; left: 2rem; background-color: var(--color-grass); color: white; font-size: clamp(1.2rem, 2.5vw, 1.5rem); font-weight: 900; padding: 0.4rem 1.5rem; border-radius: 12px; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); letter-spacing: 0.05em; transition: background-color 0.3s; }
+        .character-name.type-player { background-color: var(--color-player); }
+        .character-name.type-system { background-color: var(--color-system); border-radius: 6px; }
+        .character-name.hidden { display: none; }
+        .dialogue-text { color: var(--color-cream); font-size: clamp(1.2rem, 3vw, 1.8rem); font-weight: 700; line-height: 1.6; letter-spacing: 0.05em; flex-grow: 1; overflow-y: auto; }
+        .dialogue-text.type-player { font-style: italic; color: #e0f2fe; }
+        .continue-indicator { position: absolute; bottom: 1rem; right: 2rem; color: var(--color-yellow); font-size: 1.5rem; animation: bounce 1s infinite; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+        .continue-indicator.show { opacity: 1; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+
+        /* ================= 選項系統 ================= */
+        .choices-container { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); width: 85%; max-width: 800px; display: flex; flex-direction: column; gap: 1rem; z-index: 15; opacity: 0; pointer-events: none; transition: opacity 0.3s ease, transform 0.3s; padding-bottom: 2rem; }
+        .choices-container.show { opacity: 1; pointer-events: auto; transform: translate(-50%, 0); }
+        .choice-btn { background: rgba(255, 255, 255, 0.95); border: 3px solid var(--color-grass); border-radius: 16px; padding: 1rem 2rem; font-size: clamp(1.1rem, 2.5vw, 1.5rem); font-weight: 700; color: var(--color-dark-green); text-align: left; box-shadow: 0 6px 15px rgba(0,0,0,0.3); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; line-height: 1.4; }
+        .choice-btn:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); border-color: #4d7c0f; }
+        .choice-btn.selected { background: var(--color-grass); color: white; border-color: white; }
+        .choice-btn.disabled { pointer-events: none; opacity: 0.6; }
+        .choice-label { display: inline-block; background: var(--color-yellow); color: #854d0e; padding: 0.2rem 0.8rem; border-radius: 8px; margin-right: 1rem; font-weight: 900; flex-shrink: 0; }
+
+        /* ================= 系統 Toast ================= */
+        #toast-container { position: fixed; top: 15%; right: 5%; z-index: 100; display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none; }
+        .toast-msg { background: rgba(15, 23, 42, 0.85); color: white; padding: 1rem 1.5rem; border-radius: 8px; border-left: 6px solid var(--color-yellow); font-size: clamp(1rem, 1.5vw, 1.2rem); font-weight: 700; backdrop-filter: blur(4px); box-shadow: 0 4px 15px rgba(0,0,0,0.3); transform: translateX(120%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .toast-msg.show { transform: translateX(0); }
+        .toast-msg strong { color: var(--color-yellow); display: block; margin-bottom: 0.2rem; }
+
+        /* ================= 系統 Overlay ================= */
+        .system-overlay-bg { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index: 50; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.4s; backdrop-filter: blur(4px); }
+        .system-overlay-bg.active { opacity:1; pointer-events:auto; }
+        .overlay-content { text-align: center; color: white; padding: 3rem; border: 2px dashed rgba(255,255,255,0.4); border-radius: 16px; background: rgba(20, 83, 45, 0.5); max-width: 80%; }
+        .overlay-content h2 { color: var(--color-yellow); font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; margin-bottom: 1rem; letter-spacing: 0.1em; }
+        .overlay-content p { font-size: clamp(1.2rem, 2.5vw, 1.8rem); font-weight: 700; line-height: 1.6; }
+        .btn-continue-overlay { margin-top: 2rem; background: transparent; border: 2px solid white; color: white; padding: 0.5rem 2rem; border-radius: 999px; font-size: 1.2rem; cursor: pointer; transition: background 0.2s; }
+        .btn-continue-overlay:hover { background: rgba(255,255,255,0.2); }
+
+        /* ================= 影片 Placeholder ================= */
+        .video-placeholder-bg { position: absolute; top:0; left:0; width:100%; height:100%; background:#1e293b; z-index: 60; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.5s; overflow:hidden;}
+        .video-placeholder-bg.active { opacity:1; pointer-events:auto; }
+        .vp-bg-anim { position: absolute; top:0; left:0; width:200%; height:100%; background: linear-gradient(90deg, #1e293b 0%, #334155 50%, #1e293b 100%); animation: slide-bg 4s linear infinite; z-index: 1;}
+        @keyframes slide-bg { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .vp-content { text-align: center; color: white; width: 60%; position: relative; z-index: 2; }
+        .vp-content h2 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; margin-bottom: 1rem; }
+        .vp-content p { font-size: 1.2rem; margin-bottom: 2rem; color: #cbd5e1;}
+        .vp-progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 3px; overflow: hidden; position: relative; }
+        .vp-progress-fill { position: absolute; top:0; left:0; height:100%; background: var(--color-grass); width: 0%; animation: load-progress linear forwards; }
+        .video-placeholder-bg.active .vp-progress-fill { animation-duration: 4s; }
+        @keyframes load-progress { 0% { width: 0%; } 100% { width: 100%; } }
+
+        /* ================= Bad End ================= */
+        #bad-end-screen { position: absolute; top:0; left:0; width:100%; height:100%; background: #000; z-index: 100; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.8s; color: white; }
+        #bad-end-screen.active { opacity:1; pointer-events:auto; }
+        .be-title { color: #ef4444; font-size: clamp(3rem, 6vw, 4rem); font-weight: 900; margin-bottom: 1rem; letter-spacing: 0.1em; text-shadow: 2px 2px 0 rgba(255,0,0,0.3); }
+        .be-subtitle { font-size: clamp(1.5rem, 3vw, 2rem); margin-bottom: 0.5rem; color: #fca5a5; }
+        .be-desc { font-size: 1.2rem; margin-bottom: 3rem; color: #9ca3af; }
+
+        /* ================= Demo End ================= */
+        #demo-end-screen { position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(135deg, #0f172a, #1e293b); z-index: 100; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 1s; color: white; }
+        #demo-end-screen.active { opacity:1; pointer-events:auto; }
+        .de-logo { color: var(--color-cream); font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; margin-bottom: 0.5rem; }
+        .de-title { color: var(--color-yellow); font-size: clamp(3rem, 6vw, 5rem); font-weight: 900; margin-bottom: 2rem; letter-spacing: 0.2em; text-shadow: 0 0 20px rgba(250,204,21,0.5); }
+        .de-stats { background: rgba(0,0,0,0.4); padding: 2rem 4rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 2rem; text-align: left; }
+        .de-stats p { font-size: 1.5rem; margin: 0.5rem 0; color: #e2e8f0; display: flex; justify-content: space-between; gap: 2rem;}
+        .de-stats p span { color: var(--color-sky); font-weight: 700; }
+        .de-btns { display: flex; gap: 1rem; }
+
+        /* 開發測試用：上一部 / 回首頁 */
+        .dev-nav { position: absolute; top: 1rem; left: 50%; transform: translateX(-50%); display: flex; gap: 0.5rem; z-index: 20; pointer-events: auto; }
+        .dev-btn-home, .dev-btn-back { background: rgba(0, 0, 0, 0.6); color: white; border: 1px solid rgba(255,255,255,0.5); padding: 0.4rem 1rem; border-radius: 999px; font-size: 0.9rem; cursor: pointer; pointer-events: auto; white-space: nowrap; }
+        .dev-btn-home:hover, .dev-btn-back:hover { background: rgba(20, 83, 45, 0.9); }
+        .dev-btn-back:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    </style>
 </head>
 <body>
 
@@ -27,26 +189,7 @@
             <div class="ui-layer">
                 <h1 class="game-logo"><span class="title-small">天啊！</span><br><span class="title-large">我被香草包圍了</span></h1>
                 <button id="btn-start" class="btn-start">開始遊戲</button>
-            </div>
-        </div>
-
-        <!-- ==================== 正式版遊戲簡介 ==================== -->
-        <div id="screen-intro" class="screen">
-            <div class="intro-screen-bg"></div>
-            <div class="intro-card">
-                <h2>遊戲簡介</h2>
-                <p>在民安國小，香草園服務隊每個星期三都會前往香草園，進行環境整理與照護。</p>
-                <p>你即將扮演服務隊中的一員。你原本有些害羞、內向，對香草園的一切也還在慢慢熟悉。</p>
-                <p>在這個學期裡，你需要鼓起勇氣認識同學與老師，學習與大家互動、合作，也一步一步認識香草園裡的植物與相關知識。</p>
-                <p><strong>而今天……似乎剛好又是星期三。</strong></p>
-                <div class="intro-divider"></div>
-                <h2>遊戲目標</h2>
-                <p>在模擬上學生活的過程中，利用下課時間探索校園，逐步認識香草園服務隊的同學、老師與校園環境。</p>
-                <p>這個學期裡，你會和 <strong>11 位香草服務隊同學</strong>一起認識、照顧<strong>12 種香草植物</strong>。同學之間的羈絆、教師與校長的信任，以及你自己的勇氣，都會影響之後能遇到的事件與選擇。</p>
-                <div class="intro-actions">
-                    <button id="btn-intro-back" class="intro-secondary">回到標題</button>
-                    <button id="btn-intro-start" class="btn-start" style="font-size:1.25rem; padding:0.8rem 2rem;">開始我的星期三</button>
-                </div>
+                <p class="demo-subtitle">校園香草園互動體驗 Demo</p>
             </div>
         </div>
 
@@ -61,12 +204,12 @@
 
             <!-- HUD -->
             <div class="hud-container">
-                <div class="hud-item"><span style="font-size: 1.2em;">🕒</span> 第1週・星期三 <span id="hud-time">07:45</span> <span id="hud-location" style="font-size: 0.8em; margin-left:8px; opacity:0.8;">民安國小</span></div>
+                <div class="hud-item"><span style="font-size: 1.2em;">🕒</span> 星期三 <span id="hud-time">07:45</span> <span id="hud-location" style="font-size: 0.8em; margin-left:8px; opacity:0.8;">民安國小</span></div>
                 <div class="dev-nav">
                     <button id="btn-back-step" class="dev-btn-back" disabled>← 回到上一步</button>
-                    <button id="btn-open-panel" class="game-panel-btn">☰ 操作面板</button>
-                    <button id="btn-back-home" class="dev-btn-home">↺ 回首頁</button>
+                    <button id="btn-back-home" class="dev-btn-home">↺ 回首頁測試</button>
                 </div>
+                <div class="hud-item"><span style="font-size: 1.2em;">🌿</span> 香草園探索度 <span id="hud-exploration">0%</span></div>
             </div>
 
             <!-- Toast 容器 -->
@@ -75,127 +218,12 @@
             <!-- 對話區 -->
             <div class="dialogue-wrapper">
                 <div class="choices-container" id="choices-container"></div>
+                <img class="speaker-portrait hidden" id="speaker-portrait" alt="陳冠瑋老師質疑主角人物立繪">
                 
                 <div class="dialogue-box" id="dialogue-box">
                     <div class="character-name" id="char-name"></div>
                     <div class="dialogue-text" id="dialogue-text"></div>
                     <div class="continue-indicator" id="continue-icon">▼</div>
-                </div>
-            </div>
-
-
-            <!-- 正式版操作面板：人物屬性 / 成員介紹 -->
-            <div class="player-panel" id="player-panel">
-                <div class="player-panel-card">
-                    <div class="player-panel-header">
-                        <h2>操作面板</h2>
-                        <button id="btn-close-panel" class="player-panel-close" aria-label="關閉">×</button>
-                    </div>
-                    <div class="player-panel-tabs">
-                        <button class="player-panel-tab active" data-panel-tab="stats">人物屬性</button>
-                        <button class="player-panel-tab" data-panel-tab="tasks">目前任務</button>
-                        <button class="player-panel-tab" data-panel-tab="members">成員介紹</button>
-                        <button class="player-panel-tab" data-panel-tab="herbs">香草圖鑑</button>
-                    </div>
-                    <div class="player-panel-body">
-                        <div id="panel-stats" class="panel-section">
-                            <div class="stat-grid">
-                                <div class="stat-card">
-                                    <div class="stat-label">勇氣值</div>
-                                    <div class="stat-value" id="panel-bravery">0</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-label">觀察力</div>
-                                    <div class="stat-value" id="panel-observation">0</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-label">植物圖鑑完成</div>
-                                    <div class="stat-value" id="panel-plants">0 / 12</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-label">已認識同學</div>
-                                    <div class="stat-value" id="panel-characters">0 / 11</div>
-                                </div>
-                            </div>
-                            <div class="stat-note">
-                                勇氣值範圍為 0～100；一般活動完成時基本增加 2，主動向校長問早增加 1。觀察力來自仔細觀察與判斷。每位人物的信任度獨立計算，初始皆為 10；一般角色目前上限為 50，校長上限為 100。老師與校長使用「信任度」，學生使用「羈絆度」。關係資料請到「成員介紹」查看；植物名稱與學習進度請到「香草圖鑑」查看；任務進度請到「目前任務」查看。
-                            </div>
-                        </div>
-                        <div id="panel-tasks" class="panel-section hidden">
-                            <div id="current-task-card"></div>
-                        </div>
-                        <div id="panel-members" class="panel-section hidden">
-                            <div class="member-list" id="member-list"></div>
-                        </div>
-                        <div id="panel-herbs" class="panel-section hidden">
-                            <div class="herb-book-grid">
-                                <article class="herb-zone-card">
-                                    <div class="herb-zone-copy">
-                                        <h3>異國風情香草區</h3>
-                                        <p>收錄薑黃、左手香、檸檬香茅與斑蘭葉。從香氣、葉形與生活應用開始，認識不同風味的香草植物。</p>
-                                    </div>
-                                    <div class="herb-zone-image-wrap">
-                                        <div class="herb-zone-fallback">圖片尚未載入<br>picture/herb-game/herb-book-exotic-zone.svg</div>
-                                        <img class="herb-zone-image" src="picture/herb-game/herb-book-exotic-zone.svg" alt="異國風情香草區植物圖鑑" onload="this.previousElementSibling.style.display='none'" onerror="this.style.display='none'">
-                                    </div>
-                                </article>
-                                <article class="herb-zone-card">
-                                    <div class="herb-zone-copy">
-                                        <h3>在地原生香草區</h3>
-                                        <p>收錄艾草、魚腥草、刺蔥與月桃。這些植物和在地生活文化關係密切，觀察時可留意葉形、氣味與枝幹特徵。</p>
-                                    </div>
-                                    <div class="herb-zone-image-wrap">
-                                        <div class="herb-zone-fallback">圖片尚未載入<br>picture/herb-game/herb-book-native-zone.svg</div>
-                                        <img class="herb-zone-image" src="picture/herb-game/herb-book-native-zone.svg" alt="在地原生香草區植物圖鑑" onload="this.previousElementSibling.style.display='none'" onerror="this.style.display='none'">
-                                    </div>
-                                </article>
-                                <article class="herb-zone-card">
-                                    <div class="herb-zone-copy">
-                                        <h3>歐式浪漫香草區</h3>
-                                        <p>收錄澳洲茶樹、迷迭香、薄荷與芳香萬壽菊。這一區的植物香氣鮮明，常見於芳香、料理、茶飲或觀賞應用。</p>
-                                    </div>
-                                    <div class="herb-zone-image-wrap">
-                                        <div class="herb-zone-fallback">圖片尚未載入<br>picture/herb-game/herb-book-european-zone.svg</div>
-                                        <img class="herb-zone-image" src="picture/herb-game/herb-book-european-zone.svg" alt="歐式浪漫香草區植物圖鑑" onload="this.previousElementSibling.style.display='none'" onerror="this.style.display='none'">
-                                    </div>
-                                </article>
-                            </div>
-                            <div class="herb-book-note">植物卡只代表「知道名稱與配對」，不等於完整認識。外觀、辨認方式、香氣、用途、注意事項與觀察紀錄會隨後續事件逐步補完。</div>
-                            <div class="herb-progress-list" id="herb-progress-list"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-            <!-- 第1週星期三：上午下課自由探索地圖 -->
-            <div class="campus-map-layer" id="campus-map-layer">
-                <div class="campus-map-stage">
-                    <img id="campus-map-image" class="campus-map-image" src="" data-src="picture/herb-game/campus-map-base.svg" alt="民安國小校園地圖">
-                    <div class="map-topbar">
-                        <strong>上午下課｜想去哪裡看看？</strong>
-                        <small>可前往的地點已標示在地圖上；滑鼠移過去會微微發亮，平板可直接點選。</small>
-                    </div>
-                    <div id="campus-hotspots"></div>
-                    <aside class="map-info-panel" id="map-info-panel">
-                        <button class="map-info-close" id="map-info-close" aria-label="關閉地點介紹">×</button>
-                        <div class="map-location-kicker">校園自由探索</div>
-                        <h2 class="map-location-title" id="map-location-title">選擇地點</h2>
-                        <p class="map-location-desc" id="map-location-desc">點選地圖上的地點查看介紹。</p>
-                        <div class="map-location-hint" id="map-location-hint">第1週星期三有 1 次自由活動。</div>
-                        <button class="map-go-btn" id="map-go-btn" type="button">選擇這裡</button>
-                        <div class="map-selected-box" id="map-selected-box" style="display:none;"></div>
-                    </aside>
-                </div>
-            </div>
-
-            <!-- 遊戲內平板研究介面 -->
-            <div class="research-tablet-layer" id="research-tablet-layer">
-                <div class="research-tablet">
-                    <div class="research-tablet-head"><div><h2>平板研究｜迷迭香</h2><p>第一次練習：先選一個你想查的方向。</p></div></div>
-                    <div class="research-options" id="research-options"></div>
-                    <div class="research-result" id="research-result"></div>
-                    <button class="research-continue" id="research-continue" type="button">完成第一次查詢</button>
                 </div>
             </div>
 
@@ -207,24 +235,26 @@
 
         </div>
 
-        <!-- ==================== 第1週星期三結束畫面 ==================== -->
+        <!-- ==================== Bad End 畫面 ==================== -->
+        <div id="bad-end-screen">
+            <h1 class="be-title">BAD END</h1>
+            <h2 class="be-subtitle">《香草園消失之日》</h2>
+            <p class="be-desc">這不是我們說的整理。<br><span style="font-size: 0.8em;">(看到綠色植物之前，請先確認它到底是誰。)</span></p>
+            <button id="btn-be-retry" class="btn-start" style="font-size: 1.5rem;">重新選擇</button>
+        </div>
+
+        <!-- ==================== Demo End 畫面 ==================== -->
         <div id="demo-end-screen">
             <h2 class="de-logo">《天啊！我被香草包圍了》</h2>
-            <h1 class="de-title" style="letter-spacing:0.12em;">第1週・星期三結束</h1>
-            <div class="de-summary-grid">
-                <div class="de-summary-row"><span>勇氣值</span><span id="de-bravery">0</span></div>
-                <div class="de-summary-row"><span>觀察力</span><span id="de-observation">0</span></div>
-                <div class="de-summary-row"><span>已認識同學</span><span id="de-students">0 / 11</span></div>
-                <div class="de-summary-row"><span>我的植物</span><span>迷迭香</span></div>
-                <div class="de-summary-row"><span>陳冠瑋老師信任度</span><span id="de-chen-trust">10 / 50</span></div>
-                <div class="de-summary-row"><span>許恒維老師信任度</span><span id="de-xu-trust">10 / 50</span></div>
-                <div class="de-summary-row"><span>小琳羈絆度</span><span id="de-mint-bond">0%</span></div>
-                <div class="de-summary-row"><span>其他學生</span><span>初識</span></div>
+            <h1 class="de-title">DEMO END</h1>
+            <div class="de-stats">
+                <p>香草園探索度 <span id="de-exp">10%</span></p>
+                <p>已認識人物 <span id="de-chars">2</span></p>
+                <p>完成任務 <span id="de-quests">1</span></p>
             </div>
-            <div class="de-long-task">長期任務｜《我的香草夥伴》・迷迭香</div>
-            <p style="margin-bottom: 1.4rem; color: #94a3b8; letter-spacing: 0.12em;">下一次星期三下午特別活動：下下個星期三</p>
+            <p style="margin-bottom: 2rem; color: #94a3b8; letter-spacing: 0.2em;">未完待續……</p>
             <div class="de-btns">
-                <button id="btn-de-restart" class="btn-start" style="font-size: 1.5rem; background: var(--color-player); border-color: var(--color-sky);">重新開始</button>
+                <button id="btn-de-restart" class="btn-start" style="font-size: 1.5rem; background: var(--color-player); border-color: var(--color-sky);">重新體驗</button>
                 <button id="btn-de-home" class="btn-start" style="font-size: 1.5rem; background: transparent; color: white;">回到首頁</button>
             </div>
         </div>
@@ -232,9 +262,820 @@
     </div>
 
     <!-- ==================== JavaScript 整合區 ==================== -->
-    
-    <script src="herbgame-data.js"></script>
-<script src="herbgame-story.js"></script>
-<script src="herbgame-engine.js"></script>
+    <script>
+        /**
+         * 1. 故事資料庫 (STORY_DATA)
+         */
+        const STORY_DATA = {
+            initialScene: "scene01_01",
+            nodes: {
+                // ==========================================
+                // Scene 01: 校門口
+                // ==========================================
+                "scene01_01": { type: "dialogue", sceneImage: "picture/herb-game/scene-01-school-gate.jpg", fallbackImage: "picture/herb-game/scene-00-minan-school-cover.jpg", speaker: "我", speakerType: "player", text: "今天也是普通的一天。", next: "scene01_02" },
+                "scene01_02": { type: "dialogue", speaker: "我", speakerType: "player", text: "書包有帶。", next: "scene01_03" },
+                "scene01_03": { type: "dialogue", speaker: "我", speakerType: "player", text: "水壺有帶。", next: "scene01_04" },
+                "scene01_04": { type: "dialogue", speaker: "我", speakerType: "player", text: "總覺得……", next: "scene01_05" },
+                "scene01_05": {
+                    type: "dialogue", speaker: "我", speakerType: "player", text: "好像忘了什麼？",
+                    choices: [
+                        { id: "A", text: "應該沒什麼，先去教室", next: "scene02_01" },
+                        { id: "B", text: "停下來想想今天有什麼事", response: { speaker: "我", speakerType: "player", text: "想不起來……算了，先往裡面走。", next: "scene02_01" } },
+                        { id: "C", text: "看看其他同學都往哪裡走", response: { speaker: "我", speakerType: "player", text: "大家看起來都很正常……應該沒事吧。", next: "scene02_01" } }
+                    ]
+                },
+
+                // ==========================================
+                // Scene 02: 進入校園步道
+                // ==========================================
+                "scene02_01": { type: "dialogue", sceneImage: "picture/herb-game/scene-02-campus-walkway.jpg", speaker: "我", speakerType: "player", text: "應該真的沒有忘記什麼吧……", next: "scene02_02" },
+                "scene02_02": { type: "dialogue", speaker: "我", speakerType: "player", text: "……", next: "scene02_03" },
+                "scene02_03": { type: "dialogue", speaker: "我", speakerType: "player", text: "等等。", effect: "flash-dark", next: "scene02_04" },
+                "scene02_04": { type: "dialogue", speaker: "我", speakerType: "player", text: "今天……", next: "scene02_05" },
+                "scene02_05": { type: "dialogue", speaker: "我", speakerType: "player", text: "是不是星期三？", next: "scene03_01" },
+
+                // ==========================================
+                // Scene 03: 想起星期三集合 (記憶恢復)
+                // ==========================================
+                "scene03_01": { type: "systemOverlay", title: "【日常事項】", text: "每週三早上<br>香草園集合<br>除草與整理活動", next: "scene03_02" },
+                "scene03_02": { type: "dialogue", speaker: "我", speakerType: "player", text: "……", next: "scene03_03" },
+                "scene03_03": { type: "dialogue", speaker: "我", speakerType: "player", text: "天啊!!!!!!!!!!。", next: "scene03_04" },
+                "scene03_04": { type: "dialogue", speaker: "我", speakerType: "player", text: "我忘記了QAQ。", toast: { title: "【事件更新】", message: "星期三香草園集合", duration: 2500 }, next: "scene03_05" },
+                "scene03_05": {
+                    type: "dialogue", speaker: "我", speakerType: "player", text: "（現在該怎麼辦？）",
+                    choices: [
+                        { id: "A", text: "立刻衝去集合地點", response: { speaker: "我", speakerType: "player", text: "現在過去應該還來得及吧！", next: "scene04_01" } },
+                        { id: "B", text: "假裝完全不知道這件事", response: { speaker: "系統", speakerType: "system", text: "【判定失敗】", next: "scene03_05_B3" } },
+                        { id: "C", text: "先去教室放書包再說", response: { speaker: "我", speakerType: "player", text: "先去教室好像比較合理……", next: "scene03_05_C2" } }
+                    ]
+                },
+                "scene03_05_B3": { type: "dialogue", speaker: "我", speakerType: "player", text: "不行，老師一定會發現。", next: "scene04_01" },
+                "scene03_05_C2": { type: "dialogue", speaker: "我", speakerType: "player", text: "……不對，這樣只會更晚！", next: "scene04_01" },
+
+                // ==========================================
+                // Scene 04: 趕往集合地點 (影片過場 Placeholder)
+                // ==========================================
+                "scene04_01": { type: "video_placeholder", title: "【前往集合地點……】", subtitle: "「拜託不要已經開始了。」", duration: 4000, next: "scene05_01" },
+
+                // ==========================================
+                // Scene 05: 抵達集合地點 (正式照片)
+                // ==========================================
+                "scene05_01": { type: "dialogue", sceneImage: "picture/herb-game/scene-05-gather-arrival.jpg", speaker: "我", speakerType: "player", text: "……", next: "scene05_02" },
+                "scene05_02": { type: "dialogue", speaker: "我", speakerType: "player", text: "已經開始了。", next: "scene05_03" },
+                "scene05_03": { type: "dialogue", speaker: "我", speakerType: "player", text: "而且……", next: "scene05_04" },
+                "scene05_04": { type: "dialogue", speaker: "我", speakerType: "player", text: "我好像是最後一個。", toast: { title: "【狀態更新】", message: "遲到", duration: 2000 }, updateTime: "07:48", next: "scene06_01" },
+
+                // ==========================================
+                // Scene 06: 怎麼混進去？
+                // ==========================================
+                "scene06_01": { type: "dialogue", speaker: "我", speakerType: "player", text: "現在走過去……", next: "scene06_02" },
+                "scene06_02": {
+                    type: "dialogue", speaker: "我", speakerType: "player", text: "應該不會太明顯吧？",
+                    choices: [
+                        { id: "A", text: "安靜混進隊伍，假裝自己一直都在", response: { speaker: "我", speakerType: "player", text: "只要自然一點……<br>沒有人會發現的。", next: "scene07_01" } },
+                        { id: "B", text: "站在最後面，先聽老師在說什麼", response: { speaker: "我", speakerType: "player", text: "先躲在最後面好了。<br>至少先弄清楚大家在做什麼。", next: "scene07_01" } },
+                        { id: "C", text: "直接大喊：「老師，我來了！」", response: { speaker: "我", speakerType: "player", text: "老師，我來了！", next: "scene06_02_C2" } }
+                    ]
+                },
+                "scene06_02_C2": { type: "dialogue", speaker: "我", speakerType: "player", text: "……", next: "scene06_02_C3" },
+                "scene06_02_C3": { type: "dialogue", speaker: "我", speakerType: "player", text: "我是不是太大聲了？", next: "scene07_01" },
+
+                // ==========================================
+                // Scene 07: 加入老師說明 (正式照片)
+                // ==========================================
+                "scene07_01": { type: "dialogue", sceneImage: "picture/herb-game/scene-07-gather-briefing.jpg", speaker: "我", speakerType: "player", text: "看起來……", next: "scene07_02" },
+                "scene07_02": { type: "dialogue", speaker: "我", speakerType: "player", text: "老師正在說明今天的活動。", next: "scene08_01" },
+
+                // ==========================================
+                // Scene 08: 兩位老師自我介紹
+                // ==========================================
+                "scene08_01": { type: "dialogue", speaker: "陳冠瑋老師", speakerType: "npc", text: "大家早安，我是陳冠瑋老師。", next: "scene08_02" },
+                "scene08_02": { type: "dialogue", speaker: "陳冠瑋老師", speakerType: "npc", text: "每個星期三早上，我們會一起整理香草園。", characterUnlock: "陳冠瑋老師", next: "scene08_03" },
+                "scene08_03": { type: "dialogue", speaker: "許恒維老師", speakerType: "npc", text: "我是許恒維老師。", next: "scene08_04" },
+                "scene08_04": { type: "dialogue", speaker: "許恒維老師", speakerType: "npc", text: "第一次參加也不用擔心。", next: "scene08_05" },
+                "scene08_05": { type: "dialogue", speaker: "許恒維老師", speakerType: "npc", text: "等等會先帶大家認識香草園，再開始今天的整理。", characterUnlock: "許恒維老師", next: "scene09_01" },
+
+                // ==========================================
+                // Scene 09: 玩家開始心虛 / 被抓包
+                // ==========================================
+                "scene09_01": { type: "dialogue", speaker: "我", speakerType: "player", text: "第一次參加？", next: "scene09_02" },
+                "scene09_02": { type: "dialogue", speaker: "我", speakerType: "player", text: "……", next: "scene09_03" },
+                "scene09_03": { type: "dialogue", speaker: "我", speakerType: "player", text: "老師該不會已經發現……", next: "scene09_04" },
+                "scene09_04": { type: "dialogue", speaker: "我", speakerType: "player", text: "我是剛剛才來的吧？", next: "scene09_05" },
+                "scene09_05": { type: "dialogue", speaker: "陳冠瑋老師", speakerType: "npc", text: "那邊那位同學。", next: "scene09_06" },
+                "scene09_06": { type: "dialogue", speaker: "我", speakerType: "player", text: "……？", next: "scene09_07" },
+                "scene09_07": {
+                    type: "dialogue", speaker: "陳冠瑋老師", speakerType: "npc", text: "你是不是剛到？",
+                    choices: [
+                        { id: "A", text: "沒有啊，我一直都在", credibilityChange: -5, response: { speaker: "陳冠瑋老師", speakerType: "npc", text: "是嗎？", next: "scene09_07_A2" } },
+                        { id: "B", text: "對不起，我忘記今天星期三了", credibilityChange: 5, response: { speaker: "陳冠瑋老師", speakerType: "npc", text: "至少你有趕過來。", next: "scene09_07_B2" } },
+                        { id: "C", text: "老師，我只是去巡視校園", credibilityChange: -10, response: { speaker: "陳冠瑋老師", speakerType: "npc", text: "……巡視校園？", next: "scene09_07_C2" } }
+                    ]
+                },
+                "scene09_07_A2": { type: "dialogue", speaker: "我", speakerType: "player", text: "糟糕，他好像不相信。", next: "scene09_end" },
+                "scene09_07_B2": { type: "dialogue", speaker: "我", speakerType: "player", text: "對不起……", next: "scene09_end" },
+                "scene09_07_C2": { type: "dialogue", speaker: "陳冠瑋老師", speakerType: "npc", text: "好。", next: "scene09_07_C3" },
+                "scene09_07_C3": { type: "dialogue", speaker: "陳冠瑋老師", speakerType: "npc", text: "那你等等就順便巡視一下香草園。", next: "scene09_end" },
+                "scene09_end": { 
+                    type: "dialogue", speaker: "許恒維老師", speakerType: "npc", text: "既然人都到了，我們就準備去香草園吧。", 
+                    missionUpdate: { title: "【主線任務更新】", name: "前往香草園", objectives: ["□ 前往香草園", "□ 認識環境", "□ 了解基本整理方式"] }, 
+                    next: "scene10_01" 
+                },
+
+                // ==========================================
+                // Scene 10: 準備前往香草園
+                // ==========================================
+                "scene10_01": { type: "dialogue", speaker: "我", speakerType: "player", text: "看來……", next: "scene10_02" },
+                "scene10_02": { type: "dialogue", speaker: "我", speakerType: "player", text: "今天是逃不掉了。", next: "scene10_03" },
+                "scene10_03": { type: "dialogue", speaker: "陳冠瑋老師", speakerType: "npc", text: "走吧。", next: "scene10_04" },
+                "scene10_04": { type: "dialogue", speaker: "許恒維老師", speakerType: "npc", text: "先帶大家去看看今天要整理的地方。", effect: "fade-out", next: "scene11_01" },
+
+                // ==========================================
+                // Scene 11: 前往香草園 (影片過場)
+                // ==========================================
+                "scene11_01": { type: "video_placeholder", title: "【前往香草園……】", subtitle: "正式素材待補<br><span style='font-size:0.8em; opacity:0.8;'>第一人稱移動影片 4～6 秒</span>", duration: 4000, next: "scene12_01" },
+
+                // ==========================================
+                // Scene 12: 抵達香草園 (新區域解鎖)
+                // ==========================================
+                "scene12_01": { type: "dialogue", sceneImage: "picture/herb-game/scene-12-herb-garden-wide.jpg", fallbackImage: "PLACEHOLDER_SCENE_12", updateLocation: "香草園", speaker: "系統", speakerType: "system", text: "到達香草園。", regionUnlock: "香草園", next: "scene13_01" },
+                
+                // ==========================================
+                // Scene 13: 第一次香草園說明
+                // ==========================================
+                "scene13_01": { type: "dialogue", speaker: "許恒維老師", speakerType: "npc", text: "這裡就是我們每個星期三會整理的香草園。", next: "scene13_02" },
+                "scene13_02": { type: "dialogue", speaker: "許恒維老師", speakerType: "npc", text: "不過在開始除草之前，有一件事情一定要先記住。", next: "scene13_03" },
+                "scene13_03": { type: "dialogue", speaker: "陳冠瑋老師", speakerType: "npc", text: "不要看到綠色的東西就直接拔。", next: "scene13_04" },
+                "scene13_04": { type: "dialogue", speaker: "我", speakerType: "player", text: "……本來想說全部拔掉最快的。", next: "scene13_05" },
+                "scene13_05": { type: "dialogue", speaker: "許恒維老師", speakerType: "npc", text: "先觀察。", next: "scene13_06" },
+                "scene13_06": { type: "dialogue", speaker: "許恒維老師", speakerType: "npc", text: "確認哪些是我們種的植物，哪些才是需要處理的雜草。", next: "scene13_07" },
+                "scene13_07": { type: "systemOverlay", title: "【香草園基本原則】", text: "先觀察<br>↓<br>再判斷<br>↓<br>最後才動手", duration: 2500, next: "scene14_01" },
+
+                // ==========================================
+                // Scene 14: 第一次實際判斷
+                // ==========================================
+                "scene14_01": { type: "dialogue", sceneImage: "picture/herb-game/scene-14-herb-vs-weed.jpg", fallbackImage: "PLACEHOLDER_SCENE_14", speaker: "許恒維老師", speakerType: "npc", text: "好，那先來試試看。", next: "scene14_02" },
+                "scene14_02": {
+                    type: "dialogue", speaker: "許恒維老師", speakerType: "npc", text: "你覺得哪一邊才是現在應該處理的？",
+                    choices: [
+                        { id: "A", text: "左邊", isCorrect: false, response: { speaker: "許恒維老師", speakerType: "npc", text: "再看仔細一點。", next: "scene14_wrong" } },
+                        { id: "B", text: "右邊", isCorrect: true, response: { speaker: "許恒維老師", speakerType: "npc", text: "沒錯。", next: "scene16_01" } },
+                        { id: "C", text: "全部拔掉最快", isBadEnd: true, response: { speaker: "陳冠瑋老師", speakerType: "npc", text: "等等——", next: "bad_end_01" } }
+                    ]
+                },
+                "scene14_wrong": { type: "dialogue", speaker: "我", speakerType: "player", text: "好像真的不太一樣……", toast: { title: "【系統】", message: "觀察力練習中", duration: 2000 }, next: "scene14_02" }, // 答錯回到選擇
+                
+                // Bad End 邏輯
+                "bad_end_01": { type: "bad_end", returnNode: "scene14_02" },
+
+                // ==========================================
+                // Scene 16: 正確答案 & 任務完成
+                // ==========================================
+                "scene16_01": { type: "dialogue", speaker: "我", speakerType: "player", text: "（呼，好險選對了。）", addObservation: 1, addExploration: 10, next: "scene16_02" },
+                "scene16_02": { type: "dialogue", speaker: "許恒維老師", speakerType: "npc", text: "在動手之前，要先知道自己正在照顧什麼。", next: "scene16_03" },
+                "scene16_03": { type: "dialogue", speaker: "陳冠瑋老師", speakerType: "npc", text: "這樣才不會整理香草園，最後變成把香草園整理掉。", next: "scene16_04" },
+                "scene16_04": { type: "dialogue", speaker: "我", speakerType: "player", text: "……這句話聽起來很有道理。", next: "scene16_05" },
+                "scene16_05": { 
+                    type: "dialogue", speaker: "系統", speakerType: "system", text: "完成目標。", 
+                    missionComplete: { title: "【任務完成】", name: "初次進入香草園", objectives: ["✓ 前往香草園", "✓ 認識環境", "✓ 了解基本整理方式"] }, 
+                    next: "scene17_01" 
+                },
+
+                // ==========================================
+                // Scene 17: Demo 結尾
+                // ==========================================
+                "scene17_01": { type: "dialogue", speaker: "我", speakerType: "player", text: "原本只是……", effect: "darken", next: "scene17_02" }, // effect: darken 在此為長暗
+                "scene17_02": { type: "dialogue", speaker: "我", speakerType: "player", text: "不小心忘記星期三的集合。", next: "scene17_03" },
+                "scene17_03": { type: "dialogue", speaker: "我", speakerType: "player", text: "結果一早就被抓來香草園。", next: "scene17_04" },
+                "scene17_04": { type: "dialogue", speaker: "我", speakerType: "player", text: "而且……", next: "scene17_05" },
+                "scene17_05": { type: "dialogue", speaker: "我", speakerType: "player", text: "這好像才剛開始。", effect: "fade-out", next: "demo_end" },
+                
+                "demo_end": { type: "demo_end" }
+            }
+        };
+
+        /**
+         * 2. 遊戲核心引擎 (GameEngine)
+         */
+        class GameEngine {
+            constructor() {
+                this.dom = {
+                    screenHome: document.getElementById('screen-home'),
+                    screenGame: document.getElementById('screen-game'),
+                    btnStart: document.getElementById('btn-start'),
+                    btnBackStep: document.getElementById('btn-back-step'),
+                    btnBackHome: document.getElementById('btn-back-home'),
+                    bgImage: document.getElementById('main-bg-image'),
+                    bgPlaceholder: document.getElementById('bg-placeholder'),
+                    hudTime: document.getElementById('hud-time'),
+                    hudLocation: document.getElementById('hud-location'),
+                    hudExploration: document.getElementById('hud-exploration'),
+                    dialogueBox: document.getElementById('dialogue-box'),
+                    charName: document.getElementById('char-name'),
+                    dialogueText: document.getElementById('dialogue-text'),
+                    speakerPortrait: document.getElementById('speaker-portrait'),
+                    continueIcon: document.getElementById('continue-icon'),
+                    choicesContainer: document.getElementById('choices-container'),
+                    toastContainer: document.getElementById('toast-container'),
+                    systemOverlay: document.getElementById('system-overlay'),
+                    videoPlaceholder: document.getElementById('video-placeholder'),
+                    badEndScreen: document.getElementById('bad-end-screen'),
+                    demoEndScreen: document.getElementById('demo-end-screen')
+                };
+
+                // 核心變數
+                this.currentNodeId = null;
+                this.isTyping = false;
+                this.typeInterval = null;
+                this.currentFullText = "";
+                this.isShowingChoices = false;
+                this.isProcessingEvent = false; 
+                this.currentBgPath = "";
+
+                // 測試用「回到上一步」歷史紀錄
+                this.history = [];
+                this.tempResponseCounter = 0;
+                
+                // 遊戲狀態紀錄
+                this.gameState = {
+                    credibility: 0,
+                    exploration: 0,
+                    observation: 0,
+                    unlockedChars: new Set(),
+                    questsCompleted: 0
+                };
+
+                this.initEvents();
+            }
+
+            initEvents() {
+                this.dom.btnStart.addEventListener('click', () => {
+                    this.dom.screenHome.classList.remove('active');
+                    this.dom.screenGame.classList.add('active');
+                    this.startGame();
+                });
+
+                this.dom.btnBackStep.addEventListener('click', () => {
+                    this.goBackOneStep();
+                });
+
+                this.dom.btnBackHome.addEventListener('click', () => {
+                    this.resetGameUI();
+                    this.history = [];
+                    this.updateBackButton();
+                    this.dom.screenGame.classList.remove('active');
+                    this.dom.screenHome.classList.add('active');
+                });
+
+                this.dom.dialogueBox.addEventListener('click', () => this.handleDialogueClick());
+
+                // Bad End 重新選擇
+                document.getElementById('btn-be-retry').addEventListener('click', () => {
+                    this.dom.badEndScreen.classList.remove('active');
+                    this.isProcessingEvent = false;
+                    this.dom.dialogueBox.parentElement.style.display = 'block'; 
+                    this.loadNode(STORY_DATA.nodes[this.currentNodeId].returnNode); // 從 Bad End 節點讀取回去的節點
+                });
+
+                // Demo End 按鈕
+                document.getElementById('btn-de-restart').addEventListener('click', () => {
+                    this.dom.demoEndScreen.classList.remove('active');
+                    this.startGame(); // 完全重製並開始
+                });
+                document.getElementById('btn-de-home').addEventListener('click', () => {
+                    this.dom.demoEndScreen.classList.remove('active');
+                    this.resetGameUI();
+                    this.dom.screenGame.classList.remove('active');
+                    this.dom.screenHome.classList.add('active');
+                });
+            }
+
+            resetGameUI() {
+                this.dom.screenGame.classList.remove('effect-fadeout');
+                this.dom.screenGame.classList.remove('effect-darken');
+                this.dom.badEndScreen.classList.remove('active');
+                this.dom.demoEndScreen.classList.remove('active');
+                this.dom.systemOverlay.classList.remove('active');
+                this.dom.videoPlaceholder.classList.remove('active');
+            }
+
+            startGame() {
+                this.resetGameUI();
+                // 初始化狀態
+                this.gameState = { credibility: 0, exploration: 0, observation: 0, unlockedChars: new Set(), questsCompleted: 0 };
+                this.history = [];
+                this.tempResponseCounter = 0;
+                this.currentNodeId = null;
+                this.currentBgPath = "";
+                this.dom.hudTime.innerHTML = '07:45';
+                this.dom.hudLocation.innerHTML = '民安國小';
+                this.dom.hudExploration.innerHTML = '0%';
+                this.updateBackButton();
+                
+                this.loadNode(STORY_DATA.initialScene, { skipHistory: true });
+            }
+
+            cloneGameState() {
+                return {
+                    credibility: this.gameState.credibility,
+                    exploration: this.gameState.exploration,
+                    observation: this.gameState.observation,
+                    unlockedChars: new Set(this.gameState.unlockedChars),
+                    questsCompleted: this.gameState.questsCompleted
+                };
+            }
+
+            pushHistorySnapshot() {
+                if (!this.currentNodeId || !STORY_DATA.nodes[this.currentNodeId]) return;
+
+                this.history.push({
+                    nodeId: this.currentNodeId,
+                    gameState: this.cloneGameState(),
+                    hudTime: this.dom.hudTime.innerText,
+                    hudLocation: this.dom.hudLocation.innerText,
+                    hudExploration: this.dom.hudExploration.innerText,
+                    currentBgPath: this.currentBgPath,
+                    bgImageSrc: this.dom.bgImage.getAttribute('src') || '',
+                    bgImageDisplay: this.dom.bgImage.style.display,
+                    bgPlaceholderDisplay: this.dom.bgPlaceholder.style.display,
+                    bgPlaceholderHTML: this.dom.bgPlaceholder.innerHTML
+                });
+
+                // 避免長時間測試造成紀錄無限增加
+                if (this.history.length > 200) this.history.shift();
+                this.updateBackButton();
+            }
+
+            updateBackButton() {
+                if (!this.dom.btnBackStep) return;
+                this.dom.btnBackStep.disabled = this.history.length === 0;
+            }
+
+            restoreBackgroundSnapshot(snapshot) {
+                this.currentBgPath = snapshot.currentBgPath || '';
+                this.dom.bgImage.src = snapshot.bgImageSrc || '';
+                this.dom.bgImage.style.display = snapshot.bgImageDisplay || 'block';
+                this.dom.bgPlaceholder.style.display = snapshot.bgPlaceholderDisplay || 'none';
+                this.dom.bgPlaceholder.innerHTML = snapshot.bgPlaceholderHTML || '';
+                document.querySelector('.game-bg-layer').style.opacity = 1;
+            }
+
+            goBackOneStep() {
+                if (this.history.length === 0) return;
+
+                clearInterval(this.typeInterval);
+                this.isTyping = false;
+                this.isShowingChoices = false;
+                this.isProcessingEvent = false;
+                this.dom.choicesContainer.classList.remove('show');
+                this.dom.systemOverlay.classList.remove('active');
+                this.dom.videoPlaceholder.classList.remove('active');
+                this.dom.badEndScreen.classList.remove('active');
+                this.dom.demoEndScreen.classList.remove('active');
+                this.dom.screenGame.classList.remove('effect-fadeout', 'effect-darken');
+                this.dom.dialogueBox.parentElement.style.display = 'block';
+
+                const snapshot = this.history.pop();
+                this.gameState = {
+                    credibility: snapshot.gameState.credibility,
+                    exploration: snapshot.gameState.exploration,
+                    observation: snapshot.gameState.observation,
+                    unlockedChars: new Set(snapshot.gameState.unlockedChars),
+                    questsCompleted: snapshot.gameState.questsCompleted
+                };
+                this.dom.hudTime.innerText = snapshot.hudTime;
+                this.dom.hudLocation.innerText = snapshot.hudLocation;
+                this.dom.hudExploration.innerText = snapshot.hudExploration;
+                this.restoreBackgroundSnapshot(snapshot);
+
+                this.loadNode(snapshot.nodeId, {
+                    skipHistory: true,
+                    skipSideEffects: true,
+                    skipEffects: true,
+                    skipBackground: true
+                });
+                this.updateBackButton();
+            }
+
+            loadNode(nodeId, options = {}) {
+                const {
+                    skipHistory = false,
+                    skipSideEffects = false,
+                    skipEffects = false,
+                    skipBackground = false
+                } = options;
+
+                if (!nodeId || !STORY_DATA.nodes[nodeId]) {
+                    console.error(`Story node [${nodeId}] not found.`);
+                    return;
+                }
+
+                if (!skipHistory && this.currentNodeId && this.currentNodeId !== nodeId) {
+                    this.pushHistorySnapshot();
+                }
+
+                const node = STORY_DATA.nodes[nodeId];
+                this.currentNodeId = nodeId;
+                this.isProcessingEvent = false;
+                this.updateBackButton();
+                
+                // 特殊節點處理
+                if (node.type === 'bad_end') { this.showBadEnd(); return; }
+                if (node.type === 'demo_end') { this.showDemoEnd(); return; }
+
+                // 背景切換與特效
+                if (!skipBackground && node.sceneImage) this.updateBackground(node.sceneImage, node.fallbackImage);
+                if (!skipEffects) {
+                    if (node.effect === "flash-dark") this.triggerScreenEffect('flash-dark');
+                    if (node.effect === "fade-out") this.triggerScreenEffect('fade-out');
+                    if (node.effect === "darken") this.triggerScreenEffect('darken');
+                }
+                
+                // HUD 更新
+                if (node.updateTime) this.dom.hudTime.innerText = node.updateTime;
+                if (node.updateLocation) this.dom.hudLocation.innerText = node.updateLocation;
+
+                // 畫面類型渲染
+                switch (node.type) {
+                    case "dialogue": this.showDialogue(node); break;
+                    case "systemOverlay": this.showSystemOverlay(node); break;
+                    case "video_placeholder": this.showVideoPlaceholder(node); break;
+                }
+                
+                // 事件處理 / 狀態變數增減
+                // 回到上一步時略過副作用，避免 Toast、解鎖、探索度等重複累加
+                if (!skipSideEffects) {
+                    if (node.toast) this.showToast(node.toast);
+                    if (node.characterUnlock && !this.gameState.unlockedChars.has(node.characterUnlock)) {
+                        this.gameState.unlockedChars.add(node.characterUnlock);
+                        this.showToast({ title: "【人物資料更新】", message: node.characterUnlock, duration: 2500 });
+                    }
+                    if (node.regionUnlock) {
+                        this.showSystemOverlay({ title: "【新區域解鎖】", text: node.regionUnlock, duration: 2000, next: node.next, isAuto: true });
+                    }
+                    if (node.missionUpdate) this.showMissionOverlay(node.missionUpdate, false);
+                    if (node.missionComplete) {
+                        this.gameState.questsCompleted++;
+                        this.showMissionOverlay(node.missionComplete, true);
+                    }
+                    
+                    if (node.addObservation) {
+                        this.gameState.observation += node.addObservation;
+                        this.showToast({ title: "【系統】", message: `觀察力 +${node.addObservation}`, duration: 2000 });
+                    }
+                    if (node.addExploration) {
+                        this.gameState.exploration += node.addExploration;
+                        this.dom.hudExploration.innerText = `${this.gameState.exploration}%`;
+                        setTimeout(() => {
+                            this.showToast({ title: "【系統】", message: `香草園探索度 +${node.addExploration}%`, duration: 2500 });
+                        }, 500); // 稍微錯開 Toast
+                    }
+                }
+            }
+
+            updateBackground(imagePath, fallbackPath) {
+                if (this.currentBgPath === imagePath) return; 
+                
+                const gameBgLayer = document.querySelector('.game-bg-layer');
+                gameBgLayer.style.opacity = 0;
+                
+                setTimeout(() => {
+                    if (imagePath.startsWith("PLACEHOLDER")) {
+                        this.dom.bgImage.style.display = 'none';
+                        this.dom.bgPlaceholder.style.display = 'flex';
+                        const num = imagePath.split('_')[2];
+                        this.dom.bgPlaceholder.innerHTML = `<div>SCENE ${num}<br><span style="font-size: 1rem;">正式素材待替換</span></div>`;
+                    } else {
+                        const img = new Image();
+                        img.onload = () => {
+                            this.dom.bgImage.src = imagePath;
+                            this.dom.bgImage.style.display = 'block';
+                            this.dom.bgPlaceholder.style.display = 'none';
+                        };
+                        img.onerror = () => {
+                            if (fallbackPath && fallbackPath.startsWith("PLACEHOLDER_SCENE_12")) {
+                                this.dom.bgImage.style.display = 'none';
+                                this.dom.bgPlaceholder.style.display = 'flex';
+                                this.dom.bgPlaceholder.innerHTML = `<div>SCENE 12<br>民安國小香草園<br><span style="font-size: 1rem;">正式照片待替換</span></div>`;
+                            } else if (fallbackPath && fallbackPath.startsWith("PLACEHOLDER_SCENE_14")) {
+                                this.dom.bgImage.style.display = 'none';
+                                this.dom.bgPlaceholder.style.display = 'flex';
+                                this.dom.bgPlaceholder.innerHTML = `<div style="display:flex; width:100%; height:100%;">
+                                    <div style="flex:1; border-right:2px dashed #fff; display:flex; align-items:center; justify-content:center;">左側植物</div>
+                                    <div style="flex:1; display:flex; align-items:center; justify-content:center;">右側植物</div>
+                                </div><div style="position:absolute; top:20%; width:100%; font-size:1rem;">正式植物判斷照片待補</div>`;
+                            } else if (fallbackPath) {
+                                 this.dom.bgImage.src = fallbackPath;
+                                 this.dom.bgImage.style.display = 'block';
+                                 this.dom.bgPlaceholder.style.display = 'none';
+                            } else {
+                                 this.dom.bgImage.style.display = 'none';
+                                 this.dom.bgPlaceholder.style.display = 'flex';
+                                 this.dom.bgPlaceholder.innerHTML = `<div>照片待載入<br><span style="font-size: 0.8rem;">(路徑: ${imagePath})</span></div>`;
+                            }
+                        };
+                        img.src = imagePath; 
+                    }
+                    this.currentBgPath = imagePath;
+                    gameBgLayer.style.opacity = 1;
+                }, 300); 
+            }
+
+            triggerScreenEffect(type) {
+                const gameScreen = this.dom.screenGame;
+                if(type === 'flash-dark') {
+                    gameScreen.classList.add('effect-darken');
+                    setTimeout(() => gameScreen.classList.remove('effect-darken'), 800);
+                } else if (type === 'fade-out') {
+                    gameScreen.classList.add('effect-fadeout');
+                    // 自動移除由下一個節點邏輯控制，或是保持全黑直到場景切換
+                    setTimeout(() => gameScreen.classList.remove('effect-fadeout'), 1500); 
+                } else if (type === 'darken') {
+                    gameScreen.classList.add('effect-darken'); // 長期變暗，不用 setTimeout 移除
+                }
+            }
+            getPortraitForNode(node) {
+                if (!node || !node.speaker) return null;
+                const text = node.text || "";
+
+                // 只在需要強化情緒的橋段顯示冠瑋老師人物圖。
+                // normal：開始質疑主角
+                // thinking：玩家選到扣分／可疑回答後
+                // surprised：玩家選到加分／誠實回答後
+                if (node.speaker === "陳冠瑋老師") {
+                    const normalTexts = [
+                        "那邊那位同學。",
+                        "你是不是剛到？"
+                    ];
+                    const thinkingTexts = [
+                        "是嗎？",
+                        "……巡視校園？",
+                        "好。",
+                        "那你等等就順便巡視一下香草園。"
+                    ];
+                    const surprisedTexts = [
+                        "至少你有趕過來。",
+                        "等等——"
+                    ];
+
+                    if (normalTexts.some(t => text.includes(t))) {
+                        return "picture/herb-game/characters/chen-guanwei-normal.png";
+                    }
+                    if (thinkingTexts.some(t => text.includes(t))) {
+                        return "picture/herb-game/characters/chen-guanwei-thinking.png";
+                    }
+                    if (surprisedTexts.some(t => text.includes(t))) {
+                        return "picture/herb-game/characters/chen-guanwei-surprised.png";
+                    }
+                }
+                return null;
+            }
+
+            updateSpeakerPortrait(node) {
+                const portraitEl = this.dom.speakerPortrait;
+                const portraitPath = this.getPortraitForNode(node);
+
+                if (portraitPath) {
+                    portraitEl.src = portraitPath;
+                    portraitEl.classList.remove('hidden');
+                } else {
+                    portraitEl.removeAttribute('src');
+                    portraitEl.classList.add('hidden');
+                }
+            }
+
+            showDialogue(node) {
+                this.dom.systemOverlay.classList.remove('active');
+                this.dom.videoPlaceholder.classList.remove('active');
+                this.dom.dialogueBox.parentElement.style.display = 'block';
+                this.dom.choicesContainer.classList.remove('show');
+                
+                this.isShowingChoices = false;
+                this.currentFullText = node.text;
+                this.updateSpeakerPortrait(node);
+                
+                const charEl = this.dom.charName;
+                const textEl = this.dom.dialogueText;
+                
+                if (node.speaker) {
+                    charEl.textContent = node.speakerType === 'system' ? `【${node.speaker}】` : node.speaker;
+                    charEl.classList.remove('hidden', 'type-player', 'type-system');
+                    textEl.classList.remove('type-player');
+                    
+                    if (node.speakerType === 'player') {
+                        charEl.classList.add('type-player');
+                        textEl.classList.add('type-player');
+                    } else if (node.speakerType === 'system') {
+                        charEl.classList.add('type-system');
+                    }
+                } else {
+                    charEl.classList.add('hidden');
+                }
+
+                this.dom.dialogueText.innerHTML = "";
+                this.dom.continueIcon.classList.remove('show');
+                this.isTyping = true;
+                
+                let charIndex = 0;
+                clearInterval(this.typeInterval);
+                
+                this.typeInterval = setInterval(() => {
+                    if (charIndex < this.currentFullText.length) {
+                        this.dom.dialogueText.innerHTML += this.currentFullText.charAt(charIndex);
+                        charIndex++;
+                    } else {
+                        this.finishTyping(node);
+                    }
+                }, 30);
+            }
+
+            finishTyping(node) {
+                clearInterval(this.typeInterval);
+                this.dom.dialogueText.innerHTML = this.currentFullText;
+                this.isTyping = false;
+                
+                if (node.choices) {
+                    this.showChoices(node.choices);
+                } else {
+                    this.dom.continueIcon.classList.add('show');
+                }
+            }
+            
+            handleDialogueClick() {
+                if (this.isProcessingEvent || this.isShowingChoices) return;
+                const node = STORY_DATA.nodes[this.currentNodeId];
+
+                if (this.isTyping) {
+                    this.finishTyping(node);
+                } else {
+                    if (node.next) this.loadNode(node.next);
+                }
+            }
+
+            showChoices(choices) {
+                this.isShowingChoices = true;
+                this.dom.continueIcon.classList.remove('show');
+                this.dom.choicesContainer.innerHTML = '';
+                
+                choices.forEach(choice => {
+                    const btn = document.createElement('button');
+                    btn.className = 'choice-btn';
+                    btn.innerHTML = `<span class="choice-label">${choice.id}</span> ${choice.text}`;
+                    btn.addEventListener('click', (e) => this.handleChoiceSelection(choice, btn, e));
+                    this.dom.choicesContainer.appendChild(btn);
+                });
+                
+                this.dom.choicesContainer.classList.add('show');
+            }
+            
+            handleChoiceSelection(choice, clickedBtn, event) {
+                event.stopPropagation(); 
+                if (!this.isShowingChoices) return;
+
+                // 選擇前先保存目前節點與狀態，方便「回到上一步」真正回到選擇前
+                this.pushHistorySnapshot();
+                this.isShowingChoices = false;
+                
+                if (choice.credibilityChange) {
+                    this.gameState.credibility += choice.credibilityChange;
+                    const sign = choice.credibilityChange > 0 ? "+" : "";
+                    this.showToast({ title: "【可信度變化】", message: `可信度 ${sign}${choice.credibilityChange}`, duration: 2000 });
+                }
+
+                const allBtns = this.dom.choicesContainer.querySelectorAll('.choice-btn');
+                allBtns.forEach(btn => {
+                    if (btn === clickedBtn) btn.classList.add('selected');
+                    else btn.classList.add('disabled');
+                });
+                
+                setTimeout(() => {
+                    this.dom.choicesContainer.classList.remove('show');
+                    if (choice.response) {
+                        const tempId = `_tempResponse_${++this.tempResponseCounter}`;
+                        STORY_DATA.nodes[tempId] = choice.response;
+                        this.loadNode(tempId, { skipHistory: true });
+                    } else if (choice.next) {
+                        this.loadNode(choice.next, { skipHistory: true });
+                    }
+                }, 350);
+            }
+
+            showToast(toastData) {
+                const toastEl = document.createElement('div');
+                toastEl.className = 'toast-msg';
+                toastEl.innerHTML = `<strong>${toastData.title}</strong><br>${toastData.message}`;
+                this.dom.toastContainer.appendChild(toastEl);
+                void toastEl.offsetWidth; 
+                toastEl.classList.add('show');
+                
+                setTimeout(() => {
+                    toastEl.classList.remove('show');
+                    setTimeout(() => toastEl.remove(), 300);
+                }, toastData.duration || 2000);
+            }
+            
+            showSystemOverlay(node) {
+                this.isProcessingEvent = true;
+                this.dom.dialogueBox.parentElement.style.display = 'none'; 
+                this.dom.speakerPortrait.classList.add('hidden');
+                
+                const overlay = this.dom.systemOverlay;
+                overlay.innerHTML = `
+                    <div class="overlay-content">
+                        <h2>${node.title}</h2>
+                        <p>${node.text}</p>
+                        ${node.isAuto ? '' : '<button id="btn-overlay-continue" class="btn-continue-overlay">我知道了</button>'}
+                    </div>
+                `;
+                overlay.classList.add('active');
+                
+                if(node.isAuto) {
+                    setTimeout(() => {
+                        overlay.classList.remove('active');
+                        if (node.next) this.loadNode(node.next);
+                    }, node.duration || 2000);
+                } else {
+                    document.getElementById('btn-overlay-continue').addEventListener('click', () => {
+                        overlay.classList.remove('active');
+                        if (node.next) this.loadNode(node.next);
+                    });
+                }
+            }
+
+            showMissionOverlay(missionData, isComplete = false) {
+                this.isProcessingEvent = true;
+                this.dom.dialogueBox.parentElement.style.display = 'none'; 
+                this.dom.speakerPortrait.classList.add('hidden');
+                
+                const overlay = this.dom.systemOverlay;
+                let objHtml = missionData.objectives.map(obj => `<div style="text-align:left; margin: 0.5rem 0;">${obj}</div>`).join('');
+                let borderColor = isComplete ? '#65a30d' : '#facc15'; // 完成為綠，接取為黃
+
+                overlay.innerHTML = `
+                    <div class="overlay-content mission-card" style="border-color: ${borderColor}; background: rgba(30, 41, 59, 0.9);">
+                        <h2 style="color: var(--color-sky); font-size: 1.5rem;">${missionData.title}</h2>
+                        <h3 style="font-size: 2.5rem; margin-bottom: 1.5rem; color: white;">${missionData.name}</h3>
+                        <div style="font-size: 1.2rem; color: #cbd5e1; padding-left: 2rem;">
+                            ${objHtml}
+                        </div>
+                        <button id="btn-mission-continue" class="btn-continue-overlay" style="border-color: var(--color-sky); color: var(--color-sky);">知道了</button>
+                    </div>
+                `;
+                overlay.classList.add('active');
+                
+                document.getElementById('btn-mission-continue').addEventListener('click', () => {
+                    overlay.classList.remove('active');
+                    const currentNode = STORY_DATA.nodes[this.currentNodeId];
+                    if (currentNode.next) this.loadNode(currentNode.next);
+                });
+            }
+            
+            showVideoPlaceholder(node) {
+                this.isProcessingEvent = true;
+                this.dom.dialogueBox.parentElement.style.display = 'none';
+                this.dom.speakerPortrait.classList.add('hidden');
+                
+                const vp = this.dom.videoPlaceholder;
+                vp.innerHTML = `
+                    <div class="vp-bg-anim"></div>
+                    <div class="vp-content">
+                        <h2>${node.title}</h2>
+                        <p>${node.subtitle}</p>
+                        <div class="vp-progress-bar"><div class="vp-progress-fill"></div></div>
+                    </div>
+                `;
+                vp.classList.add('active');
+                
+                setTimeout(() => {
+                    vp.classList.remove('active');
+                    if (node.next) this.loadNode(node.next);
+                }, node.duration || 4000);
+            }
+
+            showBadEnd() {
+                this.isProcessingEvent = true;
+                this.dom.dialogueBox.parentElement.style.display = 'none';
+                this.dom.badEndScreen.classList.add('active');
+                this.dom.speakerPortrait.classList.add('hidden');
+                // 重試邏輯綁定在 initEvents 中
+            }
+
+            showDemoEnd() {
+                this.isProcessingEvent = true;
+                this.dom.dialogueBox.parentElement.style.display = 'none';
+                
+                document.getElementById('de-exp').innerText = `${this.gameState.exploration}%`;
+                document.getElementById('de-chars').innerText = this.gameState.unlockedChars.size;
+                document.getElementById('de-quests').innerText = this.gameState.questsCompleted;
+                
+                this.dom.demoEndScreen.classList.add('active');
+            }
+        }
+
+        // 啟動引擎
+        window.addEventListener('DOMContentLoaded', () => {
+            window.gameEngine = new GameEngine();
+        });
+    </script>
 </body>
 </html>
