@@ -80,8 +80,8 @@
             position: absolute;
             left: 1.25rem;
             bottom: calc(100% - 5px);
-            width: clamp(120px, 15vw, 175px);
-            max-height: 225px;
+            width: clamp(170px, 22vw, 260px);
+            max-height: 330px;
             object-fit: contain;
             z-index: 16;
             pointer-events: none;
@@ -93,10 +93,10 @@
             transition: opacity 0.18s ease, transform 0.18s ease;
         }
         .speaker-portrait.hidden { display: none; }
-        .dialogue-wrapper.has-portrait .choices-container { width: min(68%, 760px); left: 60%; }
+        .dialogue-wrapper.has-portrait .choices-container { width: min(62%, 720px); left: 64%; }
         @media (max-width: 768px) {
-            .speaker-portrait { left: 0.35rem; width: 112px; max-height: 165px; bottom: calc(100% - 3px); }
-            .dialogue-wrapper.has-portrait .choices-container { width: 72%; left: 62%; }
+            .speaker-portrait { left: 0.2rem; width: 155px; max-height: 230px; bottom: calc(100% - 3px); }
+            .dialogue-wrapper.has-portrait .choices-container { width: 65%; left: 66%; }
         }
         .dialogue-box { position: relative; width: 100%; height: 100%; background: rgba(20, 83, 45, 0.85); backdrop-filter: blur(8px); border: 3px solid rgba(255, 255, 255, 0.6); border-radius: 16px; padding: 2rem 2.5rem 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; cursor: pointer; }
         .character-name { position: absolute; top: -20px; left: 2rem; background-color: var(--color-grass); color: white; font-size: clamp(1.2rem, 2.5vw, 1.5rem); font-weight: 900; padding: 0.4rem 1.5rem; border-radius: 12px; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); letter-spacing: 0.05em; transition: background-color 0.3s; }
