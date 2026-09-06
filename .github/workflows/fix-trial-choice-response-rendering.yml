@@ -1,0 +1,44 @@
+name: Fix trial choice response rendering
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.event.head_commit.message == 'Add one-shot trial response rendering fix'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fix choice response dialogue type
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('herbgame.html')
+          s = p.read_text(encoding='utf-8')
+          old = 'STORY_DATA.nodes[tempId] = choice.response;'
+          new = 'STORY_DATA.nodes[tempId] = { type: "dialogue", ...choice.response };'
+          if old not in s:
+              raise SystemExit('Expected choice response assignment not found')
+          p.write_text(s.replace(old, new, 1), encoding='utf-8')
+          PY
+          git config user.name "ff41009tw52-rgb"
+          git config user.email "ff41009tw52@gmail.com"
+          git add herbgame.html
+          git commit -m "Fix trial choice response portrait rendering"
+          git push
+
+      - name: Remove one-shot workflow
+        shell: bash
+        run: |
+          git pull --rebase
+          rm -f .github/workflows/fix-trial-choice-response-rendering.yml
+          git add -A
+          git commit -m "Remove temporary trial response rendering workflow"
+          git push
