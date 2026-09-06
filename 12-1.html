@@ -108,6 +108,11 @@
         '.farm12-status-small{width:20px;height:20px}',
         '.farm12-status-summary{width:52px;height:52px}',
         '.farm12-status-dialog{width:76px;height:76px}',
+        '.farm12-item-art{display:inline-block;width:40px;height:40px;object-fit:contain;vertical-align:middle;flex:0 0 auto;filter:drop-shadow(0 4px 3px rgba(36,20,6,.2))}',
+        '.farm12-item-tool{width:42px;height:42px}',
+        '.farm12-item-shop{width:48px;height:48px}',
+        '.farm12-item-inline{width:22px;height:22px}',
+        '.farm12-item-action{width:24px;height:24px;margin-right:4px}',
         '.farm12-ui-icon{display:inline-block;width:1em;height:1em;vertical-align:-.14em;flex:0 0 auto;color:currentColor;overflow:visible}',
         '.farm12-art-wrap.farm12-legendary{position:relative}',
         '.farm12-art-wrap.farm12-legendary .farm12-art{animation:farm12LegendPulse 1.55s ease-in-out infinite alternate}',
@@ -172,6 +177,24 @@
         "      return <img src={asset.src} alt={asset.label} title={asset.label} loading=\"lazy\" className={'farm12-status-art farm12-status-' + mode + ' ' + className} />;",
         '    };',
         '',
+        '    const FARM12_ITEM_ASSETS = {',
+        "      wateringCan: { src: 'assets/farm12/tools/watering-can.webp', label: '澆水壺' },",
+        "      sprinkler: { src: 'assets/farm12/tools/sprinkler.webp', label: '全區灑水器' },",
+        "      chili: { src: 'assets/farm12/tools/chili-spray.webp', label: '辣椒水' },",
+        "      weed: { src: 'assets/farm12/tools/pruning-shears.webp', label: '除草剪刀' },",
+        "      fert_leaf: { src: 'assets/farm12/fertilizer/nitrogen.webp', label: '氮肥（葉菜用）' },",
+        "      fert_root: { src: 'assets/farm12/fertilizer/phosphorus.webp', label: '磷肥（根莖用）' },",
+        "      fert_fruit: { src: 'assets/farm12/fertilizer/potassium.webp', label: '鉀肥（瓜果用）' },",
+        "      net: { src: 'assets/farm12/protection/insect-net.webp', label: '防蟲紗網' },",
+        "      windbreak: { src: 'assets/farm12/protection/windbreak.webp', label: '防風網' }",
+        '    };',
+        '',
+        "    const Farm12ItemArt = ({ item, mode = 'tool', className = '' }) => {",
+        '      const asset = FARM12_ITEM_ASSETS[item];',
+        '      if (!asset) return null;',
+        "      return <img src={asset.src} alt={asset.label} title={asset.label} loading=\"lazy\" className={'farm12-item-art farm12-item-' + mode + ' ' + className} />;",
+        '    };',
+        '',
         '    const FARM12_EMOJI_ICONS = {',
         "      '✨':'sparkle', '🎓':'education', '💡':'idea', '🛒':'cart', '⚠️':'warning', '⚠':'warning',",
         "      '🐛':'bug', '🌱':'sprout', '💧':'water', '💦':'water', '🛡️':'shield', '🛡':'shield', '🏫':'school',",
@@ -229,6 +252,13 @@
         '<span className="text-[12px] leading-none drop-shadow-md z-10">{crop.icon}</span>',
         '<CropArt crop={crop} growth={crop.days} mode="seedbag" fallback={crop.icon} />',
         '種子袋圖片'
+      );
+
+      html = replaceOnce(
+        html,
+        "                    { id: 'water', label: day >= 20 ? '全區灑水' : '單格澆水', icon: '💧' },\n                    { id: 'chili', label: '辣椒水', icon: '🌶️', count: inventory.chili },\n                    { id: 'weed', label: '除草剪刀', icon: '✂️', count: inventory.scissors },\n                    ...(inventory.fert_leaf > 0 ? [{ id: 'fert_leaf', label: '氮肥(葉菜)', icon: <FertilizerBag type=\"leaf\" />, count: inventory.fert_leaf }] : []),\n                    ...(inventory.fert_root > 0 ? [{ id: 'fert_root', label: '磷肥(根莖)', icon: <FertilizerBag type=\"root\" />, count: inventory.fert_root }] : []),\n                    ...(inventory.fert_fruit > 0 ? [{ id: 'fert_fruit', label: '鉀肥(瓜果)', icon: <FertilizerBag type=\"fruit\" />, count: inventory.fert_fruit }] : []),",
+        "                    { id: 'water', label: day >= 20 ? '全區灑水' : '單格澆水', icon: <Farm12ItemArt item={day >= 20 ? 'sprinkler' : 'wateringCan'} mode=\"tool\" /> },\n                    { id: 'chili', label: '辣椒水', icon: <Farm12ItemArt item=\"chili\" mode=\"tool\" />, count: inventory.chili },\n                    { id: 'weed', label: '除草剪刀', icon: <Farm12ItemArt item=\"weed\" mode=\"tool\" />, count: inventory.scissors },\n                    ...(inventory.fert_leaf > 0 ? [{ id: 'fert_leaf', label: '氮肥(葉菜)', icon: <Farm12ItemArt item=\"fert_leaf\" mode=\"tool\" />, count: inventory.fert_leaf }] : []),\n                    ...(inventory.fert_root > 0 ? [{ id: 'fert_root', label: '磷肥(根莖)', icon: <Farm12ItemArt item=\"fert_root\" mode=\"tool\" />, count: inventory.fert_root }] : []),\n                    ...(inventory.fert_fruit > 0 ? [{ id: 'fert_fruit', label: '鉀肥(瓜果)', icon: <Farm12ItemArt item=\"fert_fruit\" mode=\"tool\" />, count: inventory.fert_fruit }] : []),",
+        '農具清單專屬圖片'
       );
 
       const oldSlot = [
@@ -314,6 +344,66 @@
         '<span className="mx-1">{schoolQuest.crop.icon}</span>{schoolQuest.crop.name}。',
         '<span className="mx-1 inline-flex items-center gap-1"><CropArt crop={schoolQuest.crop} growth={schoolQuest.crop.days} mode="quest" fallback={schoolQuest.crop.icon} />{schoolQuest.crop.name}</span>。',
         '學校任務交付作物圖片'
+      );
+
+      html = replaceOnce(
+        html,
+        '<div className="font-black text-sm md:text-base flex items-center gap-1">✂️ 除草剪刀</div>',
+        '<div className="font-black text-sm md:text-base flex items-center gap-2"><Farm12ItemArt item="weed" mode="shop" /><span>除草剪刀</span></div>',
+        '商店除草剪刀圖片'
+      );
+
+      html = replaceOnce(
+        html,
+        '<div className="font-black text-sm md:text-base flex items-center gap-1">🌶️ 辣椒水</div>',
+        '<div className="font-black text-sm md:text-base flex items-center gap-2"><Farm12ItemArt item="chili" mode="shop" /><span>辣椒水</span></div>',
+        '商店辣椒水圖片'
+      );
+
+      html = replaceOnce(html, '<FertilizerBag type="leaf" />', '<Farm12ItemArt item="fert_leaf" mode="shop" />', '商店氮肥圖片');
+      html = replaceOnce(html, '<FertilizerBag type="root" />', '<Farm12ItemArt item="fert_root" mode="shop" />', '商店磷肥圖片');
+      html = replaceOnce(html, '<FertilizerBag type="fruit" />', '<Farm12ItemArt item="fert_fruit" mode="shop" />', '商店鉀肥圖片');
+
+      html = replaceOnce(
+        html,
+        '<div className="font-black text-sm md:text-base flex items-center gap-1">🕸️ 防蟲紗網</div>',
+        '<div className="font-black text-sm md:text-base flex items-center gap-2"><Farm12ItemArt item="net" mode="shop" /><span>防蟲紗網</span></div>',
+        '商店防蟲網圖片'
+      );
+
+      html = replaceOnce(
+        html,
+        '<div className="font-black text-sm md:text-base flex items-center gap-1">🛡️ 防風網</div>',
+        '<div className="font-black text-sm md:text-base flex items-center gap-2"><Farm12ItemArt item="windbreak" mode="shop" /><span>防風網</span></div>',
+        '商店防風網圖片'
+      );
+
+      html = replaceOnce(
+        html,
+        '>部署防蟲網</button>',
+        '><Farm12ItemArt item="net" mode="action" />部署防蟲網</button>',
+        '部署防蟲網按鈕圖片'
+      );
+
+      html = replaceOnce(
+        html,
+        '>架設防風網</button>',
+        '><Farm12ItemArt item="windbreak" mode="action" />架設防風網</button>',
+        '架設防風網按鈕圖片'
+      );
+
+      html = replaceOnce(
+        html,
+        '>防蟲中 🕸️</span>',
+        '><Farm12ItemArt item="net" mode="inline" />防蟲中</span>',
+        '防蟲狀態圖片'
+      );
+
+      html = replaceOnce(
+        html,
+        '>防風中 🛡️</span>',
+        '><Farm12ItemArt item="windbreak" mode="inline" />防風中</span>',
+        '防風狀態圖片'
       );
 
       html = replaceOnce(
