@@ -13,7 +13,123 @@ async function deleteBird(id){if(!confirm('確定刪除這個鳥種及其所有�
 async function detail(){if(!selected)return go('home');app.innerHTML='<div class="loading">正在整理鳥類圖鑑...</div>';let ps=await docs('birdPhotos','birdId',selected.id),oo=obs.filter(x=>x.birdId===selected.id);app.innerHTML=`<div class="detailhero">${ps[0]?`<img src="${ps[0].imageData}" alt="${esc(selected.name)}">`:''}</div><div class="detail"><article class="article"><button class="ghost" id="dh">← 返回校園鳥類</button><h1>${esc(selected.name)}</h1><p class="muted" style="text-align:center">${esc(selected.shortDescription||'')}</p>${ps.length?`<div class="gallery">${ps.map(p=>`<figure><img src="${p.thumbnailData||p.imageData}" data-full="${p.imageData}"><figcaption>${esc(p.caption||'')}</figcaption></figure>`).join('')}</div>`:''}<section><h3>辨識特徵</h3><p>${esc(selected.identification||'尚未提供資料。')}</p></section><section><h3>生活習性</h3><p>${esc(selected.habits||'尚未提供資料。')}</p></section><section><h3>在民安怎麼找到牠？</h3><p>${esc(selected.minanTips||'尚未提供資料。')}</p></section><section><h3>校園觀察紀錄</h3><div id="obsDetail">${oo.length?oo.map(o=>`<div class="obs" data-od="${o.id}"><div class="chips"><span class="chip">${esc(o.observationDate)}</span><span class="chip">${esc(o.location)}</span></div><p>${esc(o.note||'')}</p><div class="odpics"></div></div>`).join(''):'<p class="muted">目前還沒有觀察紀錄。</p>'}</div></section></article></div>`;document.querySelector('#dh').onclick=()=>go('home');document.querySelectorAll('.gallery img').forEach(i=>i.onclick=()=>window.open(i.dataset.full,'_blank'));for(let e of document.querySelectorAll('[data-od]')){let pp=await docs('observationPhotos','observationId',e.dataset.od);e.querySelector('.odpics').innerHTML=pp.length?`<div class="gallery">${pp.map(p=>`<figure><img src="${p.thumbnailData||p.imageData}" data-full="${p.imageData}"><figcaption>${esc(p.caption||'')}</figcaption></figure>`).join('')}</div>`:''}document.querySelectorAll('.odpics img').forEach(i=>i.onclick=()=>window.open(i.dataset.full,'_blank'))}
 function filePicker(max){return`<div class="field"><label>照片（最多 ${max} 張）</label><div class="picker"><input id="files" type="file" accept="image/*" multiple><div id="previews" class="previews"></div></div></div>`}function bindPicker(max){let inp=document.querySelector('#files'),box=document.querySelector('#previews');let items=[];inp.onchange=()=>{items=[...inp.files].filter(f=>f.type.startsWith('image/')).slice(0,max).map((f,i)=>({f,url:URL.createObjectURL(f),caption:''}));box.innerHTML=items.map((x,i)=>`<div class="preview"><img src="${x.url}"><input data-cap="${i}" placeholder="照片說明（選填）"></div>`).join('');box.querySelectorAll('[data-cap]').forEach(x=>x.oninput=()=>items[+x.dataset.cap].caption=x.value)};return()=>items}
 function birdFields(v={}){return`<div class="field"><label>鳥類名稱 *</label><input id="name" required value="${esc(v.name||'')}"></div><div class="field"><label>首頁簡短介紹 *</label><textarea id="short" required rows="2">${esc(v.shortDescription||'')}</textarea></div><div class="field"><label>辨識特徵</label><textarea id="ident" rows="4">${esc(v.identification||'')}</textarea></div><div class="field"><label>生活習性</label><textarea id="habits" rows="4">${esc(v.habits||'')}</textarea></div><div class="field"><label>在民安怎麼找到牠？</label><textarea id="tips" rows="3">${esc(v.minanTips||'')}</textarea></div>`}
-async function birdForm(){if(!admin)return go('login');app.innerHTML=`<div class="panel"><button class="ghost" id="back">← 返回管理中心</button><div class="box"><h2>${edit?'編輯鳥種':'新增鳥種'}</h2><form id="bf">${birdFields(edit||{})}${filePicker(8)}<button class="btn" style="width:100%">儲存鳥種資料</button></form></div></div>`;document.querySelector('#back').onclick=()=>go('admin');let getFiles=bindPicker(8);document.querySelector('#bf').onsubmit=async e=>{e.preventDefault();let data={name:name.value.trim(),shortDescription:short.value.trim(),identification:ident.value.trim(),habits:habits.value.trim(),minanTips:tips.value.trim(),updatedAt:serverTimestamp()},id=edit?.id;if(id)await updateDoc(d('birds',id),data);else{let r=await addDoc(col('birds'),{...data,createdAt:serverTimestamp(),coverThumb:''});id=r.id}let items=getFiles(),first='';for(let i=0;i<items.length;i++){let z=await compress(items[i].f);if(!first)first=z.thumbnailData;await addDoc(col('birdPhotos'),{birdId:id,...z,caption:items[i].caption,order:Date.now()+i,createdAt:serverTimestamp()})}if(first)await updateDoc(d('birds',id),{coverThumb:first});edit=null;go('admin')}}
+async function birdForm(){
+  if(!admin)return go('login');
+  app.innerHTML=`<div class="panel"><button class="ghost" id="back">← 返回管理中心</button><div class="box"><h2>${edit?'編輯鳥種':'新增鳥種'}</h2><form id="bf">${birdFields(edit||{})}${filePicker(8)}<div id="saveError"></div><button id="saveBirdBtn" class="btn" style="width:100%">儲存鳥種資料</button></form></div></div>`;
+  document.querySelector('#back').onclick=()=>go('admin');
+  let getFiles=bindPicker(8);
+  document.querySelector('#bf').onsubmit=async e=>{
+    e.preventDefault();
+    const btn=document.querySelector('#saveBirdBtn');
+    const errBox=document.querySelector('#saveError');
+    errBox.innerHTML='';
+    btn.disabled=true;
+    btn.textContent='儲存中…';
+    try{
+      const nameEl=document.querySelector('#name');
+      const shortEl=document.querySelector('#short');
+      const identEl=document.querySelector('#ident');
+      const habitsEl=document.querySelector('#habits');
+      const tipsEl=document.querySelector('#tips');
+      const data={
+        name:nameEl.value.trim(),
+        shortDescription:shortEl.value.trim(),
+        identification:identEl.value.trim(),
+        habits:habitsEl.value.trim(),
+        minanTips:tipsEl.value.trim(),
+        updatedAt:serverTimestamp()
+      };
+      let id=edit?.id;
+      if(id){
+        await updateDoc(d('birds',id),data);
+      }else{
+        let r=await addDoc(col('birds'),{...data,createdAt:serverTimestamp(),coverThumb:''});
+        id=r.id;
+      }
+      let items=getFiles(),first='';
+      for(let i=0;i<items.length;i++){
+        let z=await compress(items[i].f);
+        if(!first)first=z.thumbnailData;
+        await addDoc(col('birdPhotos'),{
+          birdId:id,...z,caption:items[i].caption,order:Date.now()+i,createdAt:serverTimestamp()
+        });
+      }
+      if(first)await updateDoc(d('birds',id),{coverThumb:first});
+      edit=null;
+      alert('鳥種資料已儲存。');
+      go('admin');
+    }catch(err){
+      console.error('Save bird failed:',err);
+      const code=err?.code?`（${err.code}）`:'';
+      const msg=err?.message||'未知錯誤';
+      errBox.innerHTML=`<div class="err">儲存失敗 ${code}<br>${esc(msg)}</div>`;
+    }finally{
+      btn.disabled=false;
+      btn.textContent='儲存鳥種資料';
+    }
+  }
+}
 function obsFields(v={}){let loc=v.location||'前操場';return`<div class="twocol"><div class="field"><label>鳥種 *</label><select id="bird" required><option value="">-- 請選擇 --</option>${birds.map(b=>`<option value="${b.id}" ${b.id===v.birdId?'selected':''}>${esc(b.name)}</option>`).join('')}</select></div><div class="field"><label>觀察日期 *</label><input id="odate" type="date" required value="${esc(v.observationDate||new Date().toISOString().slice(0,10))}"></div></div><div class="field"><label>觀察地點 *</label><input id="loc" required value="${esc(loc)}"></div><div class="field"><label>觀察補充</label><textarea id="note" rows="4">${esc(v.note||'')}</textarea></div>`}
-async function obsForm(){if(!admin)return go('login');if(!birds.length){alert('請先新增至少一種鳥類。');return go('admin')}app.innerHTML=`<div class="panel"><button class="ghost" id="back">← 返回管理中心</button><div class="box"><h2>${edit?'編輯觀察紀錄':'新增觀察紀錄'}</h2><form id="of">${obsFields(edit||{})}${filePicker(12)}<button class="btn" style="width:100%">儲存觀察紀錄</button></form></div></div>`;document.querySelector('#back').onclick=()=>go('admin');let getFiles=bindPicker(12);document.querySelector('#of').onsubmit=async e=>{e.preventDefault();let data={birdId:bird.value,observationDate:odate.value,location:loc.value.trim(),note:note.value.trim(),updatedAt:serverTimestamp()},id=edit?.id;if(id)await updateDoc(d('observations',id),data);else{let r=await addDoc(col('observations'),{...data,createdAt:serverTimestamp(),firstThumb:'',photoCount:0});id=r.id}let existing=await docs('observationPhotos','observationId',id),items=getFiles(),first=existing[0]?.thumbnailData||'',count=existing.length;for(let i=0;i<items.length;i++){let z=await compress(items[i].f);if(!first)first=z.thumbnailData;await addDoc(col('observationPhotos'),{observationId:id,birdId:data.birdId,...z,caption:items[i].caption,order:Date.now()+i,createdAt:serverTimestamp()});count++}await updateDoc(d('observations',id),{firstThumb:first,photoCount:count});edit=null;go('admin')}}
+async function obsForm(){
+  if(!admin)return go('login');
+  if(!birds.length){alert('請先新增至少一種鳥類。');return go('admin')}
+  app.innerHTML=`<div class="panel"><button class="ghost" id="back">← 返回管理中心</button><div class="box"><h2>${edit?'編輯觀察紀錄':'新增觀察紀錄'}</h2><form id="of">${obsFields(edit||{})}${filePicker(12)}<div id="saveError"></div><button id="saveObsBtn" class="btn" style="width:100%">儲存觀察紀錄</button></form></div></div>`;
+  document.querySelector('#back').onclick=()=>go('admin');
+  let getFiles=bindPicker(12);
+  document.querySelector('#of').onsubmit=async e=>{
+    e.preventDefault();
+    const btn=document.querySelector('#saveObsBtn');
+    const errBox=document.querySelector('#saveError');
+    errBox.innerHTML='';
+    btn.disabled=true;
+    btn.textContent='儲存中…';
+    try{
+      const birdEl=document.querySelector('#bird');
+      const dateEl=document.querySelector('#odate');
+      const locEl=document.querySelector('#loc');
+      const noteEl=document.querySelector('#note');
+      const data={
+        birdId:birdEl.value,
+        observationDate:dateEl.value,
+        location:locEl.value.trim(),
+        note:noteEl.value.trim(),
+        updatedAt:serverTimestamp()
+      };
+      let id=edit?.id;
+      if(id){
+        await updateDoc(d('observations',id),data);
+      }else{
+        let r=await addDoc(col('observations'),{
+          ...data,createdAt:serverTimestamp(),firstThumb:'',photoCount:0
+        });
+        id=r.id;
+      }
+      let existing=await docs('observationPhotos','observationId',id),
+          items=getFiles(),
+          first=existing[0]?.thumbnailData||'',
+          count=existing.length;
+      for(let i=0;i<items.length;i++){
+        let z=await compress(items[i].f);
+        if(!first)first=z.thumbnailData;
+        await addDoc(col('observationPhotos'),{
+          observationId:id,birdId:data.birdId,...z,caption:items[i].caption,
+          order:Date.now()+i,createdAt:serverTimestamp()
+        });
+        count++;
+      }
+      await updateDoc(d('observations',id),{firstThumb:first,photoCount:count});
+      edit=null;
+      alert('觀察紀錄已儲存。');
+      go('admin');
+    }catch(err){
+      console.error('Save observation failed:',err);
+      const code=err?.code?`（${err.code}）`:'';
+      const msg=err?.message||'未知錯誤';
+      errBox.innerHTML=`<div class="err">儲存失敗 ${code}<br>${esc(msg)}</div>`;
+    }finally{
+      btn.disabled=false;
+      btn.textContent='儲存觀察紀錄';
+    }
+  }
+}
 render();
