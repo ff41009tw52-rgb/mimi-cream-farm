@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>《天啊！我被香草包圍了》｜AI圖片試作版</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000}
+#formal-frame{display:block;width:100vw;height:100vh;border:0;background:#000}
+#boot-note{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#102419;color:#fff;font:700 18px/1.6 system-ui,"Noto Sans TC",sans-serif;z-index:5}
+#boot-note.hidden{display:none}
+</style>
+</head>
+<body>
+<div id="boot-note">AI圖片正式試作版載入中……</div>
+<iframe id="formal-frame" src="herbgameai-formal-base.html" title="天啊！我被香草包圍了 AI圖片試作版"></iframe>
+<script>
+(() => {
+  "use strict";
+
+  const AI_SCENE_ASSETS = Object.freeze({
+    home: "picture/herb-game/ai-backgrounds/scene-00-minan-school-cover.jpg",
+    schoolGate: "picture/herb-game/ai-backgrounds/scene-01-school-gate.jpg",
+    schoolGatePrincipal: "picture/herb-game/ai-backgrounds/scene-02-school-gate-principal.jpg",
+    corridor: "picture/herb-game/ai-backgrounds/scene-03-school-corridor.jpg",
+    gatherArrival: "picture/herb-game/ai-backgrounds/scene-05-gather-arrival.jpg",
+    gatherBriefing: "picture/herb-game/ai-backgrounds/scene-07-gather-briefing.jpg",
+    herbGarden: "picture/herb-game/ai-backgrounds/scene-12-herb-garden-wide.jpg",
+    herbVsWeed: "picture/herb-game/ai-backgrounds/scene-14-herb-vs-weed.jpg",
+    classroom: "picture/herb-game/ai-backgrounds/scene-18-classroom.jpg",
+    naturalClassroom241: "picture/herb-game/ai-backgrounds/scene-24-241-natural-classroom.jpg",
+    contactBookKeyframeReference: "picture/herb-game/ai-backgrounds/scene-01-contact-book-keyframe.jpg",
+    exploration: Object.freeze({
+      "playground": "picture/herb-game/ai-backgrounds/scene-20-playground.jpg",
+      "pond": "picture/herb-game/ai-backgrounds/scene-20-pond.jpg",
+      "gym": "picture/herb-game/ai-backgrounds/scene-20-gym.jpg",
+      "plaza": "picture/herb-game/ai-backgrounds/scene-20-plaza.jpg",
+      "front-field": "picture/herb-game/ai-backgrounds/scene-20-front-field.jpg",
+      "rear-field": "picture/herb-game/ai-backgrounds/scene-20-rear-field.jpg",
+      "game-zone": "picture/herb-game/ai-backgrounds/scene-20-game-zone.jpg"
+    })
+  });
+
+  const AI_CHARACTER_ASSETS = Object.freeze({
+    "小琳": { id:"mint_student", src:"picture/herb-game/ai-characters/01_小琳_mint_student.png" },
+    "小安": { id:"left_student", src:"picture/herb-game/ai-characters/02_小安_left_student.png" },
+    "小凱": { id:"lemongrass_student", src:"picture/herb-game/ai-characters/03_小凱_lemongrass_student.png" },
+    "小樂": { id:"pandan_student", src:"picture/herb-game/ai-characters/04_小樂_pandan_student.png" },
+    "小希": { id:"mugwort_student", src:"picture/herb-game/ai-characters/05_小希_mugwort_student.png" },
+    "小柏": { id:"fishmint_student", src:"picture/herb-game/ai-characters/06_小柏_fishmint_student.png" },
+    "小杰": { id:"pricklyash_student", src:"picture/herb-game/ai-characters/07_小杰_pricklyash_student.png" },
+    "小羽": { id:"shellginger_student", src:"picture/herb-game/ai-characters/08_小羽_shellginger_student.png" },
+    "小森": { id:"teatree_student", src:"picture/herb-game/ai-characters/09_小森_teatree_student.png" },
+    "小辰": { id:"turmeric_student", src:"picture/herb-game/ai-characters/10_小辰_turmeric_student.png" },
+    "小晴": { id:"marigold_student", src:"picture/herb-game/ai-characters/11_小晴_marigold_student.png" }
+  });
+
+  const CHARACTER_BY_ID = Object.freeze(Object.fromEntries(
+    Object.entries(AI_CHARACTER_ASSETS).map(([name, info]) => [info.id, {name, ...info}])
+  ));
+
+  const LOCAL_SCENE_MAP = Object.freeze({
+    "picture/herb-game/scene-00-minan-school-cover.jpg": AI_SCENE_ASSETS.home,
+    "picture/herb-game/scene-01-school-gate.jpg": AI_SCENE_ASSETS.schoolGate,
+    "picture/herb-game/scene-02-school-gate-principal.jpg": AI_SCENE_ASSETS.schoolGatePrincipal,
+    "picture/herb-game/scene-03-school-corridor.jpg": AI_SCENE_ASSETS.corridor,
+    "picture/herb-game/scene-05-gather-arrival.jpg": AI_SCENE_ASSETS.gatherArrival,
+    "picture/herb-game/scene-07-gather-briefing.jpg": AI_SCENE_ASSETS.gatherBriefing,
+    "picture/herb-game/scene-12-herb-garden-wide.jpg": AI_SCENE_ASSETS.herbGarden,
+    "picture/herb-game/scene-14-herb-vs-weed.jpg": AI_SCENE_ASSETS.herbVsWeed,
+    "picture/herb-game/scene-18-classroom.jpg": AI_SCENE_ASSETS.classroom,
+    "picture/herb-game/scene-24-241-natural-classroom.jpg": AI_SCENE_ASSETS.naturalClassroom241,
+    "PLACEHOLDER_SCENE_22_班級教室": AI_SCENE_ASSETS.classroom,
+    "PLACEHOLDER_SCENE_24_241自然教室": AI_SCENE_ASSETS.naturalClassroom241,
+    "PLACEHOLDER_SCENE_25_241自然教室": AI_SCENE_ASSETS.naturalClassroom241
+  });
+
+  const PLACEHOLDER_LOCATION_MAP = Object.freeze({
+    "PLACEHOLDER_SCENE_20_遊樂場": "playground",
+    "PLACEHOLDER_SCENE_20_生態池": "pond",
+    "PLACEHOLDER_SCENE_20_能強館": "gym",
+    "PLACEHOLDER_SCENE_20_南瓜馬車": "plaza",
+    "PLACEHOLDER_SCENE_20_前操場": "front-field",
+    "PLACEHOLDER_SCENE_20_後操場": "rear-field",
+    "PLACEHOLDER_SCENE_20_遊戲區": "game-zone"
+  });
+
+  const EXPLORATION_NAMES = new Set(["遊樂場","生態池","能強館","南瓜馬車","前操場","後操場","遊戲區"]);
+  const frame = document.getElementById("formal-frame");
+  const bootNote = document.getElementById("boot-note");
+
+  function getCharacterVisualInfo(speaker) {
+    if (!speaker) return null;
+    if (AI_CHARACTER_ASSETS[speaker]) return { name:speaker, ...AI_CHARACTER_ASSETS[speaker] };
+    if (CHARACTER_BY_ID[speaker]) return CHARACTER_BY_ID[speaker];
+    return null;
+  }
+
+  function installAIVisualBranch(win, doc, engine) {
+    if (engine.__aiVisualBranchInstalled) return;
+    engine.__aiVisualBranchInstalled = true;
+
+    win.AI_SCENE_ASSETS = AI_SCENE_ASSETS;
+    win.AI_CHARACTER_ASSETS = AI_CHARACTER_ASSETS;
+    win.getCharacterVisualInfo = getCharacterVisualInfo;
+
+    const style = doc.createElement("style");
+    style.id = "ai-visual-branch-style";
+    style.textContent = `
+      #ai-character-layer{position:absolute;inset:0;z-index:8;pointer-events:none;overflow:hidden;}
+      #ai-character-sprite{position:absolute;bottom:-1vh;height:88vh;width:auto;max-width:42vw;object-fit:contain;object-position:center bottom;opacity:0;filter:drop-shadow(0 12px 16px rgba(0,0,0,.24));transition:opacity 210ms ease, transform 230ms ease;will-change:opacity,transform;}
+      #ai-character-layer.position-right #ai-character-sprite{right:8.5vw;left:auto;transform:translateX(20px)}
+      #ai-character-layer.position-left #ai-character-sprite{left:8.5vw;right:auto;transform:translateX(-20px)}
+      #ai-character-layer.position-center #ai-character-sprite{left:50%;right:auto;transform:translateX(calc(-50% + 20px))}
+      #ai-character-layer.visible.position-right #ai-character-sprite{opacity:1;transform:translateX(0)}
+      #ai-character-layer.visible.position-left #ai-character-sprite{opacity:1;transform:translateX(0)}
+      #ai-character-layer.visible.position-center #ai-character-sprite{opacity:1;transform:translateX(-50%)}
+      #screen-game .dialogue-wrapper{z-index:10} #screen-game .hud-container{z-index:12} #screen-game .choices-container{z-index:15}
+      #ai-version-badge{margin-top:-1.9rem;margin-bottom:1.4rem;padding:.28rem .75rem;border-radius:999px;background:rgba(20,83,45,.74);border:1px solid rgba(255,255,255,.78);color:#fff;font:700 clamp(.72rem,1.25vw,.9rem)/1.2 "Noto Sans TC",sans-serif;letter-spacing:.08em;box-shadow:0 3px 9px rgba(0,0,0,.18)}
+      @media(max-aspect-ratio:4/3){#ai-character-sprite{height:82vh;max-width:48vw}}
+    `;
+    doc.head.appendChild(style);
+
+    const gameScreen = doc.getElementById("screen-game");
+    const characterLayer = doc.createElement("div");
+    characterLayer.id = "ai-character-layer";
+    characterLayer.className = "position-right";
+    characterLayer.innerHTML = `<img id="ai-character-sprite" alt="" draggable="false">`;
+    gameScreen.appendChild(characterLayer);
+    const sprite = characterLayer.querySelector("img");
+    let activeSpeaker = "";
+    let swapTimer = 0;
+
+    const homeImg = doc.querySelector("#screen-home .home-bg-layer img, .home-bg-layer img.bg-image, .home-bg-layer .bg-image");
+    if (homeImg) { homeImg.onerror = null; homeImg.src = AI_SCENE_ASSETS.home; homeImg.removeAttribute("referrerpolicy"); }
+    const homeUi = doc.querySelector("#screen-home .ui-layer");
+    if (homeUi && !doc.getElementById("ai-version-badge")) {
+      const badge = doc.createElement("div"); badge.id = "ai-version-badge"; badge.textContent = "AI圖片試作版";
+      const startBtn = homeUi.querySelector("button"); if (startBtn) homeUi.insertBefore(badge, startBtn); else homeUi.appendChild(badge);
+    }
+
+    function setLocalBackground(assetPath) {
+      if (!assetPath || !engine.dom?.bgImage) return;
+      if (engine.currentBgPath === assetPath && engine.dom.bgImage.getAttribute("src") === assetPath) return;
+      const layer = doc.querySelector(".game-bg-layer"); if (layer) layer.style.opacity = "0";
+      const img = engine.dom.bgImage;
+      img.onerror = () => { img.style.display = "none"; if (engine.dom.bgPlaceholder) { engine.dom.bgPlaceholder.style.display = "flex"; engine.dom.bgPlaceholder.innerHTML = `<div>AI圖片載入失敗<br><span style="font-size:1rem">${assetPath}</span></div>`; } if (layer) layer.style.opacity = "1"; };
+      setTimeout(() => { img.src = assetPath; img.style.display = "block"; if (engine.dom.bgPlaceholder) engine.dom.bgPlaceholder.style.display = "none"; engine.currentBgPath = assetPath; if (layer) layer.style.opacity = "1"; }, 90);
+    }
+
+    function resolveSceneAsset(imagePath) {
+      if (!imagePath) return null;
+      if (PLACEHOLDER_LOCATION_MAP[imagePath]) { const id = engine.__aiSelectedLocationId || PLACEHOLDER_LOCATION_MAP[imagePath]; return AI_SCENE_ASSETS.exploration[id] || null; }
+      if (imagePath === "PLACEHOLDER_SCENE_20_校園探索地點" && engine.__aiSelectedLocationId) return AI_SCENE_ASSETS.exploration[engine.__aiSelectedLocationId] || null;
+      if (LOCAL_SCENE_MAP[imagePath]) return LOCAL_SCENE_MAP[imagePath];
+      if (/^https?:\/\//i.test(imagePath)) return null;
+      if (String(imagePath).startsWith("PLACEHOLDER")) return null;
+      return imagePath;
+    }
+
+    function nodeSceneOverride(nodeId) {
+      if (!nodeId) return null;
+      if (nodeId === "scene01_01") return AI_SCENE_ASSETS.schoolGate;
+      if (/^scene01_0[2-5]$/.test(nodeId)) return AI_SCENE_ASSETS.schoolGatePrincipal;
+      if (/^scene01_(?:A_after|B_after|broadcast|realize|daily|time)/.test(nodeId)) return AI_SCENE_ASSETS.corridor;
+      if (/^scene01_(?:contactbook_01|after_contactbook_01)$/.test(nodeId)) return AI_SCENE_ASSETS.classroom;
+      if (/^scene0[56]_/.test(nodeId)) return AI_SCENE_ASSETS.gatherArrival;
+      if (/^scene(?:07|08|09|10)_/.test(nodeId)) return AI_SCENE_ASSETS.gatherBriefing;
+      if (/^scene(?:12|13)_/.test(nodeId)) return AI_SCENE_ASSETS.herbGarden;
+      if (/^scene1[4-6]_/.test(nodeId)) return AI_SCENE_ASSETS.herbVsWeed;
+      if (/^scene18_/.test(nodeId)) return AI_SCENE_ASSETS.classroom;
+      if (/^scene2[23]_/.test(nodeId)) return AI_SCENE_ASSETS.classroom;
+      if (/^scene(?:24|25|26|27|28|29|30|31)_/.test(nodeId) || /^_student_(?:intro|group)_/.test(nodeId)) return AI_SCENE_ASSETS.naturalClassroom241;
+      return null;
+    }
+
+    engine.updateBackground = function(imagePath) {
+      const local = resolveSceneAsset(imagePath);
+      if (local) { setLocalBackground(local); return; }
+      if (imagePath && !String(imagePath).startsWith("PLACEHOLDER") && !/^https?:\/\//i.test(imagePath)) setLocalBackground(imagePath);
+    };
+
+    const originalConfirmMapLocation = engine.confirmMapLocation.bind(engine);
+    engine.confirmMapLocation = function() { this.__aiSelectedLocationId = this.selectedMapLocation?.id || null; return originalConfirmMapLocation(); };
+
+    function hideCharacter(immediate=false) { clearTimeout(swapTimer); activeSpeaker = ""; characterLayer.classList.remove("visible"); if (immediate) sprite.removeAttribute("src"); }
+    function isExplorationDialogue() { return EXPLORATION_NAMES.has((engine.dom?.hudLocation?.textContent || "").trim()); }
+    function renderCharacterForDialogue(node) {
+      const visual = getCharacterVisualInfo(node?.speaker);
+      if (!node || node.speakerType !== "npc" || !visual || !isExplorationDialogue()) { hideCharacter(false); return; }
+      const pos = ["left","center","right"].includes(node.characterPosition) ? node.characterPosition : "right";
+      characterLayer.classList.remove("position-left","position-center","position-right"); characterLayer.classList.add(`position-${pos}`); sprite.alt = node.speaker || "";
+      if (activeSpeaker === node.speaker && sprite.getAttribute("src") === visual.src) { characterLayer.classList.add("visible"); return; }
+      clearTimeout(swapTimer); characterLayer.classList.remove("visible");
+      swapTimer = setTimeout(() => { sprite.src = visual.src; activeSpeaker = node.speaker; requestAnimationFrame(() => requestAnimationFrame(() => characterLayer.classList.add("visible"))); }, activeSpeaker ? 165 : 45);
+    }
+
+    const originalShowDialogue = engine.showDialogue.bind(engine);
+    engine.showDialogue = function(node) { const result = originalShowDialogue(node); const forced = nodeSceneOverride(this.currentNodeId); if (forced) setLocalBackground(forced); renderCharacterForDialogue(node); return result; };
+
+    ["showSystemOverlay","showVideoPlaceholder","showVideoScene","showCampusMap","showResearchTablet","showDemoEnd"].forEach(method => {
+      if (typeof engine[method] !== "function") return; const original = engine[method].bind(engine); engine[method] = function(...args) { hideCharacter(false); return original(...args); };
+    });
+
+    const originalResetGameUI = engine.resetGameUI.bind(engine);
+    engine.resetGameUI = function(...args) { hideCharacter(true); this.__aiSelectedLocationId = null; return originalResetGameUI(...args); };
+
+    win.__HERBGAME_AI_VISUAL = { AI_SCENE_ASSETS, AI_CHARACTER_ASSETS, getCharacterVisualInfo, setLocalBackground, renderCharacterForDialogue, hideCharacter };
+
+    const preview = new URLSearchParams(location.search).get("preview");
+    if (preview === "xiaolin-playground") {
+      setTimeout(() => {
+        doc.getElementById("screen-home")?.classList.remove("active"); doc.getElementById("screen-intro")?.classList.remove("active"); gameScreen?.classList.add("active");
+        if (engine.dom?.hudTime) engine.dom.hudTime.textContent = "上午下課"; if (engine.dom?.hudLocation) engine.dom.hudLocation.textContent = "遊樂場";
+        engine.__aiSelectedLocationId = "playground"; setLocalBackground(AI_SCENE_ASSETS.exploration.playground);
+        engine.showDialogue({type:"dialogue",speaker:"小琳",speakerType:"npc",text:"你早上也在香草園對不對？",characterPosition:"right"});
+      }, 250);
+    }
+  }
+
+  frame.addEventListener("load", () => {
+    const win = frame.contentWindow; const doc = frame.contentDocument; let tries = 0;
+    const timer = setInterval(() => {
+      tries++;
+      if (win?.gameEngine) { clearInterval(timer); installAIVisualBranch(win, doc, win.gameEngine); bootNote.classList.add("hidden"); }
+      else if (tries > 100) { clearInterval(timer); bootNote.textContent = "AI圖片試作版載入失敗：找不到正式版遊戲引擎。"; }
+    }, 30);
+  });
+})();
+</script>
+</body>
+</html>
