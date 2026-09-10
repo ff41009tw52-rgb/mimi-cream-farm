@@ -24,7 +24,12 @@ jobs:
         run: |
           set -euo pipefail
           curl --fail --location --retry 3 --retry-delay 2 "$ASSET_URL" --output "$RUNNER_TEMP/herbgame-ai-transfer.png"
+          mkdir -p "$RUNNER_TEMP/herbgame-ai-assets"
+          set +e
           unzip -q "$RUNNER_TEMP/herbgame-ai-transfer.png" -d "$RUNNER_TEMP/herbgame-ai-assets"
+          unzip_rc=$?
+          set -e
+          test "$unzip_rc" -le 1
           cp -a "$RUNNER_TEMP/herbgame-ai-assets/picture/." picture/
           test "$(find picture/herb-game/ai-backgrounds -maxdepth 1 -type f -name '*.jpg' | wc -l)" -eq 18
           test "$(find picture/herb-game/ai-characters -maxdepth 1 -type f -name '*.png' | wc -l)" -eq 11
