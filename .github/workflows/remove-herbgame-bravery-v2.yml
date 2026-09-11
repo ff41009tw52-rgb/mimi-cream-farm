@@ -1,0 +1,131 @@
+name: Remove herbgame bravery system v2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/remove-herbgame-bravery-v2.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  remove-bravery:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest game
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply verified bravery-removal patch
+        run: |
+          set -euo pipefail
+          test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, textwrap
+          src=Path('.github/workflows/remove-herbgame-bravery.yml').read_text(encoding='utf-8')
+          match=re.search(r"python3 - <<'PY'\n(.*?)\n\s{10}PY\n",src,re.S)
+          assert match, 'could not extract patch script'
+          code=textwrap.dedent(match.group(1))
+          exec(compile(code,'bravery-removal-patch.py','exec'),{})
+          PY
+          test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
+
+      - name: Browser runtime and history self-test
+        run: |
+          set -euo pipefail
+          cat > bravery-runtime-selftest.html <<'HTML'
+          <!doctype html><meta charset="utf-8"><title>bravery removal selftest</title>
+          <iframe id="game" src="herbgameai-formal.html" style="width:1280px;height:720px"></iframe>
+          <pre id="result">WAIT</pre>
+          <script>
+          const result=document.getElementById('result');
+          window.addEventListener('error',e=>{result.textContent='FAIL-JS '+e.message;});
+          (async()=>{
+            const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+            try{
+              const outer=document.getElementById('game');
+              let ow,inner,w,d,e;
+              for(let i=0;i<160;i++){
+                ow=outer.contentWindow;
+                inner=ow?.document?.getElementById('formal-frame');
+                w=inner?.contentWindow; d=inner?.contentDocument; e=w?.gameEngine;
+                if(e?.__aiVisualBranchInstalled) break;
+                await sleep(50);
+              }
+              if(!e?.__aiVisualBranchInstalled) throw new Error('engine init timeout');
+              const story=w.eval('STORY_DATA');
+              const checks={};
+              checks.home=!!d.getElementById('screen-home')&&!!d.getElementById('btn-start');
+              e.renderPlayerPanel();
+              checks.panel=!!d.getElementById('panel-observation')&&!d.getElementById('panel-bravery')&&!Object.hasOwn(e.gameState,'bravery');
+              checks.endRow=!d.getElementById('de-bravery');
+              const greet=story.nodes.scene01_05.choices.find(x=>x.id==='A');
+              const pass=story.nodes.scene01_05.choices.find(x=>x.id==='B');
+              checks.greeting=greet.text==='校長早安！'&&greet.setState?.morningGreeting==='greet'&&pass.text==='今天還是有點不好意思，默默走過去。'&&pass.setState?.morningGreeting==='passby'&&!('braveryChange'in greet)&&!('braveryChange'in pass)&&!('trustChange'in pass);
+              e.startGame();
+              checks.start=!Object.hasOwn(e.gameState,'bravery')&&e.gameState.morningGreeting===null;
+              e.currentNodeId='scene01_05';
+              e.pushHistorySnapshot();
+              e.gameState.morningGreeting='greet';
+              e.goBackOneStep();
+              checks.history=e.gameState.morningGreeting===null&&!Object.hasOwn(e.gameState,'bravery');
+              const loud=story.nodes.scene06_02.choices.find(x=>x.id==='C');
+              const honest=story.nodes.scene09_07.choices.find(x=>x.id==='B');
+              checks.events=!('braveryChange'in loud)&&!('braveryChange'in honest)&&honest.trustChange===5;
+              checks.mission=!!story.nodes.scene16_05.missionComplete&&!('addBravery'in story.nodes.scene16_05);
+              checks.gates=!JSON.stringify(story).includes('requiredBravery');
+              e.gameState.morningGreeting='greet';
+              e.loadNode('ai_day1_diary',{skipHistory:true,skipSideEffects:true});
+              checks.diaryGreet=story.nodes.ai_day1_diary.text.includes('早上｜我主動向校長說了早安。')&&!story.nodes.ai_day1_diary.text.includes('勇氣');
+              e.gameState.morningGreeting='passby';
+              e.loadNode('ai_day1_diary',{skipHistory:true,skipSideEffects:true});
+              checks.diaryPass=story.nodes.ai_day1_diary.text.includes('早上｜看到校長時，我最後還是默默走了過去。')&&!story.nodes.ai_day1_diary.text.includes('勇氣');
+              e.showDemoEnd();
+              const labels=[...d.querySelectorAll('#demo-end-screen .de-summary-row span:first-child')].map(x=>x.textContent.trim());
+              checks.summary=!labels.includes('勇氣值')&&['觀察力','已認識同學','我的植物','陳冠瑋老師信任度','許恒維老師信任度','小琳羈絆度','其他學生'].every(x=>labels.includes(x));
+              const failed=Object.entries(checks).filter(([,v])=>v!==true).map(([k])=>k);
+              if(failed.length) throw new Error('failed checks: '+failed.join(','));
+              result.textContent='PASS-BRAVERY-REMOVAL '+JSON.stringify({checks,labels});
+            }catch(err){result.textContent='FAIL-BRAVERY-REMOVAL '+(err?.stack||err);}
+          })();
+          </script>
+          HTML
+          python3 -m http.server 8000 --bind 127.0.0.1 >/tmp/herbgame-http.log 2>&1 &
+          server_pid=$!
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --virtual-time-budget=12000 --dump-dom http://127.0.0.1:8000/bravery-runtime-selftest.html > /tmp/selftest-dom.html 2>/tmp/chrome.log || { cat /tmp/chrome.log; exit 1; }
+          cat /tmp/selftest-dom.html
+          grep -q 'PASS-BRAVERY-REMOVAL' /tmp/selftest-dom.html
+          ! grep -q 'FAIL-BRAVERY-REMOVAL' /tmp/selftest-dom.html
+          rm -f bravery-runtime-selftest.html
+          kill "$server_pid" || true
+
+      - name: Final scan, protect formal, commit
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          active=Path('herbgameai-formal-base.html').read_text(encoding='utf-8')+'\n'+Path('herbgameai-formal.html').read_text(encoding='utf-8')
+          tokens=['bravery','requiredBravery','braveryChange','addBravery','panel-bravery','de-bravery','勇氣值','勇氣不足','勇氣結局','勇氣100','勇氣門檻']
+          bad=[t for t in tokens if re.search(re.escape(t),active,re.I)]
+          assert not bad,bad
+          for t in ['SEL值','同理心值','社交值','自信值','SEL總分']:
+              assert t not in active,t
+          courage=[line.strip() for line in Path('herbgameai-formal-base.html').read_text(encoding='utf-8').splitlines() if '勇氣' in line]
+          assert courage==['<p>在這個學期裡，你需要鼓起勇氣認識同學與老師，學習與大家互動、合作，也一步一步認識香草園裡的植物與相關知識。</p>'],courage
+          print('FINAL_ACTIVE_AI_SCAN=PASS')
+          print('RETAINED_NATURAL_COURAGE=',courage[0])
+          PY
+          test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
+          rm -f .github/workflows/remove-herbgame-bravery.yml .github/workflows/remove-herbgame-bravery-v2.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --name-only | grep -qx 'herbgame-formal.html'; then echo 'Protected formal file was staged'; exit 1; fi
+          git diff --cached --name-only
+          git commit -m "refactor: remove bravery system from AI herb game"
+          git push origin HEAD:main
