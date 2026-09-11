@@ -1,0 +1,81 @@
+name: Capture herbgame Day 1 acceptance
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/capture-herbgame-day1-acceptance.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout final Day 1 build
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Protect formal source and start local site
+        run: |
+          set -euo pipefail
+          test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
+          test "$(git hash-object herbgameai-formal-base.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
+          mkdir -p picture/herb-game/acceptance
+          python3 -m http.server 8000 --bind 127.0.0.1 > /tmp/herbgame-http.log 2>&1 &
+          echo $! > /tmp/herbgame-http.pid
+          sleep 2
+          curl --fail http://127.0.0.1:8000/herbgameai-formal.html >/dev/null
+
+      - name: Capture real 1920x1080 game previews
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          "$CHROME" --version
+          capture() {
+            local preview="$1"
+            local out="$2"
+            "$CHROME" \
+              --headless=new \
+              --no-sandbox \
+              --disable-gpu \
+              --hide-scrollbars \
+              --window-size=1920,1080 \
+              --force-device-scale-factor=1 \
+              --virtual-time-budget=5000 \
+              --screenshot="$out" \
+              "http://127.0.0.1:8000/herbgameai-formal.html?preview=$preview"
+          }
+          capture xiaolin-event-01 picture/herb-game/acceptance/day1-xiaolin-event01.png
+          capture plant-card-mint picture/herb-game/acceptance/day1-xiaolin-mint-card.png
+          capture plant-card-rosemary picture/herb-game/acceptance/day1-player-rosemary-card.png
+          python3 - <<'PY'
+          from pathlib import Path
+          import struct
+          files = [
+            Path('picture/herb-game/acceptance/day1-xiaolin-event01.png'),
+            Path('picture/herb-game/acceptance/day1-xiaolin-mint-card.png'),
+            Path('picture/herb-game/acceptance/day1-player-rosemary-card.png'),
+          ]
+          for p in files:
+            data=p.read_bytes()
+            assert data[:8] == b'\x89PNG\r\n\x1a\n', p
+            w,h=struct.unpack('>II',data[16:24])
+            assert (w,h)==(1920,1080),(p,w,h)
+            assert len(data)>100_000,(p,len(data))
+            print(p, w, h, len(data))
+          PY
+
+      - name: Commit screenshots and remove one-shot workflow
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/capture-herbgame-day1-acceptance.yml
+          test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --name-only | grep -qx 'herbgame-formal.html'; then echo 'Protected formal file was staged'; exit 1; fi
+          git commit -m "test: add Day 1 acceptance screenshots"
+          git push origin HEAD:main
