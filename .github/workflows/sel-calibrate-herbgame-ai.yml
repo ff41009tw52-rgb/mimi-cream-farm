@@ -29,6 +29,18 @@ jobs:
           sed -i "s/'trustByMember','trustMaxByMember','trustChange','trustTarget','requiredTrust','requiredTrustTarget','teacherTrust','chenTrust','xuTrust','principalTrust',//" .github/scripts/sel_calibrate.py
           sed -i "s/'信任度不足','信任度變化','校長信任'//" .github/scripts/sel_calibrate.py
           python3 .github/scripts/sel_calibrate.py
+          # The old node trust handler contains nested braces; remove the residual tail left by the first structural pass.
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('herbgameai-formal.html')
+          s=p.read_text(encoding='utf-8')
+          pattern=r'\n\s*if \(!\(node\.trustTarget in this\.gameState\.trustMaxByMember\)\) \{.*?\n\s*if \(node\.plantUnlock'
+          s2,n=re.subn(pattern,'\n                    if (node.plantUnlock',s,count=1,flags=re.S)
+          if n != 1:
+              raise AssertionError(f'residual node trust cleanup expected 1, found {n}')
+          p.write_text(s2,encoding='utf-8')
+          PY
           test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
 
       - name: Static checks
