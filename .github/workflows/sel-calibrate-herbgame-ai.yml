@@ -24,6 +24,7 @@ jobs:
           set -euo pipefail
           test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
           test ! -e herbgameai-formal-base.html
+          sed -i 's/firstHerbGardenObservation/firstHerbGardenInspection/g' .github/scripts/sel_calibrate.py
           python3 .github/scripts/sel_calibrate.py
           test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
 
