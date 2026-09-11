@@ -315,7 +315,7 @@
                 <div class="intro-divider"></div>
                 <h2>遊戲目標</h2>
                 <p>在模擬上學生活的過程中，利用下課時間探索校園，逐步認識香草園服務隊的同學、老師與校園環境。</p>
-                <p>這個學期裡，你會和 <strong>11 位香草服務隊同學</strong>一起認識、照顧<strong>12 種香草植物</strong>。同學之間的羈絆、教師與校長的信任，以及你自己的勇氣，都會影響之後能遇到的事件與選擇。</p>
+                <p>這個學期裡，你會和 <strong>11 位香草服務隊同學</strong>一起認識、照顧<strong>12 種香草植物</strong>。你認識的人、經歷過的事件，以及做過的選擇，都可能影響之後的校園生活。</p>
                 <div class="intro-actions">
                     <button id="btn-intro-back" class="intro-secondary">回到標題</button>
                     <button id="btn-intro-start" class="btn-start" style="font-size:1.25rem; padding:0.8rem 2rem;">開始我的星期三</button>
@@ -374,10 +374,6 @@
                         <div id="panel-stats" class="panel-section">
                             <div class="stat-grid">
                                 <div class="stat-card">
-                                    <div class="stat-label">勇氣值</div>
-                                    <div class="stat-value" id="panel-bravery">0</div>
-                                </div>
-                                <div class="stat-card">
                                     <div class="stat-label">觀察力</div>
                                     <div class="stat-value" id="panel-observation">0</div>
                                 </div>
@@ -391,7 +387,7 @@
                                 </div>
                             </div>
                             <div class="stat-note">
-                                勇氣值範圍為 0～100；一般活動完成時基本增加 2，主動向校長問早增加 1。觀察力來自仔細觀察與判斷。每位人物的信任度獨立計算，初始皆為 10；一般角色目前上限為 50，校長上限為 100。老師與校長使用「信任度」，學生使用「羈絆度」。關係資料請到「成員介紹」查看；植物名稱與學習進度請到「香草圖鑑」查看；任務進度請到「目前任務」查看。
+                                觀察力來自仔細觀察與判斷。每位人物的信任度獨立計算，初始皆為 10；一般角色目前上限為 50，校長上限為 100。老師與校長使用「信任度」，學生使用「羈絆度」。關係資料請到「成員介紹」查看；植物名稱與學習進度請到「香草圖鑑」查看；任務進度請到「目前任務」查看。
                             </div>
                         </div>
                         <div id="panel-tasks" class="panel-section hidden">
@@ -485,7 +481,6 @@
             <h2 class="de-logo">《天啊！我被香草包圍了》</h2>
             <h1 class="de-title" style="letter-spacing:0.12em;">第1週・星期三結束</h1>
             <div class="de-summary-grid">
-                <div class="de-summary-row"><span>勇氣值</span><span id="de-bravery">0</span></div>
                 <div class="de-summary-row"><span>觀察力</span><span id="de-observation">0</span></div>
                 <div class="de-summary-row"><span>已認識同學</span><span id="de-students">0 / 11</span></div>
                 <div class="de-summary-row"><span>我的植物</span><span>迷迭香</span></div>
@@ -895,13 +890,13 @@
         }
 
         const CAMPUS_LOCATIONS = [
-            { id:"playground", name:"遊樂場", x:4.8, y:45.0, w:11.8, h:22.5, radius:"24px", description:"有大型溜滑梯的活動區。這裡很適合友情、活潑互動、勇氣與遊戲型事件。", hint:"今天這裡好像很熱鬧。", tutorialIntro:"我在高溜滑梯附近看到一個很有精神的同學。" },
+            { id:"playground", name:"遊樂場", x:4.8, y:45.0, w:11.8, h:22.5, radius:"24px", description:"有大型溜滑梯的活動區。這裡很適合友情、主動互動與遊戲型事件。", hint:"今天這裡好像很熱鬧。", tutorialIntro:"我在高溜滑梯附近看到一個很有精神的同學。" },
             { id:"pond", name:"生態池", x:16.2, y:50.0, w:13.8, h:15.0, radius:"45%", description:"校園裡適合觀察自然、水域生態與周邊植物的區域，也是較安靜的人物事件場所。", hint:"水邊似乎有些動靜。", tutorialIntro:"我看到一個同學蹲在生態池旁，好像正在看手上的葉子。" },
             { id:"gym", name:"能強館", x:5.1, y:65.6, w:20.2, h:18.8, radius:"18px", description:"學校體育館。適合體育、合作、競賽、分組與人物衝突相關事件。", hint:"裡面傳來活動的聲音。", tutorialIntro:"我看到一個同學剛從能強館的方向走出來。" },
             { id:"plaza", name:"南瓜馬車", x:39.4, y:50.3, w:9.4, h:12.5, radius:"45%", description:"校園裡醒目的大型南瓜馬車，也是學生常會經過與停留的地方。適合校園活動、集合、多角色事件與特殊日期。", hint:"南瓜馬車附近似乎有人停留。", tutorialIntro:"我在南瓜馬車旁看到一個同學，正拿著一片葉子晃來晃去。" },
-            { id:"front-field", name:"前操場", x:66.0, y:29.2, w:24.1, h:35.2, radius:"24px", description:"較熱鬧的運動區域。適合球類、團隊合作、人物衝突與勇氣調停事件。", hint:"操場上看起來很有活力。", tutorialIntro:"我在前操場邊看到一個同學朝這邊走過來。" },
+            { id:"front-field", name:"前操場", x:66.0, y:29.2, w:24.1, h:35.2, radius:"24px", description:"較熱鬧的運動區域。適合球類、團隊合作、人物衝突與協調事件。", hint:"操場上看起來很有活力。", tutorialIntro:"我在前操場邊看到一個同學朝這邊走過來。" },
             { id:"rear-field", name:"後操場", x:22.2, y:33.2, w:28.4, h:16.4, radius:"28px", description:"相對安靜的操場區域。適合散步、談心、回憶與較深入的人物故事。", hint:"這裡比另一側操場安靜一些。", tutorialIntro:"我在後操場走著走著，前面有個同學突然注意到我。" },
-            { id:"game-zone", name:"遊戲區", x:70.0, y:18.2, w:11.3, h:12.8, radius:"24px", description:"以攀爬與遊具活動為主的區域。適合互助、同伴鼓勵與小型勇氣事件。", hint:"遊具附近好像有人。", tutorialIntro:"我在攀爬設施附近看到一個同學，她似乎也發現我了。" }
+            { id:"game-zone", name:"遊戲區", x:70.0, y:18.2, w:11.3, h:12.8, radius:"24px", description:"以攀爬與遊具活動為主的區域。適合互助、同伴鼓勵與合作事件。", hint:"遊具附近好像有人。", tutorialIntro:"我在攀爬設施附近看到一個同學，她似乎也發現我了。" }
         ];
 
         const STORY_DATA = {
@@ -947,23 +942,24 @@
                     type: "dialogue",
                     speaker: "我",
                     speakerType: "player",
-                    text: "要不要鼓起勇氣跟校長打招呼？",
+                    text: "要不要跟校長打招呼？",
                     choices: [
                         {
                             id: "A",
-                            text: "鼓起勇氣，向校長說早安！",
-                            braveryChange: 1,
+                            text: "校長早安！",
+                            setState: { morningGreeting: "greet" },
                             next: "scene01_A_video"
                         },
                         {
                             id: "B",
-                            text: "還是有點害羞……默默走過去好了",
+                            text: "今天還是有點不好意思，默默走過去。",
+                            setState: { morningGreeting: "passby" },
                             next: "scene01_B_video"
                         }
                     ]
                 },
 
-                // A 路線：向校長問早（最新企劃：勇氣 +1；影片本身不重複加值）
+                // A 路線：向校長問早
                 "scene01_A_video": {
                     type: "video_scene",
                     videoPath: "video/herb-game/scene-01-principal-greeting.mp4",
@@ -1126,7 +1122,7 @@
                     choices: [
                         { id: "A", text: "安靜混進隊伍，假裝自己一直都在", response: { speaker: "我", speakerType: "player", text: "只要自然一點……<br>沒有人會發現的。", next: "scene07_01" } },
                         { id: "B", text: "站在最後面，先聽老師在說什麼", response: { speaker: "我", speakerType: "player", text: "先躲在最後面好了。<br>至少先弄清楚大家在做什麼。", next: "scene07_01" } },
-                        { id: "C", text: "直接大喊：「老師，我來了！」", braveryChange: 2, response: { speaker: "我", speakerType: "player", text: "老師，我來了！", next: "scene06_02_C2" } }
+                        { id: "C", text: "直接大喊：「老師，我來了！」",  response: { speaker: "我", speakerType: "player", text: "老師，我來了！", next: "scene06_02_C2" } }
                     ]
                 },
                 "scene06_02_C2": { type: "dialogue", speaker: "我", speakerType: "player", text: "……", next: "scene06_02_C3" },
@@ -1160,7 +1156,7 @@
                     type: "dialogue", speaker: "陳冠瑋老師", speakerType: "npc", text: "你是不是剛到？",
                     choices: [
                         { id: "A", text: "沒有啊，我一直都在", trustChange: -5, trustTarget: "陳冠瑋老師", response: { speaker: "陳冠瑋老師", speakerType: "npc", text: "是嗎？", next: "scene09_07_A2" } },
-                        { id: "B", text: "對不起，我忘記今天星期三了", braveryChange: 2, trustChange: 5, trustTarget: "陳冠瑋老師", response: { speaker: "陳冠瑋老師", speakerType: "npc", text: "至少你有趕過來。", next: "scene09_07_B2" } },
+                        { id: "B", text: "對不起，我忘記今天星期三了",  trustChange: 5, trustTarget: "陳冠瑋老師", response: { speaker: "陳冠瑋老師", speakerType: "npc", text: "至少你有趕過來。", next: "scene09_07_B2" } },
                         { id: "C", text: "老師，我只是去巡視校園", trustChange: -5, trustTarget: "陳冠瑋老師", response: { speaker: "陳冠瑋老師", speakerType: "npc", text: "……巡視校園？", next: "scene09_07_C2" } }
                     ]
                 },
@@ -1247,7 +1243,7 @@
                 "scene16_04": { type: "dialogue", speaker: "我", speakerType: "player", text: "……這句話聽起來很有道理。", next: "scene16_05" },
                 "scene16_05": { 
                     type: "dialogue", speaker: "系統", speakerType: "system", text: "完成目標。",
-                    addBravery: 2,
+                    
                     missionComplete: { title: "【任務完成】", name: "第一次香草園巡查", objectives: ["✓ 前往香草園", "✓ 認識環境", "✓ 找出需要處理的位置", "✓ 完成今天的第一項工作"] }, 
                     next: "scene17_01" 
                 },
@@ -1287,7 +1283,7 @@
                     {id:"A",text:"聞起來涼涼的。",response:{speaker:STUDENT_INFO.mint_student.name,speakerType:"npc",text:"對吧？就是有種涼涼的感覺。",next:"scene20_mint_end"}},
                     {id:"B",text:"味道好明顯。",response:{speaker:STUDENT_INFO.mint_student.name,speakerType:"npc",text:"對！一下就聞得出來。",next:"scene20_mint_end"}},
                     {id:"C",text:"我不知道怎麼形容。",response:{speaker:STUDENT_INFO.mint_student.name,speakerType:"npc",text:"沒關係，下午你就知道要怎麼形容了。",next:"scene20_mint_end"}}]},
-                "scene20_mint_end":{type:"dialogue",speaker:STUDENT_INFO.mint_student.name,speakerType:"npc",text:"下午你就知道它是什麼了。",bondChange:35,bondTarget:"mint_student",studentEventComplete:{studentId:"mint_student",eventId:"event1",status:"事件①完成"},addBravery:2,next:"scene21_return"},
+                "scene20_mint_end":{type:"dialogue",speaker:STUDENT_INFO.mint_student.name,speakerType:"npc",text:"下午你就知道它是什麼了。",bondChange:35,bondTarget:"mint_student",studentEventComplete:{studentId:"mint_student",eventId:"event1",status:"事件①完成"},next:"scene21_return"},
                 "scene21_return":{type:"video_placeholder",title:"【回到班級教室】",subtitle:"第一人稱：下課結束，回到班級教室。<br><span style='font-size:.8em;opacity:.8;'>正式移動素材待補</span>",duration:2600,next:"scene22_01"},
                 "scene22_01":{type:"dialogue",sceneImage:"PLACEHOLDER_SCENE_22_班級教室",updateTime:"上午課程",updateLocation:"班級教室",speaker:"我",speakerType:"player",text:"短短的下課一下就結束了。",next:"scene22_class"},
                 "scene22_class":{type:"systemOverlay",title:"【上課時間】",text:"上午的課程繼續進行……",duration:2000,isAuto:true,next:"scene23_01"},
@@ -1408,7 +1404,6 @@
                     btnOpenPanel: document.getElementById('btn-open-panel'),
                     btnClosePanel: document.getElementById('btn-close-panel'),
                     playerPanel: document.getElementById('player-panel'),
-                    panelBravery: document.getElementById('panel-bravery'),
                     panelObservation: document.getElementById('panel-observation'),
                     panelPlants: document.getElementById('panel-plants'),
                     panelCharacters: document.getElementById('panel-characters'),
@@ -1459,7 +1454,6 @@
                 
                 // 遊戲狀態紀錄
                 this.gameState = {
-                    bravery: 0,
                     trustByMember: {
                         "校長": 10,
                         "陳冠瑋老師": 10,
@@ -1471,6 +1465,7 @@
                         "許恒維老師": 50
                     },
                     observation: 0,
+                    morningGreeting: null,
                     unlockedChars: new Set(),
                     unlockedStudents: new Set(),
                     studentRelations: createInitialStudentRelations(),
@@ -1566,7 +1561,7 @@
             startGame() {
                 this.resetGameUI();
                 // 初始化狀態
-                this.gameState = { bravery: 0, trustByMember: { "校長": 10, "陳冠瑋老師": 10, "許恒維老師": 10 }, trustMaxByMember: { "校長": 100, "陳冠瑋老師": 50, "許恒維老師": 50 }, observation: 0, unlockedChars: new Set(), unlockedStudents: new Set(), studentRelations: createInitialStudentRelations(), discoveredHerbNames: new Set(), knownPlants: new Set(), herbKnowledge: createInitialHerbKnowledge(), researchTopics: new Set(), currentTask: null, freeActivitiesRemaining: 1, selectedLocation: null, selectedCampusLocation: null, questsCompleted: 0 };
+                this.gameState = { trustByMember: { "校長": 10, "陳冠瑋老師": 10, "許恒維老師": 10 }, trustMaxByMember: { "校長": 100, "陳冠瑋老師": 50, "許恒維老師": 50 }, observation: 0, morningGreeting: null, unlockedChars: new Set(), unlockedStudents: new Set(), studentRelations: createInitialStudentRelations(), discoveredHerbNames: new Set(), knownPlants: new Set(), herbKnowledge: createInitialHerbKnowledge(), researchTopics: new Set(), currentTask: null, freeActivitiesRemaining: 1, selectedLocation: null, selectedCampusLocation: null, questsCompleted: 0 };
                 this.history = [];
                 this.tempResponseCounter = 0;
                 this.currentNodeId = null;
@@ -1599,8 +1594,7 @@
             }
 
             renderPlayerPanel() {
-                if (!this.dom.panelBravery) return;
-                this.dom.panelBravery.innerText = `${this.gameState.bravery} / 100`;
+                if (!this.dom.panelObservation) return;
                 this.dom.panelObservation.innerText = this.gameState.observation;
                 this.dom.panelPlants.innerText = `${this.gameState.knownPlants.size} / 12`;
                 this.dom.panelCharacters.innerText = `${this.gameState.unlockedStudents.size} / 11`;
@@ -1644,10 +1638,10 @@
 
             cloneGameState() {
                 return {
-                    bravery: this.gameState.bravery,
                     trustByMember: { ...this.gameState.trustByMember },
                     trustMaxByMember: { ...this.gameState.trustMaxByMember },
                     observation: this.gameState.observation,
+                    morningGreeting: this.gameState.morningGreeting ?? null,
                     unlockedChars: new Set(this.gameState.unlockedChars),
                     unlockedStudents: new Set(this.gameState.unlockedStudents),
                     studentRelations: Object.fromEntries(Object.entries(this.gameState.studentRelations).map(([id,r])=>[id,{...r,completedEvents:[...r.completedEvents]}])),
@@ -1718,10 +1712,10 @@
 
                 const snapshot = this.history.pop();
                 this.gameState = {
-                    bravery: snapshot.gameState.bravery,
                     trustByMember: { ...(snapshot.gameState.trustByMember || { "校長": 10, "陳冠瑋老師": 10, "許恒維老師": 10 }) },
                     trustMaxByMember: { ...(snapshot.gameState.trustMaxByMember || { "校長": 100, "陳冠瑋老師": 50, "許恒維老師": 50 }) },
                     observation: snapshot.gameState.observation,
+                    morningGreeting: snapshot.gameState.morningGreeting ?? null,
                     unlockedChars: new Set(snapshot.gameState.unlockedChars),
                     unlockedStudents: new Set(snapshot.gameState.unlockedStudents || []),
                     studentRelations: Object.fromEntries(Object.entries(snapshot.gameState.studentRelations || createInitialStudentRelations()).map(([id,r])=>[id,{...r,completedEvents:[...(r.completedEvents||[])]}])),
@@ -1847,13 +1841,6 @@
                     if (node.addObservation) {
                         this.gameState.observation += node.addObservation;
                         this.showToast({ title: "【系統】", message: `觀察力 +${node.addObservation}`, duration: 2000 });
-                    }
-                    if (node.addBravery) {
-                        const oldBravery = this.gameState.bravery;
-                        this.gameState.bravery = Math.max(0, Math.min(100, oldBravery + node.addBravery));
-                        const actualChange = this.gameState.bravery - oldBravery;
-                        const sign = actualChange > 0 ? "+" : "";
-                        this.showToast({ title: "【勇氣值變化】", message: `勇氣 ${sign}${actualChange}（${this.gameState.bravery}/100）`, duration: 2200 });
                     }
                     if (node.trustChange && node.trustTarget) {
                         if (!(node.trustTarget in this.gameState.trustByMember)) {
@@ -2242,35 +2229,10 @@
                     return;
                 }
 
-                if (choice.requiredBravery && this.gameState.bravery < choice.requiredBravery) {
-                    this.showToast({
-                        title: "【勇氣不足】",
-                        message: `需要勇氣值 ${choice.requiredBravery}`,
-                        duration: 2200
+                if (choice.setState && typeof choice.setState === "object") {
+                    Object.entries(choice.setState).forEach(([key, value]) => {
+                        this.gameState[key] = value;
                     });
-                    this.isShowingChoices = false;
-                    this.dom.choicesContainer.classList.remove('show');
-
-                    const failure = choice.failureResponse;
-                    if (failure) {
-                        const tempId = `_tempResponse_${++this.tempResponseCounter}`;
-                        STORY_DATA.nodes[tempId] = failure;
-                        this.loadNode(tempId, { skipHistory: true });
-                    } else if (choice.failureNext) {
-                        this.loadNode(choice.failureNext, { skipHistory: true });
-                    } else {
-                        setTimeout(() => this.loadNode(this.currentNodeId, { skipHistory: true, skipSideEffects: true }), 350);
-                    }
-                    return;
-                }
-
-                if (choice.braveryChange) {
-                    const oldBravery = this.gameState.bravery;
-                    this.gameState.bravery = Math.max(0, Math.min(100, oldBravery + choice.braveryChange));
-                    const actualChange = this.gameState.bravery - oldBravery;
-                    const sign = actualChange > 0 ? "+" : "";
-                    this.showToast({ title: "【勇氣值變化】", message: `勇氣 ${sign}${actualChange}（${this.gameState.bravery}/100）`, duration: 2000 });
-                    this.renderPlayerPanel();
                 }
 
                 if (choice.trustChange && choice.trustTarget) {
@@ -2471,7 +2433,7 @@
 
             showDemoEnd() {
                 this.isProcessingEvent=true;this.dom.dialogueBox.parentElement.style.display='none';this.hideResearchTablet();this.hideCampusMap();
-                document.getElementById('de-bravery').innerText=`${this.gameState.bravery} / 100`;document.getElementById('de-observation').innerText=this.gameState.observation;document.getElementById('de-students').innerText=`${this.gameState.unlockedStudents.size} / 11`;document.getElementById('de-chen-trust').innerText=`${this.gameState.trustByMember["陳冠瑋老師"]} / 50`;document.getElementById('de-xu-trust').innerText=`${this.gameState.trustByMember["許恒維老師"]} / 50`;document.getElementById('de-mint-bond').innerText=`${this.gameState.studentRelations.mint_student.bond}%`;this.renderPlayerPanel();this.dom.demoEndScreen.classList.add('active');
+                document.getElementById('de-observation').innerText=this.gameState.observation;document.getElementById('de-students').innerText=`${this.gameState.unlockedStudents.size} / 11`;document.getElementById('de-chen-trust').innerText=`${this.gameState.trustByMember["陳冠瑋老師"]} / 50`;document.getElementById('de-xu-trust').innerText=`${this.gameState.trustByMember["許恒維老師"]} / 50`;document.getElementById('de-mint-bond').innerText=`${this.gameState.studentRelations.mint_student.bond}%`;this.renderPlayerPanel();this.dom.demoEndScreen.classList.add('active');
             }
         }
 

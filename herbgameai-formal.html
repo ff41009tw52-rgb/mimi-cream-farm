@@ -386,6 +386,21 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000}
       return found?.name || "校園裡";
     }
 
+    function getMorningGreetingDiaryLine() {
+      const greeting = engine.gameState?.morningGreeting;
+      if (greeting === "greet") return "早上｜我主動向校長說了早安。";
+      if (greeting === "passby") return "早上｜看到校長時，我最後還是默默走了過去。";
+      return "";
+    }
+
+    function getDay1DiaryText() {
+      return [
+        getMorningGreetingDiaryLine(),
+        `上午下課，我去了${getSelectedLocationName()}，在那裡遇到了小琳。`,
+        "下午，我在241自然教室拿到了自己的植物卡——迷迭香。"
+      ].filter(Boolean).join("<br><br>");
+    }
+
     function addNode(nodes, id, node) { nodes[id] = { ...node }; }
 
     function installDay1StoryPatch() {
@@ -519,7 +534,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000}
       if (n.scene33_long_task) n.scene33_long_task.next="ai_day1_dismiss";
       addNode(n,"ai_day1_dismiss",{type:"dialogue",speaker:"陳冠瑋老師",speakerType:"npc",text:"今天就到這裡。大家放學前記得把自己的植物卡收好。",next:"ai_day1_bell"});
       addNode(n,"ai_day1_bell",{type:"dialogue",updateTime:"放學",updateLocation:"241自然教室",speaker:null,speakerType:"system",text:"【放學鐘聲響起。】",next:"ai_day1_diary"});
-      addNode(n,"ai_day1_diary",{type:"systemOverlay",title:"【Day 1 日記】",text:`上午下課，我去了${getSelectedLocationName()}，在那裡遇到了小琳。<br><br>下午，我在241自然教室拿到了自己的植物卡——迷迭香。`,next:"day1_end"});
+      addNode(n,"ai_day1_diary",{type:"systemOverlay",title:"【Day 1 日記】",text:getDay1DiaryText(),next:"day1_end"});
     }
 
     installDay1StoryPatch();
@@ -548,7 +563,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000}
       if (nodeId === "ai_mint_nickname" && STORY_DATA?.nodes?.[nodeId]) STORY_DATA.nodes[nodeId].text = getForgetWednesdayNickname();
       if (nodeId === "ai_rosemary_7" && STORY_DATA?.nodes?.[nodeId]) STORY_DATA.nodes[nodeId].text = getForgetWednesdayNickname();
       if (nodeId === "ai_day1_diary" && STORY_DATA?.nodes?.[nodeId]) {
-        STORY_DATA.nodes[nodeId].text = `上午下課，我去了${getSelectedLocationName()}，在那裡遇到了小琳。<br><br>下午，我在241自然教室拿到了自己的植物卡——迷迭香。`;
+        STORY_DATA.nodes[nodeId].text = getDay1DiaryText();
       }
       if (nodeId === "ai_mint_bell_2" && STORY_DATA?.nodes?.[nodeId]) {
         const relation = this.gameState?.studentRelations?.mint_student;
