@@ -134,8 +134,11 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           if git diff --cached --name-only | grep -qx 'herbgame-formal.html'; then echo 'Protected formal file staged'; exit 1; fi
-          changed="$(git diff --cached --name-only)"
-          echo "$changed"
-          test "$changed" = "herbgameai-formal.html"
+          mapfile -t changed < <(git diff --cached --name-only | sort)
+          printf '%s\n' "${changed[@]}"
+          test "${#changed[@]}" -eq 3
+          test "${changed[0]}" = ".github/scripts/sel_calibrate.py"
+          test "${changed[1]}" = ".github/workflows/sel-calibrate-herbgame-ai.yml"
+          test "${changed[2]}" = "herbgameai-formal.html"
           git commit -m "refactor: calibrate SEL systems and remove adult approval scores"
           git push origin HEAD:main
