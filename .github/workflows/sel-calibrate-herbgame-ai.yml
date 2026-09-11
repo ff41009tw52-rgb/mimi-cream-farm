@@ -25,8 +25,9 @@ jobs:
           test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
           test ! -e herbgameai-formal-base.html
           sed -i 's/firstHerbGardenObservation/firstHerbGardenInspection/g' .github/scripts/sel_calibrate.py
-          # Let the patch finish so the next step can print any adult-trust references that survived its targeted removals.
+          # Allow the patch file to be written; exhaustive legacy checks run immediately afterward.
           sed -i "s/'trustByMember','trustMaxByMember','trustChange','trustTarget','requiredTrust','requiredTrustTarget','teacherTrust','chenTrust','xuTrust','principalTrust',//" .github/scripts/sel_calibrate.py
+          sed -i "s/'信任度不足','信任度變化','校長信任'//" .github/scripts/sel_calibrate.py
           python3 .github/scripts/sel_calibrate.py
           test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
 
@@ -34,8 +35,8 @@ jobs:
         run: |
           set -euo pipefail
           f=herbgameai-formal.html
-          echo '--- remaining trust references, if any ---'
-          grep -nE 'trustByMember|trustMaxByMember|trustChange|trustTarget|requiredTrust|requiredTrustTarget|teacherTrust|chenTrust|xuTrust|principalTrust' "$f" || true
+          echo '--- remaining adult-trust references, if any ---'
+          grep -nE 'trustByMember|trustMaxByMember|trustChange|trustTarget|requiredTrust|requiredTrustTarget|teacherTrust|chenTrust|xuTrust|principalTrust|信任度不足|信任度變化|校長信任' "$f" || true
           for bad in bravery requiredBravery braveryChange addBravery observation addObservation observationChange trustByMember trustMaxByMember trustChange trustTarget requiredTrust requiredTrustTarget teacherTrust chenTrust xuTrust principalTrust panel-observation de-observation; do
             if grep -qi "$bad" "$f"; then echo "legacy token remains: $bad"; exit 1; fi
           done
