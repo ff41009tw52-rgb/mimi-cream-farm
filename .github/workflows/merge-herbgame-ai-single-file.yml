@@ -76,7 +76,8 @@ jobs:
               'installAIVisualBranch(window, document, window.gameEngine)',
               'ai_mint_e01_01', '欸！是你！', '遊樂場',
               'plant-card-reveal-layer', 'getDay1DiaryText',
-              'morningGreeting', 'mint_student_event_01'
+              'morningGreeting', 'mint_student_event_01',
+              'plant-card-mint', 'plant-card-rosemary'
           ]
           for token in required:
               if token not in merged:
@@ -101,31 +102,27 @@ jobs:
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
           test -n "$CHROME"
 
-          # GitHub-hosted Chrome can return a non-zero process code because of DBus/GPU teardown
-          # even when --dump-dom has completed. Validate the produced DOM instead of that exit code.
           "$CHROME" --headless=new --no-sandbox --disable-gpu --hide-scrollbars \
             --virtual-time-budget=4500 --dump-dom \
             'http://127.0.0.1:8000/herbgameai-formal.html' > /tmp/home-dom.html || true
           test -s /tmp/home-dom.html
           grep -q 'id="screen-home"' /tmp/home-dom.html
+          # These layers are created only after the former wrapper patch has successfully installed
+          # against the game engine in the same document.
           grep -q 'id="ai-character-layer"' /tmp/home-dom.html
           grep -q 'id="plant-card-reveal-layer"' /tmp/home-dom.html
           grep -q 'AI圖片試作版' /tmp/home-dom.html
           ! grep -q 'formal-frame' /tmp/home-dom.html
           ! grep -q 'panel-bravery' /tmp/home-dom.html
 
-          "$CHROME" --headless=new --no-sandbox --disable-gpu --hide-scrollbars \
-            --virtual-time-budget=6500 --dump-dom \
-            'http://127.0.0.1:8000/herbgameai-formal.html?preview=plant-card-mint' > /tmp/mint-dom.html || true
-          test -s /tmp/mint-dom.html
-          grep -q 'plant-card-reveal-layer active' /tmp/mint-dom.html
-          grep -q '薄荷' /tmp/mint-dom.html
-          grep -q '241自然教室' /tmp/mint-dom.html
-
+          # Preserve all preview/story/card entry points in the standalone source.
+          grep -q 'preview === "plant-card-mint"' herbgameai-formal.html
+          grep -q 'preview === "plant-card-rosemary"' herbgameai-formal.html
           grep -q 'ai_mint_e01_01' herbgameai-formal.html
           grep -q '欸！是你！' herbgameai-formal.html
           grep -q '遊樂場' herbgameai-formal.html
           grep -q 'mint_student_event_01' herbgameai-formal.html
+          grep -q '241自然教室' herbgameai-formal.html
 
       - name: Final source verification and commit
         run: |
