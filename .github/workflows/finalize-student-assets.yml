@@ -1,0 +1,182 @@
+name: Finalize student character assets
+
+on:
+  push:
+    branches:
+      - final-integrate-student-assets
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+
+      - name: Create canonical transparent PNG asset names
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd picture/herb-game/ai-characters
+          cp '01_小琳_mint_student.png' mint_student.png
+          cp '02_小安_left_student.png' left_student.png
+          cp '03_小凱_lemongrass_student.png' lemongrass_student.png
+          cp '04_小樂_pandan_student.png' pandan_student.png
+          cp '05_小希_mugwort_student.png' mugwort_student.png
+          cp '06_小柏_fishmint_student.png' fishmint_student.png
+          cp '07_小杰_pricklyash_student.png' pricklyash_student.png
+          cp '08_小羽_shellginger_student.png' shellginger_student.png
+          cp '09_小森_teatree_student.png' teatree_student.png
+          cp '10_小辰_turmeric_student.png' turmeric_student.png
+          cp '11_小晴_marigold_student.png' marigold_student.png
+
+      - name: Verify image dimensions alpha and uniqueness
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --quiet pillow
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          import hashlib
+
+          ids = [
+              'mint_student','left_student','lemongrass_student','pandan_student',
+              'mugwort_student','fishmint_student','pricklyash_student','shellginger_student',
+              'teatree_student','turmeric_student','marigold_student'
+          ]
+          hashes=[]
+          for sid in ids:
+              p=Path('picture/herb-game/ai-characters')/f'{sid}.png'
+              with Image.open(p) as im:
+                  assert im.size == (1024,1536), f'{sid}: unexpected size {im.size}'
+                  rgba=im.convert('RGBA')
+                  amin,amax=rgba.getchannel('A').getextrema()
+                  assert amin < 255 and amax > 0, f'{sid}: invalid alpha {amin}-{amax}'
+                  print(f'{sid}: {im.size[0]}x{im.size[1]} mode={im.mode} alpha={amin}-{amax}')
+              hashes.append(hashlib.sha256(p.read_bytes()).hexdigest())
+          assert len(set(hashes)) == len(ids), 'duplicate character image detected'
+          PY
+
+      - name: Patch herbgameai-formal.html
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          p=Path('herbgameai-formal.html')
+          s=p.read_text(encoding='utf-8')
+          ids=[
+              'mint_student','left_student','lemongrass_student','pandan_student',
+              'mugwort_student','fishmint_student','pricklyash_student','shellginger_student',
+              'teatree_student','turmeric_student','marigold_student'
+          ]
+          names={
+              'mint_student':'小琳','left_student':'小安','lemongrass_student':'小凱',
+              'pandan_student':'小樂','mugwort_student':'小希','fishmint_student':'小柏',
+              'pricklyash_student':'小杰','shellginger_student':'小羽','teatree_student':'小森',
+              'turmeric_student':'小辰','marigold_student':'小晴'
+          }
+
+          for sid in ids:
+              canonical=f'picture/herb-game/ai-characters/{sid}.png'
+              pat=rf'id:"{re.escape(sid)}",name:'
+              repl=f'id:"{sid}",avatar:"{canonical}",name:'
+              s,n=re.subn(pat,repl,s,count=1)
+              if n != 1:
+                  raise SystemExit(f'failed to attach avatar to STUDENT_INFO.{sid}: {n}')
+
+          for sid,name in names.items():
+              pat=rf'"{re.escape(name)}": \{{ id:"{re.escape(sid)}", src:"picture/herb-game/ai-characters/[^\"]+" \}}'
+              repl=f'"{name}": {{ id:"{sid}", src:STUDENT_INFO.{sid}.avatar }}'
+              s,n=re.subn(pat,repl,s,count=1)
+              if n != 1:
+                  raise SystemExit(f'failed to unify AI_CHARACTER_ASSETS.{sid}: {n}')
+
+          old = '''                const studentCards = STUDENT_ORDER.map(id => {
+                    const info=STUDENT_INFO[id], unlocked=this.gameState.unlockedStudents.has(id), relation=this.gameState.studentRelations[id] || {bond:0,status:"未認識",completedEvents:[],discoveries:[]};
+                    const plantShown=this.gameState.discoveredHerbNames.has(info.plant)?info.plant:"？？？";
+                    return `<div class="member-card ${unlocked ? '' : 'locked'}"><div class="member-card-layout"><div class="member-avatar-slot ${unlocked ? '' : 'locked'}">${unlocked ? '人物頭像<br><small>待放入</small>' : '？？<br><small>未解鎖</small>'}</div><div class="member-main"><div class="member-name">${unlocked ? info.name : '？？？'}<span class="member-type-badge">學生</span></div>${unlocked ? `<div class="member-meta"><div class="member-meta-row"><strong>代表植物</strong><span>${plantShown}</span></div><div class="member-meta-row"><strong>喜歡的地方</strong><span>${info.favoritePlace}</span></div><div class="member-meta-row"><strong>目前印象</strong><span>${info.currentImpression}</span></div>${relation.discoveries?.length ? `<div class="member-meta-row"><strong>新的發現</strong><span>${relation.discoveries.join("／")}</span></div>` : ""}<div class="member-meta-row"><strong>故事進度</strong><span>${relation.status}</span></div></div><div class="member-bond"><span>相處進度</span><span class="member-bond-value">${relation.bond}%</span></div>` : '<div class="member-desc">尚未解鎖。</div>'}</div></div></div>`;
+                }).join('');'''
+          new = '''                const studentCards = STUDENT_ORDER.map(id => {
+                    const info=STUDENT_INFO[id], unlocked=this.gameState.unlockedStudents.has(id), relation=this.gameState.studentRelations[id] || {bond:0,status:"未認識",completedEvents:[],discoveries:[]};
+                    const plantShown=this.gameState.discoveredHerbNames.has(info.plant)?info.plant:"？？？";
+                    const avatarHtml = unlocked && info.avatar
+                        ? `<img class="member-avatar-img" src="${info.avatar}" alt="${info.name}" draggable="false" onerror="const failedPath=this.getAttribute('src');console.error('[HerbGame] student image load failed','${id}',failedPath);this.style.display='none';this.parentElement.innerHTML='人物圖片<br><small>載入失敗</small>';" />`
+                        : '？？<br><small>未解鎖</small>';
+                    return `<div class="member-card ${unlocked ? '' : 'locked'}"><div class="member-card-layout"><div class="member-avatar-slot ${unlocked ? '' : 'locked'}">${avatarHtml}</div><div class="member-main"><div class="member-name">${unlocked ? info.name : '？？？'}<span class="member-type-badge">學生</span></div>${unlocked ? `<div class="member-meta"><div class="member-meta-row"><strong>代表植物</strong><span>${plantShown}</span></div><div class="member-meta-row"><strong>喜歡的地方</strong><span>${info.favoritePlace}</span></div><div class="member-meta-row"><strong>目前印象</strong><span>${info.currentImpression}</span></div>${relation.discoveries?.length ? `<div class="member-meta-row"><strong>新的發現</strong><span>${relation.discoveries.join("／")}</span></div>` : ""}<div class="member-meta-row"><strong>故事進度</strong><span>${relation.status}</span></div></div><div class="member-bond"><span>相處進度</span><span class="member-bond-value">${relation.bond}%</span></div>` : '<div class="member-desc">尚未解鎖。</div>'}</div></div></div>`;
+                }).join('');'''
+          if old not in s:
+              raise SystemExit('student card block did not match current formal page')
+          s=s.replace(old,new,1)
+
+          s=s.replace(
+              '.member-card-layout { display:grid; grid-template-columns:92px 1fr; gap:1rem; align-items:start; }',
+              '.member-card-layout { display:grid; grid-template-columns:104px 1fr; gap:1rem; align-items:start; }',1)
+          s=s.replace(
+              '.member-avatar-slot { width:92px; min-height:92px; border-radius:18px; border:2px dashed #cbd5e1; background:linear-gradient(180deg,#f8fafc 0%,#eef2f7 100%); display:flex; align-items:center; justify-content:center; text-align:center; color:#64748b; font-weight:900; line-height:1.25; padding:.5rem; box-sizing:border-box; }',
+              '.member-avatar-slot { width:104px; height:124px; min-height:124px; overflow:hidden; border-radius:18px; border:2px dashed #cbd5e1; background:linear-gradient(180deg,#f8fafc 0%,#eef2f7 100%); display:flex; align-items:center; justify-content:center; text-align:center; color:#64748b; font-weight:900; line-height:1.25; padding:.35rem; box-sizing:border-box; }',1)
+          s=s.replace('            min-height:88px;\n            object-fit:contain;', '            min-height:0;\n            object-fit:contain;',1)
+          s=s.replace(
+              '@media (max-width:760px) { .herb-progress-list,.research-options,.de-summary-grid { grid-template-columns:1fr; } .member-meta-row { grid-template-columns:90px 1fr; } .member-card-layout { grid-template-columns:72px 1fr; gap:.8rem; } .member-avatar-slot { width:72px; min-height:72px; border-radius:16px; font-size:.92rem; } }',
+              '@media (max-width:760px) { .herb-progress-list,.research-options,.de-summary-grid { grid-template-columns:1fr; } .member-meta-row { grid-template-columns:90px 1fr; } .member-card-layout { grid-template-columns:72px 1fr; gap:.8rem; } .member-avatar-slot { width:72px; height:88px; min-height:88px; border-radius:16px; font-size:.92rem; } }',1)
+
+          marker='''    const sprite = characterLayer.querySelector("img");
+
+    const plantCardLayer = doc.createElement("div");'''
+          replacement='''    const sprite = characterLayer.querySelector("img");
+    sprite.addEventListener("error", () => {
+      const failedPath = sprite.getAttribute("src") || "";
+      console.error("[HerbGame] student sprite load failed", activeSpeaker || "unknown", failedPath);
+      characterLayer.classList.remove("visible");
+      sprite.removeAttribute("src");
+    });
+
+    const plantCardLayer = doc.createElement("div");'''
+          if marker not in s:
+              raise SystemExit('sprite insertion point missing')
+          s=s.replace(marker,replacement,1)
+
+          for sid in ids:
+              canonical=f'picture/herb-game/ai-characters/{sid}.png'
+              if s.count(canonical) != 1:
+                  raise SystemExit(f'{sid}: expected one canonical path, got {s.count(canonical)}')
+          p.write_text(s,encoding='utf-8')
+          PY
+
+      - name: Validate formal page integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'avatar:"picture/herb-game/ai-characters/mint_student.png"' herbgameai-formal.html
+          grep -q 'src:STUDENT_INFO.mint_student.avatar' herbgameai-formal.html
+          grep -q '\[HerbGame\] student image load failed' herbgameai-formal.html
+          grep -q '\[HerbGame\] student sprite load failed' herbgameai-formal.html
+          if grep -Eq 'src:"picture/herb-game/ai-characters/[0-9][0-9]_' herbgameai-formal.html; then
+            echo 'Old numbered character path remains in active mapping' >&2
+            exit 1
+          fi
+          if sed -n '/const studentCards = STUDENT_ORDER.map/,/this.dom.memberList.innerHTML/p' herbgameai-formal.html | grep -q '人物頭像<br><small>待放入</small>'; then
+            echo 'Student gallery placeholder still present' >&2
+            exit 1
+          fi
+
+      - name: Commit final integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f tools/trigger-final-student-assets.txt
+          rmdir tools 2>/dev/null || true
+          rm -f .github/workflows/finalize-student-assets.yml
+          rm -f .github/workflows/integrate-final-student-assets.yml
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+          git add -A
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Integrate final transparent student character assets'
+          git push
