@@ -8,14 +8,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Download original final PNGs
-        run: python3 tools/download_final_students.py
-      - name: Apply final integration
-        run: python3 tools/finalize_student_assets.py
-      - name: Commit integrated assets
+      - name: Apply character integration
+        run: python3 tools/apply_character_integration.py
+      - name: Commit integrated game page
         run: |
           git add -A
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Integrate final transparent student character assets"
+          git commit -m "Integrate final student character assets into formal game"
           git push
