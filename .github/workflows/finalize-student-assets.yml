@@ -9,7 +9,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Apply character integration
-        run: python3 tools/apply_character_integration.py
+        run: |
+          sed -i 's/width < 500/width < 250/' tools/apply_character_integration.py
+          python3 tools/apply_character_integration.py
       - name: Commit integrated game page
         run: |
           git add -A
