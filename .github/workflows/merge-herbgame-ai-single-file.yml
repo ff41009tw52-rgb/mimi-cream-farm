@@ -101,9 +101,12 @@ jobs:
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
           test -n "$CHROME"
 
+          # GitHub-hosted Chrome can return a non-zero process code because of DBus/GPU teardown
+          # even when --dump-dom has completed. Validate the produced DOM instead of that exit code.
           "$CHROME" --headless=new --no-sandbox --disable-gpu --hide-scrollbars \
             --virtual-time-budget=4500 --dump-dom \
-            'http://127.0.0.1:8000/herbgameai-formal.html' > /tmp/home-dom.html
+            'http://127.0.0.1:8000/herbgameai-formal.html' > /tmp/home-dom.html || true
+          test -s /tmp/home-dom.html
           grep -q 'id="screen-home"' /tmp/home-dom.html
           grep -q 'id="ai-character-layer"' /tmp/home-dom.html
           grep -q 'id="plant-card-reveal-layer"' /tmp/home-dom.html
@@ -113,12 +116,12 @@ jobs:
 
           "$CHROME" --headless=new --no-sandbox --disable-gpu --hide-scrollbars \
             --virtual-time-budget=6500 --dump-dom \
-            'http://127.0.0.1:8000/herbgameai-formal.html?preview=plant-card-mint' > /tmp/mint-dom.html
+            'http://127.0.0.1:8000/herbgameai-formal.html?preview=plant-card-mint' > /tmp/mint-dom.html || true
+          test -s /tmp/mint-dom.html
           grep -q 'plant-card-reveal-layer active' /tmp/mint-dom.html
           grep -q '薄荷' /tmp/mint-dom.html
           grep -q '241自然教室' /tmp/mint-dom.html
 
-          # 小琳 Event 1 的內容與地點改用靜態來源驗收，避免打字動畫造成 dump-dom 時序假失敗。
           grep -q 'ai_mint_e01_01' herbgameai-formal.html
           grep -q '欸！是你！' herbgameai-formal.html
           grep -q '遊樂場' herbgameai-formal.html
