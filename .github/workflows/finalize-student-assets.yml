@@ -8,6 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Download original final PNGs
+        run: python3 tools/download_final_students.py
       - name: Apply final integration
         run: python3 tools/finalize_student_assets.py
       - name: Commit integrated assets
