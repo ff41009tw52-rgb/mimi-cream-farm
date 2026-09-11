@@ -55,6 +55,24 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000}
     "小晴": { id:"marigold_student", src:"picture/herb-game/ai-characters/11_小晴_marigold_student.png" }
   });
 
+  const PLANT_CARD_ASSETS = Object.freeze({
+    rosemary: { name:"迷迭香", image:"picture/herb-game/plant-cards/plant-card-01-rosemary.webp" },
+    mint: { name:"薄荷", image:"picture/herb-game/plant-cards/plant-card-02-mint.webp" },
+    left_hand_incense: { name:"左手香", image:"picture/herb-game/plant-cards/plant-card-03-left-hand-incense.webp" },
+    lemongrass: { name:"檸檬香茅", image:"picture/herb-game/plant-cards/plant-card-04-lemongrass.webp" },
+    pandan: { name:"斑蘭葉", image:"picture/herb-game/plant-cards/plant-card-05-pandan.webp" },
+    mugwort: { name:"艾草", image:"picture/herb-game/plant-cards/plant-card-06-mugwort.webp" },
+    fish_mint: { name:"魚腥草", image:"picture/herb-game/plant-cards/plant-card-07-fish-mint.webp" },
+    prickly_ash: { name:"刺蔥", image:"picture/herb-game/plant-cards/plant-card-08-prickly-ash.webp" },
+    shell_ginger: { name:"月桃", image:"picture/herb-game/plant-cards/plant-card-09-shell-ginger.webp" },
+    australian_tea_tree: { name:"澳洲茶樹", image:"picture/herb-game/plant-cards/plant-card-10-australian-tea-tree.webp" },
+    turmeric: { name:"薑黃", image:"picture/herb-game/plant-cards/plant-card-11-turmeric.webp" },
+    aromatic_marigold: { name:"芳香萬壽菊", image:"picture/herb-game/plant-cards/plant-card-12-aromatic-marigold.webp" }
+  });
+  const PLANT_CARD_BY_NAME = Object.freeze(Object.fromEntries(
+    Object.entries(PLANT_CARD_ASSETS).map(([id, card]) => [card.name, {id, ...card}])
+  ));
+
   const CHARACTER_BY_ID = Object.freeze(Object.fromEntries(
     Object.entries(AI_CHARACTER_ASSETS).map(([name, info]) => [info.id, {name, ...info}])
   ));
@@ -107,17 +125,48 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000}
     const style = doc.createElement("style");
     style.id = "ai-visual-branch-style";
     style.textContent = `
-      #ai-character-layer{position:absolute;inset:0;z-index:8;pointer-events:none;overflow:hidden;}
-      #ai-character-sprite{position:absolute;bottom:-1vh;height:88vh;width:auto;max-width:42vw;object-fit:contain;object-position:center bottom;opacity:0;filter:drop-shadow(0 12px 16px rgba(0,0,0,.24));transition:opacity 210ms ease, transform 230ms ease;will-change:opacity,transform;}
+      #ai-character-layer{
+        position:absolute;inset:0;z-index:8;pointer-events:none;overflow:hidden;
+      }
+      #ai-character-sprite{
+        position:absolute;bottom:-1vh;height:88vh;width:auto;max-width:42vw;
+        object-fit:contain;object-position:center bottom;opacity:0;
+        filter:drop-shadow(0 12px 16px rgba(0,0,0,.24));
+        transition:opacity 210ms ease, transform 230ms ease;
+        will-change:opacity,transform;
+      }
       #ai-character-layer.position-right #ai-character-sprite{right:8.5vw;left:auto;transform:translateX(20px)}
       #ai-character-layer.position-left #ai-character-sprite{left:8.5vw;right:auto;transform:translateX(-20px)}
       #ai-character-layer.position-center #ai-character-sprite{left:50%;right:auto;transform:translateX(calc(-50% + 20px))}
       #ai-character-layer.visible.position-right #ai-character-sprite{opacity:1;transform:translateX(0)}
       #ai-character-layer.visible.position-left #ai-character-sprite{opacity:1;transform:translateX(0)}
       #ai-character-layer.visible.position-center #ai-character-sprite{opacity:1;transform:translateX(-50%)}
-      #screen-game .dialogue-wrapper{z-index:10} #screen-game .hud-container{z-index:12} #screen-game .choices-container{z-index:15}
-      #ai-version-badge{margin-top:-1.9rem;margin-bottom:1.4rem;padding:.28rem .75rem;border-radius:999px;background:rgba(20,83,45,.74);border:1px solid rgba(255,255,255,.78);color:#fff;font:700 clamp(.72rem,1.25vw,.9rem)/1.2 "Noto Sans TC",sans-serif;letter-spacing:.08em;box-shadow:0 3px 9px rgba(0,0,0,.18)}
-      @media(max-aspect-ratio:4/3){#ai-character-sprite{height:82vh;max-width:48vw}}
+      #screen-game .dialogue-wrapper{z-index:10}
+      #screen-game .hud-container{z-index:12}
+      #screen-game .choices-container{z-index:15}
+      #plant-card-reveal-layer{position:absolute;inset:0;z-index:9;visibility:hidden;pointer-events:none;transition:visibility 0s linear 280ms;}
+      #plant-card-reveal-layer.active{visibility:visible;pointer-events:auto;transition-delay:0s;}
+      #plant-card-dimmer{position:absolute;inset:0;background:rgba(0,0,0,.44);opacity:0;transition:opacity 280ms ease-out;}
+      #plant-card-reveal-layer.active #plant-card-dimmer{opacity:1;}
+      #plant-card-stage{position:absolute;left:50%;top:41%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;pointer-events:none;}
+      #plant-card-image{display:block;width:clamp(320px,25vw,480px);max-width:86vw;max-height:70vh;height:auto;object-fit:contain;opacity:0;transform:scale(.95);filter:drop-shadow(0 0 18px rgba(255,244,190,.42)) drop-shadow(0 14px 28px rgba(0,0,0,.32));transition:opacity 280ms ease-out,transform 280ms ease-out;}
+      #plant-card-reveal-layer.active #plant-card-image{opacity:1;transform:scale(1);}
+      #plant-card-fallback{display:none;width:clamp(320px,25vw,480px);max-width:86vw;min-height:52vh;padding:2rem;border:3px solid rgba(239,224,169,.88);border-radius:24px;box-sizing:border-box;background:#f5f0dc;color:#26452f;align-items:center;justify-content:center;flex-direction:column;text-align:center;font:800 clamp(1.6rem,3vw,2.7rem)/1.35 "Noto Sans TC",sans-serif;box-shadow:0 0 18px rgba(255,244,190,.42),0 14px 28px rgba(0,0,0,.32);opacity:0;transform:scale(.95);transition:opacity 280ms ease-out,transform 280ms ease-out;}
+      #plant-card-fallback small{display:block;margin-top:1rem;font-size:.48em;font-weight:700;opacity:.72;}
+      #plant-card-reveal-layer.active #plant-card-fallback{opacity:1;transform:scale(1);}
+      #plant-card-hint{position:absolute;left:50%;bottom:18.5vh;transform:translateX(-50%);padding:.38rem .9rem;border-radius:999px;background:rgba(15,23,42,.72);border:1px solid rgba(255,255,255,.55);color:#fff;font:700 clamp(.75rem,1.15vw,.95rem)/1.2 "Noto Sans TC",sans-serif;letter-spacing:.04em;white-space:nowrap;opacity:0;transition:opacity 180ms ease-out;pointer-events:none;}
+      #plant-card-reveal-layer.active #plant-card-hint{opacity:.96;}
+      #screen-game .dialogue-wrapper{z-index:10}
+      #screen-game .hud-container,#screen-game .dev-nav{z-index:12}
+      #ai-version-badge{
+        margin-top:-1.9rem;margin-bottom:1.4rem;padding:.28rem .75rem;border-radius:999px;
+        background:rgba(20,83,45,.74);border:1px solid rgba(255,255,255,.78);
+        color:#fff;font:700 clamp(.72rem,1.25vw,.9rem)/1.2 "Noto Sans TC",sans-serif;
+        letter-spacing:.08em;box-shadow:0 3px 9px rgba(0,0,0,.18)
+      }
+      @media(max-aspect-ratio:4/3){
+        #ai-character-sprite{height:82vh;max-width:48vw}
+      }
     `;
     doc.head.appendChild(style);
 
@@ -128,30 +177,75 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000}
     characterLayer.innerHTML = `<img id="ai-character-sprite" alt="" draggable="false">`;
     gameScreen.appendChild(characterLayer);
     const sprite = characterLayer.querySelector("img");
+
+    const plantCardLayer = doc.createElement("div");
+    plantCardLayer.id = "plant-card-reveal-layer";
+    plantCardLayer.setAttribute("aria-hidden", "true");
+    plantCardLayer.innerHTML = `
+      <div id="plant-card-dimmer"></div>
+      <div id="plant-card-stage">
+        <img id="plant-card-image" alt="" draggable="false">
+        <div id="plant-card-fallback"><span id="plant-card-fallback-name"></span><small>植物卡準備中</small></div>
+      </div>
+      <div id="plant-card-hint">點一下收起植物卡</div>`;
+    gameScreen.appendChild(plantCardLayer);
+    const plantCardImage = plantCardLayer.querySelector("#plant-card-image");
+    const plantCardFallback = plantCardLayer.querySelector("#plant-card-fallback");
+    const plantCardFallbackName = plantCardLayer.querySelector("#plant-card-fallback-name");
+    let plantCardActive = false;
+    let plantCardDismissedAt = 0;
+
     let activeSpeaker = "";
     let swapTimer = 0;
 
     const homeImg = doc.querySelector("#screen-home .home-bg-layer img, .home-bg-layer img.bg-image, .home-bg-layer .bg-image");
-    if (homeImg) { homeImg.onerror = null; homeImg.src = AI_SCENE_ASSETS.home; homeImg.removeAttribute("referrerpolicy"); }
+    if (homeImg) {
+      homeImg.onerror = null;
+      homeImg.src = AI_SCENE_ASSETS.home;
+      homeImg.removeAttribute("referrerpolicy");
+    }
     const homeUi = doc.querySelector("#screen-home .ui-layer");
     if (homeUi && !doc.getElementById("ai-version-badge")) {
-      const badge = doc.createElement("div"); badge.id = "ai-version-badge"; badge.textContent = "AI圖片試作版";
-      const startBtn = homeUi.querySelector("button"); if (startBtn) homeUi.insertBefore(badge, startBtn); else homeUi.appendChild(badge);
+      const badge = doc.createElement("div");
+      badge.id = "ai-version-badge";
+      badge.textContent = "AI圖片試作版";
+      const startBtn = homeUi.querySelector("button");
+      if (startBtn) homeUi.insertBefore(badge, startBtn);
+      else homeUi.appendChild(badge);
     }
 
     function setLocalBackground(assetPath) {
       if (!assetPath || !engine.dom?.bgImage) return;
       if (engine.currentBgPath === assetPath && engine.dom.bgImage.getAttribute("src") === assetPath) return;
-      const layer = doc.querySelector(".game-bg-layer"); if (layer) layer.style.opacity = "0";
+      const layer = doc.querySelector(".game-bg-layer");
+      if (layer) layer.style.opacity = "0";
       const img = engine.dom.bgImage;
-      img.onerror = () => { img.style.display = "none"; if (engine.dom.bgPlaceholder) { engine.dom.bgPlaceholder.style.display = "flex"; engine.dom.bgPlaceholder.innerHTML = `<div>AI圖片載入失敗<br><span style="font-size:1rem">${assetPath}</span></div>`; } if (layer) layer.style.opacity = "1"; };
-      setTimeout(() => { img.src = assetPath; img.style.display = "block"; if (engine.dom.bgPlaceholder) engine.dom.bgPlaceholder.style.display = "none"; engine.currentBgPath = assetPath; if (layer) layer.style.opacity = "1"; }, 90);
+      img.onerror = () => {
+        img.style.display = "none";
+        if (engine.dom.bgPlaceholder) {
+          engine.dom.bgPlaceholder.style.display = "flex";
+          engine.dom.bgPlaceholder.innerHTML = `<div>AI圖片載入失敗<br><span style="font-size:1rem">${assetPath}</span></div>`;
+        }
+        if (layer) layer.style.opacity = "1";
+      };
+      setTimeout(() => {
+        img.src = assetPath;
+        img.style.display = "block";
+        if (engine.dom.bgPlaceholder) engine.dom.bgPlaceholder.style.display = "none";
+        engine.currentBgPath = assetPath;
+        if (layer) layer.style.opacity = "1";
+      }, 90);
     }
 
     function resolveSceneAsset(imagePath) {
       if (!imagePath) return null;
-      if (PLACEHOLDER_LOCATION_MAP[imagePath]) { const id = engine.__aiSelectedLocationId || PLACEHOLDER_LOCATION_MAP[imagePath]; return AI_SCENE_ASSETS.exploration[id] || null; }
-      if (imagePath === "PLACEHOLDER_SCENE_20_校園探索地點" && engine.__aiSelectedLocationId) return AI_SCENE_ASSETS.exploration[engine.__aiSelectedLocationId] || null;
+      if (PLACEHOLDER_LOCATION_MAP[imagePath]) {
+        const id = engine.__aiSelectedLocationId || PLACEHOLDER_LOCATION_MAP[imagePath];
+        return AI_SCENE_ASSETS.exploration[id] || null;
+      }
+      if (imagePath === "PLACEHOLDER_SCENE_20_校園探索地點" && engine.__aiSelectedLocationId) {
+        return AI_SCENE_ASSETS.exploration[engine.__aiSelectedLocationId] || null;
+      }
       if (LOCAL_SCENE_MAP[imagePath]) return LOCAL_SCENE_MAP[imagePath];
       if (/^https?:\/\//i.test(imagePath)) return null;
       if (String(imagePath).startsWith("PLACEHOLDER")) return null;
@@ -174,56 +268,410 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000}
       return null;
     }
 
-    engine.updateBackground = function(imagePath) {
+    const originalUpdateBackground = engine.updateBackground.bind(engine);
+    engine.updateBackground = function(imagePath, fallbackPath) {
       const local = resolveSceneAsset(imagePath);
-      if (local) { setLocalBackground(local); return; }
-      if (imagePath && !String(imagePath).startsWith("PLACEHOLDER") && !/^https?:\/\//i.test(imagePath)) setLocalBackground(imagePath);
+      if (local) {
+        setLocalBackground(local);
+        return;
+      }
+      // AI分支禁止 Placeholder/外部網路圖補洞。若非 Placeholder，僅允許既有專案相對路徑。
+      if (imagePath && !String(imagePath).startsWith("PLACEHOLDER") && !/^https?:\/\//i.test(imagePath)) {
+        setLocalBackground(imagePath);
+      }
     };
 
-    const originalConfirmMapLocation = engine.confirmMapLocation.bind(engine);
-    engine.confirmMapLocation = function() { this.__aiSelectedLocationId = this.selectedMapLocation?.id || null; return originalConfirmMapLocation(); };
-
-    function hideCharacter(immediate=false) { clearTimeout(swapTimer); activeSpeaker = ""; characterLayer.classList.remove("visible"); if (immediate) sprite.removeAttribute("src"); }
-    function isExplorationDialogue() { return EXPLORATION_NAMES.has((engine.dom?.hudLocation?.textContent || "").trim()); }
-    function renderCharacterForDialogue(node) {
-      const visual = getCharacterVisualInfo(node?.speaker);
-      if (!node || node.speakerType !== "npc" || !visual || !isExplorationDialogue()) { hideCharacter(false); return; }
-      const pos = ["left","center","right"].includes(node.characterPosition) ? node.characterPosition : "right";
-      characterLayer.classList.remove("position-left","position-center","position-right"); characterLayer.classList.add(`position-${pos}`); sprite.alt = node.speaker || "";
-      if (activeSpeaker === node.speaker && sprite.getAttribute("src") === visual.src) { characterLayer.classList.add("visible"); return; }
-      clearTimeout(swapTimer); characterLayer.classList.remove("visible");
-      swapTimer = setTimeout(() => { sprite.src = visual.src; activeSpeaker = node.speaker; requestAnimationFrame(() => requestAnimationFrame(() => characterLayer.classList.add("visible"))); }, activeSpeaker ? 165 : 45);
+    function hideCharacter(immediate=false) {
+      clearTimeout(swapTimer);
+      activeSpeaker = "";
+      characterLayer.classList.remove("visible");
+      if (immediate) sprite.removeAttribute("src");
     }
 
+    function isExplorationDialogue() {
+      const locationName = (engine.dom?.hudLocation?.textContent || "").trim();
+      return EXPLORATION_NAMES.has(locationName);
+    }
+
+    function renderCharacterForDialogue(node) {
+      const visual = getCharacterVisualInfo(node?.speaker);
+      if (!node || node.speakerType !== "npc" || !visual || !isExplorationDialogue()) {
+        hideCharacter(false);
+        return;
+      }
+      const pos = ["left","center","right"].includes(node.characterPosition) ? node.characterPosition : "right";
+      characterLayer.classList.remove("position-left","position-center","position-right");
+      characterLayer.classList.add(`position-${pos}`);
+      sprite.alt = node.speaker || "";
+      if (activeSpeaker === node.speaker && sprite.getAttribute("src") === visual.src) {
+        characterLayer.classList.add("visible");
+        return;
+      }
+      clearTimeout(swapTimer);
+      characterLayer.classList.remove("visible");
+      swapTimer = setTimeout(() => {
+        sprite.src = visual.src;
+        activeSpeaker = node.speaker;
+        requestAnimationFrame(() => requestAnimationFrame(() => characterLayer.classList.add("visible")));
+      }, activeSpeaker ? 165 : 45);
+    }
+
+    function showPlantCard(cardLike) {
+      const byId = typeof cardLike === "string" ? PLANT_CARD_ASSETS[cardLike] : null;
+      const info = byId || cardLike || {};
+      const card = info.id && PLANT_CARD_ASSETS[info.id]
+        ? { id:info.id, ...PLANT_CARD_ASSETS[info.id], ...info }
+        : (PLANT_CARD_BY_NAME[info.name] || info);
+      const name = card?.name || "植物";
+      const image = card?.image || "";
+      plantCardActive = true;
+      plantCardLayer.classList.remove("active");
+      plantCardLayer.setAttribute("aria-hidden", "false");
+      plantCardImage.style.display = "block";
+      plantCardFallback.style.display = "none";
+      plantCardFallbackName.textContent = name;
+      plantCardImage.alt = `${name}植物卡`;
+      plantCardImage.onerror = () => {
+        plantCardImage.style.display = "none";
+        plantCardFallback.style.display = "flex";
+      };
+      if (image) plantCardImage.src = image;
+      else plantCardImage.onerror();
+      engine.dom?.continueIcon?.classList.remove("show");
+      requestAnimationFrame(() => requestAnimationFrame(() => plantCardLayer.classList.add("active")));
+    }
+
+    function hidePlantCard() {
+      if (!plantCardActive) return false;
+      plantCardActive = false;
+      plantCardDismissedAt = Date.now();
+      plantCardLayer.classList.remove("active");
+      plantCardLayer.setAttribute("aria-hidden", "true");
+      setTimeout(() => {
+        if (!plantCardActive) {
+          plantCardImage.removeAttribute("src");
+          plantCardImage.onerror = null;
+          plantCardFallback.style.display = "none";
+        }
+      }, 300);
+      engine.dom?.continueIcon?.classList.add("show");
+      return true;
+    }
+
+    plantCardLayer.addEventListener("click", (event) => {
+      if (!plantCardActive) return;
+      event.preventDefault();
+      event.stopPropagation();
+      hidePlantCard();
+    });
+
+    function getStoryRef() { try { return win.eval("STORY_DATA"); } catch { return null; } }
+    function getStudentInfoRef() { try { return win.eval("STUDENT_INFO"); } catch { return null; } }
+    function getStudentOrderRef() { try { return win.eval("STUDENT_ORDER"); } catch { return []; } }
+    function getCampusLocationsRef() { try { return win.eval("CAMPUS_LOCATIONS"); } catch { return []; } }
+    function getPlayerProfileRef() { try { return win.eval("PLAYER_PROFILE"); } catch { return {}; } }
+
+    function getForgetWednesdayNickname() {
+      const profile = getPlayerProfileRef() || {};
+      const raw = String(engine.gameState?.playerGender ?? engine.gameState?.gender ?? profile.gender ?? profile.sex ?? "").trim().toLowerCase();
+      if (["男","男性","male","m","boy"].includes(raw)) return "忘記星期三先生。";
+      if (["女","女性","female","f","girl"].includes(raw)) return "忘記星期三小姐。";
+      return "忘記星期三同學。";
+    }
+
+    function getSelectedLocationName() {
+      if (engine.__aiSelectedLocationName) return engine.__aiSelectedLocationName;
+      const id = engine.gameState?.selectedCampusLocation || engine.gameState?.selectedLocation || engine.__aiSelectedLocationId;
+      const found = (getCampusLocationsRef() || []).find(item => item.id === id);
+      return found?.name || "校園裡";
+    }
+
+    function addNode(nodes, id, node) { nodes[id] = { ...node }; }
+
+    function installDay1StoryPatch() {
+      const STORY_DATA = getStoryRef();
+      const STUDENT_INFO = getStudentInfoRef();
+      const STUDENT_ORDER = getStudentOrderRef();
+      if (!STORY_DATA?.nodes || !STUDENT_INFO || !Array.isArray(STUDENT_ORDER)) return;
+      const n = STORY_DATA.nodes;
+
+      // ---------- Day 1 上午：小琳 Event 1《忘記星期三先生／小姐》 ----------
+      addNode(n,"ai_mint_e01_00",{type:"dialogue",speaker:null,speakerType:"system",text:"【小琳看到主角，立刻走過來。】",next:"ai_mint_e01_01"});
+      addNode(n,"ai_mint_e01_01",{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"欸！是你！",studentUnlock:"mint_student",studentStatus:"初識",next:"ai_mint_e01_02"});
+      addNode(n,"ai_mint_e01_02",{type:"dialogue",speaker:"我",speakerType:"player",text:"……我？",next:"ai_mint_e01_03"});
+      addNode(n,"ai_mint_e01_03",{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"早上最後一個跑到香草園的那個！",next:"ai_mint_e01_04"});
+      addNode(n,"ai_mint_e01_04",{type:"dialogue",speaker:"我",speakerType:"player",text:"……可以不要記這麼清楚嗎？",next:"ai_mint_e01_05"});
+      addNode(n,"ai_mint_e01_05",{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"哈哈，因為很搞笑啊！不過還好你有趕上啦。",next:"ai_mint_e01_06"});
+      addNode(n,"ai_mint_e01_06",{type:"dialogue",speaker:null,speakerType:"system",text:"【小琳一邊說，一邊把手裡那片葉子拿起來。】",next:"ai_mint_e01_07"});
+      addNode(n,"ai_mint_e01_07",{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"你看，這是早上許老師讓我們觀察的時候給我的，我就一直拿著啦。",next:"ai_mint_e01_08"});
+      addNode(n,"ai_mint_e01_08",{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"超香的喔，你要聞聞看嗎？",next:"ai_mint_e01_09"});
+      addNode(n,"ai_mint_e01_09",{type:"dialogue",speaker:null,speakerType:"system",text:"【她還沒完全等主角回答，就很自然地把葉子往主角面前靠近。】",next:"ai_mint_distance_choice"});
+      addNode(n,"ai_mint_distance_choice",{type:"dialogue",speaker:"我",speakerType:"player",text:"……",choices:[
+        {id:"A",text:"【直接靠近聞。】",response:{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"對吧對吧！味道超明顯的！",next:"ai_mint_smell_question"}},
+        {id:"B",text:"【稍微往後退。】",response:{type:"dialogue",speaker:null,speakerType:"system",text:"【主角稍微往後退。】",next:"ai_mint_distance_b2"}},
+        {id:"C",text:"【「等一下啦，我還沒說好。」】",response:{type:"dialogue",speaker:"我",speakerType:"player",text:"等一下啦，我還沒說好。",next:"ai_mint_distance_c2"}}
+      ]});
+      addNode(n,"ai_mint_distance_b2",{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"咦？太近喔？",next:"ai_mint_distance_b3"});
+      addNode(n,"ai_mint_distance_b3",{type:"dialogue",speaker:null,speakerType:"system",text:"【小琳把手收回一點。】",next:"ai_mint_distance_b4"});
+      addNode(n,"ai_mint_distance_b4",{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"這樣可以了吧？",next:"ai_mint_smell_question"});
+      addNode(n,"ai_mint_distance_c2",{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"喔對齁。",next:"ai_mint_distance_c3"});
+      addNode(n,"ai_mint_distance_c3",{type:"dialogue",speaker:null,speakerType:"system",text:"【她真的停了一下。】",next:"ai_mint_distance_c4"});
+      addNode(n,"ai_mint_distance_c4",{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"那你現在好了嗎？",next:"ai_mint_distance_c5"});
+      addNode(n,"ai_mint_distance_c5",{type:"dialogue",speaker:"我",speakerType:"player",text:"……妳還是很快。",next:"ai_mint_distance_c6"});
+      addNode(n,"ai_mint_distance_c6",{type:"dialogue",speaker:null,speakerType:"system",text:"【小琳笑出來。】",next:"ai_mint_smell_question"});
+      addNode(n,"ai_mint_smell_question",{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"很酷吧？你覺得聞起來像什麼？",choices:[
+        {id:"A",text:"有點像喉糖。",response:{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"對！我也覺得有那種感覺！",next:"ai_mint_reveal_q"}},
+        {id:"B",text:"味道很濃，聞了很有精神。",response:{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"是不是！我超喜歡這種味道。",next:"ai_mint_reveal_q"}},
+        {id:"C",text:"很清爽……但我不知道要怎麼形容。",response:{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"沒差啦，反正每個人形容味道本來就不一樣。",next:"ai_mint_reveal_q"}}
+      ]});
+      addNode(n,"ai_mint_reveal_q",{type:"dialogue",speaker:"我",speakerType:"player",text:"所以這到底是什麼？",next:"ai_mint_reveal_1"});
+      addNode(n,"ai_mint_reveal_1",{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"這是薄荷啦！薄荷！",next:"ai_mint_reveal_2"});
+      addNode(n,"ai_mint_reveal_2",{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"我超——喜歡薄荷的！",next:"ai_mint_future_1"});
+      addNode(n,"ai_mint_future_1",{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"老師之後會分不同的香草給我們。",next:"ai_mint_future_2"});
+      addNode(n,"ai_mint_future_2",{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"我超希望自己可以分到薄荷！",next:"ai_mint_future_3"});
+      addNode(n,"ai_mint_future_3",{type:"dialogue",speaker:"我",speakerType:"player",text:"如果不是呢？",next:"ai_mint_future_4"});
+      addNode(n,"ai_mint_future_4",{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"那我就跟拿到的人換啊。",next:"ai_mint_future_5"});
+      addNode(n,"ai_mint_future_5",{type:"dialogue",speaker:"我",speakerType:"player",text:"可以這樣喔？",next:"ai_mint_future_6"});
+      addNode(n,"ai_mint_future_6",{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"不知道，先問再說！",next:"ai_mint_future_7"});
+      addNode(n,"ai_mint_future_7",{type:"dialogue",speaker:"我",speakerType:"player",text:"……",next:"ai_mint_name_1"});
+      addNode(n,"ai_mint_name_1",{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"對了，我還不知道你叫什麼耶。",next:"ai_mint_name_2"});
+      addNode(n,"ai_mint_name_2",{type:"dialogue",speaker:null,speakerType:"system",text:"【主角與小琳交換名字。】",next:"ai_mint_name_3"});
+      addNode(n,"ai_mint_name_3",{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"好，我記住了。",next:"ai_mint_nickname"});
+      addNode(n,"ai_mint_nickname",{type:"dialogue",speaker:"小琳",speakerType:"npc",text:getForgetWednesdayNickname(),next:"ai_mint_name_4"});
+      addNode(n,"ai_mint_name_4",{type:"dialogue",speaker:"我",speakerType:"player",text:"不要幫我取這種名字啦！",next:"ai_mint_bell_1"});
+      addNode(n,"ai_mint_bell_1",{type:"dialogue",speaker:null,speakerType:"system",text:"【鐘聲響起。】",next:"ai_mint_bell_2"});
+      addNode(n,"ai_mint_bell_2",{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"啊，鐘響了。",bondChange:35,bondTarget:"mint_student",studentEventComplete:{studentId:"mint_student",eventId:"mint_student_event_01",status:"事件①完成"},next:"scene21_return"});
+
+      // 原本地圖選擇仍負責記錄實際地點；教學日固定轉入小琳 Event 1。
+      if (n.scene20_location_intro) {
+        n.scene20_location_intro.speaker = null;
+        n.scene20_location_intro.speakerType = "system";
+        n.scene20_location_intro.text = "【小琳看到主角，立刻走過來。】";
+        n.scene20_location_intro.next = "ai_mint_e01_01";
+      }
+
+      // ---------- Event 1 後：回班＋中午/下午一次帶過 ----------
+      if (n.scene21_return) n.scene21_return.next = "ai_timepass_1";
+      addNode(n,"ai_timepass_1",{type:"dialogue",sceneImage:"PLACEHOLDER_SCENE_22_班級教室",updateTime:"上午課程",updateLocation:"班級教室",speaker:"我",speakerType:"player",text:"剩下的上午課很快就過去了。",next:"ai_timepass_2"});
+      addNode(n,"ai_timepass_2",{type:"dialogue",updateTime:"中午至下午",speaker:"我",speakerType:"player",text:"吃完午餐、午休結束後，下午的課也跟著開始。",next:"ai_timepass_3"});
+      addNode(n,"ai_timepass_3",{type:"dialogue",updateTime:"下午",speaker:"我",speakerType:"player",text:"不知不覺，就到了今天的特別活動時間。",next:"scene24_to_241"});
+
+      // ---------- 241：先完成全員初識，不在初識階段發卡 ----------
+      engine.showStudentIntroSequence = function(node) {
+        const generated = [];
+        const resolve = (speaker, student) => speaker === "self" ? student.name : speaker;
+        const pushStep = (id, step) => { generated.push(id); n[id] = { ...step }; };
+        STUDENT_ORDER.forEach((studentId,index) => {
+          const student = STUDENT_INFO[studentId];
+          const prefix = `_ai_student_intro_${studentId}`;
+          const steps = [{type:"dialogue",speaker:student.cardTeacher,speakerType:"npc",text:`${student.name}。`,studentUnlock:studentId,studentStatus:"初識"}];
+          student.introDialogue.forEach(line => steps.push({type:"dialogue",speaker:resolve(line.speaker,student),speakerType:line.speaker==="我"?"player":"npc",text:line.text}));
+          steps.forEach((step,stepIndex)=>pushStep(`${prefix}_${stepIndex}`,step));
+          const groupLines = (()=>{ try { return win.eval("STUDENT_INTRO_GROUP_DIALOGUES"); } catch { return {}; } })()[index+1];
+          if (groupLines) groupLines.forEach((line,groupIndex)=>pushStep(`_ai_student_group_${index+1}_${groupIndex}`,{type:"dialogue",speaker:line.speaker,speakerType:line.speaker==="我"?"player":"npc",text:line.text}));
+        });
+        generated.forEach((id,index)=>{ n[id].next = generated[index+1] || node.next; });
+        if (generated.length) { n[generated[generated.length-1]].taskProgress=[1]; this.loadNode(generated[0],{skipHistory:true}); }
+      };
+
+      // ---------- 241：12張植物卡共用揭示系統 ----------
+      const reactions = {
+        mint_student:["耶！真的是薄荷！","我就說吧！"],
+        left_student:["……左手香。好，我記住了。"],
+        lemongrass_student:["檸檬香茅？好，我等等想去看看。"],
+        pandan_student:["斑蘭葉？這個名字很好聽。"],
+        mugwort_student:["艾草？這個名字我好像聽過。"],
+        fishmint_student:["魚腥草……我想先看看它長什麼樣。"],
+        pricklyash_student:["刺蔥？好，我記住了。"],
+        shellginger_student:["月桃。好，我先收好。"],
+        teatree_student:["澳洲茶樹？我等等想查一下這個名字。"],
+        turmeric_student:["薑黃……原來是這個。"],
+        marigold_student:["芳香萬壽菊！名字也太長了吧！"]
+      };
+      const cardIdsByStudent = {
+        mint_student:"mint",left_student:"left_hand_incense",lemongrass_student:"lemongrass",pandan_student:"pandan",mugwort_student:"mugwort",fishmint_student:"fish_mint",pricklyash_student:"prickly_ash",shellginger_student:"shell_ginger",teatree_student:"australian_tea_tree",turmeric_student:"turmeric",marigold_student:"aromatic_marigold"
+      };
+      const cardSequence=[];
+      STUDENT_ORDER.forEach(studentId=>{
+        const student=STUDENT_INFO[studentId],prefix=`ai_card_${studentId}`;
+        const called=`${prefix}_called`,answer=`${prefix}_answer`,reveal=`${prefix}_reveal`;
+        addNode(n,called,{type:"dialogue",speaker:student.cardTeacher,speakerType:"npc",text:`${student.name}。`});
+        addNode(n,answer,{type:"dialogue",speaker:student.name,speakerType:"npc",text:"有！"});
+        addNode(n,reveal,{type:"dialogue",speaker:student.cardTeacher,speakerType:"npc",text:`你的植物是——${student.plant}。`,discoverHerbName:student.plant,plantCardReveal:cardIdsByStudent[studentId]});
+        cardSequence.push(called,answer,reveal);
+        (reactions[studentId]||[]).forEach((text,i)=>{const id=`${prefix}_react_${i}`;addNode(n,id,{type:"dialogue",speaker:student.name,speakerType:"npc",text});cardSequence.push(id);});
+      });
+      addNode(n,"ai_card_distribution_intro",{type:"dialogue",speaker:"陳冠瑋老師",speakerType:"npc",text:"好，大家都認識了。接下來發今天的植物卡。",next:cardSequence[0]});
+      cardSequence.forEach((id,index)=>{n[id].next=cardSequence[index+1]||"ai_rosemary_1";});
+      if (n.scene31_favorite_e) n.scene31_favorite_e.next="ai_card_distribution_intro";
+
+      // 主角最後取得迷迭香，同一套揭示系統。
+      addNode(n,"ai_rosemary_1",{type:"dialogue",speaker:"陳冠瑋老師",speakerType:"npc",text:"最後一張。",next:"ai_rosemary_2"});
+      addNode(n,"ai_rosemary_2",{type:"dialogue",speaker:"陳冠瑋老師",speakerType:"npc",text:"這是你的。",next:"ai_rosemary_3"});
+      addNode(n,"ai_rosemary_3",{type:"dialogue",speaker:"陳冠瑋老師",speakerType:"npc",text:"迷迭香。",discoverHerbName:"迷迭香",taskProgress:[2],plantCardReveal:"rosemary",next:"ai_rosemary_4"});
+      addNode(n,"ai_rosemary_4",{type:"dialogue",speaker:"陳冠瑋老師",speakerType:"npc",text:"剛好這個名字，常常會讓人想到『記得』這件事。",next:"ai_rosemary_5"});
+      addNode(n,"ai_rosemary_5",{type:"dialogue",speaker:"小琳",speakerType:"npc",text:"超適合你的啊！",next:"ai_rosemary_6"});
+      addNode(n,"ai_rosemary_6",{type:"dialogue",speaker:"我",speakerType:"player",text:"……為什麼？",next:"ai_rosemary_7"});
+      addNode(n,"ai_rosemary_7",{type:"dialogue",speaker:"小琳",speakerType:"npc",text:getForgetWednesdayNickname(),next:"ai_rosemary_8"});
+      addNode(n,"ai_rosemary_8",{type:"dialogue",speaker:"我",speakerType:"player",text:"這個名字到底要叫多久啦！",next:"scene33_members_update"});
+
+      // 長期任務解鎖後即進入放學 / Day 1 日記 / 結算；不開始 Day 2。
+      if (n.scene33_long_task) n.scene33_long_task.next="ai_day1_dismiss";
+      addNode(n,"ai_day1_dismiss",{type:"dialogue",speaker:"陳冠瑋老師",speakerType:"npc",text:"今天就到這裡。大家放學前記得把自己的植物卡收好。",next:"ai_day1_bell"});
+      addNode(n,"ai_day1_bell",{type:"dialogue",updateTime:"放學",updateLocation:"241自然教室",speaker:null,speakerType:"system",text:"【放學鐘聲響起。】",next:"ai_day1_diary"});
+      addNode(n,"ai_day1_diary",{type:"systemOverlay",title:"【Day 1 日記】",text:`上午下課，我去了${getSelectedLocationName()}，在那裡遇到了小琳。<br><br>下午，我在241自然教室拿到了自己的植物卡——迷迭香。`,next:"day1_end"});
+    }
+
+    installDay1StoryPatch();
+
+    // 地圖仍記錄玩家實際選擇；Day 1 教學日固定觸發小琳。
+    const originalConfirmMapLocation = engine.confirmMapLocation.bind(engine);
+    engine.confirmMapLocation = function() {
+      const location = this.selectedMapLocation;
+      this.__aiSelectedLocationId = location?.id || null;
+      this.__aiSelectedLocationName = location?.name || null;
+      const result = originalConfirmMapLocation();
+      const STORY_DATA = getStoryRef();
+      if (STORY_DATA?.nodes?.scene20_location_intro) {
+        const intro = STORY_DATA.nodes.scene20_location_intro;
+        intro.speaker = null;
+        intro.speakerType = "system";
+        intro.text = "【小琳看到主角，立刻走過來。】";
+        intro.next = "ai_mint_e01_01";
+      }
+      return result;
+    };
+
+    const originalLoadNode = engine.loadNode.bind(engine);
+    engine.loadNode = function(nodeId, options={}) {
+      const STORY_DATA = getStoryRef();
+      if (nodeId === "ai_mint_nickname" && STORY_DATA?.nodes?.[nodeId]) STORY_DATA.nodes[nodeId].text = getForgetWednesdayNickname();
+      if (nodeId === "ai_rosemary_7" && STORY_DATA?.nodes?.[nodeId]) STORY_DATA.nodes[nodeId].text = getForgetWednesdayNickname();
+      if (nodeId === "ai_day1_diary" && STORY_DATA?.nodes?.[nodeId]) {
+        STORY_DATA.nodes[nodeId].text = `上午下課，我去了${getSelectedLocationName()}，在那裡遇到了小琳。<br><br>下午，我在241自然教室拿到了自己的植物卡——迷迭香。`;
+      }
+      if (nodeId === "ai_mint_bell_2" && STORY_DATA?.nodes?.[nodeId]) {
+        const relation = this.gameState?.studentRelations?.mint_student;
+        const done = relation?.completedEvents?.includes("mint_student_event_01");
+        STORY_DATA.nodes[nodeId].bondChange = done ? 0 : 35;
+      }
+      const result = originalLoadNode(nodeId, options);
+      if (nodeId === "ai_mint_bell_2" && !options?.skipSideEffects) {
+        const relation = this.gameState?.studentRelations?.mint_student;
+        if (relation) relation.mint_student_event_01 = { completed:true };
+      }
+      return result;
+    };
+
     const originalShowDialogue = engine.showDialogue.bind(engine);
-    engine.showDialogue = function(node) { const result = originalShowDialogue(node); const forced = nodeSceneOverride(this.currentNodeId); if (forced) setLocalBackground(forced); renderCharacterForDialogue(node); return result; };
+    engine.showDialogue = function(node) {
+      const result = originalShowDialogue(node);
+      const forced = nodeSceneOverride(this.currentNodeId);
+      if (forced) setLocalBackground(forced);
+      renderCharacterForDialogue(node);
+      return result;
+    };
+
+    const originalFinishTyping = engine.finishTyping.bind(engine);
+    engine.finishTyping = function(node) {
+      const result = originalFinishTyping(node);
+      if (node?.plantCardReveal && !plantCardActive) {
+        const card = PLANT_CARD_ASSETS[node.plantCardReveal] || PLANT_CARD_BY_NAME[node.plantCardReveal];
+        showPlantCard(card ? {id:node.plantCardReveal,...card} : {name:String(node.plantCardReveal)});
+      }
+      return result;
+    };
+
+    const originalHandleDialogueClick = engine.handleDialogueClick.bind(engine);
+    engine.handleDialogueClick = function(...args) {
+      if (plantCardActive) { hidePlantCard(); return; }
+      if (Date.now() - plantCardDismissedAt < 120) return;
+      return originalHandleDialogueClick(...args);
+    };
 
     ["showSystemOverlay","showVideoPlaceholder","showVideoScene","showCampusMap","showResearchTablet","showDemoEnd"].forEach(method => {
-      if (typeof engine[method] !== "function") return; const original = engine[method].bind(engine); engine[method] = function(...args) { hideCharacter(false); return original(...args); };
+      if (typeof engine[method] !== "function") return;
+      const original = engine[method].bind(engine);
+      engine[method] = function(...args) {
+        hideCharacter(false);
+        if (plantCardActive) hidePlantCard();
+        return original(...args);
+      };
     });
 
     const originalResetGameUI = engine.resetGameUI.bind(engine);
-    engine.resetGameUI = function(...args) { hideCharacter(true); this.__aiSelectedLocationId = null; return originalResetGameUI(...args); };
+    engine.resetGameUI = function(...args) {
+      hideCharacter(true);
+      if (plantCardActive) hidePlantCard();
+      this.__aiSelectedLocationId = null;
+      this.__aiSelectedLocationName = null;
+      return originalResetGameUI(...args);
+    };
 
-    win.__HERBGAME_AI_VISUAL = { AI_SCENE_ASSETS, AI_CHARACTER_ASSETS, getCharacterVisualInfo, setLocalBackground, renderCharacterForDialogue, hideCharacter };
+    win.__HERBGAME_AI_VISUAL = {
+      AI_SCENE_ASSETS,
+      AI_CHARACTER_ASSETS,
+      getCharacterVisualInfo,
+      setLocalBackground,
+      renderCharacterForDialogue,
+      hideCharacter,
+      PLANT_CARD_ASSETS,
+      showPlantCard,
+      hidePlantCard,
+      getSelectedLocationName
+    };
 
+    // 直接驗收入口：實際使用本分支的故事節點 / 揭示元件，不改正式母版檔案。
     const preview = new URLSearchParams(location.search).get("preview");
-    if (preview === "xiaolin-playground") {
+    if (preview) {
       setTimeout(() => {
-        doc.getElementById("screen-home")?.classList.remove("active"); doc.getElementById("screen-intro")?.classList.remove("active"); gameScreen?.classList.add("active");
-        if (engine.dom?.hudTime) engine.dom.hudTime.textContent = "上午下課"; if (engine.dom?.hudLocation) engine.dom.hudLocation.textContent = "遊樂場";
-        engine.__aiSelectedLocationId = "playground"; setLocalBackground(AI_SCENE_ASSETS.exploration.playground);
-        engine.showDialogue({type:"dialogue",speaker:"小琳",speakerType:"npc",text:"你早上也在香草園對不對？",characterPosition:"right"});
+        doc.getElementById("screen-home")?.classList.remove("active");
+        doc.getElementById("screen-intro")?.classList.remove("active");
+        gameScreen?.classList.add("active");
+        const STORY_DATA = getStoryRef();
+        if (preview === "xiaolin-playground" || preview === "xiaolin-event-01") {
+          if (engine.dom?.hudTime) engine.dom.hudTime.textContent = "上午下課";
+          if (engine.dom?.hudLocation) engine.dom.hudLocation.textContent = "遊樂場";
+          engine.__aiSelectedLocationId = "playground";
+          engine.__aiSelectedLocationName = "遊樂場";
+          engine.gameState.selectedLocation = "playground";
+          engine.gameState.selectedCampusLocation = "playground";
+          setLocalBackground(AI_SCENE_ASSETS.exploration.playground);
+          engine.loadNode(preview === "xiaolin-event-01" ? "ai_mint_e01_01" : "ai_mint_e01_01", {skipHistory:true});
+        } else if (preview === "plant-card-mint") {
+          if (engine.dom?.hudTime) engine.dom.hudTime.textContent = "第1週・星期三 下午";
+          if (engine.dom?.hudLocation) engine.dom.hudLocation.textContent = "241自然教室";
+          setLocalBackground(AI_SCENE_ASSETS.naturalClassroom241);
+          const id="ai_preview_card_mint";
+          STORY_DATA.nodes[id]={type:"dialogue",speaker:"陳冠瑋老師",speakerType:"npc",text:"你的植物是——薄荷。",plantCardReveal:"mint"};
+          engine.loadNode(id,{skipHistory:true});
+        } else if (preview === "plant-card-rosemary") {
+          if (engine.dom?.hudTime) engine.dom.hudTime.textContent = "第1週・星期三 下午";
+          if (engine.dom?.hudLocation) engine.dom.hudLocation.textContent = "241自然教室";
+          setLocalBackground(AI_SCENE_ASSETS.naturalClassroom241);
+          const id="ai_preview_card_rosemary";
+          STORY_DATA.nodes[id]={type:"dialogue",speaker:"陳冠瑋老師",speakerType:"npc",text:"迷迭香。",plantCardReveal:"rosemary"};
+          engine.loadNode(id,{skipHistory:true});
+        }
       }, 250);
     }
+
   }
 
   frame.addEventListener("load", () => {
-    const win = frame.contentWindow; const doc = frame.contentDocument; let tries = 0;
+    const win = frame.contentWindow;
+    const doc = frame.contentDocument;
+    let tries = 0;
     const timer = setInterval(() => {
       tries++;
-      if (win?.gameEngine) { clearInterval(timer); installAIVisualBranch(win, doc, win.gameEngine); bootNote.classList.add("hidden"); }
-      else if (tries > 100) { clearInterval(timer); bootNote.textContent = "AI圖片試作版載入失敗：找不到正式版遊戲引擎。"; }
+      if (win?.gameEngine) {
+        clearInterval(timer);
+        installAIVisualBranch(win, doc, win.gameEngine);
+        bootNote.classList.add("hidden");
+      } else if (tries > 100) {
+        clearInterval(timer);
+        bootNote.textContent = "AI圖片試作版載入失敗：找不到正式版遊戲引擎。";
+      }
     }, 30);
   });
 })();
