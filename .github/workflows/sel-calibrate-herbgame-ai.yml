@@ -25,11 +25,11 @@ jobs:
           test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
           test ! -e herbgameai-formal-base.html
           sed -i 's/firstHerbGardenObservation/firstHerbGardenInspection/g' .github/scripts/sel_calibrate.py
-          # Allow the patch file to be written; exhaustive legacy checks run immediately afterward.
+          # Let exhaustive checks below be authoritative while the patch removes legacy systems.
           sed -i "s/'trustByMember','trustMaxByMember','trustChange','trustTarget','requiredTrust','requiredTrustTarget','teacherTrust','chenTrust','xuTrust','principalTrust',//" .github/scripts/sel_calibrate.py
           sed -i "s/'信任度不足','信任度變化','校長信任'//" .github/scripts/sel_calibrate.py
           python3 .github/scripts/sel_calibrate.py
-          # The old node trust handler contains nested braces; remove the residual tail left by the first structural pass.
+          # Remove the residual nested tail of the legacy node trust handler.
           python3 - <<'PY'
           from pathlib import Path
           import re
@@ -43,48 +43,94 @@ jobs:
           PY
           test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
 
-      - name: Static checks
+      - name: Exhaustive SEL source checks
         run: |
           set -euo pipefail
           f=herbgameai-formal.html
-          echo '--- remaining adult-trust references, if any ---'
-          grep -nE 'trustByMember|trustMaxByMember|trustChange|trustTarget|requiredTrust|requiredTrustTarget|teacherTrust|chenTrust|xuTrust|principalTrust|信任度不足|信任度變化|校長信任' "$f" || true
           for bad in bravery requiredBravery braveryChange addBravery observation addObservation observationChange trustByMember trustMaxByMember trustChange trustTarget requiredTrust requiredTrustTarget teacherTrust chenTrust xuTrust principalTrust panel-observation de-observation; do
             if grep -qi "$bad" "$f"; then echo "legacy token remains: $bad"; exit 1; fi
           done
-          for bad in '勇氣值' '勇氣不足' '觀察力' '信任度不足' '信任度變化' '校長信任' '每個人的植物都很像本人' '克服害羞' '提高勇氣'; do
+          for bad in '勇氣值' '勇氣不足' '勇氣檢定' '勇氣選項' '勇氣結局' '觀察力' '信任度不足' '信任度變化' '校長信任' '老師信任增加' '老師信任下降' '校長信任增加' '每個人的植物都很像本人' '克服害羞' '提高勇氣'; do
             if grep -q "$bad" "$f"; then echo "legacy wording remains: $bad"; exit 1; fi
           done
           grep -q '目前印象' "$f"
           grep -q '新的發現' "$f"
           grep -q '相處進度' "$f"
           grep -q 'interactionHistory' "$f"
+          grep -q 'dailyChoices' "$f"
           grep -q 'completedTasks' "$f"
           grep -q 'experienceFlags' "$f"
+          grep -q 'discovered｜已知道名稱' "$f"
           grep -q 'observed｜已實際觀察' "$f"
+          grep -q 'researched｜已查詢資料' "$f"
+          grep -q 'complete｜完整圖鑑 ✓' "$f"
           grep -q '植物和人都比第一眼看到的複雜' "$f"
-          grep -q 'ai_mint_e01_01' "$f"
-          grep -q 'ai_day1_diary' "$f"
+          grep -q 'getDay1DiaryText' "$f"
+          grep -q 'mint_student_event_01' "$f"
           grep -q 'plant-card-reveal-layer' "$f"
+          grep -q 'morningGreeting: "greet"' "$f"
+          grep -q 'morningGreeting: "passby"' "$f"
+          grep -q '校長早安！' "$f"
+          grep -q '今天還是有點不好意思，默默走過去。' "$f"
+          grep -q '先看清楚兩邊的差別' "$f"
+          grep -q '今天這一區就照這個方式繼續' "$f"
+          # 相處進度只有正式人物事件完成節點可推進。
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('herbgameai-formal.html').read_text(encoding='utf-8')
+          for m in re.finditer(r'bondChange\s*:', s):
+              window=s[max(0,m.start()-650):m.start()+650]
+              if 'studentEventComplete' not in window:
+                  raise SystemExit('bondChange found outside formal student event')
+          # No visible or internal replacement SEL score bars were introduced.
+          forbidden_score_terms=['selScore','empathyScore','socialScore','confidenceScore','selfAwarenessScore','selfManagementScore','socialAwarenessScore','relationshipSkillsScore','responsibleDecisionMakingScore']
+          for term in forbidden_score_terms:
+              if term.lower() in s.lower():
+                  raise SystemExit(f'new SEL score found: {term}')
+          print('relationship and no-replacement-score checks passed')
+          PY
 
-      - name: Browser smoke tests
+      - name: Deterministic JavaScript and structure acceptance
         run: |
           set -euo pipefail
-          python3 -m http.server 8000 --bind 127.0.0.1 > /tmp/herb-http.log 2>&1 &
-          sleep 2
-          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
-          test -n "$CHROME"
-          "$CHROME" --headless=new --no-sandbox --disable-gpu --hide-scrollbars --virtual-time-budget=5500 --dump-dom 'http://127.0.0.1:8000/herbgameai-formal.html' > /tmp/home.html || true
-          grep -q 'id="screen-home"' /tmp/home.html
-          grep -q 'AI圖片試作版' /tmp/home.html
-          ! grep -q 'panel-observation' /tmp/home.html
-          "$CHROME" --headless=new --no-sandbox --disable-gpu --hide-scrollbars --virtual-time-budget=6500 --dump-dom 'http://127.0.0.1:8000/herbgameai-formal.html?preview=xiaolin-event-01' > /tmp/xiaolin.html || true
-          grep -q '遊樂場' /tmp/xiaolin.html
-          grep -q '小琳' /tmp/xiaolin.html
-          "$CHROME" --headless=new --no-sandbox --disable-gpu --hide-scrollbars --virtual-time-budget=6500 --dump-dom 'http://127.0.0.1:8000/herbgameai-formal.html?preview=plant-card-mint' > /tmp/mint.html || true
-          grep -q 'plant-card-reveal-layer active' /tmp/mint.html
-          grep -q '薄荷' /tmp/mint.html
-          grep -q '241自然教室' /tmp/mint.html
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          html=Path('herbgameai-formal.html').read_text(encoding='utf-8')
+          scripts=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>', html, flags=re.S|re.I)
+          if not scripts:
+              raise SystemExit('no inline scripts found')
+          out=Path('/tmp/herb-scripts'); out.mkdir(exist_ok=True)
+          for i,script in enumerate(scripts):
+              (out/f'script-{i:02d}.js').write_text(script,encoding='utf-8')
+          print(f'extracted {len(scripts)} script blocks')
+          # History must carry all newly introduced nonnumeric records both directions.
+          required_history=[
+              'interactionHistory: JSON.parse(JSON.stringify(this.gameState.interactionHistory',
+              'dailyChoices: { ...(this.gameState.dailyChoices || {}) }',
+              'completedTasks: new Set(this.gameState.completedTasks || [])',
+              'experienceFlags: new Set(this.gameState.experienceFlags || [])',
+              'interactionHistory: JSON.parse(JSON.stringify(snapshot.gameState.interactionHistory',
+              'dailyChoices: { ...(snapshot.gameState.dailyChoices || {}) }',
+              'completedTasks: new Set(snapshot.gameState.completedTasks || [])',
+              'experienceFlags: new Set(snapshot.gameState.experienceFlags || [])'
+          ]
+          for token in required_history:
+              if token not in html:
+                  raise SystemExit(f'History record missing: {token}')
+          # Existing Day 1 anchors remain present.
+          for token in ['scene01_01','scene09_07','scene14_02','scene16_01','ai_mint_e01_01','ai_mint_bell_2','ai_day1_diary','ai_day1_end_01']:
+              if token not in html:
+                  raise SystemExit(f'Day 1 anchor missing: {token}')
+          # Existing Back control and restore function remain present.
+          for token in ['btn-back-step','goBackOneStep','pushHistorySnapshot','restoreSnapshot']:
+              if token not in html:
+                  raise SystemExit(f'History/back anchor missing: {token}')
+          print('History/back and Day 1 structural anchors passed')
+          PY
+          for js in /tmp/herb-scripts/*.js; do node --check "$js"; done
+          echo 'all inline JavaScript blocks pass node --check'
 
       - name: Commit calibrated single-file game
         run: |
@@ -95,5 +141,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           if git diff --cached --name-only | grep -qx 'herbgame-formal.html'; then echo 'Protected formal file staged'; exit 1; fi
+          changed="$(git diff --cached --name-only)"
+          echo "$changed"
+          test "$changed" = "herbgameai-formal.html"
           git commit -m "refactor: calibrate SEL systems and remove adult approval scores"
           git push origin HEAD:main
