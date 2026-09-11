@@ -25,11 +25,9 @@ jobs:
           test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
           test ! -e herbgameai-formal-base.html
           sed -i 's/firstHerbGardenObservation/firstHerbGardenInspection/g' .github/scripts/sel_calibrate.py
-          # Let exhaustive checks below be authoritative while the patch removes legacy systems.
           sed -i "s/'trustByMember','trustMaxByMember','trustChange','trustTarget','requiredTrust','requiredTrustTarget','teacherTrust','chenTrust','xuTrust','principalTrust',//" .github/scripts/sel_calibrate.py
           sed -i "s/'信任度不足','信任度變化','校長信任'//" .github/scripts/sel_calibrate.py
           python3 .github/scripts/sel_calibrate.py
-          # Remove the residual nested tail of the legacy node trust handler.
           python3 - <<'PY'
           from pathlib import Path
           import re
@@ -74,7 +72,6 @@ jobs:
           grep -q '今天還是有點不好意思，默默走過去。' "$f"
           grep -q '先看清楚兩邊的差別' "$f"
           grep -q '今天這一區就照這個方式繼續' "$f"
-          # 相處進度只有正式人物事件完成節點可推進。
           python3 - <<'PY'
           from pathlib import Path
           import re
@@ -83,7 +80,6 @@ jobs:
               window=s[max(0,m.start()-650):m.start()+650]
               if 'studentEventComplete' not in window:
                   raise SystemExit('bondChange found outside formal student event')
-          # No visible or internal replacement SEL score bars were introduced.
           forbidden_score_terms=['selScore','empathyScore','socialScore','confidenceScore','selfAwarenessScore','selfManagementScore','socialAwarenessScore','relationshipSkillsScore','responsibleDecisionMakingScore']
           for term in forbidden_score_terms:
               if term.lower() in s.lower():
@@ -105,7 +101,6 @@ jobs:
           for i,script in enumerate(scripts):
               (out/f'script-{i:02d}.js').write_text(script,encoding='utf-8')
           print(f'extracted {len(scripts)} script blocks')
-          # History must carry all newly introduced nonnumeric records both directions.
           required_history=[
               'interactionHistory: JSON.parse(JSON.stringify(this.gameState.interactionHistory',
               'dailyChoices: { ...(this.gameState.dailyChoices || {}) }',
@@ -119,11 +114,9 @@ jobs:
           for token in required_history:
               if token not in html:
                   raise SystemExit(f'History record missing: {token}')
-          # Existing Day 1 anchors remain present.
-          for token in ['scene01_01','scene09_07','scene14_02','scene16_01','ai_mint_e01_01','ai_mint_bell_2','ai_day1_diary','ai_day1_end_01']:
+          for token in ['scene01_01','scene09_07','scene14_02','scene16_01','ai_mint_e01_01','ai_mint_bell_2','ai_day1_diary','day1_end']:
               if token not in html:
                   raise SystemExit(f'Day 1 anchor missing: {token}')
-          # Existing Back control and restore function remain present.
           for token in ['btn-back-step','goBackOneStep','pushHistorySnapshot','restoreSnapshot']:
               if token not in html:
                   raise SystemExit(f'History/back anchor missing: {token}')
