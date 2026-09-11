@@ -163,14 +163,14 @@
         .member-list { display: grid; gap: 0.8rem; }
         .member-card { background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1rem 1.2rem; }
         .member-card.locked { opacity: 0.55; filter: grayscale(0.4); }
-        .member-card-layout { display:grid; grid-template-columns:92px 1fr; gap:1rem; align-items:start; }
-        .member-avatar-slot { width:92px; min-height:92px; border-radius:18px; border:2px dashed #cbd5e1; background:linear-gradient(180deg,#f8fafc 0%,#eef2f7 100%); display:flex; align-items:center; justify-content:center; text-align:center; color:#64748b; font-weight:900; line-height:1.25; padding:.5rem; box-sizing:border-box; }
+        .member-card-layout { display:grid; grid-template-columns:104px 1fr; gap:1rem; align-items:start; }
+        .member-avatar-slot { width:104px; height:124px; min-height:124px; overflow:hidden; border-radius:18px; border:2px dashed #cbd5e1; background:linear-gradient(180deg,#f8fafc 0%,#eef2f7 100%); display:flex; align-items:center; justify-content:center; text-align:center; color:#64748b; font-weight:900; line-height:1.25; padding:.35rem; box-sizing:border-box; }
         .member-avatar-slot.locked { color:#94a3b8; }
         .member-avatar-slot small { display:block; font-size:.8rem; font-weight:800; opacity:.9; }
         .member-avatar-img {
             width:100%;
             height:100%;
-            min-height:88px;
+            min-height:0;
             object-fit:contain;
             object-position:center bottom;
             display:block;
@@ -278,7 +278,7 @@
         .de-summary-row { display:flex; justify-content:space-between; gap:1rem; color:#e2e8f0; font-size:1.05rem; }
         .de-summary-row span:last-child { color:#7dd3fc; font-weight:900; text-align:right; }
         .de-long-task { width:min(820px,90vw); padding:.9rem 1.1rem; border-radius:14px; background:rgba(101,163,13,.16); border:1px solid rgba(190,242,100,.35); color:#d9f99d; margin-bottom:1.2rem; text-align:center; font-weight:800; }
-        @media (max-width:760px) { .herb-progress-list,.research-options,.de-summary-grid { grid-template-columns:1fr; } .member-meta-row { grid-template-columns:90px 1fr; } .member-card-layout { grid-template-columns:72px 1fr; gap:.8rem; } .member-avatar-slot { width:72px; min-height:72px; border-radius:16px; font-size:.92rem; } }
+        @media (max-width:760px) { .herb-progress-list,.research-options,.de-summary-grid { grid-template-columns:1fr; } .member-meta-row { grid-template-columns:90px 1fr; } .member-card-layout { grid-template-columns:72px 1fr; gap:.8rem; } .member-avatar-slot { width:72px; height:88px; min-height:88px; border-radius:16px; font-size:.92rem; } }
     </style>
 </head>
 <body>
@@ -517,7 +517,7 @@
         // eventLocations 暫留空，等待正式企劃指定；本版不建立任何地點權重。
         const STUDENT_INFO = {
             mint_student:{
-                id:"mint_student",name:"小琳",plant:"薄荷",favoritePlace:"遊樂場",
+                id:"mint_student",avatar:"picture/herb-game/ai-characters/01_小琳_mint_student.png",name:"小琳",plant:"薄荷",favoritePlace:"遊樂場",
                 currentImpression:"第一次聊天時，她接話很快，也很快把話題帶到遊樂場。",
                 relationshipType:"bond",bond:0,status:"未認識",completedEvents:[],eventLocations:[],
                 introDialogue:[
@@ -533,7 +533,7 @@
             },
 
             left_student:{
-                id:"left_student",name:"小安",plant:"左手香",favoritePlace:"後操場",
+                id:"left_student",avatar:"picture/herb-game/ai-characters/02_小安_left_student.png",name:"小安",plant:"左手香",favoritePlace:"後操場",
                 currentImpression:"第一次聽他介紹自己時，他話不多，說自己喜歡人少、安靜的後操場角落。",
                 relationshipType:"bond",bond:0,status:"未認識",completedEvents:[],eventLocations:[],
                 introDialogue:[
@@ -551,7 +551,7 @@
             },
 
             lemongrass_student:{
-                id:"lemongrass_student",name:"小凱",plant:"檸檬香茅",favoritePlace:"前操場",
+                id:"lemongrass_student",avatar:"picture/herb-game/ai-characters/03_小凱_lemongrass_student.png",name:"小凱",plant:"檸檬香茅",favoritePlace:"前操場",
                 currentImpression:"第一次見面時，他一說到前操場和打球，整個人就很有精神。",
                 relationshipType:"bond",bond:0,status:"未認識",completedEvents:[],eventLocations:[],
                 introDialogue:[
@@ -570,7 +570,7 @@
             },
 
             pandan_student:{
-                id:"pandan_student",name:"小樂",plant:"斑蘭葉",favoritePlace:"南瓜馬車",
+                id:"pandan_student",avatar:"picture/herb-game/ai-characters/04_小樂_pandan_student.png",name:"小樂",plant:"斑蘭葉",favoritePlace:"南瓜馬車",
                 currentImpression:"第一次自我介紹時，他特別提到南瓜馬車的顏色和裝飾。",
                 relationshipType:"bond",bond:0,status:"未認識",completedEvents:[],eventLocations:[],
                 introDialogue:[
@@ -588,7 +588,7 @@
             },
 
             mugwort_student:{
-                id:"mugwort_student",name:"小希",plant:"艾草",favoritePlace:"閱讀室",
+                id:"mugwort_student",avatar:"picture/herb-game/ai-characters/05_小希_mugwort_student.png",name:"小希",plant:"艾草",favoritePlace:"閱讀室",
                 currentImpression:"第一次聊天時，她很快把植物和故事、節慶、家裡的經驗連在一起。",
                 relationshipType:"bond",bond:0,status:"未認識",completedEvents:[],eventLocations:[],
                 introDialogue:[
@@ -606,7 +606,7 @@
             },
 
             fishmint_student:{
-                id:"fishmint_student",name:"小柏",plant:"魚腥草",favoritePlace:"生態池",
+                id:"fishmint_student",avatar:"picture/herb-game/ai-characters/06_小柏_fishmint_student.png",name:"小柏",plant:"魚腥草",favoritePlace:"生態池",
                 currentImpression:"第一次見面時，他回答不多，老師說他常在生態池看很久。",
                 relationshipType:"bond",bond:0,status:"未認識",completedEvents:[],eventLocations:[],
                 introDialogue:[
@@ -624,7 +624,7 @@
             },
 
             pricklyash_student:{
-                id:"pricklyash_student",name:"小杰",plant:"刺蔥",favoritePlace:"遊戲區",
+                id:"pricklyash_student",avatar:"picture/herb-game/ai-characters/07_小杰_pricklyash_student.png",name:"小杰",plant:"刺蔥",favoritePlace:"遊戲區",
                 currentImpression:"第一次見面時，他說話很直接，也很快說出自己喜歡遊戲區的攀爬架。",
                 relationshipType:"bond",bond:0,status:"未認識",completedEvents:[],eventLocations:[],
                 introDialogue:[
@@ -646,7 +646,7 @@
             },
 
             shellginger_student:{
-                id:"shellginger_student",name:"小羽",plant:"月桃",favoritePlace:"南瓜馬車附近",
+                id:"shellginger_student",avatar:"picture/herb-game/ai-characters/08_小羽_shellginger_student.png",name:"小羽",plant:"月桃",favoritePlace:"南瓜馬車附近",
                 currentImpression:"第一次聊天時，她很熟悉南瓜馬車附近的人流和大家平常會經過的地方。",
                 relationshipType:"bond",bond:0,status:"未認識",completedEvents:[],eventLocations:[],
                 introDialogue:[
@@ -664,7 +664,7 @@
             },
 
             teatree_student:{
-                id:"teatree_student",name:"小森",plant:"澳洲茶樹",favoritePlace:"241自然教室",
+                id:"teatree_student",avatar:"picture/herb-game/ai-characters/09_小森_teatree_student.png",name:"小森",plant:"澳洲茶樹",favoritePlace:"241自然教室",
                 currentImpression:"第一次自我介紹時，他一提到241自然教室的顯微鏡和標本就很興奮。",
                 relationshipType:"bond",bond:0,status:"未認識",completedEvents:[],eventLocations:[],
                 introDialogue:[
@@ -683,7 +683,7 @@
             },
 
             turmeric_student:{
-                id:"turmeric_student",name:"小辰",plant:"薑黃",favoritePlace:"後操場",
+                id:"turmeric_student",avatar:"picture/herb-game/ai-characters/10_小辰_turmeric_student.png",name:"小辰",plant:"薑黃",favoritePlace:"後操場",
                 currentImpression:"第一次見面時，他注意到後操場牆角那些大家容易忽略的小東西。",
                 relationshipType:"bond",bond:0,status:"未認識",completedEvents:[],eventLocations:[],
                 introDialogue:[
@@ -704,7 +704,7 @@
             },
 
             marigold_student:{
-                id:"marigold_student",name:"小晴",plant:"芳香萬壽菊",favoritePlace:"南瓜馬車",
+                id:"marigold_student",avatar:"picture/herb-game/ai-characters/11_小晴_marigold_student.png",name:"小晴",plant:"芳香萬壽菊",favoritePlace:"南瓜馬車",
                 currentImpression:"第一次自我介紹時，她很快聊起南瓜馬車附近聊天、拍照的人群。",
                 relationshipType:"bond",bond:0,status:"未認識",completedEvents:[],eventLocations:[],
                 introDialogue:[
@@ -1599,7 +1599,10 @@
                 const studentCards = STUDENT_ORDER.map(id => {
                     const info=STUDENT_INFO[id], unlocked=this.gameState.unlockedStudents.has(id), relation=this.gameState.studentRelations[id] || {bond:0,status:"未認識",completedEvents:[],discoveries:[]};
                     const plantShown=this.gameState.discoveredHerbNames.has(info.plant)?info.plant:"？？？";
-                    return `<div class="member-card ${unlocked ? '' : 'locked'}"><div class="member-card-layout"><div class="member-avatar-slot ${unlocked ? '' : 'locked'}">${unlocked ? '人物頭像<br><small>待放入</small>' : '？？<br><small>未解鎖</small>'}</div><div class="member-main"><div class="member-name">${unlocked ? info.name : '？？？'}<span class="member-type-badge">學生</span></div>${unlocked ? `<div class="member-meta"><div class="member-meta-row"><strong>代表植物</strong><span>${plantShown}</span></div><div class="member-meta-row"><strong>喜歡的地方</strong><span>${info.favoritePlace}</span></div><div class="member-meta-row"><strong>目前印象</strong><span>${info.currentImpression}</span></div>${relation.discoveries?.length ? `<div class="member-meta-row"><strong>新的發現</strong><span>${relation.discoveries.join("／")}</span></div>` : ""}<div class="member-meta-row"><strong>故事進度</strong><span>${relation.status}</span></div></div><div class="member-bond"><span>相處進度</span><span class="member-bond-value">${relation.bond}%</span></div>` : '<div class="member-desc">尚未解鎖。</div>'}</div></div></div>`;
+                    const avatarHtml = unlocked && info.avatar
+                        ? `<img class="member-avatar-img" src="${info.avatar}" alt="${info.name}" draggable="false" onerror="const failedPath=this.getAttribute('src');console.error('[HerbGame] student image load failed','${id}',failedPath);this.style.display='none';this.parentElement.innerHTML='人物圖片<br><small>載入失敗</small>';" />`
+                        : '？？<br><small>未解鎖</small>';
+                    return `<div class="member-card ${unlocked ? '' : 'locked'}"><div class="member-card-layout"><div class="member-avatar-slot ${unlocked ? '' : 'locked'}">${avatarHtml}</div><div class="member-main"><div class="member-name">${unlocked ? info.name : '？？？'}<span class="member-type-badge">學生</span></div>${unlocked ? `<div class="member-meta"><div class="member-meta-row"><strong>代表植物</strong><span>${plantShown}</span></div><div class="member-meta-row"><strong>喜歡的地方</strong><span>${info.favoritePlace}</span></div><div class="member-meta-row"><strong>目前印象</strong><span>${info.currentImpression}</span></div>${relation.discoveries?.length ? `<div class="member-meta-row"><strong>新的發現</strong><span>${relation.discoveries.join("／")}</span></div>` : ""}<div class="member-meta-row"><strong>故事進度</strong><span>${relation.status}</span></div></div><div class="member-bond"><span>相處進度</span><span class="member-bond-value">${relation.bond}%</span></div>` : '<div class="member-desc">尚未解鎖。</div>'}</div></div></div>`;
                 }).join('');
                 this.dom.memberList.innerHTML=staffCards+studentCards;
                 if(this.dom.herbProgressList){this.dom.herbProgressList.innerHTML=HERB_ORDER.map(name=>{const discovered=this.gameState.discoveredHerbNames.has(name);if(!discovered)return `<div class="herb-progress-card locked"><div class="herb-progress-title"><span>？？？</span><span class="herb-progress-status">名稱未發現</span></div></div>`;const knowledge=this.gameState.herbKnowledge[name]||{},completed=this.gameState.knownPlants.has(name);const detail=(label,key)=>name==="迷迭香"&&knowledge[key]&&HERB_INFO[name]?.research?.[key]?`<div><strong>${label}</strong>：${HERB_INFO[name].research[key]}</div>`:`<div><strong>${label}</strong>：？</div>`;return `<div class="herb-progress-card"><div class="herb-progress-title"><span>${name}</span><span class="herb-progress-status">${getHerbProgressStage(name,this.gameState).label}</span></div><div class="herb-detail-grid">${detail('外觀','appearance')}${detail('辨認方式','identification')}${detail('香氣','aroma')}${detail('用途','use')}${detail('注意事項','caution')}<div><strong>觀察紀錄</strong>：${knowledge.observed?'已完成':'未完成'}</div></div></div>`;}).join('');}
@@ -2383,17 +2386,17 @@
   });
 
   const AI_CHARACTER_ASSETS = Object.freeze({
-    "小琳": { id:"mint_student", src:"picture/herb-game/ai-characters/01_小琳_mint_student.png" },
-    "小安": { id:"left_student", src:"picture/herb-game/ai-characters/02_小安_left_student.png" },
-    "小凱": { id:"lemongrass_student", src:"picture/herb-game/ai-characters/03_小凱_lemongrass_student.png" },
-    "小樂": { id:"pandan_student", src:"picture/herb-game/ai-characters/04_小樂_pandan_student.png" },
-    "小希": { id:"mugwort_student", src:"picture/herb-game/ai-characters/05_小希_mugwort_student.png" },
-    "小柏": { id:"fishmint_student", src:"picture/herb-game/ai-characters/06_小柏_fishmint_student.png" },
-    "小杰": { id:"pricklyash_student", src:"picture/herb-game/ai-characters/07_小杰_pricklyash_student.png" },
-    "小羽": { id:"shellginger_student", src:"picture/herb-game/ai-characters/08_小羽_shellginger_student.png" },
-    "小森": { id:"teatree_student", src:"picture/herb-game/ai-characters/09_小森_teatree_student.png" },
-    "小辰": { id:"turmeric_student", src:"picture/herb-game/ai-characters/10_小辰_turmeric_student.png" },
-    "小晴": { id:"marigold_student", src:"picture/herb-game/ai-characters/11_小晴_marigold_student.png" }
+    "小琳": { id:"mint_student", src:STUDENT_INFO.mint_student.avatar },
+    "小安": { id:"left_student", src:STUDENT_INFO.left_student.avatar },
+    "小凱": { id:"lemongrass_student", src:STUDENT_INFO.lemongrass_student.avatar },
+    "小樂": { id:"pandan_student", src:STUDENT_INFO.pandan_student.avatar },
+    "小希": { id:"mugwort_student", src:STUDENT_INFO.mugwort_student.avatar },
+    "小柏": { id:"fishmint_student", src:STUDENT_INFO.fishmint_student.avatar },
+    "小杰": { id:"pricklyash_student", src:STUDENT_INFO.pricklyash_student.avatar },
+    "小羽": { id:"shellginger_student", src:STUDENT_INFO.shellginger_student.avatar },
+    "小森": { id:"teatree_student", src:STUDENT_INFO.teatree_student.avatar },
+    "小辰": { id:"turmeric_student", src:STUDENT_INFO.turmeric_student.avatar },
+    "小晴": { id:"marigold_student", src:STUDENT_INFO.marigold_student.avatar }
   });
 
   const PLANT_CARD_ASSETS = Object.freeze({
@@ -2515,6 +2518,12 @@
     characterLayer.innerHTML = `<img id="ai-character-sprite" alt="" draggable="false">`;
     gameScreen.appendChild(characterLayer);
     const sprite = characterLayer.querySelector("img");
+    sprite.addEventListener("error", () => {
+      const failedPath = sprite.getAttribute("src") || "";
+      console.error("[HerbGame] student sprite load failed", activeSpeaker || "unknown", failedPath);
+      characterLayer.classList.remove("visible");
+      sprite.removeAttribute("src");
+    });
 
     const plantCardLayer = doc.createElement("div");
     plantCardLayer.id = "plant-card-reveal-layer";
@@ -2628,7 +2637,7 @@
 
     function isExplorationDialogue() {
       const locationName = (engine.dom?.hudLocation?.textContent || "").trim();
-      return EXPLORATION_NAMES.has(locationName);
+      return EXPLORATION_NAMES.has(locationName) || locationName === "241自然教室";
     }
 
     function renderCharacterForDialogue(node) {

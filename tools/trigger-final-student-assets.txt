@@ -1,3 +1,0 @@
-Trigger final transparent student asset integration workflow.
-Retry: synchronize PR event.
-Parser test: 2.
