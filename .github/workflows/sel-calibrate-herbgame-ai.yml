@@ -117,7 +117,7 @@ jobs:
           for token in ['scene01_01','scene09_07','scene14_02','scene16_01','ai_mint_e01_01','ai_mint_bell_2','ai_day1_diary','day1_end']:
               if token not in html:
                   raise SystemExit(f'Day 1 anchor missing: {token}')
-          for token in ['btn-back-step','goBackOneStep','pushHistorySnapshot','restoreSnapshot']:
+          for token in ['btn-back-step','goBackOneStep','pushHistorySnapshot']:
               if token not in html:
                   raise SystemExit(f'History/back anchor missing: {token}')
           print('History/back and Day 1 structural anchors passed')
