@@ -1,4 +1,4 @@
-name: Refresh transparent students and dialogue controls
+name: Repair student portrait deployment
 
 on:
   push:
@@ -10,30 +10,123 @@ permissions:
   contents: write
 
 jobs:
-  refresh:
+  repair:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Checkout
+      - name: Checkout current main
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Guard protected formal version
+      - name: Guard current baseline and protected formal version
+        shell: bash
         run: |
           set -euo pipefail
-          git merge-base --is-ancestor b8a0b29ba2a52063a09937c85473e0586f39a18e HEAD
+          test "$(git rev-parse HEAD^)" = "e5ca7bfce4494a3505e82ab905853ebd5aebb813"
           test -f herbgameai-formal.html
           test ! -e herbgameai-formal-base.html
           test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
 
-      - name: Download, verify, and patch
+      - name: Verify existing web portraits and repair only avatar paths
+        shell: bash
         run: |
           set -euo pipefail
           python3 -m pip install --quiet pillow
-          python3 .github/scripts/refresh_student_transparent_space.py
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          import hashlib, re
+
+          mapping = {
+              "mint_student": "01_小琳_mint_student.png",
+              "left_student": "02_小安_left_student.png",
+              "lemongrass_student": "03_小凱_lemongrass_student.png",
+              "pandan_student": "04_小樂_pandan_student.png",
+              "mugwort_student": "05_小希_mugwort_student.png",
+              "fishmint_student": "06_小柏_fishmint_student.png",
+              "pricklyash_student": "07_小杰_pricklyash_student.png",
+              "shellginger_student": "08_小羽_shellginger_student.png",
+              "teatree_student": "09_小森_teatree_student.png",
+              "turmeric_student": "10_小辰_turmeric_student.png",
+              "marigold_student": "11_小晴_marigold_student.png",
+          }
+          base = Path("picture/herb-game/ai-characters")
+          hashes = []
+          for sid, name in mapping.items():
+              p = base / name
+              if not p.exists():
+                  raise SystemExit(f"missing existing web portrait: {p}")
+              with Image.open(p) as im:
+                  im.load()
+                  rgba = im.convert("RGBA")
+                  alpha = rgba.getchannel("A")
+                  amin, amax = alpha.getextrema()
+                  hist = alpha.histogram(); total = im.width * im.height
+                  alpha0 = hist[0] / total
+                  if im.height < 900 or amin != 0 or amax != 255 or alpha0 < .30:
+                      raise SystemExit(f"invalid web portrait {name}: size={im.size}, alpha={amin}-{amax}, alpha0={alpha0:.1%}")
+                  print(f"valid {sid}: {name} {im.size[0]}x{im.size[1]} alpha0={alpha0:.1%}")
+              hashes.append(hashlib.sha256(p.read_bytes()).hexdigest())
+          if len(set(hashes)) != 11:
+              raise SystemExit("student web portraits are not unique")
+
+          html = Path("herbgameai-formal.html")
+          s = html.read_text(encoding="utf-8")
+          for sid, name in mapping.items():
+              new = f"picture/herb-game/ai-characters/{name}"
+              pat = rf'(id:\"{re.escape(sid)}\",avatar:\")[^\"]+(\"\s*,name:)'
+              s2, n = re.subn(pat, rf'\g<1>{new}\2', s, count=1)
+              if n != 1:
+                  raise SystemExit(f"avatar repair failed for {sid}: {n}")
+              s = s2
+
+          # Existing architecture must remain unchanged: AI_CHARACTER_ASSETS reads STUDENT_INFO.avatar.
+          for sid in mapping:
+              token = f'\"{sid}\": {{ id:\"{sid}\", src:STUDENT_INFO.{sid}.avatar }}'
+              if token not in s:
+                  raise SystemExit(f"AI_CHARACTER_ASSETS source-of-truth broken for {sid}")
+
+          # Preserve the already-completed one-to-one focus and Space handling.
+          for token in [
+              '#ai-character-layer.visible.listening #ai-character-sprite{opacity:.85}',
+              'if (event.repeat) return;',
+              'hasInteractiveKeyboardFocus',
+              'playerPanel?.classList.contains(\"active\")',
+              'campusMapLayer?.classList.contains(\"active\")',
+              'researchTabletLayer?.classList.contains(\"active\")',
+              'videoPlaceholder?.classList.contains(\"active\")',
+              'locationName === \"241自然教室\"',
+              'mint_student_event_01',
+              'getDay1DiaryText',
+          ]:
+              if token not in s:
+                  raise SystemExit(f"required existing behavior missing: {token}")
+
+          # The malformed duplicate deployment paths must no longer be referenced.
+          if '_transparent.png' in s:
+              raise SystemExit('malformed _transparent portrait reference still present in HTML')
+
+          html.write_text(s, encoding="utf-8")
+          print('avatar paths repaired without rewriting student data or story')
+          PY
+
+          # These 11 duplicate PNGs were found to have malformed image streams in the deployed artifact.
+          # Remove only the broken duplicates; the validated 01..11 web PNGs remain untouched.
+          rm -f picture/herb-game/ai-characters/mint_student_transparent.png
+          rm -f picture/herb-game/ai-characters/left_student_transparent.png
+          rm -f picture/herb-game/ai-characters/lemongrass_student_transparent.png
+          rm -f picture/herb-game/ai-characters/pandan_student_transparent.png
+          rm -f picture/herb-game/ai-characters/mugwort_student_transparent.png
+          rm -f picture/herb-game/ai-characters/fishmint_student_transparent.png
+          rm -f picture/herb-game/ai-characters/pricklyash_student_transparent.png
+          rm -f picture/herb-game/ai-characters/shellginger_student_transparent.png
+          rm -f picture/herb-game/ai-characters/teatree_student_transparent.png
+          rm -f picture/herb-game/ai-characters/turmeric_student_transparent.png
+          rm -f picture/herb-game/ai-characters/marigold_student_transparent.png
 
       - name: Check inline JavaScript syntax
+        shell: bash
         run: |
           set -euo pipefail
           rm -rf /tmp/herb-js && mkdir -p /tmp/herb-js
@@ -42,25 +135,70 @@ jobs:
           import re
           s=Path('herbgameai-formal.html').read_text(encoding='utf-8')
           blocks=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',s,flags=re.S|re.I)
+          if not blocks: raise SystemExit('no inline script blocks')
           for i,b in enumerate(blocks): Path(f'/tmp/herb-js/{i:02d}.js').write_text(b,encoding='utf-8')
           print('script blocks',len(blocks))
           PY
           for js in /tmp/herb-js/*.js; do node --check "$js"; done
 
+      - name: Build focused runtime acceptance
+        shell: bash
+        run: |
+          cat > /tmp/herb-runtime.cjs <<'JS'
+          const puppeteer = require('puppeteer-core');
+          const assert = require('assert');
+          const base = process.env.TEST_URL || 'http://127.0.0.1:8000/herbgameai-formal.html';
+          const url = base + (base.includes('?') ? '&' : '?') + 'preview=xiaolin-event-01';
+          const sleep = ms => new Promise(r=>setTimeout(r,ms));
+          const ids=['mint_student','left_student','lemongrass_student','pandan_student','mugwort_student','fishmint_student','pricklyash_student','shellginger_student','teatree_student','turmeric_student','marigold_student'];
+          const expected=[
+            '01_小琳_mint_student.png','02_小安_left_student.png','03_小凱_lemongrass_student.png','04_小樂_pandan_student.png','05_小希_mugwort_student.png','06_小柏_fishmint_student.png','07_小杰_pricklyash_student.png','08_小羽_shellginger_student.png','09_小森_teatree_student.png','10_小辰_turmeric_student.png','11_小晴_marigold_student.png'
+          ];
+          async function finishTyping(page){if(await page.evaluate(()=>gameEngine?.isTyping)){await page.keyboard.press('Space');await sleep(80);}}
+          (async()=>{
+            const browser=await puppeteer.launch({headless:true,executablePath:process.env.CHROME,args:['--no-sandbox','--disable-dev-shm-usage']});
+            const page=await browser.newPage();
+            const errors=[]; page.on('pageerror',e=>errors.push(String(e)));
+            await page.goto(url,{waitUntil:'networkidle2',timeout:60000});
+            await page.waitForFunction(()=>window.gameEngine&&window.__HERBGAME_AI_VISUAL,{timeout:30000});
+            await page.waitForFunction(()=>document.querySelector('#ai-character-sprite')?.getAttribute('src')?.includes('01_小琳_mint_student.png'),{timeout:30000});
+            await page.waitForFunction(()=>document.querySelector('#ai-character-sprite')?.complete&&document.querySelector('#ai-character-sprite')?.naturalWidth>0,{timeout:30000});
+            const initial=await page.evaluate(()=>{const s=document.querySelector('#ai-character-sprite');const r=s.getBoundingClientRect();return{src:s.getAttribute('src'),op:getComputedStyle(s).opacity,x:r.x,w:r.width,h:r.height,id:gameEngine.currentNodeId};});
+            assert.equal(initial.id,'ai_mint_e01_01'); assert(initial.src.endsWith('01_小琳_mint_student.png')); assert.equal(initial.op,'1');
+            const alpha0=await page.evaluate(()=>{const im=document.querySelector('#ai-character-sprite'),c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;const x=c.getContext('2d');x.drawImage(im,0,0);const d=x.getImageData(0,0,c.width,c.height).data;let z=0;for(let i=3;i<d.length;i+=4)if(d[i]===0)z++;return z/(d.length/4);});
+            assert(alpha0>.30,`alpha0 too low ${alpha0}`);
+            await page.evaluate(()=>{window.__spriteReloads=0;document.querySelector('#ai-character-sprite').addEventListener('load',()=>window.__spriteReloads++);});
+            await finishTyping(page); await page.keyboard.press('Space'); await page.waitForFunction(()=>gameEngine.currentNodeId==='ai_mint_e01_02',{timeout:5000}); await sleep(220);
+            const player=await page.evaluate(()=>{const s=document.querySelector('#ai-character-sprite'),r=s.getBoundingClientRect();return{src:s.getAttribute('src'),op:getComputedStyle(s).opacity,x:r.x,w:r.width,h:r.height,reloads:window.__spriteReloads,visible:document.querySelector('#ai-character-layer').classList.contains('visible')};});
+            assert(player.visible); assert(player.src.endsWith('01_小琳_mint_student.png')); assert.equal(player.op,'0.85'); assert.equal(player.reloads,0); assert(Math.abs(player.x-initial.x)<1&&Math.abs(player.w-initial.w)<1&&Math.abs(player.h-initial.h)<1);
+            await finishTyping(page); await page.keyboard.press('Space'); await page.waitForFunction(()=>gameEngine.currentNodeId==='ai_mint_e01_03',{timeout:5000}); await sleep(220);
+            assert.equal(await page.$eval('#ai-character-sprite',e=>getComputedStyle(e).opacity),'1'); assert.equal(await page.evaluate(()=>window.__spriteReloads),0);
+            await finishTyping(page); const before=await page.evaluate(()=>gameEngine.currentNodeId); await page.evaluate(()=>document.dispatchEvent(new KeyboardEvent('keydown',{key:' ',code:'Space',repeat:true,bubbles:true}))); await sleep(80); assert.equal(await page.evaluate(()=>gameEngine.currentNodeId),before);
+            await page.evaluate(()=>{for(const id of ids)gameEngine.gameState.unlockedStudents.add(id);gameEngine.renderPlayerPanel();});
+            const gallery=await page.$$eval('#member-list img.member-avatar-img',els=>els.map(e=>e.getAttribute('src')).filter(Boolean).filter(x=>x.includes('ai-characters/')));
+            assert.equal(gallery.length,11); assert.equal(new Set(gallery).size,11); for(const n of expected)assert(gallery.some(x=>x.endsWith(n)),`gallery missing ${n}`); assert(gallery.every(x=>!x.includes('_transparent.png')));
+            if(errors.length)throw new Error(errors.join('\n'));
+            console.log('runtime acceptance passed',{alpha0,galleryCount:gallery.length});
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
+
       - name: Local runtime acceptance
         env:
           PUPPETEER_SKIP_DOWNLOAD: 'true'
+        shell: bash
         run: |
           set -euo pipefail
-          npm install --no-save --silent puppeteer-core@24.16.0
+          npm install --no-save --package-lock=false --silent puppeteer-core@24.16.0
           python3 -m http.server 8000 --bind 127.0.0.1 >/tmp/herb-http.log 2>&1 &
           SERVER_PID=$!
           trap 'kill $SERVER_PID || true' EXIT
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
           test -n "$CHROME"
-          CHROME="$CHROME" node .github/scripts/herb_runtime_acceptance.cjs
+          CHROME="$CHROME" node /tmp/herb-runtime.cjs
 
-      - name: Commit scoped production changes
+      - name: Commit only the repair and remove temporary scaffolding
+        shell: bash
         run: |
           set -euo pipefail
           rm -f .github/workflows/refresh-student-transparent-space.yml
@@ -72,31 +210,41 @@ jobs:
           git add -A herbgameai-formal.html picture/herb-game/ai-characters .github/workflows .github/scripts
           if git diff --cached --name-only | grep -qx 'herbgame-formal.html'; then exit 1; fi
           test "$(git diff --cached --name-only | grep -c '_transparent.png')" -eq 11
-          git commit -m "fix: use transparent student portraits and persistent dialogue focus"
+          git commit -m "fix: restore valid student web portraits"
           git push origin HEAD:main
           echo "FINAL_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
-      - name: Wait for GitHub Pages and verify all 11 deployed PNGs
+      - name: Wait for Pages and validate deployed portrait files
+        shell: bash
         run: |
           set -euo pipefail
           BASE='https://ff41009tw52-rgb.github.io/mimi-cream-farm'
           ok=0
           for i in $(seq 1 36); do
-            if curl -fsS "$BASE/herbgameai-formal.html?v=$FINAL_SHA" | grep -q 'mint_student_transparent.png'; then ok=1; break; fi
+            if curl -fsS "$BASE/herbgameai-formal.html?v=$FINAL_SHA" | grep -q '01_小琳_mint_student.png'; then ok=1; break; fi
             sleep 10
           done
           test "$ok" -eq 1
-          for sid in mint_student left_student lemongrass_student pandan_student mugwort_student fishmint_student pricklyash_student shellginger_student teatree_student turmeric_student marigold_student; do
-            code=$(curl -L -sS -o "/tmp/$sid.png" -w '%{http_code}' "$BASE/picture/herb-game/ai-characters/${sid}_transparent.png?v=$FINAL_SHA")
-            test "$code" = '200'
-            test "$(head -c 8 /tmp/$sid.png | xxd -p)" = '89504e470d0a1a0a'
-            echo "$sid HTTP $code"
-          done
+          python3 - <<'PY'
+          import subprocess
+          from pathlib import Path
+          from PIL import Image
+          names=['01_小琳_mint_student.png','02_小安_left_student.png','03_小凱_lemongrass_student.png','04_小樂_pandan_student.png','05_小希_mugwort_student.png','06_小柏_fishmint_student.png','07_小杰_pricklyash_student.png','08_小羽_shellginger_student.png','09_小森_teatree_student.png','10_小辰_turmeric_student.png','11_小晴_marigold_student.png']
+          base='https://ff41009tw52-rgb.github.io/mimi-cream-farm/picture/herb-game/ai-characters'
+          for i,n in enumerate(names):
+              p=Path('/tmp')/f'portrait-{i}.png'
+              subprocess.run(['curl','-L','--fail','--silent','--show-error','-o',str(p),f'{base}/{n}'],check=True)
+              with Image.open(p) as im:
+                  im.load(); a=im.convert('RGBA').getchannel('A'); amin,amax=a.getextrema()
+                  if amin!=0 or amax!=255: raise SystemExit(f'bad deployed alpha: {n}')
+                  print('deployed valid',n,im.size)
+          PY
 
       - name: GitHub Pages runtime acceptance
         env:
           PUPPETEER_SKIP_DOWNLOAD: 'true'
+        shell: bash
         run: |
           set -euo pipefail
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
-          TEST_URL="https://ff41009tw52-rgb.github.io/mimi-cream-farm/herbgameai-formal.html?v=$FINAL_SHA" CHROME="$CHROME" node /home/runner/work/mimi-cream-farm/mimi-cream-farm/.github/scripts/herb_runtime_acceptance.cjs
+          TEST_URL="https://ff41009tw52-rgb.github.io/mimi-cream-farm/herbgameai-formal.html?v=$FINAL_SHA" CHROME="$CHROME" node /tmp/herb-runtime.cjs
