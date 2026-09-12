@@ -31,7 +31,7 @@ jobs:
             local id="$1"
             local out="$2"
             echo "Downloading ${out}"
-            gdown --fuzzy "https://drive.google.com/file/d/${id}/view" -O "${out}"
+            gdown "${id}" -O "${out}"
             python -c "import pathlib,struct,sys; p=pathlib.Path(sys.argv[1]); d=p.read_bytes(); assert len(d)>=32 and d[:8]==b'\\x89PNG\\r\\n\\x1a\\n', f'Not a valid PNG: {p} ({len(d)} bytes)'; w,h=struct.unpack('>II',d[16:24]); assert w>=500 and h>=700, f'Unexpected PNG dimensions: {p}={w}x{h}'; print(f'OK {p.name}: {w}x{h}, {len(d)} bytes')" "${out}"
           }
 
