@@ -1,0 +1,207 @@
+name: Finalize herb student transparent portraits v2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/finalize-herb-student-v2.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download exact validated transparent PNGs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p picture/herb-game/ai-characters
+
+          curl_png() {
+            local url="$1"
+            local out="$2"
+            echo "Downloading ${out}"
+            curl -L --fail --silent --show-error --retry 3 --retry-delay 2 "$url" -o "$out"
+          }
+
+          curl_png 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/22b8ce01-0007-4b75-be1b-6af7a0404a32.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMDQ0YmFjYjJhZTk0NmYzMiIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc4OTM1NDY3NH0.aD_fCf4Wz_etiVEy6tyWipbUf42SShe9g5agLyzJUZU' 'picture/herb-game/ai-characters/mint_student_transparent_v2.png'
+          curl_png 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/c018faa9-f43c-4b60-8cee-19b803c9df6c.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiNWM5OGIwMjQ3OTUwNzgyZiIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc4OTM4MjQzNn0.19owvB9i74IABfr8NWG36I0Y7262p_eGfCE4smjikaw' 'picture/herb-game/ai-characters/left_student_transparent_v2.png'
+          curl_png 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/eaa6b6db-9d78-4b35-8703-11650497d269.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMzYwOTFiNDIyYWQzYmVmMiIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc4OTMxNTI2Nn0.m7n0F7V3THuL522i4kT3HjEwifTcQT24URiyrpsqwgc' 'picture/herb-game/ai-characters/lemongrass_student_transparent_v2.png'
+          curl_png 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/72812142-2428-4281-94c2-2da81eb609fc.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMzYyNTQ0ZjIxODJjMzk2MCIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc4OTM0NjU0Nn0.65gEHT--n5O4VWpvtXvxjLagv55sSl0IzCRs-xtzq2U' 'picture/herb-game/ai-characters/pandan_student_transparent_v2.png'
+          curl_png 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/d5814af4-13e1-47c4-977e-0a73e74eb051.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiNTViZDY2YTZlOWE5NWJlYiIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc4OTM0NjM0Mn0.2MPiT4O53LkVWXPELtjdUCyN3gwdFT9F2Ql2zHJ8Dd0' 'picture/herb-game/ai-characters/mugwort_student_transparent_v2.png'
+          curl_png 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/fb57ce70-4ebc-47a6-b109-a99eee31bc86.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMmRhYTczNWQyMGNkZjM4MSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc4OTM4MDU3M30.j9iinFQc0l0TY95ItO_Z8Ey_CLvfzVWJcgAK12rAfyk' 'picture/herb-game/ai-characters/fishmint_student_transparent_v2.png'
+          curl_png 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/187c0ee5-d348-4805-99cd-4584f4dabd94.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMGViOWYwOTUyMzRmYTIxMSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc4OTM5MzE3M30.vkhHVX-M907acQLKCU8ajufSiQjzcN4seAhpezSwpHA' 'picture/herb-game/ai-characters/pricklyash_student_transparent_v2.png'
+          curl_png 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/0c5312b2-efa0-4620-9653-183ed942a7f6.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiOGVhYjhjZDc0MGJkZjZlOCIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc4OTMyNTc4M30._ZMkZ_3UVAVfyxTtOgE9siIzJKj0jrkf65Xdli6rDH8' 'picture/herb-game/ai-characters/shellginger_student_transparent_v2.png'
+          curl_png 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/807c40e1-3580-43f3-9069-4c498307fbfb.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiNTkzNDdhM2NiYjhkNGJiNSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc4OTMzNDU4OH0.p5jCu9AZVU2VtKEl0Yp2Adde9p0yBzsrhhrS5BMzj-o' 'picture/herb-game/ai-characters/teatree_student_transparent_v2.png'
+          curl_png 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/dc4d5973-e4f6-4e64-b073-fadf6331744b.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMWE0MGM4YjU5MTg0YWM1YiIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc4OTMzMDEwMX0.IE96IM1oegjxpaKhAZjadhMeJOFqrlGN5eofcgUAbvc' 'picture/herb-game/ai-characters/turmeric_student_transparent_v2.png'
+          curl_png 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/199badc6-e670-4920-be1f-2945a7af511c.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMGVlMjlhYzVlMjJjM2YyZCIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc4OTM3OTc4MX0.djDfEzEdYLTQArcssBn8Xbi6l89k2Ew5TVxIUO7ah7c' 'picture/herb-game/ai-characters/marigold_student_transparent_v2.png'
+
+      - name: Verify exact bytes, transparency, dimensions and uniqueness
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check -q pillow
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          import hashlib
+
+          expected = {
+            'mint_student_transparent_v2.png':'5f844bae6206bb63455b9ea6722256a86784444fd10c49040cd22f63471aa20e',
+            'left_student_transparent_v2.png':'c1b41750e61bd2696b1b3d4fd91befcdcb48331d5acd0113231d2ffe202dc05d',
+            'lemongrass_student_transparent_v2.png':'b9dd0a7b2f41c2708f525126ca31b01921e999a1f7ee638f0f4f532d1bc36c46',
+            'pandan_student_transparent_v2.png':'15e3d46db0a8e955ebdb8dea6d67dd4f7ae7a1b974cd025a6a8678752f2c78bc',
+            'mugwort_student_transparent_v2.png':'a2aa970333d86869325e78783932ecf3a3e284b0455efb38f0d0de15f65984f3',
+            'fishmint_student_transparent_v2.png':'15f18ece5884aaeb5e0259911f39e43d3d0ee5803395c05d278b094eb50c7d07',
+            'pricklyash_student_transparent_v2.png':'3bc3e90a8f5eca72d3c7727c9b1c3b7f44368e7f9281409489347ece03bb7a1c',
+            'shellginger_student_transparent_v2.png':'eebefff3c42adfc239564b57509354ff04092e94dadb15b2a302768d78428f08',
+            'teatree_student_transparent_v2.png':'66c2102cb601993e70b96859c64d9482f6592d6ac963fa4d7c44d20a9a8f186c',
+            'turmeric_student_transparent_v2.png':'fc6ab1b7e47a72b5698ff9ac7b788d8505c17e01a77d85008826c13207b5fbbe',
+            'marigold_student_transparent_v2.png':'791b4317da5dd52a6b32f358e3222d31c0ffdbae3dde19ab9b881a124cb95a39',
+          }
+          base=Path('picture/herb-game/ai-characters')
+          seen=[]
+          for name,want in expected.items():
+            p=base/name
+            got=hashlib.sha256(p.read_bytes()).hexdigest()
+            if got != want: raise SystemExit(f'hash mismatch: {name}: {got}')
+            with Image.open(p) as im:
+              im.load()
+              if im.size != (1024,1536): raise SystemExit(f'bad size: {name}: {im.size}')
+              rgba=im.convert('RGBA')
+              alpha=rgba.getchannel('A')
+              amin,amax=alpha.getextrema()
+              hist=alpha.histogram(); total=im.width*im.height
+              alpha0=hist[0]/total
+              if amin != 0 or amax == 0 or alpha0 < .30:
+                raise SystemExit(f'bad alpha: {name}: {amin}-{amax}, alpha0={alpha0:.2%}')
+              print(f'OK {name}: {im.size[0]}x{im.size[1]}, alpha0={alpha0:.2%}, sha256={got}')
+            seen.append(got)
+          if len(set(seen)) != 11: raise SystemExit('duplicate student image bytes')
+          PY
+
+      - name: Patch only AI trial portrait paths and failure text
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('herbgameai-formal.html')
+          s=p.read_text(encoding='utf-8')
+          prefix='picture/herb-game/ai-characters/'
+          pairs=[
+            ('01_小琳_mint_student.png','mint_student_transparent_v2.png'),
+            ('02_小安_left_student.png','left_student_transparent_v2.png'),
+            ('03_小凱_lemongrass_student.png','lemongrass_student_transparent_v2.png'),
+            ('04_小樂_pandan_student.png','pandan_student_transparent_v2.png'),
+            ('05_小希_mugwort_student.png','mugwort_student_transparent_v2.png'),
+            ('06_小柏_fishmint_student.png','fishmint_student_transparent_v2.png'),
+            ('07_小杰_pricklyash_student.png','pricklyash_student_transparent_v2.png'),
+            ('08_小羽_shellginger_student.png','shellginger_student_transparent_v2.png'),
+            ('09_小森_teatree_student.png','teatree_student_transparent_v2.png'),
+            ('10_小辰_turmeric_student.png','turmeric_student_transparent_v2.png'),
+            ('11_小晴_marigold_student.png','marigold_student_transparent_v2.png'),
+          ]
+          for old,new in pairs:
+            oldpath=prefix+old; newpath=prefix+new
+            count=s.count(oldpath)
+            if count != 1: raise SystemExit(f'expected exactly one old avatar ref: {oldpath}, got {count}')
+            s=s.replace(oldpath,newpath)
+          old_failure="this.parentElement.innerHTML='人物圖片<br><small>載入失敗</small>';"
+          new_failure="this.parentElement.textContent='人物圖片載入失敗';"
+          if old_failure not in s: raise SystemExit('student gallery load-failure handler not found')
+          s=s.replace(old_failure,new_failure,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+
+      - name: Deterministic source-of-truth and regression checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('herbgameai-formal.html').read_text(encoding='utf-8')
+          expected={
+            'mint_student':'mint_student_transparent_v2.png',
+            'left_student':'left_student_transparent_v2.png',
+            'lemongrass_student':'lemongrass_student_transparent_v2.png',
+            'pandan_student':'pandan_student_transparent_v2.png',
+            'mugwort_student':'mugwort_student_transparent_v2.png',
+            'fishmint_student':'fishmint_student_transparent_v2.png',
+            'pricklyash_student':'pricklyash_student_transparent_v2.png',
+            'shellginger_student':'shellginger_student_transparent_v2.png',
+            'teatree_student':'teatree_student_transparent_v2.png',
+            'turmeric_student':'turmeric_student_transparent_v2.png',
+            'marigold_student':'marigold_student_transparent_v2.png',
+          }
+          prefix='picture/herb-game/ai-characters/'
+          for sid,name in expected.items():
+            path=prefix+name
+            pat=rf'id:"{re.escape(sid)}",avatar:"{re.escape(path)}"'
+            if not re.search(pat,s): raise SystemExit(f'STUDENT_INFO path missing: {sid} -> {path}')
+            if s.count(path) != 1: raise SystemExit(f'avatar path count != 1: {path}: {s.count(path)}')
+            token=f'src:STUDENT_INFO.{sid}.avatar'
+            if token not in s: raise SystemExit(f'AI_CHARACTER_ASSETS not reading STUDENT_INFO: {sid}')
+          old=[
+            '01_小琳_mint_student.png','02_小安_left_student.png','03_小凱_lemongrass_student.png','04_小樂_pandan_student.png','05_小希_mugwort_student.png','06_小柏_fishmint_student.png','07_小杰_pricklyash_student.png','08_小羽_shellginger_student.png','09_小森_teatree_student.png','10_小辰_turmeric_student.png','11_小晴_marigold_student.png'
+          ]
+          for name in old:
+            if name in s: raise SystemExit(f'old portrait reference remains: {name}')
+          if 'unlocked && info.avatar' not in s: raise SystemExit('gallery no longer gates avatar by unlock state')
+          if 'src="${info.avatar}"' not in s: raise SystemExit('gallery no longer reads STUDENT_INFO.avatar')
+          if "this.parentElement.textContent='人物圖片載入失敗';" not in s: raise SystemExit('gallery failure text rule missing')
+          for token in [
+            '[HerbGame] student sprite load failed',
+            'error:"load failed"',
+            'hideCharacter(true)',
+            'let activeSpeaker = "";',
+            'if (event.repeat) return;',
+          ]:
+            if token not in s: raise SystemExit(f'protected behavior missing: {token}')
+          if Path('herbgame-formal.html').read_bytes():
+            pass
+          PY
+          test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
+          git diff --exit-code -- herbgame-formal.html
+
+          rm -rf /tmp/herb-js && mkdir -p /tmp/herb-js
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('herbgameai-formal.html').read_text(encoding='utf-8')
+          blocks=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',s,re.S|re.I)
+          n=0
+          for block in blocks:
+            if block.strip():
+              Path(f'/tmp/herb-js/{n}.js').write_text(block,encoding='utf-8')
+              n+=1
+          print('inline scripts:',n)
+          PY
+          for f in /tmp/herb-js/*.js; do node --check "$f"; done
+
+      - name: Commit final assets and remove temporary workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/finalize-herb-student-v2.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git status --short
+          git diff --cached --name-only | grep -qx 'herbgameai-formal.html'
+          for f in mint_student left_student lemongrass_student pandan_student mugwort_student fishmint_student pricklyash_student shellginger_student teatree_student turmeric_student marigold_student; do
+            git diff --cached --name-only | grep -qx "picture/herb-game/ai-characters/${f}_transparent_v2.png"
+          done
+          git diff --cached --name-only | grep -qx '.github/workflows/finalize-herb-student-v2.yml'
+          git diff --cached --name-only | grep -qv '^herbgame-formal.html$'
+          git commit -m 'fix: deploy final transparent student portraits v2'
+          git push origin HEAD:main
