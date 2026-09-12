@@ -18,6 +18,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install Drive downloader
+        run: python -m pip install --disable-pip-version-check -q gdown
+
       - name: Download 11 final transparent student PNGs from Google Drive
         shell: bash
         run: |
@@ -27,9 +30,8 @@ jobs:
           download_png() {
             local id="$1"
             local out="$2"
-            local url="https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t"
             echo "Downloading ${out}"
-            curl -fL --retry 3 --retry-delay 2 --connect-timeout 20 --max-time 120 -o "${out}" "${url}"
+            gdown --fuzzy "https://drive.google.com/file/d/${id}/view" -O "${out}"
             python -c "import pathlib,struct,sys; p=pathlib.Path(sys.argv[1]); d=p.read_bytes(); assert len(d)>=32 and d[:8]==b'\\x89PNG\\r\\n\\x1a\\n', f'Not a valid PNG: {p} ({len(d)} bytes)'; w,h=struct.unpack('>II',d[16:24]); assert w>=500 and h>=700, f'Unexpected PNG dimensions: {p}={w}x{h}'; print(f'OK {p.name}: {w}x{h}, {len(d)} bytes')" "${out}"
           }
 
@@ -49,7 +51,32 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -c "from pathlib import Path; p=Path('herbgameai-formal.html'); s=p.read_text(encoding='utf-8'); pairs=[('01_小琳_mint_student.png','01_小琳_mint_student_transparent_v2.png'),('02_小安_left_student.png','02_小安_left_student_transparent_v2.png'),('03_小凱_lemongrass_student.png','03_小凱_lemongrass_student_transparent_v2.png'),('04_小樂_pandan_student.png','04_小樂_pandan_student_transparent_v2.png'),('05_小希_mugwort_student.png','05_小希_mugwort_student_transparent_v2.png'),('06_小柏_fishmint_student.png','06_小柏_fishmint_student_transparent_v2.png'),('07_小杰_pricklyash_student.png','07_小杰_pricklyash_student_transparent_v2.png'),('08_小羽_shellginger_student.png','08_小羽_shellginger_student_transparent_v2.png'),('09_小森_teatree_student.png','09_小森_teatree_student_transparent_v2.png'),('10_小辰_turmeric_student.png','10_小辰_turmeric_student_transparent_v2.png'),('11_小晴_marigold_student.png','11_小晴_marigold_student_transparent_v2.png')]; prefix='picture/herb-game/ai-characters/'; [None for old,new in pairs if not (s:=s.replace(prefix+old,prefix+new))]; missing=[new for _,new in pairs if prefix+new not in s]; assert not missing, f'Missing updated paths: {missing}'; p.write_text(s,encoding='utf-8'); print('Updated herbgameai-formal.html only.')"
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('herbgameai-formal.html')
+          s = p.read_text(encoding='utf-8')
+          pairs = [
+              ('01_小琳_mint_student.png','01_小琳_mint_student_transparent_v2.png'),
+              ('02_小安_left_student.png','02_小安_left_student_transparent_v2.png'),
+              ('03_小凱_lemongrass_student.png','03_小凱_lemongrass_student_transparent_v2.png'),
+              ('04_小樂_pandan_student.png','04_小樂_pandan_student_transparent_v2.png'),
+              ('05_小希_mugwort_student.png','05_小希_mugwort_student_transparent_v2.png'),
+              ('06_小柏_fishmint_student.png','06_小柏_fishmint_student_transparent_v2.png'),
+              ('07_小杰_pricklyash_student.png','07_小杰_pricklyash_student_transparent_v2.png'),
+              ('08_小羽_shellginger_student.png','08_小羽_shellginger_student_transparent_v2.png'),
+              ('09_小森_teatree_student.png','09_小森_teatree_student_transparent_v2.png'),
+              ('10_小辰_turmeric_student.png','10_小辰_turmeric_student_transparent_v2.png'),
+              ('11_小晴_marigold_student.png','11_小晴_marigold_student_transparent_v2.png'),
+          ]
+          prefix = 'picture/herb-game/ai-characters/'
+          for old,new in pairs:
+              s = s.replace(prefix+old, prefix+new)
+          missing = [new for _,new in pairs if prefix+new not in s]
+          if missing:
+              raise SystemExit(f'Missing updated paths: {missing}')
+          p.write_text(s,encoding='utf-8')
+          print('Updated herbgameai-formal.html only.')
+          PY
           git diff --exit-code -- herbgame-formal.html
 
       - name: Commit and push synced assets
