@@ -2065,7 +2065,7 @@
                 const topics=[{key:"appearance",label:"外型",teaser:"先看看迷迭香的葉子大概長什麼樣。"},{key:"aroma",label:"香氣",teaser:"先了解迷迭香常被描述成什麼氣味。"},{key:"use",label:"用途",teaser:"先查它在生活中常見的使用方式。"},{key:"caution",label:"注意事項",teaser:"先看看查資料與使用香草時要注意什麼。"}];
                 this.dom.researchOptions.innerHTML=topics.map(t=>`<button class="research-card" type="button" data-research-topic="${t.key}"><strong>${t.label}</strong><span>${t.teaser}</span></button>`).join('');
                 this.dom.researchOptions.querySelectorAll('[data-research-topic]').forEach(btn=>btn.addEventListener('click',()=>{const key=btn.dataset.researchTopic,result=HERB_INFO[node.herb]?.research?.[key]||"目前沒有資料。";this.dom.researchOptions.querySelectorAll('.research-card').forEach(el=>{el.classList.toggle('selected',el===btn);el.disabled=true;});this.gameState.researchTopics.add(`${node.herb}:${key}`);if(this.gameState.herbKnowledge[node.herb])this.gameState.herbKnowledge[node.herb][key]=true;this.dom.researchResult.innerHTML=`<strong>${node.herb}｜${topics.find(t=>t.key===key).label}</strong><br>${result}`;this.dom.researchResult.classList.add('show');this.dom.researchContinue.classList.add('show');this.renderPlayerPanel();}));
-                this.dom.researchContinue.onclick=()=>{this.hideResearchTablet();if(node.next)this.loadNode(node.next);};
+                this.dom.researchContinue.onclick=()=>{this.hideResearchTablet();this.isProcessingEvent=false;if(node.next)this.loadNode(node.next);};
             }
 
             showDialogue(node) {
@@ -2219,11 +2219,13 @@
                 if(node.isAuto) {
                     setTimeout(() => {
                         overlay.classList.remove('active');
+                        this.isProcessingEvent = false;
                         if (node.next) this.loadNode(node.next);
                     }, node.duration || 2000);
                 } else {
                     document.getElementById('btn-overlay-continue').addEventListener('click', () => {
                         overlay.classList.remove('active');
+                        this.isProcessingEvent = false;
                         if (node.next) this.loadNode(node.next);
                     });
                 }
@@ -2234,6 +2236,7 @@
                 this.dom.dialogueBox.parentElement.style.display = 'none'; 
                 
                 const overlay = this.dom.systemOverlay;
+                const sourceNodeId = this.currentNodeId;
                 let objHtml = missionData.objectives.map(obj => `<div style="text-align:left; margin: 0.5rem 0;">${obj}</div>`).join('');
                 let borderColor = isComplete ? '#65a30d' : '#facc15'; // 完成為綠，接取為黃
 
@@ -2251,8 +2254,9 @@
                 
                 document.getElementById('btn-mission-continue').addEventListener('click', () => {
                     overlay.classList.remove('active');
-                    const currentNode = STORY_DATA.nodes[this.currentNodeId];
-                    if (currentNode.next) this.loadNode(currentNode.next);
+                    this.isProcessingEvent = false;
+                    const sourceNode = STORY_DATA.nodes[sourceNodeId];
+                    if (sourceNode?.next) this.loadNode(sourceNode.next);
                 });
             }
             
@@ -2297,6 +2301,7 @@
                     finished = true;
                     if (fallbackTimer) clearTimeout(fallbackTimer);
                     vp.classList.remove('active');
+                    this.isProcessingEvent = false;
                     if (node.next) this.loadNode(node.next);
                 };
 
@@ -2340,6 +2345,7 @@
                 
                 setTimeout(() => {
                     vp.classList.remove('active');
+                    this.isProcessingEvent = false;
                     if (node.next) this.loadNode(node.next);
                 }, node.duration || 4000);
             }
@@ -2541,7 +2547,6 @@
     const plantCardFallback = plantCardLayer.querySelector("#plant-card-fallback");
     const plantCardFallbackName = plantCardLayer.querySelector("#plant-card-fallback-name");
     let plantCardActive = false;
-    let plantCardDismissedAt = 0;
 
     let activeSpeaker = "";
     let swapTimer = 0;
@@ -2704,7 +2709,6 @@
     function hidePlantCard() {
       if (!plantCardActive) return false;
       plantCardActive = false;
-      plantCardDismissedAt = Date.now();
       plantCardLayer.classList.remove("active");
       plantCardLayer.setAttribute("aria-hidden", "true");
       setTimeout(() => {
@@ -2940,6 +2944,8 @@
 
     const originalShowDialogue = engine.showDialogue.bind(engine);
     engine.showDialogue = function(node) {
+      releaseInteractiveFocus();
+      this.isProcessingEvent = false;
       const result = originalShowDialogue(node);
       const forced = nodeSceneOverride(this.currentNodeId);
       if (forced) setLocalBackground(forced);
@@ -2960,7 +2966,6 @@
     const originalHandleDialogueClick = engine.handleDialogueClick.bind(engine);
     engine.handleDialogueClick = function(...args) {
       if (plantCardActive) { hidePlantCard(); return; }
-      if (Date.now() - plantCardDismissedAt < 120) return;
       return originalHandleDialogueClick(...args);
     };
 
@@ -2968,6 +2973,20 @@
       const el = target && target.nodeType === 1 ? target : null;
       return Boolean(el?.closest?.('button,input,textarea,select,a,[contenteditable="true"],[role="button"],[role="option"],[role="menuitem"]'));
     }
+
+    function releaseInteractiveFocus() {
+      const active = doc.activeElement;
+      if (!hasInteractiveKeyboardFocus(active)) return false;
+      if (typeof active.blur === "function") active.blur();
+      return true;
+    }
+
+    const originalClosePlayerPanel = engine.closePlayerPanel.bind(engine);
+    engine.closePlayerPanel = function(...args) {
+      const result = originalClosePlayerPanel(...args);
+      releaseInteractiveFocus();
+      return result;
+    };
 
     doc.addEventListener("keydown", (event) => {
       if (!(event.code === "Space" || event.key === " ")) return;
