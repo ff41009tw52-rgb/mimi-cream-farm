@@ -1,0 +1,172 @@
+name: Fix scene06 choice recovery
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-scene06-choice-recovery.yml'
+permissions:
+  contents: write
+jobs:
+  fix-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Protect formal version and patch AI trial only
+        run: |
+          set -euo pipefail
+          test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('herbgameai-formal.html')
+          s = p.read_text(encoding='utf-8')
+
+          old = '''    const originalFinishTyping = engine.finishTyping.bind(engine);
+    engine.finishTyping = function(node) {
+      const result = originalFinishTyping(node);
+      if (node?.plantCardReveal && !plantCardActive) {'''
+          new = '''    const originalFinishTyping = engine.finishTyping.bind(engine);
+    engine.finishTyping = function(node) {
+      const result = originalFinishTyping(node);
+      // Choice nodes must never end up as a blank dialogue state. The base engine
+      // already renders choices; this is a narrow self-healing invariant for the
+      // AI trial in case a transition leaves the choice container desynchronised.
+      if (node?.choices?.length) {
+        const expectedCount = node.choices.length;
+        const choices = this.dom?.choicesContainer;
+        requestAnimationFrame(() => {
+          if (!choices) return;
+          const renderedCount = choices.querySelectorAll(".choice-btn").length;
+          if (!this.isShowingChoices || !choices.classList.contains("show") || renderedCount !== expectedCount) {
+            this.showChoices(node.choices);
+          }
+        });
+      }
+      if (node?.plantCardReveal && !plantCardActive) {'''
+          if s.count(old) != 1:
+              raise SystemExit(f'finishTyping patch match count: {s.count(old)}')
+          s = s.replace(old, new, 1)
+
+          old = '''      if (hasInteractiveKeyboardFocus(event.target) || hasInteractiveKeyboardFocus(doc.activeElement)) return;
+      if (engine.isShowingChoices || engine.dom?.choicesContainer?.classList.contains("show")) return;
+      if (engine.dom?.playerPanel?.classList.contains("active")) return;'''
+          new = '''      if (hasInteractiveKeyboardFocus(event.target) || hasInteractiveKeyboardFocus(doc.activeElement)) return;
+
+      // A choice node must not be skipped by Space. If the choice UI ever becomes
+      // desynchronised, Space repairs/reveals the choices instead of appearing dead.
+      const currentStoryNode = getStoryRef()?.nodes?.[engine.currentNodeId];
+      if (currentStoryNode?.choices?.length && !engine.isTyping) {
+        const choices = engine.dom?.choicesContainer;
+        const expectedCount = currentStoryNode.choices.length;
+        const renderedCount = choices?.querySelectorAll(".choice-btn").length || 0;
+        const choiceUIReady = Boolean(engine.isShowingChoices && choices?.classList.contains("show") && renderedCount === expectedCount);
+        if (!choiceUIReady) {
+          event.preventDefault();
+          engine.showChoices(currentStoryNode.choices);
+        }
+        return;
+      }
+      if (engine.isShowingChoices || engine.dom?.choicesContainer?.classList.contains("show")) return;
+      if (engine.dom?.playerPanel?.classList.contains("active")) return;'''
+          if s.count(old) != 1:
+              raise SystemExit(f'Space choice recovery match count: {s.count(old)}')
+          s = s.replace(old, new, 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+          git diff -- herbgameai-formal.html
+          git diff --exit-code -- herbgame-formal.html
+      - name: Static syntax checks
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/herb-js && mkdir -p /tmp/herb-js
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          s = Path('herbgameai-formal.html').read_text(encoding='utf-8')
+          required = [
+            'const currentStoryNode = getStoryRef()?.nodes?.[engine.currentNodeId];',
+            'engine.showChoices(currentStoryNode.choices);',
+            'if (node?.choices?.length)',
+            'if (event.repeat) return;',
+            'engine.handleDialogueClick();'
+          ]
+          for token in required:
+              if token not in s: raise SystemExit('missing token: ' + token)
+          blocks = re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>', s, re.S|re.I)
+          n = 0
+          for block in blocks:
+              if block.strip():
+                  Path(f'/tmp/herb-js/{n}.js').write_text(block, encoding='utf-8')
+                  n += 1
+          print('inline scripts:', n)
+          PY
+          for f in /tmp/herb-js/*.js; do node --check "$f"; done
+          test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
+      - name: Install Playwright
+        run: |
+          python3 -m pip install --quiet playwright==1.55.0
+          python3 -m playwright install --with-deps chromium >/dev/null
+      - name: Targeted scene06 verification
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/herb-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          python3 - <<'PY'
+          from playwright.sync_api import sync_playwright
+          import json
+          with sync_playwright() as pw:
+              browser = pw.chromium.launch(headless=True)
+              page = browser.new_page(viewport={"width":1755,"height":878})
+              page.route('https://**/*', lambda route: route.abort())
+              page.goto('http://127.0.0.1:8765/herbgameai-formal.html', wait_until='domcontentloaded')
+              page.wait_for_function('window.gameEngine && window.__HERBGAME_AI_VISUAL', timeout=10000)
+              page.evaluate("""() => {
+                const e=window.gameEngine;
+                e.dom.screenHome.classList.remove('active');
+                e.dom.screenIntro.classList.remove('active');
+                e.dom.screenGame.classList.add('active');
+                e.loadNode('scene06_02',{skipHistory:true});
+              }""")
+              page.wait_for_timeout(800)
+              normal = page.evaluate("""() => {
+                const e=window.gameEngine,c=e.dom.choicesContainer;
+                return {node:e.currentNodeId, typing:e.isTyping, showing:e.isShowingChoices, count:c.querySelectorAll('.choice-btn').length, cls:c.className, icon:getComputedStyle(e.dom.continueIcon).opacity};
+              }""")
+              assert normal['node']=='scene06_02' and normal['typing'] is False
+              assert normal['showing'] is True and normal['count']==3 and 'show' in normal['cls']
+              assert normal['icon']=='0'
+
+              # Simulate the exact reported failure mode: fully rendered choice node,
+              # but its buttons/class/state were lost. One Space must restore choices,
+              # never skip to the next story node.
+              page.evaluate("""() => {
+                const e=window.gameEngine,c=e.dom.choicesContainer;
+                e.isShowingChoices=false;
+                c.classList.remove('show');
+                c.innerHTML='';
+              }""")
+              page.keyboard.press('Space')
+              page.wait_for_timeout(100)
+              recovered = page.evaluate("""() => {
+                const e=window.gameEngine,c=e.dom.choicesContainer;
+                return {node:e.currentNodeId, showing:e.isShowingChoices, count:c.querySelectorAll('.choice-btn').length, cls:c.className};
+              }""")
+              print('SCENE06_RECOVERY=' + json.dumps({'normal':normal,'recovered':recovered}, ensure_ascii=False))
+              assert recovered['node']=='scene06_02'
+              assert recovered['showing'] is True and recovered['count']==3 and 'show' in recovered['cls']
+              browser.close()
+          PY
+      - name: Commit repair and remove temporary workflows
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/fix-scene06-choice-recovery.yml
+          rm -f .github/workflows/diag-scene06-choice.yml
+          test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
+          git diff --exit-code -- herbgame-formal.html
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add herbgameai-formal.html .github/workflows/fix-scene06-choice-recovery.yml .github/workflows/diag-scene06-choice.yml
+          git diff --cached --name-only
+          git commit -m 'fix: recover missing choice UI on dialogue nodes'
+          git push origin HEAD:main
