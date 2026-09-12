@@ -2956,6 +2956,20 @@
     const originalFinishTyping = engine.finishTyping.bind(engine);
     engine.finishTyping = function(node) {
       const result = originalFinishTyping(node);
+      // Choice nodes must never end up as a blank dialogue state. The base engine
+      // already renders choices; this is a narrow self-healing invariant for the
+      // AI trial in case a transition leaves the choice container desynchronised.
+      if (node?.choices?.length) {
+        const expectedCount = node.choices.length;
+        const choices = this.dom?.choicesContainer;
+        requestAnimationFrame(() => {
+          if (!choices) return;
+          const renderedCount = choices.querySelectorAll(".choice-btn").length;
+          if (!this.isShowingChoices || !choices.classList.contains("show") || renderedCount !== expectedCount) {
+            this.showChoices(node.choices);
+          }
+        });
+      }
       if (node?.plantCardReveal && !plantCardActive) {
         const card = PLANT_CARD_ASSETS[node.plantCardReveal] || PLANT_CARD_BY_NAME[node.plantCardReveal];
         showPlantCard(card ? {id:node.plantCardReveal,...card} : {name:String(node.plantCardReveal)});
@@ -3010,6 +3024,21 @@
       }
 
       if (hasInteractiveKeyboardFocus(event.target) || hasInteractiveKeyboardFocus(doc.activeElement)) return;
+
+      // A choice node must not be skipped by Space. If the choice UI ever becomes
+      // desynchronised, Space repairs/reveals the choices instead of appearing dead.
+      const currentStoryNode = getStoryRef()?.nodes?.[engine.currentNodeId];
+      if (currentStoryNode?.choices?.length && !engine.isTyping) {
+        const choices = engine.dom?.choicesContainer;
+        const expectedCount = currentStoryNode.choices.length;
+        const renderedCount = choices?.querySelectorAll(".choice-btn").length || 0;
+        const choiceUIReady = Boolean(engine.isShowingChoices && choices?.classList.contains("show") && renderedCount === expectedCount);
+        if (!choiceUIReady) {
+          event.preventDefault();
+          engine.showChoices(currentStoryNode.choices);
+        }
+        return;
+      }
       if (engine.isShowingChoices || engine.dom?.choicesContainer?.classList.contains("show")) return;
       if (engine.dom?.playerPanel?.classList.contains("active")) return;
       if (engine.dom?.campusMapLayer?.classList.contains("active")) return;
