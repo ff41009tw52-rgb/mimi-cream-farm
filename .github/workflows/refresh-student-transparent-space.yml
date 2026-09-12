@@ -14,289 +14,40 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Checkout current formal AI baseline
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Guard scope and download latest transparent Drive PNGs with new cache-safe names
-        shell: bash
+      - name: Guard protected formal version
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD^)" = "b8a0b29ba2a52063a09937c85473e0586f39a18e"
+          git merge-base --is-ancestor b8a0b29ba2a52063a09937c85473e0586f39a18e HEAD
           test -f herbgameai-formal.html
+          test ! -e herbgameai-formal-base.html
           test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
-          mkdir -p picture/herb-game/ai-characters
-          python3 - <<'PY'
-          import pathlib, subprocess, sys
-          assets = [
-              ("mint_student",        "1etFumWOsRzXMg8xLStUOEJjM112DSEYc"),
-              ("left_student",        "1CT8-yIyZ-E7Jf90kSOXDBAJ-ducZoEL-"),
-              ("lemongrass_student",  "1o6NbWyrXWaHy2cfi12f_D4DmqhtjeW3X"),
-              ("pandan_student",      "1ENyYdS41HpWjSbqfozjIT4Fv_QKeEw2Y"),
-              ("mugwort_student",     "1-CCw6whKxArcXbRC_Bf9IyF7aLaoHcVP"),
-              ("fishmint_student",    "1HCgoKTtemi2IF_7PCVCh6w_fEVP0nquz"),
-              ("pricklyash_student",  "1VCo2dmho8chozFOkshuzvWDJq4CNyqh2"),
-              ("shellginger_student", "1KVgEvoCVpmH2wPM8-nOSGIrkfFwdeheS"),
-              ("teatree_student",     "1PHwaFgbhkfxpZ7AMRCQP25tAxXHZCxbk"),
-              ("turmeric_student",    "100dlw2OoGsuvKGAsTvRObTb6rxYAmOcR"),
-              ("marigold_student",    "1jSNzmKn3gVXJSC3LxCGSoAjdY6kiyLOn"),
-          ]
-          outdir = pathlib.Path("picture/herb-game/ai-characters")
-          for sid, file_id in assets:
-              target = outdir / f"{sid}_transparent.png"
-              urls = [
-                  f"https://drive.usercontent.google.com/download?id={file_id}&export=download&confirm=t",
-                  f"https://drive.google.com/uc?export=download&id={file_id}&confirm=t",
-              ]
-              ok=False
-              for url in urls:
-                  proc=subprocess.run(["curl","-L","--fail","--silent","--show-error","--retry","2","-o",str(target),url])
-                  if proc.returncode==0 and target.exists() and target.read_bytes()[:8]==b"\x89PNG\r\n\x1a\n":
-                      ok=True; break
-              if not ok:
-                  raise SystemExit(f"Drive download failed: {sid}")
-              print(sid, target.stat().st_size)
-          PY
 
-      - name: Verify all 11 files are truly transparent and unique
+      - name: Download, verify, and patch
         run: |
           set -euo pipefail
           python3 -m pip install --quiet pillow
-          python3 - <<'PY'
-          from PIL import Image
-          from pathlib import Path
-          import hashlib
-          ids=["mint_student","left_student","lemongrass_student","pandan_student","mugwort_student","fishmint_student","pricklyash_student","shellginger_student","teatree_student","turmeric_student","marigold_student"]
-          hashes=[]
-          for sid in ids:
-              p=Path("picture/herb-game/ai-characters")/f"{sid}_transparent.png"
-              with Image.open(p) as im:
-                  if im.size != (1024,1536): raise SystemExit(f"{sid}: unexpected size {im.size}")
-                  rgba=im.convert("RGBA")
-                  alpha=rgba.getchannel("A")
-                  amin,amax=alpha.getextrema()
-                  hist=alpha.histogram(); total=im.width*im.height
-                  transparent=hist[0]/total
-                  if amin != 0: raise SystemExit(f"{sid}: no fully transparent pixels")
-                  if transparent < .30: raise SystemExit(f"{sid}: transparent area too small ({transparent:.1%})")
-                  if amax <= 0: raise SystemExit(f"{sid}: fully transparent")
-                  print(f"{sid}: {im.mode} {im.size[0]}x{im.size[1]} alpha={amin}-{amax}, alpha0={transparent:.1%}")
-              hashes.append(hashlib.sha256(p.read_bytes()).hexdigest())
-          if len(set(hashes)) != 11: raise SystemExit("duplicate student image bytes detected")
-          print("11 transparent unique PNGs verified")
-          PY
+          python3 .github/scripts/refresh_student_transparent_space.py
 
-      - name: Patch only avatar paths, one-to-one portrait focus, and Space handling
+      - name: Check inline JavaScript syntax
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-          p=Path('herbgameai-formal.html')
-          s=p.read_text(encoding='utf-8')
-          ids=["mint_student","left_student","lemongrass_student","pandan_student","mugwort_student","fishmint_student","pricklyash_student","shellginger_student","teatree_student","turmeric_student","marigold_student"]
-
-          # 1) STUDENT_INFO.avatar is the one and only student portrait source of truth.
-          for sid in ids:
-              new=f"picture/herb-game/ai-characters/{sid}_transparent.png"
-              pat=rf'(id:"{re.escape(sid)}",avatar:")[^"]+("\s*,name:)'
-              s2,n=re.subn(pat,rf'\g<1>{new}\2',s,count=1)
-              if n != 1: raise SystemExit(f"avatar patch failed for {sid}: {n}")
-              s=s2
-
-          # Gallery failure logging: never fall back to an old student image.
-          old="console.error('[HerbGame] student image load failed','${id}',failedPath);this.style.display='none';this.parentElement.innerHTML='人物圖片<br><small>載入失敗</small>';"
-          new="console.error('[HerbGame] student image load failed',{name:'${info.name}',id:'${id}',path:failedPath,error:'load failed'});this.style.display='none';this.parentElement.innerHTML='人物圖片<br><small>載入失敗</small>';"
-          if old not in s: raise SystemExit('student gallery error handler marker missing')
-          s=s.replace(old,new,1)
-
-          # Keep the existing 210ms opacity transition; add a very light listening state only.
-          style_marker='#ai-character-layer.visible.position-center #ai-character-sprite{opacity:1;transform:translateX(-50%)}'
-          if style_marker not in s: raise SystemExit('character style marker missing')
-          s=s.replace(style_marker, style_marker+'\n      #ai-character-layer.visible.listening #ai-character-sprite{opacity:.85}',1)
-
-          # Sprite error logging now reports character name, ID and exact path; no legacy fallback.
-          old_error='''    sprite.addEventListener("error", () => {
-      const failedPath = sprite.getAttribute("src") || "";
-      console.error("[HerbGame] student sprite load failed", activeSpeaker || "unknown", failedPath);
-      characterLayer.classList.remove("visible");
-      sprite.removeAttribute("src");
-    });'''
-          new_error='''    sprite.addEventListener("error", () => {
-      const failedPath = sprite.getAttribute("src") || "";
-      const failedVisual = getCharacterVisualInfo(activeSpeaker);
-      console.error("[HerbGame] student sprite load failed", {name:activeSpeaker || "unknown", id:failedVisual?.id || "unknown", path:failedPath, error:"load failed"});
-      hideCharacter(true);
-    });'''
-          if old_error not in s: raise SystemExit('sprite error handler marker missing')
-          s=s.replace(old_error,new_error,1)
-
-          # Clear listening state whenever the portrait is actually cleared.
-          old_hide='''    function hideCharacter(immediate=false) {
-      clearTimeout(swapTimer);
-      activeSpeaker = "";
-      characterLayer.classList.remove("visible");
-      if (immediate) sprite.removeAttribute("src");
-    }'''
-          new_hide='''    function hideCharacter(immediate=false) {
-      clearTimeout(swapTimer);
-      activeSpeaker = "";
-      characterLayer.classList.remove("visible","listening");
-      if (immediate) sprite.removeAttribute("src");
-    }'''
-          if old_hide not in s: raise SystemExit('hideCharacter marker missing')
-          s=s.replace(old_hide,new_hide,1)
-
-          # One-to-one rule: same NPC stays loaded. NPC speaking=100%; player/narration listening=85%.
-          pattern=r'''    function renderCharacterForDialogue\(node\) \{.*?\n    \}\n\n    function showPlantCard'''
-          replacement='''    function renderCharacterForDialogue(node) {
-      if (!node) { hideCharacter(false); return; }
-      if (node.clearCharacter || node.hideCharacter) { hideCharacter(false); return; }
-      if (!isExplorationDialogue()) { hideCharacter(false); return; }
-
-      const visual = getCharacterVisualInfo(node.speaker);
-      if (node.speakerType === "npc") {
-        // A different NPC with no student portrait (teacher, group, etc.) ends the current single-student focus.
-        if (!visual) { hideCharacter(false); return; }
-        const pos = ["left","center","right"].includes(node.characterPosition) ? node.characterPosition : "right";
-        characterLayer.classList.remove("position-left","position-center","position-right");
-        characterLayer.classList.add(`position-${pos}`);
-        sprite.alt = node.speaker || "";
-
-        // Same person: keep the exact image/position and only restore focus to 100%.
-        if (activeSpeaker === node.speaker && sprite.getAttribute("src") === visual.src) {
-          characterLayer.classList.remove("listening");
-          characterLayer.classList.add("visible");
-          return;
-        }
-
-        // Real character change: fade old portrait, then load/fade the new NPC.
-        clearTimeout(swapTimer);
-        const hadCharacter = Boolean(activeSpeaker && sprite.getAttribute("src"));
-        characterLayer.classList.remove("listening","visible");
-        swapTimer = setTimeout(() => {
-          sprite.src = visual.src;
-          activeSpeaker = node.speaker;
-          requestAnimationFrame(() => requestAnimationFrame(() => characterLayer.classList.add("visible")));
-        }, hadCharacter ? 165 : 45);
-        return;
-      }
-
-      // During the same one-to-one event, player speech / narration keeps the current NPC in place at 85%.
-      if ((node.speakerType === "player" || node.speakerType === "system" || !node.speakerType) && activeSpeaker && sprite.getAttribute("src")) {
-        characterLayer.classList.add("visible","listening");
-        return;
-      }
-
-      hideCharacter(false);
-    }
-
-    function showPlantCard'''
-          s2,n=re.subn(pattern,replacement,s,count=1,flags=re.S)
-          if n != 1: raise SystemExit(f'renderCharacterForDialogue replacement failed: {n}')
-          s=s2
-
-          # Space is an additional input, not a second dialogue engine. It always calls the existing wrapped handleDialogueClick().
-          marker='''    const originalHandleDialogueClick = engine.handleDialogueClick.bind(engine);
-    engine.handleDialogueClick = function(...args) {
-      if (plantCardActive) { hidePlantCard(); return; }
-      if (Date.now() - plantCardDismissedAt < 120) return;
-      return originalHandleDialogueClick(...args);
-    };
-'''
-          addition='''    const originalHandleDialogueClick = engine.handleDialogueClick.bind(engine);
-    engine.handleDialogueClick = function(...args) {
-      if (plantCardActive) { hidePlantCard(); return; }
-      if (Date.now() - plantCardDismissedAt < 120) return;
-      return originalHandleDialogueClick(...args);
-    };
-
-    function hasInteractiveKeyboardFocus(target) {
-      const el = target && target.nodeType === 1 ? target : null;
-      return Boolean(el?.closest?.('button,input,textarea,select,a,[contenteditable="true"],[role="button"],[role="option"],[role="menuitem"]'));
-    }
-
-    doc.addEventListener("keydown", (event) => {
-      if (!(event.code === "Space" || event.key === " ")) return;
-      if (event.repeat) return;
-      if (!gameScreen?.classList.contains("active")) return;
-
-      // Plant card has first priority: one Space only closes the card; the wrapped dialogue handler returns immediately.
-      if (plantCardActive) {
-        event.preventDefault();
-        engine.handleDialogueClick();
-        return;
-      }
-
-      // Manual system overlays may use Space as their existing Continue button; auto overlays ignore Space.
-      const systemOverlay = engine.dom?.systemOverlay;
-      if (systemOverlay?.classList.contains("active")) {
-        const continueBtn = systemOverlay.querySelector('#btn-overlay-continue, #btn-mission-continue');
-        if (continueBtn && !continueBtn.disabled) {
-          event.preventDefault();
-          continueBtn.click();
-        }
-        return;
-      }
-
-      if (hasInteractiveKeyboardFocus(event.target) || hasInteractiveKeyboardFocus(doc.activeElement)) return;
-      if (engine.isShowingChoices || engine.dom?.choicesContainer?.classList.contains("show")) return;
-      if (engine.dom?.playerPanel?.classList.contains("active")) return;
-      if (engine.dom?.campusMapLayer?.classList.contains("active")) return;
-      if (engine.dom?.researchTabletLayer?.classList.contains("active")) return;
-      if (engine.dom?.videoPlaceholder?.classList.contains("active")) return;
-      if (engine.isProcessingEvent) return;
-      if (!engine.dom?.dialogueBox || engine.dom.dialogueBox.parentElement?.style.display === "none") return;
-
-      event.preventDefault();
-      engine.handleDialogueClick();
-    });
-'''
-          if marker not in s: raise SystemExit('handleDialogueClick wrapper marker missing')
-          s=s.replace(marker,addition,1)
-
-          # Acceptance: exactly 11 new canonical portrait paths and zero old student-path references in HTML.
-          refs=re.findall(r'picture/herb-game/ai-characters/[^"\'`<>]+?\.png',s)
-          expected={f'picture/herb-game/ai-characters/{sid}_transparent.png' for sid in ids}
-          if set(refs) != expected or len(refs) != 11:
-              raise SystemExit(f'unexpected student image refs: {refs}')
-          for sid in ids:
-              if f'"{sid}": {{ id:"{sid}", src:STUDENT_INFO.{sid}.avatar }}' not in s:
-                  raise SystemExit(f'AI_CHARACTER_ASSETS no longer reads STUDENT_INFO for {sid}')
-          if 'speakerType !== "npc"' in s[s.find('function renderCharacterForDialogue'):s.find('function showPlantCard')]:
-              raise SystemExit('legacy speakerType hide rule still present')
-          for token in ['#ai-character-layer.visible.listening #ai-character-sprite{opacity:.85}','if (event.repeat) return;','engine.handleDialogueClick();','plantCardActive','playerPanel?.classList.contains("active")','campusMapLayer?.classList.contains("active")','researchTabletLayer?.classList.contains("active")','videoPlaceholder?.classList.contains("active")']:
-              if token not in s: raise SystemExit(f'missing required implementation token: {token}')
-          p.write_text(s,encoding='utf-8')
-          print('patched bytes',p.stat().st_size)
-          PY
-
-      - name: Deterministic source and JavaScript checks
-        run: |
-          set -euo pipefail
-          test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
-          test ! -e herbgameai-formal-base.html
+          rm -rf /tmp/herb-js && mkdir -p /tmp/herb-js
           python3 - <<'PY'
           from pathlib import Path
           import re
           s=Path('herbgameai-formal.html').read_text(encoding='utf-8')
-          ids=["mint_student","left_student","lemongrass_student","pandan_student","mugwort_student","fishmint_student","pricklyash_student","shellginger_student","teatree_student","turmeric_student","marigold_student"]
-          for sid in ids:
-              path=f'picture/herb-game/ai-characters/{sid}_transparent.png'
-              if s.count(path)!=1: raise SystemExit(f'{sid}: canonical path count {s.count(path)}')
-          for old in ['01_小琳_mint_student.png','02_小安_left_student.png','03_小凱_lemongrass_student.png','04_小樂_pandan_student.png','05_小希_mugwort_student.png','06_小柏_fishmint_student.png','07_小杰_pricklyash_student.png','08_小羽_shellginger_student.png','09_小森_teatree_student.png','10_小辰_turmeric_student.png','11_小晴_marigold_student.png']:
-              if old in s: raise SystemExit(f'old portrait reference remains: {old}')
-          for anchor in ['ai_mint_e01_01','ai_mint_distance_choice','mint_student_event_01','plant-card-reveal-layer','getDay1DiaryText']:
-              if anchor not in s: raise SystemExit(f'Day 1 anchor missing: {anchor}')
-          scripts=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',s,flags=re.S|re.I)
-          out=Path('/tmp/herb-js'); out.mkdir(exist_ok=True)
-          for i,js in enumerate(scripts): (out/f'{i:02d}.js').write_text(js,encoding='utf-8')
-          print('scripts',len(scripts))
+          blocks=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',s,flags=re.S|re.I)
+          for i,b in enumerate(blocks): Path(f'/tmp/herb-js/{i:02d}.js').write_text(b,encoding='utf-8')
+          print('script blocks',len(blocks))
           PY
           for js in /tmp/herb-js/*.js; do node --check "$js"; done
 
-      - name: Local runtime acceptance with Chrome
+      - name: Local runtime acceptance
         env:
           PUPPETEER_SKIP_DOWNLOAD: 'true'
         run: |
@@ -307,92 +58,25 @@ jobs:
           trap 'kill $SERVER_PID || true' EXIT
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
           test -n "$CHROME"
-          cat >/tmp/herb-runtime-test.cjs <<'JS'
-          const puppeteer=require('puppeteer-core');
-          const assert=require('assert');
-          const base=process.env.TEST_URL || 'http://127.0.0.1:8000/herbgameai-formal.html';
-          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-          (async()=>{
-            const browser=await puppeteer.launch({headless:true,executablePath:process.env.CHROME,args:['--no-sandbox','--disable-dev-shm-usage']});
-            const page=await browser.newPage();
-            const errors=[]; page.on('pageerror',e=>errors.push(String(e)));
-            await page.goto(base+'?preview=xiaolin-event-01',{waitUntil:'networkidle2',timeout:60000});
-            await page.waitForFunction(()=>window.gameEngine && window.__HERBGAME_AI_VISUAL && document.querySelector('#ai-character-sprite')?.getAttribute('src')?.includes('mint_student_transparent.png'),{timeout:30000});
-            await sleep(500);
-            let state=await page.evaluate(()=>{
-              const sp=document.querySelector('#ai-character-sprite'), r=sp.getBoundingClientRect();
-              return {id:gameEngine.currentNodeId,typing:gameEngine.isTyping,src:sp.getAttribute('src'),opacity:getComputedStyle(sp).opacity,x:r.x,y:r.y,w:r.width,h:r.height};
-            });
-            assert.equal(state.id,'ai_mint_e01_01'); assert(state.src.endsWith('mint_student_transparent.png')); assert.equal(state.opacity,'1');
-            const firstRect=state;
-            const alpha=await page.evaluate(()=>{const im=document.querySelector('#ai-character-sprite');const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;const x=c.getContext('2d');x.drawImage(im,0,0);const d=x.getImageData(0,0,c.width,c.height).data;let z=0;for(let i=3;i<d.length;i+=4)if(d[i]===0)z++;return z/(d.length/4);});
-            assert(alpha>.30,'mint portrait is not meaningfully transparent');
-            await page.evaluate(()=>{window.__spriteReloads=0;document.querySelector('#ai-character-sprite').addEventListener('load',()=>window.__spriteReloads++);});
+          CHROME="$CHROME" node .github/scripts/herb_runtime_acceptance.cjs
 
-            // typing -> first Space completes only current sentence
-            await page.keyboard.press('Space'); await sleep(80);
-            state=await page.evaluate(()=>({id:gameEngine.currentNodeId,typing:gameEngine.isTyping}));
-            assert.equal(state.id,'ai_mint_e01_01'); assert.equal(state.typing,false);
-            // second Space -> player line, same image at 85%, same placement, no reload
-            await page.keyboard.press('Space'); await page.waitForFunction(()=>gameEngine.currentNodeId==='ai_mint_e01_02'); await sleep(300);
-            state=await page.evaluate(()=>{const sp=document.querySelector('#ai-character-sprite'),r=sp.getBoundingClientRect();return {src:sp.getAttribute('src'),opacity:getComputedStyle(sp).opacity,x:r.x,y:r.y,w:r.width,h:r.height,reloads:window.__spriteReloads};});
-            assert(state.src.endsWith('mint_student_transparent.png')); assert.equal(state.opacity,'0.85'); assert.equal(state.reloads,0); assert(Math.abs(state.x-firstRect.x)<1 && Math.abs(state.w-firstRect.w)<1);
-            // player full -> next NPC returns to 100% without reloading
-            await page.keyboard.press('Space'); await sleep(50); await page.keyboard.press('Space'); await page.waitForFunction(()=>gameEngine.currentNodeId==='ai_mint_e01_03'); await sleep(300);
-            state=await page.evaluate(()=>({opacity:getComputedStyle(document.querySelector('#ai-character-sprite')).opacity,reloads:window.__spriteReloads,src:document.querySelector('#ai-character-sprite').getAttribute('src')}));
-            assert.equal(state.opacity,'1'); assert.equal(state.reloads,0); assert(state.src.endsWith('mint_student_transparent.png'));
-            // next player line -> 85% again
-            await page.keyboard.press('Space'); await sleep(50); await page.keyboard.press('Space'); await page.waitForFunction(()=>gameEngine.currentNodeId==='ai_mint_e01_04'); await sleep(300);
-            assert.equal(await page.$eval('#ai-character-sprite',el=>getComputedStyle(el).opacity),'0.85');
-            assert.equal(await page.evaluate(()=>window.__spriteReloads),0);
-
-            // Choices: Space must not choose or advance.
-            await page.evaluate(()=>gameEngine.loadNode('ai_mint_distance_choice',{skipHistory:true})); await sleep(100);
-            if(await page.evaluate(()=>gameEngine.isTyping)) { await page.keyboard.press('Space'); await sleep(80); }
-            await page.waitForFunction(()=>gameEngine.isShowingChoices===true,{timeout:5000});
-            const choiceId=await page.evaluate(()=>gameEngine.currentNodeId); await page.keyboard.press('Space'); await sleep(120);
-            assert.equal(await page.evaluate(()=>gameEngine.currentNodeId),choiceId); assert.equal(await page.evaluate(()=>gameEngine.isShowingChoices),true);
-
-            // Panel/map/research/video: Space does nothing behind the active layer.
-            await page.evaluate(()=>{gameEngine.isShowingChoices=false;gameEngine.dom.choicesContainer.classList.remove('show');gameEngine.loadNode('ai_mint_e01_04',{skipHistory:true});}); await sleep(100); if(await page.evaluate(()=>gameEngine.isTyping)) await page.keyboard.press('Space');
-            for (const id of ['player-panel','campus-map-layer','research-tablet-layer','video-placeholder']) {
-              const before=await page.evaluate(()=>gameEngine.currentNodeId); await page.evaluate(id=>document.getElementById(id).classList.add('active'),id); await page.keyboard.press('Space'); await sleep(80); assert.equal(await page.evaluate(()=>gameEngine.currentNodeId),before,`${id} allowed Space advance`); await page.evaluate(id=>document.getElementById(id).classList.remove('active'),id);
-            }
-            // repeat keydown ignored
-            const repeatBefore=await page.evaluate(()=>gameEngine.currentNodeId); await page.evaluate(()=>document.dispatchEvent(new KeyboardEvent('keydown',{key:' ',code:'Space',repeat:true,bubbles:true}))); await sleep(80); assert.equal(await page.evaluate(()=>gameEngine.currentNodeId),repeatBefore);
-
-            // Plant card: first Space closes card only; second Space advances dialogue.
-            await page.evaluate(()=>{gameEngine.loadNode('ai_mint_e01_01',{skipHistory:true});}); await sleep(150); if(await page.evaluate(()=>gameEngine.isTyping)) await page.keyboard.press('Space');
-            await page.evaluate(()=>window.__HERBGAME_AI_VISUAL.showPlantCard('mint')); await page.waitForSelector('#plant-card-reveal-layer.active');
-            const cardNode=await page.evaluate(()=>gameEngine.currentNodeId); await page.keyboard.press('Space'); await sleep(100); assert.equal(await page.evaluate(()=>gameEngine.currentNodeId),cardNode); assert.equal(await page.$eval('#plant-card-reveal-layer',el=>el.classList.contains('active')),false);
-            await sleep(150); await page.keyboard.press('Space'); await page.waitForFunction(()=>gameEngine.currentNodeId==='ai_mint_e01_02');
-
-            // Gallery uses STUDENT_INFO.avatar. Unlock all only in this disposable test page, render, and verify 11 unique new sources.
-            const gallery=await page.evaluate(()=>{for(const id of Object.keys(STUDENT_INFO)) gameEngine.gameState.unlockedStudents.add(id);gameEngine.renderPlayerPanel();return [...document.querySelectorAll('#member-list img.member-avatar-img')].filter(i=>i.alt.startsWith('小')).map(i=>i.getAttribute('src'));});
-            assert.equal(gallery.length,11); assert.equal(new Set(gallery).size,11); assert(gallery.every(x=>x.includes('_transparent.png')));
-            if(errors.length) throw new Error('page errors: '+errors.join('\n'));
-            console.log('runtime acceptance passed', {alpha,galleryCount:gallery.length});
-            await browser.close();
-          })().catch(e=>{console.error(e);process.exit(1)});
-          JS
-          CHROME="$CHROME" node /tmp/herb-runtime-test.cjs
-
-      - name: Commit only scoped production changes and remove one-shot workflow
+      - name: Commit scoped production changes
         run: |
           set -euo pipefail
           rm -f .github/workflows/refresh-student-transparent-space.yml
+          rm -f .github/scripts/refresh_student_transparent_space.py
+          rm -f .github/scripts/herb_runtime_acceptance.cjs
           test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A herbgameai-formal.html picture/herb-game/ai-characters .github/workflows/refresh-student-transparent-space.yml
-          git diff --cached --name-only
-          if git diff --cached --name-only | grep -qx 'herbgame-formal.html'; then echo 'protected formal staged'; exit 1; fi
+          git add -A herbgameai-formal.html picture/herb-game/ai-characters .github/workflows .github/scripts
+          if git diff --cached --name-only | grep -qx 'herbgame-formal.html'; then exit 1; fi
           test "$(git diff --cached --name-only | grep -c '_transparent.png')" -eq 11
           git commit -m "fix: use transparent student portraits and persistent dialogue focus"
           git push origin HEAD:main
           echo "FINAL_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
-      - name: Wait for GitHub Pages and verify deployed assets
+      - name: Wait for GitHub Pages and verify all 11 deployed PNGs
         run: |
           set -euo pipefail
           BASE='https://ff41009tw52-rgb.github.io/mimi-cream-farm'
@@ -415,4 +99,4 @@ jobs:
         run: |
           set -euo pipefail
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
-          TEST_URL="https://ff41009tw52-rgb.github.io/mimi-cream-farm/herbgameai-formal.html?v=$FINAL_SHA" CHROME="$CHROME" node /tmp/herb-runtime-test.cjs
+          TEST_URL="https://ff41009tw52-rgb.github.io/mimi-cream-farm/herbgameai-formal.html?v=$FINAL_SHA" CHROME="$CHROME" node /home/runner/work/mimi-cream-farm/mimi-cream-farm/.github/scripts/herb_runtime_acceptance.cjs
