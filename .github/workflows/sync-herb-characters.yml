@@ -2,7 +2,7 @@ name: Sync herb student characters from Drive
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - '.github/workflows/sync-herb-characters.yml'
 
@@ -29,19 +29,8 @@ jobs:
             local out="$2"
             local url="https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t"
             echo "Downloading ${out}"
-            curl -fL --retry 3 --retry-delay 2 --connect-timeout 20 --max-time 120 \
-              -o "${out}" "${url}"
-            python - "${out}" <<'PY'
-import sys, pathlib, struct
-p = pathlib.Path(sys.argv[1])
-data = p.read_bytes()
-if len(data) < 32 or data[:8] != b'\x89PNG\r\n\x1a\n':
-    raise SystemExit(f'Not a valid PNG: {p} ({len(data)} bytes)')
-w, h = struct.unpack('>II', data[16:24])
-if w < 500 or h < 700:
-    raise SystemExit(f'Unexpected PNG dimensions: {p} = {w}x{h}')
-print(f'OK {p.name}: {w}x{h}, {len(data)} bytes')
-PY
+            curl -fL --retry 3 --retry-delay 2 --connect-timeout 20 --max-time 120 -o "${out}" "${url}"
+            python -c "import pathlib,struct,sys; p=pathlib.Path(sys.argv[1]); d=p.read_bytes(); assert len(d)>=32 and d[:8]==b'\\x89PNG\\r\\n\\x1a\\n', f'Not a valid PNG: {p} ({len(d)} bytes)'; w,h=struct.unpack('>II',d[16:24]); assert w>=500 and h>=700, f'Unexpected PNG dimensions: {p}={w}x{h}'; print(f'OK {p.name}: {w}x{h}, {len(d)} bytes')" "${out}"
           }
 
           download_png '1etFumWOsRzXMg8xLStUOEJjM112DSEYc' 'picture/herb-game/ai-characters/01_小琳_mint_student_transparent_v2.png'
@@ -60,33 +49,7 @@ PY
         shell: bash
         run: |
           set -euo pipefail
-          python - <<'PY'
-from pathlib import Path
-p = Path('herbgameai-formal.html')
-s = p.read_text(encoding='utf-8')
-replacements = {
-'picture/herb-game/ai-characters/01_小琳_mint_student.png':'picture/herb-game/ai-characters/01_小琳_mint_student_transparent_v2.png',
-'picture/herb-game/ai-characters/02_小安_left_student.png':'picture/herb-game/ai-characters/02_小安_left_student_transparent_v2.png',
-'picture/herb-game/ai-characters/03_小凱_lemongrass_student.png':'picture/herb-game/ai-characters/03_小凱_lemongrass_student_transparent_v2.png',
-'picture/herb-game/ai-characters/04_小樂_pandan_student.png':'picture/herb-game/ai-characters/04_小樂_pandan_student_transparent_v2.png',
-'picture/herb-game/ai-characters/05_小希_mugwort_student.png':'picture/herb-game/ai-characters/05_小希_mugwort_student_transparent_v2.png',
-'picture/herb-game/ai-characters/06_小柏_fishmint_student.png':'picture/herb-game/ai-characters/06_小柏_fishmint_student_transparent_v2.png',
-'picture/herb-game/ai-characters/07_小杰_pricklyash_student.png':'picture/herb-game/ai-characters/07_小杰_pricklyash_student_transparent_v2.png',
-'picture/herb-game/ai-characters/08_小羽_shellginger_student.png':'picture/herb-game/ai-characters/08_小羽_shellginger_student_transparent_v2.png',
-'picture/herb-game/ai-characters/09_小森_teatree_student.png':'picture/herb-game/ai-characters/09_小森_teatree_student_transparent_v2.png',
-'picture/herb-game/ai-characters/10_小辰_turmeric_student.png':'picture/herb-game/ai-characters/10_小辰_turmeric_student_transparent_v2.png',
-'picture/herb-game/ai-characters/11_小晴_marigold_student.png':'picture/herb-game/ai-characters/11_小晴_marigold_student_transparent_v2.png',
-}
-for old, new in replacements.items():
-    s = s.replace(old, new)
-for new in replacements.values():
-    if new not in s:
-        raise SystemExit(f'Missing updated path in AI HTML: {new}')
-p.write_text(s, encoding='utf-8')
-print('Updated herbgameai-formal.html only.')
-PY
-
-          # Guardrail: original comparison version must stay untouched.
+          python -c "from pathlib import Path; p=Path('herbgameai-formal.html'); s=p.read_text(encoding='utf-8'); pairs=[('01_小琳_mint_student.png','01_小琳_mint_student_transparent_v2.png'),('02_小安_left_student.png','02_小安_left_student_transparent_v2.png'),('03_小凱_lemongrass_student.png','03_小凱_lemongrass_student_transparent_v2.png'),('04_小樂_pandan_student.png','04_小樂_pandan_student_transparent_v2.png'),('05_小希_mugwort_student.png','05_小希_mugwort_student_transparent_v2.png'),('06_小柏_fishmint_student.png','06_小柏_fishmint_student_transparent_v2.png'),('07_小杰_pricklyash_student.png','07_小杰_pricklyash_student_transparent_v2.png'),('08_小羽_shellginger_student.png','08_小羽_shellginger_student_transparent_v2.png'),('09_小森_teatree_student.png','09_小森_teatree_student_transparent_v2.png'),('10_小辰_turmeric_student.png','10_小辰_turmeric_student_transparent_v2.png'),('11_小晴_marigold_student.png','11_小晴_marigold_student_transparent_v2.png')]; prefix='picture/herb-game/ai-characters/'; [None for old,new in pairs if not (s:=s.replace(prefix+old,prefix+new))]; missing=[new for _,new in pairs if prefix+new not in s]; assert not missing, f'Missing updated paths: {missing}'; p.write_text(s,encoding='utf-8'); print('Updated herbgameai-formal.html only.')"
           git diff --exit-code -- herbgame-formal.html
 
       - name: Commit and push synced assets
