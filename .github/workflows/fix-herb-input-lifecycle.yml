@@ -1,0 +1,371 @@
+name: Fix herb Day1 input lifecycle
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-herb-input-lifecycle.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Protect source files and preserve pre-fix page
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object herbgameai-formal.html)" = "bb1c12b75821fe7a1bce000505a4c1fa5afff3b6"
+          test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
+          cp herbgameai-formal.html .herb-before-input-fix.html
+
+      - name: Patch only shared input focus and blocking-UI lifecycle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('herbgameai-formal.html')
+          s=p.read_text(encoding='utf-8')
+
+          def replace_once(old,new,label):
+              global s
+              count=s.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected 1 match, got {count}')
+              s=s.replace(old,new,1)
+
+          # Invariant: whenever a normal dialogue is shown, old UI focus cannot keep Space blocked,
+          # and a stale blocking-UI flag cannot keep mouse/Space locked.
+          replace_once(
+          '''    const originalShowDialogue = engine.showDialogue.bind(engine);
+    engine.showDialogue = function(node) {
+      const result = originalShowDialogue(node);''',
+          '''    const originalShowDialogue = engine.showDialogue.bind(engine);
+    engine.showDialogue = function(node) {
+      releaseInteractiveFocus();
+      this.isProcessingEvent = false;
+      const result = originalShowDialogue(node);''',
+          'dialogue input invariant')
+
+          # Remove the artificial post-card time lock. A single keydown already returns after
+          # consuming the card, while event.repeat prevents long-press skipping.
+          replace_once('''    let plantCardActive = false;
+    let plantCardDismissedAt = 0;''',
+                       '''    let plantCardActive = false;''',
+                       'plant-card timer declaration')
+          replace_once('''      plantCardActive = false;
+      plantCardDismissedAt = Date.now();''',
+                       '''      plantCardActive = false;''',
+                       'plant-card timer assignment')
+          replace_once('''    engine.handleDialogueClick = function(...args) {
+      if (plantCardActive) { hidePlantCard(); return; }
+      if (Date.now() - plantCardDismissedAt < 120) return;
+      return originalHandleDialogueClick(...args);
+    };''',
+                       '''    engine.handleDialogueClick = function(...args) {
+      if (plantCardActive) { hidePlantCard(); return; }
+      return originalHandleDialogueClick(...args);
+    };''',
+                       'plant-card click wrapper')
+
+          # Keep the existing interactive-focus guard, but add one shared release mechanism.
+          replace_once(
+          '''    function hasInteractiveKeyboardFocus(target) {
+      const el = target && target.nodeType === 1 ? target : null;
+      return Boolean(el?.closest?.('button,input,textarea,select,a,[contenteditable="true"],[role="button"],[role="option"],[role="menuitem"]'));
+    }
+
+    doc.addEventListener("keydown", (event) => {''',
+          '''    function hasInteractiveKeyboardFocus(target) {
+      const el = target && target.nodeType === 1 ? target : null;
+      return Boolean(el?.closest?.('button,input,textarea,select,a,[contenteditable="true"],[role="button"],[role="option"],[role="menuitem"]'));
+    }
+
+    function releaseInteractiveFocus() {
+      const active = doc.activeElement;
+      if (!hasInteractiveKeyboardFocus(active)) return false;
+      if (typeof active.blur === "function") active.blur();
+      return true;
+    }
+
+    const originalClosePlayerPanel = engine.closePlayerPanel.bind(engine);
+    engine.closePlayerPanel = function(...args) {
+      const result = originalClosePlayerPanel(...args);
+      releaseInteractiveFocus();
+      return result;
+    };
+
+    doc.addEventListener("keydown", (event) => {''',
+          'shared focus release')
+
+          # Mission overlay: bind continuation to the node that opened it and explicitly end the
+          # blocking lifecycle before loading the next node.
+          replace_once(
+          '''                const overlay = this.dom.systemOverlay;
+                let objHtml = missionData.objectives.map(obj => `<div style="text-align:left; margin: 0.5rem 0;">${obj}</div>`).join('');''',
+          '''                const overlay = this.dom.systemOverlay;
+                const sourceNodeId = this.currentNodeId;
+                let objHtml = missionData.objectives.map(obj => `<div style="text-align:left; margin: 0.5rem 0;">${obj}</div>`).join('');''',
+          'mission source capture')
+          replace_once(
+          '''                document.getElementById('btn-mission-continue').addEventListener('click', () => {
+                    overlay.classList.remove('active');
+                    const currentNode = STORY_DATA.nodes[this.currentNodeId];
+                    if (currentNode.next) this.loadNode(currentNode.next);
+                });''',
+          '''                document.getElementById('btn-mission-continue').addEventListener('click', () => {
+                    overlay.classList.remove('active');
+                    this.isProcessingEvent = false;
+                    const sourceNode = STORY_DATA.nodes[sourceNodeId];
+                    if (sourceNode?.next) this.loadNode(sourceNode.next);
+                });''',
+          'mission continue lifecycle')
+
+          # System overlay has the same blocking-state lifecycle. End it before advancing.
+          old='''                        overlay.classList.remove('active');
+                        if (node.next) this.loadNode(node.next);'''
+          count=s.count(old)
+          if count != 2:
+              raise SystemExit(f'system overlay lifecycle: expected 2 matches, got {count}')
+          s=s.replace(old,'''                        overlay.classList.remove('active');
+                        this.isProcessingEvent = false;
+                        if (node.next) this.loadNode(node.next);''')
+
+          # Research tablet and videos also own isProcessingEvent while active; close that lifecycle
+          # before re-entering a dialogue node.
+          replace_once(
+          '''                this.dom.researchContinue.onclick=()=>{this.hideResearchTablet();if(node.next)this.loadNode(node.next);};''',
+          '''                this.dom.researchContinue.onclick=()=>{this.hideResearchTablet();this.isProcessingEvent=false;if(node.next)this.loadNode(node.next);};''',
+          'research continue lifecycle')
+
+          old='''                    vp.classList.remove('active');
+                    if (node.next) this.loadNode(node.next);'''
+          count=s.count(old)
+          if count != 2:
+              raise SystemExit(f'video lifecycle: expected 2 matches, got {count}')
+          s=s.replace(old,'''                    vp.classList.remove('active');
+                    this.isProcessingEvent = false;
+                    if (node.next) this.loadNode(node.next);''')
+
+          p.write_text(s,encoding='utf-8')
+          PY
+
+      - name: Static regression checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('herbgameai-formal.html').read_text(encoding='utf-8')
+
+          required=[
+            'function releaseInteractiveFocus()',
+            'releaseInteractiveFocus();\n      this.isProcessingEvent = false;\n      const result = originalShowDialogue(node);',
+            'const originalClosePlayerPanel = engine.closePlayerPanel.bind(engine);',
+            'const sourceNodeId = this.currentNodeId;',
+            'const sourceNode = STORY_DATA.nodes[sourceNodeId];',
+            'if (event.repeat) return;',
+            'engine.handleDialogueClick();',
+            'engine.isShowingChoices || engine.dom?.choicesContainer?.classList.contains("show")',
+            'engine.dom?.playerPanel?.classList.contains("active")',
+            'engine.dom?.campusMapLayer?.classList.contains("active")',
+            'engine.dom?.researchTabletLayer?.classList.contains("active")',
+            'engine.dom?.videoPlaceholder?.classList.contains("active")',
+            'hasInteractiveKeyboardFocus(event.target) || hasInteractiveKeyboardFocus(doc.activeElement)',
+          ]
+          for token in required:
+              if token not in s:
+                  raise SystemExit(f'missing protected/input token: {token}')
+          if 'plantCardDismissedAt' in s:
+              raise SystemExit('plantCardDismissedAt time lock still present')
+          if 'handleSpaceDialogue' in s:
+              raise SystemExit('parallel Space progression system introduced')
+
+          # Ordinary dialogue wrapper must normalize processing before original showDialogue.
+          m=re.search(r'engine\.showDialogue = function\(node\) \{(.*?)const result = originalShowDialogue\(node\);',s,re.S)
+          if not m or 'this.isProcessingEvent = false;' not in m.group(1) or 'releaseInteractiveFocus();' not in m.group(1):
+              raise SystemExit('normal dialogue input invariant missing')
+
+          # Mission continue must no longer look up next from a mutable currentNodeId.
+          mm=re.search(r"btn-mission-continue'\)\.addEventListener\('click', \(\) => \{(.*?)\n                \}\);",s,re.S)
+          if not mm or 'STORY_DATA.nodes[sourceNodeId]' not in mm.group(1) or 'this.isProcessingEvent = false;' not in mm.group(1):
+              raise SystemExit('mission lifecycle hardening missing')
+
+          # Inventory requested code-level surfaces.
+          print('isProcessingEvent=true count', len(re.findall(r'isProcessingEvent\s*=\s*true',s)))
+          print('isProcessingEvent=false count', len(re.findall(r'isProcessingEvent\s*=\s*false',s)))
+          print('dynamic button count', len(re.findall(r"createElement\(['\"]button['\"]\)",s)))
+          print('addEventListener click count', len(re.findall(r"addEventListener\(['\"]click['\"]",s)))
+          print('.onclick count', s.count('.onclick'))
+          print("classList.remove active count", len(re.findall(r"classList\.remove\(['\"]active['\"]\)",s)))
+          print('loadNode call count', len(re.findall(r'\bloadNode\s*\(',s)))
+          print('handleDialogueClick count', len(re.findall(r'handleDialogueClick\s*\(',s)))
+          print('focus/blur count', len(re.findall(r'\b(?:focus|blur)\s*\(',s)))
+          PY
+
+          rm -rf /tmp/herb-js && mkdir -p /tmp/herb-js
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('herbgameai-formal.html').read_text(encoding='utf-8')
+          blocks=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',s,re.S|re.I)
+          n=0
+          for block in blocks:
+              if block.strip() and 'src=' not in block[:120]:
+                  Path(f'/tmp/herb-js/{n}.js').write_text(block,encoding='utf-8')
+                  n+=1
+          print('inline scripts:',n)
+          PY
+          for f in /tmp/herb-js/*.js; do node --check "$f"; done
+          test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
+          git diff --exit-code -- herbgame-formal.html
+
+      - name: Install Playwright for two targeted runtime checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --quiet playwright==1.55.0
+          python3 -m playwright install --with-deps chromium >/dev/null
+
+      - name: Targeted runtime verification before and after fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/herb-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          python3 - <<'PY'
+          from playwright.sync_api import sync_playwright
+          import json, time
+
+          BASE='http://127.0.0.1:8765/'
+
+          def setup_page(browser,path):
+              page=browser.new_page(viewport={"width":1280,"height":720})
+              page.route('https://**/*', lambda route: route.abort())
+              page.goto(BASE+path, wait_until='domcontentloaded', timeout=30000)
+              page.wait_for_function('window.gameEngine && window.__HERBGAME_AI_VISUAL', timeout=10000)
+              return page
+
+          def state(page):
+              return page.evaluate('''() => {
+                const e=window.gameEngine;
+                const a=document.activeElement;
+                return {
+                  currentNodeId:e.currentNodeId,
+                  isProcessingEvent:e.isProcessingEvent,
+                  isShowingChoices:e.isShowingChoices,
+                  isTyping:e.isTyping,
+                  overlayActive:!!e.dom.systemOverlay?.classList.contains('active'),
+                  panelActive:!!e.dom.playerPanel?.classList.contains('active'),
+                  mapActive:!!e.dom.campusMapLayer?.classList.contains('active'),
+                  researchActive:!!e.dom.researchTabletLayer?.classList.contains('active'),
+                  videoActive:!!e.dom.videoPlaceholder?.classList.contains('active'),
+                  dialogueDisplay:e.dom.dialogueBox?.parentElement?.style.display || '',
+                  activeElement:(a?.id || a?.className || a?.tagName || '')
+                };
+              }''')
+
+          def intro_space(browser,path):
+              p=setup_page(browser,path)
+              p.click('#btn-start')
+              p.click('#btn-intro-start')
+              p.wait_for_function("window.gameEngine.currentNodeId === 'scene01_01'")
+              p.wait_for_timeout(500)
+              before=state(p)
+              p.keyboard.press('Space')
+              p.wait_for_timeout(80)
+              after=state(p)
+              p.close()
+              return {'before':before,'after':after}
+
+          def mission_transition(browser,path,mode):
+              p=setup_page(browser,path)
+              p.evaluate('''() => {
+                const e=window.gameEngine;
+                e.dom.screenHome.classList.remove('active');
+                e.dom.screenIntro.classList.remove('active');
+                e.dom.screenGame.classList.add('active');
+                e.loadNode('scene16_05',{skipHistory:true});
+              }''')
+              p.wait_for_selector('#btn-mission-continue')
+              during=state(p)
+              p.click('#btn-mission-continue')
+              p.wait_for_function("window.gameEngine.currentNodeId === 'scene17_01'")
+              p.wait_for_timeout(900)
+              ready=state(p)
+              if mode=='mouse':
+                  p.click('#dialogue-box')
+              else:
+                  p.keyboard.press('Space')
+              p.wait_for_timeout(120)
+              after=state(p)
+              p.close()
+              return {'duringOverlay':during,'scene17Ready':ready,'afterInput':after}
+
+          with sync_playwright() as pw:
+              browser=pw.chromium.launch(headless=True)
+              pre={
+                'intro':intro_space(browser,'.herb-before-input-fix.html'),
+                'missionMouse':mission_transition(browser,'.herb-before-input-fix.html','mouse'),
+                'missionSpace':mission_transition(browser,'.herb-before-input-fix.html','space')
+              }
+              post={
+                'intro':intro_space(browser,'herbgameai-formal.html'),
+                'missionMouse':mission_transition(browser,'herbgameai-formal.html','mouse'),
+                'missionSpace':mission_transition(browser,'herbgameai-formal.html','space')
+              }
+              browser.close()
+
+          print('PRE_FIX_RUNTIME=' + json.dumps(pre,ensure_ascii=False))
+          print('POST_FIX_RUNTIME=' + json.dumps(post,ensure_ascii=False))
+
+          # A: first dialogue must immediately accept Space after clicking intro start.
+          assert post['intro']['before']['currentNodeId']=='scene01_01'
+          assert post['intro']['before']['isProcessingEvent'] is False
+          assert post['intro']['after']['currentNodeId']=='scene01_02', post['intro']
+
+          # B: mission complete must enter scene17 as an ordinary, unlocked dialogue.
+          for key in ('missionMouse','missionSpace'):
+              ready=post[key]['scene17Ready']
+              assert ready['currentNodeId']=='scene17_01', ready
+              assert ready['isProcessingEvent'] is False, ready
+              assert ready['isShowingChoices'] is False, ready
+              assert ready['overlayActive'] is False, ready
+              assert ready['panelActive'] is False, ready
+              assert ready['mapActive'] is False, ready
+              assert ready['researchActive'] is False, ready
+              assert ready['videoActive'] is False, ready
+              assert ready['dialogueDisplay'] != 'none', ready
+          assert post['missionMouse']['afterInput']['currentNodeId']=='scene17_02', post['missionMouse']
+          assert post['missionSpace']['afterInput']['currentNodeId']=='scene17_02', post['missionSpace']
+          PY
+          rm -f .herb-before-input-fix.html
+
+      - name: Commit repaired AI trial and remove temporary workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/fix-herb-input-lifecycle.yml
+          rm -f .herb-before-input-fix.html
+          test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
+          git diff --exit-code -- herbgame-formal.html
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add herbgameai-formal.html .github/workflows/fix-herb-input-lifecycle.yml
+          git diff --cached --name-only
+          test "$(git diff --cached --name-only | wc -l)" -eq 2
+          git diff --cached --name-only | grep -qx 'herbgameai-formal.html'
+          git diff --cached --name-only | grep -qx '.github/workflows/fix-herb-input-lifecycle.yml'
+          git commit -m 'fix: stabilize Day 1 dialogue input lifecycle'
+          git push origin HEAD:main
