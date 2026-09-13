@@ -32,8 +32,10 @@ jobs:
           new1 = "      assert(!n.d1_20260913_garden_08?.choices?.some(choice => String(choice?.text || '').includes('全部拔掉最快')), 'removed weed option still reachable in garden choice');"
           old2 = "      engine.finishTyping?.(n.d1_20260913_kai_08); await wait(40);\n      const cardLayer = doc.getElementById('plant-card-reveal-layer');\n      assert(cardLayer?.classList.contains('active'), 'plant card did not open');"
           new2 = "      engine.finishTyping?.(n.d1_20260913_kai_08);\n      const cardLayer = doc.getElementById('plant-card-reveal-layer');\n      for (let i=0; i<20 && !cardLayer?.classList.contains('active'); i++) await wait(50);\n      assert(cardLayer?.classList.contains('active'), 'plant card did not open');"
-          assert old1 in s and old2 in s, 'verified payload no longer matches expected smoke harness'
-          s = s.replace(old1, new1).replace(old2, new2)
+          old3 = "      assert(engine.dom?.choicesContainer?.classList.contains('show'), 'choice UI not visible after Space');\n\n      // Plant card: first Space closes only; second advances and restores student portrait."
+          new3 = "      assert(engine.dom?.choicesContainer?.classList.contains('show'), 'choice UI not visible after Space');\n      engine.isShowingChoices = false;\n      engine.dom?.choicesContainer?.classList.remove('show');\n      if (engine.dom?.choicesContainer) engine.dom.choicesContainer.innerHTML = '';\n\n      // Plant card: first Space closes only; second advances and restores student portrait."
+          assert old1 in s and old2 in s and old3 in s, 'verified payload no longer matches expected smoke harness'
+          s = s.replace(old1, new1).replace(old2, new2).replace(old3, new3)
           p.write_text(s, encoding='utf-8')
           PY
       - name: Apply patch
