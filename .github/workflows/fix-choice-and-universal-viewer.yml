@@ -1,0 +1,508 @@
+name: Fix choice responses and universal portrait viewer
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-choice-and-universal-viewer.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-test-publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Patch AI trial only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
+          test "$(git hash-object herbgameai-formal.html)" = "cb1bb34e2a909f3d0bb4a8d1fe49683d041d3893"
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path('herbgameai-formal.html')
+          s = p.read_text(encoding='utf-8')
+          original = s
+
+          def replace_once(old, new, label):
+              global s
+              count = s.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected exactly 1 occurrence, got {count}')
+              s = s.replace(old, new, 1)
+
+          # MEMBER_INFO remains the staff/principal Source of Truth; add role metadata there.
+          replace_once(
+              '"校長": { id:"principal", name:"校長", relationshipType:"interaction",',
+              '"校長": { id:"principal", name:"校長", role:"校長", relationshipType:"interaction",',
+              'principal role'
+          )
+          replace_once(
+              '"陳冠瑋老師": { id:"teacher_chen", name:"陳冠瑋老師", relationshipType:"interaction",',
+              '"陳冠瑋老師": { id:"teacher_chen", name:"陳冠瑋老師", role:"香草服務隊老師", relationshipType:"interaction",',
+              'teacher chen role'
+          )
+          replace_once(
+              '"許恒維老師": { id:"teacher_xu", name:"許恒維老師", relationshipType:"interaction",',
+              '"許恒維老師": { id:"teacher_xu", name:"許恒維老師", role:"香草園實作引導老師", relationshipType:"interaction",',
+              'teacher xu role'
+          )
+
+          # Generic clickable portrait attribute. Missing-avatar staff still render text only, not a clickable image.
+          replace_once(
+              '<img class="member-avatar-img"\n                               src="${info.avatar}"',
+              '<img class="member-avatar-img"\n                               data-character-id="${info.id || name}"\n                               src="${info.avatar}"',
+              'staff data-character-id'
+          )
+          replace_once(
+              'data-student-id="${id}"',
+              'data-character-id="${id}"',
+              'student data-character-id'
+          )
+
+          # Common choice fix: release clicked button focus and normalize temp response nodes.
+          replace_once(
+              '            handleChoiceSelection(choice, clickedBtn, event) {\n                event.stopPropagation(); \n                if (!this.isShowingChoices) return;\n',
+              '            handleChoiceSelection(choice, clickedBtn, event) {\n                event.stopPropagation(); \n                if (!this.isShowingChoices) return;\n                if (clickedBtn && document.activeElement === clickedBtn && typeof clickedBtn.blur === "function") clickedBtn.blur();\n',
+              'choice focus release'
+          )
+          replace_once(
+              '                        STORY_DATA.nodes[tempId] = choice.response;',
+              '                        STORY_DATA.nodes[tempId] = { ...choice.response, type: choice.response.type || "dialogue" };',
+              'choice response type normalization'
+          )
+
+          # Generic portrait hover selector and generic viewer metadata naming.
+          s = s.replace('.member-avatar-img[data-student-id]', '.member-avatar-img[data-character-id]')
+          s = s.replace('共用學生人物立繪 Viewer：圖片來源沿用 STUDENT_INFO[id].avatar', '共用人物立繪 Viewer：學生讀 STUDENT_INFO，老師／校長讀 MEMBER_INFO')
+          s = s.replace('member-portrait-viewer-plant', 'member-portrait-viewer-meta')
+
+          # Replace only the existing viewer script; keep the single shared Viewer DOM.
+          pattern = re.compile(r'    <script id="member-portrait-viewer-script">.*?    </script>', re.S)
+          matches = list(pattern.finditer(s))
+          if len(matches) != 1:
+              raise SystemExit(f'viewer script: expected 1 block, got {len(matches)}')
+
+          viewer_script = '''    <script id="member-portrait-viewer-script">
+    (() => {
+      'use strict';
+      const doc = document;
+      const viewer = doc.getElementById('member-portrait-viewer');
+      const viewerImage = doc.getElementById('member-portrait-viewer-image');
+      const viewerFailure = doc.getElementById('member-portrait-viewer-failure');
+      const viewerName = doc.getElementById('member-portrait-viewer-name');
+      const viewerMeta = doc.getElementById('member-portrait-viewer-meta');
+      const viewerClose = doc.getElementById('member-portrait-viewer-close');
+      const memberList = doc.getElementById('member-list');
+
+      if (!viewer || !viewerImage || !viewerFailure || !viewerName || !viewerMeta || !viewerClose || !memberList) {
+        console.error('[HerbGame] member portrait viewer init failed');
+        return;
+      }
+
+      let currentCharacterId = null;
+
+      function resolvePortraitCharacter(characterId) {
+        if (!characterId) return null;
+
+        if (typeof STUDENT_INFO !== 'undefined' && STUDENT_INFO[characterId]) {
+          const info = STUDENT_INFO[characterId];
+          return {
+            kind: 'student',
+            id: characterId,
+            unlockKey: characterId,
+            info,
+            name: info.name || characterId
+          };
+        }
+
+        if (typeof MEMBER_INFO !== 'undefined') {
+          const entry = Object.entries(MEMBER_INFO).find(([memberKey, info]) =>
+            memberKey === characterId || info?.id === characterId
+          );
+          if (entry) {
+            const [memberKey, info] = entry;
+            return {
+              kind: 'member',
+              id: info.id || memberKey,
+              unlockKey: memberKey,
+              info,
+              name: info.name || memberKey
+            };
+          }
+        }
+
+        return null;
+      }
+
+      function isCharacterUnlocked(characterId) {
+        const resolved = resolvePortraitCharacter(characterId);
+        const state = window.gameEngine?.gameState;
+        if (!resolved || !state) return false;
+        if (resolved.kind === 'student') {
+          return Boolean(state.unlockedStudents?.has?.(resolved.unlockKey));
+        }
+        return Boolean(state.unlockedChars?.has?.(resolved.unlockKey));
+      }
+
+      function getPortraitMetaText(resolved, state) {
+        if (resolved.kind === 'student') {
+          const plantDiscovered = Boolean(state.discoveredHerbNames?.has?.(resolved.info.plant));
+          return `代表植物｜${plantDiscovered ? resolved.info.plant : '？？？'}`;
+        }
+        return `身分｜${resolved.info.role || (resolved.id === 'principal' ? '校長' : '老師')}`;
+      }
+
+      function openMemberPortraitViewer(characterId) {
+        const resolved = resolvePortraitCharacter(characterId);
+        const state = window.gameEngine?.gameState;
+        if (!resolved || !state || !isCharacterUnlocked(characterId) || !resolved.info.avatar) return false;
+
+        currentCharacterId = resolved.id;
+        viewer.dataset.characterId = resolved.id;
+        viewerName.textContent = resolved.name;
+        viewerMeta.textContent = getPortraitMetaText(resolved, state);
+
+        viewerFailure.hidden = true;
+        viewerImage.hidden = false;
+        viewerImage.alt = `${resolved.name}完整人物立繪`;
+        viewerImage.src = resolved.info.avatar;
+
+        viewer.classList.add('active');
+        viewer.setAttribute('aria-hidden', 'false');
+        return true;
+      }
+
+      function closeMemberPortraitViewer() {
+        if (!viewer.classList.contains('active')) return false;
+        viewer.classList.remove('active');
+        viewer.setAttribute('aria-hidden', 'true');
+
+        const focused = doc.activeElement;
+        if (focused && viewer.contains(focused) && typeof focused.blur === 'function') focused.blur();
+
+        currentCharacterId = null;
+        delete viewer.dataset.characterId;
+        return true;
+      }
+
+      memberList.addEventListener('click', (event) => {
+        const portrait = event.target?.closest?.('.member-avatar-img[data-character-id]');
+        if (!portrait || !memberList.contains(portrait)) return;
+        const characterId = portrait.dataset.characterId;
+        const resolved = resolvePortraitCharacter(characterId);
+        if (!resolved || !isCharacterUnlocked(characterId) || !resolved.info.avatar) return;
+        openMemberPortraitViewer(characterId);
+      });
+
+      viewerClose.addEventListener('click', (event) => {
+        event.preventDefault();
+        closeMemberPortraitViewer();
+      });
+
+      viewer.addEventListener('click', (event) => {
+        if (event.target === viewer) closeMemberPortraitViewer();
+      });
+
+      viewerImage.addEventListener('load', () => {
+        if (!currentCharacterId) return;
+        viewerFailure.hidden = true;
+        viewerImage.hidden = false;
+      });
+
+      viewerImage.addEventListener('error', () => {
+        const characterId = currentCharacterId;
+        const resolved = resolvePortraitCharacter(characterId);
+        const failedPath = viewerImage.getAttribute('src') || '';
+        console.error('[HerbGame] member portrait viewer image load failed', {
+          id: characterId,
+          name: resolved?.name || '',
+          path: failedPath,
+          error: 'load failed'
+        });
+        viewerImage.hidden = true;
+        viewerFailure.hidden = false;
+      });
+
+      doc.addEventListener('keydown', (event) => {
+        if (!viewer.classList.contains('active')) return;
+
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          closeMemberPortraitViewer();
+          return;
+        }
+
+        if (event.code === 'Space' || event.key === ' ') {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }
+      }, true);
+
+      window.__HERBGAME_MEMBER_PORTRAIT_VIEWER = {
+        openMemberPortraitViewer,
+        closeMemberPortraitViewer,
+        resolvePortraitCharacter,
+        isCharacterUnlocked,
+        get activeCharacterId() { return currentCharacterId; }
+      };
+    })();
+    </script>'''
+          s = pattern.sub(viewer_script, s, count=1)
+
+          if s == original:
+              raise SystemExit('patch produced no changes')
+
+          p.write_text(s, encoding='utf-8')
+          PY
+          git diff --exit-code -- herbgame-formal.html
+          git diff -- herbgameai-formal.html
+
+      - name: JavaScript syntax and invariant checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/herb-js && mkdir -p /tmp/herb-js
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          s = Path('herbgameai-formal.html').read_text(encoding='utf-8')
+
+          assert s.count('id="member-portrait-viewer"') == 1
+          assert s.count('id="member-portrait-viewer-style"') == 1
+          assert s.count('id="member-portrait-viewer-script"') == 1
+          assert 'data-student-id' not in s
+          assert '.member-avatar-img[data-character-id]' in s
+          assert 'data-character-id="${id}"' in s
+          assert 'data-character-id="${info.id || name}"' in s
+          assert 'function resolvePortraitCharacter(characterId)' in s
+          assert 'function isCharacterUnlocked(characterId)' in s
+          assert 'viewerImage.src = resolved.info.avatar;' in s
+          assert '代表植物｜${plantDiscovered ? resolved.info.plant : \'？？？\'}' in s
+          assert '身分｜${resolved.info.role' in s
+          assert 'PORTRAIT_INFO' not in s
+          assert 'VIEWER_CHARACTER_INFO' not in s
+          assert 'STAFF_IMAGES' not in s
+          assert 'portraitImages' not in s
+          assert 'zoomImages' not in s
+          assert 'largeAvatar' not in s
+          assert 'STORY_DATA.nodes[tempId] = { ...choice.response, type: choice.response.type || "dialogue" };' in s
+          assert 'document.activeElement === clickedBtn' in s
+          response_count = len(re.findall(r'\bresponse\s*:\s*\{', s))
+          assert response_count == 9, response_count
+          assert 'member-portrait-viewer-meta' in s
+          assert 'member-portrait-viewer-plant' not in s
+          assert 'role:"香草服務隊老師"' in s
+          assert 'role:"香草園實作引導老師"' in s
+          assert 'role:"校長"' in s
+
+          blocks = re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>', s, re.S | re.I)
+          n = 0
+          for block in blocks:
+              if block.strip():
+                  Path(f'/tmp/herb-js/{n}.js').write_text(block, encoding='utf-8')
+                  n += 1
+          print('inline scripts:', n, 'choice responses:', response_count)
+          PY
+          for f in /tmp/herb-js/*.js; do node --check "$f"; done
+          test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
+
+      - name: Install Playwright
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --quiet playwright==1.55.0
+          python3 -m playwright install --with-deps chromium >/dev/null
+
+      - name: Targeted choice and viewer verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/herb-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          python3 - <<'PY'
+          import json
+          from playwright.sync_api import sync_playwright
+
+          errors = []
+          with sync_playwright() as p:
+              browser = p.chromium.launch(headless=True)
+              page = browser.new_page(viewport={"width": 1366, "height": 768})
+              page.on('pageerror', lambda exc: errors.append(str(exc)))
+              page.goto('http://127.0.0.1:8765/herbgameai-formal.html', wait_until='domcontentloaded')
+              page.wait_for_function('window.gameEngine && window.__HERBGAME_MEMBER_PORTRAIT_VIEWER')
+
+              # Open the members panel with only Xiaolin + Chen unlocked.
+              page.evaluate('''() => {
+                const e = window.gameEngine;
+                document.getElementById('screen-home')?.classList.remove('active');
+                document.getElementById('screen-intro')?.classList.remove('active');
+                e.dom.screenGame.classList.add('active');
+                e.gameState.unlockedStudents = new Set(['mint_student']);
+                e.gameState.unlockedChars = new Set(['陳冠瑋老師','許恒維老師','校長']);
+                e.gameState.discoveredHerbNames = new Set(['薄荷']);
+                e.renderPlayerPanel();
+                e.openPlayerPanel();
+                e.switchPanelTab('members');
+              }''')
+
+              xiaolin = page.locator('.member-avatar-img[data-character-id="mint_student"]')
+              chen = page.locator('.member-avatar-img[data-character-id="teacher_chen"]')
+              assert xiaolin.count() == 1
+              assert chen.count() == 1
+              assert page.locator('.member-avatar-img[data-character-id="teacher_xu"]').count() == 0
+              assert page.locator('.member-avatar-img[data-character-id="principal"]').count() == 0
+              assert page.locator('.member-avatar-img[data-character-id="left_student"]').count() == 0
+
+              # Xiaolin: same Source of Truth + discovered plant.
+              xiaolin.click()
+              page.wait_for_function("document.getElementById('member-portrait-viewer').classList.contains('active')")
+              xiaolin_view = page.evaluate('''() => ({
+                active: document.getElementById('member-portrait-viewer').classList.contains('active'),
+                id: window.__HERBGAME_MEMBER_PORTRAIT_VIEWER.activeCharacterId,
+                src: document.getElementById('member-portrait-viewer-image').getAttribute('src'),
+                expected: STUDENT_INFO.mint_student.avatar,
+                name: document.getElementById('member-portrait-viewer-name').textContent,
+                meta: document.getElementById('member-portrait-viewer-meta').textContent,
+                fit: getComputedStyle(document.getElementById('member-portrait-viewer-image')).objectFit,
+                panelActive: document.getElementById('player-panel').classList.contains('active'),
+                membersVisible: !document.getElementById('panel-members').classList.contains('hidden')
+              })''')
+              assert xiaolin_view['active'] and xiaolin_view['id'] == 'mint_student'
+              assert xiaolin_view['src'] == xiaolin_view['expected']
+              assert xiaolin_view['name'] == '小琳'
+              assert xiaolin_view['meta'] == '代表植物｜薄荷'
+              assert xiaolin_view['fit'] == 'contain'
+              assert xiaolin_view['panelActive'] and xiaolin_view['membersVisible']
+
+              # Clicking the portrait itself must not close; Space must do nothing.
+              page.locator('#member-portrait-viewer-image').click()
+              before_space = page.evaluate('window.gameEngine.currentNodeId')
+              page.keyboard.press('Space')
+              assert page.evaluate("document.getElementById('member-portrait-viewer').classList.contains('active')")
+              assert page.evaluate('window.gameEngine.currentNodeId') == before_space
+              page.keyboard.press('Escape')
+              assert not page.evaluate("document.getElementById('member-portrait-viewer').classList.contains('active')")
+              assert page.evaluate("document.getElementById('player-panel').classList.contains('active')")
+              assert page.evaluate("!document.getElementById('panel-members').classList.contains('hidden')")
+
+              # Undiscovered student plant remains hidden.
+              page.evaluate("window.gameEngine.gameState.discoveredHerbNames.delete('薄荷')")
+              xiaolin.click()
+              assert page.locator('#member-portrait-viewer-meta').inner_text() == '代表植物｜？？？'
+              page.evaluate("document.getElementById('member-portrait-viewer').click()")
+              assert not page.evaluate("document.getElementById('member-portrait-viewer').classList.contains('active')")
+
+              # Chen: same single Viewer, MEMBER_INFO avatar, identity meta.
+              chen.click()
+              chen_view = page.evaluate('''() => {
+                const info = MEMBER_INFO['陳冠瑋老師'];
+                return {
+                  active: document.getElementById('member-portrait-viewer').classList.contains('active'),
+                  id: window.__HERBGAME_MEMBER_PORTRAIT_VIEWER.activeCharacterId,
+                  src: document.getElementById('member-portrait-viewer-image').getAttribute('src'),
+                  expected: info.avatar,
+                  name: document.getElementById('member-portrait-viewer-name').textContent,
+                  meta: document.getElementById('member-portrait-viewer-meta').textContent
+                };
+              }''')
+              assert chen_view['active'] and chen_view['id'] == 'teacher_chen'
+              assert chen_view['src'] == chen_view['expected']
+              assert chen_view['name'] == '陳冠瑋老師'
+              assert chen_view['meta'] == '身分｜香草服務隊老師'
+              page.locator('#member-portrait-viewer-close').click()
+              assert not page.evaluate("document.getElementById('member-portrait-viewer').classList.contains('active')")
+              assert page.evaluate("!document.getElementById('member-portrait-viewer').contains(document.activeElement)")
+
+              # Every response-based choice must become a dialogue temp node.
+              response_cases = page.evaluate('''() => Object.entries(STORY_DATA.nodes)
+                .flatMap(([nodeId,node]) => (node.choices || []).map((choice,index) => ({nodeId,index,id:choice.id,hasResponse:Boolean(choice.response)})))
+                .filter(item => item.hasResponse)''')
+              assert len(response_cases) == 9, response_cases
+              for case in response_cases:
+                  page.evaluate('''({nodeId}) => {
+                    const e = window.gameEngine;
+                    e.dom.playerPanel.classList.remove('active');
+                    e.loadNode(nodeId, {skipHistory:true});
+                    e.finishTyping(STORY_DATA.nodes[nodeId]);
+                  }''', {"nodeId": case['nodeId']})
+                  buttons = page.locator('.choice-btn')
+                  assert buttons.count() > case['index']
+                  buttons.nth(case['index']).click()
+                  page.wait_for_timeout(430)
+                  result = page.evaluate('''() => ({
+                    nodeId: window.gameEngine.currentNodeId,
+                    type: STORY_DATA.nodes[window.gameEngine.currentNodeId]?.type,
+                    activeTag: document.activeElement?.tagName || '',
+                    activeClass: document.activeElement?.className || ''
+                  })''')
+                  assert result['nodeId'].startswith('_tempResponse_'), (case, result)
+                  assert result['type'] == 'dialogue', (case, result)
+                  assert 'choice-btn' not in result['activeClass'], (case, result)
+
+              # scene14_02 A/B/C: first Space after response advances immediately; wrong answers return choices.
+              scene14_results = []
+              expected_next = {0:'scene14_wrong',1:'scene14_correct_xu',2:'scene14_c_wrong'}
+              for index in range(3):
+                  page.evaluate('''() => {
+                    const e = window.gameEngine;
+                    e.loadNode('scene14_02', {skipHistory:true});
+                    e.finishTyping(STORY_DATA.nodes.scene14_02);
+                  }''')
+                  page.locator('.choice-btn').nth(index).click()
+                  page.wait_for_timeout(430)
+                  page.wait_for_function('!window.gameEngine.isTyping')
+                  assert page.evaluate("document.activeElement?.classList?.contains('choice-btn') || false") is False
+                  page.keyboard.press('Space')
+                  page.wait_for_timeout(60)
+                  after_space = page.evaluate('window.gameEngine.currentNodeId')
+                  assert after_space == expected_next[index], (index, after_space)
+                  returned = None
+                  if index in (0,2):
+                      page.evaluate('''() => {
+                        const e = window.gameEngine;
+                        e.finishTyping(STORY_DATA.nodes[e.currentNodeId]);
+                      }''')
+                      page.keyboard.press('Space')
+                      page.wait_for_timeout(60)
+                      assert page.evaluate('window.gameEngine.currentNodeId') == 'scene14_02'
+                      page.evaluate("window.gameEngine.finishTyping(STORY_DATA.nodes.scene14_02)")
+                      returned = page.evaluate('window.gameEngine.isShowingChoices')
+                      assert returned is True
+                  scene14_results.append({"choice": 'ABC'[index], "next": after_space, "returnedChoices": returned})
+
+              browser.close()
+
+          assert not errors, errors
+          print('CHOICE_VIEWER_OK=' + json.dumps({
+              'xiaolin': xiaolin_view,
+              'chen': chen_view,
+              'responseCases': len(response_cases),
+              'scene14': scene14_results,
+              'pageErrors': errors
+          }, ensure_ascii=False))
+          PY
+
+      - name: Commit fix and remove temporary workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/fix-choice-and-universal-viewer.yml
+          test "$(git hash-object herbgame-formal.html)" = "7444b15a2b440030b37b403d83f169606831ec7c"
+          git diff --exit-code -- herbgame-formal.html
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add herbgameai-formal.html .github/workflows/fix-choice-and-universal-viewer.yml
+          git diff --cached --name-only
+          git commit -m 'fix: normalize choice responses and generalize portrait viewer'
+          git push origin HEAD:main
