@@ -1,7 +1,21 @@
 (() => {
   'use strict';
 
-  const getGames = () => Array.isArray(window.FARM_GAMES) ? window.FARM_GAMES : [];
+  const getGames = () => {
+    const games = Array.isArray(window.FARM_GAMES) ? window.FARM_GAMES : [];
+
+    return games
+      .map((game, originalIndex) => ({
+        game,
+        originalIndex,
+        publishedTime: Date.parse(game.publishedAt || '') || 0
+      }))
+      .sort((left, right) =>
+        right.publishedTime - left.publishedTime ||
+        left.originalIndex - right.originalIndex
+      )
+      .map(({ game }) => game);
+  };
 
   const createIcon = (className) => {
     const icon = document.createElement('i');
