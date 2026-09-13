@@ -57,11 +57,15 @@ jobs:
           set -e
           if ! grep -q 'DAY1_SELFTEST_PASS' /tmp/day1-dom.txt || grep -q 'DAY1_SELFTEST_FAIL' /tmp/day1-dom.txt; then
             echo '--- selftest result ---'
-            grep -A40 -B2 'DAY1_SELFTEST_' /tmp/day1-dom.txt || true
+            grep -A40 -B2 '<pre id="day1-selftest-result"' /tmp/day1-dom.txt || true
+            echo '--- plant-card DOM diagnostics ---'
+            echo -n 'layers: '; grep -o 'id="plant-card-reveal-layer"' /tmp/day1-dom.txt | wc -l || true
+            echo -n 'active-layer strings: '; grep -o 'plant-card-reveal-layer[^>]*active' /tmp/day1-dom.txt | wc -l || true
+            grep -o '<div id="plant-card-reveal-layer"[^>]*>' /tmp/day1-dom.txt | head -10 || true
             echo '--- browser console/stderr tail ---'
-            tail -120 /tmp/day1-chrome.log || true
+            tail -80 /tmp/day1-chrome.log || true
             echo '--- HTTP log tail ---'
-            tail -40 /tmp/day1-http.log || true
+            tail -30 /tmp/day1-http.log || true
             echo "Chrome status: $CHROME_STATUS"
             exit 1
           fi
