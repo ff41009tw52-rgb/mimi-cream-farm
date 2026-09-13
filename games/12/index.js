@@ -6,6 +6,7 @@ export function mount(root, context = {}) {
   return mountEmbeddedPage(root, {
     html: pageHtml,
     baseUrl: new URL('../../', import.meta.url).href,
-    title: String(context.game?.title || '科學農場互動遊戲')
+    title: String(context.game?.title || '科學農場互動遊戲'),
+    hideFarmHomeButton: true
   });
 }

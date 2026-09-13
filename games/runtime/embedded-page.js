@@ -46,7 +46,12 @@ export function mountEmbeddedPage(root, options = {}) {
   root.append(style, wrapper);
 
   return new Promise((resolve, reject) => {
-    frame.addEventListener('load', () => resolve(), { once: true });
+    frame.addEventListener('load', () => {
+      if (options.hideFarmHomeButton) {
+        frame.contentDocument?.getElementById('farm-home-button')?.remove();
+      }
+      resolve();
+    }, { once: true });
     frame.addEventListener('error', () => reject(new Error('封裝遊戲頁面載入失敗')), { once: true });
     frame.srcdoc = injectBase(html, baseUrl);
   });
