@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>四季農莊：島嶼物語 12-1 新版</title>
+  <style>
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;background:#0f172a}
+    .version-bar{height:44px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 14px;background:#fff7df;border-bottom:2px solid #d59c3a;color:#603813;font-weight:900;position:relative;z-index:5}
+    .version-left{display:flex;align-items:center;gap:10px;min-width:0}
+    .badge{background:#237a3b;color:white;border-radius:999px;padding:5px 9px;font-size:12px;white-space:nowrap}
+    .version-note{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .version-links{display:flex;gap:8px;white-space:nowrap}
+    .version-links a{color:#155e35;text-decoration:none;border:1px solid #77a980;border-radius:9px;padding:5px 8px;background:white;font-size:12px}
+    #game{width:100%;height:calc(100% - 44px);border:0;background:#0f172a;display:block}
+    #loading{position:fixed;inset:44px 0 0 0;display:grid;place-items:center;background:#0f172a;color:white;z-index:4;text-align:center;padding:24px}
+    #loading .box{max-width:520px;background:#172033;border:1px solid #334155;border-radius:18px;padding:20px 24px;box-shadow:0 16px 50px rgba(0,0,0,.35)}
+    #loading strong{display:block;font-size:20px;margin-bottom:8px}
+    #loading small{color:#cbd5e1;line-height:1.7}
+    @media(max-width:720px){.version-note{display:none}.version-bar{height:42px;padding:0 8px}.version-links a{padding:4px 6px}#game{height:calc(100% - 42px)}#loading{inset:42px 0 0}}
+  </style>
+</head>
+<body>
+  <div class="version-bar">
+    <div class="version-left">
+      <span class="badge">12-1 新版</span>
+      <span class="version-note">視覺改版測試：全作物種子各 1 包｜測試資金最低 100000｜與原版存檔分離</span>
+    </div>
+    <div class="version-links">
+      <a href="12.html" target="_blank" rel="noopener">開啟原版 12</a>
+    </div>
+  </div>
+  <iframe id="game" title="四季農莊 12-1 新版"></iframe>
+  <div id="loading"><div class="box"><strong>正在建立 12-1 新版...</strong><small>原始 12.html 不會被修改。新版會在瀏覽器中載入原遊戲，再套用已確認的圖片流程與測試設定。</small></div></div>
+
+  <script>
+    const frame = document.getElementById('game');
+    const loading = document.getElementById('loading');
+
+    function replaceOnce(source, search, replacement, label){
+      if(!source.includes(search)) throw new Error('找不到改版掛載點：' + label);
+      return source.replace(search, replacement);
+    }
+
+    async function buildRevision(){
+      let html = await fetch('./12.html?source=12-1', {cache:'no-store'}).then(r => {
+        if(!r.ok) throw new Error('無法讀取原版 12.html：HTTP ' + r.status);
+        return r.text();
+      });
+
+      // 12-1 使用獨立存檔 key，測試新版不會覆蓋原版進度。
+      html = html.split('farm_tycoon_save_v2').join('farm_tycoon_save_v2_12_1');
+      html = html.replace('<title>四季農莊：島嶼物語</title>', '<title>四季農莊：島嶼物語｜12-1 新版</title>');
+
+      // 新遊戲直接從 100000 開始。
+      html = replaceOnce(
+        html,
+        'const [gold, setGold] = useState(100);',
+        'const [gold, setGold] = useState(100000);',
+        '12-1 測試起始資金'
+      );
+
+      // 舊的 12-1 測試存檔若低於 100000，載入時自動補到 100000；高於 100000 則保留原金額。
+      html = replaceOnce(
+        html,
+        'setGold(state.gold);',
+        'setGold(Math.max(100000, Number(state.gold) || 0));',
+        '12-1 載入存檔測試資金'
+      );
+
+      // 新遊戲的背包直接放入每一種作物種子各 1 包。
+      html = replaceOnce(
+        html,
+        'scissors: 10, chili: 10, seeds: {}, crops: {}',
+        'scissors: 10, chili: 10, seeds: Object.fromEntries(Object.values(CROPS).flat().filter(Boolean).map(crop => [crop.id, 1])), crops: {}',
+        '12-1 全作物測試種子'
+      );
+
+      // 載入舊測試存檔時保留原數量，但缺少或歸零的作物種子補到 1 包。
+      html = replaceOnce(
+        html,
+        'setInventory({ ...state.inventory, crops: state.inventory.crops || {} });',
+        'setInventory({ ...state.inventory, seeds: { ...(state.inventory?.seeds || {}), ...Object.fromEntries(Object.values(CROPS).flat().filter(Boolean).map(crop => [crop.id, Math.max(1, Number(state.inventory?.seeds?.[crop.id]) || 0)])) }, crops: state.inventory?.crops || {} });',
+        '12-1 載入存檔補齊全作物種子'
+      );
+
+      const artCss = [
+        '<style>',
+        '.farm12-art-wrap{display:inline-grid;place-items:center;vertical-align:middle;transition:transform .25s ease,filter .25s ease}',
+        '.farm12-art{display:block;width:54px;height:54px;background-repeat:no-repeat;background-size:contain;background-position:center;filter:drop-shadow(0 5px 4px rgba(50,24,5,.25))}',
+        '.farm12-art.farm12-art-image{background-size:contain;background-position:center}',
+        '.farm12-art-wrap.farm12-field{width:56px;height:56px}',
+        '.farm12-art-wrap.farm12-field .farm12-art{width:56px;height:56px}',
+        '.farm12-art-wrap.farm12-seedbag{width:24px;height:24px;position:relative;z-index:2}',
+        '.farm12-art-wrap.farm12-seedbag .farm12-art{width:24px;height:24px}',
+        '.farm12-art-wrap.farm12-flying{width:64px;height:64px}',
+        '.farm12-art-wrap.farm12-flying .farm12-art{width:64px;height:64px}',
+        '.farm12-art-wrap.farm12-legendary{position:relative}',
+        '.farm12-art-wrap.farm12-legendary .farm12-art{animation:farm12LegendPulse 1.55s ease-in-out infinite alternate}',
+        '.farm12-art-wrap.farm12-legendary-seedling .farm12-art{filter:drop-shadow(0 0 3px rgba(255,247,172,.6)) drop-shadow(0 0 6px rgba(255,176,0,.42))}',
+        '.farm12-art-wrap.farm12-legendary-pre .farm12-art{filter:drop-shadow(0 0 5px rgba(255,247,172,.85)) drop-shadow(0 0 10px rgba(255,176,0,.68))}',
+        '.farm12-art-wrap.farm12-legendary-mature .farm12-art{filter:drop-shadow(0 0 6px #fff7ac) drop-shadow(0 0 15px #ffb000)}',
+        '.farm12-art-wrap.farm12-legendary::after{content:"";position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;box-shadow:-13px -9px 0 #fff7ac,15px -17px 0 #fff;animation:farm12LegendSparkle 1.8s ease-in-out infinite;pointer-events:none}',
+        '.farm12-art-wrap.farm12-legendary-seedling::after{opacity:.25}.farm12-art-wrap.farm12-legendary-pre::after{opacity:.55}.farm12-art-wrap.farm12-legendary-mature::after{opacity:1}',
+        '@keyframes farm12LegendPulse{from{transform:scale(.96)}to{transform:scale(1.08)}}',
+        '@keyframes farm12LegendSparkle{0%,100%{transform:scale(.7);opacity:.25}50%{transform:scale(1.25);opacity:1}}',
+        '@media(min-width:768px){.farm12-art-wrap.farm12-field{width:78px;height:78px}.farm12-art-wrap.farm12-field .farm12-art{width:78px;height:78px}}',
+        '</style>'
+      ].join('');
+      html = html.replace('</head>', artCss + '</head>');
+
+      const cropArtCode = [
+        '    // --- 12-1 新版：已核准的專屬作物圖片流程 ---',
+        '    const FARM12_PILOT_SPRITES = {',
+        "      sweetpotatoleaf: { seedling: { src: 'assets/farm12/crops/seedling/sweetpotatoleaf.webp' }, mature: { src: 'assets/farm12/crops/mature/sweetpotatoleaf.webp' } },",
+        "      bokchoy: { seedling: { src: 'assets/farm12/pilot/bokchoy-just-germinated.webp' }, mature: { src: 'assets/farm12/crops/mature/bokchoy.webp' } },",
+        "      guava: { seedling: { src: 'assets/farm12/crops/seedling/guava.webp' }, pre: { src: 'assets/farm12/crops/pre-mature/guava.webp' }, mature: { src: 'assets/farm12/crops/mature/guava.webp' } },",
+        "      waterspinach: { seedling: { src: 'assets/farm12/crops/seedling/waterspinach.webp' }, mature: { src: 'assets/farm12/crops/mature/waterspinach.webp' } },",
+        "      loofah: { seedling: { src: 'assets/farm12/crops/seedling/loofah.webp' }, pre: { src: 'assets/farm12/crops/pre-mature/loofah.webp' }, mature: { src: 'assets/farm12/crops/mature/loofah.webp' } },",
+        "      mango: { seedling: { src: 'assets/farm12/crops/seedling/mango.webp' }, pre: { src: 'assets/farm12/crops/pre-mature/mango.webp' }, mature: { src: 'assets/farm12/crops/mature/mango.webp' } },",
+        "      waterbamboo: { seedling: { src: 'assets/farm12/crops/seedling/waterbamboo.webp' }, mature: { src: 'assets/farm12/crops/mature/waterbamboo.webp' } },",
+        "      taro: { seedling: { src: 'assets/farm12/crops/seedling/taro.webp' }, pre: { src: 'assets/farm12/crops/pre-mature/taro.webp' }, mature: { src: 'assets/farm12/crops/mature/taro.webp' } },",
+        "      pomelo: { seedling: { src: 'assets/farm12/crops/seedling/pomelo.webp' }, pre: { src: 'assets/farm12/crops/pre-mature/pomelo.webp' }, mature: { src: 'assets/farm12/crops/mature/pomelo.webp' } },",
+        "      whiteradish: { seedling: { src: 'assets/farm12/crops/seedling/whiteradish.webp' }, mature: { src: 'assets/farm12/crops/mature/whiteradish.webp' } },",
+        "      cabbage: { seedling: { src: 'assets/farm12/crops/seedling/cabbage.webp' }, pre: { src: 'assets/farm12/crops/pre-mature/cabbage.webp' }, mature: { src: 'assets/farm12/crops/mature/cabbage.webp' } },",
+        "      strawberry: { seedling: { src: 'assets/farm12/crops/seedling/strawberry.webp' }, pre: { src: 'assets/farm12/crops/pre-mature/strawberry.webp' }, mature: { src: 'assets/farm12/crops/mature/strawberry.webp' } },",
+        "      golden_peach: { seedling: { src: 'assets/farm12/crops/legendary/golden_peach-seedling.webp' }, pre: { src: 'assets/farm12/crops/legendary/golden_peach-pre-mature.webp' }, mature: { src: 'assets/farm12/crops/legendary/golden_peach.webp' } },",
+        "      crystal_melon: { seedling: { src: 'assets/farm12/crops/legendary/crystal_melon-seedling.webp' }, pre: { src: 'assets/farm12/crops/legendary/crystal_melon-pre-mature.webp' }, mature: { src: 'assets/farm12/crops/legendary/crystal_melon.webp' } },",
+        "      giant_pumpkin: { seedling: { src: 'assets/farm12/crops/legendary/giant_pumpkin-seedling.webp' }, pre: { src: 'assets/farm12/crops/legendary/giant_pumpkin-pre-mature.webp' }, mature: { src: 'assets/farm12/crops/legendary/giant_pumpkin.webp' } },",
+        "      white_strawberry: { seedling: { src: 'assets/farm12/crops/legendary/white_strawberry-seedling.webp' }, pre: { src: 'assets/farm12/crops/legendary/white_strawberry-pre-mature.webp' }, mature: { src: 'assets/farm12/crops/legendary/white_strawberry.webp' } }",
+        '    };',
+        '',
+        "    const CropArt = ({ crop, growth = 0, fallback = '🌱', mode = 'field' }) => {",
+        '      if (!crop) return <span>{fallback}</span>;',
+        '      const sprites = FARM12_PILOT_SPRITES[crop.id];',
+        "      const fallbackClass = mode === 'seedbag' ? 'text-[12px] leading-none drop-shadow-md z-10' : 'text-4xl md:text-6xl transition-all';",
+        '      if (!sprites) return <span className={fallbackClass}>{fallback}</span>;',
+        '      const mature = growth >= crop.days;',
+        "      let stage = mature ? 'mature' : 'seedling';",
+        "      if (!mature && sprites.pre && growth / crop.days >= 0.38) stage = 'pre';",
+        '      const pos = sprites[stage];',
+        '      if (!pos) return <span className={fallbackClass}>{fallback}</span>;',
+        "      const legendary = ['golden_peach','crystal_melon','giant_pumpkin','white_strawberry'].includes(crop.id);",
+        "      const cls = 'farm12-art-wrap farm12-' + mode + (legendary ? ' farm12-legendary farm12-legendary-' + stage : '');",
+        "      const artClass = 'farm12-art' + (pos.src ? ' farm12-art-image' : '');",
+        "      const artStyle = pos.src ? { backgroundImage: 'url(' + pos.src + ')' } : {'--farm12-x': pos[0], '--farm12-y': pos[1]};",
+        "      return <span className={cls} title={crop.name + '・' + (stage === 'pre' ? '開花幼果期' : stage === 'mature' ? '成熟' : '幼苗')}><span className={artClass} style={artStyle} /></span>;",
+        '    };',
+        ''
+      ].join('\n');
+
+      html = replaceOnce(
+        html,
+        '    // --- 自定義 UI 元件：專屬種子袋 ---',
+        cropArtCode + '    // --- 自定義 UI 元件：專屬種子袋 ---',
+        'CropArt 元件'
+      );
+
+      html = replaceOnce(
+        html,
+        '<span className="text-[12px] leading-none drop-shadow-md z-10">{crop.icon}</span>',
+        '<CropArt crop={crop} growth={crop.days} mode="seedbag" fallback={crop.icon} />',
+        '種子袋圖片'
+      );
+
+      const oldSlot = [
+        '                              <span className={`text-4xl md:text-6xl transition-all ${slot.growth >= slot.crop.days ? \'scale-110 drop-shadow-md\' : \'scale-50 opacity-40\'}`}>',
+        "                                {slot.growth >= slot.crop.days ? slot.crop.icon : '🌱'}",
+        '                              </span>'
+      ].join('\n');
+      const newSlot = [
+        '                              <CropArt',
+        '                                crop={slot.crop}',
+        '                                growth={slot.growth}',
+        "                                fallback={slot.growth >= slot.crop.days ? slot.crop.icon : '🌱'}",
+        '                                mode="field"',
+        '                              />'
+      ].join('\n');
+      html = replaceOnce(html, oldSlot, newSlot, '農田生長圖片');
+
+      const oldPlotSummaryArt = [
+        '                        <div className={`text-4xl md:text-5xl group-hover:scale-110 transition-transform z-20 ${isGiantPumpkin && matureCount === plantedCount ? \'animate-pulse\' : \'\'}`}>',
+        '                          {plantedCount > 0 ? (',
+        "                            isGiantPumpkin ? '🎃' : (matureCount === plantedCount ? '✨' : '🌿')",
+        "                          ) : '🕳️'}",
+        '                        </div>'
+      ].join('\n');
+      const newPlotSummaryArt = [
+        '                        <div className={`text-4xl md:text-5xl group-hover:scale-110 transition-transform z-20 ${isGiantPumpkin && matureCount === plantedCount ? \'animate-pulse\' : \'\'}`}>',
+        '                          {plantedCount > 0 ? (',
+        '                            <CropArt',
+        '                              crop={plot.slots.find(slot => slot?.crop)?.crop}',
+        '                              growth={plot.slots.find(slot => slot?.crop)?.growth || 0}',
+        "                              fallback={plot.slots.find(slot => slot?.crop)?.crop?.icon || '🌱'}",
+        '                              mode="field"',
+        '                            />',
+        "                          ) : '🕳️'}",
+        '                        </div>'
+      ].join('\n');
+      html = replaceOnce(html, oldPlotSummaryArt, newPlotSummaryArt, '農田總覽實際作物圖片');
+
+      html = replaceOnce(
+        html,
+        'setFlyingCrops(prev => [...prev, { id: newId, icon: crop.icon, startX, startY, endX, endY }]);',
+        'setFlyingCrops(prev => [...prev, { id: newId, icon: crop.icon, cropId: crop.id, cropName: crop.name, startX, startY, endX, endY }]);',
+        '收成動畫資料'
+      );
+
+      html = replaceOnce(
+        html,
+        '            {data.icon}',
+        '            <CropArt crop={{ id: data.cropId, name: data.cropName || \'作物\', days: 1, icon: data.icon }} growth={1} mode="flying" fallback={data.icon} />',
+        '收成飛行圖片'
+      );
+
+      html = html.replace('<div id="root"></div>', '<div id="root"></div><div style="position:fixed;right:8px;bottom:8px;z-index:9998;background:rgba(21,94,53,.9);color:white;border-radius:999px;padding:5px 9px;font:700 11px Microsoft JhengHei,sans-serif;pointer-events:none">12-1 視覺新版・資金 100000・全種子各 1</div>');
+
+      frame.srcdoc = html;
+      frame.addEventListener('load', () => { loading.style.display = 'none'; }, {once:true});
+    }
+
+    buildRevision().catch(err => {
+      console.error(err);
+      loading.innerHTML = '<div class="box"><strong>12-1 建立失敗</strong><small>' + String(err.message || err) + '<br>原版 12.html 完全沒有被修改。</small></div>';
+    });
+  </script>
+</body>
+</html>
