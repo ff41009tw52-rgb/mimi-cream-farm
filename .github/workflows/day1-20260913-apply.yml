@@ -48,8 +48,6 @@ jobs:
           s = s.replace(old_apply, new_apply)
           p.write_text(s, encoding='utf-8')
           PY
-          echo '--- second Space smoke source ---'
-          grep -n -B18 -A18 "second Space did not advance" /tmp/build_day1_patch.py || true
       - name: Apply patch
         run: python3 /tmp/build_day1_patch.py
       - name: Verify target isolation and syntax
@@ -77,21 +75,18 @@ jobs:
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
           test -n "$CHROME"
           timeout 40s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --virtual-time-budget=12000 --dump-dom 'http://127.0.0.1:8765/herbgameai-formal.html?selftest=day1-20260913' >/tmp/day1-dom.txt 2>/tmp/day1-chrome.log
-          if ! grep -q 'DAY1_SELFTEST_PASS' /tmp/day1-dom.txt || grep -q 'DAY1_SELFTEST_FAIL' /tmp/day1-dom.txt; then
+          if ! grep -Eq '<pre id="day1-selftest-result"[^>]*>DAY1_SELFTEST_PASS</pre>' /tmp/day1-dom.txt; then
             grep -A40 -B2 '<pre id="day1-selftest-result"' /tmp/day1-dom.txt || true
             tail -100 /tmp/day1-chrome.log || true
             tail -40 /tmp/day1-http.log || true
             exit 1
           fi
-      - name: Commit tested AI Day1 update
+      - name: Commit tested AI Day1 update and remove temporary patch tooling
         shell: bash
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add herbgameai-formal.html
-          if git diff --cached --quiet; then
-            echo 'No HTML changes to commit.'
-          else
-            git commit -m 'feat: implement integrated Day 1 story and portrait sync'
-            git push origin HEAD:main
-          fi
+          git rm -f .github/workflows/day1-20260913-apply.yml tools/day1-20260913.payload
+          git commit -m 'feat: implement integrated Day 1 story and portrait sync'
+          git push origin HEAD:main
