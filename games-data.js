@@ -332,6 +332,18 @@
       moduleUrl: 'games/17/index.js',
       actionLabel: '佈置新家',
       actionIcon: 'fas fa-leaf'
+    },
+    {
+      grades: ['4'],
+      gradeLabel: '四年級',
+      subject: 'science',
+      icon: 'fas fa-water',
+      title: '🌊 流水搬運小實驗',
+      description: '觀察流水如何侵蝕、搬運並沉積礫石、沙與土壤，從互動實驗認識流水改變地表的作用。',
+      gameNumber: '41',
+      moduleUrl: 'games/41/index.js',
+      actionLabel: '開始實驗',
+      actionIcon: 'fas fa-play'
     }
   ];
 
