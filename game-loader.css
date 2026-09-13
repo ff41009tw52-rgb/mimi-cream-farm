@@ -14,8 +14,7 @@
 html,
 body,
 #game-shell,
-#game-content,
-#game-frame {
+#game-content {
   width: 100%;
   height: 100%;
 }
@@ -103,8 +102,7 @@ body {
   outline-offset: 3px;
 }
 
-#game-content,
-#game-frame {
+#game-content {
   display: block;
   border: 0;
   background: #ffffff;
