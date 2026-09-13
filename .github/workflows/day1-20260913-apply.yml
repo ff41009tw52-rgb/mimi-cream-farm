@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'tools/day1-20260913.payload'
+      - '.github/workflows/day1-20260913-apply.yml'
 
 permissions:
   contents: write
