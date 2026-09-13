@@ -1,0 +1,67 @@
+name: Apply Day1 2026-09-13 patch
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/day1-20260913.payload'
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Decode patch builder
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64, gzip
+          from pathlib import Path
+          data = Path('tools/day1-20260913.payload').read_text().strip()
+          Path('/tmp/build_day1_patch.py').write_bytes(gzip.decompress(base64.b64decode(data)))
+          PY
+      - name: Apply patch
+        run: python3 /tmp/build_day1_patch.py
+      - name: Verify target isolation and syntax
+        shell: bash
+        run: |
+          git diff --check
+          git diff --exit-code HEAD -- herbgame-formal.html
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          html=Path('herbgameai-formal.html').read_text(encoding='utf-8')
+          m=re.search(r'<script id="day1-20260913-patch">(.*?)</script><!-- /day1-20260913-patch -->', html, re.S)
+          assert m, 'Day1 patch script missing'
+          Path('/tmp/day1-patch.js').write_text(m.group(1), encoding='utf-8')
+          PY
+          node --check /tmp/day1-patch.js
+      - name: Browser smoke test
+        shell: bash
+        run: |
+          python3 -m http.server 8765 >/tmp/day1-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+          sleep 1
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          test -n "$CHROME"
+          timeout 40s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --virtual-time-budget=12000 --dump-dom 'http://127.0.0.1:8765/herbgameai-formal.html?selftest=day1-20260913' >/tmp/day1-dom.txt 2>/tmp/day1-chrome.log
+          grep -q 'DAY1_SELFTEST_PASS' /tmp/day1-dom.txt
+          ! grep -q 'DAY1_SELFTEST_FAIL' /tmp/day1-dom.txt
+      - name: Commit tested AI Day1 update
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add herbgameai-formal.html
+          if git diff --cached --quiet; then
+            echo 'No HTML changes to commit.'
+          else
+            git commit -m 'feat: implement integrated Day 1 story and portrait sync'
+            git push origin HEAD:main
+          fi
