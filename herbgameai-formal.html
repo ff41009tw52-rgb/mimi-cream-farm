@@ -2831,7 +2831,7 @@
       if (image) plantCardImage.src = image;
       else plantCardImage.onerror();
       engine.dom?.continueIcon?.classList.remove("show");
-      requestAnimationFrame(() => requestAnimationFrame(() => plantCardLayer.classList.add("active")));
+      requestAnimationFrame(() => requestAnimationFrame(() => { if (plantCardActive) plantCardLayer.classList.add("active"); }));
     }
 
     function hidePlantCard() {
@@ -3417,5 +3417,667 @@ const __aiBootTimer = setInterval(() => {
       };
     })();
     </script>
+    <script id="day1-20260913-patch">
+(() => {
+  'use strict';
+  const PATCH_VERSION = '2026-09-13-day1-integrated-v1';
+  let bootTries = 0;
+  const bootTimer = setInterval(() => {
+    bootTries += 1;
+    if (window.gameEngine && window.__HERBGAME_AI_VISUAL) {
+      clearInterval(bootTimer);
+      installDay1Patch(window, document, window.gameEngine);
+    } else if (bootTries > 160) {
+      clearInterval(bootTimer);
+      console.error('[HerbGame Day1] patch init failed: engine/AI visual branch unavailable');
+    }
+  }, 30);
+
+  function installDay1Patch(win, doc, engine) {
+    if (engine.__day1_20260913_installed) return;
+    engine.__day1_20260913_installed = true;
+
+    const STORY_DATA = win.eval('STORY_DATA');
+    const STUDENT_INFO = win.eval('STUDENT_INFO');
+    const MEMBER_INFO = win.eval('MEMBER_INFO');
+    const PLAYER_PROFILE = (() => { try { return win.eval('PLAYER_PROFILE'); } catch { return {}; } })();
+    if (!STORY_DATA?.nodes || !STUDENT_INFO || !MEMBER_INFO) {
+      console.error('[HerbGame Day1] required data unavailable');
+      return;
+    }
+    const n = STORY_DATA.nodes;
+
+    const FIRST_IMPRESSION = Object.freeze({
+      left_student: '感覺很安靜的男生',
+      lemongrass_student: '感覺很有精神的男生',
+      pandan_student: '感覺很講究的女生',
+      mugwort_student: '感覺很認真在聽的女生',
+      fishmint_student: '感覺很沉穩的男生',
+      pricklyash_student: '感覺說話很直接的男生',
+      shellginger_student: '感覺很細心的女生',
+      teatree_student: '感覺很認真的男生',
+      turmeric_student: '感覺很會觀察的男生',
+      marigold_student: '感覺很有活力的女生'
+    });
+    const DAY1_ORDER = Object.freeze([
+      'mint_student','lemongrass_student','pandan_student','left_student','mugwort_student',
+      'pricklyash_student','shellginger_student','teatree_student','fishmint_student',
+      'turmeric_student','marigold_student'
+    ]);
+    const CARD_ID = Object.freeze({
+      mint_student:'mint', lemongrass_student:'lemongrass', pandan_student:'pandan',
+      left_student:'left_hand_incense', mugwort_student:'mugwort', pricklyash_student:'prickly_ash',
+      shellginger_student:'shell_ginger', teatree_student:'australian_tea_tree',
+      fishmint_student:'fish_mint', turmeric_student:'turmeric', marigold_student:'aromatic_marigold'
+    });
+
+    const add = (id, node) => { n[id] = { day1PortraitManaged:true, ...node }; return id; };
+    const npc = (speaker, text, extra={}) => ({type:'dialogue', speaker, speakerType:'npc', text, ...extra});
+    const player = (text, extra={}) => ({type:'dialogue', speaker:'我', speakerType:'player', text, ...extra});
+    const inner = (text, extra={}) => ({type:'dialogue', speaker:'我／內心', speakerType:'player', text, ...extra});
+    const system = (text, extra={}) => ({type:'dialogue', speaker:null, speakerType:'system', text, ...extra});
+    const unknown = (studentId, text, extra={}) => {
+      const info = STUDENT_INFO[studentId];
+      return npc(info.name, text, {displaySpeaker:FIRST_IMPRESSION[studentId], visualStudentId:studentId, ...extra});
+    };
+    const student = (studentId, text, extra={}) => {
+      const info = STUDENT_INFO[studentId];
+      return npc(info.name, text, {visualStudentId:studentId, ...extra});
+    };
+    const chain = (prefix, steps, next) => {
+      const ids = steps.map((step, i) => `${prefix}_${String(i+1).padStart(2,'0')}`);
+      steps.forEach((step, i) => add(ids[i], {...step, next: step.next || ids[i+1] || next}));
+      return ids;
+    };
+
+    function nicknameBase() {
+      const raw = String(engine.gameState?.playerGender ?? engine.gameState?.gender ?? PLAYER_PROFILE?.gender ?? PLAYER_PROFILE?.sex ?? '').trim().toLowerCase();
+      if (['男','男性','male','m','boy'].includes(raw)) return '忘記星期三先生';
+      if (['女','女性','female','f','girl'].includes(raw)) return '忘記星期三小姐';
+      return '忘記星期三同學';
+    }
+
+    // ---------------- Day 1 opening: school gate -> classroom -> gathering ----------------
+    STORY_DATA.initialScene = 'd1_20260913_gate_01';
+    chain('d1_20260913_gate', [
+      system('早安。', {sceneImage:'picture/herb-game/scene-01-school-gate.jpg', updateTime:'07:45', updateLocation:'校門口', displaySpeaker:'校長／背景聲'}),
+      system('同學，慢慢走，不要跑喔。', {displaySpeaker:'校長／背景聲'})
+    ], 'd1_20260913_class_01');
+    chain('d1_20260913_class', [
+      player('等等……', {sceneImage:'picture/herb-game/scene-18-classroom.jpg', updateLocation:'班級教室'}),
+      player('今天星期三？'),
+      player('……糟了。'),
+      player('早自習要集合！')
+    ], 'd1_20260913_run');
+    add('d1_20260913_run', {type:'video_placeholder', title:'【趕往集合】', subtitle:'第一人稱：發現今天是星期三後，立刻趕往集合地點。', duration:1400, next:'d1_20260913_gather_01'});
+    chain('d1_20260913_gather', [
+      npc('陳冠瑋老師','你是不是剛到？',{sceneImage:'picture/herb-game/scene-05-gather-arrival.jpg', updateTime:'早自習', updateLocation:'集合地點', characterUnlock:'陳冠瑋老師'}),
+      inner('……被看到了。'),
+      player('要怎麼回答？', {choices:[
+        {id:'A', text:'老師，我剛剛才趕過來。', response:{...player('老師，我剛剛才趕過來。'), next:'d1_20260913_late_a_01'}},
+        {id:'B', text:'對不起，我忘記今天星期三了。', response:{...player('對不起，我忘記今天星期三了。'), next:'d1_20260913_late_b_01'}},
+        {id:'C', text:'老師，我剛剛……去巡視校園。', response:{...player('老師，我剛剛……去巡視校園。'), next:'d1_20260913_late_c_01'}}
+      ]})
+    ], null);
+    chain('d1_20260913_late_a', [
+      npc('陳冠瑋老師','這個我看得出來。'), player('對不起。'),
+      npc('陳冠瑋老師','先不用站在這裡道歉，跟上比較重要。'), player('好，老師。')
+    ], 'd1_20260913_merge_01');
+    chain('d1_20260913_late_b', [
+      npc('陳冠瑋老師','忘記星期三？'), npc('陳冠瑋老師','那你今天本來打算去哪裡？圖書館吹冷氣嗎？'),
+      player('沒有啦……我是真的忘記了。'), npc('陳冠瑋老師','好，現在想起來就先跟上。'), player('好，謝謝老師。')
+    ], 'd1_20260913_merge_01');
+    chain('d1_20260913_late_c', [
+      npc('陳冠瑋老師','巡視校園？'), player('呃……我是說，我剛剛繞了一下才過來。'),
+      npc('陳冠瑋老師','原來如此。'), npc('陳冠瑋老師','那等一下香草園也麻煩你順便巡視一下。'),
+      player('……好的，老師。'), npc('陳冠瑋老師','很好，巡視員，跟上。'), inner('好像越解釋工作越多了。')
+    ], 'd1_20260913_merge_01');
+    chain('d1_20260913_merge', [
+      npc('許恒維老師','好，人都到了。',{characterUnlock:'許恒維老師'}),
+      npc('許恒維老師','我們先去香草園，到了再說明今天要做什麼。'),
+      npc('陳冠瑋老師','大家跟好，不要走散。')
+    ], 'd1_20260913_garden_01');
+
+    // ---------------- Herb garden judgment; visual supports position/arrangement only ----------------
+    chain('d1_20260913_garden', [
+      npc('陳冠瑋老師','等等整理的時候，先提醒一件事。',{sceneImage:'picture/herb-game/scene-12-herb-garden-wide.jpg', updateLocation:'香草園'}),
+      npc('陳冠瑋老師','不要看到綠色的就直接拔。'),
+      player('老師，真的有人會全部拔掉嗎？'),
+      npc('陳冠瑋老師','每年都有幾個很有行動力的。'),
+      npc('陳冠瑋老師','通常行動完才發現不太對。'),
+      npc('許恒維老師','所以現在先不用急著動手。'),
+      npc('許恒維老師','你看看這兩邊。'),
+      npc('許恒維老師','你覺得現在應該先處理哪一邊？',{sceneImage:'picture/herb-game/scene-14-herb-vs-weed.jpg', choices:[
+        {id:'A',text:'左邊',response:{...player('我覺得是左邊。'),next:'d1_20260913_weed_a_01'}},
+        {id:'B',text:'右邊',response:{...player('我覺得是右邊。'),next:'d1_20260913_weed_b_01'}},
+        {id:'C',text:'老師，我現在還看不出來。',response:{...player('老師，我現在真的還看不出來。'),next:'d1_20260913_weed_c_01'}}
+      ]})
+    ], null);
+    chain('d1_20260913_weed_a', [
+      npc('許恒維老師','你是看到什麼，所以選左邊？'), player('看起來比較亂。'),
+      npc('許恒維老師','好，那先記住你剛才注意到的地方。'),
+      npc('許恒維老師','再看看兩邊的生長位置和排列，有沒有其他線索。'), player('好，我再看一次。')
+    ], 'd1_20260913_garden_08');
+    chain('d1_20260913_weed_c', [
+      npc('許恒維老師','沒關係。'), npc('許恒維老師','不知道的時候不用急著猜。'),
+      npc('許恒維老師','先看看它們長的位置和排列，有沒有哪一邊比較像特地種在一起的。'), player('好，我再仔細看看。')
+    ], 'd1_20260913_garden_08');
+    chain('d1_20260913_weed_b', [
+      npc('許恒維老師','你看到什麼了？'), player('左邊比較像是一起種的，右邊看起來比較散。'),
+      npc('許恒維老師','對，你有注意到它們生長的位置。'),
+      npc('許恒維老師','之後遇到不確定的，也可以先找得到的線索，不用急著動手。'),
+      npc('陳冠瑋老師','不然香草園整理到最後，就只剩「園」。'), player('那真的會整理得很乾淨。'),
+      npc('陳冠瑋老師','我不是在稱讚。',{experienceFlag:'firstHerbGardenInspection'})
+    ], 'd1_20260913_service_end_01');
+    chain('d1_20260913_service_end', [
+      npc('許恒維老師','今天先整理到這裡，大家辛苦了。'),
+      npc('陳冠瑋老師','先回教室吧，等等還要上課。')
+    ], 'd1_20260913_return_class');
+    add('d1_20260913_return_class', {type:'video_placeholder', title:'【回到教室】', subtitle:'上午的香草園服務結束，回到班級教室。', duration:1500, next:'d1_20260913_break_01'});
+    chain('d1_20260913_break', [
+      system('上午的課程繼續進行……',{sceneImage:'picture/herb-game/scene-18-classroom.jpg',updateTime:'上午課程',updateLocation:'班級教室'}),
+      system('下課鐘響了。',{updateTime:'上午下課'}),
+      player('這次下課……要去哪裡看看呢？')
+    ], 'scene19_map');
+
+    // Keep Xiao Lin Event 1 intact, then replace only the post-event time passage.
+    if (n.scene21_return) n.scene21_return.next = 'd1_20260913_timepass';
+    add('d1_20260913_timepass', {type:'video_placeholder', title:'【時間經過】', subtitle:'上午剩餘課程、午餐、午休與下午課程很快過去。', duration:2200, next:'d1_20260913_241_01'});
+
+    // ---------------- 241 service-team introduction ----------------
+    const serviceIntro = [
+      npc('許恒維老師','早上大家已經整理過一次香草園了。',{sceneImage:'PLACEHOLDER_SCENE_24_241自然教室',updateTime:'下午',updateLocation:'241自然教室',setTask:{name:'香草服務隊特別活動①《我們是香草服務隊》',objectives:['認識香草服務隊成員','領取植物卡','記住自己的香草夥伴']}}),
+      student('mint_student','老師，我們以後每個星期三都要拔草嗎？'),
+      npc('陳冠瑋老師','如果只有拔草，我們就叫「拔草服務隊」。'),
+      student('mint_student','那不要，聽起來好累。'),
+      npc('許恒維老師','所以當然不只拔草。'),
+      npc('許恒維老師','等等每個人都會有一株主要負責的植物。接下來幾個星期，就從認識它開始。'),
+      unknown('lemongrass_student','所以今天就會分嗎？'),
+      npc('陳冠瑋老師','會。'),
+      unknown('lemongrass_student','那可以現在分嗎？'),
+      npc('陳冠瑋老師','不可以。'),
+      unknown('pandan_student','老師，那我們最後要怎麼介紹自己的植物？'),
+      npc('許恒維老師','現在不用急著決定。'),
+      npc('許恒維老師','有人喜歡講，有人可能比較會做東西，也可以用作品或其他方式。'),
+      npc('許恒維老師','先真的認識它，之後再找適合自己的方式。'),
+      student('mint_student','那會做吃的嗎？'),
+      npc('陳冠瑋老師','妳怎麼只記得這個？'),
+      student('mint_student','因為這個也很重要啊。'),
+      npc('陳冠瑋老師','有些植物之後真的會用得到。'),
+      npc('陳冠瑋老師','前提是先認對。'),
+      student('mint_student','好啦，我會認真認。'),
+      npc('許恒維老師','那我們今天就一邊認識人，一邊把植物發下去。'),
+      npc('陳冠瑋老師','自我介紹不用講很長。'),
+      npc('陳冠瑋老師','名字，再說一件平常喜歡做、喜歡去，或最近常做的事情就好。'),
+      student('mint_student','我可以先嗎？'),
+      npc('陳冠瑋老師','我本來就知道妳會問。')
+    ];
+    chain('d1_20260913_241', serviceIntro, 'd1_20260913_mint_01');
+
+    // 1 小琳 + 薄荷
+    chain('d1_20260913_mint', [
+      student('mint_student','那我先！'),
+      student('mint_student','我是小琳。下課很常去遊樂場或南瓜馬車那邊。'),
+      student('mint_student','如果看到我，可以直接叫我。'),
+      unknown('lemongrass_student','根本不用叫吧，妳自己就會跑過去了。'),
+      student('mint_student','哪有！'),
+      npc('許恒維老師','好，小琳。妳負責的是——薄荷。',{plantCardReveal:CARD_ID.mint_student}),
+      student('mint_student','真的薄荷！',{discoverHerbName:'薄荷',studentPlantAssignment:'mint_student'}),
+      student('mint_student','太好了，我早上就在想希望是這個。'),
+      system('【她轉頭看向主角。】'),
+      student('mint_student','不用換了！'), player('我還什麼都沒說耶。',{taskProgress:[0]})
+    ], 'd1_20260913_kai_01');
+
+    // 2 小凱 + 檸檬香茅
+    chain('d1_20260913_kai', [
+      unknown('lemongrass_student','換我。'), unknown('lemongrass_student','我是小凱！'),
+      student('lemongrass_student','我下課大部分都在前操場，不是在打球，就是準備打球。',{studentUnlock:'lemongrass_student',studentStatus:'初識'}),
+      student('mint_student','你上次球差點飛進花圃。'),
+      student('lemongrass_student','那次真的有風吹啦！'),
+      unknown('pandan_student','風吹得還滿準的。'),
+      student('lemongrass_student','連妳也這樣講！'),
+      npc('陳冠瑋老師','好，小凱。你的植物是——檸檬香茅。',{plantCardReveal:CARD_ID.lemongrass_student}),
+      student('lemongrass_student','檸檬香茅？',{discoverHerbName:'檸檬香茅',studentPlantAssignment:'lemongrass_student'}),
+      student('lemongrass_student','名字有檸檬，真的會有檸檬的味道嗎？'),
+      npc('許恒維老師','這個就留給你之後自己確認。'),
+      student('lemongrass_student','好，我等等就想去看。')
+    ], 'd1_20260913_le_01');
+
+    // 3 小樂 + 斑蘭葉
+    chain('d1_20260913_le', [
+      unknown('pandan_student','那接下來我好了。'), unknown('pandan_student','我是小樂。'),
+      student('pandan_student','我滿喜歡畫畫、做卡片，還有整理版面。',{studentUnlock:'pandan_student',studentStatus:'初識'}),
+      student('lemongrass_student','她真的會管很細。'), student('pandan_student','因為你們每次都貼歪啊。'),
+      student('lemongrass_student','差一點點而已。'), student('pandan_student','差一點也是歪。'),
+      npc('許恒維老師','小樂負責的是——斑蘭葉。',{plantCardReveal:CARD_ID.pandan_student}),
+      student('pandan_student','這個葉子的顏色滿好看的。',{discoverHerbName:'斑蘭葉',studentPlantAssignment:'pandan_student'}),
+      student('mint_student','妳第一個就看顏色喔？'), student('pandan_student','不然第一眼本來就會先看到啊。')
+    ], 'd1_20260913_an_01');
+
+    // 4 小安 + 左手香
+    chain('d1_20260913_an', [
+      unknown('left_student','那……我來好了。'), unknown('left_student','大家好，我是小安。'),
+      student('left_student','我下課比較常去後操場。',{studentUnlock:'left_student',studentStatus:'初識'}),
+      student('lemongrass_student','後操場？那邊不是很遠嗎？'), student('left_student','就是因為比較遠，所以人比較少。'),
+      student('left_student','我滿喜歡那邊的，比較安靜。'), student('pandan_student','難怪有時候下課都沒看到你。'),
+      student('left_student','我其實都還在學校啦。'),
+      npc('許恒維老師','小安負責——左手香。',{plantCardReveal:CARD_ID.left_student}),
+      student('left_student','左手香……',{discoverHerbName:'左手香',studentPlantAssignment:'left_student'}),
+      student('left_student','名字滿好記的。'), student('left_student','我想先看看它實際長什麼樣。')
+    ], 'd1_20260913_xi_01');
+
+    // 5 小希 + 艾草
+    chain('d1_20260913_xi', [
+      unknown('mugwort_student','我是小希。'),
+      student('mugwort_student','我很喜歡聽故事。',{studentUnlock:'mugwort_student',studentStatus:'初識'}),
+      student('mugwort_student','尤其是家裡以前發生的事情，我聽過以後常常會記很久。'),
+      unknown('shellginger_student','妳上次不是還跟我講了一個講超久的？'),
+      student('mugwort_student','因為那個真的很有趣啊。'), unknown('shellginger_student','我沒有說不好聽啦。'),
+      npc('許恒維老師','小希負責的是——艾草。',{plantCardReveal:CARD_ID.mugwort_student}),
+      student('mugwort_student','艾草？',{discoverHerbName:'艾草',studentPlantAssignment:'mugwort_student'}),
+      student('mugwort_student','我好像有聽家裡的人說過。'), unknown('teatree_student','妳記得他們說什麼嗎？'),
+      student('mugwort_student','記得一點。'), student('mugwort_student','可是我還是回去再問清楚好了。')
+    ], 'd1_20260913_jie_01');
+
+    // 6 小杰 + 刺蔥
+    chain('d1_20260913_jie', [
+      unknown('pricklyash_student','我是小杰。'),
+      student('pricklyash_student','我平常常去遊戲區或能強館。',{studentUnlock:'pricklyash_student',studentStatus:'初識'}),
+      student('pricklyash_student','如果有要搬東西，也可以叫我。'), student('lemongrass_student','這句是真的，他搬東西超快。'),
+      student('pricklyash_student','不然要搬到明天喔？'), student('lemongrass_student','我是在稱讚你欸。'),
+      student('pricklyash_student','我知道啦。'),
+      npc('陳冠瑋老師','小杰，你負責的是——刺蔥。',{plantCardReveal:CARD_ID.pricklyash_student}),
+      student('pricklyash_student','刺蔥？',{discoverHerbName:'刺蔥',studentPlantAssignment:'pricklyash_student'}),
+      student('mint_student','有刺耶。'), student('pricklyash_student','所以等等不要有人看到「刺」就真的跑去摸。'),
+      student('lemongrass_student','你為什麼看著我講？'), student('pricklyash_student','你自己想。')
+    ], 'd1_20260913_yu_01');
+
+    // 7 小羽 + 月桃
+    chain('d1_20260913_yu', [
+      unknown('shellginger_student','大家好，我是小羽。'),
+      student('shellginger_student','我比較常去南瓜馬車附近。',{studentUnlock:'shellginger_student',studentStatus:'初識'}),
+      student('shellginger_student','如果教室有東西忘了收，我看到也會順手幫忙。'),
+      student('pandan_student','難怪我的剪刀上次自己跑回盒子裡。'), student('shellginger_student','那個是我收的。'),
+      student('pandan_student','我就知道。'), student('shellginger_student','下次我先問妳好了。'),
+      npc('許恒維老師','小羽負責的是——月桃。',{plantCardReveal:CARD_ID.shellginger_student}),
+      student('shellginger_student','月桃。',{discoverHerbName:'月桃',studentPlantAssignment:'shellginger_student'}),
+      student('shellginger_student','我先記一下它在哪一區，等等比較不會找錯。'),
+      student('pandan_student','妳已經開始規劃了喔？'), student('shellginger_student','先記著比較安心。')
+    ], 'd1_20260913_sen_01');
+
+    // 8 小森 + 澳洲茶樹
+    chain('d1_20260913_sen', [
+      unknown('teatree_student','我是小森。'),
+      student('teatree_student','我很喜歡查資料。',{studentUnlock:'teatree_student',studentStatus:'初識'}),
+      student('teatree_student','看到不認識的東西，我常常會先猜，再回去查自己猜得對不對。'),
+      student('mugwort_student','那你不是會查超久？'), student('teatree_student','有時候會。'),
+      student('teatree_student','可是查到自己原本想錯，也滿有意思的。'),
+      npc('許恒維老師','小森負責的是——澳洲茶樹。',{plantCardReveal:CARD_ID.teatree_student}),
+      student('teatree_student','澳洲茶樹……',{discoverHerbName:'澳洲茶樹',studentPlantAssignment:'teatree_student'}),
+      student('lemongrass_student','所以可以泡茶？'), student('teatree_student','我也正想問。'),
+      student('teatree_student','算了，先不要告訴我。'), student('teatree_student','我等等自己查。'),
+      npc('陳冠瑋老師','很好，省我一句。')
+    ], 'd1_20260913_bai_01');
+
+    // 9 小柏 + 魚腥草
+    chain('d1_20260913_bai', [
+      unknown('fishmint_student','大家好，我是小柏。'),
+      student('fishmint_student','我比較常去生態池。',{studentUnlock:'fishmint_student',studentStatus:'初識'}),
+      student('fishmint_student','有些東西我會多看一下。'), unknown('turmeric_student','你上次在池邊蹲很久。'),
+      student('fishmint_student','我在看水裡的東西。'), unknown('turmeric_student','我知道。'),
+      npc('許恒維老師','小柏負責——魚腥草。',{plantCardReveal:CARD_ID.fishmint_student}),
+      student('pricklyash_student','魚腥草？名字聽起來味道很重。',{discoverHerbName:'魚腥草',studentPlantAssignment:'fishmint_student'}),
+      student('fishmint_student','可能吧。'), student('fishmint_student','不過還是實際看過再說。'), student('pricklyash_student','也是。')
+    ], 'd1_20260913_chenstudent_01');
+
+    // 10 小辰 + 薑黃
+    chain('d1_20260913_chenstudent', [
+      unknown('turmeric_student','我是小辰。'),
+      student('turmeric_student','我比較常去後操場或生態池。',{studentUnlock:'turmeric_student',studentStatus:'初識'}),
+      student('turmeric_student','有時候看到一些小東西，我會停下來多看一下。'),
+      student('fishmint_student','所以你也常常蹲在那邊。'), student('turmeric_student','你也是啊。'), student('fishmint_student','也是。'),
+      npc('許恒維老師','小辰負責的是——薑黃。',{plantCardReveal:CARD_ID.turmeric_student}),
+      student('turmeric_student','薑黃這個名字我知道。',{discoverHerbName:'薑黃',studentPlantAssignment:'turmeric_student'}),
+      student('teatree_student','我以前比較常看到薑黃粉。'), student('turmeric_student','我也是。'),
+      student('turmeric_student','所以我想看看整株到底長什麼樣子。')
+    ], 'd1_20260913_qing_01');
+
+    // 11 小晴 + 芳香萬壽菊
+    chain('d1_20260913_qing', [
+      unknown('marigold_student','最後換我！'), unknown('marigold_student','我是小晴。'),
+      student('marigold_student','我下課滿常去南瓜馬車或遊樂場。',{studentUnlock:'marigold_student',studentStatus:'初識'}),
+      student('marigold_student','如果大家要一起做什麼，也可以找我。'), student('pricklyash_student','妳是會直接把全部人都找來吧。'),
+      student('marigold_student','一起比較熱鬧啊。'), student('shellginger_student','上次妳說「幾個人就好」，最後來了八個。'),
+      student('marigold_student','八個也還好吧。'),
+      npc('許恒維老師','小晴負責的是——芳香萬壽菊。',{plantCardReveal:CARD_ID.marigold_student}),
+      student('marigold_student','芳香萬壽菊……',{discoverHerbName:'芳香萬壽菊',studentPlantAssignment:'marigold_student'}),
+      student('pandan_student','名字滿長的。'), student('marigold_student','我先念兩次。'),
+      student('marigold_student','芳香萬壽菊。'), student('lemongrass_student','一次。'), student('marigold_student','我等一下會念第二次啦。',{taskProgress:[1]})
+    ], 'd1_20260913_playerintro_01');
+
+    // Protagonist intro
+    chain('d1_20260913_playerintro', [
+      npc('許恒維老師','好，最後剩你。'), player('我嗎？'),
+      student('mint_student',`${nicknameBase()}還沒講。`,{dynamicText:'nickname'}),
+      player('那個可以先不要當成我的正式介紹嗎？'), student('mint_student','好啦。'),
+      npc('陳冠瑋老師','不用講很長，跟大家一樣就好。'), system('【主角站起來。】',{clearCharacter:true}),
+      player('大家好。'), player('我是今天新加入的。'),
+      player('我可能比較慢熟一點，不過之後還請大家多多指教。'),
+      student('mint_student','他其實會講話啦。'), player('我本來就會。'), system('【教室裡有人笑了一下。】')
+    ], 'd1_20260913_rosemary_01');
+
+    // Rosemary card and memory association (no causal assignment link)
+    chain('d1_20260913_rosemary', [
+      npc('許恒維老師','那最後這張就是你的。'),
+      npc('許恒維老師','迷迭香。',{plantCardReveal:'rosemary'}),
+      player('迷迭香……',{discoverHerbName:'迷迭香'}), player('這個名字我好像有聽過。'),
+      npc('許恒維老師','很好，名字先記住就好。'), npc('許恒維老師','其他的之後自己慢慢認識。'),
+      npc('許恒維老師','對了，迷迭香在一些文化裡，也常和「記憶」產生聯想。'),
+      student('mint_student','記憶？'), student('mint_student','你今天早上不是剛好——'), player('小琳。'),
+      student('mint_student','我還沒說完！'), npc('陳冠瑋老師','我知道妳要說什麼。'),
+      npc('陳冠瑋老師','先聲明，植物不是按照「今天忘記了什麼」來分的。'),
+      system('【教室裡笑了一下。】'), student('mint_student','可是也太剛好了吧。'),
+      player('至少這樣我應該很難忘記它叫什麼了。'), student('mint_student','你看！已經有效了！'),
+      npc('陳冠瑋老師','不要亂下研究結論。',{taskProgress:[2]})
+    ], 'd1_20260913_closing_01');
+
+    // Day 1 card-distribution closing; then reuse current ending flow unchanged.
+    chain('d1_20260913_closing', [
+      npc('許恒維老師','好，現在每個人都知道自己負責哪一株了。'),
+      npc('許恒維老師','不過拿到卡片，只代表你知道它的名字。'),
+      npc('許恒維老師','還不代表你真的認識它。'), system('【學生們看看自己的卡片。】'),
+      npc('許恒維老師','接下來幾個星期，你們會慢慢把這些空白補起來。'),
+      npc('陳冠瑋老師','所以卡片先收好。'), npc('陳冠瑋老師','不要第一天就弄丟。'),
+      student('mint_student','我的還在。'), npc('陳冠瑋老師','我沒有只在說妳。')
+    ], 'scene33_members_update');
+
+    // Make the dynamic nickname refresh each time this node is loaded.
+    const originalLoadNode = engine.loadNode.bind(engine);
+    engine.loadNode = function(nodeId, options={}) {
+      const node = n[nodeId];
+      if (node?.dynamicText === 'nickname') node.text = `${nicknameBase()}還沒講。`;
+      const result = originalLoadNode(nodeId, options);
+      if (!options?.skipSideEffects && node?.studentPlantAssignment && STUDENT_INFO[node.studentPlantAssignment]) {
+        const relation = this.gameState?.studentRelations?.[node.studentPlantAssignment];
+        if (relation) relation.plantAssigned = true;
+        this.renderPlayerPanel?.();
+      }
+      return result;
+    };
+
+    // Representative plant in the member panel is gated by formal card assignment,
+    // not by global herb-name discovery (Xiao Lin can know mint before she is assigned it).
+    function maskUnassignedPlantPairings() {
+      const state = engine.gameState;
+      if (!state) return;
+      doc.querySelectorAll('#member-list .member-avatar-img[data-character-id]').forEach(img => {
+        const id = img.dataset.characterId;
+        if (!STUDENT_INFO[id]) return;
+        const card = img.closest('.member-card');
+        if (!card) return;
+        const rows = [...card.querySelectorAll('.member-meta-row')];
+        const row = rows.find(r => r.querySelector('strong')?.textContent?.trim() === '代表植物');
+        const value = row?.querySelector('span');
+        if (value) value.textContent = state.studentRelations?.[id]?.plantAssigned ? STUDENT_INFO[id].plant : '？？？';
+      });
+    }
+    const originalRenderPlayerPanel = engine.renderPlayerPanel.bind(engine);
+    engine.renderPlayerPanel = function(...args) {
+      const result = originalRenderPlayerPanel(...args);
+      maskUnassignedPlantPairings();
+      return result;
+    };
+
+    // Mask the same field in the full portrait Viewer.
+    const viewer = doc.getElementById('member-portrait-viewer');
+    const viewerMeta = doc.getElementById('member-portrait-viewer-meta');
+    function syncViewerMeta() {
+      if (!viewer?.classList.contains('active') || !viewerMeta) return;
+      const id = viewer.dataset.characterId;
+      if (!STUDENT_INFO[id]) return;
+      viewerMeta.textContent = `代表植物｜${engine.gameState?.studentRelations?.[id]?.plantAssigned ? STUDENT_INFO[id].plant : '？？？'}`;
+    }
+    if (viewer) {
+      new MutationObserver(syncViewerMeta).observe(viewer, {attributes:true,attributeFilter:['class','data-character-id'],subtree:true,childList:true});
+      viewer.addEventListener('click', () => setTimeout(syncViewerMeta, 0));
+    }
+
+    // Day 1 speaker portrait layer: students always use STUDENT_INFO[id].avatar.
+    // The visible nameplate may be a first-impression label before formal introduction.
+    const layer = doc.getElementById('ai-character-layer');
+    const sprite = doc.getElementById('ai-character-sprite');
+    const nameEl = doc.querySelector('.character-name');
+    let activePortrait = null;
+    let customSwapTimer = 0;
+
+    function studentIdForSpeaker(node) {
+      if (node?.visualStudentId && STUDENT_INFO[node.visualStudentId]) return node.visualStudentId;
+      if (!node?.speaker) return null;
+      const entry = Object.entries(STUDENT_INFO).find(([id, info]) => id === node.speaker || info?.name === node.speaker);
+      return entry?.[0] || null;
+    }
+    function memberForSpeaker(speaker) {
+      if (!speaker) return null;
+      const entry = Object.entries(MEMBER_INFO).find(([key, info]) => key === speaker || info?.id === speaker || info?.name === speaker);
+      return entry ? {key:entry[0], info:entry[1]} : null;
+    }
+    function setPosition(pos='right') {
+      if (!layer) return;
+      const p = ['left','center','right'].includes(pos) ? pos : 'right';
+      layer.classList.remove('position-left','position-center','position-right');
+      layer.classList.add(`position-${p}`);
+    }
+    function renderTeacher(member, node) {
+      if (!layer || !sprite || !member?.info?.avatar) return false;
+      setPosition(node.characterPosition || 'right');
+      clearTimeout(customSwapTimer);
+      const src = member.info.avatar;
+      const same = sprite.getAttribute('src') === src;
+      activePortrait = {kind:'member', id:member.info.id || member.key, src};
+      sprite.alt = node.displaySpeaker || member.info.name || member.key;
+      if (same) {
+        layer.classList.remove('listening');
+        layer.classList.add('visible');
+        return true;
+      }
+      layer.classList.remove('visible','listening');
+      customSwapTimer = setTimeout(() => {
+        if (sprite.getAttribute('src') !== src) sprite.src = src;
+        requestAnimationFrame(() => requestAnimationFrame(() => layer.classList.add('visible')));
+      }, 45);
+      return true;
+    }
+    function clearCustomPortrait() {
+      activePortrait = null;
+      clearTimeout(customSwapTimer);
+    }
+
+    const originalShowDialogue = engine.showDialogue.bind(engine);
+    engine.showDialogue = function(node) {
+      const result = originalShowDialogue(node);
+      if (!node?.day1PortraitManaged) return result;
+      if (node.displaySpeaker && nameEl) nameEl.textContent = node.displaySpeaker;
+      if (node.clearCharacter || node.hideCharacter) {
+        clearCustomPortrait();
+        return result;
+      }
+      const sid = studentIdForSpeaker(node);
+      if (node.speakerType === 'npc' && sid) {
+        const info = STUDENT_INFO[sid];
+        activePortrait = {kind:'student', id:sid, src:info.avatar};
+        if (sprite) sprite.alt = node.displaySpeaker || info.name;
+        return result;
+      }
+      if (node.speakerType === 'npc') {
+        const member = memberForSpeaker(node.speaker);
+        if (member?.info?.avatar) renderTeacher(member, node);
+        else clearCustomPortrait();
+        return result;
+      }
+      if ((node.speakerType === 'player' || node.speakerType === 'system' || !node.speakerType) && activePortrait && layer && sprite?.getAttribute('src')) {
+        layer.classList.add('visible','listening');
+      }
+      return result;
+    };
+
+    // Overlays / videos / maps intentionally end the current portrait context.
+    ['showSystemOverlay','showVideoPlaceholder','showVideoScene','showCampusMap','showResearchTablet','showDemoEnd'].forEach(method => {
+      if (typeof engine[method] !== 'function') return;
+      const original = engine[method].bind(engine);
+      engine[method] = function(...args) {
+        clearCustomPortrait();
+        return original(...args);
+      };
+    });
+
+    engine.renderPlayerPanel?.();
+    win.__HERBGAME_DAY1_20260913 = {PATCH_VERSION,FIRST_IMPRESSION,DAY1_ORDER,CARD_ID,maskUnassignedPlantPairings};
+
+    // Built-in browser smoke test used by CI only. Never runs for normal players.
+    if (new URLSearchParams(location.search).get('selftest') === 'day1-20260913') {
+      setTimeout(() => runSelfTest().catch(err => finishSelfTest(false,[String(err?.stack || err)])), 300);
+    }
+
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    function finishSelfTest(ok, failures) {
+      const pre = doc.createElement('pre');
+      pre.id = 'day1-selftest-result';
+      pre.style.display = 'none';
+      pre.textContent = ok ? 'DAY1_SELFTEST_PASS' : `DAY1_SELFTEST_FAIL\n${failures.join('\n')}`;
+      doc.body.appendChild(pre);
+      if (!ok) console.error('[HerbGame Day1 selftest]', failures);
+    }
+    async function runSelfTest() {
+      const failures = [];
+      const assert = (condition, message) => { if (!condition) failures.push(message); };
+      const spriteEl = doc.getElementById('ai-character-sprite');
+      const layerEl = doc.getElementById('ai-character-layer');
+      const nameBox = doc.querySelector('.character-name');
+      doc.getElementById('screen-home')?.classList.remove('active');
+      doc.getElementById('screen-intro')?.classList.remove('active');
+      doc.getElementById('screen-game')?.classList.add('active');
+      if (engine.dom?.hudLocation) engine.dom.hudLocation.textContent = '241自然教室';
+
+      assert(STORY_DATA.initialScene === 'd1_20260913_gate_01', 'initial scene not patched');
+      assert(JSON.stringify(DAY1_ORDER) === JSON.stringify(['mint_student','lemongrass_student','pandan_student','left_student','mugwort_student','pricklyash_student','shellginger_student','teatree_student','fishmint_student','turmeric_student','marigold_student']), 'Day1 order mismatch');
+      assert(n.d1_20260913_garden_08?.choices?.[2]?.text === '老師，我現在還看不出來。', 'legal unsure option missing');
+      assert(!n.d1_20260913_garden_08?.choices?.some(choice => String(choice?.text || '').includes('全部拔掉最快')), 'removed weed option still reachable in garden choice');
+
+      const introCases = [
+        ['lemongrass_student','d1_20260913_kai_02','d1_20260913_kai_03'],
+        ['pandan_student','d1_20260913_le_02','d1_20260913_le_03'],
+        ['left_student','d1_20260913_an_02','d1_20260913_an_03'],
+        ['mugwort_student','d1_20260913_xi_01','d1_20260913_xi_02'],
+        ['pricklyash_student','d1_20260913_jie_01','d1_20260913_jie_02'],
+        ['shellginger_student','d1_20260913_yu_01','d1_20260913_yu_02'],
+        ['teatree_student','d1_20260913_sen_01','d1_20260913_sen_02'],
+        ['fishmint_student','d1_20260913_bai_01','d1_20260913_bai_02'],
+        ['turmeric_student','d1_20260913_chenstudent_01','d1_20260913_chenstudent_02'],
+        ['marigold_student','d1_20260913_qing_02','d1_20260913_qing_03']
+      ];
+      for (const [sid, revealId, afterId] of introCases) {
+        assert(n[revealId]?.displaySpeaker === FIRST_IMPRESSION[sid], `${sid} reveal label leaked`);
+        assert(!n[revealId]?.studentUnlock, `${sid} unlocked on reveal sentence`);
+        assert(n[afterId]?.studentUnlock === sid, `${sid} not unlocked on following node`);
+      }
+
+      // Visual switch: Kai -> Le -> Kai uses each STUDENT_INFO avatar and masked unknown label.
+      for (const [id, sid, expectedLabel] of [
+        ['d1_20260913_kai_05','lemongrass_student','小凱'],
+        ['d1_20260913_kai_06','pandan_student',FIRST_IMPRESSION.pandan_student],
+        ['d1_20260913_kai_07','lemongrass_student','小凱']
+      ]) {
+        engine.loadNode(id,{skipHistory:true,skipSideEffects:true});
+        engine.finishTyping?.(n[id]);
+        await wait(220);
+        assert(spriteEl?.getAttribute('src') === STUDENT_INFO[sid].avatar, `${id} wrong portrait`);
+        assert(nameBox?.textContent?.trim() === expectedLabel, `${id} wrong nameplate: ${nameBox?.textContent}`);
+      }
+
+      // Player line retains current NPC at listening opacity/state.
+      add('d1_20260913_selftest_player', player('測試主角插話。'));
+      engine.loadNode('d1_20260913_kai_05',{skipHistory:true,skipSideEffects:true});
+      engine.finishTyping?.(n.d1_20260913_kai_05); await wait(200);
+      const kaiSrc = spriteEl?.getAttribute('src');
+      engine.loadNode('d1_20260913_selftest_player',{skipHistory:true,skipSideEffects:true});
+      engine.finishTyping?.(n.d1_20260913_selftest_player); await wait(30);
+      assert(spriteEl?.getAttribute('src') === kaiSrc, 'player line changed/cleared NPC portrait');
+      assert(layerEl?.classList.contains('listening'), 'player line did not set 85% listening state');
+
+      // Choice Space no-op.
+      engine.loadNode('d1_20260913_gather_03',{skipHistory:true,skipSideEffects:true});
+      engine.finishTyping?.(n.d1_20260913_gather_03); await wait(30);
+      const beforeChoiceId = engine.currentNodeId;
+      doc.dispatchEvent(new KeyboardEvent('keydown',{code:'Space',key:' ',bubbles:true,cancelable:true}));
+      await wait(30);
+      assert(engine.currentNodeId === beforeChoiceId, 'Space skipped a choice node');
+      assert(engine.dom?.choicesContainer?.classList.contains('show'), 'choice UI not visible after Space');
+      await wait(180);
+      engine.isShowingChoices = false;
+      engine.isTyping = false;
+      engine.isProcessingEvent = false;
+      engine.dom?.choicesContainer?.classList.remove('show');
+      if (engine.dom?.choicesContainer) engine.dom.choicesContainer.innerHTML = '';
+      ['systemOverlay','playerPanel','campusMapLayer','researchTabletLayer','videoPlaceholder'].forEach(key => engine.dom?.[key]?.classList?.remove('active'));
+      if (doc.activeElement && typeof doc.activeElement.blur === 'function') doc.activeElement.blur();
+
+      // Plant card: first Space closes only; second advances and restores student portrait.
+      engine.gameState.unlockedStudents.add('lemongrass_student');
+      if (engine.gameState.studentRelations.lemongrass_student) engine.gameState.studentRelations.lemongrass_student.plantAssigned = false;
+      engine.loadNode('d1_20260913_kai_08',{skipHistory:true,skipSideEffects:true});
+      engine.finishTyping?.(n.d1_20260913_kai_08);
+      engine.isTyping = false;
+      engine.isProcessingEvent = false;
+      const cardLayer = doc.getElementById('plant-card-reveal-layer');
+      for (let i=0; i<20 && cardLayer?.getAttribute('aria-hidden') !== 'false'; i++) await wait(25);
+      assert(cardLayer?.getAttribute('aria-hidden') === 'false', 'plant card did not open');
+      doc.dispatchEvent(new KeyboardEvent('keydown',{code:'Space',key:' ',bubbles:true,cancelable:true}));
+      await wait(100);
+      assert(engine.currentNodeId === 'd1_20260913_kai_08', 'first Space advanced past card node');
+      assert(cardLayer?.getAttribute('aria-hidden') === 'true', 'first Space did not close plant card');
+      assert(!cardLayer?.classList.contains('active'), 'plant card active class returned after close');
+      doc.dispatchEvent(new KeyboardEvent('keydown',{code:'Space',key:' ',bubbles:true,cancelable:true}));
+      await wait(240);
+      assert(engine.currentNodeId === 'd1_20260913_kai_09', 'second Space did not advance to reaction');
+      assert(spriteEl?.getAttribute('src') === STUDENT_INFO.lemongrass_student.avatar, 'student portrait not restored after plant card');
+
+      // Person card: discovering mint name alone must not reveal pairing; assignment does.
+      engine.gameState.unlockedStudents.add('mint_student');
+      engine.gameState.discoveredHerbNames.add('薄荷');
+      engine.gameState.studentRelations.mint_student.plantAssigned = false;
+      engine.renderPlayerPanel();
+      const mintImg = doc.querySelector('#member-list .member-avatar-img[data-character-id="mint_student"]');
+      const mintCard = mintImg?.closest('.member-card');
+      const plantRow = [...(mintCard?.querySelectorAll('.member-meta-row') || [])].find(r => r.querySelector('strong')?.textContent?.trim() === '代表植物');
+      assert(plantRow?.querySelector('span')?.textContent?.trim() === '？？？', 'mint pairing leaked before card assignment');
+      engine.gameState.studentRelations.mint_student.plantAssigned = true;
+      engine.renderPlayerPanel();
+      const mintImg2 = doc.querySelector('#member-list .member-avatar-img[data-character-id="mint_student"]');
+      const plantRow2 = [...(mintImg2?.closest('.member-card')?.querySelectorAll('.member-meta-row') || [])].find(r => r.querySelector('strong')?.textContent?.trim() === '代表植物');
+      assert(plantRow2?.querySelector('span')?.textContent?.trim() === '薄荷', 'mint pairing not shown after card assignment');
+
+      // Card reveal nodes must not unlock plant name until the post-card line.
+      const revealAndReaction = [
+        ['d1_20260913_kai_08','d1_20260913_kai_09','檸檬香茅'],
+        ['d1_20260913_le_08','d1_20260913_le_09','斑蘭葉'],
+        ['d1_20260913_an_09','d1_20260913_an_10','左手香'],
+        ['d1_20260913_xi_07','d1_20260913_xi_08','艾草'],
+        ['d1_20260913_jie_08','d1_20260913_jie_09','刺蔥'],
+        ['d1_20260913_yu_08','d1_20260913_yu_09','月桃'],
+        ['d1_20260913_sen_07','d1_20260913_sen_08','澳洲茶樹'],
+        ['d1_20260913_bai_07','d1_20260913_bai_08','魚腥草'],
+        ['d1_20260913_chenstudent_07','d1_20260913_chenstudent_08','薑黃'],
+        ['d1_20260913_qing_09','d1_20260913_qing_10','芳香萬壽菊']
+      ];
+      for (const [revealId,reactionId,plant] of revealAndReaction) {
+        assert(!n[revealId]?.discoverHerbName, `${plant} leaked on card reveal node`);
+        assert(n[reactionId]?.discoverHerbName === plant, `${plant} not unlocked after card close`);
+      }
+
+      finishSelfTest(failures.length === 0, failures);
+    }
+  }
+})();
+    </script><!-- /day1-20260913-patch -->
 </body>
 </html>
