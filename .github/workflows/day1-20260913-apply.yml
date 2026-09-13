@@ -28,14 +28,24 @@ jobs:
           p = Path('/tmp/build_day1_patch.py')
           p.write_bytes(gzip.decompress(base64.b64decode(data)))
           s = p.read_text(encoding='utf-8')
+
           old1 = "      assert(!JSON.stringify(Object.values(n).filter(x => String(x?.day1PortraitManaged))).includes('全部拔掉最快'), 'removed weed option still reachable in Day1 patch');"
           new1 = "      assert(!n.d1_20260913_garden_08?.choices?.some(choice => String(choice?.text || '').includes('全部拔掉最快')), 'removed weed option still reachable in garden choice');"
-          old2 = "      engine.finishTyping?.(n.d1_20260913_kai_08); await wait(40);\n      const cardLayer = doc.getElementById('plant-card-reveal-layer');\n      assert(cardLayer?.classList.contains('active'), 'plant card did not open');"
-          new2 = "      engine.finishTyping?.(n.d1_20260913_kai_08);\n      const cardLayer = doc.getElementById('plant-card-reveal-layer');\n      for (let i=0; i<20 && !cardLayer?.classList.contains('active'); i++) await wait(50);\n      assert(cardLayer?.classList.contains('active'), 'plant card did not open');"
+
+          old2 = "      engine.finishTyping?.(n.d1_20260913_kai_08); await wait(40);\n      const cardLayer = doc.getElementById('plant-card-reveal-layer');\n      assert(cardLayer?.classList.contains('active'), 'plant card did not open');\n      doc.dispatchEvent(new KeyboardEvent('keydown',{code:'Space',key:' ',bubbles:true,cancelable:true}));\n      await wait(30);\n      assert(engine.currentNodeId === 'd1_20260913_kai_08', 'first Space advanced past card node');\n      assert(!cardLayer?.classList.contains('active'), 'first Space did not close plant card');"
+          new2 = "      engine.finishTyping?.(n.d1_20260913_kai_08);\n      const cardLayer = doc.getElementById('plant-card-reveal-layer');\n      for (let i=0; i<20 && cardLayer?.getAttribute('aria-hidden') !== 'false'; i++) await wait(25);\n      assert(cardLayer?.getAttribute('aria-hidden') === 'false', 'plant card did not open');\n      doc.dispatchEvent(new KeyboardEvent('keydown',{code:'Space',key:' ',bubbles:true,cancelable:true}));\n      await wait(100);\n      assert(engine.currentNodeId === 'd1_20260913_kai_08', 'first Space advanced past card node');\n      assert(cardLayer?.getAttribute('aria-hidden') === 'true', 'first Space did not close plant card');\n      assert(!cardLayer?.classList.contains('active'), 'plant card active class returned after close');"
+
           old3 = "      assert(engine.dom?.choicesContainer?.classList.contains('show'), 'choice UI not visible after Space');\n\n      // Plant card: first Space closes only; second advances and restores student portrait."
           new3 = "      assert(engine.dom?.choicesContainer?.classList.contains('show'), 'choice UI not visible after Space');\n      engine.isShowingChoices = false;\n      engine.dom?.choicesContainer?.classList.remove('show');\n      if (engine.dom?.choicesContainer) engine.dom.choicesContainer.innerHTML = '';\n\n      // Plant card: first Space closes only; second advances and restores student portrait."
+
           assert old1 in s and old2 in s and old3 in s, 'verified payload no longer matches expected smoke harness'
           s = s.replace(old1, new1).replace(old2, new2).replace(old3, new3)
+
+          # AI-only hardening: a delayed nested rAF must not re-activate a card after Space already closed it.
+          old_apply = "    text = path.read_text(encoding='utf-8')\n    start = '    <script id=\"day1-20260913-patch\">'"
+          new_apply = "    text = path.read_text(encoding='utf-8')\n    card_raf = 'requestAnimationFrame(() => requestAnimationFrame(() => plantCardLayer.classList.add(\"active\")));'\n    guarded_card_raf = 'requestAnimationFrame(() => requestAnimationFrame(() => { if (plantCardActive) plantCardLayer.classList.add(\"active\"); }));'\n    if card_raf in text:\n        text = text.replace(card_raf, guarded_card_raf, 1)\n    start = '    <script id=\"day1-20260913-patch\">'"
+          assert old_apply in s, 'apply() marker missing'
+          s = s.replace(old_apply, new_apply)
           p.write_text(s, encoding='utf-8')
           PY
       - name: Apply patch
@@ -49,6 +59,7 @@ jobs:
           from pathlib import Path
           import re
           html=Path('herbgameai-formal.html').read_text(encoding='utf-8')
+          assert 'if (plantCardActive) plantCardLayer.classList.add("active")' in html, 'plant-card race guard missing'
           m=re.search(r'<script id="day1-20260913-patch">(.*?)</script><!-- /day1-20260913-patch -->', html, re.S)
           assert m, 'Day1 patch script missing'
           Path('/tmp/day1-patch.js').write_text(m.group(1), encoding='utf-8')
