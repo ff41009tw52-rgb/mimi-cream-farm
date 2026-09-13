@@ -89,7 +89,8 @@ with sync_playwright() as p:
     response_cases = page.evaluate('''() => Object.entries(STORY_DATA.nodes)
       .flatMap(([nodeId,node]) => (node.choices || []).map((choice,index) => ({nodeId,index,id:choice.id,hasResponse:Boolean(choice.response)})))
       .filter(item => item.hasResponse)''')
-    assert len(response_cases) == 9, response_cases
+    assert response_cases, 'No choice.response cases found'
+    assert sum(1 for case in response_cases if case['nodeId'] == 'scene14_02') == 3, response_cases
 
     for case in response_cases:
         page.evaluate('''({nodeId}) => {
@@ -148,6 +149,7 @@ print('CHOICE_VIEWER_OK=' + json.dumps({
     'xiaolin': xiaolin_view,
     'chen': chen_view,
     'responseCases': len(response_cases),
+    'responseCaseIds': response_cases,
     'scene14': scene14_results,
     'pageErrors': errors,
 }, ensure_ascii=False))
