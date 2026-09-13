@@ -334,6 +334,19 @@
       actionIcon: 'fas fa-leaf'
     },
     {
+      grades: ['3'],
+      gradeLabel: '三年級',
+      subject: 'science',
+      icon: 'fas fa-cloud-rain',
+      title: '🌧️ 小小雨量偵探',
+      description: '橘咪咪和白奶油發現農場最近的雨量不太一樣，邀請你一起成為小小雨量偵探！透過觀察與記錄雨水，幫兩隻貓咪了解降雨變化，找出最適合農作物生長的天氣線索。',
+      publishedAt: '2026-09-13',
+      gameNumber: '39',
+      moduleUrl: 'games/39/index.js',
+      actionLabel: '開始偵測',
+      actionIcon: 'fas fa-umbrella'
+    },
+    {
       grades: ['4'],
       gradeLabel: '四年級',
       subject: 'science',
