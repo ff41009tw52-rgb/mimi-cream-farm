@@ -48,6 +48,8 @@ jobs:
           s = s.replace(old_apply, new_apply)
           p.write_text(s, encoding='utf-8')
           PY
+          echo '--- second Space smoke source ---'
+          grep -n -B18 -A18 "second Space did not advance" /tmp/build_day1_patch.py || true
       - name: Apply patch
         run: python3 /tmp/build_day1_patch.py
       - name: Verify target isolation and syntax
