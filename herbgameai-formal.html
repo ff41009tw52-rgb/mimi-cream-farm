@@ -1660,7 +1660,7 @@
             startGame() {
                 this.resetGameUI();
                 // 初始化狀態
-                this.gameState = { morningGreeting: null, interactionHistory: { principal: [] }, dailyChoices: {}, completedTasks: new Set(), experienceFlags: new Set(), unlockedChars: new Set(), unlockedStudents: new Set(), studentRelations: createInitialStudentRelations(), discoveredHerbNames: new Set(), knownPlants: new Set(), herbKnowledge: createInitialHerbKnowledge(), researchTopics: new Set(), currentTask: null, freeActivitiesRemaining: 1, selectedLocation: null, selectedCampusLocation: null, questsCompleted: 0 };
+                this.gameState = { morningGreeting: null, interactionHistory: { principal: [] }, dailyChoices: {}, currentDayKey: "week1-wednesday", completedDays: new Set(), todayDiaryEvents: [], diaryDays: {}, completedTasks: new Set(), experienceFlags: new Set(), unlockedChars: new Set(), unlockedStudents: new Set(), studentRelations: createInitialStudentRelations(), discoveredHerbNames: new Set(), knownPlants: new Set(), herbKnowledge: createInitialHerbKnowledge(), researchTopics: new Set(), currentTask: null, freeActivitiesRemaining: 1, selectedLocation: null, selectedCampusLocation: null, questsCompleted: 0 };
                 this.history = [];
                 this.tempResponseCounter = 0;
                 this.currentNodeId = null;
@@ -1741,6 +1741,10 @@
                     morningGreeting: this.gameState.morningGreeting ?? null,
                     interactionHistory: JSON.parse(JSON.stringify(this.gameState.interactionHistory || { principal: [] })),
                     dailyChoices: { ...(this.gameState.dailyChoices || {}) },
+                    currentDayKey: this.gameState.currentDayKey || "week1-wednesday",
+                    completedDays: new Set(this.gameState.completedDays || []),
+                    todayDiaryEvents: JSON.parse(JSON.stringify(this.gameState.todayDiaryEvents || [])),
+                    diaryDays: JSON.parse(JSON.stringify(this.gameState.diaryDays || {})),
                     completedTasks: new Set(this.gameState.completedTasks || []),
                     experienceFlags: new Set(this.gameState.experienceFlags || []),
                     unlockedChars: new Set(this.gameState.unlockedChars),
@@ -1816,6 +1820,10 @@
                     morningGreeting: snapshot.gameState.morningGreeting ?? null,
                     interactionHistory: JSON.parse(JSON.stringify(snapshot.gameState.interactionHistory || { principal: [] })),
                     dailyChoices: { ...(snapshot.gameState.dailyChoices || {}) },
+                    currentDayKey: snapshot.gameState.currentDayKey || "week1-wednesday",
+                    completedDays: new Set(snapshot.gameState.completedDays || []),
+                    todayDiaryEvents: JSON.parse(JSON.stringify(snapshot.gameState.todayDiaryEvents || [])),
+                    diaryDays: JSON.parse(JSON.stringify(snapshot.gameState.diaryDays || {})),
                     completedTasks: new Set(snapshot.gameState.completedTasks || []),
                     experienceFlags: new Set(snapshot.gameState.experienceFlags || []),
                     unlockedChars: new Set(snapshot.gameState.unlockedChars),
@@ -2507,6 +2515,10 @@
     herbVsWeed: "picture/herb-game/ai-backgrounds/scene-14-herb-vs-weed.jpg",
     classroom: "picture/herb-game/ai-backgrounds/scene-18-classroom.jpg",
     naturalClassroom241: "picture/herb-game/ai-backgrounds/scene-24-241-natural-classroom.jpg",
+    herbGardenPath: "picture/herb-game/ai-backgrounds/scene-17-path-to-herb-garden.jpg",
+    scienceRoomCorridor: "picture/herb-game/ai-backgrounds/scene-31-corridor-to-science-room.jpg",
+    schoolGateAfterSchool: "picture/herb-game/ai-backgrounds/scene-37-school-gate-after-school.jpg",
+    homeStudyDesk: "picture/herb-game/ai-backgrounds/scene-38-home-study-desk.jpg",
     contactBookKeyframeReference: "picture/herb-game/ai-backgrounds/scene-01-contact-book-keyframe.jpg",
     exploration: Object.freeze({
       "playground": "picture/herb-game/ai-backgrounds/scene-20-playground.jpg",
@@ -4079,5 +4091,476 @@ const __aiBootTimer = setInterval(() => {
   }
 })();
     </script><!-- /day1-20260913-patch -->
+
+    <script id="day1-diary-integration-20260915">
+(() => {
+  'use strict';
+  const PATCH_VERSION = '2026-09-15-day1-diary-v1';
+  let bootTries = 0;
+  const bootTimer = setInterval(() => {
+    bootTries += 1;
+    if (window.gameEngine && window.__HERBGAME_DAY1_20260913 && window.__HERBGAME_AI_VISUAL) {
+      clearInterval(bootTimer);
+      installDay1DiaryIntegration(window, document, window.gameEngine);
+    } else if (bootTries > 180) {
+      clearInterval(bootTimer);
+      console.error('[HerbGame Diary] integration init failed');
+    }
+  }, 30);
+
+  function installDay1DiaryIntegration(win, doc, engine) {
+    if (engine.__day1DiaryIntegrationInstalled) return;
+    engine.__day1DiaryIntegrationInstalled = true;
+
+    const STORY_DATA = win.eval('STORY_DATA');
+    const n = STORY_DATA?.nodes;
+    const assets = win.__HERBGAME_AI_VISUAL.AI_SCENE_ASSETS;
+    if (!n || !assets) {
+      console.error('[HerbGame Diary] story/assets unavailable');
+      return;
+    }
+
+    const REFLECTION_POOL = Object.freeze([
+      '今天有一件事讓我有點意外。',
+      '今天的下課，跟平常有點不一樣。',
+      '有件事情，我現在還記得很清楚。',
+      '今天好像又多知道了一點。',
+      '有些事情真的不能只看第一眼。'
+    ]);
+    const DIARY_EVENT_CATALOG = Object.freeze({
+      'day1-first-herb-garden': Object.freeze({
+        eventId: 'day1-first-herb-garden',
+        characterId: null,
+        eventType: 'teacher-herb-service',
+        image: 'picture/herb-game/diary/day1-garden-memory.webp',
+        imageAlt: '香草園回憶示意插圖',
+        diaryTitle: '第一次進香草園',
+        defaultNote: '第一次走進香草園。\n原來不能看到綠色的就直接拔。',
+        reflectionPrompt: '有些事情真的不能只看第一眼。',
+        eventOrder: 1,
+        dayKey: 'week1-wednesday'
+      }),
+      'day1-service-team-introduction': Object.freeze({
+        eventId: 'day1-service-team-introduction',
+        characterId: null,
+        eventType: 'service-team-introduction',
+        image: 'picture/herb-game/diary/day1-service-team-memory.webp',
+        imageAlt: '學生與兩位老師集合的回憶示意插圖，非正式角色肖像',
+        diaryTitle: '認識香草服務隊',
+        defaultNote: '一口氣認識了好多人。\n名字可能還要慢慢記。',
+        reflectionPrompt: '今天認識的人好多，我想慢慢把大家的名字記起來。',
+        eventOrder: 2,
+        dayKey: 'week1-wednesday'
+      })
+    });
+    const DIARY_DAY_DEFINITIONS = Object.freeze({
+      'week1-wednesday': Object.freeze({
+        dayKey: 'week1-wednesday',
+        order: 1,
+        week: 1,
+        weekday: '星期三',
+        eyebrow: '放學後・想一想',
+        heading: '今天我想記住的是……',
+        bodyParagraphs: Object.freeze([
+          '今天最讓我記住的，不只是拿到迷迭香。',
+          '大家看到植物卡時的反應都不太一樣。有人先注意名字，有人先看植物長什麼樣，也有人已經開始想著之後要查什麼了。',
+          '原來大家第一眼注意到的東西，真的差很多。'
+        ]),
+        promptLead: '今天我想先寫這一句……',
+        inputPlaceholder: '選一句開始，也可以自己寫。',
+        reflections: Object.freeze([
+          Object.freeze({ id: 'remember-names', prompt: '今天認識的人好多，我想慢慢把大家的名字記起來。' }),
+          Object.freeze({ id: 'different-focus', prompt: '大家注意的東西都不一樣，我覺得很有趣。' }),
+          Object.freeze({ id: 'remember-rosemary', prompt: '迷迭香……這個名字，今天大概真的記住了。' })
+        ])
+      })
+    });
+
+    function clone(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    function ensureDiaryState() {
+      const state = engine.gameState || (engine.gameState = {});
+      state.currentDayKey ||= 'week1-wednesday';
+      if (!(state.completedDays instanceof Set)) state.completedDays = new Set(state.completedDays || []);
+      if (!Array.isArray(state.todayDiaryEvents)) state.todayDiaryEvents = [];
+      if (!state.diaryDays || Array.isArray(state.diaryDays)) state.diaryDays = {};
+      return state;
+    }
+
+    function ensureDiaryDay(dayKey) {
+      const state = ensureDiaryState();
+      state.diaryDays[dayKey] ||= {
+        eventIds: [],
+        eventNotes: {},
+        selectedPromptId: null,
+        customReflection: '',
+        completed: false,
+        view: 'open'
+      };
+      const day = state.diaryDays[dayKey];
+      if (!Array.isArray(day.eventIds)) day.eventIds = [];
+      if (!day.eventNotes || Array.isArray(day.eventNotes)) day.eventNotes = {};
+      day.selectedPromptId ??= null;
+      day.customReflection = String(day.customReflection || '');
+      day.completed = Boolean(day.completed);
+      day.view = day.view === 'closed' ? 'closed' : 'open';
+      return day;
+    }
+
+    function recordDiaryEvent(eventLike) {
+      const event = typeof eventLike === 'string' ? DIARY_EVENT_CATALOG[eventLike] : eventLike;
+      if (!event?.eventId || !event?.dayKey) return false;
+      const state = ensureDiaryState();
+      if (!state.todayDiaryEvents.some(item => item.eventId === event.eventId && item.dayKey === event.dayKey)) {
+        state.todayDiaryEvents.push(clone(event));
+        state.todayDiaryEvents.sort((a, b) => (a.eventOrder || 0) - (b.eventOrder || 0));
+      }
+      const day = ensureDiaryDay(event.dayKey);
+      if (!day.eventIds.includes(event.eventId)) day.eventIds.push(event.eventId);
+      return true;
+    }
+
+    function resolveEventsForDay(dayKey) {
+      const state = ensureDiaryState();
+      const dayState = ensureDiaryDay(dayKey);
+      const liveEvents = state.todayDiaryEvents.filter(item => item.dayKey === dayKey);
+      const ids = [...new Set([...dayState.eventIds, ...liveEvents.map(item => item.eventId)])];
+      return ids.map(id => liveEvents.find(item => item.eventId === id) || DIARY_EVENT_CATALOG[id])
+        .filter(Boolean)
+        .map(clone)
+        .sort((a, b) => (a.eventOrder || 0) - (b.eventOrder || 0));
+    }
+
+    function buildDiaryPayload(dayKey = ensureDiaryState().currentDayKey) {
+      const state = ensureDiaryState();
+      const availableDayKeys = Object.keys(state.diaryDays)
+        .filter(key => DIARY_DAY_DEFINITIONS[key])
+        .sort((a, b) => DIARY_DAY_DEFINITIONS[a].order - DIARY_DAY_DEFINITIONS[b].order);
+      if (DIARY_DAY_DEFINITIONS[dayKey] && !availableDayKeys.includes(dayKey)) availableDayKeys.push(dayKey);
+      const days = {};
+      for (const key of availableDayKeys) {
+        const definition = DIARY_DAY_DEFINITIONS[key];
+        days[key] = {
+          ...clone(definition),
+          events: resolveEventsForDay(key),
+          state: clone(ensureDiaryDay(key))
+        };
+      }
+      return { currentDayKey: dayKey, availableDayKeys, days };
+    }
+
+    const style = doc.createElement('style');
+    style.id = 'day1-diary-integration-style';
+    style.textContent = `
+      #herb-scene-transition{position:absolute;inset:0;z-index:190;background:#0d1611;opacity:0;pointer-events:none;display:grid;place-items:center;color:#fff;font:700 clamp(1rem,2.1vw,1.55rem)/1.5 "Noto Sans TC",sans-serif;letter-spacing:.08em;text-align:center}
+      #herb-scene-transition.active{animation:herb-short-fade var(--transition-duration,650ms) ease both}
+      #herb-scene-transition span{opacity:.92;text-shadow:0 2px 12px rgba(0,0,0,.7)}
+      @keyframes herb-short-fade{0%{opacity:0}36%{opacity:1}64%{opacity:1}100%{opacity:0}}
+      #herb-diary-layer{position:absolute;inset:0;z-index:300;background:#30251e;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .32s ease,visibility 0s linear .32s}
+      #herb-diary-layer.active{opacity:1;visibility:visible;pointer-events:auto;transition-delay:0s}
+      #herb-diary-frame{display:block;width:100%;height:100%;border:0;background:#30251e}
+      #herb-diary-actions{position:absolute;right:3.2%;bottom:3%;z-index:2;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s ease}
+      #herb-diary-layer.ready-to-end #herb-diary-actions{opacity:1;visibility:visible;pointer-events:auto}
+      #herb-finish-day{min-width:8.5rem;min-height:44px;padding:.65rem 1.15rem;border:1px solid rgba(255,255,255,.65);border-radius:999px;background:rgba(24,62,38,.9);color:#fff;font:800 clamp(.9rem,1.25vw,1.05rem)/1.2 "Noto Sans TC",sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.28);cursor:pointer}
+      #herb-day-end-layer{position:absolute;inset:0;z-index:310;display:grid;place-items:center;background:rgba(20,31,24,.94);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .35s ease,visibility 0s linear .35s;color:#fff}
+      #herb-day-end-layer.active{opacity:1;visibility:visible;pointer-events:auto;transition-delay:0s}
+      .herb-day-end-card{text-align:center;padding:2rem 2.4rem}
+      .herb-day-end-card h2{margin:0 0 2rem;font:800 clamp(1.8rem,4vw,3rem)/1.25 "Noto Sans TC",sans-serif;letter-spacing:.08em}
+      .herb-day-end-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+      .herb-day-end-actions button{min-width:11rem;min-height:48px;padding:.75rem 1.2rem;border-radius:999px;border:1px solid rgba(255,255,255,.7);font:800 1rem/1.2 "Noto Sans TC",sans-serif;cursor:pointer}
+      #herb-review-diary{background:#f5edcf;color:#304c38}#herb-return-home{background:#2f6545;color:#fff}
+      @media(max-width:900px){#herb-diary-actions{right:2%;bottom:2%}#herb-finish-day{min-width:7.4rem;padding:.55rem .9rem}}
+      @media(prefers-reduced-motion:reduce){#herb-scene-transition.active{animation-duration:1ms!important}}
+    `;
+    doc.head.appendChild(style);
+
+    const gameScreen = doc.getElementById('screen-game');
+    const transitionLayer = doc.createElement('div');
+    transitionLayer.id = 'herb-scene-transition';
+    transitionLayer.setAttribute('aria-hidden', 'true');
+    transitionLayer.innerHTML = '<span></span>';
+    const diaryLayer = doc.createElement('section');
+    diaryLayer.id = 'herb-diary-layer';
+    diaryLayer.setAttribute('aria-hidden', 'true');
+    diaryLayer.innerHTML = `
+      <iframe id="herb-diary-frame" src="herb-diary.html" title="香草日記"></iframe>
+      <div id="herb-diary-actions"><button type="button" id="herb-finish-day">結束今天</button></div>`;
+    const dayEndLayer = doc.createElement('section');
+    dayEndLayer.id = 'herb-day-end-layer';
+    dayEndLayer.setAttribute('aria-hidden', 'true');
+    dayEndLayer.innerHTML = `
+      <div class="herb-day-end-card" role="dialog" aria-modal="true" aria-labelledby="herb-day-end-title">
+        <h2 id="herb-day-end-title">第1週・星期三結束</h2>
+        <div class="herb-day-end-actions">
+          <button type="button" id="herb-review-diary">回看今天的日記</button>
+          <button type="button" id="herb-return-home">回到首頁</button>
+        </div>
+      </div>`;
+    gameScreen.append(transitionLayer, diaryLayer, dayEndLayer);
+
+    const diaryFrame = diaryLayer.querySelector('#herb-diary-frame');
+    const finishDayButton = diaryLayer.querySelector('#herb-finish-day');
+    const reviewDiaryButton = dayEndLayer.querySelector('#herb-review-diary');
+    const returnHomeButton = dayEndLayer.querySelector('#herb-return-home');
+    let transitionTimer = 0;
+    let currentDiaryDayKey = 'week1-wednesday';
+
+    function hideDialogue() {
+      if (engine.dom?.dialogueBox?.parentElement) engine.dom.dialogueBox.parentElement.style.display = 'none';
+    }
+    function showDialogue() {
+      if (engine.dom?.dialogueBox?.parentElement) engine.dom.dialogueBox.parentElement.style.display = 'block';
+    }
+    function hideDiary() {
+      diaryLayer.classList.remove('active', 'ready-to-end');
+      diaryLayer.setAttribute('aria-hidden', 'true');
+    }
+    function hideDayEnd() {
+      dayEndLayer.classList.remove('active');
+      dayEndLayer.setAttribute('aria-hidden', 'true');
+    }
+
+    function sendDiaryPayload(dayKey) {
+      const payload = buildDiaryPayload(dayKey);
+      diaryFrame.contentWindow?.postMessage({ type: 'herb:diary-init', payload }, '*');
+    }
+
+    function showDiary(dayKey = ensureDiaryState().currentDayKey) {
+      ensureDiaryState().currentDayKey = dayKey;
+      ensureDiaryDay(dayKey);
+      currentDiaryDayKey = dayKey;
+      clearTimeout(transitionTimer);
+      transitionLayer.classList.remove('active');
+      hideDayEnd();
+      engine.dom?.playerPanel?.classList.remove('active');
+      engine.dom?.systemOverlay?.classList.remove('active');
+      engine.dom?.videoPlaceholder?.classList.remove('active');
+      win.__HERBGAME_AI_VISUAL.hideCharacter(false);
+      hideDialogue();
+      engine.isProcessingEvent = true;
+      diaryLayer.classList.add('active');
+      diaryLayer.setAttribute('aria-hidden', 'false');
+      const day = ensureDiaryDay(dayKey);
+      diaryLayer.classList.toggle('ready-to-end', day.completed && day.view === 'closed');
+      sendDiaryPayload(dayKey);
+      return true;
+    }
+
+    function showSceneTransition(node) {
+      clearTimeout(transitionTimer);
+      hideDiary();
+      hideDayEnd();
+      win.__HERBGAME_AI_VISUAL.hideCharacter(false);
+      engine.isProcessingEvent = true;
+      hideDialogue();
+      const duration = Math.max(400, Math.min(800, Number(node.duration) || 650));
+      transitionLayer.style.setProperty('--transition-duration', `${duration}ms`);
+      transitionLayer.querySelector('span').textContent = node.transitionText || '';
+      transitionLayer.classList.remove('active');
+      void transitionLayer.offsetWidth;
+      transitionLayer.classList.add('active');
+      transitionLayer.setAttribute('aria-hidden', 'false');
+      transitionTimer = window.setTimeout(() => {
+        transitionLayer.classList.remove('active');
+        transitionLayer.setAttribute('aria-hidden', 'true');
+        showDialogue();
+        engine.isProcessingEvent = false;
+        if (node.next) engine.loadNode(node.next);
+      }, duration);
+    }
+
+    function saveDiaryState(dayKey, incoming) {
+      if (!DIARY_DAY_DEFINITIONS[dayKey] || !incoming) return;
+      const day = ensureDiaryDay(dayKey);
+      day.eventNotes = { ...(incoming.eventNotes || day.eventNotes || {}) };
+      day.selectedPromptId = incoming.selectedPromptId ?? null;
+      day.customReflection = String(incoming.customReflection || '');
+      day.completed = Boolean(incoming.completed);
+      day.view = incoming.view === 'closed' ? 'closed' : 'open';
+      diaryLayer.classList.toggle('ready-to-end', dayKey === currentDiaryDayKey && day.completed && day.view === 'closed');
+    }
+
+    function finishDay() {
+      const state = ensureDiaryState();
+      const day = ensureDiaryDay(currentDiaryDayKey);
+      if (!day.completed || day.view !== 'closed') return;
+      state.completedDays.add(currentDiaryDayKey);
+      hideDiary();
+      transitionLayer.querySelector('span').textContent = '';
+      transitionLayer.style.setProperty('--transition-duration', '650ms');
+      transitionLayer.classList.remove('active');
+      void transitionLayer.offsetWidth;
+      transitionLayer.classList.add('active');
+      transitionTimer = window.setTimeout(() => {
+        transitionLayer.classList.remove('active');
+        dayEndLayer.classList.add('active');
+        dayEndLayer.setAttribute('aria-hidden', 'false');
+        engine.isProcessingEvent = true;
+        reviewDiaryButton.focus({ preventScroll: true });
+      }, 650);
+    }
+
+    win.addEventListener('message', event => {
+      if (event.source !== diaryFrame.contentWindow || !event.data?.type) return;
+      const { type, detail } = event.data;
+      if (type === 'herb:diary-ready') {
+        sendDiaryPayload(currentDiaryDayKey);
+        return;
+      }
+      if (!detail?.dayKey || !detail?.state) return;
+      saveDiaryState(detail.dayKey, detail.state);
+      if (type === 'herb:diary-navigate') currentDiaryDayKey = detail.dayKey;
+    });
+    diaryFrame.addEventListener('load', () => sendDiaryPayload(currentDiaryDayKey));
+    finishDayButton.addEventListener('click', finishDay);
+    reviewDiaryButton.addEventListener('click', () => showDiary(currentDiaryDayKey));
+    returnHomeButton.addEventListener('click', () => {
+      hideDiary();
+      hideDayEnd();
+      engine.isProcessingEvent = false;
+      engine.resetGameUI();
+      engine.dom.screenGame.classList.remove('active');
+      engine.dom.screenHome.classList.add('active');
+    });
+
+    const originalStartGame = engine.startGame.bind(engine);
+    engine.startGame = function(...args) {
+      const result = originalStartGame(...args);
+      ensureDiaryState();
+      return result;
+    };
+    const originalCloneGameState = engine.cloneGameState.bind(engine);
+    engine.cloneGameState = function(...args) {
+      ensureDiaryState();
+      const result = originalCloneGameState(...args);
+      result.currentDayKey = this.gameState.currentDayKey;
+      result.completedDays = new Set(this.gameState.completedDays || []);
+      result.todayDiaryEvents = clone(this.gameState.todayDiaryEvents || []);
+      result.diaryDays = clone(this.gameState.diaryDays || {});
+      return result;
+    };
+
+    const originalLoadNode = engine.loadNode.bind(engine);
+    engine.loadNode = function(nodeId, options = {}) {
+      const node = n[nodeId];
+      const result = originalLoadNode(nodeId, options);
+      if (!options?.skipSideEffects && node?.diaryEvent) recordDiaryEvent(node.diaryEvent);
+      if (node?.type === 'scene_transition') showSceneTransition(node);
+      if (node?.type === 'diary') showDiary(node.dayKey || ensureDiaryState().currentDayKey);
+      return result;
+    };
+
+    const originalResetGameUI = engine.resetGameUI.bind(engine);
+    engine.resetGameUI = function(...args) {
+      clearTimeout(transitionTimer);
+      transitionLayer.classList.remove('active');
+      hideDiary();
+      hideDayEnd();
+      return originalResetGameUI(...args);
+    };
+
+    // The active Day 1 route uses short static transitions. Legacy video helpers
+    // stay intact for future major events and endings.
+    n.d1_20260913_run = {
+      ...n.d1_20260913_run,
+      type: 'scene_transition',
+      sceneImage: assets.corridor,
+      duration: 600
+    };
+    n.d1_20260913_merge_03.next = 'd1_20260915_garden_path';
+    n.d1_20260915_garden_path = {
+      type: 'scene_transition',
+      sceneImage: assets.herbGardenPath,
+      duration: 700,
+      next: 'd1_20260913_garden_01'
+    };
+    n.d1_20260913_return_class = {
+      ...n.d1_20260913_return_class,
+      type: 'scene_transition',
+      sceneImage: assets.classroom,
+      duration: 600,
+      diaryEvent: DIARY_EVENT_CATALOG['day1-first-herb-garden']
+    };
+    n.scene21_return = {
+      ...n.scene21_return,
+      type: 'scene_transition',
+      sceneImage: assets.classroom,
+      duration: 550,
+      next: 'd1_20260913_timepass'
+    };
+    n.d1_20260913_timepass = {
+      ...n.d1_20260913_timepass,
+      type: 'scene_transition',
+      sceneImage: assets.classroom,
+      transitionText: '上午剩餘課程、午餐與午休很快過去。',
+      updateTime: '下午',
+      updateLocation: '班級教室',
+      duration: 700,
+      next: 'd1_20260915_to_241'
+    };
+    n.d1_20260915_to_241 = {
+      type: 'scene_transition',
+      sceneImage: assets.scienceRoomCorridor,
+      updateTime: '下午',
+      updateLocation: '241自然教室外走廊',
+      duration: 700,
+      next: 'd1_20260913_241_01'
+    };
+    n.scene33_members_update.diaryEvent = DIARY_EVENT_CATALOG['day1-service-team-introduction'];
+    n.scene33_long_task.next = 'scene34_01';
+    Object.entries(n).forEach(([id, node]) => {
+      if (/^scene3[4-6]_/.test(id) && node) node.day1PortraitManaged = true;
+    });
+    delete n.scene36_09.effect;
+    n.scene36_09.next = 'd1_20260915_activity_end_01';
+    n.d1_20260915_activity_end_01 = { type: 'dialogue', day1PortraitManaged: true, speaker: '陳冠瑋老師', speakerType: 'npc', text: '好，今天就到這裡。東西收一收，準備回家吧。', next: 'd1_20260915_activity_end_02' };
+    n.d1_20260915_activity_end_02 = { type: 'dialogue', day1PortraitManaged: true, speaker: '許恒維老師', speakerType: 'npc', text: '植物卡記得收好，別忘在教室。', next: 'd1_20260915_activity_end_03' };
+    n.d1_20260915_activity_end_03 = { type: 'dialogue', day1PortraitManaged: true, speaker: '小琳', speakerType: 'npc', visualStudentId: 'mint_student', text: '那明天見。', next: 'd1_20260915_activity_end_04' };
+    n.d1_20260915_activity_end_04 = { type: 'dialogue', day1PortraitManaged: true, speaker: '我', speakerType: 'player', text: '嗯，明天見。', next: 'd1_20260915_after_school_transition' };
+    n.d1_20260915_after_school_transition = { type: 'scene_transition', sceneImage: assets.schoolGateAfterSchool, updateTime: '放學後', updateLocation: '校門口', duration: 650, next: 'd1_20260915_after_school_01' };
+    n.d1_20260915_after_school_01 = { type: 'dialogue', day1PortraitManaged: true, speaker: null, speakerType: 'system', text: '放學後。', next: 'd1_20260915_after_school_02' };
+    n.d1_20260915_after_school_02 = { type: 'dialogue', day1PortraitManaged: true, speaker: '我', speakerType: 'player', text: '總算真的放學了……', next: 'd1_20260915_after_school_03' };
+    n.d1_20260915_after_school_03 = { type: 'dialogue', day1PortraitManaged: true, speaker: '我', speakerType: 'player', text: '今天好像發生了不少事。', next: 'd1_20260915_after_school_04' };
+    n.d1_20260915_after_school_04 = { type: 'dialogue', day1PortraitManaged: true, speaker: '我', speakerType: 'player', text: '第一次進香草園，又一下子認識了這麼多人……', next: 'd1_20260915_after_school_05' };
+    n.d1_20260915_after_school_05 = { type: 'dialogue', day1PortraitManaged: true, speaker: '我', speakerType: 'player', text: '回家再記一下好了。', next: 'd1_20260915_home_transition' };
+    n.d1_20260915_home_transition = { type: 'scene_transition', sceneImage: assets.homeStudyDesk, updateTime: '傍晚', updateLocation: '家中・書桌', duration: 650, next: 'd1_20260915_home_01' };
+    n.d1_20260915_home_01 = { type: 'dialogue', day1PortraitManaged: true, speaker: null, speakerType: 'system', text: '回到家後……', next: 'd1_20260915_home_02' };
+    n.d1_20260915_home_02 = { type: 'dialogue', day1PortraitManaged: true, speaker: '我', speakerType: 'player', text: '先把今天寫下來吧。', next: 'd1_20260915_diary' };
+    n.d1_20260915_diary = { type: 'diary', dayKey: 'week1-wednesday' };
+
+    ensureDiaryState();
+    win.__HERBGAME_DIARY = {
+      PATCH_VERSION,
+      REFLECTION_POOL,
+      DIARY_EVENT_CATALOG,
+      DIARY_DAY_DEFINITIONS,
+      recordDiaryEvent,
+      buildDiaryPayload,
+      showDiary,
+      finishDay,
+      get isOpen() { return diaryLayer.classList.contains('active'); }
+    };
+
+    const preview = new URLSearchParams(location.search).get('preview');
+    if (preview === 'diary-day1' || preview === 'day1-ending') {
+      setTimeout(() => {
+        doc.getElementById('screen-home')?.classList.remove('active');
+        doc.getElementById('screen-intro')?.classList.remove('active');
+        gameScreen.classList.add('active');
+        recordDiaryEvent('day1-first-herb-garden');
+        recordDiaryEvent('day1-service-team-introduction');
+        if (preview === 'diary-day1') {
+          engine.gameState.currentDayKey = 'week1-wednesday';
+          showDiary('week1-wednesday');
+        } else {
+          engine.loadNode('scene36_08', { skipHistory: true });
+        }
+      }, 320);
+    }
+  }
+})();
+    </script><!-- /day1-diary-integration-20260915 -->
 </body>
 </html>
