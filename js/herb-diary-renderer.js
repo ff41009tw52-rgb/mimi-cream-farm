@@ -380,6 +380,9 @@
     emit('herb:diary-state');
   });
   customReflectionInput.addEventListener('paste', insertPlainText);
+  reflectionBox.addEventListener('click', event => {
+    if (event.target === reflectionBox || event.target === selectedPromptText) focusReflectionEnd();
+  });
   prevBtn.addEventListener('click', () => navigate(prevBtn));
   nextBtn.addEventListener('click', () => navigate(nextBtn));
   reopenBtn.addEventListener('click', () => setOpen(true));
