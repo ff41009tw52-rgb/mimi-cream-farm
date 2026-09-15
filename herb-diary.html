@@ -882,7 +882,7 @@
 
 </style>
   <style>
-:root{--paper-strip:url("picture/herb-game/diary/paper-strip.webp");--pencil-circle:url("picture/herb-game/diary/pencil-circle.png");--ink:#51493b;--soft-ink:#786b55;--hand:"霞鶩文楷 TC","LXGW WenKai TC","LXGW WenKai","Noto Serif TC",serif;color-scheme:light}
+:root{--paper-strip:url("picture/herb-game/diary/paper-strip.png");--pencil-circle:url("picture/herb-game/diary/pencil-circle.png");--ink:#51493b;--soft-ink:#786b55;--hand:"霞鶩文楷 TC","LXGW WenKai TC","LXGW WenKai","Noto Serif TC",serif;color-scheme:light}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#30251e}body{height:100dvh;display:grid;place-items:center;overflow:hidden;color:var(--ink);font-family:var(--hand)}button,[contenteditable]{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}button{cursor:pointer;touch-action:manipulation}button:focus-visible,[contenteditable]:focus-visible{outline:1.5px dashed #756447;outline-offset:3px}button[aria-disabled="true"]{cursor:default}
 .game{position:relative;width:min(100vw,177.77778dvh);aspect-ratio:16/9;overflow:hidden;isolation:isolate;container-type:inline-size;background:#a2764d}.art{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;user-select:none;pointer-events:none}.closed-art{z-index:0}.open-art{z-index:1;opacity:1;transition:opacity .58s ease .1s}.spread{position:absolute;inset:0;z-index:2;transition:opacity .3s ease,transform .55s ease;transform-origin:51% 50%}.page{position:absolute;inset:0;pointer-events:none}.page>*{pointer-events:auto}
 .date{position:absolute;left:20%;top:15.8%;margin:0;font-size:1.02cqw;letter-spacing:.1em;color:var(--soft-ink)}.page-title{position:absolute;left:20%;top:19.4%;margin:0;font-size:2.08cqw;font-weight:400;letter-spacing:.11em;transform:rotate(-.8deg)}.event-edit-hint{position:absolute;left:20.15%;top:25.15%;margin:0;font-size:.78cqw;line-height:1.4;letter-spacing:.025em;color:#8c7e68;opacity:.88}.event-area{position:absolute;inset:0;pointer-events:none}.event{position:absolute;margin:0;--tilt:0deg;transform:rotate(var(--tilt));animation:paste-in .7s ease both;animation-delay:var(--delay)}.paper{background:var(--paper-strip) center/100% 152% no-repeat;filter:drop-shadow(0 .14cqw .13cqw #57351f20)}.event h3{font-size:1.28cqw;line-height:1.45;font-weight:400;margin:0}
@@ -903,8 +903,8 @@
 </head>
 <body>
   <main class="game opening" id="diaryGame" data-view="open" aria-label="放學後日記回想">
-    <img class="art closed-art" src="picture/herb-game/diary/diary-closed.webp" alt="" aria-hidden="true" draggable="false">
-    <img class="art open-art" src="picture/herb-game/diary/diary-open.webp" alt="" aria-hidden="true" draggable="false">
+    <img class="art closed-art" src="picture/herb-game/diary/diary-closed.png" alt="" aria-hidden="true" draggable="false">
+    <img class="art open-art" src="picture/herb-game/diary/diary-open.png" alt="" aria-hidden="true" draggable="false">
     <div class="spread" id="spread">
       <section class="page left" aria-labelledby="eventsHeading">
         <p class="date" id="dayLabel"></p>

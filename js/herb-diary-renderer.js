@@ -21,7 +21,7 @@
         events: [
           {
             eventId: 'day1-first-herb-garden',
-            image: 'picture/herb-game/diary/day1-garden-memory.webp',
+            image: 'picture/herb-game/diary/day1-garden-memory.png',
             imageAlt: '香草園回憶示意插圖',
             diaryTitle: '第一次進香草園',
             defaultNote: '第一次走進香草園。\n原來不能看到綠色的就直接拔。',
@@ -29,7 +29,7 @@
           },
           {
             eventId: 'day1-service-team-introduction',
-            image: 'picture/herb-game/diary/day1-service-team-memory.webp',
+            image: 'picture/herb-game/diary/day1-service-team-memory.png',
             imageAlt: '學生與兩位老師集合的回憶示意插圖，非正式角色肖像',
             diaryTitle: '認識香草服務隊',
             defaultNote: '一口氣認識了好多人。\n名字可能還要慢慢記。',
