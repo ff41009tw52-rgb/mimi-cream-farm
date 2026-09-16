@@ -284,7 +284,7 @@
 
     <style id="member-portrait-viewer-style">
         .member-avatar-img[data-character-id] {
-            cursor: default;
+            cursor: zoom-in;
             transition: transform 160ms ease;
             transform-origin: center bottom;
         }
@@ -3289,7 +3289,7 @@ const __aiBootTimer = setInterval(() => {
     (() => {
       'use strict';
       const doc = document;
-      const MEMBER_PORTRAIT_VIEWER_ENABLED = false; // 2026-09-16: 暫停大圖 Viewer，先確保 Day 1 測試順暢
+      const MEMBER_PORTRAIT_VIEWER_ENABLED = true; // 2026-09-16: recursive observer fixed; enlargement restored
       const viewer = doc.getElementById('member-portrait-viewer');
       const viewerImage = doc.getElementById('member-portrait-viewer-image');
       const viewerFailure = doc.getElementById('member-portrait-viewer-failure');
@@ -3349,7 +3349,8 @@ const __aiBootTimer = setInterval(() => {
         viewerFailure.hidden = true;
         viewerImage.hidden = false;
         viewerImage.alt = `${resolved.name}完整人物立繪`;
-        viewerImage.src = resolved.info.avatar;
+        viewerImage.decoding = 'async';
+        if (viewerImage.getAttribute('src') !== resolved.info.avatar) viewerImage.src = resolved.info.avatar;
         viewer.classList.add('active');
         viewer.setAttribute('aria-hidden', 'false');
         return true;
@@ -3845,10 +3846,12 @@ const __aiBootTimer = setInterval(() => {
       if (!viewer?.classList.contains('active') || !viewerMeta) return;
       const id = viewer.dataset.characterId;
       if (!STUDENT_INFO[id]) return;
-      viewerMeta.textContent = `代表植物｜${engine.gameState?.studentRelations?.[id]?.plantAssigned ? STUDENT_INFO[id].plant : '？？？'}`;
+      const nextText = `代表植物｜${engine.gameState?.studentRelations?.[id]?.plantAssigned ? STUDENT_INFO[id].plant : '？？？'}`;
+      if (viewerMeta.textContent !== nextText) viewerMeta.textContent = nextText;
     }
     if (viewer) {
-      new MutationObserver(syncViewerMeta).observe(viewer, {attributes:true,attributeFilter:['class','data-character-id'],subtree:true,childList:true});
+      // Only observe open/close and character changes. Never observe the text node this callback writes.
+      new MutationObserver(syncViewerMeta).observe(viewer, {attributes:true,attributeFilter:['class','data-character-id']});
       viewer.addEventListener('click', () => setTimeout(syncViewerMeta, 0));
     }
 
@@ -4065,6 +4068,17 @@ const __aiBootTimer = setInterval(() => {
       const mintImg2 = doc.querySelector('#member-list .member-avatar-img[data-character-id="mint_student"]');
       const plantRow2 = [...(mintImg2?.closest('.member-card')?.querySelectorAll('.member-meta-row') || [])].find(r => r.querySelector('strong')?.textContent?.trim() === '代表植物');
       assert(plantRow2?.querySelector('span')?.textContent?.trim() === '薄荷', 'mint pairing not shown after card assignment');
+
+      // Regression: portrait enlargement must open/close without a recursive MutationObserver freeze.
+      const portraitViewer = doc.getElementById('member-portrait-viewer');
+      const portraitViewerMeta = doc.getElementById('member-portrait-viewer-meta');
+      mintImg2?.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true}));
+      await wait(120);
+      assert(portraitViewer?.classList.contains('active'), 'portrait viewer did not open');
+      assert(portraitViewerMeta?.textContent?.trim() === '代表植物｜薄荷', `portrait viewer meta mismatch: ${portraitViewerMeta?.textContent}`);
+      win.__HERBGAME_MEMBER_PORTRAIT_VIEWER?.closeMemberPortraitViewer?.();
+      await wait(30);
+      assert(!portraitViewer?.classList.contains('active'), 'portrait viewer did not close');
 
       // Card reveal nodes must not unlock plant name until the post-card line.
       const revealAndReaction = [
