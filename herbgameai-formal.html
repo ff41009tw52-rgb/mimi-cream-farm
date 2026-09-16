@@ -525,7 +525,7 @@
                                     </div>
                                     <div class="herb-zone-image-wrap">
                                         <div class="herb-zone-fallback">圖片尚未載入<br>picture/herb-game/herb-book-exotic-zone.png</div>
-                                        <img class="herb-zone-image" src="picture/herb-game/herb-book-exotic-zone.png" alt="異國風情香草區植物圖鑑" referrerpolicy="no-referrer" onload="this.previousElementSibling.style.display='none'" onerror="if(!this.dataset.netStep){this.dataset.netStep='1';this.src='https://images.unsplash.com/photo-1737639441322-8d083c13eb6a?auto=format&fit=crop&w=1600&q=82';}else if(this.dataset.netStep==='1'){this.dataset.netStep='2';this.src='https://images.unsplash.com/photo-1710926851153-c5c4cd1e4596?auto=format&fit=crop&w=1600&q=82';}else{this.style.display='none';}">
+                                        <img class="herb-zone-image" src="https://images.unsplash.com/photo-1737639441322-8d083c13eb6a?auto=format&fit=crop&w=1600&q=82" data-net-step="1" alt="異國風情香草區植物圖鑑" referrerpolicy="no-referrer" onload="this.previousElementSibling.style.display='none'" onerror="if(!this.dataset.netStep){this.dataset.netStep='1';this.src='https://images.unsplash.com/photo-1737639441322-8d083c13eb6a?auto=format&fit=crop&w=1600&q=82';}else if(this.dataset.netStep==='1'){this.dataset.netStep='2';this.src='https://images.unsplash.com/photo-1710926851153-c5c4cd1e4596?auto=format&fit=crop&w=1600&q=82';}else{this.style.display='none';}">
                                     </div>
                                 </article>
                                 <article class="herb-zone-card">
@@ -535,7 +535,7 @@
                                     </div>
                                     <div class="herb-zone-image-wrap">
                                         <div class="herb-zone-fallback">圖片尚未載入<br>picture/herb-game/herb-book-native-zone.png</div>
-                                        <img class="herb-zone-image" src="picture/herb-game/herb-book-native-zone.png" alt="在地原生香草區植物圖鑑" referrerpolicy="no-referrer" onload="this.previousElementSibling.style.display='none'" onerror="if(!this.dataset.netStep){this.dataset.netStep='1';this.src='https://images.unsplash.com/photo-1737639441322-8d083c13eb6a?auto=format&fit=crop&w=1600&q=82';}else if(this.dataset.netStep==='1'){this.dataset.netStep='2';this.src='https://images.unsplash.com/photo-1710926851153-c5c4cd1e4596?auto=format&fit=crop&w=1600&q=82';}else{this.style.display='none';}">
+                                        <img class="herb-zone-image" src="https://images.unsplash.com/photo-1737639441322-8d083c13eb6a?auto=format&fit=crop&w=1600&q=82" data-net-step="1" alt="在地原生香草區植物圖鑑" referrerpolicy="no-referrer" onload="this.previousElementSibling.style.display='none'" onerror="if(!this.dataset.netStep){this.dataset.netStep='1';this.src='https://images.unsplash.com/photo-1737639441322-8d083c13eb6a?auto=format&fit=crop&w=1600&q=82';}else if(this.dataset.netStep==='1'){this.dataset.netStep='2';this.src='https://images.unsplash.com/photo-1710926851153-c5c4cd1e4596?auto=format&fit=crop&w=1600&q=82';}else{this.style.display='none';}">
                                     </div>
                                 </article>
                                 <article class="herb-zone-card">
@@ -545,7 +545,7 @@
                                     </div>
                                     <div class="herb-zone-image-wrap">
                                         <div class="herb-zone-fallback">圖片尚未載入<br>picture/herb-game/herb-book-european-zone.png</div>
-                                        <img class="herb-zone-image" src="picture/herb-game/herb-book-european-zone.png" alt="歐式浪漫香草區植物圖鑑" referrerpolicy="no-referrer" onload="this.previousElementSibling.style.display='none'" onerror="if(!this.dataset.netStep){this.dataset.netStep='1';this.src='https://images.unsplash.com/photo-1737639441322-8d083c13eb6a?auto=format&fit=crop&w=1600&q=82';}else if(this.dataset.netStep==='1'){this.dataset.netStep='2';this.src='https://images.unsplash.com/photo-1710926851153-c5c4cd1e4596?auto=format&fit=crop&w=1600&q=82';}else{this.style.display='none';}">
+                                        <img class="herb-zone-image" src="https://images.unsplash.com/photo-1737639441322-8d083c13eb6a?auto=format&fit=crop&w=1600&q=82" data-net-step="1" alt="歐式浪漫香草區植物圖鑑" referrerpolicy="no-referrer" onload="this.previousElementSibling.style.display='none'" onerror="if(!this.dataset.netStep){this.dataset.netStep='1';this.src='https://images.unsplash.com/photo-1737639441322-8d083c13eb6a?auto=format&fit=crop&w=1600&q=82';}else if(this.dataset.netStep==='1'){this.dataset.netStep='2';this.src='https://images.unsplash.com/photo-1710926851153-c5c4cd1e4596?auto=format&fit=crop&w=1600&q=82';}else{this.style.display='none';}">
                                     </div>
                                 </article>
                             </div>
@@ -4092,10 +4092,11 @@ const __aiBootTimer = setInterval(() => {
 })();
     </script><!-- /day1-20260913-patch -->
 
+    <script src="js/herb-diary-renderer.js?v=20260916-v8"></script>
     <script id="day1-diary-integration-20260915">
 (() => {
   'use strict';
-  const PATCH_VERSION = '2026-09-15-day1-diary-v1';
+  const PATCH_VERSION = '2026-09-16-day1-diary-v8';
   let bootTries = 0;
   const bootTimer = setInterval(() => {
     bootTries += 1;
@@ -4260,7 +4261,7 @@ const __aiBootTimer = setInterval(() => {
       @keyframes herb-short-fade{0%{opacity:0}36%{opacity:1}64%{opacity:1}100%{opacity:0}}
       #herb-diary-layer{position:absolute;inset:0;z-index:300;background:#30251e;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .32s ease,visibility 0s linear .32s}
       #herb-diary-layer.active{opacity:1;visibility:visible;pointer-events:auto;transition-delay:0s}
-      #herb-diary-frame{display:block;width:100%;height:100%;border:0;background:#30251e}
+      #herb-diary-host{display:grid;width:100%;height:100%;place-items:center;background:#30251e}
       #herb-diary-actions{position:absolute;right:3.2%;bottom:3%;z-index:2;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s ease}
       #herb-diary-layer.ready-to-end #herb-diary-actions{opacity:1;visibility:visible;pointer-events:auto}
       #herb-finish-day{min-width:8.5rem;min-height:44px;padding:.65rem 1.15rem;border:1px solid rgba(255,255,255,.65);border-radius:999px;background:rgba(24,62,38,.9);color:#fff;font:800 clamp(.9rem,1.25vw,1.05rem)/1.2 "Noto Sans TC",sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.28);cursor:pointer}
@@ -4285,7 +4286,7 @@ const __aiBootTimer = setInterval(() => {
     diaryLayer.id = 'herb-diary-layer';
     diaryLayer.setAttribute('aria-hidden', 'true');
     diaryLayer.innerHTML = `
-      <iframe id="herb-diary-frame" src="herb-diary.html?v=20260915-2" title="香草日記"></iframe>
+      <div id="herb-diary-host" aria-label="香草日記"></div>
       <div id="herb-diary-actions"><button type="button" id="herb-finish-day">結束今天</button></div>`;
     const dayEndLayer = doc.createElement('section');
     dayEndLayer.id = 'herb-day-end-layer';
@@ -4300,7 +4301,35 @@ const __aiBootTimer = setInterval(() => {
       </div>`;
     gameScreen.append(transitionLayer, diaryLayer, dayEndLayer);
 
-    const diaryFrame = diaryLayer.querySelector('#herb-diary-frame');
+    const diaryHost = diaryLayer.querySelector('#herb-diary-host');
+    const diaryRoot = diaryHost.attachShadow({ mode: 'open' });
+    // Mount the shared v8 markup in this page; shadow styles preserve its layout.
+    const diaryReady = fetch('herb-diary.html?v=20260916-v8').then(response => {
+      if (!response.ok) throw new Error('Diary markup: ' + response.status);
+      return response.text();
+    }).then(markup => {
+      const template = new DOMParser().parseFromString(markup, 'text/html');
+      template.querySelectorAll('style').forEach(source => {
+        const local = doc.createElement('style');
+        local.textContent = source.textContent.replaceAll(':root', ':host');
+        // Font faces belong to the document font set, also used inside the shadow.
+        if (source.textContent.includes('@font-face')) doc.head.appendChild(local);
+        else diaryRoot.appendChild(local);
+      });
+      const hostStyle = doc.createElement('style');
+      hostStyle.textContent = ':host{color:var(--ink);font-family:var(--hand);font-weight:400;line-height:normal;letter-spacing:normal;text-align:left;user-select:text;touch-action:manipulation}.game{width:100%;max-height:100%;}';
+      diaryRoot.append(hostStyle, template.getElementById('diaryGame'));
+      return win.HerbDiaryRenderer.mount(diaryRoot, { onChange(type, detail) {
+        if (type === 'herb:diary-navigate') currentDiaryDayKey = detail.dayKey;
+        saveDiaryState(detail.dayKey, detail.state);
+      } });
+    }).catch(error => {
+      console.error('[HerbGame Diary]', error);
+      diaryHost.textContent = '日記載入失敗，請重新整理頁面。';
+      return null;
+    });
+    diaryHost.addEventListener('click', event => event.stopPropagation());
+    diaryHost.addEventListener('keydown', event => event.stopPropagation());
     const finishDayButton = diaryLayer.querySelector('#herb-finish-day');
     const reviewDiaryButton = dayEndLayer.querySelector('#herb-review-diary');
     const returnHomeButton = dayEndLayer.querySelector('#herb-return-home');
@@ -4324,7 +4353,7 @@ const __aiBootTimer = setInterval(() => {
 
     function sendDiaryPayload(dayKey) {
       const payload = buildDiaryPayload(dayKey);
-      diaryFrame.contentWindow?.postMessage({ type: 'herb:diary-init', payload }, '*');
+      diaryReady.then(renderer => renderer?.init(payload));
     }
 
     function showDiary(dayKey = ensureDiaryState().currentDayKey) {
@@ -4402,18 +4431,6 @@ const __aiBootTimer = setInterval(() => {
       }, 650);
     }
 
-    win.addEventListener('message', event => {
-      if (event.source !== diaryFrame.contentWindow || !event.data?.type) return;
-      const { type, detail } = event.data;
-      if (type === 'herb:diary-ready') {
-        sendDiaryPayload(currentDiaryDayKey);
-        return;
-      }
-      if (!detail?.dayKey || !detail?.state) return;
-      saveDiaryState(detail.dayKey, detail.state);
-      if (type === 'herb:diary-navigate') currentDiaryDayKey = detail.dayKey;
-    });
-    diaryFrame.addEventListener('load', () => sendDiaryPayload(currentDiaryDayKey));
     finishDayButton.addEventListener('click', finishDay);
     reviewDiaryButton.addEventListener('click', () => showDiary(currentDiaryDayKey));
     returnHomeButton.addEventListener('click', () => {
