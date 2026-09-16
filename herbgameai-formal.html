@@ -284,7 +284,7 @@
 
     <style id="member-portrait-viewer-style">
         .member-avatar-img[data-character-id] {
-            cursor: zoom-in;
+            cursor: default;
             transition: transform 160ms ease;
             transform-origin: center bottom;
         }
@@ -630,8 +630,6 @@
                 description: "重視快樂學習，鼓勵大家勇敢思考、合作創新，也提醒大家關心身邊的人。每天早上常能看到他在校門口熱情地和大家打招呼。"
             },
             "陳冠瑋老師": { id:"teacher_chen", name:"陳冠瑋老師", role:"香草服務隊老師", relationshipType:"interaction",
-                avatar: "picture/herb-game/chen-guanwei-thinking.png",
-                avatarFallback: "https://raw.githubusercontent.com/ff41009tw52-rgb/mimi-cream-farm/main/picture/herb-game/chen-guanwei-thinking.png",
                 description: "香草服務隊的活動引導老師，負責帶領大家完成任務、處理現場狀況，也常在關鍵時刻提醒大家不要做出太驚人的事情。"
             },
             "許恒維老師": { id:"teacher_xu", name:"許恒維老師", role:"香草園實作引導老師", relationshipType:"interaction",
@@ -945,9 +943,6 @@
                 GITHUB_HERB_RAW + "scene-14-herb-vs-weed.jpg",
             "picture/herb-game/campus-map-base.png":
                 GITHUB_HERB_RAW + "campus-map-base.png",
-            "picture/herb-game/chen-guanwei-thinking.png":
-                GITHUB_HERB_RAW + "chen-guanwei-thinking.png",
-
             // 尚未有正式圖：不要先要求一個不存在的 GitHub 路徑再等 404，
             // 直接交給固定網路圖片。
             "picture/herb-game/scene-01-school-gate.jpg":
@@ -3294,6 +3289,7 @@ const __aiBootTimer = setInterval(() => {
     (() => {
       'use strict';
       const doc = document;
+      const MEMBER_PORTRAIT_VIEWER_ENABLED = false; // 2026-09-16: 暫停大圖 Viewer，先確保 Day 1 測試順暢
       const viewer = doc.getElementById('member-portrait-viewer');
       const viewerImage = doc.getElementById('member-portrait-viewer-image');
       const viewerFailure = doc.getElementById('member-portrait-viewer-failure');
@@ -3342,6 +3338,7 @@ const __aiBootTimer = setInterval(() => {
       }
 
       function openMemberPortraitViewer(characterId) {
+        if (!MEMBER_PORTRAIT_VIEWER_ENABLED) return false;
         const resolved = resolvePortraitCharacter(characterId);
         const state = window.gameEngine?.gameState;
         if (!resolved || !state || !isCharacterUnlocked(characterId) || !resolved.info.avatar) return false;
