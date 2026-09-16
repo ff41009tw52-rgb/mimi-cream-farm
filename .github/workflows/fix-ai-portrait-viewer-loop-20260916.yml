@@ -16,161 +16,94 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Diagnose and patch viewer loop
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo '=== portrait assets ==='
-          file picture/herb-game/ai-characters/*_transparent_v2.png || true
-          echo '=== problematic observer before patch ==='
-          grep -n -C 8 "MutationObserver(syncViewerMeta)" herbgameai-formal.html || true
-
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path('herbgameai-formal.html')
-          text = p.read_text(encoding='utf-8')
-          original = text
-
-          # Re-enable the feature. Chen Guanwei's real-person image removal stays untouched.
-          old_flag = "const MEMBER_PORTRAIT_VIEWER_ENABLED = false; // 2026-09-16: 暫停大圖 Viewer，先確保 Day 1 測試順暢"
-          new_flag = "const MEMBER_PORTRAIT_VIEWER_ENABLED = true; // 2026-09-16: viewer loop fixed; enlargement restored"
-          if old_flag not in text:
-              raise SystemExit('disabled viewer flag not found')
-          text = text.replace(old_flag, new_flag, 1)
-          text = text.replace(
-              ".member-avatar-img[data-character-id] {\n            cursor: default;",
-              ".member-avatar-img[data-character-id] {\n            cursor: zoom-in;",
-              1
-          )
-
-          # Avoid needless reassignment/redecode when reopening the same portrait.
-          old_src = """        viewerImage.alt = `${resolved.name}完整人物立繪`;
-        viewerImage.src = resolved.info.avatar;
-        viewer.classList.add('active');"""
-          new_src = """        viewerImage.alt = `${resolved.name}完整人物立繪`;
-        viewerImage.decoding = 'async';
-        if (viewerImage.getAttribute('src') !== resolved.info.avatar) viewerImage.src = resolved.info.avatar;
-        viewer.classList.add('active');"""
-          if old_src not in text:
-              raise SystemExit('viewer image assignment block not found')
-          text = text.replace(old_src, new_src, 1)
-
-          # Root cause fix: the old observer watched subtree/childList while its callback
-          # changed viewerMeta.textContent. That mutation retriggered the same observer forever.
-          old_observer = """    function syncViewerMeta() {
-      if (!viewer?.classList.contains('active') || !viewerMeta) return;
-      const id = viewer.dataset.characterId;
-      if (!STUDENT_INFO[id]) return;
-      viewerMeta.textContent = `代表植物｜${engine.gameState?.studentRelations?.[id]?.plantAssigned ? STUDENT_INFO[id].plant : '？？？'}`;
-    }
-    if (viewer) {
-      new MutationObserver(syncViewerMeta).observe(viewer, {attributes:true,attributeFilter:['class','data-character-id'],subtree:true,childList:true});
-      viewer.addEventListener('click', () => setTimeout(syncViewerMeta, 0));
-    }"""
-          new_observer = """    function syncViewerMeta() {
-      if (!viewer?.classList.contains('active') || !viewerMeta) return;
-      const id = viewer.dataset.characterId;
-      if (!STUDENT_INFO[id]) return;
-      const nextText = `代表植物｜${engine.gameState?.studentRelations?.[id]?.plantAssigned ? STUDENT_INFO[id].plant : '？？？'}`;
-      if (viewerMeta.textContent !== nextText) viewerMeta.textContent = nextText;
-    }
-    if (viewer) {
-      // Observe only the two Viewer attributes that actually change when a portrait opens/closes.
-      // Do not observe childList/subtree: syncViewerMeta itself writes textContent.
-      new MutationObserver(syncViewerMeta).observe(viewer, {attributes:true,attributeFilter:['class','data-character-id']});
-      viewer.addEventListener('click', () => setTimeout(syncViewerMeta, 0));
-    }"""
-          if old_observer not in text:
-              raise SystemExit('problematic viewer observer block not found')
-          text = text.replace(old_observer, new_observer, 1)
-
-          # Add a regression check to the existing CI-only Day1 browser selftest.
-          anchor = """      assert(plantRow2?.querySelector('span')?.textContent?.trim() === '薄荷', 'mint pairing not shown after card assignment');
-
-      // Card reveal nodes must not unlock plant name until the post-card line."""
-          inserted = """      assert(plantRow2?.querySelector('span')?.textContent?.trim() === '薄荷', 'mint pairing not shown after card assignment');
-
-      // Portrait Viewer regression: opening must stay responsive and show the gated plant meta.
-      const portraitViewer = doc.getElementById('member-portrait-viewer');
-      const portraitViewerMeta = doc.getElementById('member-portrait-viewer-meta');
-      mintImg2?.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true}));
-      await wait(120);
-      assert(portraitViewer?.classList.contains('active'), 'portrait viewer did not open');
-      assert(portraitViewerMeta?.textContent?.trim() === '代表植物｜薄荷', `portrait viewer meta mismatch: ${portraitViewerMeta?.textContent}`);
-      win.__HERBGAME_MEMBER_PORTRAIT_VIEWER?.closeMemberPortraitViewer?.();
-      await wait(30);
-      assert(!portraitViewer?.classList.contains('active'), 'portrait viewer did not close');
-
-      // Card reveal nodes must not unlock plant name until the post-card line."""
-          if anchor not in text:
-              raise SystemExit('selftest insertion anchor not found')
-          text = text.replace(anchor, inserted, 1)
-
-          if text == original:
-              raise SystemExit('no changes made')
-          if "subtree:true,childList:true" in text:
-              raise SystemExit('recursive observer options still present')
-          if "const MEMBER_PORTRAIT_VIEWER_ENABLED = true;" not in text:
-              raise SystemExit('viewer not re-enabled')
-          if "chen-guanwei-thinking.png" in text:
-              raise SystemExit('Chen real-person image reference returned unexpectedly')
-          p.write_text(text, encoding='utf-8')
-          PY
-
-      - name: Static regression guards
-        shell: bash
-        run: |
-          set -euo pipefail
-          git diff --check
-          test -z "$(git diff --name-only -- herbgame-formal.html)"
-          grep -q "const MEMBER_PORTRAIT_VIEWER_ENABLED = true;" herbgameai-formal.html
-          grep -q "cursor: zoom-in;" herbgameai-formal.html
-          grep -q "if (viewerMeta.textContent !== nextText)" herbgameai-formal.html
-          grep -Fq "observe(viewer, {attributes:true,attributeFilter:['class','data-character-id']});" herbgameai-formal.html
-          ! grep -q "subtree:true,childList:true" herbgameai-formal.html
-          ! grep -q "chen-guanwei-thinking.png" herbgameai-formal.html
-
-      - name: JavaScript syntax checks
+      - name: Repair AI portrait viewer
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
           import re
-          html = Path('herbgameai-formal.html').read_text(encoding='utf-8')
-          for script_id in ('member-portrait-viewer-script','day1-20260913-patch'):
-              m = re.search(r'<script id="'+re.escape(script_id)+r'">(.*?)</script>', html, re.S)
+          p = Path('herbgameai-formal.html')
+          s = p.read_text(encoding='utf-8')
+          before = s
+          old_flag = 'const MEMBER_PORTRAIT_VIEWER_ENABLED = false; // 2026-09-16: 暫停大圖 Viewer，先確保 Day 1 測試順暢'
+          new_flag = 'const MEMBER_PORTRAIT_VIEWER_ENABLED = true; // 2026-09-16: recursive observer fixed; enlargement restored'
+          if old_flag not in s:
+              raise SystemExit('disabled viewer flag not found')
+          s = s.replace(old_flag, new_flag, 1)
+          s = s.replace('.member-avatar-img[data-character-id] {\n            cursor: default;', '.member-avatar-img[data-character-id] {\n            cursor: zoom-in;', 1)
+          old_src = "viewerImage.alt = `${resolved.name}完整人物立繪`;\n        viewerImage.src = resolved.info.avatar;\n        viewer.classList.add('active');"
+          new_src = "viewerImage.alt = `${resolved.name}完整人物立繪`;\n        viewerImage.decoding = 'async';\n        if (viewerImage.getAttribute('src') !== resolved.info.avatar) viewerImage.src = resolved.info.avatar;\n        viewer.classList.add('active');"
+          if old_src not in s:
+              raise SystemExit('viewer src block not found')
+          s = s.replace(old_src, new_src, 1)
+          pattern = re.compile(r"    function syncViewerMeta\(\) \{\n      if \(!viewer\?\.classList\.contains\('active'\) \|\| !viewerMeta\) return;\n      const id = viewer\.dataset\.characterId;\n      if \(!STUDENT_INFO\[id\]\) return;\n      viewerMeta\.textContent = `代表植物｜\$\{engine\.gameState\?\.studentRelations\?\.\[id\]\?\.plantAssigned \? STUDENT_INFO\[id\]\.plant : '？？？'\}`;\n    \}\n    if \(viewer\) \{\n      new MutationObserver\(syncViewerMeta\)\.observe\(viewer, \{attributes:true,attributeFilter:\['class','data-character-id'\],subtree:true,childList:true\}\);\n      viewer\.addEventListener\('click', \(\) => setTimeout\(syncViewerMeta, 0\)\);\n    \}")
+          replacement = "\n".join(["    function syncViewerMeta() {","      if (!viewer?.classList.contains('active') || !viewerMeta) return;","      const id = viewer.dataset.characterId;","      if (!STUDENT_INFO[id]) return;","      const nextText = `代表植物｜${engine.gameState?.studentRelations?.[id]?.plantAssigned ? STUDENT_INFO[id].plant : '？？？'}`;","      if (viewerMeta.textContent !== nextText) viewerMeta.textContent = nextText;","    }","    if (viewer) {","      // Only observe open/close and character changes. Never observe the text node this callback writes.","      new MutationObserver(syncViewerMeta).observe(viewer, {attributes:true,attributeFilter:['class','data-character-id']});","      viewer.addEventListener('click', () => setTimeout(syncViewerMeta, 0));","    }"])
+          s, count = pattern.subn(replacement, s, count=1)
+          if count != 1:
+              raise SystemExit(f'problem observer replacement count={count}')
+          anchor = "      assert(plantRow2?.querySelector('span')?.textContent?.trim() === '薄荷', 'mint pairing not shown after card assignment');\n\n      // Card reveal nodes must not unlock plant name until the post-card line."
+          test_lines = ["      assert(plantRow2?.querySelector('span')?.textContent?.trim() === '薄荷', 'mint pairing not shown after card assignment');","","      // Regression: portrait enlargement must open/close without a recursive MutationObserver freeze.","      const portraitViewer = doc.getElementById('member-portrait-viewer');","      const portraitViewerMeta = doc.getElementById('member-portrait-viewer-meta');","      mintImg2?.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true}));","      await wait(120);","      assert(portraitViewer?.classList.contains('active'), 'portrait viewer did not open');","      assert(portraitViewerMeta?.textContent?.trim() === '代表植物｜薄荷', `portrait viewer meta mismatch: ${portraitViewerMeta?.textContent}`);","      win.__HERBGAME_MEMBER_PORTRAIT_VIEWER?.closeMemberPortraitViewer?.();","      await wait(30);","      assert(!portraitViewer?.classList.contains('active'), 'portrait viewer did not close');","","      // Card reveal nodes must not unlock plant name until the post-card line."]
+          if anchor not in s:
+              raise SystemExit('selftest anchor not found')
+          s = s.replace(anchor, "\n".join(test_lines), 1)
+          if s == before:
+              raise SystemExit('no changes made')
+          if 'subtree:true,childList:true' in s:
+              raise SystemExit('recursive observer remains')
+          if 'chen-guanwei-thinking.png' in s:
+              raise SystemExit('Chen image reference unexpectedly present')
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Static and syntax checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          test -z "$(git diff --name-only -- herbgame-formal.html)"
+          grep -q 'const MEMBER_PORTRAIT_VIEWER_ENABLED = true;' herbgameai-formal.html
+          grep -q 'cursor: zoom-in;' herbgameai-formal.html
+          grep -q 'if (viewerMeta.textContent !== nextText)' herbgameai-formal.html
+          ! grep -q 'subtree:true,childList:true' herbgameai-formal.html
+          ! grep -q 'chen-guanwei-thinking.png' herbgameai-formal.html
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          h = Path('herbgameai-formal.html').read_text(encoding='utf-8')
+          for sid in ('member-portrait-viewer-script','day1-20260913-patch'):
+              m = re.search(r'<script id="'+re.escape(sid)+r'">(.*?)</script>', h, re.S)
               if not m:
-                  raise SystemExit(f'{script_id} not found')
-              Path(f'/tmp/{script_id}.js').write_text(m.group(1), encoding='utf-8')
+                  raise SystemExit(f'{sid} missing')
+              Path('/tmp/'+sid+'.js').write_text(m.group(1), encoding='utf-8')
           PY
           node --check /tmp/member-portrait-viewer-script.js
           node --check /tmp/day1-20260913-patch.js
 
-      - name: Browser Day1 and portrait selftest
+      - name: Browser regression test
         shell: bash
         run: |
           set -euo pipefail
           python3 -m http.server 8765 >/tmp/herb-http.log 2>&1 &
-          SERVER_PID=$!
-          trap 'kill $SERVER_PID || true' EXIT
+          PID=$!
+          trap 'kill $PID || true' EXIT
           sleep 1
           CHROME=$(command -v chromium || command -v chromium-browser || command -v google-chrome || true)
           if [ -z "$CHROME" ]; then
-            echo 'Chromium not installed; static and syntax tests already passed.'
+            echo 'No Chromium available; syntax/static checks passed.'
             exit 0
           fi
-          timeout 45s "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=12000 --dump-dom "http://127.0.0.1:8765/herbgameai-formal.html?selftest=day1-20260913" > /tmp/day1-dom.txt
+          timeout 45s "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=15000 --dump-dom 'http://127.0.0.1:8765/herbgameai-formal.html?selftest=day1-20260913' > /tmp/day1-dom.txt
           grep -q 'DAY1_SELFTEST_PASS' /tmp/day1-dom.txt
-          ! grep -q '<pre id="day1-selftest-result"[^>]*>DAY1_SELFTEST_FAIL' /tmp/day1-dom.txt
+          ! grep -Eq '<pre id="day1-selftest-result"[^>]*>DAY1_SELFTEST_FAIL' /tmp/day1-dom.txt
 
-      - name: Commit repaired viewer and remove temporary workflow
+      - name: Commit fix and remove temporary workflow
         shell: bash
         run: |
           set -euo pipefail
           rm -f .github/workflows/fix-ai-portrait-viewer-loop-20260916.yml
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add herbgameai-formal.html .github/workflows/fix-ai-portrait-viewer-loop-20260916.yml
-          git commit -m "fix: repair recursive portrait viewer observer"
+          git commit -m 'fix: repair portrait enlargement freeze'
           git push origin HEAD:main
