@@ -7,12 +7,19 @@
     return;
   }
 
+  const engine = window.SCIENCE_ASSISTANT_ENGINE;
+  if (!engine) {
+    console.warn('[Science Assistant] Missing question engine.');
+    return;
+  }
+
   const state = {
     grade: null,
     characterKey: 'mimi',
     isReplying: false,
     siteKnowledge: null,
-    curriculum: []
+    curriculum: [],
+    knowledgePromise: null
   };
 
   const loadJson = async (url) => {
@@ -348,26 +355,33 @@
   };
 
   const replyFor = (question, preset) => {
-    if (preset?.gameId) return getGameReply(preset.gameId);
-    if (preset?.action === 'grade-games') return getGradeGamesReply(state.grade);
+    if (preset?.gameId) {
+      return engine.answerQuestion({
+        question: preset.gameId + ' 號遊戲在哪裡？',
+        grade: state.grade,
+        siteKnowledge: state.siteKnowledge,
+        curriculum: state.curriculum,
+        fallbackText: config.mockFallback
+      });
+    }
+    if (preset?.action === 'grade-games') {
+      return engine.answerQuestion({
+        question: '有什麼' + state.grade + '年級遊戲？',
+        grade: state.grade,
+        siteKnowledge: state.siteKnowledge,
+        curriculum: state.curriculum,
+        fallbackText: config.mockFallback
+      });
+    }
     if (preset?.answer) return { text: preset.answer };
 
-    const compact = question.replace(/\s+/g, '');
-    const gameMatch = compact.match(/(?:第)?(\d{1,2})(?:號|關)?.*(?:怎麼玩|在哪|遊戲)/);
-    if (gameMatch) return getGameReply(gameMatch[1]);
-
-    if (/有什麼.*年級.*遊戲|年級.*有哪些.*遊戲|推薦.*遊戲/.test(compact)) {
-      const gradeMap = { 三: '3', 四: '4', 五: '5', 六: '6' };
-      const mentioned = compact.match(/[三四五六3-6](?=年級)/)?.[0];
-      const grade = gradeMap[mentioned] || mentioned || state.grade;
-      return getGradeGamesReply(grade);
-    }
-
-    const quick = (config.quickPrompts[state.grade] || []).find((item) => item.label.includes(question));
-    if (quick) return replyFor(question, quick);
-    const curriculumReply = findCurriculumReply(question);
-    if (curriculumReply) return curriculumReply;
-    return { text: config.mockFallback };
+    return engine.answerQuestion({
+      question,
+      grade: state.grade,
+      siteKnowledge: state.siteKnowledge,
+      curriculum: state.curriculum,
+      fallbackText: config.mockFallback
+    });
   };
 
   const respond = (question, preset) => {
@@ -375,7 +389,8 @@
     state.isReplying = true;
     ui.send.disabled = true;
     const typing = addTyping();
-    window.setTimeout(() => {
+    window.setTimeout(async () => {
+      await state.knowledgePromise;
       typing.remove();
       const reply = replyFor(question, preset);
       addMessage('assistant', reply.text, reply.action);
@@ -457,7 +472,7 @@
   });
 
   const storedGrade = getStoredGrade();
-  loadKnowledge();
+  state.knowledgePromise = loadKnowledge();
   if (storedGrade) startChat(storedGrade);
   else showGradeScreen();
 })();

@@ -66,6 +66,12 @@ for (const dataset of manifest.datasets) {
 const configSource = fs.readFileSync(path.join(repoRoot, 'ai-assistant', 'ai-assistant-config.js'), 'utf8');
 assert(configSource.includes("siteKnowledgeUrl: 'data/site-knowledge.json'"), 'assistant config missing site knowledge URL');
 assert(configSource.includes("curriculumManifestUrl: 'knowledge/index.json'"), 'assistant config missing curriculum manifest URL');
+const indexSource = fs.readFileSync(path.join(repoRoot, 'index.html'), 'utf8');
+assert(indexSource.includes('ai-assistant/assistant-engine.js'), 'homepage missing assistant engine script');
+assert(
+  indexSource.indexOf('assistant-engine.js') < indexSource.indexOf('ai-assistant.js'),
+  'assistant engine must load before the assistant UI'
+);
 
 console.log('Knowledge validation passed.');
 console.log('  Games: 41 total / 32 published / 9 unlisted / 0 missing');
