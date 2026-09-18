@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "1.0.0",
+  "updatedOn": "2026-09-18",
+  "siteKnowledge": "data/site-knowledge.json",
+  "coverage": {
+    "grade3": "planned",
+    "grade4": "partial",
+    "grade5": "planned",
+    "grade6": "planned"
+  },
+  "datasets": [
+    {
+      "id": "g4-s1-u1-earth-surface",
+      "grade": "4",
+      "semester": "上",
+      "unit": "第一單元",
+      "title": "地表的靜與動",
+      "path": "knowledge/grade4/unit1-earth-surface.json",
+      "status": "available",
+      "sourcePages": "課本印刷頁 10–33"
+    }
+  ]
+}
