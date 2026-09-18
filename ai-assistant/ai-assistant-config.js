@@ -3,6 +3,8 @@
 
   window.SCIENCE_ASSISTANT_CONFIG = {
     storageKey: 'scienceFarmAssistantGrade',
+    siteKnowledgeUrl: 'data/site-knowledge.json',
+    curriculumManifestUrl: 'knowledge/index.json',
     title: '橘咪咪與白奶油的科學小幫手',
     subtitle: '自然不懂？遊戲不會玩？來問我們！',
     characters: {

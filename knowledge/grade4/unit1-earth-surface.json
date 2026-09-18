@@ -1,0 +1,298 @@
+{
+  "schemaVersion": "1.0.0",
+  "unitId": "g4-s1-u1-earth-surface",
+  "grade": "4",
+  "semester": "上",
+  "unit": "第一單元",
+  "title": "地表的靜與動",
+  "updatedOn": "2026-09-18",
+  "source": {
+    "title": "國民小學自然科學課本第三冊（4上）",
+    "publisher": "康軒文教",
+    "edition": "民國113年8月再版",
+    "printedPages": [10, 33],
+    "coreContentPages": [12, 31],
+    "scienceReadingPages": [32, 33],
+    "pdfPages": [12, 35],
+    "note": "依使用者提供課本整理成可檢索摘要；內容採改寫，不取代課本原文。"
+  },
+  "scope": [
+    "地表環境與組成物質",
+    "流水搬運與堆積",
+    "人類活動與地表保護",
+    "地震造成的地表變動與災害",
+    "地震資訊、防災與速報",
+    "風搬運沙粒與沙丘移動"
+  ],
+  "learningGoals": [
+    "從觀察辨認不同地表環境與常見物質。",
+    "用實驗證據解釋流水如何搬運、堆積地表物質。",
+    "區分地震的震源、震央、規模、震度等資訊。",
+    "提出地震前、中、後可執行的防災行動。",
+    "理解人類活動及自然作用都可能改變地表。"
+  ],
+  "concepts": [
+    {
+      "id": "surface-environments",
+      "section": "1-1 地表環境有什麼",
+      "sourcePages": [12, 15],
+      "keywords": ["地表環境", "生物", "非生物", "空氣", "水"],
+      "coreConcept": "地表有海岸、河口、山地等不同環境，也包含生物與空氣、水、岩石等非生物成分。",
+      "studentExplanation": "不同地方的陽光、水分、溫度和地面材料不一樣，因此適合生活的生物也不同。",
+      "misconceptions": [
+        "地表只指泥土表面。",
+        "環境只有看得見的生物，沒有空氣和水等非生物成分。"
+      ],
+      "teacherNotes": "可請學生比較校園、河邊、海岸照片，分別列出生物與非生物成分。",
+      "relatedGameIds": []
+    },
+    {
+      "id": "surface-materials",
+      "section": "1-1 地表環境有什麼",
+      "sourcePages": [16, 17],
+      "keywords": ["岩石", "礫石", "沙", "土壤", "顆粒"],
+      "coreConcept": "地表常見岩石、礫石、沙和土壤；它們的顆粒大小、觸感與外形不同。",
+      "studentExplanation": "礫石顆粒通常較大、表面較粗；沙較細；土壤顆粒最細，也常混有腐植質。",
+      "misconceptions": [
+        "礫石、沙和土壤只是名稱不同，性質完全相同。",
+        "顆粒越小就一定越重。"
+      ],
+      "teacherNotes": "比較材料時應固定觀察方法，可從顆粒大小、粗細、顏色與觸感記錄。",
+      "relatedGameIds": ["41"]
+    },
+    {
+      "id": "surface-change-agents",
+      "section": "1-2 地表環境會變動嗎",
+      "sourcePages": [18, 18],
+      "keywords": ["地表變動", "流水", "風", "地震", "人類活動"],
+      "coreConcept": "地表會受到流水、風、地震與人類活動等因素影響而持續改變。",
+      "studentExplanation": "河水、強風、地震或施工都可能搬動材料、破壞坡面或形成新的地形。",
+      "misconceptions": [
+        "地表只有地震時才會改變。",
+        "所有地表變化都能用肉眼立刻看見。"
+      ],
+      "teacherNotes": "引導學生區分快速事件與長時間累積的改變。",
+      "relatedGameIds": ["41"]
+    },
+    {
+      "id": "flowing-water-action",
+      "section": "1-2 地表環境會變動嗎",
+      "sourcePages": [19, 20],
+      "keywords": ["流水", "搬運", "堆積", "顆粒大小", "水流強弱"],
+      "coreConcept": "流水能帶走地表物質並在別處堆積；較小顆粒通常移動較遠，水流較強時搬運能力通常較大。",
+      "studentExplanation": "水流經混合的礫石、沙和土壤時，細小材料容易被帶得更遠，水勢增加也可能讓更多材料移動。",
+      "misconceptions": [
+        "流水只會把所有材料搬到同一個位置。",
+        "顆粒越大一定被搬得越遠。",
+        "水流強弱不會影響搬運結果。"
+      ],
+      "teacherNotes": "課本實驗主要呈現搬運與堆積；說明侵蝕時應搭配實際觀察證據。",
+      "relatedGameIds": ["41"]
+    },
+    {
+      "id": "fair-flowing-water-test",
+      "section": "1-2 地表環境會變動嗎",
+      "sourcePages": [19, 20],
+      "keywords": ["公平測試", "操縱變因", "控制變因", "觀察紀錄"],
+      "coreConcept": "比較水量或水流強弱時，其餘材料、坡度、容器與倒水方式應盡量相同。",
+      "studentExplanation": "一次只改變一個條件，才知道結果主要是由哪個條件造成。",
+      "misconceptions": [
+        "同時改變水量、坡度和材料也能公平比較。",
+        "只看一次結果就足以排除所有偶然差異。"
+      ],
+      "teacherNotes": "可讓學生標記操縱變因、應變變因與控制變因，並重複試驗。",
+      "relatedGameIds": ["41"]
+    },
+    {
+      "id": "human-impact-and-protection",
+      "section": "1-2 地表環境會變動嗎",
+      "sourcePages": [21, 22],
+      "keywords": ["開發", "濫墾", "採砂石", "植被", "水土保持"],
+      "coreConcept": "過度開發、砍伐或採取河床砂石可能加劇地表破壞；保留植被與適當工程可降低部分風險。",
+      "studentExplanation": "植物根系能幫助固定土壤；開發前要評估坡地、河川和生態環境。",
+      "misconceptions": [
+        "所有工程都一定能完全阻止地表變動。",
+        "只要種一棵樹就不會發生土石流。"
+      ],
+      "teacherNotes": "避免把災害簡化成單一原因，需同時考慮降雨、地形、地質與人類活動。",
+      "relatedGameIds": []
+    },
+    {
+      "id": "earthquake-effects",
+      "section": "1-3 怎樣做好地震防災",
+      "sourcePages": [23, 24],
+      "keywords": ["地震", "地表抬升", "斷裂", "山崩", "災害"],
+      "coreConcept": "強烈地震可能使地表抬升、斷裂或引發山崩，也可能造成火災及交通、建築和水利設施損害。",
+      "studentExplanation": "地震除了讓地面搖動，也可能改變地形並讓物品掉落、建築受損或道路中斷。",
+      "misconceptions": [
+        "每次地震都會造成同樣程度的破壞。",
+        "地震的影響只發生在震央。"
+      ],
+      "teacherNotes": "討論災害時應連結到可執行的安全行動，避免製造不必要恐慌。",
+      "relatedGameIds": []
+    },
+    {
+      "id": "earthquake-report-terms",
+      "section": "1-3 怎樣做好地震防災",
+      "sourcePages": [25, 25],
+      "keywords": ["震源", "震央", "震源深度", "地震報告"],
+      "coreConcept": "震源是地下引發地震的位置；震央是震源垂直投影到地表的位置；震源深度是震央到震源的距離。",
+      "studentExplanation": "可以把震源想成地下事件的位置，震央是它正上方的地表位置。",
+      "misconceptions": [
+        "震央就是地下開始震動的位置。",
+        "震源深度是觀測站到震央的水平距離。"
+      ],
+      "teacherNotes": "用剖面圖呈現三者關係，比只背名詞更有效。",
+      "relatedGameIds": []
+    },
+    {
+      "id": "magnitude-and-intensity",
+      "section": "1-3 怎樣做好地震防災",
+      "sourcePages": [25, 27],
+      "keywords": ["規模", "震度", "地震能量", "搖晃程度"],
+      "coreConcept": "規模描述一次地震釋放能量的大小；震度描述某地感受到的搖晃與可能影響，同一地震在不同地點的震度可不同。",
+      "studentExplanation": "一場地震有代表能量大小的規模，但各地離震源距離和地質不同，感受到的震度可能不一樣。",
+      "misconceptions": [
+        "規模和震度是同一件事。",
+        "同一次地震全臺各地震度都相同。",
+        "離震央最近的地方在任何情況下震度必然最大。"
+      ],
+      "teacherNotes": "課本列示中央氣象署震度分級：0、1、2、3、4、5弱、5強、6弱、6強、7級。",
+      "relatedGameIds": []
+    },
+    {
+      "id": "earthquake-preparedness",
+      "section": "1-3 怎樣做好地震防災",
+      "sourcePages": [28, 29],
+      "keywords": ["防災", "避難包", "趴下", "掩護", "穩住"],
+      "coreConcept": "地震防災包含平時準備、發生時保護自己，以及搖晃停止後安全疏散與確認資訊。",
+      "studentExplanation": "平時固定家具並準備物資；搖晃時趴下、掩護、穩住；之後避開危險物並依指示行動。",
+      "misconceptions": [
+        "地震時應立刻衝到戶外。",
+        "只準備避難包，不需要演練或固定家具。",
+        "搖晃停止後就一定沒有危險。"
+      ],
+      "teacherNotes": "具體行動要依所在場所調整；以學校既有防災計畫和政府指引為準。",
+      "relatedGameIds": []
+    },
+    {
+      "id": "prediction-and-early-warning",
+      "section": "1-3 怎樣做好地震防災",
+      "sourcePages": [30, 31],
+      "keywords": ["地震預測", "地震速報", "觀測站", "警報"],
+      "coreConcept": "目前無法事先準確預測地震發生的時間、地點與規模；地震速報是在地震發生並被測得後，利用資訊傳遞爭取短暫反應時間。",
+      "studentExplanation": "速報不是預言，而是偵測到地震後，比較快把警訊送到尚未受到強烈搖晃的地方。",
+      "misconceptions": [
+        "收到地震速報表示政府早就知道會地震。",
+        "每個地點都一定能在搖晃前收到速報。",
+        "速報能保證完全避免災害。"
+      ],
+      "teacherNotes": "清楚區分預測與速報，並提醒收到警報後立即採取保護行動。",
+      "relatedGameIds": []
+    },
+    {
+      "id": "moving-dunes",
+      "section": "科學閱讀：會移動的沙丘",
+      "sourcePages": [32, 33],
+      "keywords": ["沙丘", "風", "搬運", "堆積", "移動", "移動速度"],
+      "coreConcept": "風能把沙粒搬到沙丘另一側並堆積，使沙丘逐漸移動；其他條件相近時，小沙丘可能移動得較快。",
+      "studentExplanation": "迎風面的沙粒被吹上坡，越過頂部後在背風面落下，長期累積後整個沙丘的位置會改變。",
+      "misconceptions": [
+        "沙丘像固體物體一樣整塊滑動。",
+        "沙丘只會變大，不會改變位置。"
+      ],
+      "teacherNotes": "這是閱讀延伸內容，可和流水搬運、堆積進行類比，但作用媒介不同。",
+      "relatedGameIds": []
+    }
+  ],
+  "qaSeeds": [
+    {
+      "query": "地表環境裡只有生物嗎？",
+      "answer": "不是。地表環境同時包含生物，以及空氣、水、岩石、沙和土壤等非生物成分。",
+      "conceptId": "surface-environments"
+    },
+    {
+      "query": "礫石、沙和土壤有什麼差別？",
+      "answer": "可比較顆粒大小與觸感：礫石通常較大且粗，沙較細，土壤顆粒通常更細並可能含腐植質。",
+      "conceptId": "surface-materials"
+    },
+    {
+      "query": "流水會怎麼改變地表？",
+      "answer": "流水能帶走地表材料、把它們搬到別處，再堆積下來；水流越強，搬運能力通常越大。",
+      "conceptId": "flowing-water-action"
+    },
+    {
+      "query": "哪一種顆粒通常被流水搬得比較遠？",
+      "answer": "在課本的比較情境中，較小的顆粒通常比較容易被帶得更遠。",
+      "conceptId": "flowing-water-action"
+    },
+    {
+      "query": "怎樣才算公平比較水量對搬運的影響？",
+      "answer": "只改變水量，並讓材料、坡度、容器和倒水方式等條件盡量相同。",
+      "conceptId": "fair-flowing-water-test"
+    },
+    {
+      "query": "植物為什麼能幫助保護坡地？",
+      "answer": "植物根系能幫助固定土壤，植被也能減少雨水直接沖刷地面，但不能保證完全不發生災害。",
+      "conceptId": "human-impact-and-protection"
+    },
+    {
+      "query": "震源和震央有什麼不同？",
+      "answer": "震源是地下引發地震的位置；震央是震源垂直投影到地表的位置。",
+      "conceptId": "earthquake-report-terms"
+    },
+    {
+      "query": "震源深度是什麼？",
+      "answer": "震源深度是震央到地下震源的距離。",
+      "conceptId": "earthquake-report-terms"
+    },
+    {
+      "query": "地震規模和震度一樣嗎？",
+      "answer": "不一樣。規模描述地震釋放能量的大小；震度描述某個地點感受到的搖晃與影響。",
+      "conceptId": "magnitude-and-intensity"
+    },
+    {
+      "query": "同一場地震各地震度會一樣嗎？",
+      "answer": "不一定。各地距離震源、地質等條件不同，因此震度可能不同。",
+      "conceptId": "magnitude-and-intensity"
+    },
+    {
+      "query": "地震搖晃時要立刻跑出去嗎？",
+      "answer": "不要在強烈搖晃時貿然奔跑。先趴下、掩護、穩住，保護頭頸，再依場所安全指引行動。",
+      "conceptId": "earthquake-preparedness"
+    },
+    {
+      "query": "地震前可以準備什麼？",
+      "answer": "可固定易倒家具、準備防災物資、確認避難路線和集合地點，並參與演練。",
+      "conceptId": "earthquake-preparedness"
+    },
+    {
+      "query": "現在能準確預測地震嗎？",
+      "answer": "目前無法事先準確預測地震發生的時間、地點和規模。",
+      "conceptId": "prediction-and-early-warning"
+    },
+    {
+      "query": "地震速報等於預測嗎？",
+      "answer": "不等於。速報是在地震已發生並被觀測站測得後，快速傳出警訊以爭取反應時間。",
+      "conceptId": "prediction-and-early-warning"
+    },
+    {
+      "query": "沙丘為什麼會移動？",
+      "answer": "風把沙粒從迎風面搬過沙丘頂部，再堆積到背風面；長期累積使沙丘位置改變。",
+      "conceptId": "moving-dunes"
+    },
+    {
+      "query": "有沒有和流水搬運相關的遊戲？",
+      "answer": "有，首頁已發布 41 號「流水搬運小實驗」，可觀察礫石、沙、土壤與水流強弱的關係。",
+      "conceptId": "flowing-water-action",
+      "gameId": "41"
+    }
+  ],
+  "answeringPolicy": {
+    "audience": "國小四年級",
+    "style": "先用一到三句白話回答，再視需要補充例子或追問。",
+    "evidence": "涉及本單元時，答案應能連回 conceptId 與 sourcePages。",
+    "safety": "地震防災以學校計畫及政府最新指引為準，不提供可能導致冒險的指示。",
+    "uncertainty": "超出資料範圍時明確說明不知道，不自行編造課本內容或遊戲規則。"
+  }
+}

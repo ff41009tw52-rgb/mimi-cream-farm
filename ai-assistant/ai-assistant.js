@@ -10,7 +10,29 @@
   const state = {
     grade: null,
     characterKey: 'mimi',
-    isReplying: false
+    isReplying: false,
+    siteKnowledge: null,
+    curriculum: []
+  };
+
+  const loadJson = async (url) => {
+    const response = await window.fetch(url, { cache: 'no-cache' });
+    if (!response.ok) throw new Error(String(response.status) + ' ' + url);
+    return response.json();
+  };
+
+  const loadKnowledge = async () => {
+    try {
+      const [siteKnowledge, manifest] = await Promise.all([
+        loadJson(config.siteKnowledgeUrl),
+        loadJson(config.curriculumManifestUrl)
+      ]);
+      state.siteKnowledge = siteKnowledge;
+      const available = (manifest.datasets || []).filter((dataset) => dataset.status === 'available');
+      state.curriculum = await Promise.all(available.map((dataset) => loadJson(dataset.path)));
+    } catch (error) {
+      console.warn('[Science Assistant] Knowledge files could not be loaded.', error);
+    }
   };
 
   const getStoredGrade = () => {
@@ -245,6 +267,11 @@
 
   const getGames = () => (Array.isArray(window.FARM_GAMES) ? window.FARM_GAMES : []);
 
+  const getIndexedGame = (gameNumber) => {
+    const padded = String(gameNumber).padStart(2, '0');
+    return state.siteKnowledge?.games?.find((game) => game.id === padded) || null;
+  };
+
   const getGradeGamesReply = (grade) => {
     const games = getGames().filter((game) => Array.isArray(game.grades) && game.grades.includes(grade));
     if (!games.length) {
@@ -267,7 +294,13 @@
   const getGameReply = (gameNumber) => {
     const padded = String(gameNumber).padStart(2, '0');
     const game = getGames().find((item) => String(item.gameNumber || item.id || '').padStart(2, '0') === padded);
+    const indexed = getIndexedGame(padded);
     if (!game) {
+      if (indexed?.status === 'unlisted') {
+        return {
+          text: '網站中有 ' + padded + ' 號「' + indexed.title + '」模組，但它目前沒有在首頁發布，所以我先不推薦或提供開啟連結。'
+        };
+      }
       return {
         text: `我目前沒有在網站資料中找到 ${padded} 號遊戲，所以先不亂告訴你。`
       };
@@ -277,6 +310,40 @@
     return {
       text: `找到了！${padded} 號是「${title}」。你可以先開啟遊戲查看畫面中的玩法說明。`,
       action: { kind: 'game', href: game.url, label: title }
+    };
+  };
+
+  const findCurriculumReply = (question) => {
+    const units = state.curriculum.filter((unit) => String(unit.grade) === state.grade);
+    if (!units.length) return null;
+
+    let best = null;
+    for (const unit of units) {
+      for (const concept of unit.concepts || []) {
+        const matched = (concept.keywords || []).filter((keyword) => question.includes(keyword));
+        const score = matched.reduce((total, keyword) => total + (keyword.length >= 2 ? 2 : 1), 0);
+        if (!best || score > best.score) best = { unit, concept, score };
+      }
+    }
+
+    if (!best || best.score < 2) return null;
+    const [startPage, endPage] = best.concept.sourcePages;
+    const pageLabel = startPage === endPage
+      ? '第 ' + startPage + ' 頁'
+      : '第 ' + startPage + '–' + endPage + ' 頁';
+    const relatedGame = best.concept.relatedGameIds
+      ?.map((id) => getIndexedGame(id))
+      .find((game) => game?.recommendable);
+
+    return {
+      text: best.concept.studentExplanation + '（依據：' + best.unit.title + '，課本' + pageLabel + '）',
+      action: relatedGame
+        ? {
+            kind: 'game',
+            href: relatedGame.url,
+            label: String(relatedGame.title).replace(/^[^A-Za-z0-9\u3400-\u9fff]+/, '')
+          }
+        : null
     };
   };
 
@@ -298,6 +365,8 @@
 
     const quick = (config.quickPrompts[state.grade] || []).find((item) => item.label.includes(question));
     if (quick) return replyFor(question, quick);
+    const curriculumReply = findCurriculumReply(question);
+    if (curriculumReply) return curriculumReply;
     return { text: config.mockFallback };
   };
 
@@ -388,6 +457,7 @@
   });
 
   const storedGrade = getStoredGrade();
+  loadKnowledge();
   if (storedGrade) startChat(storedGrade);
   else showGradeScreen();
 })();
