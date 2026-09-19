@@ -19,7 +19,8 @@
     isReplying: false,
     siteKnowledge: null,
     curriculum: [],
-    knowledgePromise: null
+    knowledgePromise: null,
+    assistantMessageCount: 0
   };
 
   const loadJson = async (url) => {
@@ -238,9 +239,17 @@
 
   const addMessage = (role, text, action) => {
     const row = makeElement('div', `assistant-message assistant-message--${role}`);
-    const bubble = makeElement('div', 'assistant-message__bubble', text);
+    const displayText = role === 'assistant'
+      ? engine.stylizeCatReply(
+          text,
+          currentCharacter().replySuffixes,
+          state.assistantMessageCount
+        )
+      : text;
+    const bubble = makeElement('div', 'assistant-message__bubble', displayText);
 
     if (role === 'assistant') {
+      state.assistantMessageCount += 1;
       const avatar = makeElement('img', 'assistant-message__avatar');
       avatar.src = currentCharacter().avatar;
       avatar.alt = currentCharacter().name;
@@ -421,6 +430,7 @@
   const startChat = (grade) => {
     state.grade = grade;
     state.characterKey = characterForGrade(grade);
+    state.assistantMessageCount = 0;
     storeGrade(grade);
 
     const character = currentCharacter();

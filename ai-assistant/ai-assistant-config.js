@@ -13,14 +13,16 @@
         grades: ['3', '4'],
         gradeLabel: '三、四年級',
         avatar: 'ai-assistant/assets/mimi-avatar.jpg',
-        welcome: '嗨！我是橘咪咪。自然問題、找遊戲或網站操作，都可以先問我！'
+        welcome: '嗨！我是橘咪咪。自然問題、找遊戲或網站操作，都可以先問我！',
+        replySuffixes: ['喵！', '一起來看看喵！', '橘咪咪陪你找答案喵～']
       },
       cream: {
         name: '白奶油',
         grades: ['5', '6'],
         gradeLabel: '五、六年級',
         avatar: 'ai-assistant/assets/cream-avatar.jpg',
-        welcome: '你好！我是白奶油。我可以陪你比較現象、找證據，也能幫你找到適合的遊戲。'
+        welcome: '你好！我是白奶油。我可以陪你比較現象、找證據，也能幫你找到適合的遊戲。',
+        replySuffixes: ['喵嗚～', '讓本喵陪你慢慢找～', '白奶油記住了喵～']
       }
     },
     quickPrompts: {

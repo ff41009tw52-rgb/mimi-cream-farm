@@ -23,6 +23,12 @@ const answer = (question, grade = '4') => engine.answerQuestion({
 });
 
 assert(engine, 'engine must be exposed on window');
+assert.equal(engine.stylizeCatReply('找到答案了。', ['喵！'], 0), '找到答案了，喵！');
+assert.equal(
+  engine.stylizeCatReply('慢慢找就好。', ['喵嗚～', '讓本喵陪你慢慢找～'], 1),
+  '慢慢找就好，讓本喵陪你慢慢找～'
+);
+assert.equal(engine.stylizeCatReply('已經知道了喵！', ['喵！'], 0), '已經知道了喵！');
 
 const lookupIntent = engine.classifyQuestion('41 號遊戲在哪裡？', '4');
 assert.equal(lookupIntent.type, 'game_lookup');
