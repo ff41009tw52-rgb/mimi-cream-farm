@@ -45,6 +45,7 @@ export default {
           ok: true,
           service: "mimi-cream-ai",
           status: "ready",
+          deploymentSource: "github",
           geminiConfigured: Boolean(env.GEMINI_API_KEY),
           path: url.pathname
         },
