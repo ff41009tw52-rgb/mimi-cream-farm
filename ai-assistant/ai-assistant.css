@@ -15,8 +15,8 @@
 
 .science-assistant {
   position: fixed;
-  left: 24px;
-  bottom: 24px;
+  right: 30px;
+  bottom: 96px;
   z-index: 10020;
   color: var(--assistant-ink);
   font-family: "微軟正黑體", "Microsoft JhengHei", sans-serif;
@@ -70,7 +70,7 @@
 
 .assistant-panel {
   position: absolute;
-  left: 0;
+  right: 0;
   bottom: 76px;
   display: flex;
   width: min(410px, calc(100vw - 32px));
@@ -83,7 +83,7 @@
   flex-direction: column;
   opacity: 0;
   transform: translateY(12px) scale(0.98);
-  transform-origin: bottom left;
+  transform-origin: bottom right;
   visibility: hidden;
   pointer-events: none;
   transition: opacity 180ms ease, transform 180ms ease, visibility 180ms;
@@ -471,8 +471,8 @@
 
 @media (max-width: 620px) {
   .science-assistant {
-    left: 12px;
-    bottom: 12px;
+    right: 20px;
+    bottom: 84px;
   }
 
   .assistant-launcher {

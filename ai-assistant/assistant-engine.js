@@ -19,6 +19,14 @@
 
   const cleanTitle = (value) => String(value || '').replace(/^[^A-Za-z0-9\u3400-\u9fff]+/, '');
 
+  const stylizeCatReply = (text, suffixes, variantIndex = 0) => {
+    const original = String(text || '').trim();
+    if (!original || /喵[！!。～~]?$/.test(original)) return original;
+    const available = Array.isArray(suffixes) && suffixes.length ? suffixes : ['喵！'];
+    const suffix = available[Math.abs(Number(variantIndex) || 0) % available.length];
+    return original.replace(/[。！!？?～~]+$/, '') + '，' + suffix;
+  };
+
   const detectGrade = (question, fallbackGrade) => {
     const match = String(question || '').match(/([三四五六3-6])\s*年級/);
     return (match && GRADE_MAP[match[1]]) || String(fallbackGrade || '');
@@ -411,6 +419,7 @@
 
   window.SCIENCE_ASSISTANT_ENGINE = Object.freeze({
     normalizeText,
+    stylizeCatReply,
     detectGrade,
     extractGameNumber,
     classifyQuestion,

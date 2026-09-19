@@ -72,6 +72,16 @@ assert(
   indexSource.indexOf('assistant-engine.js') < indexSource.indexOf('ai-assistant.js'),
   'assistant engine must load before the assistant UI'
 );
+const assistantCss = fs.readFileSync(path.join(repoRoot, 'ai-assistant', 'ai-assistant.css'), 'utf8');
+assert(
+  /\.science-assistant\s*\{[\s\S]*?right:\s*30px;[\s\S]*?bottom:\s*96px;/.test(assistantCss),
+  'assistant launcher must sit above the desktop feedback button'
+);
+assert(
+  /\.assistant-panel\s*\{[\s\S]*?right:\s*0;/.test(assistantCss),
+  'assistant panel must open from the right edge'
+);
+assert(configSource.includes('replySuffixes'), 'assistant characters missing cat reply suffixes');
 
 console.log('Knowledge validation passed.');
 console.log('  Games: 41 total / 32 published / 9 unlisted / 0 missing');
