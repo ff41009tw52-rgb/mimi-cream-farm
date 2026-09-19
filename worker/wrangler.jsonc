@@ -1,0 +1,9 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mimi-cream-ai",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-19",
+  "observability": {
+    "enabled": true
+  }
+}
