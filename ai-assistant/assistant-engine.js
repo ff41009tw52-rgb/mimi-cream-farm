@@ -305,10 +305,12 @@
 
     const preview = games.slice(0, 4).map((game) => game.id + ' 號「' + cleanTitle(game.title) + '」').join('、');
     const more = games.length > 4 ? '等，共 ' + games.length + ' 個' : '，共 ' + games.length + ' 個';
+    const grouped = ['3-4', '5-6'].includes(String(grade));
     return {
       intent: 'grade_games',
       source: 'site-knowledge',
-      text: (grade ? gradeDisplayLabel(grade) : '網站') + '目前有 ' + preview + more + '。按下面按鈕可篩選首頁。',
+      text: (grade ? gradeDisplayLabel(grade) : '網站') + '目前有 ' + preview + more
+        + (grouped ? '。你也可以直接問我某一個遊戲名稱或編號。' : '。按下面按鈕可篩選首頁。'),
       action: ['3', '4', '5', '6'].includes(String(grade)) ? { kind: 'grade', grade } : null
     };
   };
