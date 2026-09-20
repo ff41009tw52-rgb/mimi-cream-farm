@@ -104,6 +104,8 @@ assert(gameResults.every((result) => result.game.recommendable && result.game.gr
 
 
 const genericGameList = answer('有什麼遊戲？', '3-4');
+assert.equal(engine.classifyQuestion('有什麼遊戲?', '3-4').type, 'grade_games');
+assert.equal(engine.classifyQuestion('有哪些遊戲！', '5-6').type, 'grade_games');
 assert.equal(genericGameList.intent, 'grade_games');
 assert.match(genericGameList.text, /三、四年級/);
 
