@@ -266,15 +266,6 @@
   font-weight: 700;
 }
 
-.assistant-privacy-note {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 18px;
-  color: #806d63;
-  font-size: 0.75rem;
-}
-
 .assistant-chat {
   display: flex;
   height: 100%;
