@@ -140,8 +140,7 @@
       button.appendChild(makeElement('span', '', `${character}陪你`));
       gradeGrid.appendChild(button);
     });
-    const privacy = makeElement('div', 'assistant-privacy-note', '🔒 不需要輸入姓名');
-    gradeScreen.append(duo, gradeTitle, gradeDescription, gradeGrid, privacy);
+    gradeScreen.append(duo, gradeTitle, gradeDescription, gradeGrid);
 
     const chat = makeElement('section', 'assistant-chat');
     chat.hidden = true;
