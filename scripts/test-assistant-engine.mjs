@@ -103,6 +103,14 @@ assert(gameResults.length >= 1);
 assert(gameResults.every((result) => result.game.recommendable && result.game.grades.includes('5')));
 
 
+const genericGameList = answer('有什麼遊戲？', '3-4');
+assert.equal(genericGameList.intent, 'grade_games');
+assert.match(genericGameList.text, /三、四年級/);
+
+const genericUpperList = answer('有哪些遊戲可以玩？', '5-6');
+assert.equal(genericUpperList.intent, 'grade_games');
+assert.match(genericUpperList.text, /五、六年級/);
+
 const groupedLower = answer('有什麼適合這個年級的遊戲？', '3-4');
 assert.equal(groupedLower.intent, 'grade_games');
 assert.equal(groupedLower.action, null);
