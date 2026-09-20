@@ -24,12 +24,15 @@
 
 .assistant-launcher {
   display: flex;
+  width: 146px;
+  height: 59px;
+  min-height: 0;
   align-items: center;
-  gap: 10px;
-  min-height: 64px;
-  padding: 7px 18px 7px 8px;
+  justify-content: center;
+  gap: 7px;
+  padding: 6px 10px;
   border: 3px solid #fff;
-  border-radius: 999px;
+  border-radius: 50px;
   background: linear-gradient(135deg, #ff983f, var(--assistant-orange));
   box-shadow: 0 8px 24px rgba(100, 58, 23, 0.32);
   color: #fff;
@@ -46,12 +49,13 @@
 
 .assistant-launcher__faces {
   display: flex;
-  width: 78px;
+  width: 46px;
+  flex: 0 0 46px;
 }
 
 .assistant-launcher__faces img {
-  width: 50px;
-  height: 50px;
+  width: 34px;
+  height: 34px;
   border: 3px solid #fff;
   border-radius: 50%;
   background: #fff;
@@ -64,7 +68,7 @@
 }
 
 .assistant-launcher__faces img:last-child {
-  margin-left: -20px;
+  margin-left: -14px;
   object-position: 50% 46%;
 }
 
@@ -476,17 +480,24 @@
   }
 
   .assistant-launcher {
-    min-height: 58px;
-    padding-right: 14px;
+    width: 136px;
+    height: 52px;
+    min-height: 0;
+    padding: 6px 9px;
   }
 
   .assistant-launcher__faces img {
-    width: 44px;
-    height: 44px;
+    width: 30px;
+    height: 30px;
   }
 
   .assistant-launcher__faces {
-    width: 68px;
+    width: 40px;
+    flex-basis: 40px;
+  }
+
+  .assistant-launcher__faces img:last-child {
+    margin-left: -12px;
   }
 
   .assistant-panel {
