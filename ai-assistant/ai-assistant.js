@@ -20,7 +20,8 @@
     siteKnowledge: null,
     curriculum: [],
     knowledgePromise: null,
-    assistantMessageCount: 0
+    assistantMessageCount: 0,
+    conversation: []
   };
 
   const loadJson = async (url) => {
@@ -363,6 +364,56 @@
     };
   };
 
+  const getAiHistory = () => {
+    const limit = Math.max(0, Number(config.aiHistoryLimit) || 8);
+    return state.conversation.slice(-limit).map((item) => ({
+      role: item.role,
+      text: item.text
+    }));
+  };
+
+  const askAi = async (question) => {
+    if (!config.apiEndpoint) {
+      throw new Error('AI endpoint is not configured.');
+    }
+
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(
+      () => controller.abort(),
+      Math.max(3000, Number(config.aiTimeoutMs) || 15000)
+    );
+
+    try {
+      const response = await window.fetch(config.apiEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: question,
+          grade: state.grade,
+          character: state.characterKey,
+          history: getAiHistory()
+        }),
+        signal: controller.signal
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload?.ok || !payload?.reply) {
+        throw new Error(payload?.detail || payload?.error || ('AI HTTP ' + response.status));
+      }
+
+      return {
+        intent: 'ai',
+        source: 'gemini',
+        model: payload.model || null,
+        text: String(payload.reply).trim()
+      };
+    } finally {
+      window.clearTimeout(timeoutId);
+    }
+  };
+
   const replyFor = (question, preset) => {
     if (preset?.gameId) {
       return engine.answerQuestion({
@@ -398,14 +449,39 @@
     state.isReplying = true;
     ui.send.disabled = true;
     const typing = addTyping();
+
     window.setTimeout(async () => {
       await state.knowledgePromise;
+
+      let reply = replyFor(question, preset);
+      if (!preset && reply?.source === 'fallback') {
+        try {
+          reply = await askAi(question);
+        } catch (error) {
+          console.warn('[Science Assistant] AI request failed.', error);
+          reply = {
+            intent: 'ai_error',
+            source: 'fallback',
+            text: config.aiErrorMessage || reply.text
+          };
+        }
+      }
+
       typing.remove();
-      const reply = replyFor(question, preset);
       addMessage('assistant', reply.text, reply.action);
+
+      state.conversation.push(
+        { role: 'user', text: question },
+        { role: 'assistant', text: reply.text }
+      );
+      const keep = Math.max(2, (Number(config.aiHistoryLimit) || 8) * 2);
+      if (state.conversation.length > keep) {
+        state.conversation.splice(0, state.conversation.length - keep);
+      }
+
       state.isReplying = false;
       ui.send.disabled = !ui.input.value.trim();
-    }, 520);
+    }, 320);
   };
 
   const ask = (question, preset) => {
@@ -431,6 +507,7 @@
     state.grade = grade;
     state.characterKey = characterForGrade(grade);
     state.assistantMessageCount = 0;
+    state.conversation = [];
     storeGrade(grade);
 
     const character = currentCharacter();
@@ -447,6 +524,7 @@
   const showGradeScreen = () => {
     state.grade = null;
     state.isReplying = false;
+    state.conversation = [];
     ui.headerAvatar.src = config.characters.mimi.avatar;
     ui.headerAvatar.alt = '橘咪咪';
     ui.headerSubtitle.textContent = config.subtitle;
