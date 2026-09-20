@@ -448,36 +448,45 @@
     const typing = addTyping();
 
     window.setTimeout(async () => {
-      await state.knowledgePromise;
+      try {
+        await state.knowledgePromise;
 
-      let reply = replyFor(question, preset);
-      if (!preset && reply?.source === 'fallback') {
-        try {
-          reply = await askAi(question);
-        } catch (error) {
-          console.warn('[Science Assistant] AI request failed.', error);
-          reply = {
-            intent: 'ai_error',
-            source: 'fallback',
-            text: config.aiErrorMessage || reply.text
-          };
+        let reply = replyFor(question, preset);
+        if (!preset && reply?.source === 'fallback') {
+          try {
+            reply = await askAi(question);
+          } catch (error) {
+            console.warn('[Science Assistant] AI request failed.', error);
+            reply = {
+              intent: 'ai_error',
+              source: 'fallback',
+              text: config.aiErrorMessage || reply.text
+            };
+          }
         }
+
+        typing.remove();
+        addMessage('assistant', reply.text, reply.action);
+
+        state.conversation.push(
+          { role: 'user', text: question },
+          { role: 'assistant', text: reply.text }
+        );
+        const keep = Math.max(2, (Number(config.aiHistoryLimit) || 8) * 2);
+        if (state.conversation.length > keep) {
+          state.conversation.splice(0, state.conversation.length - keep);
+        }
+      } catch (error) {
+        console.error('[Science Assistant] Reply flow failed.', error);
+        typing.remove();
+        addMessage(
+          'assistant',
+          '剛剛回答時出了一點問題，請再問一次，或換個方式問我。'
+        );
+      } finally {
+        state.isReplying = false;
+        ui.send.disabled = !ui.input.value.trim();
       }
-
-      typing.remove();
-      addMessage('assistant', reply.text, reply.action);
-
-      state.conversation.push(
-        { role: 'user', text: question },
-        { role: 'assistant', text: reply.text }
-      );
-      const keep = Math.max(2, (Number(config.aiHistoryLimit) || 8) * 2);
-      if (state.conversation.length > keep) {
-        state.conversation.splice(0, state.conversation.length - keep);
-      }
-
-      state.isReplying = false;
-      ui.send.disabled = !ui.input.value.trim();
     }, 320);
   };
 
