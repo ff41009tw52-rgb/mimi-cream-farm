@@ -5,6 +5,10 @@
     storageKey: 'scienceFarmAssistantGrade',
     siteKnowledgeUrl: 'data/site-knowledge.json',
     curriculumManifestUrl: 'knowledge/index.json',
+    apiEndpoint: 'https://mimi-cream-ai.ff41009tw52.workers.dev/',
+    aiTimeoutMs: 15000,
+    aiHistoryLimit: 8,
+    aiErrorMessage: '現在有點忙，暫時連不上 AI。你可以再試一次，或換個方式問我。',
     title: '橘咪咪與白奶油的科學小幫手',
     subtitle: '自然不懂？遊戲不會玩？來問我們！',
     characters: {
