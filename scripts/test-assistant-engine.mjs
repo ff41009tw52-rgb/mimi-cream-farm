@@ -191,7 +191,8 @@ const safeScienceCases = [
   '樹幹有什麼功能？',
   '腦幹是什麼？',
   '操場為什麼會積水？',
-  '這個操作要怎麼做？'
+  '這個操作要怎麼做？',
+  '幹嘛植物需要陽光？'
 ];
 for (const message of safeScienceCases) {
   assert.equal(engine.containsExplicitProfanity(message), false, message);
