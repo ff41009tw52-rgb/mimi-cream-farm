@@ -21,7 +21,9 @@
     curriculum: [],
     knowledgePromise: null,
     assistantMessageCount: 0,
-    conversation: []
+    conversation: [],
+    responseToken: 0,
+    activeController: null
   };
 
   const loadJson = async (url) => {
@@ -41,23 +43,6 @@
       state.curriculum = await Promise.all(available.map((dataset) => loadJson(dataset.path)));
     } catch (error) {
       console.warn('[Science Assistant] Knowledge files could not be loaded.', error);
-    }
-  };
-
-  const getStoredGrade = () => {
-    try {
-      const grade = window.localStorage.getItem(config.storageKey);
-      return ['3', '4', '5', '6'].includes(grade) ? grade : null;
-    } catch (error) {
-      return null;
-    }
-  };
-
-  const storeGrade = (grade) => {
-    try {
-      window.localStorage.setItem(config.storageKey, grade);
-    } catch (error) {
-      // The assistant still works when storage is unavailable.
     }
   };
 
@@ -374,7 +359,9 @@
       throw new Error('AI endpoint is not configured.');
     }
 
+    state.activeController?.abort();
     const controller = new AbortController();
+    state.activeController = controller;
     const timeoutId = window.setTimeout(
       () => controller.abort(),
       Math.max(3000, Number(config.aiTimeoutMs) || 15000)
@@ -408,6 +395,9 @@
       };
     } finally {
       window.clearTimeout(timeoutId);
+      if (state.activeController === controller) {
+        state.activeController = null;
+      }
     }
   };
 
@@ -445,11 +435,13 @@
     if (state.isReplying) return;
     state.isReplying = true;
     ui.send.disabled = true;
+    const token = ++state.responseToken;
     const typing = addTyping();
 
     window.setTimeout(async () => {
       try {
         await state.knowledgePromise;
+        if (token !== state.responseToken) return;
 
         let reply = replyFor(question, preset);
         if (!preset && reply?.source === 'fallback') {
@@ -465,6 +457,7 @@
           }
         }
 
+        if (token !== state.responseToken) return;
         typing.remove();
         addMessage('assistant', reply.text, reply.action);
 
@@ -477,15 +470,19 @@
           state.conversation.splice(0, state.conversation.length - keep);
         }
       } catch (error) {
-        console.error('[Science Assistant] Reply flow failed.', error);
-        typing.remove();
-        addMessage(
-          'assistant',
-          '剛剛回答時出了一點問題，請再問一次，或換個方式問我。'
-        );
+        if (token === state.responseToken) {
+          console.error('[Science Assistant] Reply flow failed.', error);
+          typing.remove();
+          addMessage(
+            'assistant',
+            '剛剛回答時出了一點問題，請再問一次，或換個方式問我。'
+          );
+        }
       } finally {
-        state.isReplying = false;
-        ui.send.disabled = !ui.input.value.trim();
+        if (token === state.responseToken) {
+          state.isReplying = false;
+          ui.send.disabled = !ui.input.value.trim();
+        }
       }
     }, 320);
   };
@@ -510,11 +507,14 @@
   };
 
   const startChat = (grade) => {
+    state.responseToken += 1;
+    state.activeController?.abort();
+    state.activeController = null;
+    state.isReplying = false;
     state.grade = grade;
     state.characterKey = characterForGrade(grade);
     state.assistantMessageCount = 0;
     state.conversation = [];
-    storeGrade(grade);
 
     const character = currentCharacter();
     const gradeLabel = grade === '3-4' ? '三、四年級' : grade === '5-6' ? '五、六年級' : grade + '年級';
@@ -529,6 +529,9 @@
   };
 
   const showGradeScreen = () => {
+    state.responseToken += 1;
+    state.activeController?.abort();
+    state.activeController = null;
     state.grade = null;
     state.isReplying = false;
     state.conversation = [];
