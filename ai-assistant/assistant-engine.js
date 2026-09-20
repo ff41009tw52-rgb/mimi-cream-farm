@@ -42,7 +42,10 @@
   };
 
   const detectGrade = (question, fallbackGrade) => {
-    const match = String(question || '').match(/([三四五六3-6])\s*年級/);
+    const source = String(question || '');
+    if (/三\s*[、,，]?\s*四\s*年級|3\s*[-~～到至、,，]?\s*4\s*年級/.test(source)) return '3-4';
+    if (/五\s*[、,，]?\s*六\s*年級|5\s*[-~～到至、,，]?\s*6\s*年級/.test(source)) return '5-6';
+    const match = source.match(/([三四五六3-6])\s*年級/);
     return (match && GRADE_MAP[match[1]]) || String(fallbackGrade || '');
   };
 
@@ -163,7 +166,7 @@
       .map((game) => ({ game, score: gameSearchScore(question, game), exact: false }))
       .filter((result) => result.score >= 4)
       .filter((result) => !options.recommendableOnly || result.game.recommendable)
-      .filter((result) => !options.gradeOnly || !grade || gradeValues(grade).some((item) => result.Array.isArray(game.grades) && game.grades.includes(item)))
+      .filter((result) => !options.gradeOnly || !grade || gradeValues(grade).some((item) => Array.isArray(result.game.grades) && result.game.grades.includes(item)))
       .sort((left, right) => {
         if (right.score !== left.score) return right.score - left.score;
         if (left.game.recommendable !== right.game.recommendable) return left.game.recommendable ? -1 : 1;
