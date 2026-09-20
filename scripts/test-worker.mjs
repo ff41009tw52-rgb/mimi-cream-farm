@@ -192,7 +192,7 @@ try {
   assert.equal(body.ok, true);
   assert.equal(body.reply, '備援模型回答成功。');
   assert.equal(callCount, 2);
-  assert.equal(calledModels[0], 'gemini-3.8-flash');
+  assert.equal(calledModels[0], 'gemini-3.5-flash-lite');
   assert.equal(calledModels[1], 'gemini-3.5-flash');
   assert.equal(body.model, 'gemini-3.5-flash');
 } finally {
