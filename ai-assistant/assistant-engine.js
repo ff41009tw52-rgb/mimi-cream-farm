@@ -33,6 +33,99 @@
     return value ? value + '年級' : '';
   };
 
+  const compactGuardText = (value) => String(value || '')
+    .normalize('NFKC')
+    .toLowerCase()
+    .replace(/[\s，。！？!?、；;：「」『』（）()【】\[\]\\\-_.:：・,\"'~～]+/g, '');
+
+  const containsExplicitProfanity = (question) => {
+    const raw = String(question || '').normalize('NFKC').toLowerCase();
+    const compact = compactGuardText(raw);
+
+    // Keep legitimate science terms such as 「幹細胞」 available.
+    const safeScienceTerms = ['幹細胞', '腦幹', '樹幹', '莖幹'];
+    const protectedText = safeScienceTerms.reduce(
+      (text, term) => text.replaceAll(term, ''),
+      compact
+    );
+
+    const explicitTerms = [
+      '幹你娘', '幹你媽', '操你媽', '草你媽', '靠北', '靠杯',
+      '機掰', '雞掰', '雞巴', '屌你', '他媽的', '媽的',
+      'fuck', 'fucking', 'shit', 'bitch', 'motherfucker'
+    ];
+
+    if (explicitTerms.some((term) => protectedText.includes(term))) return true;
+
+    // Stand-alone 「幹」/「操」 used as an expletive, while avoiding common science words.
+    if (/^(幹|操)$/.test(protectedText)) return true;
+    if (/(^|[\s，。！？!?、；;])(?:幹|操)(?:[\s，。！？!?、；;]|$)/.test(raw)) return true;
+
+    return false;
+  };
+
+  const looksLikeNoise = (question) => {
+    const raw = String(question || '').trim();
+    if (!raw) return false;
+
+    const compact = compactGuardText(raw);
+    if (!compact) return true;
+
+    // Long keyboard mashing / symbol-only / repeated-character messages.
+    if (/^[a-z]{7,}$/i.test(compact) && !/[aeiou]{2,}/i.test(compact)) return true;
+    if (/^(.)\1{4,}$/.test(compact)) return true;
+    if (!/[\u3400-\u9fffA-Za-z0-9]/.test(raw)) return true;
+
+    return false;
+  };
+
+  const isClearlyOffTopic = (question) => {
+    const text = normalizeText(question);
+
+    // Casual/personal chat that is clearly outside this assistant's learning scope.
+    const patterns = [
+      /你(最)?喜歡(吃|喝|哪|什麼)/,
+      /你有沒有(男|女)朋友/,
+      /你幾歲/,
+      /你住哪/,
+      /你會不會談戀愛/,
+      /晚餐吃什麼/,
+      /早餐吃什麼/,
+      /午餐吃什麼/,
+      /幫我寫情書/,
+      /唱歌給我聽/,
+      /講八卦/,
+      /股票|彩券|賭博/
+    ];
+
+    return patterns.some((pattern) => pattern.test(text));
+  };
+
+  const guardQuestion = (question) => {
+    if (containsExplicitProfanity(question)) {
+      return {
+        type: 'profanity',
+        text: '這裡是學習小幫手，請不要使用髒話。換成尊重、清楚的說法，我就能繼續幫你。'
+      };
+    }
+
+    if (looksLikeNoise(question)) {
+      return {
+        type: 'noise',
+        text: '我看不太懂這段文字。請重新問一次，可以問自然科學、網站操作或遊戲相關問題。'
+      };
+    }
+
+    if (isClearlyOffTopic(question)) {
+      return {
+        type: 'off_topic',
+        text: '這個問題好像和自然科學、網站或遊戲沒有太大關係。可以換個相關問題再問我嗎？'
+      };
+    }
+
+    return null;
+  };
+
   const stylizeCatReply = (text, suffixes, variantIndex = 0) => {
     const original = String(text || '').trim();
     if (!original || /喵[！!。～~]?$/.test(original)) return original;
@@ -430,6 +523,16 @@
     curriculum,
     fallbackText
   }) => {
+    const guard = guardQuestion(question);
+    if (guard) {
+      return {
+        intent: guard.type === 'profanity' ? 'blocked_language' : 'rephrase',
+        source: 'input-guard',
+        policy: guard.type,
+        text: guard.text
+      };
+    }
+
     const classification = classifyQuestion(question, grade);
     const resolvedGrade = classification.entities.grade || String(grade || '');
 
@@ -464,6 +567,10 @@
     classifyQuestion,
     searchGames,
     searchCurriculum,
+    containsExplicitProfanity,
+    looksLikeNoise,
+    isClearlyOffTopic,
+    guardQuestion,
     answerQuestion
   });
 })();
