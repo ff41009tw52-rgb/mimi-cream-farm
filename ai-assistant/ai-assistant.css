@@ -235,13 +235,13 @@
 
 .assistant-grade-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 11px;
+  grid-template-columns: 1fr;
+  gap: 12px;
 }
 
 .assistant-grade-btn {
-  min-height: 68px;
-  padding: 10px;
+  min-height: 76px;
+  padding: 12px 14px;
   border: 2px solid #f4c491;
   border-radius: 17px;
   background: #fff;
