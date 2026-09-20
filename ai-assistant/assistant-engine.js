@@ -149,7 +149,7 @@
       .map((game) => ({ game, score: gameSearchScore(question, game), exact: false }))
       .filter((result) => result.score >= 4)
       .filter((result) => !options.recommendableOnly || result.game.recommendable)
-      .filter((result) => !options.gradeOnly || !grade || result.game.grades.includes(grade))
+      .filter((result) => !options.gradeOnly || !grade || gradeValues(grade).some((item) => result.game.grades.includes(item)))
       .sort((left, right) => {
         if (right.score !== left.score) return right.score - left.score;
         if (left.game.recommendable !== right.game.recommendable) return left.game.recommendable ? -1 : 1;
@@ -169,7 +169,7 @@
 
   const searchCurriculum = (question, curriculum, grade) => {
     const units = (Array.isArray(curriculum) ? curriculum : [])
-      .filter((unit) => !grade || String(unit.grade) === String(grade));
+      .filter((unit) => !grade || gradeValues(grade).includes(String(unit.grade)));
     const results = [];
 
     units.forEach((unit) => {
@@ -273,7 +273,7 @@
 
   const answerGradeGames = (grade, siteKnowledge) => {
     const games = (siteKnowledge?.games || [])
-      .filter((game) => game.recommendable && (!grade || game.grades.includes(grade)))
+      .filter((game) => game.recommendable && (!grade || gradeValues(grade).some((item) => game.grades.includes(item))))
       .sort((left, right) => {
         const leftDate = left.publishedAt || '';
         const rightDate = right.publishedAt || '';
@@ -294,7 +294,7 @@
     return {
       intent: 'grade_games',
       source: 'site-knowledge',
-      text: (grade ? grade + '年級' : '網站') + '目前有 ' + preview + more + '。按下面按鈕可篩選首頁。',
+      text: (grade ? gradeDisplayLabel(grade) : '網站') + '目前有 ' + preview + more + '。按下面按鈕可篩選首頁。',
       action: grade ? { kind: 'grade', grade } : gameAction(games[0])
     };
   };
@@ -317,7 +317,7 @@
     const published = results
       .map((result) => result.game)
       .filter((game) => game.recommendable)
-      .filter((game) => !grade || game.grades.includes(grade))
+      .filter((game) => !grade || gradeValues(grade).some((item) => game.grades.includes(item)))
       .slice(0, 3);
 
     if (!published.length) {
