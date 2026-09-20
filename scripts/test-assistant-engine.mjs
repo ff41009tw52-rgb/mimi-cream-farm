@@ -163,6 +163,53 @@ const missingGame = answer('99 號遊戲在哪裡？', '3-4');
 assert.notEqual(missingGame.intent, 'game_lookup');
 
 
+
+const profanityCases = [
+  '幹你娘',
+  '操你媽',
+  '靠北',
+  '雞掰',
+  '他媽的',
+  'fuck',
+  'shit'
+];
+for (const message of profanityCases) {
+  const result = answer(message, '3-4');
+  assert.equal(result.intent, 'blocked_language', message);
+  assert.equal(result.policy, 'profanity', message);
+  assert.match(result.text, /不要使用髒話/);
+}
+
+const safeScienceCases = [
+  '什麼是幹細胞？',
+  '樹幹有什麼功能？',
+  '腦幹是什麼？'
+];
+for (const message of safeScienceCases) {
+  assert.equal(engine.containsExplicitProfanity(message), false, message);
+}
+
+const noiseCases = ['aaaaaaa', '哈哈哈哈哈哈', '!!!???'];
+for (const message of noiseCases) {
+  const result = answer(message, '3-4');
+  assert.equal(result.intent, 'rephrase', message);
+}
+
+const offTopicCases = [
+  '你最喜歡吃什麼？',
+  '晚餐吃什麼？',
+  '幫我寫情書'
+];
+for (const message of offTopicCases) {
+  const result = answer(message, '3-4');
+  assert.equal(result.intent, 'rephrase', message);
+  assert.equal(result.policy, 'off_topic', message);
+}
+
+const validScienceAfterGuard = answer('植物為什麼需要陽光？', '3-4');
+assert.notEqual(validScienceAfterGuard.intent, 'blocked_language');
+assert.notEqual(validScienceAfterGuard.intent, 'rephrase');
+
 console.log('Assistant engine tests passed.');
 console.log('  Classification: game lookup / recommendation / curriculum / site help / unknown');
 console.log('  Search: published games and Grade 4 Unit 1 curriculum');
