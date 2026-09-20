@@ -47,6 +47,8 @@ const publishedGame = answer('41 號遊戲在哪裡？');
 assert.equal(publishedGame.intent, 'game_lookup');
 assert.equal(publishedGame.action?.href, 'play.html?game=41');
 assert.match(publishedGame.text, /流水搬運小實驗/);
+assert.doesNotMatch(publishedGame.text, /41 號/);
+assert.equal(publishedGame.links?.[0]?.href, 'play.html?game=41');
 
 const unlistedGame = answer('13 號遊戲在哪裡？');
 assert.equal(unlistedGame.policy, 'unlisted');
@@ -61,13 +63,14 @@ assert.match(teacherResource.text, /教師資源/);
 const gradeGames = answer('推薦四年級的遊戲');
 assert.equal(gradeGames.intent, 'grade_games');
 assert.equal(gradeGames.action?.kind, 'grade');
-assert.match(gradeGames.text, /41 號/);
-assert.doesNotMatch(gradeGames.text, /13 號/);
+assert.doesNotMatch(gradeGames.text, /\d+ 號/);
+assert(gradeGames.links?.some((link) => /流水搬運小實驗/.test(link.label)));
 
 const topicGames = answer('有沒有跟流水有關的遊戲？');
 assert.equal(topicGames.intent, 'game_search');
 assert.equal(topicGames.action?.href, 'play.html?game=41');
-assert.match(topicGames.text, /41 號/);
+assert.doesNotMatch(topicGames.text, /\d+ 號/);
+assert(topicGames.links?.some((link) => /流水搬運小實驗/.test(link.label)));
 
 const earthquakeTerms = answer('震源和震央有什麼不同？');
 assert.equal(earthquakeTerms.intent, 'curriculum');
@@ -117,14 +120,16 @@ const groupedLower = answer('有什麼適合這個年級的遊戲？', '3-4');
 assert.equal(groupedLower.intent, 'grade_games');
 assert.equal(groupedLower.action, null);
 assert.match(groupedLower.text, /三、四年級/);
-assert.match(groupedLower.text, /41 號/);
+assert.doesNotMatch(groupedLower.text, /\d+ 號/);
+assert(groupedLower.links?.some((link) => /流水搬運小實驗/.test(link.label)));
 assert.doesNotMatch(groupedLower.text, /按下面按鈕可篩選首頁/);
 
 const groupedUpper = answer('有什麼適合這個年級的遊戲？', '5-6');
 assert.equal(groupedUpper.intent, 'grade_games');
 assert.equal(groupedUpper.action, null);
 assert.match(groupedUpper.text, /五、六年級/);
-assert.match(groupedUpper.text, /35 號/);
+assert.doesNotMatch(groupedUpper.text, /\d+ 號/);
+assert(groupedUpper.links?.some((link) => /操作動滑輪/.test(link.label)));
 
 assert.equal(engine.classifyQuestion('有什麼三、四年級遊戲？', '5-6').entities.grade, '3-4');
 assert.equal(engine.classifyQuestion('推薦五六年級遊戲', '3-4').entities.grade, '5-6');
