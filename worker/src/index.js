@@ -4,7 +4,12 @@ const ALLOWED_ORIGINS = new Set([
   "http://127.0.0.1:5500"
 ]);
 
-const GEMINI_MODEL = "gemini-3.5-flash";
+const GEMINI_MODELS = [
+  "gemini-3.8-flash",
+  "gemini-3.5-flash",
+  "gemini-3.5-flash-lite"
+];
+const GEMINI_MODEL = GEMINI_MODELS[0];
 const MAX_HISTORY = 8;
 const MAX_MESSAGE_LENGTH = 2000;
 
@@ -176,9 +181,6 @@ function extractText(data) {
 }
 
 async function askGemini(env, { message, grade, character, history }) {
-  const endpoint =
-    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
-
   const body = {
     systemInstruction: {
       parts: [{ text: buildSystemPrompt({ grade, character }) }]
@@ -196,33 +198,83 @@ async function askGemini(env, { message, grade, character, history }) {
     }
   };
 
-  const response = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-goog-api-key": env.GEMINI_API_KEY
-    },
-    body: JSON.stringify(body)
-  });
+  const retryableStatuses = new Set([404, 408, 409, 429, 500, 502, 503, 504]);
+  const failures = [];
 
-  const data = await response.json().catch(() => ({}));
+  for (const model of GEMINI_MODELS) {
+    const endpoint =
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
-  if (!response.ok) {
-    const detail =
-      data?.error?.message ||
-      `Gemini API returned HTTP ${response.status}`;
-    throw new Error(detail);
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": env.GEMINI_API_KEY
+        },
+        body: JSON.stringify(body)
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        const detail =
+          data?.error?.message ||
+          `Gemini API returned HTTP ${response.status}`;
+
+        failures.push({
+          model,
+          status: response.status,
+          detail
+        });
+
+        if (retryableStatuses.has(response.status)) {
+          continue;
+        }
+
+        throw new Error(detail);
+      }
+
+      const reply = extractText(data);
+      if (!reply) {
+        failures.push({
+          model,
+          status: 200,
+          detail: "Gemini returned an empty response"
+        });
+        continue;
+      }
+
+      if (failures.length) {
+        console.warn("Gemini fallback succeeded", {
+          selectedModel: model,
+          previousFailures: failures
+        });
+      }
+
+      return {
+        reply,
+        model
+      };
+    } catch (error) {
+      const detail = error?.message || String(error);
+      failures.push({
+        model,
+        status: null,
+        detail
+      });
+
+      if (model !== GEMINI_MODELS[GEMINI_MODELS.length - 1]) {
+        continue;
+      }
+    }
   }
 
-  const reply = extractText(data);
-  if (!reply) {
-    throw new Error("Gemini returned an empty response");
-  }
+  const summary = failures
+    .map((item) => `${item.model}: ${item.status ?? "network"} ${item.detail}`)
+    .join(" | ");
 
-  return {
-    reply,
-    model: GEMINI_MODEL
-  };
+  throw new Error(summary || "All Gemini models failed");
 }
 
 export default {
@@ -246,6 +298,7 @@ export default {
           deploymentSource: "github",
           geminiConfigured: Boolean(env.GEMINI_API_KEY),
           model: GEMINI_MODEL,
+          models: GEMINI_MODELS,
           path: url.pathname
         },
         200,
