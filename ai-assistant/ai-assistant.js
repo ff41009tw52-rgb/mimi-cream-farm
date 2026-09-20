@@ -559,8 +559,6 @@
     if (event.key === 'Escape' && ui.root.classList.contains('is-open')) setOpen(false);
   });
 
-  const storedGrade = getStoredGrade();
   state.knowledgePromise = loadKnowledge();
-  if (storedGrade) startChat(storedGrade);
-  else showGradeScreen();
+  showGradeScreen();
 })();
