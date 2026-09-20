@@ -416,7 +416,10 @@
       conceptId: result.concept.id,
       confidence: Math.min(1, result.score / 14),
       text: result.answer + '（依據：' + sourceLabel(result.unit, result.concept) + '）',
-      action: gameAction(relatedGame)
+      links: relatedGame?.url
+        ? [{ href: relatedGame.url, label: cleanTitle(relatedGame.title) }]
+        : [],
+      note: relatedGame?.url ? '想練習的話，可以直接點遊戲名稱。' : ''
     };
   };
 
