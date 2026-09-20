@@ -10,6 +10,7 @@ on:
       - 'worker/**'
       - 'scripts/test-assistant-engine.mjs'
       - 'scripts/test-worker.mjs'
+      - 'scripts/test-assistant-static.mjs'
       - '.github/workflows/test-science-assistant.yml'
   pull_request:
     paths:
@@ -19,6 +20,7 @@ on:
       - 'worker/**'
       - 'scripts/test-assistant-engine.mjs'
       - 'scripts/test-worker.mjs'
+      - 'scripts/test-assistant-static.mjs'
 
 jobs:
   test:
@@ -40,3 +42,5 @@ jobs:
         run: node scripts/test-assistant-engine.mjs
       - name: Test Worker
         run: node scripts/test-worker.mjs
+      - name: Test assistant frontend structure
+        run: node scripts/test-assistant-static.mjs
