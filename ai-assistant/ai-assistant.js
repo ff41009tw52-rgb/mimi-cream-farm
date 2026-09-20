@@ -533,7 +533,10 @@
     window.setTimeout(() => ui.gradeGrid.querySelector('button')?.focus(), 0);
   };
 
-  ui.launcher.addEventListener('click', () => setOpen(true));
+  ui.launcher.addEventListener('click', () => {
+    showGradeScreen();
+    setOpen(true);
+  });
   ui.close.addEventListener('click', () => setOpen(false));
   ui.changeGrade.addEventListener('click', showGradeScreen);
   ui.gradeGrid.addEventListener('click', (event) => {
