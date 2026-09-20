@@ -103,6 +103,8 @@
     if (
       (/年級/.test(text) && /(遊戲|實驗)/.test(text) && /(有什麼|有哪些|推薦|適合)/.test(text))
       || /推薦.*(遊戲|實驗)/.test(text)
+      || /^(有什麼|有哪些)(遊戲|實驗)(可以玩)?$/.test(text)
+      || /^有沒有(遊戲|實驗)$/.test(text)
     ) {
       return { type: 'grade_games', confidence: 0.96, entities: { grade, gameNumber } };
     }
@@ -302,7 +304,7 @@
       return {
         intent: 'grade_games',
         source: 'site-knowledge',
-        text: '我目前沒有在網站資料中找到' + (grade ? grade + '年級' : '符合條件的') + '遊戲，所以先不亂推薦。'
+        text: '我目前沒有在網站資料中找到' + (grade ? gradeDisplayLabel(grade) : '符合條件的') + '遊戲，所以先不亂推薦。'
       };
     }
 
