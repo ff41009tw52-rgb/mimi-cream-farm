@@ -94,7 +94,8 @@ assert.match(magnitude.text, /震度/);
 const flowingWater = answer('流水怎麼改變地表？');
 assert.equal(flowingWater.intent, 'curriculum');
 assert.equal(flowingWater.conceptId, 'flowing-water-action');
-assert.equal(flowingWater.action?.href, 'play.html?game=41');
+assert.equal(flowingWater.links?.[0]?.href, 'play.html?game=41');
+assert.match(flowingWater.links?.[0]?.label || '', /流水搬運小實驗/);
 
 const siteHelp = answer('網頁畫面卡住了');
 assert.equal(siteHelp.intent, 'site_help');
