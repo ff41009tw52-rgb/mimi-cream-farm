@@ -101,10 +101,11 @@ const siteHelp = answer('網頁畫面卡住了');
 assert.equal(siteHelp.intent, 'site_help');
 assert.match(siteHelp.text, /重新整理/);
 
-const unknown = answer('你最喜歡哪一種罐頭？');
-assert.equal(unknown.intent, 'unknown');
-assert.equal(unknown.source, 'fallback');
-assert.equal(unknown.text, '測試用保守回答');
+const unrelated = answer('你最喜歡哪一種罐頭？');
+assert.equal(unrelated.intent, 'rephrase');
+assert.equal(unrelated.source, 'input-guard');
+assert.equal(unrelated.policy, 'off_topic');
+assert.match(unrelated.text, /換個相關問題/);
 
 const gameResults = engine.searchGames('肌肉遊戲', siteKnowledge, {
   grade: '5',
@@ -168,7 +169,12 @@ const profanityCases = [
   '幹你娘',
   '操你媽',
   '靠北',
+  '靠杯',
+  '靠邀',
   '雞掰',
+  '機掰',
+  '白癡',
+  '智障',
   '他媽的',
   'fuck',
   'shit'
@@ -183,7 +189,9 @@ for (const message of profanityCases) {
 const safeScienceCases = [
   '什麼是幹細胞？',
   '樹幹有什麼功能？',
-  '腦幹是什麼？'
+  '腦幹是什麼？',
+  '操場為什麼會積水？',
+  '這個操作要怎麼做？'
 ];
 for (const message of safeScienceCases) {
   assert.equal(engine.containsExplicitProfanity(message), false, message);
