@@ -29,6 +29,38 @@ const readJson = async (response) => JSON.parse(await response.text());
   assert.equal(response.status, 503);
 }
 
+
+{
+  const response = await worker.fetch(
+    new Request('https://example.test/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: '靠北', grade: '3-4', character: 'mimi' })
+    }),
+    { GEMINI_API_KEY: 'test-key' }
+  );
+  assert.equal(response.status, 400);
+  const body = await readJson(response);
+  assert.equal(body.blocked, true);
+  assert.equal(body.policy, 'profanity');
+  assert.match(body.reply, /不要使用髒話/);
+}
+
+{
+  const response = await worker.fetch(
+    new Request('https://example.test/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: '你最喜歡吃什麼？', grade: '3-4', character: 'mimi' })
+    }),
+    { GEMINI_API_KEY: 'test-key' }
+  );
+  assert.equal(response.status, 400);
+  const body = await readJson(response);
+  assert.equal(body.blocked, true);
+  assert.equal(body.policy, 'off_topic');
+}
+
 try {
   globalThis.fetch = async (_url, options) => {
     const requestBody = JSON.parse(options.body);
