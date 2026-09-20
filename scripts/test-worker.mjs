@@ -69,7 +69,7 @@ try {
     return new Response(JSON.stringify({
       candidates: [{
         content: {
-          parts: [{ text: '這是測試回答。' }]
+          parts: [{ text: '**這是測試回答**! 請看重點。' }]
         }
       }]
     }), {
@@ -98,7 +98,7 @@ try {
   assert.equal(response.status, 200);
   const body = await readJson(response);
   assert.equal(body.ok, true);
-  assert.equal(body.reply, '這是測試回答。');
+  assert.equal(body.reply, '這是測試回答！ 請看重點。');
   assert.equal(body.grade, '3-4');
   assert.equal(body.character, 'mimi');
 } finally {
