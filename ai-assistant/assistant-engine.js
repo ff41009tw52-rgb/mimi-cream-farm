@@ -43,15 +43,17 @@
     const compact = compactGuardText(raw);
 
     // Keep legitimate science terms such as 「幹細胞」 available.
-    const safeScienceTerms = ['幹細胞', '腦幹', '樹幹', '莖幹'];
+    const safeScienceTerms = ['幹細胞', '腦幹', '樹幹', '莖幹', '操場', '操作'];
     const protectedText = safeScienceTerms.reduce(
       (text, term) => text.replaceAll(term, ''),
       compact
     );
 
     const explicitTerms = [
-      '幹你娘', '幹你媽', '操你媽', '草你媽', '靠北', '靠杯',
+      '幹你娘', '幹你媽', '幹拎娘', '幹林娘',
+      '操你媽', '草你媽', '靠北', '靠杯', '靠邀',
       '機掰', '雞掰', '雞巴', '屌你', '他媽的', '媽的',
+      '白癡', '智障',
       'fuck', 'fucking', 'shit', 'bitch', 'motherfucker'
     ];
 
