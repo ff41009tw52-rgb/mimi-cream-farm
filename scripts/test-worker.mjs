@@ -140,4 +140,63 @@ try {
   globalThis.fetch = originalFetch;
 }
 
+
+try {
+  let callCount = 0;
+  const calledModels = [];
+  globalThis.fetch = async (url, options) => {
+    callCount += 1;
+    const match = String(url).match(/models\/([^:]+):generateContent/);
+    calledModels.push(match?.[1] || '');
+
+    if (callCount === 1) {
+      return new Response(JSON.stringify({
+        error: { message: 'temporary quota test' }
+      }), {
+        status: 429,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const requestBody = JSON.parse(options.body);
+    assert.match(requestBody.systemInstruction.parts[0].text, /橘咪咪/);
+
+    return new Response(JSON.stringify({
+      candidates: [{
+        content: {
+          parts: [{ text: '備援模型回答成功。' }]
+        }
+      }]
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  };
+
+  const response = await worker.fetch(
+    new Request('https://example.test/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: '乾冰冒出的白煙是什麼？',
+        grade: '3-4',
+        character: 'mimi',
+        history: []
+      })
+    }),
+    { GEMINI_API_KEY: 'fallback-test-key' }
+  );
+
+  assert.equal(response.status, 200);
+  const body = await readJson(response);
+  assert.equal(body.ok, true);
+  assert.equal(body.reply, '備援模型回答成功。');
+  assert.equal(callCount, 2);
+  assert.equal(calledModels[0], 'gemini-3.8-flash');
+  assert.equal(calledModels[1], 'gemini-3.5-flash');
+  assert.equal(body.model, 'gemini-3.5-flash');
+} finally {
+  globalThis.fetch = originalFetch;
+}
+
 console.log('Worker tests passed.');
