@@ -28,3 +28,7 @@ const engineSource = fs.readFileSync('ai-assistant/assistant-engine.js', 'utf8')
 assert.match(engineSource, /input-guard/);
 assert.match(engineSource, /containsExplicitProfanity/);
 assert.match(engineSource, /isClearlyOffTopic/);
+
+const assistantCss = fs.readFileSync('ai-assistant/ai-assistant.css', 'utf8');
+assert.match(assistantCss, /\.assistant-messages\s*\{[\s\S]*flex:\s*1 1 auto/);
+assert.match(assistantCss, /\.assistant-messages > \.assistant-message:first-child\s*\{[\s\S]*margin-top:\s*auto/);
