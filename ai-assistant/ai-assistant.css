@@ -274,10 +274,18 @@
 }
 
 .assistant-messages {
+  display: flex;
   min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
   padding: 15px 13px 8px;
   overflow-y: auto;
   overscroll-behavior: contain;
+  scroll-behavior: smooth;
+}
+
+.assistant-messages > .assistant-message:first-child {
+  margin-top: auto;
 }
 
 .assistant-message {
