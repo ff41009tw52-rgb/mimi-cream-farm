@@ -5,13 +5,14 @@ const ALLOWED_ORIGINS = new Set([
 ]);
 
 const GEMINI_MODELS = [
+  "gemini-2.5-flash-lite",
   "gemini-3.5-flash-lite",
-  "gemini-3.5-flash",
-  "gemini-3.8-flash"
+  "gemini-3.1-flash-lite"
 ];
 const GEMINI_MODEL = GEMINI_MODELS[0];
 const MAX_HISTORY = 8;
 const MAX_MESSAGE_LENGTH = 2000;
+const MODEL_TIMEOUT_MS = 9000;
 
 function corsHeaders(origin) {
   const allowOrigin = ALLOWED_ORIGINS.has(origin)
@@ -198,7 +199,7 @@ async function askGemini(env, { message, grade, character, history }) {
     }
   };
 
-  const retryableStatuses = new Set([404, 408, 409, 429, 500, 502, 503, 504]);
+  const retryableStatuses = new Set([400, 404, 408, 409, 429, 500, 502, 503, 504]);
   const failures = [];
 
   for (const model of GEMINI_MODELS) {
@@ -206,14 +207,23 @@ async function askGemini(env, { message, grade, character, history }) {
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
     try {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": env.GEMINI_API_KEY
-        },
-        body: JSON.stringify(body)
-      });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), MODEL_TIMEOUT_MS);
+
+      let response;
+      try {
+        response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": env.GEMINI_API_KEY
+          },
+          body: JSON.stringify(body),
+          signal: controller.signal
+        });
+      } finally {
+        clearTimeout(timeoutId);
+      }
 
       const data = await response.json().catch(() => ({}));
 
