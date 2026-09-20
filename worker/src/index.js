@@ -152,6 +152,8 @@ function buildSystemPrompt({ grade, character }) {
     "5. 不要求學生提供姓名、電話、地址、帳號、密碼等個人資訊。",
     "6. 遇到可能危險的實驗、藥品、火源、尖銳器材或高溫操作，要提醒由老師或成人陪同。",
     "7. 回答以精簡為主，通常控制在 3～8 句；只有學生明確要求詳細說明時才延伸。",
+    "8. 不要使用 Markdown 格式，不要輸出 **粗體**、__底線__、# 標題、反引號或 Markdown 項目符號。",
+    "9. 中文句子使用臺灣繁體中文全形標點，例如：，。！？：「」；只有英文、網址、數字、單位需要時才使用半形符號。",
     isMimi
       ? "角色語氣：親切、活潑、清楚，可以偶爾用「我們來看看」這類自然口吻，但不要過度撒嬌。"
       : "角色語氣：沉穩、條理清楚、鼓勵推理，可以適度提出『為什麼』或『比較看看』的思考方向。"
@@ -179,6 +181,25 @@ function extractText(data) {
     .map((part) => typeof part?.text === "string" ? part.text : "")
     .join("")
     .trim();
+}
+function normalizeAssistantText(value) {
+  let text = String(value || "")
+    .replace(/\r\n?/g, "\n")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/__([^_]+)__/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/^#{1,6}\s*/gm, "")
+    .replace(/^\s*[-*+]\s+/gm, "• ")
+    .trim();
+
+  text = text
+    .replace(/([\u3400-\u9fff])\s*,\s*(?=[\u3400-\u9fff])/g, "$1，")
+    .replace(/([\u3400-\u9fff])\s*;\s*(?=[\u3400-\u9fff])/g, "$1；")
+    .replace(/([\u3400-\u9fff])\s*:\s*(?=[\u3400-\u9fff])/g, "$1：")
+    .replace(/([\u3400-\u9fff])\s*!+/g, "$1！")
+    .replace(/([\u3400-\u9fff])\s*\?+/g, "$1？");
+
+  return text;
 }
 
 async function askGemini(env, { message, grade, character, history }) {
@@ -245,7 +266,7 @@ async function askGemini(env, { message, grade, character, history }) {
         throw new Error(detail);
       }
 
-      const reply = extractText(data);
+      const reply = normalizeAssistantText(extractText(data));
       if (!reply) {
         failures.push({
           model,
