@@ -285,8 +285,8 @@
     return {
       intent: 'game_lookup',
       source: 'site-knowledge',
-      text: '找到了！' + gameNumber + ' 號是「' + cleanTitle(game.title) + '」。' + description,
-      action: gameAction(game)
+      text: '找到了！「' + cleanTitle(game.title) + '」。' + description,
+      links: game.url ? [{ href: game.url, label: cleanTitle(game.title) }] : []
     };
   };
 
@@ -308,14 +308,18 @@
       };
     }
 
-    const preview = games.slice(0, 4).map((game) => game.id + ' 號「' + cleanTitle(game.title) + '」').join('、');
-    const more = games.length > 4 ? '等，共 ' + games.length + ' 個' : '，共 ' + games.length + ' 個';
+    const recommended = games.slice(0, 4);
+    const more = games.length > 4 ? '另外還有其他適合的遊戲。' : '';
     const grouped = ['3-4', '5-6'].includes(String(grade));
     return {
       intent: 'grade_games',
       source: 'site-knowledge',
-      text: (grade ? gradeDisplayLabel(grade) : '網站') + '目前有 ' + preview + more
-        + (grouped ? '。你也可以直接問我某一個遊戲名稱或編號。' : '。按下面按鈕可篩選首頁。'),
+      text: (grade ? gradeDisplayLabel(grade) : '網站') + '可以先玩這幾個：',
+      links: recommended.map((game) => ({
+        href: game.url,
+        label: cleanTitle(game.title)
+      })),
+      note: more || (grouped ? '也可以直接告訴我你想玩的主題，我再幫你找。' : ''),
       action: ['3', '4', '5', '6'].includes(String(grade)) ? { kind: 'grade', grade } : null
     };
   };
@@ -349,12 +353,15 @@
       };
     }
 
-    const list = published.map((game) => game.id + ' 號「' + cleanTitle(game.title) + '」').join('、');
     return {
       intent: 'game_search',
       source: 'site-knowledge',
-      text: '找到的已發布遊戲有：' + list + '。我先提供最相符的遊戲連結。',
-      action: gameAction(published[0])
+      text: '找到幾個相關遊戲：',
+      links: published.map((game) => ({
+        href: game.url,
+        label: cleanTitle(game.title)
+      })),
+      note: '點遊戲名稱就可以直接開啟。'
     };
   };
 
