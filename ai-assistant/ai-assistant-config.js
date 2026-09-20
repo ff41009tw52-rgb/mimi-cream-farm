@@ -6,7 +6,7 @@
     siteKnowledgeUrl: 'data/site-knowledge.json',
     curriculumManifestUrl: 'knowledge/index.json',
     apiEndpoint: 'https://mimi-cream-ai.ff41009tw52.workers.dev/',
-    aiTimeoutMs: 15000,
+    aiTimeoutMs: 35000,
     aiHistoryLimit: 8,
     aiErrorMessage: '現在有點忙，暫時連不上 AI。你可以再試一次，或換個方式問我。',
     title: '橘咪咪與白奶油的科學小幫手',
