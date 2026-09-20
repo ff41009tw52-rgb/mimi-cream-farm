@@ -102,6 +102,42 @@ const gameResults = engine.searchGames('肌肉遊戲', siteKnowledge, {
 assert(gameResults.length >= 1);
 assert(gameResults.every((result) => result.game.recommendable && result.game.grades.includes('5')));
 
+
+const groupedLower = answer('有什麼適合這個年級的遊戲？', '3-4');
+assert.equal(groupedLower.intent, 'grade_games');
+assert.equal(groupedLower.action, null);
+assert.match(groupedLower.text, /三、四年級/);
+assert.match(groupedLower.text, /41 號/);
+assert.doesNotMatch(groupedLower.text, /按下面按鈕可篩選首頁/);
+
+const groupedUpper = answer('有什麼適合這個年級的遊戲？', '5-6');
+assert.equal(groupedUpper.intent, 'grade_games');
+assert.equal(groupedUpper.action, null);
+assert.match(groupedUpper.text, /五、六年級/);
+assert.match(groupedUpper.text, /35 號/);
+
+assert.equal(engine.classifyQuestion('有什麼三、四年級遊戲？', '5-6').entities.grade, '3-4');
+assert.equal(engine.classifyQuestion('推薦五六年級遊戲', '3-4').entities.grade, '5-6');
+
+const groupedSearch = engine.searchGames('肌肉遊戲', siteKnowledge, {
+  grade: '5-6',
+  recommendableOnly: true,
+  gradeOnly: true
+});
+assert(groupedSearch.length >= 1);
+assert(groupedSearch.every((result) =>
+  result.game.recommendable
+  && result.game.grades.some((grade) => grade === '5' || grade === '6')
+));
+
+const groupedCurriculum = answer('流水怎麼改變地表？', '3-4');
+assert.equal(groupedCurriculum.intent, 'curriculum');
+assert.equal(groupedCurriculum.conceptId, 'flowing-water-action');
+
+const missingGame = answer('99 號遊戲在哪裡？', '3-4');
+assert.notEqual(missingGame.intent, 'game_lookup');
+
+
 console.log('Assistant engine tests passed.');
 console.log('  Classification: game lookup / recommendation / curriculum / site help / unknown');
 console.log('  Search: published games and Grade 4 Unit 1 curriculum');
