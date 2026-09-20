@@ -23,3 +23,8 @@ assert.match(worker, /env\.GEMINI_API_KEY/);
 assert.doesNotMatch(worker, /AIza[0-9A-Za-z_-]{20,}/);
 
 console.log('Assistant static checks passed.');
+
+const engineSource = fs.readFileSync('ai-assistant/assistant-engine.js', 'utf8');
+assert.match(engineSource, /input-guard/);
+assert.match(engineSource, /containsExplicitProfanity/);
+assert.match(engineSource, /isClearlyOffTopic/);
