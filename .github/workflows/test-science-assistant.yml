@@ -1,0 +1,42 @@
+name: Test science assistant
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'ai-assistant/**'
+      - 'data/site-knowledge.json'
+      - 'knowledge/**'
+      - 'worker/**'
+      - 'scripts/test-assistant-engine.mjs'
+      - 'scripts/test-worker.mjs'
+      - '.github/workflows/test-science-assistant.yml'
+  pull_request:
+    paths:
+      - 'ai-assistant/**'
+      - 'data/site-knowledge.json'
+      - 'knowledge/**'
+      - 'worker/**'
+      - 'scripts/test-assistant-engine.mjs'
+      - 'scripts/test-worker.mjs'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check frontend
+        run: |
+          node --check ai-assistant/ai-assistant-config.js
+          node --check ai-assistant/assistant-engine.js
+          node --check ai-assistant/ai-assistant.js
+      - name: Syntax check Worker
+        run: node --check worker/src/index.js
+      - name: Test assistant engine
+        run: node scripts/test-assistant-engine.mjs
+      - name: Test Worker
+        run: node scripts/test-worker.mjs
