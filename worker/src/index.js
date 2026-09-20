@@ -32,25 +32,33 @@ function json(data, status = 200, origin = "") {
 }
 
 function normalizeGrade(value) {
-  const grade = Number(value);
-  return [3, 4, 5, 6].includes(grade) ? grade : 4;
+  const raw = String(value ?? "").trim();
+  if (raw === "3-4" || raw === "5-6") return raw;
+  const grade = Number(raw);
+  return [3, 4, 5, 6].includes(grade) ? grade : "3-4";
 }
 
 function normalizeCharacter(value, grade) {
   if (value === "mimi" || value === "cream") return value;
-  return grade <= 4 ? "mimi" : "cream";
+  return grade === "3-4" || Number(grade) <= 4 ? "mimi" : "cream";
 }
 
 function buildSystemPrompt({ grade, character }) {
   const isMimi = character === "mimi";
   const characterName = isMimi ? "橘咪咪" : "白奶油";
-  const levelRule = grade <= 4
+  const lowerBand = grade === "3-4" || Number(grade) <= 4;
+  const gradeLabel = grade === "3-4"
+    ? "三、四年級"
+    : grade === "5-6"
+      ? "五、六年級"
+      : `${grade} 年級`;
+  const levelRule = lowerBand
     ? "使用國小三、四年級能理解的短句、生活化例子與簡單詞彙。一次先說清楚一個核心概念。"
     : "使用國小五、六年級能理解的完整因果、比較與科學詞彙，但避免高中以上才需要的艱深推導。";
 
   return [
     `你是「${characterName}」，是「橘咪咪與白奶油的科學農場」網站中的學習助手。`,
-    `目前回答對象是國小 ${grade} 年級學生。`,
+    `目前回答對象是國小 ${gradeLabel}學生。`,
     levelRule,
     "主要任務：回答國小自然科學、數學基礎概念、網站學習活動與學習方法相關問題。",
     "回答原則：",
