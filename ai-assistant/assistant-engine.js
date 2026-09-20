@@ -19,6 +19,20 @@
 
   const cleanTitle = (value) => String(value || '').replace(/^[^A-Za-z0-9\u3400-\u9fff]+/, '');
 
+  const gradeValues = (grade) => {
+    const value = String(grade || '');
+    if (value === '3-4') return ['3', '4'];
+    if (value === '5-6') return ['5', '6'];
+    return value ? [value] : [];
+  };
+
+  const gradeDisplayLabel = (grade) => {
+    const value = String(grade || '');
+    if (value === '3-4') return '三、四年級';
+    if (value === '5-6') return '五、六年級';
+    return value ? value + '年級' : '';
+  };
+
   const stylizeCatReply = (text, suffixes, variantIndex = 0) => {
     const original = String(text || '').trim();
     if (!original || /喵[！!。～~]?$/.test(original)) return original;
@@ -149,7 +163,7 @@
       .map((game) => ({ game, score: gameSearchScore(question, game), exact: false }))
       .filter((result) => result.score >= 4)
       .filter((result) => !options.recommendableOnly || result.game.recommendable)
-      .filter((result) => !options.gradeOnly || !grade || gradeValues(grade).some((item) => result.game.grades.includes(item)))
+      .filter((result) => !options.gradeOnly || !grade || gradeValues(grade).some((item) => result.Array.isArray(game.grades) && game.grades.includes(item)))
       .sort((left, right) => {
         if (right.score !== left.score) return right.score - left.score;
         if (left.game.recommendable !== right.game.recommendable) return left.game.recommendable ? -1 : 1;
@@ -273,7 +287,7 @@
 
   const answerGradeGames = (grade, siteKnowledge) => {
     const games = (siteKnowledge?.games || [])
-      .filter((game) => game.recommendable && (!grade || gradeValues(grade).some((item) => game.grades.includes(item))))
+      .filter((game) => game.recommendable && (!grade || gradeValues(grade).some((item) => Array.isArray(game.grades) && game.grades.includes(item))))
       .sort((left, right) => {
         const leftDate = left.publishedAt || '';
         const rightDate = right.publishedAt || '';
@@ -295,7 +309,7 @@
       intent: 'grade_games',
       source: 'site-knowledge',
       text: (grade ? gradeDisplayLabel(grade) : '網站') + '目前有 ' + preview + more + '。按下面按鈕可篩選首頁。',
-      action: grade ? { kind: 'grade', grade } : gameAction(games[0])
+      action: ['3', '4', '5', '6'].includes(String(grade)) ? { kind: 'grade', grade } : null
     };
   };
 
@@ -317,7 +331,7 @@
     const published = results
       .map((result) => result.game)
       .filter((game) => game.recommendable)
-      .filter((game) => !grade || gradeValues(grade).some((item) => game.grades.includes(item)))
+      .filter((game) => !grade || gradeValues(grade).some((item) => Array.isArray(game.grades) && game.grades.includes(item)))
       .slice(0, 3);
 
     if (!published.length) {
