@@ -321,6 +321,36 @@
   color: #fff;
 }
 
+.assistant-message__links {
+  margin-top: 9px;
+  line-height: 1.75;
+}
+
+.assistant-message__text-link {
+  color: var(--assistant-orange-dark);
+  font-weight: 900;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.assistant-message__text-link:hover {
+  text-decoration-thickness: 3px;
+}
+
+.assistant-message__text-link:focus-visible {
+  outline: 3px solid #174f28;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.assistant-message__note {
+  margin-top: 6px;
+  color: #806d63;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
 .assistant-message__action {
   display: inline-flex;
   align-items: center;
