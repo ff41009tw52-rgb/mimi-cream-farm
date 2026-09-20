@@ -61,7 +61,7 @@
     }
   };
 
-  const characterForGrade = (grade) => (['3', '4'].includes(grade) ? 'mimi' : 'cream');
+  const characterForGrade = (grade) => (['3', '4', '3-4'].includes(grade) ? 'mimi' : 'cream');
 
   const makeElement = (tagName, className, text) => {
     const element = document.createElement(tagName);
@@ -131,8 +131,8 @@
     );
     const gradeGrid = makeElement('div', 'assistant-grade-grid');
     [
-      ['4', '三、四年級', '橘咪咪'],
-      ['6', '五、六年級', '白奶油']
+      ['3-4', '三、四年級', '橘咪咪'],
+      ['5-6', '五、六年級', '白奶油']
     ].forEach(([grade, label, character]) => {
       const button = makeElement('button', 'assistant-grade-btn', label);
       button.type = 'button';
@@ -424,7 +424,7 @@
     }
     if (preset?.action === 'grade-games') {
       return engine.answerQuestion({
-        question: '有什麼' + state.grade + '年級遊戲？',
+        question: '有什麼適合這個年級的遊戲？',
         grade: state.grade,
         siteKnowledge: state.siteKnowledge,
         curriculum: state.curriculum,
@@ -509,9 +509,10 @@
     storeGrade(grade);
 
     const character = currentCharacter();
+    const gradeLabel = grade === '3-4' ? '三、四年級' : grade === '5-6' ? '五、六年級' : grade + '年級';
     ui.headerAvatar.src = character.avatar;
     ui.headerAvatar.alt = character.name;
-    ui.headerSubtitle.textContent = `${grade}年級・${character.name}陪你`;
+    ui.headerSubtitle.textContent = `${gradeLabel}・${character.name}陪你`;
     ui.gradeScreen.hidden = true;
     ui.chat.hidden = false;
     ui.messages.replaceChildren();
