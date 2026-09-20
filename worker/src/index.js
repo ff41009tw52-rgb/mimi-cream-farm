@@ -43,6 +43,83 @@ function normalizeCharacter(value, grade) {
   return grade === "3-4" || Number(grade) <= 4 ? "mimi" : "cream";
 }
 
+function compactGuardText(value) {
+  return String(value || "")
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[\s，。！？!?、；;：「」『』（）()【】\[\]\\\-_.:：・,\"'~～]+/g, "");
+}
+
+function guardMessage(message) {
+  const raw = String(message || "").normalize("NFKC").toLowerCase();
+  const compact = compactGuardText(raw);
+  const safeScienceTerms = ["幹細胞", "腦幹", "樹幹", "莖幹", "操場", "操作"];
+  const protectedText = safeScienceTerms.reduce(
+    (text, term) => text.replaceAll(term, ""),
+    compact
+  );
+
+  const explicitTerms = [
+    "幹你娘", "幹你媽", "幹拎娘", "幹林娘",
+    "操你媽", "草你媽", "靠北", "靠杯", "靠邀",
+    "機掰", "雞掰", "雞巴", "他媽的", "媽的",
+    "白癡", "智障",
+    "fuck", "fucking", "shit", "bitch", "motherfucker"
+  ];
+
+  if (
+    explicitTerms.some((term) => protectedText.includes(term))
+    || /^(幹|操)$/.test(protectedText)
+    || /(^|[\s，。！？!?、；;])(?:幹|操)(?:[\s，。！？!?、；;]|$)/.test(raw)
+  ) {
+    return {
+      status: 400,
+      type: "profanity",
+      reply: "這裡是學習小幫手，請不要使用髒話或侮辱性的文字。換成尊重、清楚的說法，我就能繼續幫你。"
+    };
+  }
+
+  if (
+    !compact
+    || (/^[a-z]{7,}$/i.test(compact) && !/[aeiou]{2,}/i.test(compact))
+    || /^(.)\1{4,}$/.test(compact)
+    || !/[\u3400-\u9fffA-Za-z0-9]/.test(raw)
+  ) {
+    return {
+      status: 400,
+      type: "noise",
+      reply: "我看不太懂這段文字。請重新問一次，可以問自然科學、網站操作或遊戲相關問題。"
+    };
+  }
+
+  const offTopicPatterns = [
+    /你(最)?喜歡(吃|喝|哪|什麼)/,
+    /你有沒有(男|女)朋友/,
+    /你幾歲/,
+    /你住哪/,
+    /你會不會談戀愛/,
+    /晚餐吃什麼/,
+    /早餐吃什麼/,
+    /午餐吃什麼/,
+    /幫我寫情書/,
+    /唱歌給我聽/,
+    /講八卦/,
+    /股票|彩券|賭博/,
+    /哪間餐廳|哪裡好吃|去哪裡玩|哪部電影|哪個明星/
+  ];
+
+  const normalized = compactGuardText(message);
+  if (offTopicPatterns.some((pattern) => pattern.test(normalized))) {
+    return {
+      status: 400,
+      type: "off_topic",
+      reply: "這個問題好像和自然科學、網站或遊戲沒有太大關係。可以換個相關問題再問我嗎？"
+    };
+  }
+
+  return null;
+}
+
 function buildSystemPrompt({ grade, character }) {
   const isMimi = character === "mimi";
   const characterName = isMimi ? "橘咪咪" : "白奶油";
@@ -222,6 +299,21 @@ export default {
           error: `message is too long (max ${MAX_MESSAGE_LENGTH} characters)`
         },
         400,
+        origin
+      );
+    }
+
+    const guard = guardMessage(message);
+    if (guard) {
+      return json(
+        {
+          ok: false,
+          blocked: true,
+          policy: guard.type,
+          reply: guard.reply,
+          error: "Input rejected by learning assistant guard"
+        },
+        guard.status,
         origin
       );
     }
