@@ -15,7 +15,7 @@
   const normalizeText = (value) => String(value || '')
     .normalize('NFKC')
     .toLowerCase()
-    .replace(/[，。！？、；：「」『』（）()【】\[\]\s\-_.:：・]/g, '');
+    .replace(/[，。！？!?、；;：「」『』（）()【】\[\]\s\-_.:：・,\"']/g, '');
 
   const cleanTitle = (value) => String(value || '').replace(/^[^A-Za-z0-9\u3400-\u9fff]+/, '');
 
