@@ -402,6 +402,16 @@
       });
 
       const payload = await response.json().catch(() => ({}));
+
+      if (payload?.blocked && payload?.reply) {
+        return {
+          intent: payload.policy === 'profanity' ? 'blocked_language' : 'rephrase',
+          source: 'worker-guard',
+          policy: payload.policy || 'guard',
+          text: String(payload.reply).trim()
+        };
+      }
+
       if (!response.ok || !payload?.ok || !payload?.reply) {
         throw new Error(payload?.detail || payload?.error || ('AI HTTP ' + response.status));
       }
