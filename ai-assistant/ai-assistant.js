@@ -220,7 +220,7 @@
     return null;
   };
 
-  const addMessage = (role, text, action) => {
+  const addMessage = (role, text, action, links = [], note = '') => {
     const row = makeElement('div', `assistant-message assistant-message--${role}`);
     const displayText = role === 'assistant'
       ? engine.stylizeCatReply(
@@ -237,6 +237,25 @@
       avatar.src = currentCharacter().avatar;
       avatar.alt = currentCharacter().name;
       row.append(avatar, bubble);
+
+      if (Array.isArray(links) && links.length) {
+        const linkList = makeElement('div', 'assistant-message__links');
+        links.forEach((item, index) => {
+          const link = makeElement('a', 'assistant-message__text-link', item.label);
+          link.href = item.href;
+          link.setAttribute('aria-label', `開啟${item.label}`);
+          linkList.appendChild(link);
+          if (index < links.length - 1) {
+            linkList.appendChild(document.createTextNode('、'));
+          }
+        });
+        bubble.appendChild(linkList);
+      }
+
+      if (note) {
+        bubble.appendChild(makeElement('div', 'assistant-message__note', note));
+      }
+
       const actionElement = makeAction(action);
       if (actionElement) bubble.appendChild(actionElement);
     } else {
@@ -459,7 +478,7 @@
 
         if (token !== state.responseToken) return;
         typing.remove();
-        addMessage('assistant', reply.text, reply.action);
+        addMessage('assistant', reply.text, reply.action, reply.links, reply.note);
 
         state.conversation.push(
           { role: 'user', text: question },
