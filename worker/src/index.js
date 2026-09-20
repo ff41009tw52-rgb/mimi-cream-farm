@@ -5,9 +5,9 @@ const ALLOWED_ORIGINS = new Set([
 ]);
 
 const GEMINI_MODELS = [
-  "gemini-3.8-flash",
+  "gemini-3.5-flash-lite",
   "gemini-3.5-flash",
-  "gemini-3.5-flash-lite"
+  "gemini-3.8-flash"
 ];
 const GEMINI_MODEL = GEMINI_MODELS[0];
 const MAX_HISTORY = 8;
