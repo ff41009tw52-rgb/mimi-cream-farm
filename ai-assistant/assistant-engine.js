@@ -259,7 +259,9 @@
       return {
         intent: 'game_lookup',
         source: 'site-knowledge',
-        text: '我目前沒有在網站資料中找到 ' + gameNumber + ' 號遊戲，所以先不亂告訴你。'
+        text: '我目前沒有在網站資料中找到你說的這個遊戲，所以先不亂告訴你。',
+        links: [{ href: 'feedback.html', label: '回報問題／推薦小遊戲' }],
+        note: '如果你希望網站加入這個遊戲或主題，可以告訴我們。'
       };
     }
 
@@ -268,7 +270,7 @@
         intent: 'game_lookup',
         source: 'site-knowledge',
         policy: 'teacher-resource',
-        text: gameNumber + ' 號「' + game.title + '」是教師資源，不是學生遊戲，因此不會放入學生推薦或提供遊戲按鈕。'
+        text: '「' + cleanTitle(game.title) + '」目前是教師資源，不是學生遊戲，所以不會放入學生遊戲推薦。'
       };
     }
 
@@ -277,7 +279,7 @@
         intent: 'game_lookup',
         source: 'site-knowledge',
         policy: 'unlisted',
-        text: '網站中有 ' + gameNumber + ' 號「' + game.title + '」模組，但它目前沒有在首頁發布，所以我先不推薦或提供開啟連結。'
+        text: '網站中有「' + cleanTitle(game.title) + '」這個內容，但目前沒有在首頁發布，所以我先不提供開啟連結。'
       };
     }
 
@@ -304,7 +306,9 @@
       return {
         intent: 'grade_games',
         source: 'site-knowledge',
-        text: '我目前沒有在網站資料中找到' + (grade ? gradeDisplayLabel(grade) : '符合條件的') + '遊戲，所以先不亂推薦。'
+        text: '目前還沒有找到' + (grade ? gradeDisplayLabel(grade) : '符合條件的') + '遊戲。',
+        links: [{ href: 'feedback.html', label: '回報問題／推薦小遊戲' }],
+        note: '你可以告訴我們想玩的學科或主題，作為之後新增小遊戲的參考。'
       };
     }
 
@@ -330,7 +334,9 @@
       return {
         intent: 'game_search',
         source: 'site-knowledge',
-        text: '我目前沒有找到符合這個主題的已確認遊戲。你可以改用遊戲編號、完整名稱或自然主題再問一次。'
+        text: '目前還沒有找到符合這個學科或主題的遊戲。',
+        links: [{ href: 'feedback.html', label: '回報問題／推薦小遊戲' }],
+        note: '如果你很想玩這個主題，可以告訴我們想加入什麼內容。'
       };
     }
 
@@ -349,7 +355,9 @@
       return {
         intent: 'game_search',
         source: 'site-knowledge',
-        text: '我找到了相關模組，但沒有符合目前年級且已在首頁發布的學生遊戲，所以先不推薦。'
+        text: '有找到相關內容，但目前沒有適合這個年級且已發布的學生遊戲。',
+        links: [{ href: 'feedback.html', label: '回報問題／推薦小遊戲' }],
+        note: '你可以告訴我們希望新增哪一類小遊戲。'
       };
     }
 
@@ -371,7 +379,7 @@
       return {
         intent: 'site_help',
         source: 'site-rules',
-        text: '請按首頁右下角的「回報問題」，並寫下遊戲編號、使用的裝置，以及發生問題前做了什麼。'
+        text: '請按首頁右下角的「回報問題」，並寫下遊戲名稱、使用的裝置，以及發生問題前做了什麼。'
       };
     }
     if (/年級|篩選/.test(text)) {
@@ -385,7 +393,7 @@
       return {
         intent: 'site_help',
         source: 'site-rules',
-        text: '請先確認網路，再重新整理頁面；若只有某個遊戲打不開，請記下遊戲編號並使用右下角的「回報問題」。'
+        text: '請先確認網路，再重新整理頁面；若只有某個遊戲打不開，請記下遊戲名稱並使用右下角的「回報問題」。'
       };
     }
     return {
@@ -441,7 +449,7 @@
       intent: 'unknown',
       source: 'fallback',
       confidence: classification.confidence,
-      text: fallbackText || '我目前的資料還沒有這題，所以先不猜答案。你可以換一個自然關鍵詞、遊戲名稱或編號再問一次。'
+      text: fallbackText || '我目前的資料還沒有這題，所以先不猜答案。你可以換一個自然關鍵詞或遊戲名稱再問一次。'
     };
   };
 
