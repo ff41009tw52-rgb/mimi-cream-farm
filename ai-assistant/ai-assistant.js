@@ -131,10 +131,8 @@
     );
     const gradeGrid = makeElement('div', 'assistant-grade-grid');
     [
-      ['3', '三年級', '橘咪咪'],
-      ['4', '四年級', '橘咪咪'],
-      ['5', '五年級', '白奶油'],
-      ['6', '六年級', '白奶油']
+      ['4', '三、四年級', '橘咪咪'],
+      ['6', '五、六年級', '白奶油']
     ].forEach(([grade, label, character]) => {
       const button = makeElement('button', 'assistant-grade-btn', label);
       button.type = 'button';
