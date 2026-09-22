@@ -1,0 +1,9 @@
+{
+  "name": "aquatic-observation-module",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check assets/aquatic/aquatic-data.js && node --check assets/aquatic/aquatic-api.js && node --check assets/aquatic/aquatic-storage.js && node --check assets/aquatic/aquatic.js && node --check assets/aquatic/aquatic-teacher.js && node --check cloudflare/aquatic/worker.js",
+    "test": "npm run check && node tests/static.test.mjs && node tests/worker.test.mjs"
+  }
+}

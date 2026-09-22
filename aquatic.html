@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0d9488">
+  <title>水生植物觀察任務｜橘咪咪與白奶油</title>
+  <link rel="stylesheet" href="assets/aquatic/aquatic.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="回科學農場首頁">
+      <span aria-hidden="true">🌿</span>
+      <span>水生植物觀察任務</span>
+    </a>
+    <button id="connection-status" class="connection" type="button" aria-live="polite">連線中</button>
+  </header>
+
+  <main id="app" class="app-shell">
+    <section id="profile-view" class="view hero-view">
+      <div class="hero-copy">
+        <p class="eyebrow">橘咪咪與白奶油的科學農場</p>
+        <h1>帶著眼睛和相機<br>到生態池找植物！</h1>
+        <p>你拍的照片會放進自己的水生植物圖鑑。觀察、比較，再用自己的理由完成分類。</p>
+        <ul class="mission-list" aria-label="任務流程">
+          <li><span>1</span>到生態池觀察</li>
+          <li><span>2</span>拍下植物特徵</li>
+          <li><span>3</span>比較並自行分類</li>
+        </ul>
+      </div>
+      <form id="profile-form" class="card profile-card">
+        <h2>先領取觀察紀錄本</h2>
+        <label>班級<input name="className" autocomplete="organization" maxlength="12" required placeholder="例如：四年三班"></label>
+        <label>座號<input name="seatNumber" inputmode="numeric" maxlength="3" required placeholder="例如：12"></label>
+        <label>姓名<input name="studentName" autocomplete="name" maxlength="20" required placeholder="請輸入真實姓名"></label>
+        <p class="privacy-note">資料只供本次課堂與教師查看。請不要輸入電話、住址或密碼。</p>
+        <button class="primary-button" type="submit">開始觀察</button>
+        <p id="profile-error" class="form-error" role="alert"></p>
+      </form>
+    </section>
+
+    <section id="field-guide-view" class="view" hidden>
+      <div class="page-heading">
+        <div>
+          <p class="eyebrow">我的水生植物圖鑑</p>
+          <h1 id="student-greeting">今天要觀察 7 種植物</h1>
+        </div>
+        <button id="switch-student" class="text-button" type="button">更換學生</button>
+      </div>
+      <section class="progress-card" aria-labelledby="progress-title">
+        <div class="progress-copy"><strong id="progress-title">觀察進度</strong><span id="progress-label">0 / 7</span></div>
+        <div class="progress-track"><span id="progress-bar"></span></div>
+      </section>
+      <div id="plant-grid" class="plant-grid" role="list"></div>
+      <section class="next-task card">
+        <div><p class="eyebrow">完成七種觀察後</p><h2>把植物送回適合的家</h2><p>依照你看到的生長位置完成分類，再寫下這次觀察心得。</p></div>
+        <button id="open-classification" class="primary-button" type="button">前往分類與總整理</button>
+      </section>
+    </section>
+
+    <section id="plant-view" class="view" hidden>
+      <button class="back-button" type="button" data-back>← 返回我的圖鑑</button>
+      <div class="page-heading compact"><div><p class="eyebrow">植物觀察紀錄</p><h1 id="plant-title"></h1></div><span id="plant-status" class="status-pill"></span></div>
+      <div class="observation-layout">
+        <section class="card photo-card">
+          <h2>1. 拍下你看到的植物</h2>
+          <div id="photo-preview" class="photo-preview"><p>還沒有照片</p></div>
+          <div class="photo-actions">
+            <label class="primary-button file-button">拍照或選擇照片<input id="photo-input" type="file" accept="image/*" capture="environment"></label>
+            <button id="retry-upload" class="secondary-button" type="button" hidden>重新上傳</button>
+          </div>
+          <p id="photo-message" class="helper" aria-live="polite">照片只會用在你的圖鑑與教師課堂檢視。</p>
+          <label class="not-found"><input id="not-found" type="checkbox"> 今天沒有找到這種植物</label>
+        </section>
+
+        <section class="card compare-card">
+          <h2>2. 比較課本參考圖</h2>
+          <div class="comparison-grid">
+            <figure><div id="reference-crop" class="reference-crop" role="img"></div><figcaption>課本參考圖</figcaption></figure>
+            <figure><div id="student-photo-compare" class="student-photo-empty">我的照片</div><figcaption>我的照片</figcaption></figure>
+          </div>
+          <details>
+            <summary>查看課本中的生長位置描述</summary>
+            <p id="textbook-description"></p>
+            <p id="textbook-page" class="source-note"></p>
+          </details>
+        </section>
+      </div>
+
+      <form id="observation-form" class="card questions-card">
+        <h2>3. 寫下你的觀察</h2>
+        <div id="question-list"></div>
+        <div class="form-actions"><button class="secondary-button" type="button" data-back>先存草稿並返回</button><button class="primary-button" type="submit">完成這種植物</button></div>
+        <p id="observation-error" class="form-error" role="alert"></p>
+      </form>
+    </section>
+
+    <section id="classification-view" class="view" hidden>
+      <button class="back-button" type="button" data-back>← 返回我的圖鑑</button>
+      <div class="page-heading"><div><p class="eyebrow">最後任務</p><h1>我怎麼分類水生植物？</h1><p>請依照根、莖、葉所在的位置，替每一種植物選擇適合的類別。</p></div></div>
+      <form id="classification-form">
+        <div id="classification-list" class="classification-list"></div>
+        <section class="card reflection-card">
+          <h2>我的觀察心得</h2>
+          <label>我分類時最注意哪一個特徵？<textarea name="classificationReason" maxlength="180" required placeholder="請用自己的話說明分類理由。"></textarea></label>
+          <label>這次到生態池觀察，我發現……<textarea name="reflection" maxlength="240" required placeholder="可以寫新發現、疑問，或下次還想觀察的事。"></textarea></label>
+        </section>
+        <div class="sticky-submit"><button class="primary-button" type="submit">完成整份觀察紀錄</button></div>
+        <p id="classification-error" class="form-error" role="alert"></p>
+      </form>
+    </section>
+
+    <section id="complete-view" class="view complete-view" hidden>
+      <div class="card completion-card"><div class="celebration" aria-hidden="true">🎉</div><p class="eyebrow">觀察任務完成</p><h1>你完成自己的水生植物紀錄了！</h1><p id="completion-summary"></p><button id="review-record" class="primary-button" type="button">回到我的圖鑑</button></div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script>window.AQUATIC_API_URL = window.AQUATIC_API_URL || 'https://aquatic-observation-api.YOUR-SUBDOMAIN.workers.dev';</script>
+  <script type="module" src="assets/aquatic/aquatic.js"></script>
+</body>
+</html>

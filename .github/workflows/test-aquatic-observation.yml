@@ -1,0 +1,33 @@
+name: Test aquatic observation
+
+on:
+  push:
+    paths:
+      - 'aquatic.html'
+      - 'aquatic-teacher.html'
+      - 'assets/aquatic/**'
+      - 'cloudflare/aquatic/**'
+      - 'tests/static.test.mjs'
+      - 'tests/worker.test.mjs'
+      - 'package.json'
+  pull_request:
+    paths:
+      - 'aquatic.html'
+      - 'aquatic-teacher.html'
+      - 'assets/aquatic/**'
+      - 'cloudflare/aquatic/**'
+      - 'tests/static.test.mjs'
+      - 'tests/worker.test.mjs'
+      - 'package.json'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm test
+
