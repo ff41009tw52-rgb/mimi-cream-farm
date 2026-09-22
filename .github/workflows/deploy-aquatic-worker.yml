@@ -1,6 +1,9 @@
 name: Deploy aquatic observation worker
 
 on:
+  push:
+    branches:
+      - feat/aquatic-observation-cloud
   workflow_dispatch:
 
 permissions:
