@@ -17,3 +17,11 @@
 4. 將 Worker 網址填入 `aquatic.html` 與 `aquatic-teacher.html` 的 `AQUATIC_API_URL`。
 
 前端只接受教材所列七種植物 ID。照片經瀏覽器壓縮後上傳 R2，D1 只保存檔案 key 與觀察資料。
+
+若採 GitHub Actions 部署，只需在 Repository Actions secrets 設定：
+
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+- `AQUATIC_TEACHER_PASSWORD`
+
+再手動執行 `Deploy aquatic observation worker`。Workflow 會自動建立或重用 D1 與 R2、套用 schema、設定 Worker secrets、部署並檢查健康端點。
