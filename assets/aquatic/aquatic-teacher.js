@@ -53,7 +53,7 @@ function studentsInClass() {
 function matchingSeats() {
   const query = $('#student-search').value.trim();
   const students = new Map(studentsInClass().map((student) => [Number(student.seatNumber), student]));
-  return Array.from({ length:25 }, (_, index) => {
+  return Array.from({ length:30 }, (_, index) => {
     const seatNumber = index + 1;
     return { seatNumber, student:students.get(seatNumber) || null };
   }).filter((item) => !query || String(item.seatNumber).includes(query.replace(/^0+/, '')) || seatLabel(item.seatNumber).includes(query));
@@ -67,11 +67,11 @@ function renderSummary() {
   const students = studentsInClass();
   const completed = students.filter(studentComplete).length;
   const startedToday = students.filter((student) => sameTaipeiDay(student.createdAt)).length;
-  const average = students.reduce((sum, student) => sum + student.completedPlants, 0) / 25;
+  const average = students.reduce((sum, student) => sum + student.completedPlants, 0) / 30;
   const items = [
     ['今天已開始', `${startedToday} 人`],
-    ['完成', `${completed} / 25`],
-    ['未完成', `${25 - completed} 人`],
+    ['完成', `${completed} / 30`],
+    ['未完成', `${30 - completed} 人`],
     ['平均完成植物', `${average.toFixed(1)} / 7`]
   ];
   $('#summary-cards').replaceChildren(...items.map(([label, value]) => {
@@ -84,7 +84,7 @@ function renderSummary() {
   $('#plant-progress-summary').replaceChildren(...AQUATIC_PLANTS.map((plant) => {
     const item = document.createElement('div');
     const name = document.createElement('span'); name.textContent = plant.name;
-    const count = document.createElement('strong'); count.textContent = `${counts[plant.id] || 0} / 25`;
+    const count = document.createElement('strong'); count.textContent = `${counts[plant.id] || 0} / 30`;
     item.append(name, count); return item;
   }));
   $('#dashboard-class-title').textContent = `${currentClass()}班`;
@@ -128,7 +128,7 @@ function renderPhotos() {
   const plant = AQUATIC_PLANTS.find((item) => item.id === state.selectedPlantId);
   const students = new Map(studentsInClass().map((student) => [Number(student.seatNumber), student]));
   const photos = new Map(state.dashboard.photos.filter((photo) => photo.className === currentClass() && photo.plantId === state.selectedPlantId).map((photo) => [Number(photo.seatNumber), photo]));
-  for (let seatNumber = 1; seatNumber <= 25; seatNumber += 1) {
+  for (let seatNumber = 1; seatNumber <= 30; seatNumber += 1) {
     const student = students.get(seatNumber); const photo = photos.get(seatNumber);
     const card = document.createElement('article'); card.className = 'wall-card';
     if (photo && student) {
