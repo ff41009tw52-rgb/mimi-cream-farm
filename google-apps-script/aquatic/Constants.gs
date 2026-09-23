@@ -27,6 +27,10 @@ var AQUATIC_CONFIG = Object.freeze({
     ]),
     Reflection: Object.freeze([
       'studentId', 'className', 'seatNumber', 'reflection', 'completedAt', 'createdAt', 'updatedAt'
+    ]),
+    Environment: Object.freeze([
+      'studentId', 'className', 'seatNumber', 'waterFlow', 'aquaticLife', 'otherFindings',
+      'completedAt', 'createdAt', 'updatedAt'
     ])
   })
 });

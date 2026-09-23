@@ -85,34 +85,26 @@ export const OBSERVATION_QUESTIONS = Object.freeze([
     id: 'location',
     label: '你在什麼位置找到它？',
     type: 'choice',
-    options: ['水面上', '水中', '水邊或泥土中', '其他位置']
+    options: ['水面上', '水中', '水邊或泥土中']
   },
   {
     id: 'leaf_position',
     label: '它的葉主要在哪裡？',
     type: 'choice',
-    options: ['漂浮在水面', '浸在水中', '挺出水面', '目前看不清楚']
+    options: ['漂浮在水面', '浸在水中', '挺出水面']
   },
   {
     id: 'root_position',
     label: '從現場觀察或課本圖判斷，它的根可能在哪裡？',
     type: 'choice',
-    options: ['漂浮在水裡', '固定在水底泥土裡', '目前無法判斷']
-  },
-  {
-    id: 'feature',
-    label: '請寫下一個你真的看到的外形特徵。',
-    type: 'text',
-    maxLength: 80,
-    placeholder: '例如：葉片圓圓的，平貼在水面。'
-  },
-  {
-    id: 'difference',
-    label: '你的照片和課本參考圖有哪裡相同或不同？',
-    type: 'text',
-    maxLength: 120,
-    placeholder: '請比較葉片、顏色、大小或生長位置。'
+    options: ['漂浮在水裡', '固定在水底泥土裡']
   }
+]);
+
+export const WATER_FLOW_OPTIONS = Object.freeze([
+  { value: 'fast', label: '水流急速' },
+  { value: 'slow', label: '水流緩慢' },
+  { value: 'still', label: '靜止不動' }
 ]);
 
 export const plantById = (id) => AQUATIC_PLANTS.find((plant) => plant.id === id);

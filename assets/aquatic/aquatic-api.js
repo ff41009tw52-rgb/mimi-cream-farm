@@ -25,12 +25,21 @@ export class AquaticApi {
 
   async call(action, payload = {}) {
     if (!this.configured) throw new Error('Google 雲端後端尚未完成設定。');
-    const response = await fetch(this.baseUrl, {
-      method: 'POST',
-      redirect: 'follow',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action, ...payload })
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 25000);
+    let response;
+    try {
+      response = await fetch(this.baseUrl, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action, ...payload }),
+        signal: controller.signal
+      });
+    } catch (error) {
+      if (error?.name === 'AbortError') throw new Error('Google 雲端回應較慢，資料已保留在這台裝置，請稍後再試。');
+      throw error;
+    } finally { clearTimeout(timeout); }
     if (!response.ok) throw new Error(`Google 雲端服務暫時無法使用（${response.status}）。`);
     const result = await response.json().catch(() => null);
     if (!result || result.ok !== true) {

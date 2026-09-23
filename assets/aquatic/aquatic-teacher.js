@@ -1,4 +1,4 @@
-import { AQUATIC_CLASSES, AQUATIC_PLANTS, CATEGORY_OPTIONS, OBSERVATION_QUESTIONS } from './aquatic-data.js';
+import { AQUATIC_CLASSES, AQUATIC_PLANTS, CATEGORY_OPTIONS, OBSERVATION_QUESTIONS, WATER_FLOW_OPTIONS } from './aquatic-data.js';
 import { AquaticApi } from './aquatic-api.js';
 
 const api = new AquaticApi();
@@ -60,7 +60,7 @@ function matchingSeats() {
 }
 
 function studentComplete(student) {
-  return Boolean(student && student.completedPlants === AQUATIC_PLANTS.length && student.classificationComplete && student.hasReflection);
+  return Boolean(student && student.completedPlants === AQUATIC_PLANTS.length && student.classificationComplete && (student.environmentComplete || student.hasLegacyReflection));
 }
 
 function renderSummary() {
@@ -101,7 +101,8 @@ function renderStudents() {
   rows.forEach(({ seatNumber, student }) => {
     const tr = document.createElement('tr');
     const status = studentComplete(student) ? '已完成' : student ? '進行中' : '尚未開始';
-    [seatLabel(seatNumber), student ? `${student.completedPlants} / 7` : '0 / 7', student?.classificationComplete ? '✓' : '—', student?.hasReflection ? '✓' : '—', status].forEach((value) => {
+    const environmentState = student?.environmentComplete ? '✓' : student?.hasLegacyReflection ? '舊版' : '—';
+    [seatLabel(seatNumber), student ? `${student.completedPlants} / 7` : '0 / 7', student?.classificationComplete ? '✓' : '—', environmentState, status].forEach((value) => {
       const td = document.createElement('td'); td.textContent = value; tr.append(td);
     });
     tr.classList.toggle('not-started', !student);
@@ -157,7 +158,7 @@ async function openStudent(studentId) {
       const card = document.createElement('section'); card.className = 'card detail-plant';
       const head = document.createElement('div'); head.className = 'detail-plant-head'; const img = new Image(); img.alt = `${plant.name}學生照片`;
       const title = document.createElement('div');
-      title.innerHTML = `<h2>${plant.name}</h2><p>${observation?.notFound ? '今天沒有找到' : observation?.completed ? '觀察完成' : '尚未完成'}</p><small>最後記錄：${formatTime(observation?.updatedAt)}</small>`;
+      title.innerHTML = `<h2>${plant.name}</h2><p>${observation?.completed ? '觀察完成' : observation ? '草稿' : '尚未完成'}</p><small>最後記錄：${formatTime(observation?.updatedAt)}</small>`;
       head.append(img, title); card.append(head);
       if (observation?.hasPhoto) authPhoto(() => api.teacherPhoto(state.token, studentId, plant.id), img); else img.hidden = true;
       const answers = document.createElement('ul'); answers.className = 'answer-list';
@@ -171,7 +172,12 @@ async function openStudent(studentId) {
       const names = AQUATIC_PLANTS.filter((plant) => data.record.classification?.[plant.id] === category.id).map((plant) => plant.name).join('、') || '—';
       return `<dt>${category.id}</dt><dd>${names}</dd>`;
     }).join('');
-    summary.innerHTML = `<h2>分類與心得</h2><dl>${categories}<dt>分類理由</dt><dd>${escapeHtml(data.record.summary?.classificationReason || '—')}</dd><dt>觀察心得</dt><dd>${escapeHtml(data.record.summary?.reflection || '—')}</dd><dt>完成時間</dt><dd>${formatTime(data.record.summary?.completedAt)}</dd></dl>`;
+    const environment = data.record.environment || data.record.summary?.environment || null;
+    const flowLabel = WATER_FLOW_OPTIONS.find((item) => item.value === environment?.waterFlow)?.label || '—';
+    const life = [];
+    if (environment?.aquaticLife?.plant) life.push('有水生植物');
+    if (environment?.aquaticLife?.animal) life.push('有水生動物');
+    summary.innerHTML = `<h2>分類與環境調查</h2><dl>${categories}<dt>水流情形</dt><dd>${escapeHtml(flowLabel)}</dd><dt>水生生物</dt><dd>${escapeHtml(life.join('、') || '—')}</dd><dt>其他發現</dt><dd>${escapeHtml(environment?.otherFindings || '—')}</dd><dt>完成時間</dt><dd>${formatTime(environment?.completedAt || data.record.summary?.completedAt)}</dd></dl>`;
     grid.append(summary); root.append(grid); $('#teacher-dashboard-view').hidden = true; $('#student-detail-view').hidden = false; window.scrollTo(0, 0);
   } catch (error) { toast(error.message); }
 }
