@@ -208,10 +208,15 @@ async function retryPendingUploads() {
 
 async function saveDraftAndReturn() {
   if (!state.currentPlant) { renderGuide(); return; }
-  const plantId = state.currentPlant.id; const data = collectObservation(); saveDraft(plantId, data); setObservation(plantId, { answers: data.answers, completed: false });
+  const plantId = state.currentPlant.id; const data = collectObservation(); const existing = observationFor(plantId);
+  const keepCompleted = Boolean(existing?.completed && existing?.hasPhoto && Object.values(data.answers).every(Boolean));
+  saveDraft(plantId, data); setObservation(plantId, { answers: data.answers, completed: keepCompleted });
   renderGuide(); toast('紀錄已先保存在這台裝置');
   if (!state.student?.token || !navigator.onLine) return;
-  api.saveObservation(state.student.token, plantId, { ...data, completed: false }).then(() => toast('草稿已同步到 Google 雲端')).catch(() => toast('網路較慢，草稿保留在這台裝置'));
+  api.saveObservation(state.student.token, plantId, { ...data, completed: keepCompleted }).then(() => {
+    if (keepCompleted) localStorage.removeItem(draftKey(plantId));
+    toast(keepCompleted ? '觀察紀錄已同步到 Google 雲端' : '草稿已同步到 Google 雲端');
+  }).catch(() => toast('網路較慢，紀錄保留在這台裝置'));
   retryPendingUploads();
 }
 
