@@ -1,5 +1,12 @@
 function sheet_(name) {
-  var sheet = configuredSpreadsheet_().getSheetByName(name);
+  var spreadsheet = configuredSpreadsheet_();
+  var sheet = spreadsheet.getSheetByName(name);
+  if (!sheet && AQUATIC_CONFIG.sheets[name]) {
+    sheet = spreadsheet.insertSheet(name);
+    sheet.getRange(1, 1, 1, AQUATIC_CONFIG.sheets[name].length).setValues([AQUATIC_CONFIG.sheets[name]]);
+    sheet.setFrozenRows(1);
+    sheet.setHiddenGridlines(true);
+  }
   if (!sheet) throw apiError_('資料庫缺少 ' + name + ' 工作表。', 500);
   return sheet;
 }
@@ -70,7 +77,8 @@ function loginStudent_(className, seatNumber) {
     }
     return {
       token: makeToken_('student', String(student.studentId), AQUATIC_CONFIG.studentTokenSeconds),
-      student: studentJson_(student)
+      student: studentJson_(student),
+      record: recordFor_(student.studentId)
     };
   } finally {
     lock.releaseLock();
@@ -137,16 +145,22 @@ function saveObservation_(student, plantId, data) {
   var notFound = Boolean(data.notFound);
   var completed = Boolean(data.completed);
   var sourceAnswers = data.answers || {};
+  var existing = findObservation_(student.studentId, plantId);
+  var legacyAnswers = existing ? parseJson_(existing.answers, {}) : {};
+  var legacyComparison = existing ? parseJson_(existing.comparisonAnswers, {}) : {};
   var answers = {
     location: cleanText_(sourceAnswers.location, 80),
     leaf_position: cleanText_(sourceAnswers.leaf_position, 80),
     root_position: cleanText_(sourceAnswers.root_position, 80),
-    feature: cleanText_(sourceAnswers.feature, 80)
+    feature: cleanText_(sourceAnswers.feature || legacyAnswers.feature, 80)
   };
-  var comparisonAnswers = { difference: cleanText_(sourceAnswers.difference, 120) };
-  var required = [answers.location, answers.leaf_position, answers.root_position, answers.feature, comparisonAnswers.difference];
+  var comparisonAnswers = { difference: cleanText_(sourceAnswers.difference || legacyComparison.difference, 120) };
+  var required = [answers.location, answers.leaf_position, answers.root_position];
   if (completed && !notFound && required.some(function (value) { return !value; })) {
-    throw apiError_('請完成每一題觀察紀錄。', 400);
+    throw apiError_('請完成三個觀察選擇題。', 400);
+  }
+  if (completed && !notFound && (!existing || !existing.driveFileId)) {
+    throw apiError_('請先上傳植物照片。', 400);
   }
   var lock = LockService.getScriptLock();
   lock.waitLock(15000);
@@ -181,6 +195,12 @@ function upsertByStudent_(sheetName, student, changes) {
 
 function saveSummary_(student, body) {
   body = body || {};
+  var completedPlants = observationRowsFor_(student.studentId).filter(function (row) {
+    return ['completed', 'not_found'].indexOf(String(row.status)) >= 0;
+  }).length;
+  if (completedPlants !== Object.keys(AQUATIC_CONFIG.plants).length) {
+    throw apiError_('請先完成七種植物觀察。', 400);
+  }
   var classification = {};
   Object.keys(AQUATIC_CONFIG.plants).forEach(function (plantId) {
     var value = cleanText_((body.classification || {})[plantId], 12);
@@ -189,20 +209,24 @@ function saveSummary_(student, body) {
     }
     classification[plantId] = value;
   });
-  var reason = cleanText_(body.classificationReason, 180);
-  var reflection = cleanText_(body.reflection, 240);
-  if (!reason || !reflection) throw apiError_('請完成分類理由和觀察心得。', 400);
+  var environment = body.environment || {};
+  var waterFlow = cleanText_(environment.waterFlow, 12);
+  if (['fast', 'slow', 'still'].indexOf(waterFlow) < 0) throw apiError_('請選擇水流情形。', 400);
+  var aquaticLife = environment.aquaticLife || {};
+  var normalizedLife = { plant: Boolean(aquaticLife.plant), animal: Boolean(aquaticLife.animal) };
+  var otherFindings = cleanText_(environment.otherFindings, 240);
   var completedAt = nowIso_();
   var lock = LockService.getScriptLock();
   lock.waitLock(15000);
   try {
     upsertByStudent_('Classification', student, {
       classification: JSON.stringify(classification),
-      classificationReason: reason,
       completedAt: completedAt
     });
-    upsertByStudent_('Reflection', student, {
-      reflection: reflection,
+    upsertByStudent_('Environment', student, {
+      waterFlow: waterFlow,
+      aquaticLife: JSON.stringify(normalizedLife),
+      otherFindings: otherFindings,
       completedAt: completedAt
     });
   } finally {
@@ -214,17 +238,26 @@ function saveSummary_(student, body) {
 function recordFor_(studentId) {
   var classificationRow = rows_('Classification').find(function (row) { return String(row.studentId) === String(studentId); });
   var reflectionRow = rows_('Reflection').find(function (row) { return String(row.studentId) === String(studentId); });
+  var environmentRow = rows_('Environment').find(function (row) { return String(row.studentId) === String(studentId); });
+  var environment = environmentRow ? {
+    waterFlow: String(environmentRow.waterFlow || ''),
+    aquaticLife: parseJson_(environmentRow.aquaticLife, { plant: false, animal: false }),
+    otherFindings: String(environmentRow.otherFindings || ''),
+    completedAt: String(environmentRow.completedAt || '')
+  } : null;
   var summary = null;
-  if (classificationRow || reflectionRow) {
+  if (classificationRow || reflectionRow || environmentRow) {
     summary = {
       classificationReason: classificationRow ? String(classificationRow.classificationReason || '') : '',
       reflection: reflectionRow ? String(reflectionRow.reflection || '') : '',
-      completedAt: String((reflectionRow && reflectionRow.completedAt) || (classificationRow && classificationRow.completedAt) || '')
+      environment: environment,
+      completedAt: String((environmentRow && environmentRow.completedAt) || (reflectionRow && reflectionRow.completedAt) || (classificationRow && classificationRow.completedAt) || '')
     };
   }
   return {
     observations: observationRowsFor_(studentId).map(observationJson_),
     classification: classificationRow ? parseJson_(classificationRow.classification, {}) : {},
+    environment: environment,
     summary: summary
   };
 }
@@ -234,8 +267,10 @@ function teacherDashboard_() {
   var observations = rows_('Observations');
   var classifications = rows_('Classification');
   var reflections = rows_('Reflection');
+  var environments = rows_('Environment');
   var classificationIds = new Set(classifications.filter(function (row) { return row.completedAt; }).map(function (row) { return String(row.studentId); }));
   var reflectionIds = new Set(reflections.filter(function (row) { return String(row.reflection || '').trim(); }).map(function (row) { return String(row.studentId); }));
+  var environmentIds = new Set(environments.filter(function (row) { return row.completedAt; }).map(function (row) { return String(row.studentId); }));
   var plantCounts = {};
   AQUATIC_CONFIG.classes.forEach(function (className) {
     plantCounts[className] = {};
@@ -248,7 +283,8 @@ function teacherDashboard_() {
     return Object.assign(studentJson_(student), {
       completedPlants: completedPlants,
       classificationComplete: classificationIds.has(String(student.studentId)),
-      hasReflection: reflectionIds.has(String(student.studentId))
+      environmentComplete: environmentIds.has(String(student.studentId)),
+      hasLegacyReflection: reflectionIds.has(String(student.studentId))
     });
   });
   observations.forEach(function (row) {
@@ -266,7 +302,7 @@ function teacherDashboard_() {
     };
   });
   var completedStudents = studentOutput.filter(function (student) {
-    return student.completedPlants === Object.keys(AQUATIC_CONFIG.plants).length && student.classificationComplete && student.hasReflection;
+    return student.completedPlants === Object.keys(AQUATIC_CONFIG.plants).length && student.classificationComplete && (student.environmentComplete || student.hasLegacyReflection);
   }).length;
   return {
     summary: {
