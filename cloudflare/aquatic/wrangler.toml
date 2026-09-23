@@ -1,0 +1,17 @@
+name = "aquatic-observation-api"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+workers_dev = true
+
+[[d1_databases]]
+binding = "AQUATIC_DB"
+database_name = "aquatic-observation-db"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+[[r2_buckets]]
+binding = "AQUATIC_MEDIA"
+bucket_name = "aquatic-observation-media"
+
+# Deploy secrets with Wrangler or the Cloudflare dashboard:
+# TEACHER_PASSWORD and SESSION_SECRET
+
