@@ -25,13 +25,14 @@ const appsScriptWebApp = /https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-
 assert.match(student, appsScriptWebApp); assert.match(teacher, appsScriptWebApp);
 assert.doesNotMatch(`${student}${teacher}`, /YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL/);
 
-for (const className of ['307','308','309','310','311','312','313']) assert.match(data, new RegExp(`'${className}'`));
-assert.match(student, /id="student-class"/); assert.doesNotMatch(student, /name="studentName"/); assert.doesNotMatch(teacher, /<th>姓名<\/th>/);
-assert.match(teacher, /id="plant-filter"/); assert.match(teacherApp, /length:25/); assert.match(teacherApp, /selectedPlantId/);
+for (const className of ['307','309','310','311','312','313','314']) assert.match(data, new RegExp(`'${className}'`));
+assert.doesNotMatch(data, /'308'/);
+assert.match(student, /id="student-class"/); assert.match(student, /座號（1～30）/); assert.match(student, /max="30"/); assert.doesNotMatch(student, /name="studentName"/); assert.doesNotMatch(teacher, /<th>姓名<\/th>/);
+assert.match(teacher, /id="plant-filter"/); assert.match(teacherApp, /length:30/); assert.match(teacherApp, /selectedPlantId/);
 
 for (const sheetName of ['Students','Observations','Classification','Reflection','Environment']) assert.match(constants, new RegExp(sheetName));
 for (const field of ['className','seatNumber','plantId','status','driveFileId','answers','classification','waterFlow','aquaticLife','otherFindings','createdAt','updatedAt']) assert.match(constants, new RegExp(field));
-assert.match(constants, /水生植物觀察/); assert.match(setup, /DRIVE_ROOT_FOLDER_ID/); assert.match(setup, /SPREADSHEET_ID/);
+assert.match(constants, /水生植物觀察/); assert.match(constants, /normalizedSeat > 30/); assert.match(constants, /1～30/); assert.match(setup, /DRIVE_ROOT_FOLDER_ID/); assert.match(setup, /SPREADSHEET_ID/);
 assert.match(auth, /TEACHER_PASSWORD/); assert.match(auth, /computeHmacSha256Signature/); assert.match(auth, /verifyToken_\(token, 'student'\)/);
 assert.match(router, /requireTeacher_/); assert.match(router, /requireStudent_/); assert.match(photos, /DriveApp\.getFileById/);
 assert.doesNotMatch(photos, /setSharing|ANYONE|DOMAIN_WITH_LINK/);
