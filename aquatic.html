@@ -7,6 +7,7 @@
   <title>水生植物觀察任務｜橘咪咪與白奶油</title>
   <link rel="stylesheet" href="assets/aquatic/aquatic.css?v=20260924-3">
   <link rel="stylesheet" href="assets/aquatic/aquatic-fixes.css?v=20260924-3">
+  <link rel="stylesheet" href="assets/aquatic/aquatic-record.css?v=20260924-1">
 </head>
 <body>
   <header class="topbar">
@@ -86,34 +87,36 @@
       </div>
 
       <form id="observation-form" class="card questions-card">
-        <h2>3. 完成三個觀察選擇題</h2>
-        <div id="question-list"></div>
+        <h2>3. 完成觀察紀錄</h2>
+        <section class="record-section" aria-labelledby="plant-observation-heading">
+          <h3 id="plant-observation-heading">植物觀察</h3>
+          <div id="question-list"></div>
+        </section>
+        <section id="inline-environment" class="record-section inline-environment" aria-labelledby="environment-heading">
+          <h3 id="environment-heading">環境調查</h3>
+          <p class="inline-environment-note">這份環境調查只需填寫一次，之後會自動保留並帶到最後整理。</p>
+          <fieldset class="environment-question">
+            <legend>1. 水流情形</legend>
+            <div class="choice-list">
+              <label><input type="radio" name="envWaterFlowInline" value="fast">水流急速</label>
+              <label><input type="radio" name="envWaterFlowInline" value="slow">水流緩慢</label>
+              <label><input type="radio" name="envWaterFlowInline" value="still">靜止不動</label>
+            </div>
+          </fieldset>
+          <fieldset class="environment-question">
+            <legend>2. 水生生物</legend>
+            <div class="choice-list">
+              <label><input type="checkbox" name="envAquaticPlantInline">有水生植物</label>
+              <label><input type="checkbox" name="envAquaticAnimalInline">有水生動物</label>
+            </div>
+          </fieldset>
+          <label class="environment-findings">3. 其他發現<textarea name="envOtherFindingsInline" maxlength="240" placeholder="例如：有睡蓮、魚、蛙等生物。"></textarea></label>
+          <p id="inline-environment-status" class="inline-environment-status" role="status" aria-live="polite"></p>
+        </section>
         <div class="form-actions single-action"><button id="complete-observation" class="primary-button" type="submit">完成觀察</button></div>
         <p id="save-status" class="save-status" role="status" aria-live="polite"></p>
         <p id="observation-error" class="form-error" role="alert"></p>
       </form>
-
-      <section id="inline-environment" class="card reflection-card inline-environment">
-        <h2>環境調查表</h2>
-        <p class="inline-environment-note">這份環境調查只需填寫一次，之後會自動保留並帶到最後整理。</p>
-        <fieldset class="environment-question">
-          <legend>1. 水流情形</legend>
-          <div class="choice-list">
-            <label><input type="radio" name="envWaterFlowInline" value="fast">水流急速</label>
-            <label><input type="radio" name="envWaterFlowInline" value="slow">水流緩慢</label>
-            <label><input type="radio" name="envWaterFlowInline" value="still">靜止不動</label>
-          </div>
-        </fieldset>
-        <fieldset class="environment-question">
-          <legend>2. 水生生物</legend>
-          <div class="choice-list">
-            <label><input type="checkbox" name="envAquaticPlantInline">有水生植物</label>
-            <label><input type="checkbox" name="envAquaticAnimalInline">有水生動物</label>
-          </div>
-        </fieldset>
-        <label>3. 其他發現<textarea name="envOtherFindingsInline" maxlength="240" placeholder="例如：有睡蓮、魚、蛙等生物。"></textarea></label>
-        <p id="inline-environment-status" class="inline-environment-status" role="status" aria-live="polite"></p>
-      </section>
     </section>
 
     <section id="classification-view" class="view" hidden>
