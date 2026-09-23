@@ -21,7 +21,9 @@ assert.match(app, /compressImage/); assert.match(app, /retryPendingUploads/); as
 assert.match(api, /text\/plain;charset=utf-8/); assert.match(api, /studentLogin/); assert.match(api, /teacherDashboard/);
 assert.match(storage, /maxEdge = 1280/);
 assert.doesNotMatch(`${student}${teacher}${api}`, /aquatic-observation-api\.ff41009tw52\.workers\.dev/);
-assert.match(student, /YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL/); assert.match(teacher, /YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL/);
+const appsScriptWebApp = /https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec/;
+assert.match(student, appsScriptWebApp); assert.match(teacher, appsScriptWebApp);
+assert.doesNotMatch(`${student}${teacher}`, /YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL/);
 
 for (const className of ['307','308','309','310','311','312','313']) assert.match(data, new RegExp(`'${className}'`));
 assert.match(student, /id="student-class"/); assert.doesNotMatch(student, /name="studentName"/); assert.doesNotMatch(teacher, /<th>姓名<\/th>/);
