@@ -1,4 +1,4 @@
-import { AquaticApi } from './aquatic-api.js';
+import { AquaticApi } from './aquatic-api.js?v=20260924-6';
 
 const api = new AquaticApi();
 const detailRoot = document.querySelector('#student-detail');
