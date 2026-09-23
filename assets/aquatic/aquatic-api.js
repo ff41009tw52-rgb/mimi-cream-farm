@@ -112,10 +112,10 @@ export class AquaticApi {
   saveSummary(token, data) { return this.call('saveSummary', { token, data }); }
 
   teacherLogin(password) {
-    return this.call('teacherLogin', { password }, { timeoutMs: 25000 });
+    return this.call('teacherLogin', { password }, { timeoutMs: 40000 });
   }
   teacherDashboard(token) {
-    return this.call('teacherDashboard', { token }, { timeoutMs: 25000 });
+    return this.call('teacherDashboard', { token }, { timeoutMs: 45000 });
   }
   teacherStudent(token, studentId) {
     return this.call('teacherStudent', { token, studentId }, { timeoutMs: 25000 });
