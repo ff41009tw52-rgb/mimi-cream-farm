@@ -1,9 +1,6 @@
 name: Deploy aquatic observation worker
 
 on:
-  push:
-    branches:
-      - feat/aquatic-observation-cloud
   workflow_dispatch:
 
 permissions:
@@ -47,7 +44,7 @@ jobs:
           sed -i "s/REPLACE_WITH_D1_DATABASE_ID/$DATABASE_ID/" wrangler.toml
       - name: Ensure R2 bucket
         run: |
-          if ! npx wrangler r2 bucket list --json | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>process.exit(JSON.parse(s).some(r=>(r.name||r.bucket)==='aquatic-observation-media')?0:1))"; then
+          if ! npx wrangler r2 bucket list | grep -Fq 'aquatic-observation-media'; then
             npx wrangler r2 bucket create aquatic-observation-media --location apac
           fi
       - name: Apply D1 schema
