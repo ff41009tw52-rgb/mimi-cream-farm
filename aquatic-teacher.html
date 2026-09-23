@@ -26,13 +26,13 @@
       <section class="card filters"><label>選擇班級<select id="class-filter"></select></label><label>搜尋座號<input id="student-search" type="search" inputmode="numeric" placeholder="例如：12"></label></section>
       <nav class="teacher-tabs" aria-label="教師端檢視"><button class="active" type="button" data-tab="students">學生進度</button><button type="button" data-tab="photos">全班照片牆</button></nav>
       <section id="students-panel" class="teacher-panel"><div class="table-wrap"><table><thead><tr><th>座號</th><th>植物紀錄</th><th>分類</th><th>環境調查</th><th>狀態</th><th></th></tr></thead><tbody id="student-rows"></tbody></table></div><p id="students-empty" class="empty-state" hidden>目前沒有符合條件的座號。</p></section>
-      <section id="photos-panel" class="teacher-panel" hidden><p class="wall-help">選擇植物後，可直接投影查看全班 01～25 號的照片。</p><div id="plant-filter" class="plant-filter" aria-label="選擇照片牆植物"></div><div id="photo-wall" class="photo-wall"></div></section>
+      <section id="photos-panel" class="teacher-panel" hidden><p class="wall-help">選擇植物後，可直接投影查看全班 01～30 號的照片。</p><div id="plant-filter" class="plant-filter" aria-label="選擇照片牆植物"></div><div id="photo-wall" class="photo-wall"></div></section>
     </section>
     <section id="student-detail-view" hidden><button id="detail-back" class="back-button" type="button">← 返回班級名單</button><div id="student-detail"></div></section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>window.AQUATIC_API_URL = window.AQUATIC_API_URL || 'https://script.google.com/macros/s/AKfycbxAH8T5Qg6rp9_HacZrw0FTNq7BoOEBTwvxc8Bppu_cMdjdvGJzNQ3cqjR0oKmT9aZG/exec';</script>
-  <script type="module" src="assets/aquatic/aquatic-teacher.js?v=20260924-3"></script>
+  <script type="module" src="assets/aquatic/aquatic-teacher.js?v=20260924-4"></script>
   <script type="module" src="assets/aquatic/aquatic-teacher-login-fix.js?v=20260924-3"></script>
 </body>
 </html>
