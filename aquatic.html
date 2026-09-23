@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#0d9488">
   <title>水生植物觀察任務｜橘咪咪與白奶油</title>
-  <link rel="stylesheet" href="assets/aquatic/aquatic.css">
+  <link rel="stylesheet" href="assets/aquatic/aquatic.css?v=20260924-2">
+  <link rel="stylesheet" href="assets/aquatic/aquatic-fixes.css?v=20260924-2">
 </head>
 <body>
   <header class="topbar">
@@ -48,10 +49,7 @@
         </div>
         <button id="switch-student" class="text-button" type="button">更換學生</button>
       </div>
-      <section class="progress-card" aria-labelledby="progress-title">
-        <div class="progress-copy"><strong id="progress-title">觀察進度</strong><span id="progress-label">0 / 7</span></div>
-        <div class="progress-track"><span id="progress-bar"></span></div>
-      </section>
+      <div class="compat-progress-nodes" hidden aria-hidden="true"><span id="progress-label"></span><span id="progress-bar"></span></div>
       <div id="plant-grid" class="plant-grid" role="list"></div>
       <section class="next-task card">
         <div><p class="eyebrow">完成七種觀察後</p><h2>把植物送回適合的家</h2><p id="classification-help">依照你看到的生長位置完成分類，再填寫一次環境調查表。</p></div>
@@ -132,6 +130,7 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>window.AQUATIC_API_URL = window.AQUATIC_API_URL || 'https://script.google.com/macros/s/AKfycbxAH8T5Qg6rp9_HacZrw0FTNq7BoOEBTwvxc8Bppu_cMdjdvGJzNQ3cqjR0oKmT9aZG/exec';</script>
-  <script type="module" src="assets/aquatic/aquatic.js"></script>
+  <script type="module" src="assets/aquatic/aquatic.js?v=20260924-2"></script>
+  <script type="module" src="assets/aquatic/aquatic-fixes.js?v=20260924-2"></script>
 </body>
 </html>
