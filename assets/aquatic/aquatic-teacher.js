@@ -1,5 +1,5 @@
 import { AQUATIC_CLASSES, AQUATIC_PLANTS, CATEGORY_OPTIONS, OBSERVATION_QUESTIONS, WATER_FLOW_OPTIONS } from './aquatic-data.js';
-import { AquaticApi } from './aquatic-api.js';
+import { AquaticApi } from './aquatic-api.js?v=20260924-6';
 
 const api = new AquaticApi();
 const $ = (selector, root = document) => root.querySelector(selector);
@@ -10,6 +10,10 @@ const state = {
   photoUrls: [],
   selectedPlantId: AQUATIC_PLANTS[0].id
 };
+
+const photoQueue = [];
+let activePhotoLoads = 0;
+const MAX_PHOTO_CONCURRENCY = 4;
 
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[character]);
 const seatLabel = (seat) => String(seat).padStart(2, '0');
@@ -37,13 +41,44 @@ function showDashboard() {
   $('#teacher-logout').hidden = false;
 }
 
+function showLogin(message = '') {
+  $('#teacher-login-view').hidden = false;
+  $('#teacher-dashboard-view').hidden = true;
+  $('#student-detail-view').hidden = true;
+  $('#teacher-logout').hidden = true;
+  $('#login-error').textContent = message;
+}
+
 function clearPhotoUrls() { state.photoUrls.forEach(URL.revokeObjectURL); state.photoUrls = []; }
 
-async function authPhoto(urlFactory, img) {
-  try {
-    const blob = await urlFactory(); const url = URL.createObjectURL(blob);
-    state.photoUrls.push(url); img.src = url;
-  } catch { img.alt = '照片暫時無法讀取'; }
+function pumpPhotoQueue() {
+  while (activePhotoLoads < MAX_PHOTO_CONCURRENCY && photoQueue.length) {
+    const job = photoQueue.shift();
+    if (!job.img?.isConnected) { job.resolve(); continue; }
+    activePhotoLoads += 1;
+    (async () => {
+      try {
+        const blob = await job.urlFactory();
+        if (!job.img.isConnected) return;
+        const url = URL.createObjectURL(blob);
+        state.photoUrls.push(url);
+        job.img.src = url;
+      } catch {
+        if (job.img?.isConnected) job.img.alt = '照片暫時無法讀取';
+      } finally {
+        activePhotoLoads -= 1;
+        job.resolve();
+        pumpPhotoQueue();
+      }
+    })();
+  }
+}
+
+function authPhoto(urlFactory, img) {
+  return new Promise((resolve) => {
+    photoQueue.push({ urlFactory, img, resolve });
+    pumpPhotoQueue();
+  });
 }
 
 function studentsInClass() {
@@ -144,8 +179,22 @@ function renderPhotos() {
   }
 }
 
-function renderAll() { renderFilters(); renderSummary(); renderStudents(); renderPlantFilters(); renderPhotos(); }
-async function loadDashboard() { state.dashboard = await api.teacherDashboard(state.token); renderAll(); showDashboard(); }
+function photosPanelVisible() { return !$('#photos-panel').hidden; }
+function renderAll() {
+  renderFilters(); renderSummary(); renderStudents(); renderPlantFilters();
+  if (photosPanelVisible()) renderPhotos(); else $('#photo-wall').replaceChildren();
+}
+
+async function loadDashboard() {
+  const refresh = $('#teacher-refresh');
+  if (refresh) { refresh.disabled = true; refresh.textContent = '載入中……'; }
+  try {
+    state.dashboard = await api.teacherDashboard(state.token);
+    renderAll(); showDashboard();
+  } finally {
+    if (refresh) { refresh.disabled = false; refresh.textContent = '重新整理'; }
+  }
+}
 
 async function openStudent(studentId) {
   try {
@@ -179,27 +228,66 @@ async function openStudent(studentId) {
     if (environment?.aquaticLife?.animal) life.push('有水生動物');
     summary.innerHTML = `<h2>分類與環境調查</h2><dl>${categories}<dt>水流情形</dt><dd>${escapeHtml(flowLabel)}</dd><dt>水生生物</dt><dd>${escapeHtml(life.join('、') || '—')}</dd><dt>其他發現</dt><dd>${escapeHtml(environment?.otherFindings || '—')}</dd><dt>完成時間</dt><dd>${formatTime(environment?.completedAt || data.record.summary?.completedAt)}</dd></dl>`;
     grid.append(summary); root.append(grid); $('#teacher-dashboard-view').hidden = true; $('#student-detail-view').hidden = false; window.scrollTo(0, 0);
-  } catch (error) { toast(error.message); }
+  } catch (error) { toast(error.message || '學生資料載入失敗，請稍後再試。'); }
 }
 
 $('#teacher-login-form').addEventListener('submit', async (event) => {
-  event.preventDefault(); $('#login-error').textContent = '';
+  event.preventDefault();
+  const form = event.currentTarget;
+  const submit = form.querySelector('button[type="submit"]');
+  $('#login-error').textContent = '';
+  if (submit) { submit.disabled = true; submit.textContent = '登入中……'; }
   try {
-    const result = await api.teacherLogin(new FormData(event.currentTarget).get('password'));
-    state.token = result.token; sessionStorage.setItem('aquatic.teacherToken', state.token); event.currentTarget.reset(); await loadDashboard();
-  } catch (error) { $('#login-error').textContent = error.message; }
+    const result = await api.teacherLogin(new FormData(form).get('password'));
+    state.token = result.token;
+    sessionStorage.setItem('aquatic.teacherToken', state.token);
+    form.reset();
+    await loadDashboard();
+  } catch (error) {
+    if (error?.status === 401) {
+      sessionStorage.removeItem('aquatic.teacherToken'); state.token = null;
+    }
+    showLogin(error?.message || '教師端暫時無法載入，請稍後再試。');
+  } finally {
+    if (submit) { submit.disabled = false; submit.textContent = '確定'; }
+  }
 });
-$('#teacher-refresh').addEventListener('click', async () => { try { await loadDashboard(); toast('資料已更新'); } catch (error) { toast(error.message); } });
-$('#class-filter').addEventListener('change', () => { $('#student-search').value = ''; renderSummary(); renderStudents(); renderPhotos(); });
+
+$('#teacher-refresh').addEventListener('click', async () => {
+  try { await loadDashboard(); toast('資料已更新'); }
+  catch (error) { toast(error?.message || '資料更新失敗，請稍後再試。'); }
+});
+
+$('#class-filter').addEventListener('change', () => {
+  $('#student-search').value = ''; renderSummary(); renderStudents();
+  if (photosPanelVisible()) renderPhotos();
+});
 $('#student-search').addEventListener('input', renderStudents);
 $$('[data-tab]').forEach((button) => button.addEventListener('click', () => {
   $$('[data-tab]').forEach((item) => item.classList.toggle('active', item === button));
-  $('#students-panel').hidden = button.dataset.tab !== 'students'; $('#photos-panel').hidden = button.dataset.tab !== 'photos';
+  $('#students-panel').hidden = button.dataset.tab !== 'students';
+  $('#photos-panel').hidden = button.dataset.tab !== 'photos';
+  if (button.dataset.tab === 'photos') renderPhotos();
 }));
 $('#detail-back').addEventListener('click', () => { clearPhotoUrls(); showDashboard(); });
 $('#teacher-logout').addEventListener('click', () => {
   sessionStorage.removeItem('aquatic.teacherToken'); state.token = null; clearPhotoUrls();
-  $('#teacher-dashboard-view').hidden = true; $('#student-detail-view').hidden = true; $('#teacher-login-view').hidden = false; $('#teacher-logout').hidden = true;
+  showLogin();
 });
 
-(async function boot() { if (!state.token) return; try { await loadDashboard(); } catch { sessionStorage.removeItem('aquatic.teacherToken'); state.token = null; } })();
+(async function boot() {
+  if (!state.token) {
+    api.health().catch(() => {});
+    return;
+  }
+  try {
+    await loadDashboard();
+  } catch (error) {
+    if (error?.status === 401) {
+      sessionStorage.removeItem('aquatic.teacherToken'); state.token = null;
+      showLogin('教師登入已失效，請重新登入。');
+    } else {
+      showLogin('Google 雲端回應較慢，登入狀態已保留。請稍後再按一次「確定」。');
+    }
+  }
+})();
