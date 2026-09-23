@@ -48,6 +48,18 @@ assert.match(app, /observer\.disconnect/); assert.doesNotMatch(app, /await loadR
 assert.match(app, /const keepCompleted = Boolean\(existing\?\.completed && existing\?\.hasPhoto/);
 assert.match(store, /record: recordFor_/); assert.match(store, /Environment/); assert.match(teacherApp, /分類與環境調查/);
 
+const observationForm = student.match(/<form id="observation-form"[\s\S]*?<\/form>/)?.[0] || '';
+assert.match(observationForm, /3\. 完成觀察紀錄/);
+assert.match(observationForm, /id="question-list"[\s\S]*id="inline-environment"[\s\S]*id="complete-observation"/);
+assert.doesNotMatch(observationForm, /id="inline-environment"[^>]*class="[^"]*card/);
+for (const field of ['envWaterFlowInline', 'envAquaticPlantInline', 'envAquaticAnimalInline', 'envOtherFindingsInline']) {
+  assert.match(observationForm, new RegExp(`name="${field}"`));
+}
+assert.match(student, /name="waterFlow"/);
+assert.match(student, /name="aquaticPlant"/);
+assert.match(student, /name="aquaticAnimal"/);
+assert.match(student, /name="otherFindings"/);
+
 assert.doesNotMatch(deployWorkflow, /r2 bucket|d1 execute|wrangler deploy/i);
 assert.match(deployWorkflow, /No R2 action is performed/);
 console.log('Static aquatic checks passed.');

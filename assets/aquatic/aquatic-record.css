@@ -1,0 +1,119 @@
+/* Only the plant record uses this unified card; the final classification form is unchanged. */
+#observation-form {
+  padding: clamp(20px, 3vw, 30px);
+}
+
+#observation-form > h2 {
+  margin: 0 0 18px;
+}
+
+#observation-form .record-section {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+
+#observation-form .record-section + .record-section {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid #dcece8;
+}
+
+#observation-form .record-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 8px;
+  color: var(--teal-dark);
+  font-size: 1.12rem;
+}
+
+#observation-form .record-section h3::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid #dcece8;
+}
+
+#observation-form .question,
+#observation-form .environment-question {
+  min-width: 0;
+  margin: 0;
+  padding: 12px 0;
+  border: 0;
+  border-radius: 0;
+}
+
+#observation-form .question + .question,
+#observation-form .environment-question + .environment-question {
+  border-top: 1px solid #eef3f1;
+}
+
+#observation-form .question legend,
+#observation-form .environment-question legend {
+  padding: 0;
+  margin-bottom: 8px;
+  font-weight: 850;
+}
+
+#observation-form .inline-environment-note {
+  margin: 0 0 4px;
+  font-size: .87rem;
+  line-height: 1.45;
+}
+
+#observation-form .environment-findings {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 0 0;
+  border-top: 1px solid #eef3f1;
+  font-weight: 850;
+}
+
+#observation-form .environment-findings textarea {
+  display: block;
+  width: 100%;
+  min-height: 76px;
+  padding: 10px 12px;
+  border: 1px solid #cddfda;
+  border-radius: 12px;
+  background: #fcfefd;
+}
+
+#observation-form .choice-list {
+  gap: 8px;
+}
+
+#observation-form .choice-list label {
+  min-height: 42px;
+  padding: 8px 11px;
+  border-width: 1px;
+  border-radius: 11px;
+}
+
+#observation-form .choice-list input {
+  flex: 0 0 auto;
+}
+
+#observation-form .inline-environment-status:empty,
+#observation-form .save-status:empty,
+#observation-form .form-error:empty {
+  display: none;
+}
+
+#observation-form .form-actions {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #dcece8;
+}
+
+@media (max-width: 600px) {
+  #observation-form .record-section + .record-section {
+    margin-top: 14px;
+    padding-top: 14px;
+  }
+
+  #observation-form .choice-list label {
+    max-width: 100%;
+  }
+}
