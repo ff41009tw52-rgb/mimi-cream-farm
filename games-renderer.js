@@ -1,8 +1,27 @@
 (() => {
   'use strict';
 
+  const homepageFeatures = Object.freeze([
+    Object.freeze({
+      id: 'aquatic-observation',
+      grades: Object.freeze(['4']),
+      gradeLabel: '四年級',
+      subject: 'life',
+      icon: 'fas fa-water',
+      title: '🌿 水生植物觀察任務',
+      description: '跟著橘咪咪與白奶油到生態池實地觀察七種水生植物！拍下植物特徵、完成觀察題目，再整理植物分類與環境調查。',
+      url: 'aquatic.html',
+      actionLabel: '開始觀察',
+      actionIcon: 'fas fa-camera',
+      publishedAt: '2026-09-24T00:00:00+08:00'
+    })
+  ]);
+
   const getGames = () => {
-    const games = Array.isArray(window.FARM_GAMES) ? window.FARM_GAMES : [];
+    const games = [
+      ...homepageFeatures,
+      ...(Array.isArray(window.FARM_GAMES) ? window.FARM_GAMES : [])
+    ];
 
     return games
       .map((game, originalIndex) => ({
