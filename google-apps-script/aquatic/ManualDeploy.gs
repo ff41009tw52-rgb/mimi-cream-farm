@@ -1,7 +1,7 @@
 // ===== Constants.gs =====
 var AQUATIC_CONFIG = Object.freeze({
   folderName: '水生植物觀察',
-  classes: Object.freeze(['307', '308', '309', '310', '311', '312', '313']),
+  classes: Object.freeze(['307', '309', '310', '311', '312', '313', '314']),
   plants: Object.freeze({
     'water-lettuce': '大萍',
     duckweed: '浮萍',
@@ -62,8 +62,8 @@ function assertClassSeat_(className, seatNumber) {
   var normalizedClass = cleanText_(className, 3);
   var normalizedSeat = Number(seatNumber);
   if (AQUATIC_CONFIG.classes.indexOf(normalizedClass) < 0 ||
-      !Number.isInteger(normalizedSeat) || normalizedSeat < 1 || normalizedSeat > 25) {
-    throw apiError_('請選擇班級，並輸入 1～25 的座號。', 400);
+      !Number.isInteger(normalizedSeat) || normalizedSeat < 1 || normalizedSeat > 30) {
+    throw apiError_('請選擇班級，並輸入 1～30 的座號。', 400);
   }
   return { className: normalizedClass, seatNumber: normalizedSeat };
 }
@@ -234,8 +234,9 @@ function sheet_(name) {
   return sheet;
 }
 
-function rows_(sheetName) {
-  var sheet = sheet_(sheetName);
+function rows_(sheetName, spreadsheet) {
+  // The dashboard reads several tabs from one workbook; open it only once.
+  var sheet = spreadsheet ? spreadsheet.getSheetByName(sheetName) || sheet_(sheetName) : sheet_(sheetName);
   var lastRow = sheet.getLastRow();
   var headers = AQUATIC_CONFIG.sheets[sheetName];
   if (lastRow < 2) return [];
@@ -321,6 +322,14 @@ function parseJson_(value, fallback) {
   try { return JSON.parse(String(value || '')); } catch (error) { return fallback; }
 }
 
+function observationRowComplete_(row) {
+  if (!row || String(row.status) !== 'completed' || !String(row.driveFileId || '').trim()) return false;
+  var answers = parseJson_(row.answers, {});
+  return ['location', 'leaf_position', 'root_position'].every(function (key) {
+    return Boolean(String(answers[key] || '').trim());
+  });
+}
+
 function observationJson_(row) {
   var answers = parseJson_(row.answers, {});
   var comparison = parseJson_(row.comparisonAnswers, {});
@@ -330,7 +339,7 @@ function observationJson_(row) {
     answers: answers,
     notFound: String(row.status) === 'not_found',
     notFoundReason: String(row.notFoundReason || ''),
-    completed: ['completed', 'not_found'].indexOf(String(row.status)) >= 0,
+    completed: observationRowComplete_(row),
     hasPhoto: Boolean(row.driveFileId),
     updatedAt: String(row.updatedAt || '')
   };
@@ -379,17 +388,17 @@ function saveObservation_(student, plantId, data) {
   };
   var comparisonAnswers = { difference: cleanText_(sourceAnswers.difference || legacyComparison.difference, 120) };
   var required = [answers.location, answers.leaf_position, answers.root_position];
-  if (completed && !notFound && required.some(function (value) { return !value; })) {
+  if (completed && required.some(function (value) { return !value; })) {
     throw apiError_('請完成三個觀察選擇題。', 400);
   }
-  if (completed && !notFound && (!existing || !existing.driveFileId)) {
+  if (completed && (!existing || !existing.driveFileId)) {
     throw apiError_('請先上傳植物照片。', 400);
   }
   var lock = LockService.getScriptLock();
   lock.waitLock(15000);
   try {
     upsertObservationObject_(student, plantId, {
-      status: completed ? (notFound ? 'not_found' : 'completed') : 'draft',
+      status: completed ? 'completed' : 'draft',
       answers: JSON.stringify(answers),
       comparisonAnswers: JSON.stringify(comparisonAnswers),
       notFoundReason: notFound ? cleanText_(data.notFoundReason || '今天沒有找到', 160) : ''
@@ -418,9 +427,7 @@ function upsertByStudent_(sheetName, student, changes) {
 
 function saveSummary_(student, body) {
   body = body || {};
-  var completedPlants = observationRowsFor_(student.studentId).filter(function (row) {
-    return ['completed', 'not_found'].indexOf(String(row.status)) >= 0;
-  }).length;
+  var completedPlants = observationRowsFor_(student.studentId).filter(observationRowComplete_).length;
   if (completedPlants !== Object.keys(AQUATIC_CONFIG.plants).length) {
     throw apiError_('請先完成七種植物觀察。', 400);
   }
@@ -486,11 +493,14 @@ function recordFor_(studentId) {
 }
 
 function teacherDashboard_() {
-  var students = rows_('Students');
-  var observations = rows_('Observations');
-  var classifications = rows_('Classification');
-  var reflections = rows_('Reflection');
-  var environments = rows_('Environment');
+  var startedAt = Date.now();
+  var spreadsheet = configuredSpreadsheet_();
+  var students = rows_('Students', spreadsheet);
+  var observations = rows_('Observations', spreadsheet);
+  var classifications = rows_('Classification', spreadsheet);
+  var reflections = rows_('Reflection', spreadsheet);
+  var environments = rows_('Environment', spreadsheet);
+  var sheetsMs = Date.now() - startedAt;
   var classificationIds = new Set(classifications.filter(function (row) { return row.completedAt; }).map(function (row) { return String(row.studentId); }));
   var reflectionIds = new Set(reflections.filter(function (row) { return String(row.reflection || '').trim(); }).map(function (row) { return String(row.studentId); }));
   var environmentIds = new Set(environments.filter(function (row) { return row.completedAt; }).map(function (row) { return String(row.studentId); }));
@@ -499,10 +509,14 @@ function teacherDashboard_() {
     plantCounts[className] = {};
     Object.keys(AQUATIC_CONFIG.plants).forEach(function (plantId) { plantCounts[className][plantId] = 0; });
   });
+  var completedByStudent = new Map();
+  observations.forEach(function (row) {
+    if (!observationRowComplete_(row)) return;
+    var id = String(row.studentId);
+    completedByStudent.set(id, (completedByStudent.get(id) || 0) + 1);
+  });
   var studentOutput = students.map(function (student) {
-    var completedPlants = observations.filter(function (row) {
-      return String(row.studentId) === String(student.studentId) && ['completed', 'not_found'].indexOf(String(row.status)) >= 0;
-    }).length;
+    var completedPlants = completedByStudent.get(String(student.studentId)) || 0;
     return Object.assign(studentJson_(student), {
       completedPlants: completedPlants,
       classificationComplete: classificationIds.has(String(student.studentId)),
@@ -511,7 +525,7 @@ function teacherDashboard_() {
     });
   });
   observations.forEach(function (row) {
-    if (plantCounts[row.className] && ['completed', 'not_found'].indexOf(String(row.status)) >= 0 && plantCounts[row.className][row.plantId] != null) {
+    if (plantCounts[row.className] && observationRowComplete_(row) && plantCounts[row.className][row.plantId] != null) {
       plantCounts[row.className][row.plantId] += 1;
     }
   });
@@ -527,6 +541,7 @@ function teacherDashboard_() {
   var completedStudents = studentOutput.filter(function (student) {
     return student.completedPlants === Object.keys(AQUATIC_CONFIG.plants).length && student.classificationComplete && (student.environmentComplete || student.hasLegacyReflection);
   }).length;
+  console.info('aquatic.teacherDashboard sheetsMs=' + sheetsMs + ' aggregateMs=' + (Date.now() - startedAt - sheetsMs));
   return {
     summary: {
       studentCount: studentOutput.length,
@@ -601,6 +616,66 @@ function photoFor_(studentId, plantId) {
   };
 }
 
+// ===== Admin.gs =====
+function deleteStudentRows_(sheetName, studentId) {
+  var targetRows = rows_(sheetName)
+    .filter(function (row) { return String(row.studentId) === String(studentId); })
+    .map(function (row) { return Number(row._row); })
+    .sort(function (left, right) { return right - left; });
+  var targetSheet = sheet_(sheetName);
+  targetRows.forEach(function (rowNumber) { targetSheet.deleteRow(rowNumber); });
+  return targetRows.length;
+}
+
+function trashStudentPhotoFolder_(student) {
+  var root = configuredRootFolder_();
+  var classFolders = root.getFoldersByName(String(student.className) + '班');
+  var trashed = 0;
+  while (classFolders.hasNext()) {
+    var classFolder = classFolders.next();
+    var seatFolders = classFolder.getFoldersByName(seatLabel_(student.seatNumber) + '號');
+    while (seatFolders.hasNext()) {
+      seatFolders.next().setTrashed(true);
+      trashed += 1;
+    }
+  }
+  return trashed;
+}
+
+function resetStudentBySeat_(className, seatNumber) {
+  var identity = assertClassSeat_(className, seatNumber);
+  var student = findStudent_(identity.className, identity.seatNumber);
+  if (!student) throw apiError_('這個座號目前沒有可還原的學生資料。', 404);
+
+  var result = {
+    className: String(student.className),
+    seatNumber: Number(student.seatNumber),
+    studentId: String(student.studentId),
+    trashedPhotoFolders: 0,
+    deletedRows: {}
+  };
+
+  result.trashedPhotoFolders = trashStudentPhotoFolder_(student);
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    ['Observations', 'Classification', 'Reflection', 'Environment'].forEach(function (sheetName) {
+      result.deletedRows[sheetName] = deleteStudentRows_(sheetName, student.studentId);
+    });
+  } finally {
+    lock.releaseLock();
+  }
+
+  return {
+    reset: true,
+    className: result.className,
+    seatNumber: result.seatNumber,
+    trashedPhotoFolders: result.trashedPhotoFolders,
+    deletedRows: result.deletedRows
+  };
+}
+
 // ===== Code.gs =====
 function apiError_(message, status) {
   var error = new Error(message);
@@ -662,12 +737,20 @@ function route_(request) {
     if (!targetStudent) throw apiError_('找不到學生。', 404);
     return photoFor_(targetStudent.studentId, cleanText_(request.plantId, 40));
   }
+  if (action === 'teacherResetStudent') {
+    requireTeacher_(request.token);
+    return resetStudentBySeat_(request.className, request.seatNumber);
+  }
   throw apiError_('找不到這個 API 功能。', 404);
 }
 
 function doPost(event) {
+  var action = '';
+  var startedAt = Date.now();
   try {
-    return jsonOutput_({ ok: true, data: route_(parseRequest_(event)) });
+    var request = parseRequest_(event);
+    action = cleanText_(request.action, 60);
+    return jsonOutput_({ ok: true, data: route_(request) });
   } catch (error) {
     console.error(error && error.stack ? error.stack : error);
     return jsonOutput_({
@@ -675,6 +758,10 @@ function doPost(event) {
       status: Number(error && error.status) || 500,
       error: error && error.message ? error.message : '伺服器暫時發生錯誤。'
     });
+  } finally {
+    if (action === 'teacherLogin' || action === 'teacherDashboard') {
+      console.info('aquatic.' + action + ' serverMs=' + (Date.now() - startedAt));
+    }
   }
 }
 

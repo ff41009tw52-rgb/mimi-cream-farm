@@ -4,6 +4,6 @@
   "type": "module",
   "scripts": {
     "check": "node --check assets/aquatic/aquatic-data.js && node --check assets/aquatic/aquatic-api.js && node --check assets/aquatic/aquatic-storage.js && node --check assets/aquatic/aquatic.js && node --check assets/aquatic/aquatic-teacher.js && for f in google-apps-script/aquatic/*.gs; do node --check < \"$f\" || exit 1; done",
-    "test": "npm run check && node tests/static.test.mjs && node tests/apps-script.test.mjs && node tests/aquatic-teacher-api.test.mjs"
+    "test": "npm run check && node tests/static.test.mjs && node tests/apps-script.test.mjs && node tests/aquatic-teacher-api.test.mjs && node tests/manual-deploy.test.mjs"
   }
 }

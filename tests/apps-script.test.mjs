@@ -47,6 +47,7 @@ const schemas = {
   Environment: ['studentId', 'className', 'seatNumber', 'waterFlow', 'aquaticLife', 'otherFindings', 'completedAt', 'createdAt', 'updatedAt']
 };
 const sheets = Object.fromEntries(Object.entries(schemas).map(([name, headers]) => [name, new FakeSheet(headers)]));
+let spreadsheetOpens = 0;
 const properties = new Map([['TOKEN_SECRET', 'unit-test-token-secret'], ['TEACHER_PASSWORD', 'unit-test-password']]);
 let uuid = 0;
 const toBase64Url = (bytes) => Buffer.from(bytes).toString('base64url');
@@ -80,7 +81,10 @@ const context = vm.createContext({
     })
   },
   LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
-  configuredSpreadsheet_: () => ({ getSheetByName: (name) => sheets[name] || null }),
+  configuredSpreadsheet_: () => {
+    spreadsheetOpens += 1;
+    return { getSheetByName: (name) => sheets[name] || null };
+  },
   ContentService: {
     MimeType: { JSON:'application/json' },
     createTextOutput: (text) => ({ text, setMimeType() { return this; } })
@@ -121,9 +125,13 @@ assert.equal(completedRecord.environment.otherFindings, '有睡蓮、魚和蛙�
 
 assert.throws(() => context.route_({ action:'teacherDashboard', token:student01a.token }), /登入資訊已失效/);
 const teacher = context.route_({ action:'teacherLogin', password:'unit-test-password' });
+const beforeDashboardOpens = spreadsheetOpens;
 const dashboard = context.route_({ action:'teacherDashboard', token:teacher.token });
+assert.equal(spreadsheetOpens - beforeDashboardOpens, 1, '教師儀表板只應開啟一次試算表');
 assert.equal(dashboard.students.length, 2);
 assert.equal(dashboard.students.find((item) => item.seatNumber === 1).completedPlants, 7);
 assert.equal(dashboard.students.find((item) => item.seatNumber === 1).environmentComplete, true);
 assert.equal(dashboard.students.find((item) => item.seatNumber === 2).completedPlants, 0);
+assert.equal(dashboard.photos.length, 7);
+assert.equal(dashboard.summary.completedStudents, 1);
 console.log('Google Apps Script aquatic checks passed.');

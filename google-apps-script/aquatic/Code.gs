@@ -66,8 +66,12 @@ function route_(request) {
 }
 
 function doPost(event) {
+  var action = '';
+  var startedAt = Date.now();
   try {
-    return jsonOutput_({ ok: true, data: route_(parseRequest_(event)) });
+    var request = parseRequest_(event);
+    action = cleanText_(request.action, 60);
+    return jsonOutput_({ ok: true, data: route_(request) });
   } catch (error) {
     console.error(error && error.stack ? error.stack : error);
     return jsonOutput_({
@@ -75,6 +79,10 @@ function doPost(event) {
       status: Number(error && error.status) || 500,
       error: error && error.message ? error.message : '伺服器暫時發生錯誤。'
     });
+  } finally {
+    if (action === 'teacherLogin' || action === 'teacherDashboard') {
+      console.info('aquatic.' + action + ' serverMs=' + (Date.now() - startedAt));
+    }
   }
 }
 
