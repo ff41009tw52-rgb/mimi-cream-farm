@@ -71,6 +71,7 @@ export class AquaticApi {
   teacherLogin(password) { return this.call('teacherLogin', { password }); }
   teacherDashboard(token) { return this.call('teacherDashboard', { token }); }
   teacherStudent(token, studentId) { return this.call('teacherStudent', { token, studentId }); }
+  teacherResetStudent(token, className, seatNumber) { return this.call('teacherResetStudent', { token, className, seatNumber }); }
   async teacherPhoto(token, studentId, plantId) {
     const result = await this.call('teacherPhoto', { token, studentId, plantId });
     return base64ToBlob(result.base64, result.mimeType);
