@@ -48,7 +48,8 @@ assert.match(fixes, /照片與三題都完成後才算完成/);
 
 assert.match(admin, /function resetStudentBySeat_/);
 assert.match(admin, /setTrashed\(true\)/);
-for (const sheetName of ['Students','Observations','Classification','Reflection','Environment']) assert.match(admin, new RegExp(sheetName));
+for (const sheetName of ['Observations','Classification','Reflection','Environment']) assert.match(admin, new RegExp(sheetName));
+assert.doesNotMatch(admin, /deleteStudentRows_\('Students'/);
 assert.match(teacherReset, /還原此學生資料/);
 assert.match(teacherReset, /teacherResetStudent/);
 assert.match(teacher, /aquatic-teacher-reset\.js/);

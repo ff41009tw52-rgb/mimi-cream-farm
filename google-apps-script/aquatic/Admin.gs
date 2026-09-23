@@ -44,7 +44,6 @@ function resetStudentBySeat_(className, seatNumber) {
     ['Observations', 'Classification', 'Reflection', 'Environment'].forEach(function (sheetName) {
       result.deletedRows[sheetName] = deleteStudentRows_(sheetName, student.studentId);
     });
-    result.deletedRows.Students = deleteStudentRows_('Students', student.studentId);
   } finally {
     lock.releaseLock();
   }
