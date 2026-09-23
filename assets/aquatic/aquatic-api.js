@@ -40,7 +40,7 @@ export class AquaticApi {
       });
     } catch (error) {
       if (error?.name === 'AbortError') {
-        const timeoutError = new Error('Google 雲端回應較慢，正在重新連線。');
+        const timeoutError = new Error('Google 雲端回應較慢，請稍後再試。');
         timeoutError.code = 'TIMEOUT';
         timeoutError.retryable = true;
         throw timeoutError;
@@ -88,7 +88,7 @@ export class AquaticApi {
   }
 
   health() {
-    return this.callWithRetry('health', {}, { attempts: 2, timeoutMs: 45000, retryDelayMs: 700 });
+    return this.call('health', {}, { timeoutMs: 25000 });
   }
   createProfile(profile) {
     return this.callWithRetry('studentLogin', profile, { attempts: 2, timeoutMs: 45000, retryDelayMs: 900 });
@@ -112,19 +112,19 @@ export class AquaticApi {
   saveSummary(token, data) { return this.call('saveSummary', { token, data }); }
 
   teacherLogin(password) {
-    return this.callWithRetry('teacherLogin', { password }, { attempts: 2, timeoutMs: 45000 });
+    return this.call('teacherLogin', { password }, { timeoutMs: 25000 });
   }
   teacherDashboard(token) {
-    return this.callWithRetry('teacherDashboard', { token }, { attempts: 2, timeoutMs: 45000 });
+    return this.call('teacherDashboard', { token }, { timeoutMs: 25000 });
   }
   teacherStudent(token, studentId) {
-    return this.callWithRetry('teacherStudent', { token, studentId }, { attempts: 2, timeoutMs: 45000 });
+    return this.call('teacherStudent', { token, studentId }, { timeoutMs: 25000 });
   }
   teacherResetStudent(token, className, seatNumber) {
-    return this.callWithRetry('teacherResetStudent', { token, className, seatNumber }, { attempts: 2, timeoutMs: 60000, retryDelayMs: 1200 });
+    return this.call('teacherResetStudent', { token, className, seatNumber }, { timeoutMs: 25000 });
   }
   async teacherPhoto(token, studentId, plantId) {
-    const result = await this.callWithRetry('teacherPhoto', { token, studentId, plantId }, { attempts: 2, timeoutMs: 45000 });
+    const result = await this.call('teacherPhoto', { token, studentId, plantId }, { timeoutMs: 25000 });
     return base64ToBlob(result.base64, result.mimeType);
   }
 }

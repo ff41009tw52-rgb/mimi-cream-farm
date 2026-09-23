@@ -1,5 +1,5 @@
 import { AQUATIC_CLASSES, AQUATIC_PLANTS, CATEGORY_OPTIONS, OBSERVATION_QUESTIONS, WATER_FLOW_OPTIONS } from './aquatic-data.js';
-import { AquaticApi } from './aquatic-api.js?v=20260924-6';
+import { AquaticApi } from './aquatic-api.js?v=20260924-7';
 
 const api = new AquaticApi();
 const $ = (selector, root = document) => root.querySelector(selector);
@@ -11,6 +11,7 @@ const state = {
   selectedPlantId: AQUATIC_PLANTS[0].id
 };
 
+let authSerial = 0;
 const photoQueue = [];
 let activePhotoLoads = 0;
 const MAX_PHOTO_CONCURRENCY = 4;
@@ -30,8 +31,12 @@ const formatTime = (value) => {
 };
 
 function toast(message) {
-  const node = $('#toast'); node.textContent = message; node.classList.add('show');
-  clearTimeout(toast.timer); toast.timer = setTimeout(() => node.classList.remove('show'), 2600);
+  const node = $('#toast');
+  if (!node) return;
+  node.textContent = message;
+  node.classList.add('show');
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => node.classList.remove('show'), 2600);
 }
 
 function showDashboard() {
@@ -49,7 +54,17 @@ function showLogin(message = '') {
   $('#login-error').textContent = message;
 }
 
-function clearPhotoUrls() { state.photoUrls.forEach(URL.revokeObjectURL); state.photoUrls = []; }
+function normalizeDashboard(data) {
+  if (!data || !Array.isArray(data.students) || !Array.isArray(data.photos) || !data.plantCounts || typeof data.plantCounts !== 'object') {
+    throw new Error('教師資料格式不完整，請重新整理後再試。');
+  }
+  return data;
+}
+
+function clearPhotoUrls() {
+  state.photoUrls.forEach(URL.revokeObjectURL);
+  state.photoUrls = [];
+}
 
 function pumpPhotoQueue() {
   while (activePhotoLoads < MAX_PHOTO_CONCURRENCY && photoQueue.length) {
@@ -82,7 +97,8 @@ function authPhoto(urlFactory, img) {
 }
 
 function studentsInClass() {
-  return state.dashboard.students.filter((student) => student.className === currentClass());
+  const students = Array.isArray(state.dashboard?.students) ? state.dashboard.students : [];
+  return students.filter((student) => student.className === currentClass());
 }
 
 function matchingSeats() {
@@ -102,7 +118,7 @@ function renderSummary() {
   const students = studentsInClass();
   const completed = students.filter(studentComplete).length;
   const startedToday = students.filter((student) => sameTaipeiDay(student.createdAt)).length;
-  const average = students.reduce((sum, student) => sum + student.completedPlants, 0) / 30;
+  const average = students.reduce((sum, student) => sum + Number(student.completedPlants || 0), 0) / 30;
   const items = [
     ['今天已開始', `${startedToday} 人`],
     ['完成', `${completed} / 30`],
@@ -115,7 +131,7 @@ function renderSummary() {
     const span = document.createElement('span'); span.textContent = label;
     node.append(strong, span); return node;
   }));
-  const counts = state.dashboard.plantCounts?.[currentClass()] || {};
+  const counts = state.dashboard?.plantCounts?.[currentClass()] || {};
   $('#plant-progress-summary').replaceChildren(...AQUATIC_PLANTS.map((plant) => {
     const item = document.createElement('div');
     const name = document.createElement('span'); name.textContent = plant.name;
@@ -162,7 +178,8 @@ function renderPhotos() {
   clearPhotoUrls(); const wall = $('#photo-wall'); wall.replaceChildren();
   const plant = AQUATIC_PLANTS.find((item) => item.id === state.selectedPlantId);
   const students = new Map(studentsInClass().map((student) => [Number(student.seatNumber), student]));
-  const photos = new Map(state.dashboard.photos.filter((photo) => photo.className === currentClass() && photo.plantId === state.selectedPlantId).map((photo) => [Number(photo.seatNumber), photo]));
+  const dashboardPhotos = Array.isArray(state.dashboard?.photos) ? state.dashboard.photos : [];
+  const photos = new Map(dashboardPhotos.filter((photo) => photo.className === currentClass() && photo.plantId === state.selectedPlantId).map((photo) => [Number(photo.seatNumber), photo]));
   for (let seatNumber = 1; seatNumber <= 30; seatNumber += 1) {
     const student = students.get(seatNumber); const photo = photos.get(seatNumber);
     const card = document.createElement('article'); card.className = 'wall-card';
@@ -185,12 +202,17 @@ function renderAll() {
   if (photosPanelVisible()) renderPhotos(); else $('#photo-wall').replaceChildren();
 }
 
-async function loadDashboard() {
+async function loadDashboard(expectedToken = state.token, expectedSerial = authSerial) {
+  if (!expectedToken) throw new Error('請先登入教師端。');
   const refresh = $('#teacher-refresh');
   if (refresh) { refresh.disabled = true; refresh.textContent = '載入中……'; }
   try {
-    state.dashboard = await api.teacherDashboard(state.token);
-    renderAll(); showDashboard();
+    const dashboard = normalizeDashboard(await api.teacherDashboard(expectedToken));
+    if (expectedToken !== state.token || expectedSerial !== authSerial) return false;
+    state.dashboard = dashboard;
+    renderAll();
+    showDashboard();
+    return true;
   } finally {
     if (refresh) { refresh.disabled = false; refresh.textContent = '重新整理'; }
   }
@@ -198,7 +220,9 @@ async function loadDashboard() {
 
 async function openStudent(studentId) {
   try {
-    const data = await api.teacherStudent(state.token, studentId); clearPhotoUrls(); const root = $('#student-detail'); root.replaceChildren();
+    const data = await api.teacherStudent(state.token, studentId);
+    if (!data?.student || !data?.record || !Array.isArray(data.record.observations)) throw new Error('學生資料格式不完整，請重新整理後再試。');
+    clearPhotoUrls(); const root = $('#student-detail'); root.replaceChildren();
     const header = document.createElement('div'); header.className = 'detail-header';
     header.innerHTML = `<div><p class="eyebrow">學生完整紀錄</p><h1>${escapeHtml(data.student.className)}班 ${seatLabel(data.student.seatNumber)}號的水生植物觀察</h1></div><strong>${data.record.observations.filter((item) => item.completed).length} / 7 種已完成</strong>`;
     root.append(header); const grid = document.createElement('div'); grid.className = 'detail-grid';
@@ -217,8 +241,9 @@ async function openStudent(studentId) {
       card.append(answers); grid.append(card);
     });
     const summary = document.createElement('section'); summary.className = 'card detail-summary';
+    const classification = data.record.classification || {};
     const categories = CATEGORY_OPTIONS.map((category) => {
-      const names = AQUATIC_PLANTS.filter((plant) => data.record.classification?.[plant.id] === category.id).map((plant) => plant.name).join('、') || '—';
+      const names = AQUATIC_PLANTS.filter((plant) => classification[plant.id] === category.id).map((plant) => plant.name).join('、') || '—';
       return `<dt>${category.id}</dt><dd>${names}</dd>`;
     }).join('');
     const environment = data.record.environment || data.record.summary?.environment || null;
@@ -228,34 +253,45 @@ async function openStudent(studentId) {
     if (environment?.aquaticLife?.animal) life.push('有水生動物');
     summary.innerHTML = `<h2>分類與環境調查</h2><dl>${categories}<dt>水流情形</dt><dd>${escapeHtml(flowLabel)}</dd><dt>水生生物</dt><dd>${escapeHtml(life.join('、') || '—')}</dd><dt>其他發現</dt><dd>${escapeHtml(environment?.otherFindings || '—')}</dd><dt>完成時間</dt><dd>${formatTime(environment?.completedAt || data.record.summary?.completedAt)}</dd></dl>`;
     grid.append(summary); root.append(grid); $('#teacher-dashboard-view').hidden = true; $('#student-detail-view').hidden = false; window.scrollTo(0, 0);
-  } catch (error) { toast(error.message || '學生資料載入失敗，請稍後再試。'); }
+  } catch (error) {
+    toast(error?.message || '學生資料載入失敗，請稍後再試。');
+  }
 }
 
 $('#teacher-login-form').addEventListener('submit', async (event) => {
   event.preventDefault();
   const form = event.currentTarget;
   const submit = form.querySelector('button[type="submit"]');
+  const serial = ++authSerial;
   $('#login-error').textContent = '';
   if (submit) { submit.disabled = true; submit.textContent = '登入中……'; }
   try {
     const result = await api.teacherLogin(new FormData(form).get('password'));
+    if (serial !== authSerial) return;
     state.token = result.token;
     sessionStorage.setItem('aquatic.teacherToken', state.token);
     form.reset();
-    await loadDashboard();
+    const loaded = await loadDashboard(state.token, serial);
+    if (!loaded && serial === authSerial) showLogin('教師資料載入被新的登入動作取代，請再按一次確定。');
   } catch (error) {
+    if (serial !== authSerial) return;
     if (error?.status === 401) {
-      sessionStorage.removeItem('aquatic.teacherToken'); state.token = null;
+      sessionStorage.removeItem('aquatic.teacherToken');
+      state.token = null;
     }
     showLogin(error?.message || '教師端暫時無法載入，請稍後再試。');
   } finally {
-    if (submit) { submit.disabled = false; submit.textContent = '確定'; }
+    if (serial === authSerial && submit) { submit.disabled = false; submit.textContent = '確定'; }
   }
 });
 
 $('#teacher-refresh').addEventListener('click', async () => {
-  try { await loadDashboard(); toast('資料已更新'); }
-  catch (error) { toast(error?.message || '資料更新失敗，請稍後再試。'); }
+  try {
+    await loadDashboard(state.token, authSerial);
+    toast('資料已更新');
+  } catch (error) {
+    toast(error?.message || '資料更新失敗，請稍後再試。');
+  }
 });
 
 $('#class-filter').addEventListener('change', () => {
@@ -271,23 +307,33 @@ $$('[data-tab]').forEach((button) => button.addEventListener('click', () => {
 }));
 $('#detail-back').addEventListener('click', () => { clearPhotoUrls(); showDashboard(); });
 $('#teacher-logout').addEventListener('click', () => {
-  sessionStorage.removeItem('aquatic.teacherToken'); state.token = null; clearPhotoUrls();
+  authSerial += 1;
+  sessionStorage.removeItem('aquatic.teacherToken');
+  state.token = null;
+  state.dashboard = null;
+  clearPhotoUrls();
   showLogin();
 });
 
 (async function boot() {
+  showLogin();
   if (!state.token) {
     api.health().catch(() => {});
     return;
   }
+  const tokenAtBoot = state.token;
+  const serialAtBoot = authSerial;
+  $('#login-error').textContent = '正在讀取教師資料……';
   try {
-    await loadDashboard();
+    await loadDashboard(tokenAtBoot, serialAtBoot);
   } catch (error) {
+    if (tokenAtBoot !== state.token || serialAtBoot !== authSerial) return;
     if (error?.status === 401) {
-      sessionStorage.removeItem('aquatic.teacherToken'); state.token = null;
+      sessionStorage.removeItem('aquatic.teacherToken');
+      state.token = null;
       showLogin('教師登入已失效，請重新登入。');
     } else {
-      showLogin('Google 雲端回應較慢，登入狀態已保留。請稍後再按一次「確定」。');
+      showLogin(error?.message || '教師資料載入失敗，請稍後再試。');
     }
   }
 })();
