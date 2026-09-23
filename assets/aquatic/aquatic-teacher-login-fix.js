@@ -1,4 +1,4 @@
-import { AquaticApi } from './aquatic-api.js';
+import { AquaticApi } from './aquatic-api.js?v=20260924-6';
 
 const form = document.querySelector('#teacher-login-form');
 const loginView = document.querySelector('#teacher-login-view');
@@ -42,7 +42,8 @@ if (form) {
       sessionStorage.setItem('aquatic.teacherToken', result.token);
       form.reset();
       if (loginView) loginView.hidden = true;
-      // 重新載入後，既有 aquatic-teacher.js 會從 sessionStorage 取得 token 並載入 Dashboard。
+      // 重新載入後，由 aquatic-teacher.js 直接使用剛取得的 token 載入 Dashboard，
+      // 避免手動登入與舊 token 的背景驗證同時完成造成畫面被切回登入頁。
       window.location.reload();
     } catch (error) {
       if (loginView) loginView.hidden = false;
