@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node --check assets/aquatic/aquatic-data.js && node --check assets/aquatic/aquatic-api.js && node --check assets/aquatic/aquatic-storage.js && node --check assets/aquatic/aquatic.js && node --check assets/aquatic/aquatic-teacher.js && node --check cloudflare/aquatic/worker.js",
-    "test": "npm run check && node tests/static.test.mjs && node tests/worker.test.mjs"
+    "check": "node --check assets/aquatic/aquatic-data.js && node --check assets/aquatic/aquatic-api.js && node --check assets/aquatic/aquatic-storage.js && node --check assets/aquatic/aquatic.js && node --check assets/aquatic/aquatic-teacher.js && for f in google-apps-script/aquatic/*.gs; do node --check < \"$f\" || exit 1; done",
+    "test": "npm run check && node tests/static.test.mjs && node tests/apps-script.test.mjs"
   }
 }

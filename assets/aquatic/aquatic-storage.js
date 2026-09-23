@@ -24,7 +24,7 @@ export const putPhoto = (key, value) => transact('readwrite', (store) => store.p
 export const getPhoto = (key) => transact('readonly', (store) => store.get(key));
 export const deletePhoto = (key) => transact('readwrite', (store) => store.delete(key));
 
-export async function compressImage(file, { maxEdge = 1600, quality = 0.82 } = {}) {
+export async function compressImage(file, { maxEdge = 1280, quality = 0.82 } = {}) {
   const bitmap = await createImageBitmap(file);
   const ratio = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
   const width = Math.max(1, Math.round(bitmap.width * ratio));

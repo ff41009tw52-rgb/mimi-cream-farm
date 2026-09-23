@@ -1,4 +1,18 @@
-const normalizeBase = (value) => String(value || '').replace(/\/$/, '');
+const normalizeBase = (value) => String(value || '').trim().replace(/\/$/, '');
+
+const blobToBase64 = (blob) => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onload = () => resolve(String(reader.result || '').split(',')[1] || '');
+  reader.onerror = () => reject(reader.error || new Error('照片讀取失敗。'));
+  reader.readAsDataURL(blob);
+});
+
+const base64ToBlob = (base64, mimeType) => {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+  return new Blob([bytes], { type: mimeType || 'image/jpeg' });
+};
 
 export class AquaticApi {
   constructor(baseUrl = window.AQUATIC_API_URL) {
@@ -6,42 +20,52 @@ export class AquaticApi {
   }
 
   get configured() {
-    return Boolean(this.baseUrl && !this.baseUrl.includes('YOUR-SUBDOMAIN'));
+    return Boolean(this.baseUrl && !this.baseUrl.includes('YOUR_GOOGLE_APPS_SCRIPT'));
   }
 
-  async request(path, { method = 'GET', token, body, headers = {}, responseType = 'json' } = {}) {
-    if (!this.configured) throw new Error('後端服務尚未完成設定。');
-    const requestHeaders = { ...headers };
-    if (token) requestHeaders.Authorization = `Bearer ${token}`;
-    let payload = body;
-    if (body && !(body instanceof Blob) && !(body instanceof FormData)) {
-      requestHeaders['Content-Type'] = 'application/json';
-      payload = JSON.stringify(body);
-    }
-    const response = await fetch(`${this.baseUrl}${path}`, { method, headers: requestHeaders, body: payload });
-    if (!response.ok) {
-      const errorBody = await response.json().catch(() => ({}));
-      const error = new Error(errorBody.error || `服務暫時無法使用（${response.status}）`);
-      error.status = response.status;
-      error.details = errorBody;
+  async call(action, payload = {}) {
+    if (!this.configured) throw new Error('Google 雲端後端尚未完成設定。');
+    const response = await fetch(this.baseUrl, {
+      method: 'POST',
+      redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action, ...payload })
+    });
+    if (!response.ok) throw new Error(`Google 雲端服務暫時無法使用（${response.status}）。`);
+    const result = await response.json().catch(() => null);
+    if (!result || result.ok !== true) {
+      const error = new Error(result?.error || 'Google 雲端服務回傳了無法辨識的資料。');
+      error.status = Number(result?.status || 500);
       throw error;
     }
-    if (response.status === 204) return null;
-    return responseType === 'blob' ? response.blob() : response.json();
+    return result.data;
   }
 
-  health() { return this.request('/api/health'); }
-  createProfile(profile) { return this.request('/api/student/profile', { method: 'POST', body: profile }); }
-  studentRecord(token) { return this.request('/api/student/record', { token }); }
-  saveObservation(token, plantId, data) { return this.request(`/api/student/observations/${encodeURIComponent(plantId)}`, { method: 'PUT', token, body: data }); }
-  uploadPhoto(token, plantId, blob) { return this.request(`/api/student/observations/${encodeURIComponent(plantId)}/photo`, { method: 'PUT', token, body: blob, headers: { 'Content-Type': blob.type || 'image/jpeg' } }); }
-  studentPhoto(token, plantId) { return this.request(`/api/student/observations/${encodeURIComponent(plantId)}/photo`, { token, responseType: 'blob' }); }
-  saveSummary(token, body) { return this.request('/api/student/summary', { method: 'PUT', token, body }); }
+  health() { return this.call('health'); }
+  createProfile(profile) { return this.call('studentLogin', profile); }
+  studentRecord(token) { return this.call('studentRecord', { token }); }
+  saveObservation(token, plantId, data) { return this.call('saveObservation', { token, plantId, data }); }
+  async uploadPhoto(token, plantId, blob) {
+    return this.call('uploadPhoto', {
+      token,
+      plantId,
+      mimeType: blob.type || 'image/jpeg',
+      base64: await blobToBase64(blob)
+    });
+  }
+  async studentPhoto(token, plantId) {
+    const result = await this.call('studentPhoto', { token, plantId });
+    return base64ToBlob(result.base64, result.mimeType);
+  }
+  saveSummary(token, data) { return this.call('saveSummary', { token, data }); }
 
-  teacherLogin(password) { return this.request('/api/teacher/login', { method: 'POST', body: { password } }); }
-  teacherDashboard(token) { return this.request('/api/teacher/dashboard', { token }); }
-  teacherStudent(token, studentId) { return this.request(`/api/teacher/students/${encodeURIComponent(studentId)}`, { token }); }
-  teacherPhoto(token, studentId, plantId) { return this.request(`/api/teacher/students/${encodeURIComponent(studentId)}/photos/${encodeURIComponent(plantId)}`, { token, responseType: 'blob' }); }
+  teacherLogin(password) { return this.call('teacherLogin', { password }); }
+  teacherDashboard(token) { return this.call('teacherDashboard', { token }); }
+  teacherStudent(token, studentId) { return this.call('teacherStudent', { token, studentId }); }
+  async teacherPhoto(token, studentId, plantId) {
+    const result = await this.call('teacherPhoto', { token, studentId, plantId });
+    return base64ToBlob(result.base64, result.mimeType);
+  }
 }
 
 export const getStoredStudent = () => {

@@ -6,18 +6,20 @@ on:
       - 'aquatic.html'
       - 'aquatic-teacher.html'
       - 'assets/aquatic/**'
+      - 'google-apps-script/aquatic/**'
       - 'cloudflare/aquatic/**'
       - 'tests/static.test.mjs'
-      - 'tests/worker.test.mjs'
+      - 'tests/apps-script.test.mjs'
       - 'package.json'
   pull_request:
     paths:
       - 'aquatic.html'
       - 'aquatic-teacher.html'
       - 'assets/aquatic/**'
+      - 'google-apps-script/aquatic/**'
       - 'cloudflare/aquatic/**'
       - 'tests/static.test.mjs'
-      - 'tests/worker.test.mjs'
+      - 'tests/apps-script.test.mjs'
       - 'package.json'
 
 jobs:
@@ -30,4 +32,3 @@ jobs:
         with:
           node-version: '22'
       - run: npm test
-

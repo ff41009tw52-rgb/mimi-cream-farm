@@ -1,4 +1,4 @@
-name: Deploy aquatic observation worker
+name: Retired aquatic Cloudflare deployment
 
 on:
   workflow_dispatch:
@@ -6,56 +6,9 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: aquatic-observation-production
-  cancel-in-progress: false
-
 jobs:
-  deploy:
+  retired:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    defaults:
-      run:
-        working-directory: cloudflare/aquatic
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      AQUATIC_TEACHER_PASSWORD: ${{ secrets.AQUATIC_TEACHER_PASSWORD }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Validate deployment secrets
-        run: |
-          test -n "$CLOUDFLARE_API_TOKEN"
-          test -n "$CLOUDFLARE_ACCOUNT_ID"
-          test -n "$AQUATIC_TEACHER_PASSWORD"
-      - name: Install Wrangler
-        run: npm install --no-save wrangler@4
-      - name: Ensure D1 database
-        run: |
-          DATABASE_ID="$(npx wrangler d1 list --json | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const rows=JSON.parse(s);process.stdout.write(rows.find(r=>r.name==='aquatic-observation-db')?.uuid||'')})")"
-          if [ -z "$DATABASE_ID" ]; then
-            npx wrangler d1 create aquatic-observation-db --location apac
-            DATABASE_ID="$(npx wrangler d1 list --json | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const rows=JSON.parse(s);process.stdout.write(rows.find(r=>r.name==='aquatic-observation-db')?.uuid||'')})")"
-          fi
-          test -n "$DATABASE_ID"
-          sed -i "s/REPLACE_WITH_D1_DATABASE_ID/$DATABASE_ID/" wrangler.toml
-      - name: Ensure R2 bucket
-        run: |
-          if ! npx wrangler r2 bucket list | grep -Fq 'aquatic-observation-media'; then
-            npx wrangler r2 bucket create aquatic-observation-media --location apac
-          fi
-      - name: Apply D1 schema
-        run: npx wrangler d1 execute aquatic-observation-db --remote --file=schema.sql
-      - name: Deploy Worker
-        run: npx wrangler deploy
-      - name: Set Worker secrets
-        run: |
-          printf '%s' "$AQUATIC_TEACHER_PASSWORD" | npx wrangler secret put TEACHER_PASSWORD --name aquatic-observation-api
-          openssl rand -hex 32 | npx wrangler secret put SESSION_SECRET --name aquatic-observation-api
-      - name: Verify health endpoint
-        run: |
-          curl --fail --retry 6 --retry-delay 5 --retry-all-errors \
-            https://aquatic-observation-api.ff41009tw52.workers.dev/api/health
+      - name: Cloudflare deployment is retired
+        run: echo "Aquatic observation now uses Google Apps Script, Google Sheets, and Google Drive. No R2 action is performed."

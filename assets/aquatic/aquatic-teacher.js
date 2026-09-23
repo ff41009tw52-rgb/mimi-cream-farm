@@ -14,14 +14,14 @@ const state = {
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[character]);
 const seatLabel = (seat) => String(seat).padStart(2, '0');
 const currentClass = () => $('#class-filter').value || AQUATIC_CLASSES[0];
-const sqliteDate = (value) => value ? new Date(`${String(value).replace(' ', 'T')}Z`) : null;
+const cloudDate = (value) => value ? new Date(String(value)) : null;
 const sameTaipeiDay = (value) => {
-  const date = sqliteDate(value); if (!date || Number.isNaN(date.getTime())) return false;
+  const date = cloudDate(value); if (!date || Number.isNaN(date.getTime())) return false;
   const options = { timeZone:'Asia/Taipei', year:'numeric', month:'2-digit', day:'2-digit' };
   return new Intl.DateTimeFormat('zh-TW', options).format(date) === new Intl.DateTimeFormat('zh-TW', options).format(new Date());
 };
 const formatTime = (value) => {
-  const date = sqliteDate(value); if (!date || Number.isNaN(date.getTime())) return '—';
+  const date = cloudDate(value); if (!date || Number.isNaN(date.getTime())) return '—';
   return new Intl.DateTimeFormat('zh-TW', { timeZone:'Asia/Taipei', dateStyle:'short', timeStyle:'short' }).format(date);
 };
 
