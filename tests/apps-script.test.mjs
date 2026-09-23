@@ -43,7 +43,8 @@ const schemas = {
   Students: ['studentId', 'className', 'seatNumber', 'createdAt', 'updatedAt'],
   Observations: ['observationId', 'studentId', 'className', 'seatNumber', 'plantId', 'status', 'driveFileId', 'mimeType', 'answers', 'comparisonAnswers', 'notFoundReason', 'hasPhoto', 'createdAt', 'updatedAt'],
   Classification: ['studentId', 'className', 'seatNumber', 'classification', 'classificationReason', 'completedAt', 'createdAt', 'updatedAt'],
-  Reflection: ['studentId', 'className', 'seatNumber', 'reflection', 'completedAt', 'createdAt', 'updatedAt']
+  Reflection: ['studentId', 'className', 'seatNumber', 'reflection', 'completedAt', 'createdAt', 'updatedAt'],
+  Environment: ['studentId', 'className', 'seatNumber', 'waterFlow', 'aquaticLife', 'otherFindings', 'completedAt', 'createdAt', 'updatedAt']
 };
 const sheets = Object.fromEntries(Object.entries(schemas).map(([name, headers]) => [name, new FakeSheet(headers)]));
 const properties = new Map([['TOKEN_SECRET', 'unit-test-token-secret'], ['TEACHER_PASSWORD', 'unit-test-password']]);
@@ -92,21 +93,37 @@ const student01b = context.route_({ action:'studentLogin', className:'307', seat
 const student02 = context.route_({ action:'studentLogin', className:'307', seatNumber:2 });
 assert.equal(student01a.student.id, student01b.student.id, '同班同座號必須回到同一學生');
 assert.notEqual(student01a.student.id, student02.student.id, '不同座號不可共用學生紀錄');
+assert.equal(student01a.record.observations.length, 0, '登入應一次帶回學生紀錄，避免第二次 API');
 
+context.upsertObservationObject_({ studentId:student01a.student.id, className:'307', seatNumber:1 }, 'water-lettuce', { driveFileId:'test-photo', mimeType:'image/jpeg', hasPhoto:true });
 context.route_({
   action:'saveObservation', token:student01a.token, plantId:'water-lettuce',
-  data:{ completed:true, notFound:false, answers:{ location:'水面上', leaf_position:'漂浮在水面', root_position:'漂浮在水裡', feature:'葉片層層排列', difference:'和課本很像' } }
+  data:{ completed:true, answers:{ location:'水面上', leaf_position:'漂浮在水面', root_position:'漂浮在水裡' } }
 });
 const record01 = context.route_({ action:'studentRecord', token:student01b.token });
 const record02 = context.route_({ action:'studentRecord', token:student02.token });
 assert.equal(record01.record.observations.length, 1);
-assert.equal(record01.record.observations[0].answers.difference, '和課本很像');
+assert.equal(record01.record.observations[0].answers.root_position, '漂浮在水裡');
 assert.equal(record02.record.observations.length, 0);
+assert.throws(() => context.route_({ action:'saveObservation', token:student02.token, plantId:'duckweed', data:{ completed:true, answers:{ location:'水面上', leaf_position:'漂浮在水面', root_position:'漂浮在水裡' } } }), /上傳植物照片/);
+
+for (const plantId of ['duckweed','water-hyacinth','hydrilla','water-lily','yellow-water-lily','lotus']) {
+  context.upsertObservationObject_({ studentId:student01a.student.id, className:'307', seatNumber:1 }, plantId, { driveFileId:`photo-${plantId}`, mimeType:'image/jpeg', hasPhoto:true });
+  context.route_({ action:'saveObservation', token:student01a.token, plantId, data:{ completed:true, answers:{ location:'水面上', leaf_position:'漂浮在水面', root_position:'漂浮在水裡' } } });
+}
+const classification = Object.fromEntries(['water-lettuce','duckweed','water-hyacinth','hydrilla','water-lily','yellow-water-lily','lotus'].map((id) => [id, id === 'hydrilla' ? '沉水植物' : id === 'lotus' ? '挺水植物' : ['water-lily','yellow-water-lily'].includes(id) ? '浮葉植物' : '漂浮植物']));
+context.route_({ action:'saveSummary', token:student01a.token, data:{ classification, environment:{ waterFlow:'slow', aquaticLife:{ plant:true, animal:true }, otherFindings:'有睡蓮、魚和蛙。' } } });
+const completedRecord = context.route_({ action:'studentRecord', token:student01a.token }).record;
+assert.equal(completedRecord.environment.waterFlow, 'slow');
+assert.equal(completedRecord.environment.aquaticLife.plant, true);
+assert.equal(completedRecord.environment.aquaticLife.animal, true);
+assert.equal(completedRecord.environment.otherFindings, '有睡蓮、魚和蛙。');
 
 assert.throws(() => context.route_({ action:'teacherDashboard', token:student01a.token }), /登入資訊已失效/);
 const teacher = context.route_({ action:'teacherLogin', password:'unit-test-password' });
 const dashboard = context.route_({ action:'teacherDashboard', token:teacher.token });
 assert.equal(dashboard.students.length, 2);
-assert.equal(dashboard.students.find((item) => item.seatNumber === 1).completedPlants, 1);
+assert.equal(dashboard.students.find((item) => item.seatNumber === 1).completedPlants, 7);
+assert.equal(dashboard.students.find((item) => item.seatNumber === 1).environmentComplete, true);
 assert.equal(dashboard.students.find((item) => item.seatNumber === 2).completedPlants, 0);
 console.log('Google Apps Script aquatic checks passed.');
