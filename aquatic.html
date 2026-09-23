@@ -21,12 +21,6 @@
       <div class="hero-copy">
         <p class="eyebrow">橘咪咪與白奶油的科學農場</p>
         <h1>帶著眼睛和相機<br>到生態池找植物！</h1>
-        <p>你拍的照片會放進自己的水生植物圖鑑。觀察、比較，再用自己的理由完成分類。</p>
-        <ul class="mission-list" aria-label="任務流程">
-          <li><span>1</span>到生態池觀察</li>
-          <li><span>2</span>拍下植物特徵</li>
-          <li><span>3</span>比較並自行分類</li>
-        </ul>
       </div>
       <div class="login-column">
         <form id="profile-form" class="card profile-card">
@@ -40,6 +34,10 @@
         </form>
         <a class="teacher-entry" href="aquatic-teacher.html">👨‍🏫 教師儀表板</a>
       </div>
+    </section>
+
+    <section id="loading-view" class="view loading-view" hidden aria-live="polite">
+      <div class="card loading-card"><span class="loading-spinner" aria-hidden="true"></span><h1 id="loading-title">正在開啟觀察簿……</h1><p id="loading-message">正在連接 Google 雲端資料，請稍候。</p></div>
     </section>
 
     <section id="field-guide-view" class="view" hidden>
@@ -56,8 +54,8 @@
       </section>
       <div id="plant-grid" class="plant-grid" role="list"></div>
       <section class="next-task card">
-        <div><p class="eyebrow">完成七種觀察後</p><h2>把植物送回適合的家</h2><p>依照你看到的生長位置完成分類，再寫下這次觀察心得。</p></div>
-        <button id="open-classification" class="primary-button" type="button">前往分類與總整理</button>
+        <div><p class="eyebrow">完成七種觀察後</p><h2>把植物送回適合的家</h2><p id="classification-help">依照你看到的生長位置完成分類，再填寫一次環境調查表。</p></div>
+        <button id="open-classification" class="primary-button" type="button">前往分類與環境調查</button>
       </section>
     </section>
 
@@ -73,7 +71,6 @@
             <button id="retry-upload" class="secondary-button" type="button" hidden>重新上傳</button>
           </div>
           <p id="photo-message" class="helper" aria-live="polite">照片只會用在你的圖鑑與教師課堂檢視。</p>
-          <label class="not-found"><input id="not-found" type="checkbox"> 今天沒有找到這種植物</label>
         </section>
 
         <section class="card compare-card">
@@ -91,9 +88,10 @@
       </div>
 
       <form id="observation-form" class="card questions-card">
-        <h2>3. 寫下你的觀察</h2>
+        <h2>3. 完成三個觀察選擇題</h2>
         <div id="question-list"></div>
-        <div class="form-actions"><button class="secondary-button" type="button" data-back>先存草稿並返回</button><button class="primary-button" type="submit">完成這種植物</button></div>
+        <div class="form-actions single-action"><button id="complete-observation" class="primary-button" type="submit">完成觀察</button></div>
+        <p id="save-status" class="save-status" role="status" aria-live="polite"></p>
         <p id="observation-error" class="form-error" role="alert"></p>
       </form>
     </section>
@@ -104,9 +102,23 @@
       <form id="classification-form">
         <div id="classification-list" class="classification-list"></div>
         <section class="card reflection-card">
-          <h2>我的觀察心得</h2>
-          <label>我分類時最注意哪一個特徵？<textarea name="classificationReason" maxlength="180" required placeholder="請用自己的話說明分類理由。"></textarea></label>
-          <label>這次到生態池觀察，我發現……<textarea name="reflection" maxlength="240" required placeholder="可以寫新發現、疑問，或下次還想觀察的事。"></textarea></label>
+          <h2>環境調查表</h2>
+          <fieldset class="environment-question">
+            <legend>1. 水流情形</legend>
+            <div class="choice-list">
+              <label><input type="radio" name="waterFlow" value="fast" required>水流急速</label>
+              <label><input type="radio" name="waterFlow" value="slow">水流緩慢</label>
+              <label><input type="radio" name="waterFlow" value="still">靜止不動</label>
+            </div>
+          </fieldset>
+          <fieldset class="environment-question">
+            <legend>2. 水生生物</legend>
+            <div class="choice-list">
+              <label><input type="checkbox" name="aquaticPlant">有水生植物</label>
+              <label><input type="checkbox" name="aquaticAnimal">有水生動物</label>
+            </div>
+          </fieldset>
+          <label>3. 其他發現<textarea name="otherFindings" maxlength="240" placeholder="例如：有睡蓮、魚、蛙等生物。"></textarea></label>
         </section>
         <div class="sticky-submit"><button class="primary-button" type="submit">完成整份觀察紀錄</button></div>
         <p id="classification-error" class="form-error" role="alert"></p>
