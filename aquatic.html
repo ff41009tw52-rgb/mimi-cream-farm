@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#0d9488">
   <title>水生植物觀察任務｜橘咪咪與白奶油</title>
-  <link rel="stylesheet" href="assets/aquatic/aquatic.css?v=20260924-2">
-  <link rel="stylesheet" href="assets/aquatic/aquatic-fixes.css?v=20260924-2">
+  <link rel="stylesheet" href="assets/aquatic/aquatic.css?v=20260924-3">
+  <link rel="stylesheet" href="assets/aquatic/aquatic-fixes.css?v=20260924-3">
 </head>
 <body>
   <header class="topbar">
@@ -92,6 +92,28 @@
         <p id="save-status" class="save-status" role="status" aria-live="polite"></p>
         <p id="observation-error" class="form-error" role="alert"></p>
       </form>
+
+      <section id="inline-environment" class="card reflection-card inline-environment">
+        <h2>環境調查表</h2>
+        <p class="inline-environment-note">這份環境調查只需填寫一次，之後會自動保留並帶到最後整理。</p>
+        <fieldset class="environment-question">
+          <legend>1. 水流情形</legend>
+          <div class="choice-list">
+            <label><input type="radio" name="envWaterFlowInline" value="fast">水流急速</label>
+            <label><input type="radio" name="envWaterFlowInline" value="slow">水流緩慢</label>
+            <label><input type="radio" name="envWaterFlowInline" value="still">靜止不動</label>
+          </div>
+        </fieldset>
+        <fieldset class="environment-question">
+          <legend>2. 水生生物</legend>
+          <div class="choice-list">
+            <label><input type="checkbox" name="envAquaticPlantInline">有水生植物</label>
+            <label><input type="checkbox" name="envAquaticAnimalInline">有水生動物</label>
+          </div>
+        </fieldset>
+        <label>3. 其他發現<textarea name="envOtherFindingsInline" maxlength="240" placeholder="例如：有睡蓮、魚、蛙等生物。"></textarea></label>
+        <p id="inline-environment-status" class="inline-environment-status" role="status" aria-live="polite"></p>
+      </section>
     </section>
 
     <section id="classification-view" class="view" hidden>
@@ -130,7 +152,7 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>window.AQUATIC_API_URL = window.AQUATIC_API_URL || 'https://script.google.com/macros/s/AKfycbxAH8T5Qg6rp9_HacZrw0FTNq7BoOEBTwvxc8Bppu_cMdjdvGJzNQ3cqjR0oKmT9aZG/exec';</script>
-  <script type="module" src="assets/aquatic/aquatic.js?v=20260924-2"></script>
-  <script type="module" src="assets/aquatic/aquatic-fixes.js?v=20260924-2"></script>
+  <script type="module" src="assets/aquatic/aquatic.js?v=20260924-3"></script>
+  <script type="module" src="assets/aquatic/aquatic-fixes.js?v=20260924-3"></script>
 </body>
 </html>
