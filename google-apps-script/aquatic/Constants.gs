@@ -1,6 +1,6 @@
 var AQUATIC_CONFIG = Object.freeze({
   folderName: '水生植物觀察',
-  classes: Object.freeze(['307', '308', '309', '310', '311', '312', '313']),
+  classes: Object.freeze(['307', '309', '310', '311', '312', '313', '314']),
   plants: Object.freeze({
     'water-lettuce': '大萍',
     duckweed: '浮萍',
@@ -61,8 +61,8 @@ function assertClassSeat_(className, seatNumber) {
   var normalizedClass = cleanText_(className, 3);
   var normalizedSeat = Number(seatNumber);
   if (AQUATIC_CONFIG.classes.indexOf(normalizedClass) < 0 ||
-      !Number.isInteger(normalizedSeat) || normalizedSeat < 1 || normalizedSeat > 25) {
-    throw apiError_('請選擇班級，並輸入 1～25 的座號。', 400);
+      !Number.isInteger(normalizedSeat) || normalizedSeat < 1 || normalizedSeat > 30) {
+    throw apiError_('請選擇班級，並輸入 1～30 的座號。', 400);
   }
   return { className: normalizedClass, seatNumber: normalizedSeat };
 }
