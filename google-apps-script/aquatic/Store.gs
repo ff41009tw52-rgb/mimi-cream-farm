@@ -11,8 +11,9 @@ function sheet_(name) {
   return sheet;
 }
 
-function rows_(sheetName) {
-  var sheet = sheet_(sheetName);
+function rows_(sheetName, spreadsheet) {
+  // The dashboard reads several tabs from one workbook; open it only once.
+  var sheet = spreadsheet ? spreadsheet.getSheetByName(sheetName) || sheet_(sheetName) : sheet_(sheetName);
   var lastRow = sheet.getLastRow();
   var headers = AQUATIC_CONFIG.sheets[sheetName];
   if (lastRow < 2) return [];
@@ -269,11 +270,14 @@ function recordFor_(studentId) {
 }
 
 function teacherDashboard_() {
-  var students = rows_('Students');
-  var observations = rows_('Observations');
-  var classifications = rows_('Classification');
-  var reflections = rows_('Reflection');
-  var environments = rows_('Environment');
+  var startedAt = Date.now();
+  var spreadsheet = configuredSpreadsheet_();
+  var students = rows_('Students', spreadsheet);
+  var observations = rows_('Observations', spreadsheet);
+  var classifications = rows_('Classification', spreadsheet);
+  var reflections = rows_('Reflection', spreadsheet);
+  var environments = rows_('Environment', spreadsheet);
+  var sheetsMs = Date.now() - startedAt;
   var classificationIds = new Set(classifications.filter(function (row) { return row.completedAt; }).map(function (row) { return String(row.studentId); }));
   var reflectionIds = new Set(reflections.filter(function (row) { return String(row.reflection || '').trim(); }).map(function (row) { return String(row.studentId); }));
   var environmentIds = new Set(environments.filter(function (row) { return row.completedAt; }).map(function (row) { return String(row.studentId); }));
@@ -282,10 +286,14 @@ function teacherDashboard_() {
     plantCounts[className] = {};
     Object.keys(AQUATIC_CONFIG.plants).forEach(function (plantId) { plantCounts[className][plantId] = 0; });
   });
+  var completedByStudent = new Map();
+  observations.forEach(function (row) {
+    if (!observationRowComplete_(row)) return;
+    var id = String(row.studentId);
+    completedByStudent.set(id, (completedByStudent.get(id) || 0) + 1);
+  });
   var studentOutput = students.map(function (student) {
-    var completedPlants = observations.filter(function (row) {
-      return String(row.studentId) === String(student.studentId) && observationRowComplete_(row);
-    }).length;
+    var completedPlants = completedByStudent.get(String(student.studentId)) || 0;
     return Object.assign(studentJson_(student), {
       completedPlants: completedPlants,
       classificationComplete: classificationIds.has(String(student.studentId)),
@@ -310,6 +318,7 @@ function teacherDashboard_() {
   var completedStudents = studentOutput.filter(function (student) {
     return student.completedPlants === Object.keys(AQUATIC_CONFIG.plants).length && student.classificationComplete && (student.environmentComplete || student.hasLegacyReflection);
   }).length;
+  console.info('aquatic.teacherDashboard sheetsMs=' + sheetsMs + ' aggregateMs=' + (Date.now() - startedAt - sheetsMs));
   return {
     summary: {
       studentCount: studentOutput.length,

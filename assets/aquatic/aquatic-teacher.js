@@ -217,6 +217,7 @@ async function loadDashboard(expectedToken = state.token, expectedSerial = authS
   if (!expectedToken) throw new Error('請先登入教師端。');
   const refresh = $('#teacher-refresh');
   if (refresh) { refresh.disabled = true; refresh.textContent = '載入中……'; }
+  const startedAt = performance.now();
   try {
     const dashboard = normalizeDashboard(await api.teacherDashboard(expectedToken));
     if (expectedToken !== state.token || expectedSerial !== authSerial) return false;
@@ -226,6 +227,7 @@ async function loadDashboard(expectedToken = state.token, expectedSerial = authS
     loginStatus();
     return true;
   } finally {
+    console.info('aquatic.teacherDashboard clientMs=' + Math.round(performance.now() - startedAt));
     if (refresh) { refresh.disabled = false; refresh.textContent = '重新整理'; }
   }
 }
@@ -279,7 +281,15 @@ $('#teacher-login-form').addEventListener('submit', async (event) => {
   loginStatus(state.token ? '正在重新讀取班級資料……' : '正在驗證教師密碼……');
   if (submit) { submit.disabled = true; submit.textContent = '處理中……'; }
   try {
-    const result = state.token ? { token: state.token } : await api.teacherLogin(new FormData(form).get('password'));
+    let result = { token: state.token };
+    if (!state.token) {
+      const startedAt = performance.now();
+      try {
+        result = await api.teacherLogin(new FormData(form).get('password'));
+      } finally {
+        console.info('aquatic.teacherLogin clientMs=' + Math.round(performance.now() - startedAt));
+      }
+    }
     if (serial !== authSerial) return;
     state.token = result.token;
     sessionStorage.setItem('aquatic.teacherToken', state.token);
