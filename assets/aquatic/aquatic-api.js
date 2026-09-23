@@ -87,9 +87,15 @@ export class AquaticApi {
     throw lastError || new Error('Google 雲端服務暫時無法使用。');
   }
 
-  health() { return this.call('health'); }
-  createProfile(profile) { return this.call('studentLogin', profile); }
-  studentRecord(token) { return this.call('studentRecord', { token }); }
+  health() {
+    return this.callWithRetry('health', {}, { attempts: 2, timeoutMs: 45000, retryDelayMs: 700 });
+  }
+  createProfile(profile) {
+    return this.callWithRetry('studentLogin', profile, { attempts: 2, timeoutMs: 45000, retryDelayMs: 900 });
+  }
+  studentRecord(token) {
+    return this.callWithRetry('studentRecord', { token }, { attempts: 2, timeoutMs: 45000, retryDelayMs: 900 });
+  }
   saveObservation(token, plantId, data) { return this.call('saveObservation', { token, plantId, data }); }
   async uploadPhoto(token, plantId, blob) {
     return this.call('uploadPhoto', {
@@ -100,7 +106,7 @@ export class AquaticApi {
     });
   }
   async studentPhoto(token, plantId) {
-    const result = await this.call('studentPhoto', { token, plantId });
+    const result = await this.callWithRetry('studentPhoto', { token, plantId }, { attempts: 2, timeoutMs: 45000, retryDelayMs: 700 });
     return base64ToBlob(result.base64, result.mimeType);
   }
   saveSummary(token, data) { return this.call('saveSummary', { token, data }); }
