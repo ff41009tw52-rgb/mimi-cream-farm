@@ -28,21 +28,24 @@
           <li><span>3</span>比較並自行分類</li>
         </ul>
       </div>
-      <form id="profile-form" class="card profile-card">
-        <h2>先領取觀察紀錄本</h2>
-        <label>班級<input name="className" autocomplete="organization" maxlength="12" required placeholder="例如：四年三班"></label>
-        <label>座號<input name="seatNumber" inputmode="numeric" maxlength="3" required placeholder="例如：12"></label>
-        <label>姓名<input name="studentName" autocomplete="name" maxlength="20" required placeholder="請輸入真實姓名"></label>
-        <p class="privacy-note">資料只供本次課堂與教師查看。請不要輸入電話、住址或密碼。</p>
-        <button class="primary-button" type="submit">開始觀察</button>
-        <p id="profile-error" class="form-error" role="alert"></p>
-      </form>
+      <div class="login-column">
+        <form id="profile-form" class="card profile-card">
+          <p class="eyebrow">個人觀察任務</p>
+          <h2>打開我的水生植物觀察簿</h2>
+          <label>💧 班級<select id="student-class" name="className" required aria-label="選擇班級"></select></label>
+          <label>🔎 座號（1～25）<input name="seatNumber" type="number" inputmode="numeric" min="1" max="25" required placeholder="請輸入座號"></label>
+          <p class="privacy-note">請先選班級，再輸入座號，就能回到自己的水生植物觀察簿。不需要輸入姓名或密碼。</p>
+          <button class="primary-button" type="submit">進入水生植物觀察</button>
+          <p id="profile-error" class="form-error" role="alert"></p>
+        </form>
+        <a class="teacher-entry" href="aquatic-teacher.html">👨‍🏫 教師儀表板</a>
+      </div>
     </section>
 
     <section id="field-guide-view" class="view" hidden>
       <div class="page-heading">
         <div>
-          <p class="eyebrow">我的水生植物圖鑑</p>
+          <p class="eyebrow">我的水生植物觀察簿</p>
           <h1 id="student-greeting">今天要觀察 7 種植物</h1>
         </div>
         <button id="switch-student" class="text-button" type="button">更換學生</button>

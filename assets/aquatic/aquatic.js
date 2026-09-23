@@ -1,4 +1,4 @@
-import { AQUATIC_PLANTS, CATEGORY_OPTIONS, OBSERVATION_QUESTIONS, plantById } from './aquatic-data.js';
+import { AQUATIC_CLASSES, AQUATIC_PLANTS, CATEGORY_OPTIONS, OBSERVATION_QUESTIONS, plantById } from './aquatic-data.js';
 import { AquaticApi, clearStoredStudent, getStoredStudent, setStoredStudent } from './aquatic-api.js';
 import { compressImage, getPhoto, photoKey, putPhoto } from './aquatic-storage.js';
 
@@ -54,7 +54,7 @@ async function loadRecord() {
 
 function renderGuide() {
   const student = state.student.student;
-  $('#student-greeting').textContent = `${student.className} ${student.seatNumber}號 ${student.studentName} 的圖鑑`;
+  $('#student-greeting').textContent = `${student.className}班 ${String(student.seatNumber).padStart(2, '0')}號｜我的水生植物觀察簿`;
   const completed = state.record.observations.filter((item) => item.completed).length;
   $('#progress-label').textContent = `${completed} / ${AQUATIC_PLANTS.length}`;
   $('#progress-bar').style.width = `${completed / AQUATIC_PLANTS.length * 100}%`;
@@ -182,7 +182,9 @@ async function retryPendingUploads() {
 
 $('#profile-form').addEventListener('submit', async (event) => {
   event.preventDefault(); $('#profile-error').textContent = ''; const form = new FormData(event.currentTarget);
-  const profile = { className: form.get('className'), seatNumber: form.get('seatNumber'), studentName: form.get('studentName') };
+  const seatNumber = Number(form.get('seatNumber'));
+  if (!Number.isInteger(seatNumber) || seatNumber < 1 || seatNumber > 25) { $('#profile-error').textContent = '座號請輸入 1～25。'; return; }
+  const profile = { className: form.get('className'), seatNumber };
   try { state.student = await api.createProfile(profile); setStoredStudent(state.student); await loadRecord(); renderGuide(); }
   catch (error) { $('#profile-error').textContent = error.message; }
 });
@@ -216,6 +218,9 @@ $('#classification-form').addEventListener('submit', async (event) => {
 $('#switch-student').addEventListener('click', () => { clearStoredStudent(); state.student = null; showView('profile'); });
 $('#review-record').addEventListener('click', renderGuide);
 window.addEventListener('online', () => { setConnection(); retryPendingUploads(); }); window.addEventListener('offline', setConnection); setConnection();
+
+const classSelect = $('#student-class');
+AQUATIC_CLASSES.forEach((className) => classSelect.append(new Option(`${className}班`, className)));
 
 (async function boot() {
   if (!state.student?.token) { showView('profile'); return; }

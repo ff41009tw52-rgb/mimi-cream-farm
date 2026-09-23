@@ -12,18 +12,20 @@
   <main class="app-shell teacher-shell">
     <section id="teacher-login-view" class="teacher-login">
       <form id="teacher-login-form" class="card profile-card">
-        <p class="eyebrow">教師專用</p><h1>查看全班觀察紀錄</h1>
-        <label>教師密碼<input name="password" type="password" autocomplete="current-password" required></label>
-        <button class="primary-button" type="submit">登入</button><p id="login-error" class="form-error" role="alert"></p>
+        <p class="eyebrow">教師專用</p><h1>橘咪咪與白奶油<br>教師管理中心</h1>
+        <p>請輸入教師專區密碼。</p>
+        <label>教師密碼<input name="password" type="password" inputmode="numeric" autocomplete="current-password" required></label>
+        <div class="form-actions"><a class="secondary-button button-link" href="aquatic.html">取消</a><button class="primary-button" type="submit">確定</button></div><p id="login-error" class="form-error" role="alert"></p>
       </form>
     </section>
     <section id="teacher-dashboard-view" hidden>
-      <div class="page-heading"><div><p class="eyebrow">班級儀表板</p><h1>全班觀察進度</h1></div><button id="teacher-refresh" class="secondary-button" type="button">重新整理</button></div>
+      <div class="page-heading"><div><p class="eyebrow">橘咪咪與白奶油 教師管理中心</p><h1><span id="dashboard-class-title">307班</span>・水生植物觀察</h1></div><button id="teacher-refresh" class="secondary-button" type="button">重新整理</button></div>
       <div id="summary-cards" class="summary-cards"></div>
-      <section class="card filters"><label>選擇班級<select id="class-filter"><option value="">全部班級</option></select></label><label>搜尋學生<input id="student-search" type="search" placeholder="姓名或座號"></label></section>
+      <section id="plant-progress-summary" class="card plant-progress-summary" aria-label="各植物完成數"></section>
+      <section class="card filters"><label>選擇班級<select id="class-filter"></select></label><label>搜尋座號<input id="student-search" type="search" inputmode="numeric" placeholder="例如：12"></label></section>
       <nav class="teacher-tabs" aria-label="教師端檢視"><button class="active" type="button" data-tab="students">學生進度</button><button type="button" data-tab="photos">全班照片牆</button></nav>
-      <section id="students-panel" class="teacher-panel"><div class="table-wrap"><table><thead><tr><th>班級</th><th>座號</th><th>姓名</th><th>已觀察</th><th>分類</th><th>心得</th><th></th></tr></thead><tbody id="student-rows"></tbody></table></div><p id="students-empty" class="empty-state" hidden>目前還沒有學生資料。</p></section>
-      <section id="photos-panel" class="teacher-panel" hidden><div id="photo-wall" class="photo-wall"></div><p id="photos-empty" class="empty-state" hidden>目前還沒有學生照片。</p></section>
+      <section id="students-panel" class="teacher-panel"><div class="table-wrap"><table><thead><tr><th>座號</th><th>植物紀錄</th><th>分類</th><th>心得</th><th>狀態</th><th></th></tr></thead><tbody id="student-rows"></tbody></table></div><p id="students-empty" class="empty-state" hidden>目前沒有符合條件的座號。</p></section>
+      <section id="photos-panel" class="teacher-panel" hidden><p class="wall-help">選擇植物後，可直接投影查看全班 01～25 號的照片。</p><div id="plant-filter" class="plant-filter" aria-label="選擇照片牆植物"></div><div id="photo-wall" class="photo-wall"></div></section>
     </section>
     <section id="student-detail-view" hidden><button id="detail-back" class="back-button" type="button">← 返回班級名單</button><div id="student-detail"></div></section>
   </main>

@@ -1,3 +1,5 @@
+export const AQUATIC_CLASSES = Object.freeze(['307', '308', '309', '310', '311', '312', '313']);
+
 export const AQUATIC_PLANTS = Object.freeze([
   {
     id: 'water-lettuce',

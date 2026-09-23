@@ -1,5 +1,7 @@
 const PLANTS = new Set(['water-lettuce','duckweed','water-hyacinth','hydrilla','water-lily','yellow-water-lily','lotus']);
 const PLANT_NAMES = { 'water-lettuce':'大萍', duckweed:'浮萍', 'water-hyacinth':'布袋蓮', hydrilla:'水蘊草', 'water-lily':'睡蓮', 'yellow-water-lily':'臺灣萍蓬草', lotus:'荷花' };
+const CLASSES = Object.freeze(['307','308','309','310','311','312','313']);
+const CLASS_SET = new Set(CLASSES);
 const CATEGORIES = new Set(['漂浮植物','沉水植物','浮葉植物','挺水植物']);
 const ALLOWED_ORIGINS = new Set(['https://ff41009tw52-rgb.github.io','http://localhost:4173','http://127.0.0.1:4173','http://localhost:5500','http://127.0.0.1:5500']);
 const MAX_PHOTO_BYTES = 6 * 1024 * 1024;
@@ -34,7 +36,7 @@ async function studentFromRequest(request, env) {
 async function makeTeacherToken(env) { const exp = Math.floor(Date.now()/1000) + 8*60*60; const payload = `teacher.${exp}`; return `${payload}.${await hmac(env.SESSION_SECRET, payload)}`; }
 async function isTeacher(request, env) { const token = (request.headers.get('Authorization') || '').replace(/^Bearer\s+/i,''); const match = token.match(/^teacher\.(\d+)\.([A-Za-z0-9_-]+)$/); if (!match || Number(match[1]) < Date.now()/1000 || !env.SESSION_SECRET) return false; const payload = `teacher.${match[1]}`; return safeEqual(match[2], await hmac(env.SESSION_SECRET, payload)); }
 
-function studentJson(row) { return { id:row.id, className:row.class_name, seatNumber:row.seat_number, studentName:row.student_name, createdAt:row.created_at }; }
+function studentJson(row) { return { id:row.id, className:row.class_name, seatNumber:Number(row.seat_number), createdAt:row.created_at, updatedAt:row.updated_at }; }
 function observationJson(row) { return { plantId:row.plant_id, answers:JSON.parse(row.answers_json || '{}'), notFound:Boolean(row.not_found), completed:Boolean(row.completed), hasPhoto:Boolean(row.photo_key), updatedAt:row.updated_at }; }
 
 async function recordFor(env, studentId) {
@@ -44,10 +46,16 @@ async function recordFor(env, studentId) {
 }
 
 async function handleProfile(request, env, origin) {
-  const body = await readJson(request); const className=clean(body.className,12), seatNumber=clean(body.seatNumber,3), studentName=clean(body.studentName,20);
-  if (!className || !/^\d{1,3}$/.test(seatNumber) || !studentName) return json({ error:'請正確輸入班級、數字座號與姓名。' },400,origin);
-  let student = await env.AQUATIC_DB.prepare('SELECT * FROM students WHERE class_name=? AND seat_number=? AND student_name=?').bind(className,seatNumber,studentName).first();
-  if (!student) { const id=crypto.randomUUID(); await env.AQUATIC_DB.prepare('INSERT INTO students(id,class_name,seat_number,student_name) VALUES(?,?,?,?)').bind(id,className,seatNumber,studentName).run(); student=await env.AQUATIC_DB.prepare('SELECT * FROM students WHERE id=?').bind(id).first(); }
+  const body = await readJson(request); const className=clean(body.className,3), seat=Number(clean(body.seatNumber,2));
+  if (!CLASS_SET.has(className) || !Number.isInteger(seat) || seat<1 || seat>25) return json({ error:'請選擇班級，並輸入 1～25 的座號。' },400,origin);
+  const seatNumber=String(seat);
+  let student = await env.AQUATIC_DB.prepare('SELECT * FROM students WHERE class_name=? AND seat_number=? ORDER BY created_at LIMIT 1').bind(className,seatNumber).first();
+  if (!student) {
+    const id=crypto.randomUUID();
+    await env.AQUATIC_DB.prepare("INSERT OR IGNORE INTO students(id,class_name,seat_number,student_name) VALUES(?,?,?,'')").bind(id,className,seatNumber).run();
+    student=await env.AQUATIC_DB.prepare('SELECT * FROM students WHERE class_name=? AND seat_number=? ORDER BY created_at LIMIT 1').bind(className,seatNumber).first();
+  }
+  if (!student) return json({ error:'目前無法建立學生觀察簿，請稍後再試。' },500,origin);
   const token=randomToken(); await env.AQUATIC_DB.prepare('INSERT INTO student_devices(token_hash,student_id) VALUES(?,?)').bind(await sha256(token),student.id).run();
   return json({ token, student:studentJson(student) },200,origin);
 }
@@ -87,12 +95,17 @@ async function handleSummary(request, env, origin, student) {
 }
 
 async function teacherDashboard(env, origin) {
-  const studentsResult=await env.AQUATIC_DB.prepare(`SELECT s.*,COUNT(CASE WHEN o.completed=1 THEN 1 END) completed_plants,MAX(CASE WHEN ss.completed_at IS NOT NULL THEN 1 ELSE 0 END) summary_complete,MAX(CASE WHEN LENGTH(ss.reflection)>0 THEN 1 ELSE 0 END) has_reflection FROM students s LEFT JOIN observations o ON o.student_id=s.id LEFT JOIN student_summaries ss ON ss.student_id=s.id GROUP BY s.id ORDER BY s.class_name,CAST(s.seat_number AS INTEGER),s.student_name`).all();
-  const photosResult=await env.AQUATIC_DB.prepare(`SELECT s.id student_id,s.class_name,s.seat_number,s.student_name,o.plant_id FROM observations o JOIN students s ON s.id=o.student_id WHERE o.photo_key IS NOT NULL ORDER BY s.class_name,CAST(s.seat_number AS INTEGER),o.plant_id`).all();
+  const studentsResult=await env.AQUATIC_DB.prepare(`SELECT s.*,COUNT(CASE WHEN o.completed=1 THEN 1 END) completed_plants,MAX(CASE WHEN ss.completed_at IS NOT NULL THEN 1 ELSE 0 END) summary_complete,MAX(CASE WHEN LENGTH(ss.reflection)>0 THEN 1 ELSE 0 END) has_reflection FROM students s LEFT JOIN observations o ON o.student_id=s.id LEFT JOIN student_summaries ss ON ss.student_id=s.id GROUP BY s.id ORDER BY s.class_name,CAST(s.seat_number AS INTEGER)`).all();
+  const photosResult=await env.AQUATIC_DB.prepare(`SELECT s.id student_id,s.class_name,s.seat_number,o.plant_id FROM observations o JOIN students s ON s.id=o.student_id WHERE o.photo_key IS NOT NULL ORDER BY s.class_name,CAST(s.seat_number AS INTEGER),o.plant_id`).all();
+  const plantCountsResult=await env.AQUATIC_DB.prepare('SELECT s.class_name,o.plant_id,COUNT(*) completed_count FROM observations o JOIN students s ON s.id=o.student_id WHERE o.completed=1 GROUP BY s.class_name,o.plant_id').all();
   const students=(studentsResult.results||[]).map((row)=>({ ...studentJson(row), completedPlants:Number(row.completed_plants), classificationComplete:Boolean(row.summary_complete), hasReflection:Boolean(row.has_reflection) }));
-  const photos=(photosResult.results||[]).map((row)=>({ studentId:row.student_id,className:row.class_name,seatNumber:row.seat_number,studentName:row.student_name,plantId:row.plant_id,plantName:PLANT_NAMES[row.plant_id] }));
-  const classMap=new Map(); students.forEach((student)=>classMap.set(student.className,(classMap.get(student.className)||0)+1)); const classes=[...classMap].map(([className,studentCount])=>({className,studentCount})); const completedStudents=students.filter((student)=>student.classificationComplete).length;
-  return json({ summary:{studentCount:students.length,completedStudents,photoCount:photos.length,completionRate:students.length?Math.round(completedStudents/students.length*100):0},classes,students,photos },200,origin);
+  const photos=(photosResult.results||[]).map((row)=>({ studentId:row.student_id,className:row.class_name,seatNumber:Number(row.seat_number),plantId:row.plant_id,plantName:PLANT_NAMES[row.plant_id] }));
+  const classes=CLASSES.map((className)=>({className,studentCount:students.filter((student)=>student.className===className).length}));
+  const completedStudents=students.filter((student)=>student.completedPlants===PLANTS.size&&student.classificationComplete&&student.hasReflection).length;
+  const startedToday=students.filter((student)=>new Date(`${student.createdAt.replace(' ','T')}Z`).toLocaleDateString('en-CA',{timeZone:'Asia/Taipei'})===new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Taipei'})).length;
+  const plantCounts=Object.fromEntries(CLASSES.map((className)=>[className,Object.fromEntries([...PLANTS].map((plantId)=>[plantId,0]))]));
+  (plantCountsResult.results||[]).forEach((row)=>{ if (plantCounts[row.class_name]&&PLANTS.has(row.plant_id)) plantCounts[row.class_name][row.plant_id]=Number(row.completed_count); });
+  return json({ summary:{studentCount:students.length,startedToday,completedStudents,photoCount:photos.length,completionRate:students.length?Math.round(completedStudents/students.length*100):0},classes,students,photos,plantCounts },200,origin);
 }
 
 async function route(request, env) {

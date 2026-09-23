@@ -4,10 +4,10 @@ CREATE TABLE IF NOT EXISTS students (
   id TEXT PRIMARY KEY,
   class_name TEXT NOT NULL,
   seat_number TEXT NOT NULL,
-  student_name TEXT NOT NULL,
+  student_name TEXT NOT NULL DEFAULT '',
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(class_name, seat_number, student_name)
+  UNIQUE(class_name, seat_number)
 );
 
 CREATE TABLE IF NOT EXISTS student_devices (
@@ -42,6 +42,6 @@ CREATE TABLE IF NOT EXISTS student_summaries (
 );
 
 CREATE INDEX IF NOT EXISTS idx_students_class_seat ON students(class_name, CAST(seat_number AS INTEGER));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_students_identity ON students(class_name, seat_number);
 CREATE INDEX IF NOT EXISTS idx_observations_student ON observations(student_id);
 CREATE INDEX IF NOT EXISTS idx_observations_photo ON observations(photo_key) WHERE photo_key IS NOT NULL;
-
