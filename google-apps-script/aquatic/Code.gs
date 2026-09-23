@@ -58,6 +58,10 @@ function route_(request) {
     if (!targetStudent) throw apiError_('找不到學生。', 404);
     return photoFor_(targetStudent.studentId, cleanText_(request.plantId, 40));
   }
+  if (action === 'teacherResetStudent') {
+    requireTeacher_(request.token);
+    return resetStudentBySeat_(request.className, request.seatNumber);
+  }
   throw apiError_('找不到這個 API 功能。', 404);
 }
 

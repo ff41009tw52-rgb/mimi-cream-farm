@@ -56,6 +56,23 @@ function setPhoto(thumb, blob, plantName) {
   thumb.replaceChildren(img);
 }
 
+function setCompletionBadge(badge, complete) {
+  if (!badge) return;
+  badge.className = `plant-state${complete ? ' done' : ''}`;
+  badge.textContent = complete ? '✓ 已完成' : '未完成';
+}
+
+function updateStrictGuideState(completedCount) {
+  const button = document.querySelector('#open-classification');
+  const help = document.querySelector('#classification-help');
+  if (button) button.disabled = completedCount !== AQUATIC_PLANTS.length;
+  if (help) {
+    help.textContent = completedCount === AQUATIC_PLANTS.length
+      ? '七種植物都完整完成了，現在進行植物分類與環境調查。'
+      : `還有 ${AQUATIC_PLANTS.length - completedCount} 種植物未完整完成；照片與三題都完成後才算完成。`;
+  }
+}
+
 async function resolvePhoto(studentSession, plant, observation) {
   const studentId = studentSession?.student?.id;
   if (!studentId) return null;
@@ -78,6 +95,8 @@ async function refreshGuideThumbnails() {
   const studentId = studentSession?.student?.id;
   const record = studentId ? cachedRecord(studentId) : { observations: [] };
   const currentRefresh = ++refreshId;
+  let verifiedComplete = 0;
+  updateStrictGuideState(0);
 
   cards.forEach((card, index) => {
     const plant = AQUATIC_PLANTS[index];
@@ -86,25 +105,27 @@ async function refreshGuideThumbnails() {
     if (!plant || !thumb) return;
 
     const observation = observationFor(record, plant.id);
-    const complete = isStrictlyComplete(observation);
+    const candidate = isStrictlyComplete(observation);
 
-    if (badge) {
-      badge.className = `plant-state${complete ? ' done' : ''}`;
-      badge.textContent = complete ? '✓ 已完成' : '未完成';
-    }
-
+    setCompletionBadge(badge, false);
     setPlaceholder(thumb);
-    if (!complete) return;
+    if (!candidate) return;
 
     resolvePhoto(studentSession, plant, observation)
       .then((blob) => {
         if (currentRefresh !== refreshId || !thumb.isConnected) return;
-        if (blob) setPhoto(thumb, blob, plant.name);
+        if (!blob) return;
+        setPhoto(thumb, blob, plant.name);
+        setCompletionBadge(badge, true);
+        verifiedComplete += 1;
+        updateStrictGuideState(verifiedComplete);
       })
       .catch((error) => {
         console.error(`[aquatic] ${plant.name} photo load failed`, error);
         if (currentRefresh === refreshId && thumb.isConnected) {
           setPlaceholder(thumb, '照片暫時無法讀取');
+          setCompletionBadge(badge, false);
+          updateStrictGuideState(verifiedComplete);
         }
       });
   });
@@ -261,7 +282,6 @@ if (classificationView) {
   }).observe(classificationView, { attributes: true, attributeFilter: ['hidden'] });
 }
 
-// 保留學生端簡潔訊息，但在開發者主控台留下真正的照片上傳錯誤。
 const originalUploadPhoto = AquaticApi.prototype.uploadPhoto;
 AquaticApi.prototype.uploadPhoto = async function patchedUploadPhoto(...args) {
   try {

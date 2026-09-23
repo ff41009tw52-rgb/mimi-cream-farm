@@ -98,6 +98,14 @@ function parseJson_(value, fallback) {
   try { return JSON.parse(String(value || '')); } catch (error) { return fallback; }
 }
 
+function observationRowComplete_(row) {
+  if (!row || String(row.status) !== 'completed' || !String(row.driveFileId || '').trim()) return false;
+  var answers = parseJson_(row.answers, {});
+  return ['location', 'leaf_position', 'root_position'].every(function (key) {
+    return Boolean(String(answers[key] || '').trim());
+  });
+}
+
 function observationJson_(row) {
   var answers = parseJson_(row.answers, {});
   var comparison = parseJson_(row.comparisonAnswers, {});
@@ -107,7 +115,7 @@ function observationJson_(row) {
     answers: answers,
     notFound: String(row.status) === 'not_found',
     notFoundReason: String(row.notFoundReason || ''),
-    completed: ['completed', 'not_found'].indexOf(String(row.status)) >= 0,
+    completed: observationRowComplete_(row),
     hasPhoto: Boolean(row.driveFileId),
     updatedAt: String(row.updatedAt || '')
   };
@@ -156,17 +164,17 @@ function saveObservation_(student, plantId, data) {
   };
   var comparisonAnswers = { difference: cleanText_(sourceAnswers.difference || legacyComparison.difference, 120) };
   var required = [answers.location, answers.leaf_position, answers.root_position];
-  if (completed && !notFound && required.some(function (value) { return !value; })) {
+  if (completed && required.some(function (value) { return !value; })) {
     throw apiError_('請完成三個觀察選擇題。', 400);
   }
-  if (completed && !notFound && (!existing || !existing.driveFileId)) {
+  if (completed && (!existing || !existing.driveFileId)) {
     throw apiError_('請先上傳植物照片。', 400);
   }
   var lock = LockService.getScriptLock();
   lock.waitLock(15000);
   try {
     upsertObservationObject_(student, plantId, {
-      status: completed ? (notFound ? 'not_found' : 'completed') : 'draft',
+      status: completed ? 'completed' : 'draft',
       answers: JSON.stringify(answers),
       comparisonAnswers: JSON.stringify(comparisonAnswers),
       notFoundReason: notFound ? cleanText_(data.notFoundReason || '今天沒有找到', 160) : ''
@@ -195,9 +203,7 @@ function upsertByStudent_(sheetName, student, changes) {
 
 function saveSummary_(student, body) {
   body = body || {};
-  var completedPlants = observationRowsFor_(student.studentId).filter(function (row) {
-    return ['completed', 'not_found'].indexOf(String(row.status)) >= 0;
-  }).length;
+  var completedPlants = observationRowsFor_(student.studentId).filter(observationRowComplete_).length;
   if (completedPlants !== Object.keys(AQUATIC_CONFIG.plants).length) {
     throw apiError_('請先完成七種植物觀察。', 400);
   }
@@ -278,7 +284,7 @@ function teacherDashboard_() {
   });
   var studentOutput = students.map(function (student) {
     var completedPlants = observations.filter(function (row) {
-      return String(row.studentId) === String(student.studentId) && ['completed', 'not_found'].indexOf(String(row.status)) >= 0;
+      return String(row.studentId) === String(student.studentId) && observationRowComplete_(row);
     }).length;
     return Object.assign(studentJson_(student), {
       completedPlants: completedPlants,
@@ -288,7 +294,7 @@ function teacherDashboard_() {
     });
   });
   observations.forEach(function (row) {
-    if (plantCounts[row.className] && ['completed', 'not_found'].indexOf(String(row.status)) >= 0 && plantCounts[row.className][row.plantId] != null) {
+    if (plantCounts[row.className] && observationRowComplete_(row) && plantCounts[row.className][row.plantId] != null) {
       plantCounts[row.className][row.plantId] += 1;
     }
   });
