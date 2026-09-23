@@ -1,5 +1,5 @@
 import { AQUATIC_CLASSES, AQUATIC_PLANTS, CATEGORY_OPTIONS, OBSERVATION_QUESTIONS, WATER_FLOW_OPTIONS } from './aquatic-data.js';
-import { AquaticApi } from './aquatic-api.js?v=20260924-7';
+import { AquaticApi } from './aquatic-api.js?v=20260924-8';
 
 const api = new AquaticApi();
 const $ = (selector, root = document) => root.querySelector(selector);
@@ -52,6 +52,17 @@ function showLogin(message = '') {
   $('#student-detail-view').hidden = true;
   $('#teacher-logout').hidden = true;
   $('#login-error').textContent = message;
+  const password = $('#teacher-login-form input[name="password"]');
+  password.required = !state.token;
+  password.disabled = Boolean(state.token);
+  password.closest('label').hidden = Boolean(state.token);
+  $('#teacher-login-form button[type="submit"]').textContent = state.token ? '重試載入' : '確定';
+}
+
+function loginStatus(message = '') {
+  const status = $('#login-status');
+  status.textContent = message;
+  status.hidden = !message;
 }
 
 function normalizeDashboard(data) {
@@ -212,6 +223,7 @@ async function loadDashboard(expectedToken = state.token, expectedSerial = authS
     state.dashboard = dashboard;
     renderAll();
     showDashboard();
+    loginStatus();
     return true;
   } finally {
     if (refresh) { refresh.disabled = false; refresh.textContent = '重新整理'; }
@@ -264,24 +276,27 @@ $('#teacher-login-form').addEventListener('submit', async (event) => {
   const submit = form.querySelector('button[type="submit"]');
   const serial = ++authSerial;
   $('#login-error').textContent = '';
-  if (submit) { submit.disabled = true; submit.textContent = '登入中……'; }
+  loginStatus(state.token ? '正在重新讀取班級資料……' : '正在驗證教師密碼……');
+  if (submit) { submit.disabled = true; submit.textContent = '處理中……'; }
   try {
-    const result = await api.teacherLogin(new FormData(form).get('password'));
+    const result = state.token ? { token: state.token } : await api.teacherLogin(new FormData(form).get('password'));
     if (serial !== authSerial) return;
     state.token = result.token;
     sessionStorage.setItem('aquatic.teacherToken', state.token);
     form.reset();
+    loginStatus('密碼已驗證，正在讀取班級資料……');
     const loaded = await loadDashboard(state.token, serial);
-    if (!loaded && serial === authSerial) showLogin('教師資料載入被新的登入動作取代，請再按一次確定。');
+    if (!loaded && serial === authSerial) showLogin('教師資料載入被新的登入動作取代，請按「重試載入」。');
   } catch (error) {
     if (serial !== authSerial) return;
     if (error?.status === 401) {
       sessionStorage.removeItem('aquatic.teacherToken');
       state.token = null;
     }
-    showLogin(error?.message || '教師端暫時無法載入，請稍後再試。');
+    showLogin(state.token ? '教師身分已驗證，但班級資料暫時無法載入。請按「重試載入」，無須重輸密碼。' : (error?.message || '教師端暫時無法載入，請稍後再試。'));
+    loginStatus();
   } finally {
-    if (serial === authSerial && submit) { submit.disabled = false; submit.textContent = '確定'; }
+    if (serial === authSerial && submit) { submit.disabled = false; submit.textContent = state.token ? '重試載入' : '確定'; }
   }
 });
 
@@ -313,17 +328,15 @@ $('#teacher-logout').addEventListener('click', () => {
   state.dashboard = null;
   clearPhotoUrls();
   showLogin();
+  loginStatus();
 });
 
 (async function boot() {
   showLogin();
-  if (!state.token) {
-    api.health().catch(() => {});
-    return;
-  }
+  if (!state.token) return;
   const tokenAtBoot = state.token;
   const serialAtBoot = authSerial;
-  $('#login-error').textContent = '正在讀取教師資料……';
+  loginStatus('正在讀取班級資料……');
   try {
     await loadDashboard(tokenAtBoot, serialAtBoot);
   } catch (error) {
@@ -332,8 +345,10 @@ $('#teacher-logout').addEventListener('click', () => {
       sessionStorage.removeItem('aquatic.teacherToken');
       state.token = null;
       showLogin('教師登入已失效，請重新登入。');
+      loginStatus();
     } else {
-      showLogin(error?.message || '教師資料載入失敗，請稍後再試。');
+      showLogin('教師身分已驗證，但班級資料暫時無法載入。請按「重試載入」，無須重輸密碼。');
+      loginStatus();
     }
   }
 })();

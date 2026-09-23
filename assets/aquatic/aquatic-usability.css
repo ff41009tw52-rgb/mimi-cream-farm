@@ -28,3 +28,8 @@
     width: 100%;
   }
 }
+#teacher-login-form .login-status {
+  color: #0f766e;
+  font-weight: 600;
+  margin: 0.8rem 0 0;
+}
