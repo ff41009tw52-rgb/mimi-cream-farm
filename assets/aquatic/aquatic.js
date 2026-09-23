@@ -147,7 +147,7 @@ function openPlant(plantId) {
   $('#photo-preview').innerHTML = observation?.hasPhoto ? '<p>照片載入中……</p>' : '<p>還沒有照片</p>';
   $('#student-photo-compare').textContent = observation?.hasPhoto ? '照片載入中……' : '我的照片';
   $('#photo-message').textContent = observation?.hasPhoto ? '正在背景載入照片，題目可以先作答。' : '照片只會用在你的圖鑑與教師課堂檢視。';
-  $('#retry-upload').hidden = true; $('#observation-error').textContent = ''; $('#save-status').textContent = '';
+  $('#retry-upload').hidden = true; $('#photo-validation').textContent = ''; $('#observation-error').textContent = ''; $('#save-status').textContent = '';
   renderQuestions(draft?.answers || observation?.answers || {}); showView('plant'); loadPlantPhoto(plantId, loadId);
 }
 
@@ -172,6 +172,7 @@ const uploadCurrentPhoto = () => uploadPlantPhoto(state.currentPlant.id);
 
 async function handlePhoto(file) {
   if (!file) return;
+  $('#photo-validation').textContent = ''; $('#observation-error').textContent = '';
   $('#photo-message').textContent = '正在壓縮照片……';
   try {
     const plantId = state.currentPlant.id; const blob = await compressImage(file); const key = photoKey(state.student.student.id, plantId);
@@ -237,7 +238,15 @@ $('#retry-upload').addEventListener('click', async () => { $('#photo-message').t
 $('#observation-form').addEventListener('input', () => state.currentPlant && saveDraft(state.currentPlant.id, collectObservation()));
 $('#observation-form').addEventListener('submit', async (event) => {
   event.preventDefault(); const data = collectObservation(); const plantId = state.currentPlant.id; const local = await getPhoto(photoKey(state.student.student.id, plantId)).catch(() => null);
-  if (!local?.blob && !observationFor(plantId)?.hasPhoto) { $('#observation-error').textContent = '請先拍下這種植物。'; return; }
+  if (!local?.blob && !observationFor(plantId)?.hasPhoto) {
+    $('#photo-validation').textContent = '請先拍下這種植物。';
+    $('#observation-error').textContent = '請先拍下這種植物。';
+    const heading = $('#photo-step-title');
+    heading.focus({ preventScroll: true });
+    $('.photo-card').scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+    return;
+  }
+  $('#photo-validation').textContent = '';
   if (Object.values(data.answers).some((value) => !value)) { $('#observation-error').textContent = '請完成三個觀察選擇題。'; return; }
   $('#observation-error').textContent = ''; $('#save-status').textContent = '正在儲存……'; const button = $('#complete-observation'); button.disabled = true;
   try {

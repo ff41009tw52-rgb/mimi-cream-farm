@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="assets/aquatic/aquatic.css?v=20260924-3">
   <link rel="stylesheet" href="assets/aquatic/aquatic-fixes.css?v=20260924-3">
   <link rel="stylesheet" href="assets/aquatic/aquatic-record.css?v=20260924-1">
+  <link rel="stylesheet" href="assets/aquatic/aquatic-usability.css?v=1">
 </head>
 <body>
   <header class="topbar">
@@ -63,12 +64,13 @@
       <div class="page-heading compact"><div><p class="eyebrow">植物觀察紀錄</p><h1 id="plant-title"></h1></div><span id="plant-status" class="status-pill"></span></div>
       <div class="observation-layout">
         <section class="card photo-card">
-          <h2>1. 拍下你看到的植物</h2>
+          <h2 id="photo-step-title" tabindex="-1">1. 拍下你看到的植物</h2>
           <div id="photo-preview" class="photo-preview"><p>還沒有照片</p></div>
           <div class="photo-actions">
             <label class="primary-button file-button">拍照或選擇照片<input id="photo-input" type="file" accept="image/*" capture="environment"></label>
             <button id="retry-upload" class="secondary-button" type="button" hidden>重新上傳</button>
           </div>
+          <p id="photo-validation" class="form-error" role="alert"></p>
           <p id="photo-message" class="helper" aria-live="polite">照片只會用在你的圖鑑與教師課堂檢視。</p>
         </section>
 
@@ -155,7 +157,7 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>window.AQUATIC_API_URL = window.AQUATIC_API_URL || 'https://script.google.com/macros/s/AKfycbxAH8T5Qg6rp9_HacZrw0FTNq7BoOEBTwvxc8Bppu_cMdjdvGJzNQ3cqjR0oKmT9aZG/exec';</script>
-  <script type="module" src="assets/aquatic/aquatic.js?v=20260924-5"></script>
+  <script type="module" src="assets/aquatic/aquatic.js?v=20260924-6"></script>
   <script type="module" src="assets/aquatic/aquatic-fixes.js?v=20260924-5"></script>
 </body>
 </html>
