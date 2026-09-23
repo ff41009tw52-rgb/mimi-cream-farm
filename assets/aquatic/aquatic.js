@@ -222,7 +222,7 @@ async function saveDraftAndReturn() {
 
 $('#profile-form').addEventListener('submit', async (event) => {
   event.preventDefault(); $('#profile-error').textContent = ''; const form = new FormData(event.currentTarget); const seatNumber = Number(form.get('seatNumber'));
-  if (!Number.isInteger(seatNumber) || seatNumber < 1 || seatNumber > 25) { $('#profile-error').textContent = '座號請輸入 1～25。'; return; }
+  if (!Number.isInteger(seatNumber) || seatNumber < 1 || seatNumber > 30) { $('#profile-error').textContent = '座號請輸入 1～30。'; return; }
   const profile = { className: String(form.get('className')), seatNumber };
   showLoading('正在開啟觀察簿……', `${profile.className}班 ${String(seatNumber).padStart(2, '0')}號，正在載入雲端紀錄。`);
   try {
