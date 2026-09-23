@@ -2,6 +2,12 @@ name: Deploy aquatic observation worker
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - feat/aquatic-observation-cloud
+    paths:
+      - 'cloudflare/aquatic/**'
+      - '.github/workflows/deploy-aquatic-worker.yml'
 
 permissions:
   contents: read
