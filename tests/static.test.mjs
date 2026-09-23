@@ -45,6 +45,7 @@ assert.match(student, /name="aquaticPlant"/); assert.match(student, /name="aquat
 assert.match(app, /正在開啟觀察簿/); assert.match(app, /照片載入中/); assert.match(app, /紀錄已先保存在這台裝置/);
 assert.match(app, /readCachedRecord/); assert.match(app, /cacheRecord/); assert.match(app, /loadPlantPhoto/);
 assert.match(app, /observer\.disconnect/); assert.doesNotMatch(app, /await loadRecord\(\); renderGuide/);
+assert.match(app, /const keepCompleted = Boolean\(existing\?\.completed && existing\?\.hasPhoto/);
 assert.match(store, /record: recordFor_/); assert.match(store, /Environment/); assert.match(teacherApp, /分類與環境調查/);
 
 assert.doesNotMatch(deployWorkflow, /r2 bucket|d1 execute|wrangler deploy/i);
