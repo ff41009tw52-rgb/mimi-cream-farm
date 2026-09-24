@@ -8,8 +8,27 @@ const photoWall = document.querySelector('#photo-wall');
 const photosPanel = document.querySelector('#photos-panel');
 const toast = document.querySelector('#toast');
 const repairedPhotoUrls = new Set();
-let dashboardPromise = null;
+let lastTeacherStudent = null;
+let lastDashboard = null;
 let photoRepairQueued = false;
+
+// Cache the same API responses the main teacher app is already requesting.
+// This avoids an extra dashboard request just to discover student IDs for photos.
+const originalTeacherStudent = AquaticApi.prototype.teacherStudent;
+AquaticApi.prototype.teacherStudent = async function patchedTeacherStudent(...args) {
+  const result = await originalTeacherStudent.apply(this, args);
+  lastTeacherStudent = result;
+  queuePhotoRepair();
+  return result;
+};
+
+const originalTeacherDashboard = AquaticApi.prototype.teacherDashboard;
+AquaticApi.prototype.teacherDashboard = async function patchedTeacherDashboard(...args) {
+  const result = await originalTeacherDashboard.apply(this, args);
+  lastDashboard = result;
+  queuePhotoRepair();
+  return result;
+};
 
 function showToast(message) {
   if (!toast) return;
@@ -77,18 +96,6 @@ function classSeatFromText(value) {
   return match ? { className: match[1], seatNumber: Number(match[2]) } : null;
 }
 
-async function teacherDashboard() {
-  const token = sessionStorage.getItem('aquatic.teacherToken');
-  if (!token) throw new Error('教師登入已失效');
-  if (!dashboardPromise) {
-    dashboardPromise = api.teacherDashboard(token).catch((error) => {
-      dashboardPromise = null;
-      throw error;
-    });
-  }
-  return dashboardPromise;
-}
-
 function studentForIdentity(dashboard, identity) {
   if (!identity || !Array.isArray(dashboard?.students)) return null;
   return dashboard.students.find((student) =>
@@ -97,53 +104,66 @@ function studentForIdentity(dashboard, identity) {
   ) || null;
 }
 
+async function fetchTeacherPhotoWithRetry(token, studentId, plantId) {
+  let lastError;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      return await api.teacherPhoto(token, studentId, plantId);
+    } catch (error) {
+      lastError = error;
+      if (attempt === 0) await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+  }
+  throw lastError;
+}
+
 async function loadTeacherPhoto(img, studentId, plantId) {
-  if (!img || !studentId || !plantId || img.src || img.dataset.photoRepairLoading === '1') return;
+  if (!img || !studentId || !plantId || img.getAttribute('src') || img.dataset.photoRepairLoading === '1') return;
   const token = sessionStorage.getItem('aquatic.teacherToken');
   if (!token) return;
+
   img.dataset.photoRepairLoading = '1';
+  img.hidden = false;
   try {
-    const blob = await api.teacherPhoto(token, studentId, plantId);
-    if (!img.isConnected || img.src) return;
+    const blob = await fetchTeacherPhotoWithRetry(token, studentId, plantId);
+    if (img.getAttribute('src')) return;
     const url = URL.createObjectURL(blob);
     repairedPhotoUrls.add(url);
     img.src = url;
     img.hidden = false;
     img.dataset.photoRepairLoaded = '1';
   } catch (error) {
-    if (img.isConnected && !img.src) img.alt = '照片暫時無法讀取';
-    console.error('[aquatic teacher] photo repair failed', error);
+    img.alt = '照片暫時無法讀取';
+    console.error('[aquatic teacher] photo load failed', { studentId, plantId, error });
   } finally {
     delete img.dataset.photoRepairLoading;
   }
 }
 
-async function repairStudentDetailPhotos() {
-  if (!detailRoot || detailView?.hidden) return;
-  const identity = currentStudentIdentity();
-  if (!identity) return;
-  const dashboard = await teacherDashboard().catch(() => null);
-  const student = studentForIdentity(dashboard, identity);
-  if (!student) return;
+function repairStudentDetailPhotos() {
+  if (!detailRoot || detailView?.hidden || !lastTeacherStudent?.student || !lastTeacherStudent?.record) return;
+  const visibleIdentity = currentStudentIdentity();
+  const student = lastTeacherStudent.student;
+  if (!visibleIdentity || String(student.className) !== String(visibleIdentity.className) || Number(student.seatNumber) !== Number(visibleIdentity.seatNumber)) return;
 
+  const observations = Array.isArray(lastTeacherStudent.record.observations) ? lastTeacherStudent.record.observations : [];
   detailRoot.querySelectorAll('.detail-plant').forEach((card) => {
-    const img = card.querySelector('img');
-    if (!img || img.hidden || img.src) return;
     const plantId = plantIdForName(card.querySelector('h2')?.textContent);
-    if (plantId) loadTeacherPhoto(img, student.id, plantId);
+    const observation = observations.find((item) => item.plantId === plantId);
+    if (!plantId || !observation?.hasPhoto) return;
+    const img = card.querySelector('img');
+    if (!img || img.getAttribute('src')) return;
+    loadTeacherPhoto(img, student.id, plantId);
   });
 }
 
-async function repairPhotoWall() {
-  if (!photoWall || photosPanel?.hidden) return;
-  const dashboard = await teacherDashboard().catch(() => null);
-  if (!dashboard) return;
-
+function repairPhotoWall() {
+  if (!photoWall || photosPanel?.hidden || !lastDashboard) return;
   photoWall.querySelectorAll('.wall-card').forEach((card) => {
     const img = card.querySelector('img');
-    if (!img || img.src) return;
+    if (!img || img.getAttribute('src')) return;
     const identity = classSeatFromText(card.querySelector('strong')?.textContent);
-    const student = studentForIdentity(dashboard, identity);
+    const student = studentForIdentity(lastDashboard, identity);
     const plantId = plantIdForName(card.querySelector('span')?.textContent);
     if (student && plantId) loadTeacherPhoto(img, student.id, plantId);
   });
@@ -152,24 +172,19 @@ async function repairPhotoWall() {
 function queuePhotoRepair() {
   if (photoRepairQueued) return;
   photoRepairQueued = true;
-  setTimeout(() => {
+  requestAnimationFrame(() => {
     photoRepairQueued = false;
+    ensureResetButton();
     repairStudentDetailPhotos();
     repairPhotoWall();
-  }, 0);
+  });
 }
 
 if (detailRoot) {
-  new MutationObserver(() => {
-    ensureResetButton();
-    queuePhotoRepair();
-  }).observe(detailRoot, { childList: true, subtree: true });
+  new MutationObserver(queuePhotoRepair).observe(detailRoot, { childList: true, subtree: true });
 }
 if (detailView) {
-  new MutationObserver(() => {
-    ensureResetButton();
-    queuePhotoRepair();
-  }).observe(detailView, { attributes: true, attributeFilter: ['hidden'] });
+  new MutationObserver(queuePhotoRepair).observe(detailView, { attributes: true, attributeFilter: ['hidden'] });
 }
 if (photoWall) {
   new MutationObserver(queuePhotoRepair).observe(photoWall, { childList: true, subtree: true });
