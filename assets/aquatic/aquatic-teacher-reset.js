@@ -1,9 +1,15 @@
-import { AquaticApi } from './aquatic-api.js?v=20260924-7';
+import { AQUATIC_PLANTS } from './aquatic-data.js';
+import { AquaticApi } from './aquatic-api.js?v=20260924-8';
 
 const api = new AquaticApi();
 const detailRoot = document.querySelector('#student-detail');
 const detailView = document.querySelector('#student-detail-view');
+const photoWall = document.querySelector('#photo-wall');
+const photosPanel = document.querySelector('#photos-panel');
 const toast = document.querySelector('#toast');
+const repairedPhotoUrls = new Set();
+let dashboardPromise = null;
+let photoRepairQueued = false;
 
 function showToast(message) {
   if (!toast) return;
@@ -62,10 +68,120 @@ function ensureResetButton() {
   header.append(button);
 }
 
+function plantIdForName(name) {
+  return AQUATIC_PLANTS.find((plant) => plant.name === String(name || '').trim())?.id || '';
+}
+
+function classSeatFromText(value) {
+  const match = String(value || '').match(/(\d{3})班\s*(\d{1,2})號/);
+  return match ? { className: match[1], seatNumber: Number(match[2]) } : null;
+}
+
+async function teacherDashboard() {
+  const token = sessionStorage.getItem('aquatic.teacherToken');
+  if (!token) throw new Error('教師登入已失效');
+  if (!dashboardPromise) {
+    dashboardPromise = api.teacherDashboard(token).catch((error) => {
+      dashboardPromise = null;
+      throw error;
+    });
+  }
+  return dashboardPromise;
+}
+
+function studentForIdentity(dashboard, identity) {
+  if (!identity || !Array.isArray(dashboard?.students)) return null;
+  return dashboard.students.find((student) =>
+    String(student.className) === String(identity.className) &&
+    Number(student.seatNumber) === Number(identity.seatNumber)
+  ) || null;
+}
+
+async function loadTeacherPhoto(img, studentId, plantId) {
+  if (!img || !studentId || !plantId || img.src || img.dataset.photoRepairLoading === '1') return;
+  const token = sessionStorage.getItem('aquatic.teacherToken');
+  if (!token) return;
+  img.dataset.photoRepairLoading = '1';
+  try {
+    const blob = await api.teacherPhoto(token, studentId, plantId);
+    if (!img.isConnected || img.src) return;
+    const url = URL.createObjectURL(blob);
+    repairedPhotoUrls.add(url);
+    img.src = url;
+    img.hidden = false;
+    img.dataset.photoRepairLoaded = '1';
+  } catch (error) {
+    if (img.isConnected && !img.src) img.alt = '照片暫時無法讀取';
+    console.error('[aquatic teacher] photo repair failed', error);
+  } finally {
+    delete img.dataset.photoRepairLoading;
+  }
+}
+
+async function repairStudentDetailPhotos() {
+  if (!detailRoot || detailView?.hidden) return;
+  const identity = currentStudentIdentity();
+  if (!identity) return;
+  const dashboard = await teacherDashboard().catch(() => null);
+  const student = studentForIdentity(dashboard, identity);
+  if (!student) return;
+
+  detailRoot.querySelectorAll('.detail-plant').forEach((card) => {
+    const img = card.querySelector('img');
+    if (!img || img.hidden || img.src) return;
+    const plantId = plantIdForName(card.querySelector('h2')?.textContent);
+    if (plantId) loadTeacherPhoto(img, student.id, plantId);
+  });
+}
+
+async function repairPhotoWall() {
+  if (!photoWall || photosPanel?.hidden) return;
+  const dashboard = await teacherDashboard().catch(() => null);
+  if (!dashboard) return;
+
+  photoWall.querySelectorAll('.wall-card').forEach((card) => {
+    const img = card.querySelector('img');
+    if (!img || img.src) return;
+    const identity = classSeatFromText(card.querySelector('strong')?.textContent);
+    const student = studentForIdentity(dashboard, identity);
+    const plantId = plantIdForName(card.querySelector('span')?.textContent);
+    if (student && plantId) loadTeacherPhoto(img, student.id, plantId);
+  });
+}
+
+function queuePhotoRepair() {
+  if (photoRepairQueued) return;
+  photoRepairQueued = true;
+  setTimeout(() => {
+    photoRepairQueued = false;
+    repairStudentDetailPhotos();
+    repairPhotoWall();
+  }, 0);
+}
+
 if (detailRoot) {
-  new MutationObserver(ensureResetButton).observe(detailRoot, { childList: true, subtree: true });
+  new MutationObserver(() => {
+    ensureResetButton();
+    queuePhotoRepair();
+  }).observe(detailRoot, { childList: true, subtree: true });
 }
 if (detailView) {
-  new MutationObserver(ensureResetButton).observe(detailView, { attributes: true, attributeFilter: ['hidden'] });
+  new MutationObserver(() => {
+    ensureResetButton();
+    queuePhotoRepair();
+  }).observe(detailView, { attributes: true, attributeFilter: ['hidden'] });
 }
+if (photoWall) {
+  new MutationObserver(queuePhotoRepair).observe(photoWall, { childList: true, subtree: true });
+}
+if (photosPanel) {
+  new MutationObserver(queuePhotoRepair).observe(photosPanel, { attributes: true, attributeFilter: ['hidden'] });
+}
+
+window.addEventListener('pagehide', () => {
+  repairedPhotoUrls.forEach((url) => URL.revokeObjectURL(url));
+  repairedPhotoUrls.clear();
+});
+
 ensureResetButton();
+queuePhotoRepair();
