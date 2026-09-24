@@ -67,15 +67,16 @@ assert.match(store, /record: recordFor_/); assert.match(store, /Environment/); a
 
 const observationForm = student.match(/<form id="observation-form"[\s\S]*?<\/form>/)?.[0] || '';
 assert.match(observationForm, /3\. 完成觀察紀錄/);
-assert.match(observationForm, /id="question-list"[\s\S]*id="inline-environment"[\s\S]*id="complete-observation"/);
-assert.doesNotMatch(observationForm, /id="inline-environment"[^>]*class="[^"]*card/);
-for (const field of ['envWaterFlowInline', 'envAquaticPlantInline', 'envAquaticAnimalInline', 'envOtherFindingsInline']) {
-  assert.match(observationForm, new RegExp(`name="${field}"`));
-}
-assert.match(student, /name="waterFlow"/);
-assert.match(student, /name="aquaticPlant"/);
-assert.match(student, /name="aquaticAnimal"/);
-assert.match(student, /name="otherFindings"/);
+assert.match(observationForm, /id="question-list"[\s\S]*id="complete-observation"/);
+assert.doesNotMatch(observationForm, /inline-environment|envWaterFlowInline|envAquaticPlantInline|envAquaticAnimalInline|envOtherFindingsInline|環境調查/);
+assert.doesNotMatch(fixes, /inline-environment|envWaterFlowInline|envAquaticPlantInline|envAquaticAnimalInline|envOtherFindingsInline|environmentDraft/);
+
+const classificationForm = student.match(/<form id="classification-form"[\s\S]*?<\/form>/)?.[0] || '';
+assert.match(classificationForm, /環境調查表/);
+assert.match(classificationForm, /name="waterFlow"/);
+assert.match(classificationForm, /name="aquaticPlant"/);
+assert.match(classificationForm, /name="aquaticAnimal"/);
+assert.match(classificationForm, /name="otherFindings"/);
 
 assert.doesNotMatch(deployWorkflow, /r2 bucket|d1 execute|wrangler deploy/i);
 assert.match(deployWorkflow, /No R2 action is performed/);
