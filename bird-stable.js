@@ -268,7 +268,7 @@ async function uploadDriveItem(item, kind, progress, idToken=null) {
 
 async function uploadDriveAudio(file, progress, idToken=null) {
   if (!file) throw new Error('請先選擇音檔。');
-  if (!/\.(m4a|mp3)$/i.test(file.name) || !['audio/mp4','audio/x-m4a','audio/mpeg','audio/mp3','application/octet-stream',''].includes(file.type)) {
+  if (!/\.(m4a|mp3)$/i.test(file.name)) {
     throw new Error('請使用手機錄音的 M4A 或 MP3 檔案。');
   }
   if (!file.size || file.size > 5 * 1024 * 1024) throw new Error('音檔不可超過 5 MB，請剪出較短的鳥叫片段。');
