@@ -277,7 +277,7 @@ async function uploadDriveAudio(file, progress, idToken=null) {
   if (progress) progress('正在上傳音檔至 Google Drive…');
   // Reuse the existing, authenticated bird upload action and its Drive folder.
   const result = await submitDriveJob('upload', {
-    idToken: idToken || await currentIdToken(false), kind:'bird',
+    idToken: idToken || await currentIdToken(false), kind:'birdAudio',
     fileName:file.name, mimeType:/\.mp3$/i.test(file.name)?'audio/mpeg':'audio/mp4', dataBase64
   }, 180000);
   if (!result?.fileId) throw new Error('音檔上傳後沒有取得 Google Drive 檔案編號。');
@@ -649,7 +649,7 @@ function audioForm() {
     }catch(err){
       if(replacement && !committed) try{await driveDelete(replacement.driveFileId);}catch{}
       busy=false; saveBtn.disabled=false; status.textContent='';
-      errorBox.innerHTML=`<div class="err">上傳失敗：${esc(errorText(err))}</div>`;
+      errorBox.innerHTML=`<div class="err">上傳失敗：${esc(err?.message === 'INVALID_IMAGE_TYPE' ? '雲端服務目前只接受照片，必須更新 Apps Script 才能上傳鳥叫錄音。' : errorText(err))}</div>`;
     }
   };
   const deleteBtn=document.querySelector('#deleteAudioBtn');
