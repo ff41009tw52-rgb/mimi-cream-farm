@@ -2,7 +2,7 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebas
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
 import {
   getFirestore, collection, doc, getDocs, getDoc, query, where,
-  serverTimestamp, setDoc, updateDoc, deleteDoc
+  serverTimestamp, setDoc, updateDoc, deleteDoc, onSnapshot
 } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
 const firebaseConfig = {
@@ -40,6 +40,7 @@ let busy = false;
 let systemCheck = null;
 let flash = '';
 let booted = false;
+let stopAudioWatch = null;
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({
   '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
@@ -65,6 +66,15 @@ function driveThumb(fileId, size=1600) {
 
 function driveOriginal(fileId) {
   return fileId ? `https://drive.google.com/file/d/${encodeURIComponent(fileId)}/view` : '';
+}
+
+function driveAudioPreview(fileId) {
+  return fileId ? `https://drive.google.com/file/d/${encodeURIComponent(fileId)}/preview` : '';
+}
+
+function audioMarkup(audio) {
+  if (!audio?.driveFileId) return '';
+  return `<section class="bird-audio"><h3>聆聽鳥叫</h3><p class="muted">點擊播放器，聽聽牠的聲音。</p><iframe title="鳥叫錄音播放器" src="${esc(driveAudioPreview(audio.driveFileId))}" allow="autoplay" loading="lazy"></iframe><p class="muted audio-filename">${esc(audio.fileName || '鳥叫錄音')}</p></section>`;
 }
 
 async function currentIdToken(force=false) {
@@ -154,7 +164,7 @@ async function submitDriveJob(action, payload={}, timeoutMs=120000) {
         return data;
       }
       if (data.status === 'error') {
-        throw new Error(data.error || 'Google Drive 圖片服務回報失敗');
+        throw new Error(data.error || 'Google Drive 上傳服務回報失敗');
       }
     }
     throw new Error('Google Drive 圖片服務逾時，請確認 Apps Script v3 部署仍有效。');
@@ -179,7 +189,7 @@ async function driveDelete(fileId) {
 function fileAsDataURL(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onerror = () => reject(new Error('無法讀取圖片檔案'));
+    reader.onerror = () => reject(new Error('無法讀取檔案'));
     reader.onload = () => resolve(reader.result);
     reader.readAsDataURL(file);
   });
@@ -256,6 +266,26 @@ async function uploadDriveItem(item, kind, progress, idToken=null) {
   };
 }
 
+async function uploadDriveAudio(file, progress, idToken=null) {
+  if (!file) throw new Error('請先選擇音檔。');
+  if (!/\.(m4a|mp3)$/i.test(file.name) || !['audio/mp4','audio/x-m4a','audio/mpeg','audio/mp3','application/octet-stream',''].includes(file.type)) {
+    throw new Error('請使用手機錄音的 M4A 或 MP3 檔案。');
+  }
+  if (!file.size || file.size > 5 * 1024 * 1024) throw new Error('音檔不可超過 5 MB，請剪出較短的鳥叫片段。');
+  if (progress) progress('正在讀取音檔…');
+  const dataBase64 = await fileAsDataURL(file);
+  if (progress) progress('正在上傳音檔至 Google Drive…');
+  // Reuse the existing, authenticated bird upload action and its Drive folder.
+  const result = await submitDriveJob('upload', {
+    idToken: idToken || await currentIdToken(false), kind:'bird',
+    fileName:file.name, mimeType:/\.mp3$/i.test(file.name)?'audio/mpeg':'audio/mp4', dataBase64
+  }, 180000);
+  if (!result?.fileId) throw new Error('音檔上傳後沒有取得 Google Drive 檔案編號。');
+  return {driveFileId:result.fileId, fileName:result.fileName || file.name,
+    mimeType:result.mimeType || (/\.mp3$/i.test(file.name)?'audio/mpeg':'audio/mp4'),
+    fileSize:Number(result.size || file.size)};
+}
+
 async function docsBy(collectionName, key, value) {
   const snap = await getDocs(query(col(collectionName), where(key, '==', value)));
   return snap.docs.map(x => ({id:x.id, ...x.data()})).sort((a,b)=>(a.order||0)-(b.order||0));
@@ -293,6 +323,7 @@ function setTopState() {
 
 function go(next, payload=null) {
   if (busy) return;
+  if (stopAudioWatch) { stopAudioWatch(); stopAudioWatch=null; }
   view = next;
   if (payload) selectedBird = payload;
   window.scrollTo(0,0);
@@ -331,6 +362,7 @@ function render() {
   if (view === 'admin') return adminPage();
   if (view === 'detail') return detail();
   if (view === 'birdform') return birdForm();
+  if (view === 'audioform') return audioForm();
   if (view === 'obsform') return obsForm();
 }
 
@@ -406,13 +438,14 @@ function adminPage() {
   if (!admin) return go('login');
   const diag = systemCheck ? `<div class="${systemCheck.ok?'emptybox':'err'}" style="margin-bottom:18px;padding:14px 18px"><b>系統檢查：</b> ${esc(systemCheck.text)} <span class="muted">（${VERSION}）</span></div>` : '';
   const notice = flash ? `<div class="emptybox" style="margin-bottom:18px;padding:14px 18px">${esc(flash)}</div>` : '';
-  app.innerHTML = `<div class="section"><div class="sectionhead"><div><h2>管理中心</h2><div class="muted">文字資料存 Firestore，新照片以高畫質保存到 Google Drive</div></div><div class="actions"><button class="btn btn2" id="checkBtn">重新檢查</button><button class="btn btn2" id="newObs">＋ 新增觀察</button><button class="btn" id="newBird">＋ 新增鳥種</button></div></div>${diag}${notice}<div class="box"><h3>已建立的鳥種（${birds.length}）</h3>${birds.length?birds.map(b=>`<div class="adminrow">${adminThumb(b.coverThumb,b.name)}<div><b>${esc(b.name)}</b><div class="muted">${esc(b.shortDescription||'')}</div></div><div class="actions"><button class="btn btn2" data-view="${b.id}">查看</button><button class="btn btn2" data-edit="${b.id}">編輯</button><button class="btn danger" data-delbird="${b.id}">刪除</button></div></div>`).join(''):'<p class="muted">尚無鳥類資料。</p>'}</div><div class="box" style="margin-top:22px"><h3>觀察紀錄（${observations.length}）</h3>${observations.length?observations.map(o=>`<div class="adminrow">${adminThumb(o.firstThumb,birds.find(b=>b.id===o.birdId)?.name||'觀察照片')}<div><b>${esc(birds.find(b=>b.id===o.birdId)?.name||'未知鳥種')}</b><div class="muted">${esc(o.observationDate)} · ${esc(o.location)}</div></div><div class="actions"><button class="btn btn2" data-editobs="${o.id}">編輯</button><button class="btn danger" data-delobs="${o.id}">刪除</button></div></div>`).join(''):'<p class="muted">尚無觀察紀錄。</p>'}</div></div>`;
+  app.innerHTML = `<div class="section"><div class="sectionhead"><div><h2>管理中心</h2><div class="muted">文字資料存 Firestore，照片與鳥叫錄音保存到 Google Drive</div></div><div class="actions"><button class="btn btn2" id="checkBtn">重新檢查</button><button class="btn btn2" id="newObs">＋ 新增觀察</button><button class="btn" id="newBird">＋ 新增鳥種</button></div></div>${diag}${notice}<div class="box"><h3>已建立的鳥種（${birds.length}）</h3>${birds.length?birds.map(b=>`<div class="adminrow">${adminThumb(b.coverThumb,b.name)}<div><b>${esc(b.name)}</b><div class="muted">${esc(b.shortDescription||'')} · ${b.audio?.driveFileId?'已有鳥叫錄音':'尚無鳥叫錄音'}</div></div><div class="actions"><button class="btn btn2" data-view="${b.id}">查看</button><button class="btn btn2" data-edit="${b.id}">編輯</button><button class="btn btn2" data-audio="${b.id}">管理音檔</button><button class="btn danger" data-delbird="${b.id}">刪除</button></div></div>`).join(''):'<p class="muted">尚無鳥類資料。</p>'}</div><div class="box" style="margin-top:22px"><h3>觀察紀錄（${observations.length}）</h3>${observations.length?observations.map(o=>`<div class="adminrow">${adminThumb(o.firstThumb,birds.find(b=>b.id===o.birdId)?.name||'觀察照片')}<div><b>${esc(birds.find(b=>b.id===o.birdId)?.name||'未知鳥種')}</b><div class="muted">${esc(o.observationDate)} · ${esc(o.location)}</div></div><div class="actions"><button class="btn btn2" data-editobs="${o.id}">編輯</button><button class="btn danger" data-delobs="${o.id}">刪除</button></div></div>`).join(''):'<p class="muted">尚無觀察紀錄。</p>'}</div></div>`;
   flash = '';
   document.querySelector('#checkBtn').onclick = async () => { systemCheck={ok:true,text:'檢查中…'}; render(); await runSystemCheck(); render(); };
   document.querySelector('#newBird').onclick = () => { editing=null; go('birdform'); };
   document.querySelector('#newObs').onclick = () => { editing=null; go('obsform'); };
   document.querySelectorAll('[data-view]').forEach(e => e.onclick = () => { selectedBird=birds.find(b=>b.id===e.dataset.view); go('detail'); });
   document.querySelectorAll('[data-edit]').forEach(e => e.onclick = () => { editing=birds.find(b=>b.id===e.dataset.edit); go('birdform'); });
+  document.querySelectorAll('[data-audio]').forEach(e => e.onclick = () => { editing=birds.find(b=>b.id===e.dataset.audio); go('audioform'); });
   document.querySelectorAll('[data-editobs]').forEach(e => e.onclick = () => { editing=observations.find(o=>o.id===e.dataset.editobs); go('obsform'); });
   document.querySelectorAll('[data-delbird]').forEach(e => e.onclick = () => deleteBird(e.dataset.delbird));
   document.querySelectorAll('[data-delobs]').forEach(e => e.onclick = () => deleteObservation(e.dataset.delobs));
@@ -426,6 +459,8 @@ async function deleteBird(id) {
     for (const o of relatedObs) await deleteObservation(o.id, true);
     const photos = await docsBy('birdPhotos','birdId',id);
     for (const p of photos) await deletePhoto('birdPhotos', p);
+    const audio = birds.find(x=>x.id===id)?.audio;
+    if (audio?.driveFileId) await driveDelete(audio.driveFileId);
     await deleteDoc(d('birds',id));
     await loadData();
     flash='鳥種及相關照片已刪除。';
@@ -458,7 +493,15 @@ async function detail() {
     const photos = await docsBy('birdPhotos','birdId',selectedBird.id);
     const birdObs = observations.filter(x=>x.birdId===selectedBird.id);
     const hero = photos[0] ? photoDisplay(photos[0], 2000) : '';
-    app.innerHTML = `<div class="detailhero">${hero?`<img src="${esc(hero)}" alt="${esc(selectedBird.name)}" decoding="async">`:''}</div><div class="detail"><article class="article"><button class="ghost" id="dh">← 返回校園鳥類</button><h1>${esc(selectedBird.name)}</h1><p class="muted" style="text-align:center">${esc(selectedBird.shortDescription||'')}</p>${photos.length?`<div class="gallery">${photos.map(p=>`<figure><img src="${esc(photoThumb(p,900))}" data-full="${esc(photoFull(p))}" alt="${esc(selectedBird.name)}" ${imgAttrs}><figcaption>${esc(p.caption||'')}</figcaption></figure>`).join('')}</div>`:''}<section><h3>辨識特徵</h3><p>${esc(selectedBird.identification||'尚未提供資料。')}</p></section><section><h3>生活習性</h3><p>${esc(selectedBird.habits||'尚未提供資料。')}</p></section><section><h3>在民安怎麼找到牠？</h3><p>${esc(selectedBird.minanTips||'尚未提供資料。')}</p></section><section><h3>校園觀察紀錄</h3><div id="obsDetail">${birdObs.length?birdObs.map(o=>`<div class="obs" data-od="${o.id}"><div class="chips"><span class="chip">${esc(o.observationDate)}</span><span class="chip">${esc(o.location)}</span></div><p>${esc(o.note||'')}</p><div class="odpics"></div></div>`).join(''):'<p class="muted">目前還沒有觀察紀錄。</p>'}</div></section></article></div>`;
+    app.innerHTML = `<div class="detailhero">${hero?`<img src="${esc(hero)}" alt="${esc(selectedBird.name)}" decoding="async">`:''}</div><div class="detail"><article class="article"><button class="ghost" id="dh">← 返回校園鳥類</button><h1>${esc(selectedBird.name)}</h1><p class="muted" style="text-align:center">${esc(selectedBird.shortDescription||'')}</p><div id="birdAudio">${audioMarkup(selectedBird.audio)}</div>${photos.length?`<div class="gallery">${photos.map(p=>`<figure><img src="${esc(photoThumb(p,900))}" data-full="${esc(photoFull(p))}" alt="${esc(selectedBird.name)}" ${imgAttrs}><figcaption>${esc(p.caption||'')}</figcaption></figure>`).join('')}</div>`:''}<section><h3>辨識特徵</h3><p>${esc(selectedBird.identification||'尚未提供資料。')}</p></section><section><h3>生活習性</h3><p>${esc(selectedBird.habits||'尚未提供資料。')}</p></section><section><h3>在民安怎麼找到牠？</h3><p>${esc(selectedBird.minanTips||'尚未提供資料。')}</p></section><section><h3>校園觀察紀錄</h3><div id="obsDetail">${birdObs.length?birdObs.map(o=>`<div class="obs" data-od="${o.id}"><div class="chips"><span class="chip">${esc(o.observationDate)}</span><span class="chip">${esc(o.location)}</span></div><p>${esc(o.note||'')}</p><div class="odpics"></div></div>`).join(''):'<p class="muted">目前還沒有觀察紀錄。</p>'}</div></section></article></div>`;
+    const watchedId=selectedBird.id;
+    stopAudioWatch=onSnapshot(d('birds',watchedId),snap=>{
+      if(view!=='detail' || selectedBird?.id!==watchedId || !snap.exists()) return;
+      const audio=snap.data().audio;
+      const slot=document.querySelector('#birdAudio');
+      if(slot && audio?.driveFileId!==selectedBird.audio?.driveFileId) slot.innerHTML=audioMarkup(audio);
+      selectedBird={...selectedBird,...snap.data()};
+    },err=>console.warn('鳥叫錄音即時更新失敗：',err));
     document.querySelector('#dh').onclick = () => go('home');
     document.querySelectorAll('.gallery img').forEach(i => i.onclick = () => { const target=i.dataset.full; if(target) window.open(target,'_blank','noopener'); });
 
@@ -496,11 +539,33 @@ function birdFields(v={}) {
   return `<div class="field"><label>鳥類名稱 *</label><input id="name" required value="${esc(v.name||'')}"></div><div class="field"><label>首頁簡短介紹 *</label><textarea id="short" required rows="2">${esc(v.shortDescription||'')}</textarea></div><div class="field"><label>辨識特徵</label><textarea id="ident" rows="4">${esc(v.identification||'')}</textarea></div><div class="field"><label>生活習性</label><textarea id="habits" rows="4">${esc(v.habits||'')}</textarea></div><div class="field"><label>在民安怎麼找到牠？</label><textarea id="tips" rows="3">${esc(v.minanTips||'')}</textarea></div>`;
 }
 
+function audioPicker() {
+  return `<div class="field"><label for="audioFile">鳥叫錄音（選填）</label><div class="picker"><input id="audioFile" type="file" accept=".m4a,.mp3,audio/mp4,audio/mpeg"><div class="muted" style="margin-top:8px">請從手機選取 M4A 或 MP3 錄音，最多 5 MB。沒有錄音也可以先儲存，之後到管理中心補上。</div><div id="audioLocalPreview"></div></div></div>`;
+}
+
+function bindAudioPicker() {
+  const input=document.querySelector('#audioFile');
+  const preview=document.querySelector('#audioLocalPreview');
+  let localUrl='';
+  input.onchange=()=>{
+    if(localUrl) URL.revokeObjectURL(localUrl);
+    localUrl=''; preview.innerHTML='';
+    const file=input.files?.[0];
+    if(!file) return;
+    localUrl=URL.createObjectURL(file);
+    const label=document.createElement('p'); label.className='muted'; label.textContent=`待上傳：${file.name}`;
+    const player=document.createElement('audio'); player.controls=true; player.preload='metadata'; player.src=localUrl;
+    preview.append(label,player);
+  };
+  return ()=>input.files?.[0] || null;
+}
+
 function birdForm() {
   if (!admin) return go('login');
-  app.innerHTML = `<div class="panel"><button class="ghost" id="back">← 返回管理中心</button><div class="box"><h2>${editing?'編輯鳥種':'新增鳥種'}</h2>${editing?'<p class="muted">原有照片會保留；新選照片會追加為 Google Drive 高畫質照片。</p>':''}<form id="bf">${birdFields(editing||{})}${filePicker(8)}<div id="saveStatus" class="muted" style="margin:10px 0"></div><div id="saveError"></div><button id="saveBirdBtn" class="btn" style="width:100%">儲存鳥種資料</button></form></div></div>`;
+  app.innerHTML = `<div class="panel"><button class="ghost" id="back">← 返回管理中心</button><div class="box"><h2>${editing?'編輯鳥種':'新增鳥種'}</h2>${editing?'<p class="muted">原有照片會保留；新選照片會追加為 Google Drive 高畫質照片。音檔請在管理中心「管理音檔」更換。</p>':''}<form id="bf">${birdFields(editing||{})}${filePicker(8)}${editing?'':audioPicker()}<div id="saveStatus" class="muted" style="margin:10px 0"></div><div id="saveError"></div><button id="saveBirdBtn" class="btn" style="width:100%">儲存鳥種資料</button></form></div></div>`;
   document.querySelector('#back').onclick = () => go('admin');
   const getFiles = bindPicker(8);
+  const getAudio = editing ? ()=>null : bindAudioPicker();
   document.querySelector('#bf').onsubmit = async e => {
     e.preventDefault();
     const btn=document.querySelector('#saveBirdBtn');
@@ -509,6 +574,8 @@ function birdForm() {
     btn.disabled=true; errorBox.innerHTML=''; busy=true;
     const birdRef=editing?d('birds',editing.id):doc(col('birds'));
     const uploaded=[];
+    let uploadedAudio=null;
+    let committed=false;
     try {
       const data={
         name:document.querySelector('#name').value.trim(),
@@ -519,14 +586,17 @@ function birdForm() {
         updatedAt:serverTimestamp()
       };
       const items=getFiles();
-      const token=items.length?await currentIdToken(false):null;
+      const audioFile=getAudio();
+      const token=items.length||audioFile?await currentIdToken(false):null;
       for(let i=0;i<items.length;i++){
         status.textContent=`照片 ${i+1}/${items.length}：準備上傳…`;
         const meta=await uploadDriveItem(items[i],'bird',msg=>{status.textContent=`照片 ${i+1}/${items.length}：${msg}`;},token);
         uploaded.push({...meta,caption:items[i].caption});
       }
+      if(audioFile) uploadedAudio=await uploadDriveAudio(audioFile,msg=>{status.textContent=`鳥叫錄音：${msg}`;},token);
       status.textContent='正在寫入鳥類資料…';
-      if(editing) await updateDoc(birdRef,data); else await setDoc(birdRef,{...data,createdAt:serverTimestamp(),coverThumb:''});
+      if(editing) await updateDoc(birdRef,data); else await setDoc(birdRef,{...data,createdAt:serverTimestamp(),coverThumb:'',...(uploadedAudio?{audio:uploadedAudio}:{})});
+      committed=true;
       for(let i=0;i<uploaded.length;i++){
         const pRef=doc(col('birdPhotos')); const z=uploaded[i];
         await setDoc(pRef,{birdId:birdRef.id,storage:'google-drive',driveFileId:z.driveFileId,driveImageUrl:z.driveImageUrl,driveThumbnailUrl:z.driveThumbnailUrl,driveUrl:z.driveUrl,fileName:z.fileName,mimeType:z.mimeType,fileSize:z.fileSize,caption:z.caption,order:Date.now()+i,createdAt:serverTimestamp()});
@@ -535,12 +605,62 @@ function birdForm() {
       await loadData();
       const saved=birds.find(b=>b.id===birdRef.id);
       if(!saved) throw new Error('資料已送出，但重新讀取後找不到剛新增的鳥種。');
-      editing=null; flash=`已成功儲存「${saved.name}」${uploaded.length?`，Google Drive 高畫質照片 ${uploaded.length} 張`:''}。`; view='admin'; busy=false; render();
+      editing=null; flash=`已成功儲存「${saved.name}」${uploaded.length?`，Google Drive 高畫質照片 ${uploaded.length} 張`:''}${uploadedAudio?'，鳥叫錄音 1 段':''}。`; view='admin'; busy=false; render();
     } catch(err) {
-      for(const z of uploaded){try{await driveDelete(z.driveFileId);}catch{}}
+      if(!committed){
+        for(const z of uploaded){try{await driveDelete(z.driveFileId);}catch{}}
+        if(uploadedAudio) try{await driveDelete(uploadedAudio.driveFileId);}catch{}
+      }
       busy=false; btn.disabled=false; btn.textContent='儲存鳥種資料'; status.textContent='';
       errorBox.innerHTML=`<div class="err">儲存失敗：${esc(errorText(err))}<br><small>版本：${VERSION}</small></div>`;
     }
+  };
+}
+
+function audioForm() {
+  if(!admin) return go('login');
+  if(!editing) return go('admin');
+  const bird=editing;
+  app.innerHTML=`<div class="panel"><button class="ghost" id="back">← 返回管理中心</button><div class="box"><h2>${esc(bird.name)}・管理鳥叫錄音</h2>${bird.audio?.driveFileId?`<p class="muted">目前的錄音：${esc(bird.audio.fileName||'鳥叫錄音')}</p>${audioMarkup(bird.audio)}`:'<p class="muted">目前尚無錄音。</p>'}<form id="audioForm">${audioPicker()}<div id="saveStatus" class="muted" role="status" aria-live="polite"></div><div id="saveError"></div><div class="actions"><button id="saveAudioBtn" class="btn" type="submit">${bird.audio?.driveFileId?'上傳並更換錄音':'上傳錄音'}</button>${bird.audio?.driveFileId?'<button id="deleteAudioBtn" class="btn danger" type="button">刪除錄音</button>':''}</div></form></div></div>`;
+  document.querySelector('#back').onclick=()=>go('admin');
+  const getAudio=bindAudioPicker();
+  const status=document.querySelector('#saveStatus');
+  const errorBox=document.querySelector('#saveError');
+  const saveBtn=document.querySelector('#saveAudioBtn');
+  document.querySelector('#audioForm').onsubmit=async e=>{
+    e.preventDefault(); errorBox.innerHTML='';
+    const file=getAudio();
+    if(!file){errorBox.innerHTML='<div class="err">請先選取音檔。</div>';return;}
+    busy=true; saveBtn.disabled=true;
+    let replacement=null;
+    let committed=false;
+    try{
+      replacement=await uploadDriveAudio(file,msg=>{status.textContent=msg;});
+      status.textContent='正在更新鳥種資料…';
+      await updateDoc(d('birds',bird.id),{audio:replacement,updatedAt:serverTimestamp()});
+      committed=true;
+      // The new recording is live before removing the old file.
+      if(bird.audio?.driveFileId && bird.audio.driveFileId!==replacement.driveFileId){
+        try{await driveDelete(bird.audio.driveFileId);}catch(err){console.warn('舊錄音清理失敗：',err);}
+      }
+      await loadData();
+      flash=`已更新「${bird.name}」的鳥叫錄音，可到鳥種頁播放。`;
+      editing=null; view='admin'; busy=false; render();
+    }catch(err){
+      if(replacement && !committed) try{await driveDelete(replacement.driveFileId);}catch{}
+      busy=false; saveBtn.disabled=false; status.textContent='';
+      errorBox.innerHTML=`<div class="err">上傳失敗：${esc(errorText(err))}</div>`;
+    }
+  };
+  const deleteBtn=document.querySelector('#deleteAudioBtn');
+  if(deleteBtn) deleteBtn.onclick=async()=>{
+    if(!confirm(`確定移除「${bird.name}」的鳥叫錄音嗎？`)) return;
+    busy=true; deleteBtn.disabled=true; errorBox.innerHTML='';
+    try{
+      await updateDoc(d('birds',bird.id),{audio:null,updatedAt:serverTimestamp()});
+      try{await driveDelete(bird.audio.driveFileId);}catch(err){console.warn('錄音檔案清理失敗：',err);}
+      await loadData(); editing=null; flash='鳥叫錄音已移除。'; view='admin'; busy=false; render();
+    }catch(err){busy=false; deleteBtn.disabled=false; errorBox.innerHTML=`<div class="err">刪除失敗：${esc(errorText(err))}</div>`;}
   };
 }
 
