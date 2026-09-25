@@ -10,10 +10,7 @@ Local VM checks pass for valid M4A/MP3, invalid file contents/extensions, over-l
 
 ## Release sequence
 
-1. In the original Apps Script project, replace the **程式碼** file with the prepared complete source and save.
-2. In **Deploy > Manage deployments**, edit the existing web app deployment, choose **New version**, and deploy. Keep the existing `/exec` URL and execution account.
-3. Check that the existing `/exec` URL returns version `3.1.0`.
-4. Merge this frontend PR so audio requests use `kind: 'birdAudio'`. Existing photos continue using their current kind.
-5. Test a real M4A from iPhone Safari, anonymous playback, optional audio creation, later replacement, and one photo upload.
-
-The frontend PR intentionally stays draft until the existing Apps Script deployment is updated; merging before step 2 would produce `INVALID_KIND` for new audio requests.
+1. The project owner saved the prepared complete source in the original Apps Script project and reported deploying a new version of the existing web app.
+2. A fresh project export confirms the saved source reports version `3.1.0` and includes `uploadAudio_`. This environment could not open the `/exec` endpoint to verify which web app version serves traffic.
+3. The frontend PR has been merged. The public site now references `bird-stable.js?v=20260926-audio3`, and the repository's current JavaScript sends `kind: 'birdAudio'`.
+4. Still verify a real M4A from iPhone Safari, anonymous playback, optional audio creation, later replacement, and one photo upload. A live upload requires an administrator login.
