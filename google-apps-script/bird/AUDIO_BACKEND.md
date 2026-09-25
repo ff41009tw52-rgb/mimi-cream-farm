@@ -45,6 +45,10 @@ if (payload.action === 'upload') {
     if (!match) throw new Error('INVALID_AUDIO_DATA');
     const bytes = Utilities.base64Decode(match[1]);
     if (!bytes.length || bytes.length > 5 * 1024 * 1024) throw new Error('INVALID_AUDIO_SIZE');
+    const u = bytes.map(n => n & 255);
+    const m4aHeader = u.length > 8 && String.fromCharCode(...u.slice(4, 8)) === 'ftyp';
+    const mp3Header = String.fromCharCode(...u.slice(0, 3)) === 'ID3' || (u[0] === 255 && (u[1] & 224) === 224);
+    if (!(isM4a ? m4aHeader : mp3Header)) throw new Error('INVALID_AUDIO_CONTENT');
     const blob = Utilities.newBlob(bytes, expectedType, safeAudioName(payload.fileName));
     const file = existingBirdFolder.createFile(blob);
     // Apply the project's existing public-read / link-view sharing policy.
