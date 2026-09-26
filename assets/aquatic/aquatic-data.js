@@ -1,4 +1,4 @@
-export const AQUATIC_CLASSES = Object.freeze(['307', '309', '310', '311', '312', '313', '314']);
+export const AQUATIC_CLASSES = Object.freeze(['407', '409', '410', '411', '412', '413', '414']);
 
 export const AQUATIC_PLANTS = Object.freeze([
   {
