@@ -1,6 +1,6 @@
 var AQUATIC_CONFIG = Object.freeze({
   folderName: '水生植物觀察',
-  classes: Object.freeze(['307', '309', '310', '311', '312', '313', '314']),
+  classes: Object.freeze(['407', '409', '410', '411', '412', '413', '414']),
   plants: Object.freeze({
     'water-lettuce': '大萍',
     duckweed: '浮萍',

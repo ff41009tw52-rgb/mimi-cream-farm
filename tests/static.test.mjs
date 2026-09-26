@@ -25,7 +25,7 @@ const appsScriptWebApp = /https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-
 assert.match(student, appsScriptWebApp); assert.match(teacher, appsScriptWebApp);
 assert.doesNotMatch(`${student}${teacher}`, /YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL/);
 
-for (const className of ['307','309','310','311','312','313','314']) assert.match(data, new RegExp(`'${className}'`));
+for (const className of ['407','409','410','411','412','413','414']) assert.match(data, new RegExp(`'${className}'`));
 assert.doesNotMatch(data, /'308'/);
 assert.match(student, /id="student-class"/); assert.match(student, /座號（1～30）/); assert.match(student, /max="30"/); assert.doesNotMatch(student, /name="studentName"/); assert.doesNotMatch(teacher, /<th>姓名<\/th>/);
 assert.match(teacher, /id="plant-filter"/); assert.match(teacherApp, /length:30/); assert.match(teacherApp, /selectedPlantId/);
