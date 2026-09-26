@@ -19,7 +19,7 @@ const ADMIN_UID = 'wJ6v4ChXyUV0SLvh581L3K6ZEZB3';
 const ADMIN_USER_HASH = '55d75a7fb38efdd36ed89f802c17cc6cdaf7babfaf2d2d1834e66aa5f4bbff98';
 const ADMIN_EMAIL = atob('ZmY0MTAwOXR3NTJAZ21haWwuY29t');
 const DRIVE_WEB_APP = 'https://script.google.com/macros/s/AKfycbyXQHmi_FbPi_o8JlKO7G_5r_oAbylS4nTSixxInXAkO3zBbut-tjuSKIZM5ab6qQvM/exec';
-const VERSION = '2026-09-10 Drive v5.1 Stable';
+const VERSION = '2026-09-26 Bird Audio 3.2';
 const JOB_TTL_MS = 24 * 60 * 60 * 1000;
 
 const fb = initializeApp(firebaseConfig);
@@ -107,7 +107,7 @@ async function cleanupOldJobs() {
   }
 }
 
-async function submitDriveJob(action, payload={}, timeoutMs=120000) {
+async function submitDriveJob(action, payload={}, timeoutMs=120000, onSubmitted=null) {
   const idToken = payload.idToken || await currentIdToken(false);
   const jobId = newDriveJobId();
   const jobRef = d('uploadJobs', jobId);
@@ -150,6 +150,7 @@ async function submitDriveJob(action, payload={}, timeoutMs=120000) {
   };
 
   form.submit();
+  if (onSubmitted) onSubmitted();
   const started = Date.now();
 
   try {
@@ -184,6 +185,21 @@ async function driveDelete(fileId) {
   if (!fileId) return;
   const idToken = await currentIdToken(false);
   return submitDriveJob('delete', {idToken, fileId}, 90000);
+}
+
+function timedUploadStatus(node, prefix='') {
+  const started = Date.now();
+  let stage = '正在準備上傳…';
+  const render = () => {
+    const seconds = Math.floor((Date.now() - started) / 1000);
+    node.textContent = prefix + stage + (seconds >= 3 ? `（已等待 ${seconds} 秒）` : '');
+  };
+  const timer = setInterval(render, 1000);
+  render();
+  return {
+    update(message) { stage = message; render(); },
+    stop() { clearInterval(timer); }
+  };
 }
 
 function fileAsDataURL(file) {
@@ -274,12 +290,11 @@ async function uploadDriveAudio(file, progress, idToken=null) {
   if (!file.size || file.size > 5 * 1024 * 1024) throw new Error('音檔不可超過 5 MB，請剪出較短的鳥叫片段。');
   if (progress) progress('正在讀取音檔…');
   const dataBase64 = await fileAsDataURL(file);
-  if (progress) progress('正在上傳音檔至 Google Drive…');
-  // Reuse the existing, authenticated bird upload action and its Drive folder.
+  if (progress) progress('正在準備傳送至 Google Drive…');
   const result = await submitDriveJob('upload', {
     idToken: idToken || await currentIdToken(false), kind:'birdAudio',
     fileName:file.name, mimeType:/\.mp3$/i.test(file.name)?'audio/mpeg':'audio/mp4', dataBase64
-  }, 180000);
+  }, 180000, () => progress?.('已送出，正在等待雲端儲存結果…'));
   if (!result?.fileId) throw new Error('音檔上傳後沒有取得 Google Drive 檔案編號。');
   return {driveFileId:result.fileId, fileName:result.fileName || file.name,
     mimeType:result.mimeType || (/\.mp3$/i.test(file.name)?'audio/mpeg':'audio/mp4'),
@@ -593,7 +608,11 @@ function birdForm() {
         const meta=await uploadDriveItem(items[i],'bird',msg=>{status.textContent=`照片 ${i+1}/${items.length}：${msg}`;},token);
         uploaded.push({...meta,caption:items[i].caption});
       }
-      if(audioFile) uploadedAudio=await uploadDriveAudio(audioFile,msg=>{status.textContent=`鳥叫錄音：${msg}`;},token);
+      if(audioFile) {
+        const timed = timedUploadStatus(status, '鳥叫錄音：');
+        try { uploadedAudio=await uploadDriveAudio(audioFile,msg=>timed.update(msg),token); }
+        finally { timed.stop(); }
+      }
       status.textContent='正在寫入鳥類資料…';
       if(editing) await updateDoc(birdRef,data); else await setDoc(birdRef,{...data,createdAt:serverTimestamp(),coverThumb:'',...(uploadedAudio?{audio:uploadedAudio}:{})});
       committed=true;
@@ -632,24 +651,27 @@ function audioForm() {
     const file=getAudio();
     if(!file){errorBox.innerHTML='<div class="err">請先選取音檔。</div>';return;}
     busy=true; saveBtn.disabled=true;
+    const timed=timedUploadStatus(status);
     let replacement=null;
     let committed=false;
     try{
-      replacement=await uploadDriveAudio(file,msg=>{status.textContent=msg;});
-      status.textContent='正在更新鳥種資料…';
+      replacement=await uploadDriveAudio(file,msg=>timed.update(msg));
+      timed.update('正在更新鳥種資料…');
       await updateDoc(d('birds',bird.id),{audio:replacement,updatedAt:serverTimestamp()});
       committed=true;
-      // The new recording is live before removing the old file.
-      if(bird.audio?.driveFileId && bird.audio.driveFileId!==replacement.driveFileId){
-        try{await driveDelete(bird.audio.driveFileId);}catch(err){console.warn('舊錄音清理失敗：',err);}
-      }
-      await loadData();
+      birds=birds.map(item=>item.id===bird.id?{...item,audio:replacement}:item);
+      timed.stop();
       flash=`已更新「${bird.name}」的鳥叫錄音，可到鳥種頁播放。`;
       editing=null; view='admin'; busy=false; render();
+      // Once the new recording is live, remove the old file without delaying success.
+      if(bird.audio?.driveFileId && bird.audio.driveFileId!==replacement.driveFileId){
+        void driveDelete(bird.audio.driveFileId).catch(err=>console.warn('舊錄音清理失敗：',err));
+      }
     }catch(err){
+      timed.stop();
       if(replacement && !committed) try{await driveDelete(replacement.driveFileId);}catch{}
       busy=false; saveBtn.disabled=false; status.textContent='';
-      errorBox.innerHTML=`<div class="err">上傳失敗：${esc(err?.message === 'INVALID_IMAGE_TYPE' ? '雲端服務目前只接受照片，必須更新 Apps Script 才能上傳鳥叫錄音。' : errorText(err))}</div>`;
+      errorBox.innerHTML=`<div class="err">上傳失敗：${esc(err?.message === 'INVALID_IMAGE_TYPE' ? '雲端服務仍使用只接受照片的舊版，請確認 Apps Script 已更新原有部署。' : errorText(err))}</div>`;
     }
   };
   const deleteBtn=document.querySelector('#deleteAudioBtn');
