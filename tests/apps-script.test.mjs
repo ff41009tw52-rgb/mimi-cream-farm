@@ -92,14 +92,14 @@ const context = vm.createContext({
 });
 vm.runInContext(script, context);
 
-const student01a = context.route_({ action:'studentLogin', className:'307', seatNumber:1 });
-const student01b = context.route_({ action:'studentLogin', className:'307', seatNumber:1 });
-const student02 = context.route_({ action:'studentLogin', className:'307', seatNumber:2 });
+const student01a = context.route_({ action:'studentLogin', className:'407', seatNumber:1 });
+const student01b = context.route_({ action:'studentLogin', className:'407', seatNumber:1 });
+const student02 = context.route_({ action:'studentLogin', className:'407', seatNumber:2 });
 assert.equal(student01a.student.id, student01b.student.id, '同班同座號必須回到同一學生');
 assert.notEqual(student01a.student.id, student02.student.id, '不同座號不可共用學生紀錄');
 assert.equal(student01a.record.observations.length, 0, '登入應一次帶回學生紀錄，避免第二次 API');
 
-context.upsertObservationObject_({ studentId:student01a.student.id, className:'307', seatNumber:1 }, 'water-lettuce', { driveFileId:'test-photo', mimeType:'image/jpeg', hasPhoto:true });
+context.upsertObservationObject_({ studentId:student01a.student.id, className:'407', seatNumber:1 }, 'water-lettuce', { driveFileId:'test-photo', mimeType:'image/jpeg', hasPhoto:true });
 context.route_({
   action:'saveObservation', token:student01a.token, plantId:'water-lettuce',
   data:{ completed:true, answers:{ location:'水面上', leaf_position:'漂浮在水面', root_position:'漂浮在水裡' } }
@@ -112,7 +112,7 @@ assert.equal(record02.record.observations.length, 0);
 assert.throws(() => context.route_({ action:'saveObservation', token:student02.token, plantId:'duckweed', data:{ completed:true, answers:{ location:'水面上', leaf_position:'漂浮在水面', root_position:'漂浮在水裡' } } }), /上傳植物照片/);
 
 for (const plantId of ['duckweed','water-hyacinth','hydrilla','water-lily','yellow-water-lily','lotus']) {
-  context.upsertObservationObject_({ studentId:student01a.student.id, className:'307', seatNumber:1 }, plantId, { driveFileId:`photo-${plantId}`, mimeType:'image/jpeg', hasPhoto:true });
+  context.upsertObservationObject_({ studentId:student01a.student.id, className:'407', seatNumber:1 }, plantId, { driveFileId:`photo-${plantId}`, mimeType:'image/jpeg', hasPhoto:true });
   context.route_({ action:'saveObservation', token:student01a.token, plantId, data:{ completed:true, answers:{ location:'水面上', leaf_position:'漂浮在水面', root_position:'漂浮在水裡' } } });
 }
 const classification = Object.fromEntries(['water-lettuce','duckweed','water-hyacinth','hydrilla','water-lily','yellow-water-lily','lotus'].map((id) => [id, id === 'hydrilla' ? '沉水植物' : id === 'lotus' ? '挺水植物' : ['water-lily','yellow-water-lily'].includes(id) ? '浮葉植物' : '漂浮植物']));
