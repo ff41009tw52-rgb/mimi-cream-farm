@@ -33,3 +33,24 @@
   font-weight: 600;
   margin: 0.8rem 0 0;
 }
+
+/* 教師端只保留：今天已開始、完成、未完成。 */
+#summary-cards .summary-card:nth-child(4) {
+  display: none;
+}
+
+#summary-cards {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 900px) {
+  #summary-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  #summary-cards {
+    grid-template-columns: 1fr;
+  }
+}
