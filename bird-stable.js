@@ -18,8 +18,8 @@ const APP_ID = 'minan-birds-v2';
 const ADMIN_UID = 'wJ6v4ChXyUV0SLvh581L3K6ZEZB3';
 const ADMIN_USER_HASH = '55d75a7fb38efdd36ed89f802c17cc6cdaf7babfaf2d2d1834e66aa5f4bbff98';
 const ADMIN_EMAIL = atob('ZmY0MTAwOXR3NTJAZ21haWwuY29t');
-const DRIVE_WEB_APP = 'https://script.google.com/macros/s/AKfycbyXQHmi_FbPi_o8JlKO7G_5r_oAbylS4nTSixxInXAkO3zBbut-tjuSKIZM5ab6qQvM/exec';
-const VERSION = '2026-09-26 Bird Audio 3.2';
+const DRIVE_WEB_APP = 'https://script.google.com/macros/s/AKfycbx4tKlSKGSH_HJLyDZ9YU5Q4UHBmpEQJuCzA4UBqAYLfdFQdm59yLEoIidyXJYz9yY6hg/exec';
+const VERSION = '2026-09-28 Bird Audio 3.3';
 const JOB_TTL_MS = 24 * 60 * 60 * 1000;
 
 const fb = initializeApp(firebaseConfig);
