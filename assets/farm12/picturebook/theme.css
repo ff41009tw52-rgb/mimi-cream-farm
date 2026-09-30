@@ -1,0 +1,77 @@
+/* 12-2: the picturebook layer is kept separate from the 12-1 game. */
+.farm12-picturebook{min-height:100vh;background:#d8e8a7 url('landscape.webp') center top/cover fixed no-repeat;color:#3a301f;font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif}
+.farm12-picturebook button:focus-visible{outline:3px solid #155e75;outline-offset:3px}
+.picturebook-opening{background:#43622f9c url('landscape.webp') center/cover no-repeat;backdrop-filter:blur(2px)}
+.picturebook-start-panel{background:#fff7df;border:7px solid #986434;box-shadow:inset 0 0 0 4px #eac892,0 13px 0 #674323,0 22px 45px #2a341e7c}
+.picturebook-start-panel h1{color:#754b22;font-size:clamp(26px,3vw,37px)}
+.picturebook-start-panel .bg-emerald-50{background:#f3e6c6;border-color:#d5a86b;color:#654020}
+.picturebook-start-panel .bg-emerald-600{background:#94612f}
+.picturebook-header{max-width:1480px;margin:4px auto 8px;min-height:132px;display:flex;align-items:center;gap:20px;justify-content:space-between}
+.picturebook-title{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:242px;min-height:104px;padding:12px 28px;background:#b77b43;border:8px solid #885029;border-radius:26px 21px 28px 20px;color:#fff5d7;text-shadow:0 2px 2px #5c351d;box-shadow:inset 0 0 0 3px #dba96c,0 6px 0 #6c4628,0 14px 22px #4355215e;transform:rotate(-1.5deg)}
+.picturebook-title span{font-size:clamp(25px,3vw,40px);font-weight:900;letter-spacing:.06em;white-space:nowrap}
+.picturebook-title small{font-size:13px;letter-spacing:.06em;font-weight:800}
+.picturebook-stats{display:flex;align-items:center;flex-wrap:wrap;justify-content:center;gap:6px;padding:8px 14px;border:3px solid #dfb886;border-radius:24px;background:#fff8e9ed;box-shadow:0 4px 10px #71532a38}
+.picturebook-stat{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;font-size:17px;font-weight:900;white-space:nowrap;color:#49321f}
+.picturebook-stat+ .picturebook-stat{border-left:2px solid #dfc29b}
+.picturebook-stat small{font-size:12px;color:#7e603d}
+.picturebook-stat .farm12-ui-icon{width:30px;height:30px}
+.picturebook-money{color:#7d4b18}
+.picturebook-actions{display:flex;align-items:center;gap:8px}
+.picturebook-actions button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:56px;border-radius:18px;padding:8px 16px;font-size:17px;font-weight:900;white-space:nowrap;box-shadow:0 5px 0 #6d4825,0 8px 16px #3a38284d;transition:transform .15s}
+.picturebook-actions button:hover{transform:translateY(-2px)}
+.picturebook-actions .farm12-ui-icon{width:28px;height:28px}
+.picturebook-shop{background:#fff0cb;border:3px solid #9b6b32;color:#623d1d}
+.picturebook-sleep{background:#315c92;border:3px solid #dce9fb;color:white}
+.picturebook-save{max-width:1480px;margin:0 auto 13px;padding:4px 8px;text-align:right;font-size:12px;font-weight:800;text-shadow:0 1px 2px #fff9e8}
+.picturebook-main{max-width:1480px;margin:auto;display:grid;grid-template-columns:190px minmax(0,1fr) 215px;align-items:start;gap:20px}
+.picturebook-tools{max-height:720px}
+.picturebook-tools>div:first-child>div{background:#fff5d9f0;border:3px dashed #ac7544;box-shadow:0 6px 12px #594b2b40}
+.picturebook-tools>div:first-child .text-3xl{font-size:28px}
+.picturebook-tools>div:last-child{min-height:380px;max-height:580px;background:#e5bc7fef;border:5px solid #9f662d;border-radius:28px;box-shadow:inset 0 0 0 3px #f9d89e,0 8px 18px #66462a4a}
+.picturebook-tools h3{font-size:18px;color:#4f3119;letter-spacing:.04em;text-align:center}
+.picturebook-tools>div:last-child>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:7px;overflow-y:auto}
+.picturebook-tools button{min-height:88px;border:2px solid #b78148;background:#fff7e7;border-radius:17px;color:#3f321e;box-shadow:0 3px 0 #ba9058}
+.picturebook-tools button:hover{background:#fffdf4}
+.picturebook-tools button.border-blue-500{border:3px solid #2679ad;background:#eaf8ff;box-shadow:0 0 0 3px #fff6d5}
+.picturebook-tools button .text-\[8px\]{font-size:12px;line-height:1.25;overflow:visible;white-space:normal}
+.picturebook-field{min-width:0}
+.picturebook-plots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.picturebook-plot{width:100%;min-width:0;min-height:306px;text-align:left;padding:10px 13px 11px;background:#f0daa3e8;border:5px solid #9c683d;border-radius:22px;box-shadow:inset 0 0 0 3px #fff0bd,0 7px 0 #75522e,0 12px 14px #62491e66;transition:transform .15s,filter .15s}
+.picturebook-plot:hover{transform:translateY(-3px);filter:brightness(1.04)}
+.picturebook-plot-label{min-height:39px;display:flex;align-items:center;gap:8px;color:#49321b;overflow:hidden}
+.picturebook-plot-label strong{flex:0 0 auto;border-radius:10px;padding:5px 8px;background:#ac7343;color:#fff7db;font-size:13px;white-space:nowrap}
+.picturebook-plot-label span{font-size:18px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.picturebook-plot-soil{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:2px;height:204px;padding:5px;border-radius:12px;background:#825029}
+.picturebook-soil-cell{display:grid;place-items:center;position:relative;min-width:0;background:url('soil-tile.webp') center/100% 100% no-repeat;overflow:visible}
+.picturebook-soil-cell .farm12-art-wrap.farm12-overview,.picturebook-soil-cell .farm12-art-wrap.farm12-overview .farm12-art{width:clamp(44px,5vw,72px);height:clamp(44px,5vw,72px)}
+.picturebook-soil-cell .picturebook-hazard{position:absolute;right:1px;top:1px;width:18px;height:18px}
+.picturebook-plot-status{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:3px;font-size:12px;font-weight:800;margin:7px 1px 0}
+.picturebook-plot-status strong{display:inline-flex;align-items:center;gap:3px;background:#fff2bf;color:#a04718;padding:4px 7px;border-radius:11px}
+.picturebook-plot-status .farm12-ui-icon{width:17px;height:17px}
+.picturebook-plot-status .picturebook-danger{background:#fff0e7;color:#ad3426}
+.picturebook-locked{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:7px;background:#f3e9d0db;border-style:dashed;color:#694c2d}
+.picturebook-locked strong{font-size:17px}
+.picturebook-locked span{padding:7px 13px;background:#fff6da;border-radius:10px;font-size:14px;font-weight:900}
+.picturebook-coop{align-self:start;padding:12px;border:4px solid #9c683d;border-radius:26px;background:#fff6dced;box-shadow:0 7px 0 #75522e,0 14px 22px #62491e66;text-align:center}
+.picturebook-coop-hero{display:block;width:100%;font-size:19px;font-weight:900;color:#60401d}
+.picturebook-coop-hero img{width:100%;max-height:175px;object-fit:contain;transition:transform .2s}
+.picturebook-coop-hero:hover img{transform:scale(1.04)}
+.picturebook-coop-info{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;margin-top:4px}
+.picturebook-coop-info button,.picturebook-primary{background:#92602f;color:#fffaf0;border-radius:12px;padding:10px 8px;font-size:14px;font-weight:900}
+.picturebook-coop-info button:hover,.picturebook-primary:hover{background:#75451e}
+.picturebook-message{max-width:1480px;margin:26px auto 0;display:flex;align-items:center;gap:12px;background:#fff7e8f5;border:3px solid #a8733f;border-radius:18px;padding:12px 18px;font-size:15px;font-weight:800;color:#50391e;box-shadow:0 5px 12px #58452642}
+.picturebook-message .farm12-ui-icon{width:29px;height:29px;flex:none}
+.picturebook-coop-modal{background:#fff7e8;border:5px solid #a46c38;border-radius:25px;padding:18px 22px 25px;box-shadow:0 14px 0 #6b4728,0 20px 40px #20231870}
+.picturebook-secondary{border:2px solid #9c7040;background:#fff0d2;color:#6b451e;padding:9px;border-radius:12px;font-weight:900}
+.picturebook-coop-reminder{display:block;width:100%;margin:-7px 0 15px;padding:9px;border:2px solid #c4873c;background:#fff2d0;border-radius:10px;color:#70491b;font-size:12px;font-weight:900}
+.farm12-picturebook .picturebook-field>div:not(.picturebook-plots){background:#fff6dfed;border:5px solid #9b6a3c;box-shadow:0 8px 0 #76512e,0 15px 22px #513c2355;height:565px}
+.farm12-picturebook .picturebook-field>div:not(.picturebook-plots) .grid.grid-cols-4>div{background:#764624 url('soil-tile.webp') center/100% 100% no-repeat;border:0;min-height:118px}
+.farm12-picturebook .picturebook-field>div:not(.picturebook-plots) .grid.grid-cols-4>div .farm12-art-wrap.farm12-field,.farm12-picturebook .picturebook-field>div:not(.picturebook-plots) .grid.grid-cols-4>div .farm12-art{max-width:70px;max-height:70px}
+.farm12-picturebook .picturebook-field>div:not(.picturebook-plots) button{font-size:13px}
+.farm12-picturebook .fixed .bg-white{background:#fff9e9;border-color:#b98854}
+.farm12-picturebook .fixed h2{color:#5e391f}
+.farm12-version-switch{background:#80532b}
+.farm12-version-switch a{color:#68411e}
+@media(max-width:1200px){.picturebook-main{grid-template-columns:178px minmax(0,1fr)}.picturebook-coop{grid-column:2;display:flex;align-items:center;gap:20px}.picturebook-coop-hero{width:170px;flex:none}.picturebook-coop-hero img{height:125px}.picturebook-plot{min-height:278px}.picturebook-plot-soil{height:178px}.picturebook-header{flex-wrap:wrap;justify-content:center}.picturebook-title{min-width:200px}}
+@media(max-width:760px){.farm12-picturebook{background-attachment:scroll;background-size:auto 1000px}.picturebook-header{gap:12px;justify-content:center}.picturebook-title{min-width:200px;min-height:76px}.picturebook-title span{font-size:27px}.picturebook-stats{order:2;width:100%}.picturebook-stat{font-size:14px;padding:3px 6px}.picturebook-actions{order:3;width:100%;justify-content:center}.picturebook-actions button{font-size:14px;min-height:49px;padding:6px 10px}.picturebook-main{display:flex;flex-direction:column;gap:15px}.picturebook-field{order:1;width:100%}.picturebook-tools{order:2;width:100%;max-height:none}.picturebook-tools>div:last-child{min-height:170px;max-height:280px}.picturebook-tools>div:last-child>div{grid-template-columns:repeat(4,minmax(0,1fr))}.picturebook-tools button{min-height:76px}.picturebook-coop{order:3;width:100%;grid-column:auto}.picturebook-plot{min-height:205px;padding:6px;border-width:3px}.picturebook-plots{gap:10px}.picturebook-plot-label{min-height:30px;gap:3px}.picturebook-plot-label strong{font-size:11px;padding:3px 5px}.picturebook-plot-label span{font-size:12px}.picturebook-plot-soil{height:126px;padding:2px;gap:0}.picturebook-soil-cell .farm12-art-wrap.farm12-overview,.picturebook-soil-cell .farm12-art-wrap.farm12-overview .farm12-art{width:clamp(25px,7vw,38px);height:clamp(25px,7vw,38px)}.picturebook-plot-status{font-size:10px;justify-content:center}.picturebook-plot-status strong{font-size:10px;padding:2px 4px}.picturebook-locked strong{font-size:12px}.picturebook-locked span{font-size:11px}.farm12-picturebook .picturebook-field>div:not(.picturebook-plots){height:auto;min-height:450px}.farm12-picturebook .picturebook-field>div:not(.picturebook-plots) .grid.grid-cols-4>div{min-height:65px}.picturebook-message{font-size:13px;margin-top:16px}.farm12-version-switch{font-size:10px;gap:4px}.farm12-version-switch a{padding:4px 5px}}
+@media(max-width:390px){.picturebook-plot-status span{display:none}.picturebook-soil-cell .picturebook-hazard{width:12px;height:12px}.picturebook-tools>div:last-child>div{grid-template-columns:repeat(3,minmax(0,1fr))}}

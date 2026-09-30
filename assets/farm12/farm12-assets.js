@@ -171,6 +171,12 @@ window.FARM12_ASSETS = {
   legacy: {
     pilotAtlas: 'assets/farm12/pilot/pilot-atlas.webp',
     svgSprite: 'assets/farm12/ui/farm12-icons.svg'
+  },
+  picturebook12_2: {
+    landscape: 'assets/farm12/picturebook/landscape.webp',
+    coop: 'assets/farm12/picturebook/coop.webp',
+    egg: 'assets/farm12/picturebook/egg.webp',
+    soilTile: 'assets/farm12/picturebook/soil-tile.webp'
   }
 };
 
