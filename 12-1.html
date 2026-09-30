@@ -442,7 +442,7 @@
         isNetted: false,
         isWindbreaked: false,
         slots: Array(8).fill(null).map((_, j) => ({
-          id: j, crop: null, growth: 0, isWatered: false, isFertilized: false, hasBug: false, hasWeed: false, perfectGrowth: true
+          id: j, crop: null, growth: 0, isWatered: false, isFertilized: false, hasBug: false, hasWeed: false, hazardDays: 0
         }))
       })));
 
@@ -450,6 +450,8 @@
       const [message, setMessage] = useState("歡迎來到 四季農莊！");
       const [showModal, setShowModal] = useState(null);
       const [saveExists, setSaveExists] = useState(false);
+      const [lastSave, setLastSave] = useState(null);
+      const [saveError, setSaveError] = useState(false);
       const [actionFx, setActionFx] = useState(null);
       const actionFxTimer = useRef(null);
 
@@ -475,7 +477,13 @@
 
       useEffect(() => {
         const saved = localStorage.getItem('farm_tycoon_save_v2_12_1');
-        if (saved) setSaveExists(true);
+        if (saved) {
+          setSaveExists(true);
+          try {
+            const state = JSON.parse(saved);
+            if (state.savedAt) setLastSave({ at: state.savedAt, day: state.day });
+          } catch (_) { /* The load button will report an invalid old save. */ }
+        }
         return () => window.clearTimeout(actionFxTimer.current);
       }, []);
 
@@ -517,7 +525,7 @@
         const targetPlot = newPlots[plotId];
 
         const s = targetPlot.slots[slotId];
-        s.crop = null; s.growth = 0; s.hasBug = false; s.hasWeed = false; s.isFertilized = false; s.perfectGrowth = true;
+        s.crop = null; s.growth = 0; s.hasBug = false; s.hasWeed = false; s.hazardDays = 0; s.isFertilized = false;
 
         setPlots(newPlots);
 
@@ -526,7 +534,7 @@
 
         setGallery(prevG => ({
           ...prevG,
-          [crop.id]: { unlocked: true, perfect: prevG[crop.id]?.perfect || true }
+          [crop.id]: { unlocked: true }
         }));
 
         setInventory(inv => ({
@@ -570,20 +578,38 @@
         }
       }, [tutorialStep, flags.tutSell, flags.tutFert, flags.tutNet, playEffect]);
 
+      const persistGame = () => {
+        const savedAt = Date.now();
+        const stateToSave = {
+          isGameStarted, farmName, day, weather, gold, inventory, gallery, plots, schoolQuest, flags, tutorialStep, savedAt
+        };
+        localStorage.setItem('farm_tycoon_save_v2_12_1', JSON.stringify(stateToSave));
+        setLastSave({ at: savedAt, day });
+        setSaveExists(true);
+        setSaveError(false);
+      };
+
       const handleSave = () => {
         try {
-          const stateToSave = {
-            isGameStarted, farmName, day, weather, gold, inventory, gallery, plots, schoolQuest, flags, tutorialStep
-          };
-          localStorage.setItem('farm_tycoon_save_v2_12_1', JSON.stringify(stateToSave));
+          persistGame();
           setMessage("💾 遊戲進度已成功儲存！");
-          setSaveExists(true);
           playEffect('coin');
           setShowModal(null);
         } catch (e) {
+          setSaveError(true);
           setMessage("❌ 存檔失敗，請確認瀏覽器設定。");
         }
       };
+
+      // Save the settled state after planting, tending, harvesting, and each new day.
+      useEffect(() => {
+        if (!isGameStarted) return;
+        const timer = window.setTimeout(() => {
+          try { persistGame(); }
+          catch (_) { setSaveError(true); }
+        }, 500);
+        return () => window.clearTimeout(timer);
+      }, [isGameStarted, farmName, day, weather, gold, inventory, gallery, plots, schoolQuest, flags, tutorialStep]);
 
       const handleLoad = () => {
         try {
@@ -596,11 +622,19 @@
             setWeather(state.weather);
             setGold(Math.max(100000, Number(state.gold) || 0));
             setInventory({ ...state.inventory, seeds: { ...(state.inventory?.seeds || {}), ...Object.fromEntries(Object.values(CROPS).flat().filter(Boolean).map(crop => [crop.id, Math.max(1, Number(state.inventory?.seeds?.[crop.id]) || 0)])) }, crops: state.inventory?.crops || {} });
-            setGallery(state.gallery || {});
-            setPlots(state.plots);
+            setGallery(Object.fromEntries(Object.entries(state.gallery || {}).map(([id, record]) => [id, { unlocked: !!record?.unlocked }])));
+            setPlots(state.plots.map(plot => ({
+              ...plot,
+              slots: plot.slots.map(slot => {
+                const { perfectGrowth, ...rest } = slot;
+                return { ...rest, hazardDays: slot.hazardDays || 0 };
+              })
+            })));
             setSchoolQuest(state.schoolQuest);
             setFlags(state.flags || { seenRain: false, seenTyphoon: false, seenQuest: false, seenBug: false, seenWeed: false, seenDay2Water: false, seenHarvest: false, seenAfterHarvest: false, seenQuestReward: false, seenForgotWater: false, tutSell: false, tutFert: false, tutNet: false });
             setTutorialStep(state.tutorialStep || 0);
+            setLastSave(state.savedAt ? { at: state.savedAt, day: state.day } : null);
+            setSaveError(false);
 
             setMessage("📂 遊戲進度讀取成功！歡迎回來！");
             setShowModal(null);
@@ -616,6 +650,17 @@
       const season = day <= 90 ? 'SPRING' : day <= 180 ? 'SUMMER' : day <= 270 ? 'AUTUMN' : 'WINTER';
       const seasonName = { SPRING: '春', SUMMER: '夏', AUTUMN: '秋', WINTER: '冬' }[season];
       const seasonColor = { SPRING: 'bg-green-100', SUMMER: 'bg-yellow-100', AUTUMN: 'bg-orange-100', WINTER: 'bg-blue-100' }[season];
+      const lastSaveLabel = lastSave ? `第 ${lastSave.day} 天・${new Date(lastSave.at).toLocaleString('zh-TW', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })} 已儲存` : '尚未儲存';
+      const sleepChecklist = plots.filter(plot => plot.isUnlocked).map(plot => {
+        const growing = plot.slots.filter(slot => slot.crop && slot.growth < slot.crop.days);
+        return {
+          plotId: plot.id,
+          water: weather === 'rainy' || weather === 'typhoon' ? 0 : growing.filter(slot => !slot.isWatered).length,
+          bugs: growing.filter(slot => slot.hasBug).length,
+          weeds: growing.filter(slot => slot.hasWeed).length,
+          urgent: growing.filter(slot => (slot.hasBug || slot.hasWeed) && (slot.hazardDays || 0) >= 1).length
+        };
+      }).filter(item => item.water || item.bugs || item.weeds);
 
       const processNextDay = () => {
         if (day >= 365) {
@@ -645,31 +690,27 @@
             if (weather === 'typhoon' && !plot.isWindbreaked && !isMature) {
               if (Math.random() < 0.5) {
                 typhoonDamageCount++;
-                return { id: slot.id, crop: null, growth: 0, isWatered: false, isFertilized: false, hasBug: false, hasWeed: false, perfectGrowth: true };
+                return { id: slot.id, crop: null, growth: 0, isWatered: false, isFertilized: false, hasBug: false, hasWeed: false, hazardDays: 0 };
               }
             }
 
-            if (slot.hasBug || slot.hasWeed) {
+            const alreadyAffected = slot.hasBug || slot.hasWeed;
+            if (alreadyAffected && (slot.hazardDays || 0) >= 1) {
               hasDeadCrops = true;
-              return { id: slot.id, crop: null, growth: 0, isWatered: false, isFertilized: false, hasBug: false, hasWeed: false, perfectGrowth: true };
+              return { id: slot.id, crop: null, growth: 0, isWatered: false, isFertilized: false, hasBug: false, hasWeed: false, hazardDays: 0 };
             }
 
             let newGrowth = slot.growth;
-            let stillPerfect = slot.perfectGrowth;
             let bug = slot.hasBug;
             let weed = slot.hasWeed;
 
-            if (!isMature) {
-              if (!plot.isNetted && !bug && Math.random() < 0.15) { bug = true; stillPerfect = false; }
-              if (!weed && Math.random() < 0.2) { weed = true; stillPerfect = false; }
+            if (!isMature && !alreadyAffected) {
+              if (!plot.isNetted && Math.random() < 0.15) bug = true;
+              if (Math.random() < 0.2) weed = true;
             }
 
-            if (slot.isWatered || weather === 'typhoon') {
+            if (!bug && !weed && (slot.isWatered || weather === 'typhoon')) {
               newGrowth += 1;
-            }
-
-            if (!slot.isWatered && weather !== 'typhoon' || bug || weed) {
-              stillPerfect = false;
             }
 
             return {
@@ -679,7 +720,7 @@
               isFertilized: false,
               hasBug: bug,
               hasWeed: weed,
-              perfectGrowth: stillPerfect
+              hazardDays: alreadyAffected ? 1 : 0
             };
           });
 
@@ -695,6 +736,7 @@
         const currentHasBug = nextPlots.some(p => p.slots.some(s => s.hasBug));
         const currentHasWeed = nextPlots.some(p => p.slots.some(s => s.hasWeed));
         const currentHasMature = nextPlots.some(p => p.slots.some(s => s.crop && s.growth >= s.crop.days));
+        const needsRescue = nextPlots.some(p => p.slots.some(s => s.crop && (s.hasBug || s.hasWeed) && s.hazardDays >= 1));
 
         setPlots(nextPlots);
 
@@ -771,8 +813,10 @@
           setMessage(`😭 災情回報：昨晚的颱風摧毀了你 ${typhoonDamageCount} 株缺乏保護的作物！`);
           playEffect('weed');
         } else if (hasDeadCrops) {
-          setMessage("警告：有作物因為未處理蟲害或雜草而枯死了！");
+          setMessage("警告：有作物連續兩晚未處理蟲害或雜草而枯死了！");
           playEffect('weed');
+        } else if (needsRescue) {
+          setMessage("有作物因蟲害或雜草暫停生長；請在今晚前清理，還有一次補救機會！");
         } else {
           if (nextWeatherType === 'typhoon') {
             setMessage(`第 ${nextDayNum} 天颱風來襲 🌀！外面狂風暴雨，農田自動澆滿水了。`);
@@ -834,6 +878,7 @@
               return prev;
             }
             targetSlot.hasWeed = false;
+            if (!targetSlot.hasBug) targetSlot.hazardDays = 0;
             setInventory(inv => ({ ...inv, scissors: inv.scissors - 1 }));
             playEffect('weed');
             triggerActionFx('weed', actionPoint);
@@ -847,6 +892,7 @@
               return prev;
             }
             targetSlot.hasBug = false;
+            if (!targetSlot.hasWeed) targetSlot.hazardDays = 0;
             setInventory(inv => ({ ...inv, chili: inv.chili - 1 }));
             playEffect('water');
             triggerActionFx('chili', actionPoint);
@@ -868,7 +914,7 @@
             let wrongTypeAny = false;
 
             targetPlot.slots.forEach(s => {
-              if (s.crop && s.growth < s.crop.days) {
+              if (s.crop && s.growth < s.crop.days && !s.hasBug && !s.hasWeed) {
                 if (s.crop.type === fertType) {
                   if (!s.isFertilized) {
                     s.growth += 1;
@@ -933,7 +979,7 @@
               ...s,
               crop: selectedSeed,
               growth: 0,
-              perfectGrowth: true,
+              hazardDays: 0,
               isWatered: weather === 'rainy' ? true : false,
               isFertilized: false,
               hasBug: false,
@@ -1281,6 +1327,10 @@
             </div>
           </div>
 
+          <div role="status" className={`max-w-4xl mx-auto -mt-2 mb-4 px-3 text-right text-[10px] md:text-xs font-bold ${saveError ? 'text-red-700' : 'text-slate-600'}`}>
+            {saveError ? '自動儲存失敗，請檢查瀏覽器設定' : `自動儲存：${lastSaveLabel}`}
+          </div>
+
           <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 relative z-30">
 
             {/* 左側：收成箱與農具清單 */}
@@ -1548,8 +1598,7 @@
                   <p className="text-slate-800 text-[10px] md:text-xs leading-relaxed font-black mt-3 bg-amber-200 p-3 rounded-xl border border-amber-300 shadow-inner">
                     💡 後果提醒：<br/>
                     1. 缺乏水分的作物，昨晚的<span className="text-red-600">生長進度已經完全停滯</span>。<br/>
-                    2. 缺水的作物將<span className="text-red-600">永遠失去</span>獲得「完美收成勳章」的資格。<br/>
-                    請務必記得每天都要檢查水分喔！（雨天除外）
+                    今天補澆水，下一次過夜就能繼續生長。（雨天免澆水）
                   </p>
                 </div>
                 <button onClick={closeEventModal} className="w-full bg-amber-500 text-white py-3 md:py-4 rounded-xl font-black text-sm md:text-base hover:bg-amber-600 transition-colors">
@@ -1593,7 +1642,7 @@
                 <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-slate-800">作物枯死了！</h2>
                 <div className="bg-slate-100 p-4 rounded-xl md:rounded-2xl mb-6 mt-4">
                   <p className="text-slate-700 text-[10px] md:text-xs leading-relaxed font-bold">
-                    你農田裡有作物因為<span className="text-red-600 font-black">【未處理蟲害】</span>或<span className="text-green-700 font-black">【雜草搶奪養分】</span>而在昨晚枯死了！
+                    你農田裡有作物因為<span className="text-red-600 font-black">【蟲害】</span>或<span className="text-green-700 font-black">【雜草】</span>連續兩晚未處理而枯死了！
                   </p>
                   <p className="text-slate-600 text-[10px] md:text-xs leading-relaxed font-bold mt-3">
                     💡 請務必每天檢查農田狀態，及時進行除草和驅蟲，否則心血都會白費喔！
@@ -1703,7 +1752,7 @@
                 <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-red-900">突發狀況：發現害蟲！</h2>
                 <div className="bg-red-50 p-4 rounded-xl md:rounded-2xl mb-6 mt-4">
                   <p className="text-slate-700 text-[10px] md:text-xs leading-relaxed font-bold">
-                    糟糕！你的農田裡出現了<span className="text-red-600 font-black">【害蟲】</span>。如果在今晚過夜前沒有驅除牠們，被寄生的植物就會被啃食枯死！
+                    糟糕！你的農田裡出現了<span className="text-red-600 font-black">【害蟲】</span>。第一次帶著蟲害過夜會暫停生長；明天還有一次機會驅蟲，若再過夜未處理才會枯死。
                   </p>
                   <p className="text-slate-800 text-[10px] md:text-xs leading-relaxed font-black mt-3 bg-red-200 p-3 rounded-xl border border-red-300 shadow-inner">
                     💡 驅蟲步驟：<br/>
@@ -1727,7 +1776,7 @@
                 <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-green-900">突發狀況：發現野草！</h2>
                 <div className="bg-green-50 p-4 rounded-xl md:rounded-2xl mb-6 mt-4">
                   <p className="text-slate-700 text-[10px] md:text-xs leading-relaxed font-bold">
-                    注意！你的農田裡長出了<span className="text-green-600 font-black">【尖刺野草】</span>。雜草會搶走養分，如果不處理，植物明天就會枯死！
+                    注意！你的農田裡長出了<span className="text-green-600 font-black">【尖刺野草】</span>。第一次帶著雜草過夜會暫停生長；明天還有一次機會除草，若再過夜未處理才會枯死。
                   </p>
                   <p className="text-slate-800 text-[10px] md:text-xs leading-relaxed font-black mt-3 bg-green-200 p-3 rounded-xl border border-green-300 shadow-inner">
                     💡 除草步驟：<br/>
@@ -2049,7 +2098,7 @@
 
                 <div className="overflow-y-auto custom-scrollbar flex-1 pr-2 md:pr-4 pb-4">
                   <p className="text-[10px] md:text-xs font-bold text-slate-500 mb-4 md:mb-6">
-                    收集所有四季作物吧！如果在未受蟲害且水分充足的「完美狀態」下收成，還能獲得額外的完美勳章喔！
+                    種植並收成四季作物，逐步點亮你的農業圖鑑！
                   </p>
 
                   <div className="space-y-6 md:space-y-8">
@@ -2069,7 +2118,6 @@
                             {cropList.map(crop => {
                               const record = gallery[crop?.id];
                               const isUnlocked = !!record?.unlocked;
-                              const isPerfect = !!record?.perfect;
 
                               return (
                                 <div key={crop?.id} className={`p-4 md:p-5 rounded-xl md:rounded-2xl border-2 flex items-start gap-4 md:gap-5 relative transition-all ${isUnlocked ? `${sBorder} ${sBg}` : 'border-slate-100 bg-slate-50 grayscale opacity-60'}`}>
@@ -2097,11 +2145,6 @@
                                     )}
                                   </div>
 
-                                  {isPerfect && (
-                                    <div className="absolute -top-2 -right-2 bg-yellow-400 border-2 border-white w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center shadow-md animate-bounce text-[10px] md:text-[12px]" title="完美收成勳章">
-                                      ✨
-                                    </div>
-                                  )}
                                 </div>
                               );
                             })}
@@ -2118,12 +2161,25 @@
           {/* 睡覺與存檔確認彈窗 */}
           {showModal === 'sleep' && (
             <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-              <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-sm w-full text-center shadow-2xl animate-in zoom-in duration-200">
+              <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-sm w-full text-center shadow-2xl animate-in zoom-in duration-200 max-h-[90vh] overflow-y-auto custom-scrollbar">
                 <div className="text-5xl md:text-6xl mb-3 md:mb-4">🌙</div>
-                <h2 className="text-xl md:text-2xl font-black mb-3 md:mb-4">準備休息了嗎？</h2>
-                <p className="text-slate-500 mb-5 md:mb-6 font-bold text-[10px] md:text-xs leading-relaxed">
-                  請確認所有作物都已澆水，並且<span className="text-red-500">沒有未處理的蟲害或雜草</span>，否則作物在夜晚會直接枯死喔！
+                <h2 className="text-xl md:text-2xl font-black mb-3">睡前待辦</h2>
+                <p className="text-slate-500 mb-3 font-bold text-[10px] md:text-xs leading-relaxed">
+                  缺水會暫停生長；蟲害與雜草第一次未處理會暫停生長，第二次過夜仍未處理才會枯死。
                 </p>
+                <div className="space-y-2 text-left mb-5 max-h-[30vh] overflow-y-auto custom-scrollbar" aria-label="各區睡前待辦">
+                  {sleepChecklist.length === 0 ? (
+                    <p className="rounded-xl bg-emerald-50 p-3 text-center font-bold text-emerald-700 text-xs">全部照顧好了，可以安心休息！</p>
+                  ) : sleepChecklist.map(item => (
+                    <button key={item.plotId} onClick={() => { setActivePlot(item.plotId); setShowModal(null); }} className="block w-full rounded-xl border border-amber-200 bg-amber-50 p-3 text-left hover:bg-amber-100 transition-colors">
+                      <strong className="block text-sm text-amber-900">第 {item.plotId + 1} 區 → 前往處理</strong>
+                      <span className="block text-xs text-slate-700 mt-1">
+                        {[item.water > 0 && `澆水 ${item.water} 格`, item.bugs > 0 && `驅蟲 ${item.bugs} 格`, item.weeds > 0 && `除草 ${item.weeds} 格`].filter(Boolean).join('・')}
+                      </span>
+                      {item.urgent > 0 && <span className="block mt-1 text-xs font-black text-red-700">其中 {item.urgent} 格若再過夜將枯死</span>}
+                    </button>
+                  ))}
+                </div>
                 <div className="flex gap-3 md:gap-4">
                   <button onClick={() => setShowModal(null)} className="flex-1 bg-slate-100 text-slate-600 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-sm md:text-base hover:bg-slate-200 transition-colors">
                     再巡一下
@@ -2134,7 +2190,7 @@
                 </div>
 
                 <div className="flex flex-col gap-3 md:gap-4 w-full mt-6 pt-6 border-t border-slate-100">
-                  <div className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-1">系統存檔 (支援手機/平板瀏覽器)</div>
+                  <div className="text-[10px] md:text-xs font-black text-slate-500">{saveError ? '自動儲存失敗，請檢查瀏覽器設定' : `自動儲存：${lastSaveLabel}`}</div>
                   <div className="flex gap-3 md:gap-4">
                     <button onClick={handleSave} className="flex-1 bg-blue-100 text-blue-700 py-3 rounded-xl font-black text-sm hover:bg-blue-200 transition-colors active:scale-95 shadow-sm">
                       💾 儲存進度
