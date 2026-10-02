@@ -23,7 +23,7 @@
   .farm12-art-wrap.farm12-overview{pointer-events:none}
   .farm12-plot-crop-name{max-width:92%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:clamp(10px,2.4vw,14px)}
   @media(min-width:768px){.farm12-art-wrap.farm12-overview,.farm12-art-wrap.farm12-overview .farm12-art{width:78px;height:78px}}
-</style><link rel="stylesheet" href="assets/farm12/picturebook/theme-v2.css?v=20261001"></head>
+</style><link rel="stylesheet" href="assets/farm12/picturebook/theme-v2.css?v=20261002"></head>
 <body class="bg-slate-900 overflow-x-hidden">
 
   <div id="root"></div><div class="farm12-version-switch"><span>12-2 繪本農莊</span><a href="index.html">遊戲首頁</a><a href="12-1.html">12-1 加強版</a><a href="12.html">原版</a></div>
@@ -1159,7 +1159,7 @@
               <span className="picturebook-stat picturebook-money"><Farm12UiIcon name="coin" /><span><small>農莊資金</small><b>${gold.toLocaleString()}</b></span></span>
             </div>
             <div className="picturebook-actions">
-              <button onClick={() => setShowModal('gallery')} className="picturebook-shop"><Farm12UiIcon name="book" />圖鑑</button>
+              <button id="farm12-gallery-button" type="button" aria-haspopup="dialog" aria-controls="farm12-gallery-dialog" onClick={() => setShowModal('gallery')} className="picturebook-shop"><Farm12UiIcon name="book" />圖鑑</button>
               {schoolQuest && <button onClick={() => setShowQuestModal(true)} className="picturebook-shop"><Farm12UiIcon name="school" /> 委託 {schoolQuest.daysLeft} 天</button>}
               <button onClick={() => setShowShop(true)} className={`picturebook-shop ${tutorialStep === 2 || (tutorialStep >= 7 && !flags.tutSell) ? 'ring-4 ring-blue-500 animate-pulse' : ''}`}><Farm12UiIcon name="cart" /> 商店</button>
               <button onClick={() => {
@@ -1405,7 +1405,6 @@
                 <StorySprite sheet="village-atlas" columns={2} index={1} label="小雞的家" className="story-building-art" />
                 <span><strong>小雞的家</strong><small>{coop.built ? (coop.fedToday ? '今天吃飽了' : '記得餵食') + `・${coop.eggs} 顆蛋` : '建造雞舍 $3,000'}</small></span>
               </button>
-              <button className="story-journal" onClick={() => setShowModal('gallery')}><StorySprite sheet="village-atlas" columns={2} index={3} label="田園圖鑑" /><span>翻開田園圖鑑<small>收藏每一次成長</small></span></button>
             </aside>
           </div>
 
@@ -1758,13 +1757,6 @@
                     <div className="text-sm font-bold text-yellow-600 mt-1">擁有的金錢: ${gold.toLocaleString()}</div>
                   </div>
                   <div className="flex items-center gap-2 md:gap-3">
-                    <button
-                      onClick={() => { setShowShop(false); setShowModal('gallery'); }}
-                      className="bg-indigo-50 text-indigo-700 border-2 border-indigo-100 px-2 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl font-black text-[10px] md:text-sm hover:bg-indigo-100 transition-colors flex items-center gap-1 md:gap-2 active:scale-95"
-                    >
-                      <span className="hidden sm:inline">📖 收集圖鑑</span>
-                      <span className="sm:hidden">📖 圖鑑</span>
-                    </button>
                     <button onClick={() => setShowShop(false)} className="bg-slate-100 p-1.5 md:p-2 rounded-full hover:bg-slate-200 transition-colors">❌</button>
                   </div>
                 </div>
@@ -1933,7 +1925,7 @@
           {/* 圖鑑系統 Modal */}
           {showModal === 'gallery' && (
             <div className="story-overlay fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-2 md:p-4 z-50">
-              <div className="story-paper bg-white p-5 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-4xl w-full shadow-2xl animate-in zoom-in duration-300 max-h-[95vh] flex flex-col">
+              <div id="farm12-gallery-dialog" role="dialog" aria-modal="true" aria-label="台灣蔬果農業圖鑑" className="story-paper bg-white p-5 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-4xl w-full shadow-2xl animate-in zoom-in duration-300 max-h-[95vh] flex flex-col">
                 <div className="flex justify-between items-center mb-4 md:mb-6 border-b pb-3 md:pb-4 shrink-0">
                   <h2 className="text-xl md:text-2xl font-black text-indigo-900 flex items-center gap-1 md:gap-2">📖 台灣蔬果農業圖鑑</h2>
                   <button onClick={() => setShowModal(null)} className="bg-slate-100 p-1.5 md:p-2 rounded-full hover:bg-slate-200 transition-colors">❌</button>
