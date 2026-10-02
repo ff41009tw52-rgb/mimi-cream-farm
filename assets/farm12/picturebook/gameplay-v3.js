@@ -1,7 +1,56 @@
 /* 12-2 care rules. Kept separate from presentation for save compatibility. */
 (function (root) {
   'use strict';
-  const count = value => Math.max(0, Math.floor(Number(value) || 0));
+  const count = value => Number.isFinite(Number(value)) ? Math.max(0, Math.floor(Number(value))) : 0;
+  const SAVE_KEY = 'farm_tycoon_save_v2_12_2_standard';
+  const startingInventory = () => ({ nets: 0, windbreaks: 0, fert_leaf: 0, fert_root: 0, fert_fruit: 0, scissors: 10, chili: 10, seeds: {}, crops: {}, eggs: 0 });
+  function normalizeInventory(saved = {}) {
+    const inventory = startingInventory();
+    for (const key of Object.keys(inventory)) {
+      if (key === 'seeds' || key === 'crops') inventory[key] = Object.fromEntries(Object.entries(saved[key] || {}).map(([id, value]) => [id, count(value)]));
+      else inventory[key] = saved[key] === undefined ? inventory[key] : count(saved[key]);
+    }
+    return inventory;
+  }
+  const seasonForDay = day => day <= 90 ? 'SPRING' : day <= 180 ? 'SUMMER' : day <= 270 ? 'AUTUMN' : 'WINTER';
+  const rainy = weather => weather === 'rainy' || weather === 'typhoon';
+  function weatherForDay(day, random = Math.random) {
+    if (day <= 3) return 'sunny';
+    const season = seasonForDay(day);
+    if ((season === 'SUMMER' || season === 'AUTUMN') && random() < .08) return 'typhoon';
+    return random() < ({ SPRING: .35, SUMMER: .45, AUTUMN: .25, WINTER: .20 })[season] ? 'rainy' : 'sunny';
+  }
+  const emptySlot = id => ({ id, crop: null, growth: 0, isWatered: false, isFertilized: false, hasBug: false, hasWeed: false, hazardDays: 0 });
+  function advanceFields(plots, weather, nextWeather, random = Math.random) {
+    let typhoonDamageCount = 0, hasDeadCrops = false;
+    const nextPlots = plots.map(plot => {
+      if (!plot.isUnlocked) return plot;
+      const slots = plot.slots.map(slot => {
+        if (!slot.crop) return slot;
+        const mature = slot.growth >= slot.crop.days;
+        // Today's weather is resolved tonight; tomorrow's weather never damages today's crop.
+        if (!mature && weather === 'typhoon' && !plot.isWindbreaked && random() < .5) {
+          typhoonDamageCount++;
+          return emptySlot(slot.id);
+        }
+        const affected = !mature && (slot.hasBug || slot.hasWeed);
+        if (affected && (slot.hazardDays || 0) >= 1) {
+          hasDeadCrops = true;
+          return emptySlot(slot.id);
+        }
+        // Settle care already performed today before introducing tomorrow's hazards.
+        const growth = Math.min(slot.crop.days, slot.growth + (!mature && !affected && (slot.isWatered || rainy(weather)) ? 1 : 0));
+        let bug = mature ? false : slot.hasBug, weed = mature ? false : slot.hasWeed;
+        if (growth < slot.crop.days && !affected) {
+          if (!plot.isNetted && random() < .15) bug = true;
+          if (random() < .20) weed = true;
+        }
+        return { ...slot, growth, isWatered: rainy(nextWeather), isFertilized: false, hasBug: bug, hasWeed: weed, hazardDays: affected ? 1 : 0 };
+      });
+      return { ...plot, slots, isNetted: slots.some(slot => slot.crop && slot.growth >= slot.crop.days) ? false : plot.isNetted };
+    });
+    return { nextPlots, typhoonDamageCount, hasDeadCrops };
+  }
   const makeHen = index => ({ id: 'hen-' + (index + 1), name: ['小米', '栗子', '芝麻'][index], color: index, fedToday: false, greetedDay: 0, affection: 0 });
   function normalizeCoop(saved = {}) {
     const built = !!saved.built;
@@ -45,7 +94,7 @@
   const cropStage = (crop, growth) => growth >= crop.days ? 'mature' : growth >= Math.max(1, Math.ceil(crop.days * .4)) ? 'growing' : 'seedling';
   const stageLabel = stage => ({ seedling: '幼苗', growing: '成長中', mature: '成熟' })[stage];
   const upgradePrice = coop => coop.hens.length === 1 ? 3000 : coop.hens.length === 2 ? 5000 : 0;
-  const api = { makeHen, normalizeCoop, advanceCoopDay, feedCoop, treatPlot, questDuration, normalizeQuest, cropStage, stageLabel, upgradePrice };
+  const api = { count, SAVE_KEY, startingInventory, normalizeInventory, seasonForDay, rainy, weatherForDay, advanceFields, makeHen, normalizeCoop, advanceCoopDay, feedCoop, treatPlot, questDuration, normalizeQuest, cropStage, stageLabel, upgradePrice };
   root.Farm12Care = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(globalThis);

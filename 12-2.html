@@ -23,12 +23,12 @@
   .farm12-art-wrap.farm12-overview{pointer-events:none}
   .farm12-plot-crop-name{max-width:92%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:clamp(10px,2.4vw,14px)}
   @media(min-width:768px){.farm12-art-wrap.farm12-overview,.farm12-art-wrap.farm12-overview .farm12-art{width:78px;height:78px}}
-</style><link rel="stylesheet" href="assets/farm12/picturebook/theme-v2.css?v=20261002"><link rel="stylesheet" href="assets/farm12/picturebook/comfort-v3.css?v=20261002"></head>
+</style><link rel="stylesheet" href="assets/farm12/picturebook/theme-v2.css?v=20261002"><link rel="stylesheet" href="assets/farm12/picturebook/comfort-v3.css?v=20261002-normal"></head>
 <body class="bg-slate-900 overflow-x-hidden">
 
   <div id="root"></div><div class="farm12-version-switch"><span>12-2 繪本農莊</span><a href="index.html">遊戲首頁</a><a href="12-1.html">12-1 加強版</a><a href="12.html">原版</a></div>
 
-  <script src="assets/farm12/picturebook/gameplay-v3.js?v=20261002"></script>
+  <script src="assets/farm12/picturebook/gameplay-v3.js?v=20261002-normal"></script>
   <script type="text/babel">
     const { useState, useEffect, useCallback, useRef } = React;
     const Care = window.Farm12Care;
@@ -213,15 +213,7 @@
 
     const PLOT_PRICES = [0, 5000, 15000, 30000];
 
-    const getRainProbability = (season) => {
-      switch(season) {
-        case 'SPRING': return 0.35;
-        case 'SUMMER': return 0.45;
-        case 'AUTUMN': return 0.25;
-        case 'WINTER': return 0.20;
-        default: return 0.2;
-      }
-    };
+
 
     // --- 飛行作物動畫元件 ---
     const FlyingCropComponent = ({ data, onRemove }) => {
@@ -260,7 +252,8 @@
 
       const [day, setDay] = useState(1);
       const [weather, setWeather] = useState('sunny');
-      const [gold, setGold] = useState(100000);
+      const [weatherMotion, setWeatherMotion] = useState(true);
+      const [gold, setGold] = useState(100);
 
       const [tutorialStep, setTutorialStep] = useState(0);
       const [flags, setFlags] = useState({
@@ -270,10 +263,7 @@
         tutSell: false, tutFert: false, tutNet: false
       });
 
-      const [inventory, setInventory] = useState({
-        nets: 0, windbreaks: 0, fert_leaf: 0, fert_root: 0, fert_fruit: 0,
-        scissors: 10, chili: 10, seeds: Object.fromEntries(Object.values(CROPS).flat().filter(Boolean).map(crop => [crop.id, 1])), crops: {}
-      });
+      const [inventory, setInventory] = useState(() => Care.startingInventory());
       const [gallery, setGallery] = useState({});
       const [coop, setCoop] = useState(() => Care.normalizeCoop());
 
@@ -340,7 +330,7 @@
       }, [day]);
 
       useEffect(() => {
-        const saved = localStorage.getItem('farm_tycoon_save_v2_12_2');
+        const saved = localStorage.getItem(Care.SAVE_KEY);
         if (saved) {
           setSaveExists(true);
           try {
@@ -447,7 +437,7 @@
         const stateToSave = {
           isGameStarted, farmName, day, weather, gold, inventory, gallery, plots, schoolQuest, flags, tutorialStep, coop, savedAt
         };
-        localStorage.setItem('farm_tycoon_save_v2_12_2', JSON.stringify(stateToSave));
+        localStorage.setItem(Care.SAVE_KEY, JSON.stringify(stateToSave));
         setLastSave({ at: savedAt, day });
         setSaveExists(true);
         setSaveError(false);
@@ -477,15 +467,15 @@
 
       const handleLoad = () => {
         try {
-          const saved = localStorage.getItem('farm_tycoon_save_v2_12_2');
+          const saved = localStorage.getItem(Care.SAVE_KEY);
           if (saved) {
             const state = JSON.parse(saved);
             setIsGameStarted(state.isGameStarted);
             setFarmName(state.farmName);
             setDay(state.day);
             setWeather(state.weather);
-            setGold(Math.max(100000, Number(state.gold) || 0));
-            setInventory({ ...state.inventory, seeds: { ...(state.inventory?.seeds || {}), ...Object.fromEntries(Object.values(CROPS).flat().filter(Boolean).map(crop => [crop.id, Math.max(1, Number(state.inventory?.seeds?.[crop.id]) || 0)])) }, crops: state.inventory?.crops || {} });
+            setGold(Care.count(state.gold));
+            setInventory(Care.normalizeInventory(state.inventory || {}));
             setGallery(Object.fromEntries(Object.entries(state.gallery || {}).map(([id, record]) => [id, { unlocked: !!record?.unlocked }])));
             setCoop(Care.normalizeCoop(state.coop || {}));
             setPlots(state.plots.map(plot => ({
@@ -512,7 +502,7 @@
         }
       };
 
-      const season = day <= 90 ? 'SPRING' : day <= 180 ? 'SUMMER' : day <= 270 ? 'AUTUMN' : 'WINTER';
+      const season = Care.seasonForDay(day);
       const seasonName = { SPRING: '春', SUMMER: '夏', AUTUMN: '秋', WINTER: '冬' }[season];
       const seasonColor = { SPRING: 'bg-green-100', SUMMER: 'bg-yellow-100', AUTUMN: 'bg-orange-100', WINTER: 'bg-blue-100' }[season];
       const lastSaveLabel = lastSave ? `第 ${lastSave.day} 天・${new Date(lastSave.at).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })} 已儲存` : '尚未儲存';
@@ -523,9 +513,10 @@
           water: weather === 'rainy' || weather === 'typhoon' ? 0 : growing.filter(slot => !slot.isWatered).length,
           bugs: growing.filter(slot => slot.hasBug).length,
           weeds: growing.filter(slot => slot.hasWeed).length,
-          urgent: growing.filter(slot => (slot.hasBug || slot.hasWeed) && (slot.hazardDays || 0) >= 1).length
+          urgent: growing.filter(slot => (slot.hasBug || slot.hasWeed) && (slot.hazardDays || 0) >= 1).length,
+          windRisk: weather === 'typhoon' && !plot.isWindbreaked ? growing.length : 0
         };
-      }).filter(item => item.water || item.bugs || item.weeds);
+      }).filter(item => item.water || item.bugs || item.weeds || item.windRisk);
 
       const processNextDay = () => {
         if (day >= 365) {
@@ -533,70 +524,12 @@
           return;
         }
 
-        let hasDeadCrops = false;
-        let typhoonDamageCount = 0;
-
         const nextDayNum = day + 1;
-        const nextSeason = nextDayNum <= 90 ? 'SPRING' : nextDayNum <= 180 ? 'SUMMER' : nextDayNum <= 270 ? 'AUTUMN' : 'WINTER';
-
-        const isTyphoonNext = (nextSeason === 'SUMMER' || nextSeason === 'AUTUMN') && Math.random() < 0.08;
-        const isRainingNext = nextDayNum > 3 ? Math.random() < getRainProbability(nextSeason) : false;
-        const nextWeatherType = isTyphoonNext ? 'typhoon' : (isRainingNext ? 'rainy' : 'sunny');
-
-        // 在處理下一天前，檢查今天是否有生長中的作物「忘記澆水」
-        const forgotWaterYesterday = plots.some(p => p.slots.some(s => s.crop && s.growth < s.crop.days && !s.isWatered));
-
-        const nextPlots = plots.map(plot => {
-          const updatedSlots = plot.slots.map(slot => {
-            if (!slot.crop) return slot;
-
-            const isMature = slot.growth >= slot.crop.days;
-
-            if (weather === 'typhoon' && !plot.isWindbreaked && !isMature) {
-              if (Math.random() < 0.5) {
-                typhoonDamageCount++;
-                return { id: slot.id, crop: null, growth: 0, isWatered: false, isFertilized: false, hasBug: false, hasWeed: false, hazardDays: 0 };
-              }
-            }
-
-            const alreadyAffected = slot.hasBug || slot.hasWeed;
-            if (alreadyAffected && (slot.hazardDays || 0) >= 1) {
-              hasDeadCrops = true;
-              return { id: slot.id, crop: null, growth: 0, isWatered: false, isFertilized: false, hasBug: false, hasWeed: false, hazardDays: 0 };
-            }
-
-            let newGrowth = slot.growth;
-            let bug = slot.hasBug;
-            let weed = slot.hasWeed;
-
-            if (!isMature && !alreadyAffected) {
-              if (!plot.isNetted && Math.random() < 0.15) bug = true;
-              if (Math.random() < 0.2) weed = true;
-            }
-
-            if (!bug && !weed && (slot.isWatered || weather === 'typhoon')) {
-              newGrowth += 1;
-            }
-
-            return {
-              ...slot,
-              growth: newGrowth,
-              isWatered: (nextWeatherType === 'rainy' || nextWeatherType === 'typhoon') ? true : false,
-              isFertilized: false,
-              hasBug: bug,
-              hasWeed: weed,
-              hazardDays: alreadyAffected ? 1 : 0
-            };
-          });
-
-          const hasMatureCrop = updatedSlots.some(s => s.crop && s.growth >= s.crop.days);
-
-          return {
-            ...plot,
-            isNetted: hasMatureCrop ? false : plot.isNetted,
-            slots: updatedSlots
-          };
-        });
+        const nextSeason = Care.seasonForDay(nextDayNum);
+        const nextWeatherType = Care.weatherForDay(nextDayNum);
+        const isTyphoonNext = nextWeatherType === 'typhoon';
+        const forgotWaterYesterday = !Care.rainy(weather) && plots.some(p => p.isUnlocked && p.slots.some(s => s.crop && s.growth < s.crop.days && !s.isWatered));
+        const { nextPlots, typhoonDamageCount, hasDeadCrops } = Care.advanceFields(plots, weather, nextWeatherType);
 
         const currentHasBug = nextPlots.some(p => p.slots.some(s => s.hasBug));
         const currentHasWeed = nextPlots.some(p => p.slots.some(s => s.hasWeed));
@@ -660,15 +593,15 @@
           newEvents.push({ type: 'irrigation_upgrade' });
         }
         if (isTyphoonNext) {
-          newEvents.push({ type: 'typhoon_warning', isFirst: !flags.seenTyphoon });
+          newEvents.unshift({ type: 'typhoon_warning', isFirst: !flags.seenTyphoon });
           if (!flags.seenTyphoon) {
             setFlags(prev => ({...prev, seenTyphoon: true}));
             // 新手教學：第一次遇到颱風送 1 個防風網
             setInventory(inv => ({ ...inv, windbreaks: (inv.windbreaks || 0) + 1 }));
           }
         }
-        if (typhoonDamageCount > 0) {
-          newEvents.push({ type: 'typhoon_damage', count: typhoonDamageCount });
+        if (weather === 'typhoon') {
+          newEvents.unshift({ type: 'typhoon_report', count: typhoonDamageCount, stormDay: day });
         }
         if (newQuest) {
           newEvents.push({ type: 'school_quest', data: newQuest });
@@ -718,7 +651,7 @@
               });
 
               if (!wateredAny) {
-                setMessage(weather === 'rainy' ? "今天是雨天，不需要人工澆水喔！" : "此區塊目前沒有需要澆水的作物！");
+                setMessage(Care.rainy(weather) ? "今天已有雨水，不需要人工澆水喔！" : "此區塊目前沒有需要澆水的作物！");
                 return prev;
               }
               playEffect('water');
@@ -730,7 +663,7 @@
                 wateredAny = true;
               }
               if (!wateredAny) {
-                setMessage(weather === 'rainy' ? "今天是雨天，不需要人工澆水喔！" : "這格沒有需要澆水的作物！");
+                setMessage(Care.rainy(weather) ? "今天已有雨水，不需要人工澆水喔！" : "這格沒有需要澆水的作物！");
                 return prev;
               }
               playEffect('water');
@@ -848,7 +781,7 @@
               crop: selectedSeed,
               growth: 0,
               hazardDays: 0,
-              isWatered: weather === 'rainy' ? true : false,
+              isWatered: Care.rainy(weather),
               isFertilized: false,
               hasBug: false,
               hasWeed: false
@@ -1160,6 +1093,7 @@
                   />
                 </div>
 
+                <p className="story-start-rules">正常開局：$100、除草／驅蟲各 10 次。<br/>種子自行購買；舊測試進度另行保留，與正常經營分開存檔。</p>
                 <div className="flex flex-col gap-3 md:gap-4">
                   <button
                     onClick={() => {
@@ -1312,7 +1246,9 @@
             </section>
 
             {/* 農田主畫面 (8格) */}
-            <div className="picturebook-field">
+            <div className="picturebook-field" data-weather={weather} data-weather-motion={weatherMotion}>
+              {Care.rainy(weather) && <div className="story-weather-layer" aria-hidden="true">{Array.from({length: 24}, (_, i) => <i key={i} className="story-rain-streak" style={{left: `${i * 4.3}%`, animationDelay: `${-(i % 9) * .19}s`, animationDuration: `${weather === 'typhoon' ? .65 + (i % 4) * .1 : 1.1 + (i % 4) * .13}s`}} />)}{weather === 'typhoon' && <><i className="story-wind-gust" /><i className="story-wind-gust story-wind-gust-second" /></>}</div>}
+              {Care.rainy(weather) && <div className="story-weather-notice"><Farm12UiIcon name={weather === 'typhoon' ? 'storm' : 'rain'} /><div><strong>{weather === 'typhoon' ? '今天颱風來襲' : '今天下雨了'}</strong><p>{weather === 'typhoon' ? '雨水會自動澆田。今晚睡覺前架好防風網，隔天才結算災損。' : '新種下的作物也會自動澆水，可以專心照顧其他農務。'}</p></div><button onClick={() => setWeatherMotion(v => !v)} aria-pressed={!weatherMotion}>{weatherMotion ? '暫停動畫' : '播放動畫'}</button></div>}
               <div className="story-field-heading"><div><small>A LITTLE CARE, EVERY DAY</small><h2>{activePlot === null ? '在田裡，慢慢長大' : `照顧第 ${activePlot + 1} 區`}</h2></div><span>{activePlot === null ? '點選農地，開始今日農務' : selectedTool === 'seed' ? `已選：${selectedSeed?.name || '種子'}` : `已選：${({water:'澆水壺',chili:'辣椒水',weed:'除草剪刀',fert_leaf:'氮肥',fert_root:'磷肥',fert_fruit:'鉀肥'})[selectedTool] || '農具'}`}</span></div>
               {activePlot === null ? (
                 <div className="picturebook-plots">
@@ -1373,15 +1309,6 @@
               ) : (
                 <div className="story-detail relative flex flex-col">
 
-                  {weather === 'rainy' && (
-                    <div className="absolute inset-0 pointer-events-none overflow-hidden bg-blue-500/5 flex justify-evenly opacity-40 z-0">
-                      <div className="w-[1px] md:w-[2px] h-12 md:h-20 bg-blue-400 animate-rain"></div>
-                      <div className="w-[1px] md:w-[2px] h-10 md:h-16 bg-blue-400 animate-rain rain-delay-1 mt-10"></div>
-                      <div className="w-[1px] md:w-[2px] h-16 md:h-24 bg-blue-400 animate-rain rain-delay-2 mt-20"></div>
-                      <div className="w-[1px] md:w-[2px] h-8 md:h-12 bg-blue-400 animate-rain rain-delay-3 mt-5"></div>
-                      <div className="w-[1px] md:w-[2px] h-12 md:h-18 bg-blue-400 animate-rain rain-delay-1 mt-30"></div>
-                    </div>
-                  )}
 
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6 gap-3 relative z-10 shrink-0">
                     <button onClick={() => setActivePlot(null)} className="bg-slate-100 hover:bg-slate-200 px-3 md:px-4 py-1.5 md:py-2 rounded-xl text-[10px] md:text-xs font-black transition-colors shrink-0">❮ 前往其他農地</button>
@@ -1507,25 +1434,25 @@
           )}
 
           {/* 颱風災損事件 */}
-          {currentEvent?.type === 'typhoon_damage' && (
+          {currentEvent?.type === 'typhoon_report' && (
             <div className="story-overlay fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-[100]">
               <div className="story-paper bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-md w-full shadow-2xl animate-in zoom-in duration-300 max-h-[85vh] overflow-y-auto hide-scrollbar border-4 border-blue-600">
                 <div className="text-center font-black text-blue-600 mb-2 animate-pulse">⚠️ 災情回報</div>
                 <div className="text-5xl md:text-6xl mb-4 text-center">🌪️</div>
-                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-slate-800">颱風過境，滿目瘡痍！</h2>
+                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-slate-800">{currentEvent.count > 0 ? '颱風災損結算' : '平安度過風雨'}</h2>
                 <div className="bg-slate-100 p-4 rounded-xl md:rounded-2xl mb-6 mt-4">
                   <p className="text-slate-700 text-[10px] md:text-xs leading-relaxed font-bold">
-                    昨晚的狂風暴雨無情地摧毀了農田裡缺乏保護的作物...
+                    第 {currentEvent.stormDay} 天的颱風已完成結算；今天的天氣請看上方天氣欄。
                   </p>
                   <p className="text-red-600 text-[10px] md:text-xs leading-relaxed font-black mt-3 bg-red-100 p-3 rounded-xl border border-red-200">
-                    統計損失：共有 {currentEvent.count} 株作物被強風連根拔起！
+                    {currentEvent.count > 0 ? `本次損失 ${currentEvent.count} 株未成熟且未受防風網保護的作物。` : '這次沒有作物損失，農田平安！'}
                   </p>
                   <p className="text-slate-600 text-[10px] md:text-xs leading-relaxed font-bold mt-3">
                     💡 記得在颱風來臨前，提前購買並部署【防風網】來保護心血喔！
                   </p>
                 </div>
                 <button onClick={closeEventModal} className="w-full bg-blue-600 text-white py-3 md:py-4 rounded-xl font-black text-sm md:text-base hover:bg-blue-700 transition-colors">
-                  我知道了，只能重新振作了
+                  查看今天的農莊
                 </button>
               </div>
             </div>
@@ -1714,10 +1641,10 @@
                 {currentEvent.isFirst && <div className="text-center font-black text-blue-600 mb-2 animate-pulse">🎓 新手必讀</div>}
 
                 <div className="text-5xl md:text-6xl mb-4 text-center">🌀</div>
-                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-blue-900">氣象局：強烈颱風警報！</h2>
+                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-blue-900">農莊氣象站：今天颱風來襲！</h2>
                 <div className="bg-blue-50 p-4 rounded-xl md:rounded-2xl mb-6 mt-4">
                   <p className="text-red-600 text-[10px] md:text-xs leading-relaxed font-black mt-2">
-                    警告：明天將有颱風！田裡「尚未成熟」且「沒有架設防風網」的作物，將有 50% 的機率被摧毀！
+                    今天已是颱風天。請在今晚睡覺前架設防風網；睡覺後才結算災損，每株「未成熟且未受防風網保護」的作物各有 50% 機率損失。已成熟的作物不受颱風傷害。
                   </p>
                   {currentEvent.isFirst && (
                     <p className="text-emerald-700 text-[10px] md:text-xs leading-relaxed font-black mt-3 bg-emerald-100 p-2 rounded-lg border border-emerald-200">
@@ -1728,7 +1655,7 @@
                     💡 防風網使用教學：<br/>
                     1. {currentEvent.isFirst ? "已經有政府送的防風網了！若不夠可前往" : "前往"}右上角「🛒 商店」購買【🛡️ 防風網】。<br/>
                     2. 進入你的農田區塊（例如第 1 區）。<br/>
-                    3. 點選畫面上方的「部署防風網」。<br/><br/>
+                    3. 點選畫面上方的「架設防風網」。<br/><br/>
                     <span className="text-blue-700">⚠️ 特別注意：一張防風網可以保護【一整大塊農地（包含裡面的8小格）】，不需要每個格子都買喔！</span>
                   </p>
                 </div>
@@ -2099,8 +2026,9 @@
                     <button key={item.plotId} onClick={() => { setActivePlot(item.plotId); setShowModal(null); }} className="block w-full rounded-xl border border-amber-200 bg-amber-50 p-3 text-left hover:bg-amber-100 transition-colors">
                       <strong className="block text-sm text-amber-900">第 {item.plotId + 1} 區 → 前往處理</strong>
                       <span className="block text-xs text-slate-700 mt-1">
-                        {[item.water > 0 && `澆水 ${item.water} 格`, item.bugs > 0 && `驅蟲 ${item.bugs} 格`, item.weeds > 0 && `除草 ${item.weeds} 格`].filter(Boolean).join('・')}
+                        {[item.water > 0 && `澆水 ${item.water} 格`, item.bugs > 0 && `驅蟲 ${item.bugs} 格`, item.weeds > 0 && `除草 ${item.weeds} 格`, item.windRisk > 0 && `防風 ${item.windRisk} 格`].filter(Boolean).join('・')}
                       </span>
+                      {item.windRisk > 0 && <span className="block mt-1 text-xs font-black text-red-700">今晚每株有 50% 受損機率，請先架設防風網</span>}
                       {item.urgent > 0 && <span className="block mt-1 text-xs font-black text-red-700">其中 {item.urgent} 格若再過夜將枯死</span>}
                     </button>
                   ))}
@@ -2160,7 +2088,7 @@
                   </div>
                 </div>
                 <button onClick={() => {
-                  localStorage.removeItem('farm_tycoon_save_v2_12_2');
+                  localStorage.removeItem(Care.SAVE_KEY);
                   window.location.reload();
                 }} className="w-full bg-slate-800 text-white py-5 md:py-6 rounded-2xl md:rounded-3xl font-black text-sm md:text-base uppercase tracking-widest hover:bg-slate-700 active:scale-95 transition-all">刪除存檔並開啟下一個循環</button>
               </div>

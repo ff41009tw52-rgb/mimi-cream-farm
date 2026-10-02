@@ -116,3 +116,21 @@
 }
 @media(max-width:360px){.picturebook-stat .farm12-ui-icon{width:20px;height:20px}.picturebook-stat{gap:2px;font-size:14px}.picturebook-stat b{font-size:15px}.picturebook-stat+.picturebook-stat{padding-left:4px}.picturebook-plot-label span{font-size:13px}.picturebook-plot{padding-left:8px;padding-right:8px}.story-hen-card{grid-template-columns:70px minmax(0,1fr)}.story-hen-art{width:70px;height:70px}}
 @media(prefers-reduced-motion:reduce){.farm12-picturebook *{transition:none!important;animation:none!important}}
+/* Weather stays inside the fields; no flashing or screen shaking. */
+.picturebook-field{position:relative;isolation:isolate}
+.story-weather-layer{position:absolute;inset:0;overflow:hidden;border-radius:18px;z-index:4;pointer-events:none;background:#6886a410}
+[data-weather=typhoon] .story-weather-layer{background:#34495525}
+.story-rain-streak{position:absolute;top:-90px;width:2px;height:45px;background:#d9e9edb3;border-radius:2px;animation:storyRainFall 1.2s linear infinite}
+[data-weather=typhoon] .story-rain-streak{height:64px;animation-name:storyStormRain}
+.story-wind-gust{position:absolute;top:40%;left:-40%;width:36%;height:24px;border-top:2px solid #e4efdc80;border-bottom:1px solid #e4efdc50;border-radius:50%;animation:storyWindGust 3s ease-in-out infinite}
+.story-wind-gust-second{top:72%;animation-delay:-1.5s}
+.story-weather-notice{position:relative;z-index:5;display:flex;align-items:center;gap:10px;padding:12px;margin-bottom:16px;background:#f8f5e8;border:1px solid #899c96;border-radius:12px;color:#344d4b}
+.story-weather-notice>.farm12-ui-icon{width:40px;height:40px}.story-weather-notice>div{flex:1;min-width:0}.story-weather-notice strong{font-size:18px}.story-weather-notice p{font-size:14px;line-height:1.75;margin-top:4px}
+.story-weather-notice button{font-size:13px;padding:6px 10px;border:1px solid #b8c1ac;border-radius:8px;background:#edf0e4;flex:none}
+.story-start-rules{font-size:14px;line-height:1.8;color:#4e5f40;border:1px solid #d2c9af;border-radius:8px;background:#f0eddc;padding:12px;margin:14px 0 18px}
+[data-weather-motion=false] .story-weather-layer{display:none}
+@keyframes storyRainFall{from{transform:translate(0,-60px);opacity:0}15%{opacity:.7}to{transform:translate(-60px,850px);opacity:0}}
+@keyframes storyStormRain{from{transform:translate(150px,-60px) rotate(24deg);opacity:0}15%{opacity:.8}to{transform:translate(-250px,850px) rotate(24deg);opacity:0}}
+@keyframes storyWindGust{from{transform:translateX(0);opacity:0}35%{opacity:.65}to{transform:translateX(420%);opacity:0}}
+@media(max-width:760px){.story-weather-notice{flex-wrap:wrap}.story-weather-notice>div{flex-basis:calc(100% - 60px)}.story-weather-notice button{margin-left:auto;min-height:44px}.story-weather-notice strong{font-size:17px}}
+@media(prefers-reduced-motion:reduce){.story-weather-layer{display:none}}
