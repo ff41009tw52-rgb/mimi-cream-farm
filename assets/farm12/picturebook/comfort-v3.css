@@ -136,7 +136,7 @@
 @media(prefers-reduced-motion:reduce){.story-weather-layer{display:none}}
 
 /* Rounded Traditional Chinese reading face, bundled with the game. */
-@font-face{font-family:'Farm Rounded';src:url('fonts/farm-rounded.woff') format('woff');font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:'Farm Rounded';src:url('fonts/farm-rounded.woff?v=20261002-clear-art') format('woff');font-style:normal;font-weight:400;font-display:swap}
 body,.farm12-picturebook,.story-home-footer{font-family:'Farm Rounded','Microsoft JhengHei','PingFang TC',sans-serif}
 .farm12-picturebook{font-weight:400;letter-spacing:.025em;line-height:1.8}
 .farm12-picturebook :is(button,input,select,textarea){font-family:inherit;letter-spacing:.025em}
@@ -162,3 +162,24 @@ body,.farm12-picturebook,.story-home-footer{font-family:'Farm Rounded','Microsof
 @media(max-width:760px){.story-guide{grid-template-columns:36px minmax(0,1fr);gap:10px;padding:18px 14px;margin-bottom:22px}.story-guide::before{left:17px;width:30px}.story-guide-emblem{width:36px;height:36px;margin-top:12px}.story-guide-emblem .farm12-ui-icon{width:26px;height:26px}.story-guide-heading{align-items:start;gap:8px;flex-wrap:wrap}.story-guide-heading h2{font-size:19px}.story-guide-body p{font-size:15px;line-height:1.85}.story-guide-count{font-size:12px}.story-guide-toggle{grid-column:2;justify-self:end}.story-guide-checklist li{font-size:14px}}
 .story-paper .animate-pulse{animation:none!important}
 .story-paper>div.text-center.font-black{font-size:13px;letter-spacing:.07em;line-height:1.7;color:#74805a!important}
+
+/* Opening page: clear instructions, comfortable reading, and no art/text overlap. */
+.picturebook-opening .picturebook-start-panel{max-width:580px!important;padding:26px 32px 30px!important;font-family:'Microsoft JhengHei','PingFang TC','Noto Sans TC',sans-serif;font-weight:400;letter-spacing:.02em}
+.picturebook-opening .story-opening-art{height:138px;margin:0 0 12px;display:flex;justify-content:center;align-items:center}
+.picturebook-opening .story-opening-art .story-sprite{width:138px;height:138px;margin:0}
+.picturebook-opening .story-eyebrow{color:#64714e;font-size:14px;line-height:1.6;letter-spacing:.12em;margin:0 0 4px}
+.picturebook-opening .picturebook-start-panel h1{font-family:'Farm Rounded','Microsoft JhengHei',sans-serif;font-size:38px;line-height:1.3;font-weight:700;letter-spacing:.08em;margin:0 0 14px!important;color:#405332}
+.picturebook-opening .story-opening-subtitle{font-size:18px;line-height:1.7;font-weight:500;color:#405332;margin:0 0 10px}
+.picturebook-opening .story-opening-description{font-size:16px;line-height:1.85;color:#505b43;margin:0}
+.story-opening-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;list-style:none;margin:18px 0 12px;padding:0}
+.story-opening-steps li{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;padding:10px 4px;border:1px solid #d6d8bc;border-radius:9px;background:#eff0df;color:#455536;font-size:15px;line-height:1.6}
+.story-opening-steps li>span{display:grid;place-items:center;width:25px;height:25px;border-radius:50%;background:#657951;color:#fffaf0;font-size:14px;font-weight:500}
+.story-opening-steps strong{font-weight:500;white-space:nowrap}
+.picturebook-opening .story-opening-time{font-size:14px;line-height:1.85;color:#616b54;margin:0 0 22px}
+.picturebook-opening .picturebook-start-panel .story-name-label{display:block;text-align:left;font-size:16px!important;font-weight:500;color:#435338;line-height:1.7;letter-spacing:.02em;margin:0 0 8px!important}
+.picturebook-opening .picturebook-start-panel input{font-family:inherit;font-size:18px;font-weight:400;line-height:1.6;letter-spacing:.02em;padding:12px 14px;text-align:left;color:#3e4d34;background:#fffdf5}
+.picturebook-opening .picturebook-start-panel input::placeholder{color:#7b806f;opacity:1;font-weight:400}
+.picturebook-opening .story-name-help{font-size:13px;line-height:1.7;text-align:left;color:#66705a;margin:7px 0 0}
+.picturebook-opening .story-start-rules{font-size:14px;line-height:1.85;text-align:left;padding:12px 14px;margin:0 0 18px;color:#4e5f40;background:#f0eddc}
+.picturebook-opening .picturebook-start-panel button{font-family:inherit;font-weight:600;font-size:17px!important;letter-spacing:.03em;line-height:1.6;min-height:52px}
+@media(max-width:600px){.picturebook-opening{padding:16px 12px!important}.picturebook-opening .picturebook-start-panel{max-width:100%!important;padding:20px 20px 24px!important}.picturebook-opening .story-opening-art{height:100px;margin-bottom:10px}.picturebook-opening .story-opening-art .story-sprite{width:100px;height:100px}.picturebook-opening .picturebook-start-panel h1{font-size:32px}.picturebook-opening .story-opening-subtitle{font-size:17px}.picturebook-opening .story-opening-description{font-size:15px;text-align:left}.picturebook-opening .story-opening-description br{display:none}.story-opening-steps{gap:6px}.story-opening-steps li{font-size:14px}.picturebook-opening .story-opening-time{text-align:left}.picturebook-opening .story-start-rules br{display:none}}

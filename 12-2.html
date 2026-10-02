@@ -5,6 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>四季農莊：島嶼物語</title>
 
+  <!-- Start the three shared crop sheets before downloading the game runtime. -->
+  <link rel="preload" as="image" type="image/webp" href="assets/farm12/picturebook/crops-atlas-v3.webp" fetchpriority="high">
+  <link rel="preload" as="image" type="image/webp" href="assets/farm12/picturebook/sprouts-atlas-v3.webp" fetchpriority="high">
+  <link rel="preload" as="image" type="image/webp" href="assets/farm12/picturebook/growth-atlas-v3.webp">
+  <script>
+    // Reuse the same URLs as the sprites; preload and decode once, including on the opening screen.
+    window.farm12CropImages = ['crops', 'sprouts', 'growth'].map(function (stage) {
+      var img = new Image();
+      img.src = 'assets/farm12/picturebook/' + stage + '-atlas-v3.webp';
+      if (img.decode) img.decode().catch(function () {});
+      return img;
+    });
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -23,7 +36,7 @@
   .farm12-art-wrap.farm12-overview{pointer-events:none}
   .farm12-plot-crop-name{max-width:92%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:clamp(10px,2.4vw,14px)}
   @media(min-width:768px){.farm12-art-wrap.farm12-overview,.farm12-art-wrap.farm12-overview .farm12-art{width:78px;height:78px}}
-</style><link rel="stylesheet" href="assets/farm12/picturebook/theme-v2.css?v=20261002"><link rel="stylesheet" href="assets/farm12/picturebook/comfort-v3.css?v=20261002-notes"></head>
+</style><link rel="stylesheet" href="assets/farm12/picturebook/theme-v2.css?v=20261002"><link rel="stylesheet" href="assets/farm12/picturebook/comfort-v3.css?v=20261002-clear-art"></head>
 <body class="bg-slate-900 overflow-x-hidden">
 
   <div id="root"></div><footer class="story-home-footer"><a href="index.html">返回遊戲首頁</a></footer>
@@ -94,10 +107,11 @@
 
     // 12-2 uses its own hand-painted atlas set, independent of 12-1 assets.
     const STORY_ROOT = 'assets/farm12/picturebook/';
+    const STORY_CROP_SHEETS = new Set(['crops-atlas', 'sprouts-atlas', 'growth-atlas']);
     const StorySprite = ({ sheet, index = 0, columns = 4, label = '', className = '' }) => (
       <span role={label ? 'img' : undefined} aria-label={label || undefined} aria-hidden={label ? undefined : true}
         className={'story-sprite ' + className}
-        style={{ backgroundImage: `url(${STORY_ROOT}${sheet}-v2.webp)`, backgroundSize: `${columns * 100}% ${columns * 100}%`, backgroundPosition: `${(index % columns) * 100 / (columns - 1)}% ${Math.floor(index / columns) * 100 / (columns - 1)}%` }} />
+        style={{ backgroundImage: `url(${STORY_ROOT}${sheet}-${STORY_CROP_SHEETS.has(sheet) ? 'v3' : 'v2'}.webp)`, backgroundSize: `${columns * 100}% ${columns * 100}%`, backgroundPosition: `${(index % columns) * 100 / (columns - 1)}% ${Math.floor(index / columns) * 100 / (columns - 1)}%` }} />
     );
     const STORY_CROPS = ['sweetpotatoleaf','bokchoy','guava','waterspinach','loofah','mango','waterbamboo','taro','pomelo','whiteradish','cabbage','strawberry','golden_peach','crystal_melon','giant_pumpkin','white_strawberry'];
     const CropArt = ({ crop, growth = 0, mode = 'field' }) => {
@@ -1036,34 +1050,36 @@
           {!isGameStarted && (
             <div className="picturebook-opening fixed inset-0 flex items-center justify-center p-4 z-[100] overflow-y-auto hide-scrollbar">
               <div className="picturebook-start-panel p-6 md:p-8 rounded-[2.5rem] max-w-2xl w-full animate-in zoom-in duration-500 my-auto">
-                <div className="story-opening-art"><StorySprite sheet="village-atlas" columns={2} index={0} label="繪本農莊" /></div><div className="story-eyebrow">島嶼物語</div><h1 className="text-3xl md:text-4xl font-black text-center mb-6 text-emerald-700">四季農莊</h1><p className="story-opening-subtitle">種一點蔬菜，照顧幾隻雞。<br/>在島嶼的四季裡，過自己的小日子。</p>
-
-                <div className="story-opening-guide space-y-4 text-slate-700 font-bold text-sm bg-emerald-50 p-4 md:p-6 rounded-3xl mb-6 border-2 border-emerald-100 max-h-[40vh] overflow-y-auto hide-scrollbar">
-                  <p className="text-sm md:text-base text-emerald-800">用 365 天，寫下屬於你的農莊日記。</p>
-                  <ul className="space-y-3 mt-4 text-xs md:text-sm">
-                    <li className="flex items-start gap-2"><span className="text-xl">🌦️</span> <span><strong className="text-blue-700">四季變化與天氣</strong>：春雨、梅雨、秋颱、冬旱。雨天免澆水，但要提防颱風摧毀心血！</span></li>
-                    <li className="flex items-start gap-2"><span className="text-xl">🥭</span> <span><strong className="text-green-700">台灣在地蔬果</strong>：種植大甲芋頭、愛文芒果等 12 種在地作物，觀察遊戲中的成長變化。</span></li>
-                    <li className="flex items-start gap-2"><span className="text-xl">🏫</span> <span><strong className="text-amber-700">小鎮特殊委託</strong>：替學校準備午餐食材，收到 3 倍售價的報酬與種子謝禮。</span></li>
-                    <li className="flex items-start gap-2"><span className="text-xl">🛡️</span> <span><strong className="text-purple-700">防災與生態管理</strong>：架設防蟲網與防風網，學習農業風險管理。</span></li>
-                    <li className="flex items-start gap-2"><Farm12UiIcon name="egg" className="story-egg" /> <span><strong className="text-amber-800">小型雞舍</strong>：餵食母雞、收集雞蛋，體驗照顧動物的日常。</span></li>
-                  </ul>
-                </div>
+                <div className="story-opening-art" aria-hidden="true"><StorySprite sheet="village-atlas" columns={2} index={0} /></div>
+                <div className="story-eyebrow">島嶼物語</div>
+                <h1>四季農莊</h1>
+                <p className="story-opening-subtitle">從一包種子開始，照顧自己的小農莊。</p>
+                <p className="story-opening-description">買種子、種菜、澆水，等作物成熟後收成賣錢。<br/>慢慢擴充農田，再蓋一座雞舍，養雞收蛋。</p>
+                <ol className="story-opening-steps" aria-label="農莊生活的三個步驟">
+                  <li><span>1</span><strong>買種子播種</strong></li>
+                  <li><span>2</span><strong>每天照顧</strong></li>
+                  <li><span>3</span><strong>收成賣錢</strong></li>
+                </ol>
+                <p className="story-opening-time">準備好迎接明天時，按「睡覺」就會進入下一天。<br/>走過四季，寫下 365 天的農莊日記。</p>
 
                 <div className="mb-6">
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3 text-center">
-                    替農莊取個名字（最多 8 個字）
+                  <label htmlFor="story-farm-name" className="story-name-label">
+                    你的農莊叫什麼名字？
                   </label>
                   <input
+                    id="story-farm-name"
+                    aria-describedby="story-name-help"
                     type="text"
                     maxLength={8}
-                    placeholder="例如：開心農莊"
+                    placeholder="開心農莊"
                     value={farmName}
                     onChange={(e) => setFarmName(e.target.value)}
                     className="w-full text-xl md:text-2xl font-black text-center text-slate-800 p-3 md:p-4 rounded-2xl border-4 border-slate-200 focus:border-emerald-500 focus:outline-none transition-colors"
                   />
+                  <p id="story-name-help" className="story-name-help">最多 8 個字；留白也可以，會叫做「開心農莊」。</p>
                 </div>
 
-                <p className="story-start-rules">帶著 $100 和除草、驅蟲用品，<br/>到田邊雜貨舖挑選第一包種子吧。</p>
+                <p className="story-start-rules">開始時有 <strong>$100</strong>，可以買一包地瓜葉種子。<br/>除草剪刀與辣椒水也準備好了，各可使用 10 次。</p>
                 <div className="flex flex-col gap-3 md:gap-4">
                   <button
                     onClick={() => {
@@ -1073,7 +1089,7 @@
                     }}
                     className="w-full bg-emerald-600 text-white py-4 md:py-5 rounded-2xl font-black text-lg md:text-xl tracking-widest hover:bg-emerald-700 active:scale-95 transition-all shadow-lg hover:shadow-emerald-600/50"
                   >
-                    開始我的農莊生活
+                    開始新的農莊生活
                   </button>
 
                   {saveExists && (
