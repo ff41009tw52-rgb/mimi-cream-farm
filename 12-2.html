@@ -23,7 +23,7 @@
   .farm12-art-wrap.farm12-overview{pointer-events:none}
   .farm12-plot-crop-name{max-width:92%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:clamp(10px,2.4vw,14px)}
   @media(min-width:768px){.farm12-art-wrap.farm12-overview,.farm12-art-wrap.farm12-overview .farm12-art{width:78px;height:78px}}
-</style><link rel="stylesheet" href="assets/farm12/picturebook/theme-v2.css?v=20261002"><link rel="stylesheet" href="assets/farm12/picturebook/comfort-v3.css?v=20261002-readable"></head>
+</style><link rel="stylesheet" href="assets/farm12/picturebook/theme-v2.css?v=20261002"><link rel="stylesheet" href="assets/farm12/picturebook/comfort-v3.css?v=20261002-notes"></head>
 <body class="bg-slate-900 overflow-x-hidden">
 
   <div id="root"></div><footer class="story-home-footer"><a href="index.html">返回遊戲首頁</a></footer>
@@ -149,7 +149,7 @@
       soil:'農地', 'check-empty':'未完成', check:'完成', book:'圖鑑', celebrate:'恭喜', pesticide:'辣椒水', rain:'雨天',
       moon:'睡覺', storm:'颱風', question:'未知', scissors:'除草剪刀', fruit:'水果', root:'根莖作物', net:'防蟲網',
       inbox:'收成籃', folder:'讀取進度', save:'儲存進度', gift:'獎勵', strawberry:'草莓', sun:'晴天', grave:'枯死',
-      medal:'勳章', wilt:'枯萎', tools:'農用耗材', tractor:'灌溉系統', sad:'災損', lock:'尚未解鎖',
+      medal:'勳章', wilt:'枯萎', tools:'農具與照顧用品', tractor:'灌溉系統', sad:'災損', lock:'尚未解鎖',
       announcement:'通知', farmer:'農夫', melon:'西瓜', weather:'天氣', hourglass:'生長期'
     };
 
@@ -194,7 +194,7 @@
         { id: 'mango', name: '芒果', type: 'fruit', price: 2500, days: 12, value: 800, icon: '🥭', desc: '【環境】熱帶果樹，喜高溫乾燥，需充足日照。\n【種植】開花期極忌連續降雨會導致落花。果實發育期需套袋，防止蟲害與烈日曬傷。' },
       ],
       AUTUMN: [
-        { id: 'waterbamboo', name: '筊白筍', type: 'root', price: 400, days: 5, value: 150, icon: '🎋', desc: '【環境】需生長於水溫穩定、活水流動的淺水田中。\n【種植】實為菰草受「黑穗菌」共生感染後膨大的幼嫩莖部。水質控制是絕對關鍵。' },
+        { id: 'waterbamboo', name: '茭白筍', type: 'root', price: 400, days: 5, value: 150, icon: '🎋', desc: '【環境】需生長於水溫穩定、活水流動的淺水田中。\n【種植】實為菰草受「黑穗菌」共生感染後膨大的幼嫩莖部。水質控制是絕對關鍵。' },
         { id: 'taro', name: '芋頭', type: 'root', price: 1500, days: 9, value: 500, icon: '🥔', desc: '【環境】喜高溫多濕，栽培分為水芋與旱芋兩種。\n【種植】生長期長，需深厚且保水力強的土壤。屬於重肥作物，生長期間需大量養分。' },
         { id: 'pomelo', name: '文旦', type: 'fruit', price: 3500, days: 15, value: 1250, icon: '🍋', desc: '【環境】喜高溫與日照，需排水良好的山坡地。\n【種植】果樹需多年栽培。果實採收後不宜馬上食用，需放置通風處數日進行「辭水」。' },
       ],
@@ -256,6 +256,8 @@
       const [gold, setGold] = useState(100);
 
       const [tutorialStep, setTutorialStep] = useState(0);
+      const [tutorialFolded, setTutorialFolded] = useState(false);
+      useEffect(() => setTutorialFolded(false), [tutorialStep]);
       const [flags, setFlags] = useState({
         seenRain: false, seenTyphoon: false, seenQuest: false, seenBug: false,
         seenWeed: false, seenDay2Water: false, seenHarvest: false,
@@ -301,7 +303,7 @@
       })));
 
       const [activePlot, setActivePlot] = useState(null);
-      const [message, setMessage] = useState("歡迎來到 四季農莊！");
+      const [message, setMessage] = useState("歡迎來到四季農莊。從一包種子開始，慢慢過田園生活吧。");
       const [showModal, setShowModal] = useState(null);
       const [saveExists, setSaveExists] = useState(false);
       const [lastSave, setLastSave] = useState(null);
@@ -396,7 +398,7 @@
           crops: { ...inv.crops, [crop.id]: (inv.crops?.[crop.id] || 0) + 1 }
         }));
 
-        setMessage(`✨ 收成了 ${crop.name}！已存入倉庫，請至商店變現。`);
+        setMessage(`收下了 ${crop.name}，已放進農產包包。可以到田邊雜貨舖出售。`);
 
         // 當畫面上的成熟作物全部被清空時，才觸發第一次收成獎勵與進階教學
         setFlags(prev => {
@@ -427,7 +429,7 @@
       useEffect(() => {
         if (tutorialStep >= 7 && flags.tutSell && flags.tutFert && flags.tutNet) {
           setTutorialStep(0);
-          setMessage("🎉 恭喜完成所有進階教學！現在你可以自由經營你的農莊了！");
+          setMessage("農務小技巧都學會了！接下來，就照自己的步調經營吧。");
           playEffect('coin');
         }
       }, [tutorialStep, flags.tutSell, flags.tutFert, flags.tutNet, playEffect]);
@@ -446,12 +448,12 @@
       const handleSave = () => {
         try {
           persistGame();
-          setMessage("💾 遊戲進度已成功儲存！");
+          setMessage("今天的農莊日記存好了，下次再接著玩吧。");
           playEffect('coin');
           setShowModal(null);
         } catch (e) {
           setSaveError(true);
-          setMessage("❌ 存檔失敗，請確認瀏覽器設定。");
+          setMessage("這次沒有存好進度。請先別關閉遊戲，確認瀏覽器允許儲存後再試一次。");
         }
       };
 
@@ -491,14 +493,14 @@
             setLastSave(state.savedAt ? { at: state.savedAt, day: state.day } : null);
             setSaveError(false);
 
-            setMessage("📂 遊戲進度讀取成功！歡迎回來！");
+            setMessage("歡迎回來！從上次的農莊日記繼續吧。");
             setShowModal(null);
             setEventQueue([]);
             setActivePlot(null);
             playEffect('water');
           }
         } catch (e) {
-          setMessage("❌ 讀檔失敗，存檔資料可能已損毀。");
+          setMessage("暫時無法讀取這份農莊日記。請重新整理後再試一次。");
         }
       };
 
@@ -611,13 +613,13 @@
         setEventQueue(newEvents);
 
         if (typhoonDamageCount > 0) {
-          setMessage(`😭 災情回報：昨晚的颱風摧毀了你 ${typhoonDamageCount} 株缺乏保護的作物！`);
+          setMessage(`昨晚的強風帶走了 ${typhoonDamageCount} 株作物。整理好農田，再種下一批吧。`);
           playEffect('weed');
         } else if (hasDeadCrops) {
-          setMessage("警告：有作物連續兩晚未處理蟲害或雜草而枯死了！");
+          setMessage("有些作物因蟲害或雜草連續兩晚沒有清理而枯萎了。空出的農田可以重新播種。");
           playEffect('weed');
         } else if (needsRescue) {
-          setMessage("有作物因蟲害或雜草暫停生長；請在今晚前清理，還有一次補救機會！");
+          setMessage("有些作物正在等你幫忙。今晚睡覺前清除蟲害與雜草，就能把握最後一次補救機會。");
         } else {
           if (nextWeatherType === 'typhoon') {
             setMessage(`第 ${nextDayNum} 天颱風來襲 🌀！外面狂風暴雨，農田自動澆滿水了。`);
@@ -651,31 +653,31 @@
               });
 
               if (!wateredAny) {
-                setMessage(Care.rainy(weather) ? "今天已有雨水，不需要人工澆水喔！" : "此區塊目前沒有需要澆水的作物！");
+                setMessage(Care.rainy(weather) ? "今天有雨水幫忙，不用再澆水了。" : "這一區暫時不用澆水，可以去看看其他農田。");
                 return prev;
               }
               playEffect('water');
               triggerActionFx('water', actionPoint);
-              setMessage(`💦 灑水完成！第 ${plotId + 1} 區的作物皆已吸滿水分！`);
+              setMessage(`第 ${plotId + 1} 區澆好水了，作物都喝到水了。`);
             } else {
               if (targetSlot.crop && !targetSlot.isWatered) {
                 targetSlot.isWatered = true;
                 wateredAny = true;
               }
               if (!wateredAny) {
-                setMessage(Care.rainy(weather) ? "今天已有雨水，不需要人工澆水喔！" : "這格沒有需要澆水的作物！");
+                setMessage(Care.rainy(weather) ? "今天有雨水幫忙，不用再澆水了。" : "這格暫時不用澆水。");
                 return prev;
               }
               playEffect('water');
               triggerActionFx('water', actionPoint);
-              setMessage(`💧 已為該格作物澆水！`);
+              setMessage(`這格澆好水了。再看看其他幼苗吧。`);
             }
           }
 
           else if (selectedTool === 'weed') {
             if (!targetSlot.hasWeed) return prev;
             if (inventory.scissors <= 0) {
-              setMessage("除草剪刀已完全損壞，請至商店購買新的剪刀！");
+              setMessage("除草剪刀用完了，到田邊雜貨舖添購一把吧。");
               return prev;
             }
             targetSlot.hasWeed = false;
@@ -683,13 +685,13 @@
             setInventory(inv => ({ ...inv, scissors: inv.scissors - 1 }));
             playEffect('weed');
             triggerActionFx('weed', actionPoint);
-            setMessage(`✨ 割除雜草成功！(剪刀剩餘 ${inventory.scissors - 1} 次)`);
+            setMessage(`雜草清乾淨了。剪刀還能使用 ${inventory.scissors - 1} 次。`);
           }
 
           else if (selectedTool === 'chili') {
             if (!targetSlot.hasBug) return prev;
             if (inventory.chili <= 0) {
-              setMessage("辣椒水已耗盡，請至商店購買補充包！");
+              setMessage("辣椒水用完了，可以到田邊雜貨舖補充。");
               return prev;
             }
             targetSlot.hasBug = false;
@@ -697,7 +699,7 @@
             setInventory(inv => ({ ...inv, chili: inv.chili - 1 }));
             playEffect('water');
             triggerActionFx('chili', actionPoint);
-            setMessage(`✨ 噴灑辣椒水驅蟲成功！(剩餘 ${inventory.chili - 1} 次)`);
+            setMessage(`菜蟲離開了。辣椒水還能使用 ${inventory.chili - 1} 次。`);
           }
 
           else if (selectedTool.startsWith('fert_')) {
@@ -706,7 +708,7 @@
             const fertName = fertNames[fertType];
 
             if (inventory[selectedTool] <= 0) {
-              setMessage(`${fertName}庫存不足，請去商店購買！`);
+              setMessage(`${fertName}用完了，可以到田邊雜貨舖補充。`);
               return prev;
             }
 
@@ -732,11 +734,11 @@
 
             if (!fertilizedAny) {
               if (alreadyFertilizedAny) {
-                setMessage(`此區塊對應的作物今天都已經施過肥了，太肥會死掉，請明天再來！`);
+                setMessage(`這一區適用的作物今天都施過肥了，明天再來照顧吧。`);
               } else if (wrongTypeAny) {
-                setMessage(`此區塊沒有適合施打【${fertName}】的作物類型！請確認作物屬性。`);
+                setMessage(`這一區的作物不適合用${fertName}。看看圖鑑，選一種合適的肥料吧。`);
               } else {
-                setMessage("此區塊目前沒有生長中的作物可以施肥！");
+                setMessage("這一區暫時沒有可以施肥的作物。");
               }
               return prev;
             }
@@ -745,13 +747,13 @@
             const hasMature = targetPlot.slots.some(s => s.crop && s.growth >= s.crop.days);
             if (hasMature && targetPlot.isNetted) {
               targetPlot.isNetted = false;
-              netBrokeMsg = " (作物成熟撐破了防蟲網！)";
+              netBrokeMsg = " 作物成熟了，防蟲網也撐破了；下次播種可以重新架設。";
             }
 
             setInventory(inv => ({ ...inv, [selectedTool]: Math.max(0, inv[selectedTool] - 1) }));
             playEffect('water');
             triggerActionFx(selectedTool, actionPoint);
-            setMessage(`✨ 施打${fertName}成功！第 ${plotId + 1} 區對應屬性的作物生長進度縮短了 1 天。${netBrokeMsg}`);
+            setMessage(`施好${fertName}了。第 ${plotId + 1} 區適用的作物多長大了 1 天。${netBrokeMsg}`);
 
             // 進階肥料教學完成檢查 (不限順序)
             if (tutorialStep >= 7 && !flags.tutFert) {
@@ -762,12 +764,12 @@
           else if (selectedTool === 'seed' && selectedSeed) {
             const isOccupied = targetPlot.slots.some(s => s.crop !== null);
             if (isOccupied) {
-              setMessage("防呆警告：此區塊尚有植物，請先收成完畢再重新種植！");
+              setMessage("這一區還有作物。等全部收成、空出農田後，再種下一批吧。");
               return prev;
             }
 
             if (!selectedSeed?.id || (inventory.seeds[selectedSeed.id] || 0) <= 0) {
-              setMessage("種子庫存不足！請先去商店購買。");
+              setMessage("種子用完了。到田邊雜貨舖挑一包喜歡的種子吧。");
               return prev;
             }
 
@@ -787,7 +789,7 @@
               hasWeed: false
             }));
 
-            setMessage(`消耗了 1 包 [${selectedSeed.name || '未知'}種子]，在第 ${plotId + 1} 區種滿了！`);
+            setMessage(`種下 1 包${selectedSeed.name || '作物'}種子，第 ${plotId + 1} 區的 8 格農田都種好了。`);
             playEffect('water');
 
             if (inventory.seeds[selectedSeed.id] <= 1) {
@@ -805,28 +807,28 @@
           setGold(g => g - cost);
           if (type === 'net') {
             setInventory(i => ({ ...i, nets: i.nets + 1 }));
-            setMessage("購買防蟲紗網成功！可在農田管理頁面部署。");
+            setMessage("防蟲網放進工具袋了。打開農田，就可以架設。");
           } else if (type === 'fert_leaf') {
             setInventory(i => ({ ...i, fert_leaf: i.fert_leaf + 1 }));
-            setMessage("購買氮肥成功！可加速「葉菜類」生長。");
+            setMessage("氮肥準備好了，可以幫葉菜類作物長得更快。");
           } else if (type === 'fert_root') {
             setInventory(i => ({ ...i, fert_root: i.fert_root + 1 }));
-            setMessage("購買磷肥成功！可加速「根莖類」生長。");
+            setMessage("磷肥準備好了，可以幫根莖類作物長得更快。");
           } else if (type === 'fert_fruit') {
             setInventory(i => ({ ...i, fert_fruit: i.fert_fruit + 1 }));
-            setMessage("購買鉀肥成功！可加速「瓜果類」生長。");
+            setMessage("鉀肥準備好了，可以幫瓜果類作物長得更快。");
           } else if (type === 'windbreak') {
             setInventory(i => ({ ...i, windbreaks: i.windbreaks + 1 }));
-            setMessage("購買防風網成功！能抵禦強烈颱風。");
+            setMessage("防風網準備好了。打開農田架設，就能保護這一區的作物。");
           } else if (type === 'scissors') {
             setInventory(i => ({ ...i, scissors: i.scissors + 10 }));
-            setMessage("購買除草剪刀成功！獲得 10 次除草耐用度。");
+            setMessage("添好除草剪刀了，可以再除草 10 次。");
           } else if (type === 'chili') {
             setInventory(i => ({ ...i, chili: i.chili + 10 }));
-            setMessage("購買辣椒水成功！獲得 10 次驅蟲噴灑量。");
+            setMessage("辣椒水補充好了，可以再驅蟲 10 次。");
           }
         } else {
-          setMessage("餘額不足，無法購買這項物品。");
+          setMessage("帶的錢還不夠，可以先賣出一些收成。");
         }
       };
 
@@ -838,7 +840,7 @@
           crops: { ...inv.crops, [cropId]: inv.crops[cropId] - amount }
         }));
         playEffect('coin');
-        setMessage(`販賣了 ${amount} 份作物，獲得 $${totalEarn.toLocaleString()}！`);
+        setMessage(`賣出 ${amount} 份農產，收入 $${totalEarn.toLocaleString()}。`);
 
         // 檢查販賣任務 (不限順序)
         if (tutorialStep >= 7 && !flags.tutSell) {
@@ -921,17 +923,17 @@
         if (gold >= price) {
           setGold(g => g - price);
           setPlots(prev => prev.map(p => p.id === plotId ? { ...p, isUnlocked: true } : p));
-          setMessage(`🎉 成功解鎖 第 ${plotId + 1} 區農田！農莊規模擴大了！`);
+          setMessage(`第 ${plotId + 1} 區開墾好了！又多了一片可以播種的農田。`);
           playEffect('coin');
         } else {
-          setMessage(`資金不足！解鎖 第 ${plotId + 1} 區需要 $${price.toLocaleString()}。`);
+          setMessage(`開墾第 ${plotId + 1} 區需要 $${price.toLocaleString()}，再存一點錢吧。`);
         }
       };
 
       const applyNet = (plotId, clickPoint) => {
         const hasMature = plots[plotId].slots.some(s => s.crop && s.growth >= s.crop.days);
         if (hasMature) {
-          setMessage("此區塊已有作物成熟，空間不足以架設防蟲網！");
+          setMessage("這一區已有成熟的作物。先收成，再為下一批作物架設防蟲網吧。");
           return;
         }
 
@@ -939,7 +941,7 @@
           setPlots(prev => prev.map(p => p.id === plotId ? { ...p, isNetted: true } : p));
           setInventory(inv => ({ ...inv, nets: Math.max(0, inv.nets - 1) }));
           triggerActionFx('net', clickPoint);
-          setMessage(`第 ${plotId + 1} 區已經罩上防蟲紗網，蟲子飛不進來了！`);
+          setMessage(`第 ${plotId + 1} 區架好防蟲網了，能擋住新來的菜蟲；原本的菜蟲仍要清除。`);
 
           // 進階防蟲網教學完成檢查 (不限順序)
           if (tutorialStep >= 7 && !flags.tutNet) {
@@ -953,7 +955,7 @@
           setPlots(prev => prev.map(p => p.id === plotId ? { ...p, isWindbreaked: true } : p));
           setInventory(inv => ({ ...inv, windbreaks: Math.max(0, inv.windbreaks - 1) }));
           triggerActionFx('windbreak', clickPoint);
-          setMessage(`第 ${plotId + 1} 區已經架設防風網，能抵禦強風侵襲！`);
+          setMessage(`第 ${plotId + 1} 區架好防風網了，颱風天也多一份安心。`);
         }
       };
 
@@ -964,7 +966,7 @@
 
         // 嚴格防呆檢查
         if (currentAmount < required) {
-            setMessage(`⚠️ 庫存不足！還差 ${required - currentAmount} 個。`);
+            setMessage(`還差 ${required - currentAmount} 份農產。收齊後，再來交付委託吧。`);
             return;
         }
 
@@ -990,7 +992,7 @@
             setFlags(f => ({ ...f, seenQuestReward: true }));
             setEventQueue(q => [...q, { type: 'tutorial_special_seed', crop: CROPS.SPECIAL.find(c=>c.id === rewardId) }]);
         } else {
-            setMessage(`🎉 委託完成！獲得 3 倍獎金與【傳說種子 x1】！`);
+            setMessage(`委託完成！已收到 3 倍售價的報酬，還有 1 包傳說種子。`);
         }
       };
 
@@ -1030,38 +1032,6 @@
             </div>
           )}
 
-          {/* --- 新手教學：步驟浮動提示框 (強制隱藏於彈窗開啟時) --- */}
-          {tutorialStep > 1 && !currentEvent && !showModal && !showShop && !showQuestModal && (
-            <div className="fixed bottom-8 md:bottom-6 left-0 right-0 z-[40] flex justify-center pointer-events-none px-4">
-              <div className="bg-blue-600 text-white px-3 py-2 md:px-4 md:py-3 rounded-2xl shadow-2xl animate-bounce border-2 border-blue-400 max-w-sm w-full text-center pointer-events-none">
-                <div className="font-black text-sm md:text-base mb-1 text-yellow-300">
-                  {tutorialStep >= 7 ? `🎓 進階任務 (自由順序)` : `🎓 新手任務 (${tutorialStep - 1}/5)`}
-                </div>
-                <div className="text-[10px] md:text-xs font-bold leading-relaxed">
-                  {tutorialStep === 2 && "第一步：到「農莊生活」點選「田邊雜貨舖」，購買一包【地瓜葉】種子！"}
-                  {tutorialStep === 3 && "第二步：太棒了！現在請在下方「工具袋」中，點選裝備剛剛購買的【地瓜葉】。"}
-                  {tutorialStep === 4 && "第三步：請點擊畫面中的「第 1 區」農田，進入該區塊，並點擊任何一塊空地將種子種下！"}
-                  {tutorialStep === 5 && <span>第四步：植物必須<span className="text-yellow-300 font-black text-sm md:text-sm mx-1">【每天】</span>澆水！請裝備下方的「💧 單格澆水」，將<span className="underline">所有剛種下的植物</span>都點擊澆滿水分。</span>}
-                  {tutorialStep === 6 && "最後一步：完美！確認植物【都有澆水】後，點擊右上角的「🌙 睡覺 ➔」進入下一天！等待它們成熟吧。"}
-                  {tutorialStep >= 7 && (
-                    <div className="flex flex-col gap-1.5 text-left bg-blue-700/50 p-2 rounded-xl mt-1.5">
-                      <p className="text-yellow-100">請完成以下三項進階農務（不限順序）：</p>
-                      <label className={`flex items-start gap-1.5 ${flags.tutSell ? 'opacity-50 line-through text-yellow-300' : ''}`}>
-                        <span>{flags.tutSell ? '✅' : '🔲'}</span> <span>去「田邊雜貨舖」賣出剛收成的作物。</span>
-                      </label>
-                      <label className={`flex items-start gap-1.5 ${flags.tutFert ? 'opacity-50 line-through text-yellow-300' : ''}`}>
-                        <span>{flags.tutFert ? '✅' : '🔲'}</span> <span>裝備【🧪 氮肥(葉菜)】並對地瓜葉施肥。</span>
-                      </label>
-                      <label className={`flex items-start gap-1.5 ${flags.tutNet ? 'opacity-50 line-through text-yellow-300' : ''}`}>
-                        <span>{flags.tutNet ? '✅' : '🔲'}</span> <span>點擊進入農田區塊，部署【防蟲網】。</span>
-                      </label>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* --- 開場畫面 / 觸發新手教學 --- */}
           {!isGameStarted && (
             <div className="picturebook-opening fixed inset-0 flex items-center justify-center p-4 z-[100] overflow-y-auto hide-scrollbar">
@@ -1069,19 +1039,19 @@
                 <div className="story-opening-art"><StorySprite sheet="village-atlas" columns={2} index={0} label="繪本農莊" /></div><div className="story-eyebrow">島嶼物語</div><h1 className="text-3xl md:text-4xl font-black text-center mb-6 text-emerald-700">四季農莊</h1><p className="story-opening-subtitle">種一點蔬菜，照顧幾隻雞。<br/>在島嶼的四季裡，過自己的小日子。</p>
 
                 <div className="story-opening-guide space-y-4 text-slate-700 font-bold text-sm bg-emerald-50 p-4 md:p-6 rounded-3xl mb-6 border-2 border-emerald-100 max-h-[40vh] overflow-y-auto hide-scrollbar">
-                  <p className="text-sm md:text-base text-emerald-800">歡迎來到台灣專屬的農業經營模擬器！在這裡，你將體驗為期 365 天的農夫生活：</p>
+                  <p className="text-sm md:text-base text-emerald-800">用 365 天，寫下屬於你的農莊日記。</p>
                   <ul className="space-y-3 mt-4 text-xs md:text-sm">
                     <li className="flex items-start gap-2"><span className="text-xl">🌦️</span> <span><strong className="text-blue-700">四季變化與天氣</strong>：春雨、梅雨、秋颱、冬旱。雨天免澆水，但要提防颱風摧毀心血！</span></li>
-                    <li className="flex items-start gap-2"><span className="text-xl">🥭</span> <span><strong className="text-green-700">台灣在地蔬果</strong>：種植大甲芋頭、愛文芒果等 12 種在地作物，體驗真實生長週期。</span></li>
-                    <li className="flex items-start gap-2"><span className="text-xl">🏫</span> <span><strong className="text-amber-700">小鎮特殊委託</strong>：接取校長的委託，學習市場「供需法則」賺取 3 倍利潤。</span></li>
-                    <li className="flex items-start gap-2"><span className="text-xl">🛡️</span> <span><strong className="text-purple-700">防災與生態管理</strong>：架設防蟲紗網與防風網，學習農業風險管理。</span></li>
+                    <li className="flex items-start gap-2"><span className="text-xl">🥭</span> <span><strong className="text-green-700">台灣在地蔬果</strong>：種植大甲芋頭、愛文芒果等 12 種在地作物，觀察遊戲中的成長變化。</span></li>
+                    <li className="flex items-start gap-2"><span className="text-xl">🏫</span> <span><strong className="text-amber-700">小鎮特殊委託</strong>：替學校準備午餐食材，收到 3 倍售價的報酬與種子謝禮。</span></li>
+                    <li className="flex items-start gap-2"><span className="text-xl">🛡️</span> <span><strong className="text-purple-700">防災與生態管理</strong>：架設防蟲網與防風網，學習農業風險管理。</span></li>
                     <li className="flex items-start gap-2"><Farm12UiIcon name="egg" className="story-egg" /> <span><strong className="text-amber-800">小型雞舍</strong>：餵食母雞、收集雞蛋，體驗照顧動物的日常。</span></li>
                   </ul>
                 </div>
 
                 <div className="mb-6">
                   <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3 text-center">
-                    請為你的農莊取個響亮的名字 (最多 8 個字)
+                    替農莊取個名字（最多 8 個字）
                   </label>
                   <input
                     type="text"
@@ -1103,7 +1073,7 @@
                     }}
                     className="w-full bg-emerald-600 text-white py-4 md:py-5 rounded-2xl font-black text-lg md:text-xl tracking-widest hover:bg-emerald-700 active:scale-95 transition-all shadow-lg hover:shadow-emerald-600/50"
                   >
-                    開始新經營！
+                    開始我的農莊生活
                   </button>
 
                   {saveExists && (
@@ -1126,14 +1096,14 @@
                 <div className="text-6xl mb-4">👨‍🌾</div>
                 <h2 className="text-2xl font-black mb-4 text-emerald-800">歡迎來到四季農莊！</h2>
                 <p className="text-slate-600 font-bold text-sm mb-8 leading-relaxed">
-                  看起來你是剛來到這座島嶼的新手農夫呢。<br/>不用擔心，我會一步一步教你如何種出第一批作物！<br/><br/>準備好開始你的農業生活了嗎？
+                  沿著小徑走，你的農田就在前面。<br/>我們一起買種子、播種、澆水，慢慢等第一批作物長大吧。
                 </p>
                 <div className="flex flex-col gap-3">
                   <button onClick={() => setTutorialStep(2)} className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black text-lg hover:bg-emerald-700 transition-colors shadow-md">
-                    開始新手教學！
+                    一起種下第一批作物
                   </button>
                   <button onClick={() => setTutorialStep(0)} className="w-full bg-slate-100 text-slate-500 py-3 rounded-2xl font-bold text-sm hover:bg-slate-200 transition-colors">
-                    我已經是老手了，跳過教學
+                    我想自己探索
                   </button>
                 </div>
               </div>
@@ -1152,7 +1122,7 @@
               <button id="farm12-gallery-button" type="button" aria-haspopup="dialog" aria-controls="farm12-gallery-dialog" onClick={() => setShowModal('gallery')} className="picturebook-shop"><Farm12UiIcon name="book" />圖鑑</button>
               {schoolQuest && <button onClick={() => setShowQuestModal(true)} className="picturebook-shop"><Farm12UiIcon name="school" /> 委託 {schoolQuest.daysLeft} 天</button>}
               <button onClick={() => {
-                if (tutorialStep > 0 && tutorialStep !== 6) { setMessage('請先完成畫面下方的新手教學，才能結束這一天。'); return; }
+                if (tutorialStep > 0 && tutorialStep !== 6) { setMessage('先照著農莊小筆記完成今天的練習，再休息吧。'); return; }
                 setShowModal('sleep');
               }} className={`picturebook-sleep ${tutorialStep === 6 ? 'ring-4 ring-blue-500 animate-pulse' : ''}`}><Farm12UiIcon name="moon" /> 睡覺</button>
             </div>
@@ -1161,6 +1131,27 @@
           <div role="status" className={`picturebook-save ${saveError ? 'text-red-700' : 'text-emerald-950'}`}>
             {saveError ? '自動儲存失敗，請檢查瀏覽器設定' : `自動儲存：${lastSaveLabel}`}
           </div>
+
+          {tutorialStep > 1 && !currentEvent && !showModal && !showShop && !showQuestModal && (
+            <aside className="story-guide" aria-labelledby="story-guide-title">
+              <div className="story-guide-emblem" aria-hidden="true"><Farm12UiIcon name="sprout" /></div>
+              <div className="story-guide-content">
+                <div className="story-guide-heading"><div><span className="story-guide-eyebrow">農莊小筆記</span><h2 id="story-guide-title">{tutorialStep >= 7 ? '再學三件農務' : ({2:'挑選第一包種子',3:'拿好種子',4:'把種子種下',5:'給幼苗喝點水',6:'好好休息一晚'})[tutorialStep]}</h2></div><span className="story-guide-count">{tutorialStep >= 7 ? `${[flags.tutSell, flags.tutFert, flags.tutNet].filter(Boolean).length} / 3 已完成` : `${tutorialStep - 1} / 5`}</span></div>
+                <div className="story-guide-progress" aria-hidden="true">{Array.from({length:tutorialStep >= 7 ? 3 : 5},(_,i)=><span key={i} className={i < (tutorialStep >= 7 ? [flags.tutSell,flags.tutFert,flags.tutNet].filter(Boolean).length : tutorialStep - 2) ? 'is-done' : i === tutorialStep - 2 && tutorialStep < 7 ? 'is-current' : ''} />)}</div>
+                {!tutorialFolded && <div id="story-guide-body" className="story-guide-body" aria-live="polite">
+                  {tutorialStep === 2 && <p>從地瓜葉開始吧。到「農莊生活」的「田邊雜貨舖」，買一包地瓜葉種子。</p>}
+                  {tutorialStep === 3 && <p>種子已經放進工具袋了。點選「地瓜葉」，就可以準備播種。</p>}
+                  {tutorialStep === 4 && <p>打開「第 1 區」，再點一下空地。一包種子就能種滿這一區的 8 格農田。</p>}
+                  {tutorialStep === 5 && <p>選好工具袋裡的「單格澆水」，替每一格幼苗澆水。記得每天照顧它們；下雨時，雨水會幫忙。</p>}
+                  {tutorialStep === 6 && <p>幼苗都喝到水了，今天辛苦了。點選上方的「睡覺」，明天再來看看它們長大了多少。</p>}
+                  {tutorialStep >= 7 && <><p>把收成賣掉，再種一批地瓜葉，試試讓農務更順手的小幫手。這三件事可以自由安排順序。</p><ul className="story-guide-checklist">
+                    {[{done:flags.tutSell,text:'到田邊雜貨舖，賣出收成。'},{done:flags.tutFert,text:'選用氮肥，替新種的地瓜葉施肥。'},{done:flags.tutNet,text:'打開農田，架設防蟲網。'}].map((item,i)=><li key={i} className={item.done ? 'is-done' : ''}><Farm12UiIcon name={item.done ? 'check' : 'check-empty'} /><span>{item.done ? '已完成：' : '待完成：'}{item.text}</span></li>)}
+                  </ul></>}
+                </div>}
+              </div>
+              <button type="button" className="story-guide-toggle" aria-expanded={!tutorialFolded} aria-controls={tutorialFolded ? undefined : "story-guide-body"} onClick={()=>setTutorialFolded(v=>!v)}>{tutorialFolded ? '展開說明' : '收起說明'}</button>
+            </aside>
+          )}
 
           <div className="picturebook-main relative z-30">
 
@@ -1175,7 +1166,7 @@
                     <StorySprite sheet="village-atlas" columns={2} index={2} label="收成籃" className="story-basket" />
                     <div className="font-black text-slate-700 text-sm md:text-base">今日收成籃</div>
                     <div className="font-bold mt-1 px-3 py-1 rounded-full text-[9px] md:text-[10px] bg-slate-100 text-slate-500">
-                        點擊作物自動收成
+                        點選成熟作物，就能收成
                     </div>
                 </div>
               </div>
@@ -1187,9 +1178,9 @@
                     { id: 'water', label: day >= 20 ? '全區灑水' : '單格澆水', icon: <Farm12ItemArt item={day >= 20 ? 'sprinkler' : 'wateringCan'} mode="tool" /> },
                     { id: 'chili', label: '辣椒水', icon: <Farm12ItemArt item="chili" mode="tool" />, count: inventory.chili },
                     { id: 'weed', label: '除草剪刀', icon: <Farm12ItemArt item="weed" mode="tool" />, count: inventory.scissors },
-                    ...(inventory.fert_leaf > 0 ? [{ id: 'fert_leaf', label: '氮肥(葉菜)', icon: <Farm12ItemArt item="fert_leaf" mode="tool" />, count: inventory.fert_leaf }] : []),
-                    ...(inventory.fert_root > 0 ? [{ id: 'fert_root', label: '磷肥(根莖)', icon: <Farm12ItemArt item="fert_root" mode="tool" />, count: inventory.fert_root }] : []),
-                    ...(inventory.fert_fruit > 0 ? [{ id: 'fert_fruit', label: '鉀肥(瓜果)', icon: <Farm12ItemArt item="fert_fruit" mode="tool" />, count: inventory.fert_fruit }] : []),
+                    ...(inventory.fert_leaf > 0 ? [{ id: 'fert_leaf', label: '氮肥（葉菜）', icon: <Farm12ItemArt item="fert_leaf" mode="tool" />, count: inventory.fert_leaf }] : []),
+                    ...(inventory.fert_root > 0 ? [{ id: 'fert_root', label: '磷肥（根莖）', icon: <Farm12ItemArt item="fert_root" mode="tool" />, count: inventory.fert_root }] : []),
+                    ...(inventory.fert_fruit > 0 ? [{ id: 'fert_fruit', label: '鉀肥（瓜果）', icon: <Farm12ItemArt item="fert_fruit" mode="tool" />, count: inventory.fert_fruit }] : []),
                     ...Object.keys(inventory.seeds || {})
                       .filter(id => inventory.seeds[id] > 0)
                       .map(id => {
@@ -1264,7 +1255,7 @@
                         >
                           <Farm12UiIcon name="lock" className="story-plot-lock" />
                           <strong>第 {plot.id + 1} 區</strong><small>等待開墾的小天地</small>
-                          <span>解鎖 ${price.toLocaleString()}</span>
+                          <span>開墾 ${price.toLocaleString()}</span>
                         </button>
                       );
                     }
@@ -1285,7 +1276,7 @@
                       >
                         <div className="picturebook-plot-label">
                           <strong>第 {plot.id + 1} 區</strong>
-                          <span title={cropNames.join('、')}>{cropNames.length ? cropNames.join('、') : '空置農田'}</span>
+                          <span title={cropNames.join('、')}>{cropNames.length ? cropNames.join('、') : '等待播種'}</span>
                         </div>
                         <div className="picturebook-plot-soil" aria-hidden="true">
                           {plot.slots.map(slot => (
@@ -1312,10 +1303,10 @@
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6 gap-3 relative z-10 shrink-0">
                     <button onClick={() => setActivePlot(null)} className="bg-slate-100 hover:bg-slate-200 px-3 md:px-4 py-1.5 md:py-2 rounded-xl text-[10px] md:text-xs font-black transition-colors shrink-0">❮ 前往其他農地</button>
                     <div className="flex items-center gap-2 flex-wrap justify-start sm:justify-end w-full sm:w-auto">
-                      <span className="w-full sm:w-auto whitespace-nowrap font-black text-slate-600 text-xs md:text-sm mr-1 md:mr-2">第 {activePlot + 1} 區：{plots[activePlot].slots.find(s => s?.crop)?.crop?.name || '空置農田'}</span>
+                      <span className="w-full sm:w-auto whitespace-nowrap font-black text-slate-600 text-xs md:text-sm mr-1 md:mr-2">第 {activePlot + 1} 區：{plots[activePlot].slots.find(s => s?.crop)?.crop?.name || '等待播種'}</span>
 
                       {inventory.nets > 0 && !plots[activePlot].isNetted && (
-                        <button onClick={(e) => applyNet(activePlot, e)} className={`bg-blue-600 text-white text-[9px] md:text-[10px] px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl font-black hover:bg-blue-700 transition-all ${(tutorialStep >= 7 && !flags.tutNet) ? 'ring-4 ring-yellow-400 animate-pulse' : ''}`}><Farm12ItemArt item="net" mode="action" />部署防蟲網</button>
+                        <button onClick={(e) => applyNet(activePlot, e)} className={`bg-blue-600 text-white text-[9px] md:text-[10px] px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl font-black hover:bg-blue-700 transition-all ${(tutorialStep >= 7 && !flags.tutNet) ? 'ring-4 ring-yellow-400 animate-pulse' : ''}`}><Farm12ItemArt item="net" mode="action" />架設防蟲網</button>
                       )}
                       {plots[activePlot].isNetted && <span className="bg-blue-100 text-blue-600 text-[9px] md:text-[10px] px-2 py-1.5 md:px-2 md:py-2 rounded-lg md:rounded-xl font-black"><Farm12ItemArt item="net" mode="inline" />防蟲中</span>}
 
@@ -1412,21 +1403,21 @@
           {currentEvent?.type === 'tutorial_forgot_water' && (
             <div className="story-overlay fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-[100]">
               <div className="story-paper bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-md w-full shadow-2xl animate-in zoom-in duration-300 max-h-[85vh] overflow-y-auto hide-scrollbar border-4 border-amber-500">
-                <div className="text-center font-black text-amber-600 mb-2 animate-pulse">⚠️ 農業警報</div>
+                <div className="text-center font-black text-amber-600 mb-2 animate-pulse">田間小提醒</div>
                 <div className="text-5xl md:text-6xl mb-4 text-center">🥀</div>
-                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-amber-900">糟糕！忘記澆水了！</h2>
+                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-amber-900">有些作物還沒喝到水</h2>
                 <div className="bg-amber-50 p-4 rounded-xl md:rounded-2xl mb-6 mt-4">
                   <p className="text-slate-700 text-[10px] md:text-xs leading-relaxed font-bold">
-                    你昨天似乎忘記幫田裡的某些作物澆水了...
+                    昨天有幾格農田沒有澆水，作物先停下來休息了。
                   </p>
                   <p className="text-slate-800 text-[10px] md:text-xs leading-relaxed font-black mt-3 bg-amber-200 p-3 rounded-xl border border-amber-300 shadow-inner">
-                    💡 後果提醒：<br/>
-                    1. 缺乏水分的作物，昨晚的<span className="text-red-600">生長進度已經完全停滯</span>。<br/>
-                    今天補澆水，下一次過夜就能繼續生長。（雨天免澆水）
+                    照顧小筆記：<br/>
+                    沒有澆水的作物，昨晚<span className="text-red-600">沒有增加生長進度</span>。<br/>
+                    今天補好水、清除蟲害與雜草，作物就能繼續長大。雨天會自動澆水。
                   </p>
                 </div>
                 <button onClick={closeEventModal} className="w-full bg-amber-500 text-white py-3 md:py-4 rounded-xl font-black text-sm md:text-base hover:bg-amber-600 transition-colors">
-                  我知道了，以後會注意！
+                  去看看需要澆水的農田
                 </button>
               </div>
             </div>
@@ -1436,18 +1427,18 @@
           {currentEvent?.type === 'typhoon_report' && (
             <div className="story-overlay fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-[100]">
               <div className="story-paper bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-md w-full shadow-2xl animate-in zoom-in duration-300 max-h-[85vh] overflow-y-auto hide-scrollbar border-4 border-blue-600">
-                <div className="text-center font-black text-blue-600 mb-2 animate-pulse">⚠️ 災情回報</div>
+                <div className="text-center font-black text-blue-600 mb-2 animate-pulse">風雨過後</div>
                 <div className="text-5xl md:text-6xl mb-4 text-center">🌪️</div>
-                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-slate-800">{currentEvent.count > 0 ? '颱風災損結算' : '平安度過風雨'}</h2>
+                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-slate-800">{currentEvent.count > 0 ? '一起整理風雨後的農田' : '平安度過風雨'}</h2>
                 <div className="bg-slate-100 p-4 rounded-xl md:rounded-2xl mb-6 mt-4">
                   <p className="text-slate-700 text-[10px] md:text-xs leading-relaxed font-bold">
-                    第 {currentEvent.stormDay} 天的颱風已完成結算；今天的天氣請看上方天氣欄。
+                    這是第 {currentEvent.stormDay} 天颱風過後的農田消息。今天的天氣顯示在上方。
                   </p>
                   <p className="text-red-600 text-[10px] md:text-xs leading-relaxed font-black mt-3 bg-red-100 p-3 rounded-xl border border-red-200">
                     {currentEvent.count > 0 ? `本次損失 ${currentEvent.count} 株未成熟且未受防風網保護的作物。` : '這次沒有作物損失，農田平安！'}
                   </p>
                   <p className="text-slate-600 text-[10px] md:text-xs leading-relaxed font-bold mt-3">
-                    💡 記得在颱風來臨前，提前購買並部署【防風網】來保護心血喔！
+                    防風網可以保護整區農田。下次風雨來時，記得在睡覺前架好。
                   </p>
                 </div>
                 <button onClick={closeEventModal} className="w-full bg-blue-600 text-white py-3 md:py-4 rounded-xl font-black text-sm md:text-base hover:bg-blue-700 transition-colors">
@@ -1461,19 +1452,19 @@
           {currentEvent?.type === 'crop_died' && (
             <div className="story-overlay fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-[100]">
               <div className="story-paper bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-md w-full shadow-2xl animate-in zoom-in duration-300 max-h-[85vh] overflow-y-auto hide-scrollbar border-4 border-slate-600">
-                <div className="text-center font-black text-slate-500 mb-2 animate-pulse">⚠️ 悲報</div>
+                <div className="text-center font-black text-slate-500 mb-2 animate-pulse">田間消息</div>
                 <div className="text-5xl md:text-6xl mb-4 text-center">🪦</div>
-                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-slate-800">作物枯死了！</h2>
+                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-slate-800">有些作物枯萎了</h2>
                 <div className="bg-slate-100 p-4 rounded-xl md:rounded-2xl mb-6 mt-4">
                   <p className="text-slate-700 text-[10px] md:text-xs leading-relaxed font-bold">
-                    你農田裡有作物因為<span className="text-red-600 font-black">【蟲害】</span>或<span className="text-green-700 font-black">【雜草】</span>連續兩晚未處理而枯死了！
+                    你農田裡有作物因為<span className="text-red-600 font-black">【蟲害】</span>或<span className="text-green-700 font-black">【雜草】</span>連續兩晚沒有清理而枯萎了。
                   </p>
                   <p className="text-slate-600 text-[10px] md:text-xs leading-relaxed font-bold mt-3">
-                    💡 請務必每天檢查農田狀態，及時進行除草和驅蟲，否則心血都會白費喔！
+                    空出的農田可以重新播種。每天巡一巡，睡前把蟲害與雜草清乾淨，下一批就能好好長大。
                   </p>
                 </div>
                 <button onClick={closeEventModal} className="w-full bg-slate-600 text-white py-3 md:py-4 rounded-xl font-black text-sm md:text-base hover:bg-slate-700 transition-colors">
-                  我知道了，真是太可惜了
+                  整理農田，再種一批
                 </button>
               </div>
             </div>
@@ -1482,20 +1473,20 @@
           {currentEvent?.type === 'tutorial_day2_water' && (
             <div className="story-overlay fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-[100]">
               <div className="story-paper bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-md w-full shadow-2xl animate-in zoom-in duration-300 max-h-[85vh] overflow-y-auto hide-scrollbar border-4 border-blue-400">
-                <div className="text-center font-black text-blue-600 mb-2 animate-pulse">🎓 新手必讀</div>
+                <div className="text-center font-black text-blue-600 mb-2 animate-pulse">農莊小筆記</div>
                 <div className="text-5xl md:text-6xl mb-4 text-center">💧</div>
-                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-blue-900">新的一天：記得澆水！</h2>
+                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-blue-900">早安，來照顧幼苗吧</h2>
                 <div className="bg-blue-50 p-4 rounded-xl md:rounded-2xl mb-6 mt-4">
                   <p className="text-slate-700 text-[10px] md:text-xs leading-relaxed font-bold">
-                    早安！在《四季農莊》中，想要植物順利長大，最重要的鐵則就是：<br/><br/>
-                    <span className="text-blue-600 font-black text-sm md:text-base bg-blue-200 px-2 py-1 rounded">【每天都必須幫生長中的植物澆水】</span>
+                    幼苗每天都需要水分。先看看天氣，再拿起澆水壺：<br/><br/>
+                    <span className="text-blue-600 font-black text-sm md:text-base bg-blue-200 px-2 py-1 rounded">晴天記得澆水，雨天讓雨水幫忙</span>
                   </p>
                   <p className="text-slate-500 text-[10px] md:text-xs leading-relaxed font-bold mt-4">
-                    💡 如果植物今天沒有喝到水，它們的生長進度就會停滯，甚至更容易生病喔！請立刻裝備下方的「單格澆水」去照顧它們吧！
+                    缺水會讓作物暫停生長。選好工具袋裡的「單格澆水」，替還沒喝到水的幼苗澆水吧。
                   </p>
                 </div>
                 <button onClick={closeEventModal} className="w-full bg-blue-500 text-white py-3 md:py-4 rounded-xl font-black text-sm md:text-base hover:bg-blue-600 transition-colors">
-                  我知道了，這就去澆水！
+                  拿起澆水壺
                 </button>
               </div>
             </div>
@@ -1504,22 +1495,22 @@
           {currentEvent?.type === 'tutorial_harvest' && (
             <div className="story-overlay fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-[100]">
               <div className="story-paper bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-md w-full shadow-2xl animate-in zoom-in duration-300 max-h-[85vh] overflow-y-auto hide-scrollbar border-4 border-yellow-400">
-                <div className="text-center font-black text-yellow-600 mb-2 animate-pulse">🎓 新手必讀</div>
+                <div className="text-center font-black text-yellow-600 mb-2 animate-pulse">農莊小筆記</div>
                 <div className="text-5xl md:text-6xl mb-4 text-center">✨</div>
-                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-yellow-900">大豐收：如何收成？</h2>
+                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-yellow-900">第一份收成，長好了</h2>
                 <div className="bg-yellow-50 p-4 rounded-xl md:rounded-2xl mb-6 mt-4">
                   <p className="text-slate-700 text-[10px] md:text-xs leading-relaxed font-bold">
-                    恭喜你！農田裡有植物成熟了（會發出閃亮特效 ✨）！
+                    田裡有作物成熟了！打開農田，找找標示「成熟」的作物吧。
                   </p>
                   <p className="text-slate-800 text-[10px] md:text-xs leading-relaxed font-black mt-3 bg-yellow-200 p-3 rounded-xl border border-yellow-300">
-                    1. 找到成熟發光的作物。<br/>
+                    1. 找到標示「成熟」的作物。<br/>
                     2. <span className="text-red-600">【直接點擊】</span>該作物。<br/>
-                    3. 作物就會自動飛進下方工具袋的<span className="text-red-600">【📥 收成籃】</span>存入庫存！<br/>
-                    4. 進入「農莊生活」的「田邊雜貨舖」，切換到「賣出農產」，把它們賣掉換錢吧！
+                    3. 收成會飛進<span className="text-red-600">【📥 收成籃】</span>，放進農產包包。<br/>
+                    4. 進入「農莊生活」的「田邊雜貨舖」，切換到「賣出農產」，就能把收成賣出去。
                   </p>
                 </div>
                 <button onClick={closeEventModal} className="w-full bg-yellow-500 text-white py-3 md:py-4 rounded-xl font-black text-sm md:text-base hover:bg-yellow-600 transition-colors">
-                  太棒了，馬上來收成！
+                  去收成吧
                 </button>
               </div>
             </div>
@@ -1528,20 +1519,20 @@
           {currentEvent?.type === 'tutorial_after_harvest' && (
             <div className="story-overlay fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-[100]">
               <div className="story-paper bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-md w-full shadow-2xl animate-in zoom-in duration-300 max-h-[85vh] overflow-y-auto hide-scrollbar border-4 border-green-400">
-                <div className="text-center font-black text-green-600 mb-2 animate-pulse">🎓 新手獎勵</div>
+                <div className="text-center font-black text-green-600 mb-2 animate-pulse">來自小鎮的心意</div>
                 <div className="text-5xl md:text-6xl mb-4 text-center">🎁</div>
-                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-green-900">鎮長的賀禮！</h2>
+                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-green-900">一份慶祝收成的小禮物</h2>
                 <div className="bg-green-50 p-4 rounded-xl md:rounded-2xl mb-6 mt-4">
                   <p className="text-slate-700 text-[10px] md:text-xs leading-relaxed font-bold">
-                    恭喜你完成了第一次全面收成！鎮長特地送來了農業物資獎勵：<br/><br/>
-                    <span className="text-green-700 font-black">【肥料 (葉菜用)】x1</span><br/>
-                    裝備後施打在葉菜類作物上，可以瞬間加速一天的生長進度！<br/><br/>
-                    <span className="text-blue-700 font-black">【防蟲紗網】x1</span><br/>
-                    點擊農田上方的「部署防蟲網」，可以保護整塊農田免受蟲害侵襲！
+                    第一批收成順利收好了！鎮長送來兩樣小幫手，已放進工具袋：<br/><br/>
+                    <span className="text-green-700 font-black">氮肥（葉菜用）1 份</span><br/>
+                    選好氮肥，點一下正在生長的葉菜，就能讓同區適用的作物多長大 1 天。<br/><br/>
+                    <span className="text-blue-700 font-black">防蟲網 1 張</span><br/>
+                    打開農田，點選「架設防蟲網」，就能擋住新來的菜蟲。
                   </p>
                 </div>
                 <button onClick={closeEventModal} className="w-full bg-green-500 text-white py-3 md:py-4 rounded-xl font-black text-sm md:text-base hover:bg-green-600 transition-colors shadow-md">
-                  收下禮物！
+                  看看這些小幫手
                 </button>
               </div>
             </div>
@@ -1550,19 +1541,19 @@
           {currentEvent?.type === 'tutorial_special_seed' && (
             <div className="story-overlay fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-[100]">
               <div className="story-paper bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-md w-full shadow-2xl animate-in zoom-in duration-300 max-h-[85vh] overflow-y-auto hide-scrollbar border-4 border-purple-400">
-                <div className="text-center font-black text-purple-600 mb-2 animate-pulse">🎓 傳說現世</div>
+                <div className="text-center font-black text-purple-600 mb-2 animate-pulse">一包特別的種子</div>
                 <div className="text-5xl md:text-6xl mb-4 text-center">✨</div>
-                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-purple-900">獲得傳說種子！</h2>
+                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-purple-900">校長送來的謝禮</h2>
                 <div className="bg-purple-50 p-4 rounded-xl md:rounded-2xl mb-6 mt-4">
                   <p className="text-slate-700 text-[10px] md:text-xs leading-relaxed font-bold">
-                    太厲害了！你完成了校長的委託！為了表達感謝，校長送給了你一顆極其稀有的<span className="text-purple-600 font-black">【{currentEvent.crop?.name} 種子】</span>！
+                    學校的食材準備好了！校長送來一包特別的<span className="text-purple-600 font-black">【{currentEvent.crop?.name} 種子】</span>！
                   </p>
                   <p className="text-slate-500 text-[10px] md:text-xs leading-relaxed font-bold mt-4 bg-purple-100 p-2 rounded">
-                    💡 傳說種子無法在商店購買，把它種在田裡耐心照顧，成熟後販賣可以獲得極大筆利潤喔！
+                    這包種子在雜貨舖買不到。一樣可以種滿 8 格農田，耐心照顧，看看會長出什麼吧。
                   </p>
                 </div>
                 <button onClick={closeEventModal} className="w-full bg-purple-500 text-white py-3 md:py-4 rounded-xl font-black text-sm md:text-base hover:bg-purple-600 transition-colors shadow-md">
-                  太棒了！
+                  好好照顧這包種子
                 </button>
               </div>
             </div>
@@ -1571,22 +1562,22 @@
           {currentEvent?.type === 'tutorial_bug' && (
             <div className="story-overlay fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-[100]">
               <div className="story-paper bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-md w-full shadow-2xl animate-in zoom-in duration-300 max-h-[85vh] overflow-y-auto hide-scrollbar border-4 border-red-400">
-                <div className="text-center font-black text-red-600 mb-2 animate-pulse">🎓 新手必讀</div>
+                <div className="text-center font-black text-red-600 mb-2 animate-pulse">農莊小筆記</div>
                 <div className="mb-4 text-center"><Farm12StatusArt type="pest" mode="dialog" /></div>
-                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-red-900">突發狀況：發現害蟲！</h2>
+                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-red-900">菜蟲來拜訪了</h2>
                 <div className="bg-red-50 p-4 rounded-xl md:rounded-2xl mb-6 mt-4">
                   <p className="text-slate-700 text-[10px] md:text-xs leading-relaxed font-bold">
-                    糟糕！你的農田裡出現了<span className="text-red-600 font-black">【害蟲】</span>。第一次帶著蟲害過夜會暫停生長；明天還有一次機會驅蟲，若再過夜未處理才會枯死。
+                    巡田時，發現了<span className="text-red-600 font-black">菜蟲</span>。第一次帶著蟲害過夜會暫停生長；明天還有一次機會驅蟲，若再過夜未處理才會枯死。
                   </p>
                   <p className="text-slate-800 text-[10px] md:text-xs leading-relaxed font-black mt-3 bg-red-200 p-3 rounded-xl border border-red-300 shadow-inner">
                     💡 驅蟲步驟：<br/>
-                    1. 前往「田邊雜貨舖」購買【辣椒水】。<br/>
-                    2. 在下方工具袋裝備【🌶️ 辣椒水】。<br/>
-                    3. 點擊有害蟲的格子進行驅逐！
+                    1. 先看看工具袋裡的辣椒水，用完了再到田邊雜貨舖補充。<br/>
+                    2. 在工具袋裡選好辣椒水。<br/>
+                    3. 點選有菜蟲的格子；也可以使用「全區驅蟲」，每格消耗 1 次。
                   </p>
                 </div>
                 <button onClick={closeEventModal} className="w-full bg-red-500 text-white py-3 md:py-4 rounded-xl font-black text-sm md:text-base hover:bg-red-600 transition-colors">
-                  我知道了，馬上處理！
+                  去照顧作物
                 </button>
               </div>
             </div>
@@ -1595,22 +1586,22 @@
           {currentEvent?.type === 'tutorial_weed' && (
             <div className="story-overlay fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-[100]">
               <div className="story-paper bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-md w-full shadow-2xl animate-in zoom-in duration-300 max-h-[85vh] overflow-y-auto hide-scrollbar border-4 border-green-400">
-                <div className="text-center font-black text-green-600 mb-2 animate-pulse">🎓 新手必讀</div>
+                <div className="text-center font-black text-green-600 mb-2 animate-pulse">農莊小筆記</div>
                 <div className="mx-auto mb-4 text-center"><Farm12StatusArt type="weed" mode="dialog" /></div>
-                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-green-900">突發狀況：發現野草！</h2>
+                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-green-900">田裡冒出了雜草</h2>
                 <div className="bg-green-50 p-4 rounded-xl md:rounded-2xl mb-6 mt-4">
                   <p className="text-slate-700 text-[10px] md:text-xs leading-relaxed font-bold">
-                    注意！你的農田裡長出了<span className="text-green-600 font-black">【尖刺野草】</span>。第一次帶著雜草過夜會暫停生長；明天還有一次機會除草，若再過夜未處理才會枯死。
+                    田裡長出了一些<span className="text-green-600 font-black">雜草</span>。第一次帶著雜草過夜會暫停生長；明天還有一次機會除草，若再過夜未處理才會枯死。
                   </p>
                   <p className="text-slate-800 text-[10px] md:text-xs leading-relaxed font-black mt-3 bg-green-200 p-3 rounded-xl border border-green-300 shadow-inner">
                     💡 除草步驟：<br/>
-                    1. 前往「田邊雜貨舖」購買【除草剪刀】。<br/>
-                    2. 在下方工具袋裝備【✂️ 除草剪刀】。<br/>
-                    3. 點擊有雜草的格子進行割除！
+                    1. 先看看工具袋裡的除草剪刀，用完了再到田邊雜貨舖添購。<br/>
+                    2. 在工具袋裡選好除草剪刀。<br/>
+                    3. 點選有雜草的格子；也可以使用「全區除草」，每格消耗 1 次。
                   </p>
                 </div>
                 <button onClick={closeEventModal} className="w-full bg-green-500 text-white py-3 md:py-4 rounded-xl font-black text-sm md:text-base hover:bg-green-600 transition-colors">
-                  我知道了，馬上處理！
+                  去照顧作物
                 </button>
               </div>
             </div>
@@ -1619,16 +1610,16 @@
           {currentEvent?.type === 'tutorial_rain' && (
             <div className="story-overlay fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-[100]">
               <div className="story-paper bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-md w-full shadow-2xl animate-in zoom-in duration-300 max-h-[85vh] overflow-y-auto hide-scrollbar border-4 border-blue-400">
-                <div className="text-center font-black text-blue-600 mb-2 animate-pulse">🎓 新手必讀</div>
+                <div className="text-center font-black text-blue-600 mb-2 animate-pulse">農莊小筆記</div>
                 <div className="text-5xl md:text-6xl mb-4 text-center">🌧️</div>
-                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-blue-900">天氣系統：下雨天</h2>
+                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-blue-900">今天，雨水來幫忙</h2>
                 <div className="bg-blue-50 p-4 rounded-xl md:rounded-2xl mb-6 mt-4">
                   <p className="text-slate-700 text-[10px] md:text-xs leading-relaxed font-bold">
-                    太棒了，今天下雨了！在《四季農莊》中，大自然是你最好的幫手。下雨天時，農田會<span className="text-blue-600 font-black">【自動吸滿水分】</span>，你今天不需要花費時間和體力去澆水喔！
+                    今天下雨了，農田會<span className="text-blue-600 font-black">自動澆好水</span>。新種下的幼苗也不用另外澆水，可以去除草、驅蟲，或看看雞舍。
                   </p>
                 </div>
                 <button onClick={closeEventModal} className="w-full bg-blue-500 text-white py-3 md:py-4 rounded-xl font-black text-sm md:text-base hover:bg-blue-600 transition-colors">
-                  我知道了！
+                  繼續今天的農務
                 </button>
               </div>
             </div>
@@ -1637,29 +1628,29 @@
           {currentEvent?.type === 'typhoon_warning' && (
             <div className="story-overlay fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-[100]">
               <div className="story-paper bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-md w-full shadow-2xl animate-in zoom-in duration-300 max-h-[85vh] overflow-y-auto hide-scrollbar border-4 border-blue-500">
-                {currentEvent.isFirst && <div className="text-center font-black text-blue-600 mb-2 animate-pulse">🎓 新手必讀</div>}
+                {currentEvent.isFirst && <div className="text-center font-black text-blue-600 mb-2 animate-pulse">農莊小筆記</div>}
 
                 <div className="text-5xl md:text-6xl mb-4 text-center">🌀</div>
                 <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-blue-900">農莊氣象站：今天颱風來襲！</h2>
                 <div className="bg-blue-50 p-4 rounded-xl md:rounded-2xl mb-6 mt-4">
                   <p className="text-red-600 text-[10px] md:text-xs leading-relaxed font-black mt-2">
-                    今天已是颱風天。請在今晚睡覺前架設防風網；睡覺後才結算災損，每株「未成熟且未受防風網保護」的作物各有 50% 機率損失。已成熟的作物不受颱風傷害。
+                    風雨來了，先替農田做好準備吧。今晚睡覺前架好防風網，就能保護作物。若沒有防護，每株未成熟的作物在過夜時都有 50% 機率受損；成熟作物不受影響。
                   </p>
                   {currentEvent.isFirst && (
                     <p className="text-emerald-700 text-[10px] md:text-xs leading-relaxed font-black mt-3 bg-emerald-100 p-2 rounded-lg border border-emerald-200">
-                      🎁 政府與農委會緊急發配了防颱物資：【防風網】x1 已存入你的庫存！
+                      小鎮送來 1 張防風網，已放進工具袋。今晚睡覺前，記得替農田架好。
                     </p>
                   )}
                   <p className="text-slate-800 text-[10px] md:text-xs leading-relaxed font-black mt-3 bg-blue-100 p-3 rounded-xl border border-blue-200 shadow-inner">
                     💡 防風網使用教學：<br/>
-                    1. {currentEvent.isFirst ? "已經有政府送的防風網了！若不夠可前往" : "前往"}「農莊生活」的「田邊雜貨舖」購買【🛡️ 防風網】。<br/>
+                    1. {currentEvent.isFirst ? "小鎮送來的防風網已經備好了。若還需要，可到" : "前往"}「農莊生活」的「田邊雜貨舖」購買【🛡️ 防風網】。<br/>
                     2. 進入你的農田區塊（例如第 1 區）。<br/>
                     3. 點選畫面上方的「架設防風網」。<br/><br/>
-                    <span className="text-blue-700">⚠️ 特別注意：一張防風網可以保護【一整大塊農地（包含裡面的8小格）】，不需要每個格子都買喔！</span>
+                    <span className="text-blue-700">一張防風網就能保護整區 8 格農田。防蟲網的用途不同，無法擋風。</span>
                   </p>
                 </div>
                 <button onClick={closeEventModal} className="w-full bg-blue-600 text-white py-3 md:py-4 rounded-xl font-black text-sm md:text-base hover:bg-blue-700 transition-colors">
-                  我知道了，馬上去準備！
+                  去替農田做好防護
                 </button>
               </div>
             </div>
@@ -1669,21 +1660,21 @@
           {currentEvent?.type === 'school_quest' && (
             <div className="story-overlay fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-[100]">
               <div className="story-paper bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-md w-full shadow-2xl animate-in zoom-in duration-300 max-h-[85vh] overflow-y-auto hide-scrollbar border-4 border-yellow-400">
-                {!flags.seenQuest && <div className="text-center font-black text-yellow-600 mb-2 animate-pulse">🎓 經濟學小知識</div>}
+                {!flags.seenQuest && <div className="text-center font-black text-yellow-600 mb-2 animate-pulse">來自學校的消息</div>}
 
                 <div className="text-5xl md:text-6xl mb-4 text-center">🏫</div>
-                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-yellow-700">偏鄉小學的營養午餐委託</h2>
+                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-yellow-700">學校的午餐委託</h2>
                 <div className="bg-yellow-50 p-4 rounded-xl md:rounded-2xl mb-6 mt-4 border border-yellow-200">
                   <p className="text-slate-600 text-[10px] md:text-xs leading-relaxed font-bold">
-                    當市場上極度需要某樣商品，但供給有限時，價格就會上漲！
+                    學校正在準備午餐，想向農莊訂購一批新鮮蔬菜。
                   </p>
                   <p className="text-slate-800 text-[10px] md:text-xs leading-relaxed font-black mt-2">
-                    附近的偏鄉小學本週急缺 <span className="text-red-600 text-sm md:text-base inline-flex items-center gap-1"><CropArt crop={currentEvent.data?.crop} growth={currentEvent.data?.crop?.days || 0} mode="quest" fallback={currentEvent.data?.crop?.icon} /> {currentEvent.data?.crop?.name}</span>！<br/><br/>
-                    只要在 <span className="text-red-600 font-black">{currentEvent.data?.daysLeft} 天</span> 內交付足夠的數量，校長願意以 <span className="bg-yellow-200 px-1 rounded">3 倍</span> 高價收購！
+                    這次需要的食材是 <span className="text-red-600 text-sm md:text-base inline-flex items-center gap-1"><CropArt crop={currentEvent.data?.crop} growth={currentEvent.data?.crop?.days || 0} mode="quest" fallback={currentEvent.data?.crop?.icon} /> {currentEvent.data?.crop?.name}</span>！<br/><br/>
+                    只要在 <span className="text-red-600 font-black">{currentEvent.data?.daysLeft} 天</span> 內交付 {currentEvent.data?.required} 份食材，學校會以平常售價的 <span className="bg-yellow-200 px-1 rounded">3 倍</span> 價格收購，並送上一包傳說種子作為謝禮。
                   </p>
                 </div>
                 <button onClick={closeEventModal} className="w-full bg-yellow-500 text-white py-3 md:py-4 rounded-xl font-black text-sm md:text-base hover:bg-yellow-600 transition-colors">
-                  太棒了，接下委託！
+                  看看需要準備什麼
                 </button>
               </div>
             </div>
@@ -1692,19 +1683,19 @@
           {currentEvent?.type === 'irrigation_upgrade' && (
             <div className="story-overlay fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-50">
               <div className="story-paper bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-md w-full shadow-2xl animate-in zoom-in duration-300 max-h-[85vh] overflow-y-auto hide-scrollbar">
-                <div className="text-[10px] md:text-xs font-black text-emerald-600 mb-2 text-center">📢 農委會補助通知</div>
+                <div className="text-[10px] md:text-xs font-black text-emerald-600 mb-2 text-center">農莊的新幫手</div>
                 <div className="text-5xl md:text-6xl mb-4 text-center">🚜</div>
-                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-emerald-700">科技升級：自動灌溉系統！</h2>
+                <h2 className="text-xl md:text-2xl font-black mb-2 text-center text-emerald-700">澆水變得更輕鬆了</h2>
                 <div className="bg-emerald-50 p-4 rounded-xl md:rounded-2xl mb-6 mt-4 border border-emerald-200">
                   <p className="text-slate-600 text-[10px] md:text-xs leading-relaxed font-bold">
-                    恭喜你度過了初期的艱辛！鑒於你對地方農業的穩定貢獻，政府與農委會特別提撥了一筆專案補助，為你的農莊全面安裝了「自動化灌溉系統」。
+                    來到農莊的第 20 天，小鎮送來了灑水器。從今天起，澆水可以一次照顧整區農田。
                   </p>
                   <p className="text-slate-800 text-[10px] md:text-xs leading-relaxed font-black mt-2">
-                    即日起，你的灑水器已升級為 <span className="bg-emerald-200 px-1 rounded">全區灑水</span>！只需點擊一次，就能瞬間為整塊農田（8格）澆滿水！
+                    即日起，你的灑水器已升級為 <span className="bg-emerald-200 px-1 rounded">全區灑水</span>。在工具袋裡選好它，再點一下農田，就能替這一區的 8 格作物澆水。
                   </p>
                 </div>
                 <button onClick={closeEventModal} className="w-full bg-emerald-500 text-white py-3 md:py-4 rounded-xl font-black text-sm md:text-base hover:bg-emerald-600 transition-colors">
-                  太棒了，收下補助！
+                  試試新的灑水器
                 </button>
               </div>
             </div>
@@ -1715,16 +1706,16 @@
             <div className="story-overlay fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
               <div className="story-paper bg-white p-6 md:p-8 rounded-[2rem] max-w-sm w-full text-center shadow-2xl animate-in zoom-in duration-200">
                 <div className="text-6xl mb-4">🏫</div>
-                <h2 className="text-xl md:text-2xl font-black mb-2 text-yellow-700">偏鄉小學急需食材</h2>
+                <h2 className="text-xl md:text-2xl font-black mb-2 text-yellow-700">替學校準備午餐食材</h2>
                 <div className="bg-yellow-50 p-4 rounded-xl mb-6 border border-yellow-200">
                   <p className="font-bold text-slate-700 text-sm md:text-base">
                     校長需要 <span className="text-red-600 text-lg md:text-xl font-black">{schoolQuest.required}</span> 個
                     <span className="mx-1 inline-flex items-center gap-1"><CropArt crop={schoolQuest.crop} growth={schoolQuest.crop.days} mode="quest" fallback={schoolQuest.crop.icon} />{schoolQuest.crop.name}</span>。
                   </p>
                   <p className="font-black mt-3 text-yellow-800 text-xs md:text-sm bg-yellow-200 py-2 rounded-lg">
-                    目前倉庫擁有：{inventory.crops?.[schoolQuest.crop.id] || 0} 個
+                    已備好：{inventory.crops?.[schoolQuest.crop.id] || 0} 個
                   </p>
-                  <p className="text-[10px] text-slate-500 mt-2 font-bold">交付可獲得3倍市價與神秘種子獎勵！<br/>(期限：生長 {schoolQuest.crop.days} 天＋3 天緩衝；剩餘 {schoolQuest.daysLeft} 天)</p>
+                  <p className="text-[10px] text-slate-500 mt-2 font-bold">交付後可收到 3 倍售價的報酬，以及 1 包傳說種子。<br/>還有 {schoolQuest.daysLeft} 天可以準備。<br/>委託期限為生長天數（{schoolQuest.crop.days} 天）再加 3 天。</p>
                 </div>
                 <div className="flex gap-3">
                   <button onClick={() => setShowQuestModal(false)} className="flex-1 bg-slate-200 py-3 md:py-4 rounded-xl font-bold text-slate-600 hover:bg-slate-300">稍後再來</button>
@@ -1747,7 +1738,7 @@
                 <div className="flex justify-between items-center mb-4 border-b pb-3 md:pb-4 shrink-0">
                   <div>
                     <div className="story-market-brand"><StorySprite sheet="village-atlas" columns={2} index={0} label="雜貨舖" /><div><small>種子・農具・新鮮收成</small><h2 className="text-xl md:text-2xl font-black">田邊雜貨舖</h2></div></div>
-                    <div className="text-sm font-bold text-yellow-600 mt-1">擁有的金錢: ${gold.toLocaleString()}</div>
+                    <div className="text-sm font-bold text-yellow-600 mt-1">隨身金錢： ${gold.toLocaleString()}</div>
                   </div>
                   <div className="flex items-center gap-2 md:gap-3">
                     <button onClick={() => setShowShop(false)} className="bg-slate-100 p-1.5 md:p-2 rounded-full hover:bg-slate-200 transition-colors">❌</button>
@@ -1775,16 +1766,16 @@
                                   seeds: { ...inv.seeds, [crop.id]: (inv.seeds[crop.id] || 0) + 1 }
                                 }));
                                 playEffect('coin');
-                                setMessage(`購買了 [${crop.name}種子]！請至下方工具袋裝備。`);
+                                setMessage(`買好 1 包${crop.name}種子了。回到農田，在工具袋裡選好種子就能播種。`);
                               } else {
-                                setMessage("餘額不足，無法購買這批種子！");
+                                setMessage("買這包種子的錢還不夠，可以先賣出一些收成。");
                               }
                             }}
                             className={`w-full p-3 md:p-4 rounded-xl md:rounded-2xl border-2 hover:border-green-400 hover:bg-green-50 transition-all flex justify-between items-center group ${tutorialStep === 2 && crop.id === 'sweetpotatoleaf' ? 'border-blue-500 animate-pulse bg-blue-50' : 'border-slate-100'}`}
                           >
                             <div>
                               <div className="font-black text-base md:text-lg text-left flex items-center gap-2"><CropArt crop={crop} growth={crop.days} mode="shop" fallback={crop.icon} /><span>{crop.name}</span></div>
-                              <div className="text-[9px] md:text-[10px] text-slate-400 mt-1 font-bold">生長 {crop.days} 天 ｜ 單售 ${crop.value}</div>
+                              <div className="text-[9px] md:text-[10px] text-slate-400 mt-1 font-bold">生長 {crop.days} 天 ｜ 收成售價 ${crop.value}</div>
                             </div>
                             <div className="bg-green-100 text-green-700 px-2 py-1 md:px-3 md:py-1 rounded-lg md:rounded-xl font-black text-xs md:text-sm group-hover:bg-green-500 group-hover:text-white transition-colors">
                               $ {crop.price}
@@ -1795,12 +1786,12 @@
                     </div>
 
                     <div>
-                      <h3 className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-3 md:mb-4 sticky top-0 bg-white/90 py-1 z-10">🛠️ 農用耗材</h3>
+                      <h3 className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-3 md:mb-4 sticky top-0 bg-white/90 py-1 z-10">🛠️ 農具與照顧用品</h3>
                       <div className="space-y-2 md:space-y-3">
                         <div className="p-3 md:p-4 rounded-xl md:rounded-2xl border-2 border-slate-100 flex justify-between items-center">
                           <div>
                             <div className="font-black text-sm md:text-base flex items-center gap-2"><Farm12ItemArt item="weed" mode="shop" /><span>除草剪刀</span></div>
-                            <div className="text-[8px] md:text-[10px] text-slate-400 mt-1 font-bold">除草 10 次<br/>庫存: {inventory.scissors}</div>
+                            <div className="text-[8px] md:text-[10px] text-slate-400 mt-1 font-bold">除草 10 次<br/>持有： {inventory.scissors}</div>
                           </div>
                           <button onClick={() => { playEffect('coin'); buyItem('scissors', 100); }} className="bg-orange-100 text-orange-700 px-3 md:px-4 py-1.5 md:py-2 rounded-lg font-black text-xs hover:bg-orange-500 hover:text-white transition-all active:scale-95">$ 100</button>
                         </div>
@@ -1808,7 +1799,7 @@
                         <div className="p-3 md:p-4 rounded-xl md:rounded-2xl border-2 border-slate-100 flex justify-between items-center">
                           <div>
                             <div className="font-black text-sm md:text-base flex items-center gap-2"><Farm12ItemArt item="chili" mode="shop" /><span>辣椒水</span></div>
-                            <div className="text-[8px] md:text-[10px] text-slate-400 mt-1 font-bold">驅蟲 10 次<br/>庫存: {inventory.chili}</div>
+                            <div className="text-[8px] md:text-[10px] text-slate-400 mt-1 font-bold">驅蟲 10 次<br/>持有： {inventory.chili}</div>
                           </div>
                           <button onClick={() => { playEffect('coin'); buyItem('chili', 100); }} className="bg-red-100 text-red-700 px-3 md:px-4 py-1.5 md:py-2 rounded-lg font-black text-xs hover:bg-red-500 hover:text-white transition-all active:scale-95">$ 100</button>
                         </div>
@@ -1817,8 +1808,8 @@
                           <div className="flex items-center gap-2">
                             <Farm12ItemArt item="fert_leaf" mode="shop" />
                             <div>
-                              <div className="font-black text-sm md:text-base">氮肥 (葉菜用)</div>
-                              <div className="text-[8px] md:text-[10px] text-slate-400 mt-1 font-bold">庫存: {inventory.fert_leaf}</div>
+                              <div className="font-black text-sm md:text-base">氮肥（葉菜用）</div>
+                              <div className="text-[8px] md:text-[10px] text-slate-400 mt-1 font-bold">持有： {inventory.fert_leaf}</div>
                             </div>
                           </div>
                           <button onClick={() => { playEffect('coin'); buyItem('fert_leaf', 80); }} className="bg-green-100 text-green-700 px-3 md:px-4 py-1.5 md:py-2 rounded-lg font-black text-xs hover:bg-green-500 hover:text-white transition-all active:scale-95">$ 80</button>
@@ -1828,8 +1819,8 @@
                           <div className="flex items-center gap-2">
                             <Farm12ItemArt item="fert_root" mode="shop" />
                             <div>
-                              <div className="font-black text-sm md:text-base">磷肥 (根莖用)</div>
-                              <div className="text-[8px] md:text-[10px] text-slate-400 mt-1 font-bold">庫存: {inventory.fert_root}</div>
+                              <div className="font-black text-sm md:text-base">磷肥（根莖用）</div>
+                              <div className="text-[8px] md:text-[10px] text-slate-400 mt-1 font-bold">持有： {inventory.fert_root}</div>
                             </div>
                           </div>
                           <button onClick={() => { playEffect('coin'); buyItem('fert_root', 120); }} className="bg-yellow-100 text-yellow-700 px-3 md:px-4 py-1.5 md:py-2 rounded-lg font-black text-xs hover:bg-yellow-500 hover:text-white transition-all active:scale-95">$ 120</button>
@@ -1839,8 +1830,8 @@
                           <div className="flex items-center gap-2">
                             <Farm12ItemArt item="fert_fruit" mode="shop" />
                             <div>
-                              <div className="font-black text-sm md:text-base">鉀肥 (瓜果用)</div>
-                              <div className="text-[8px] md:text-[10px] text-slate-400 mt-1 font-bold">庫存: {inventory.fert_fruit}</div>
+                              <div className="font-black text-sm md:text-base">鉀肥（瓜果用）</div>
+                              <div className="text-[8px] md:text-[10px] text-slate-400 mt-1 font-bold">持有： {inventory.fert_fruit}</div>
                             </div>
                           </div>
                           <button onClick={() => { playEffect('coin'); buyItem('fert_fruit', 300); }} className="bg-purple-100 text-purple-700 px-3 md:px-4 py-1.5 md:py-2 rounded-lg font-black text-xs hover:bg-purple-500 hover:text-white transition-all active:scale-95">$ 300</button>
@@ -1848,8 +1839,8 @@
 
                         <div className="p-3 md:p-4 rounded-xl md:rounded-2xl border-2 border-slate-100 flex justify-between items-center">
                           <div>
-                            <div className="font-black text-sm md:text-base flex items-center gap-2"><Farm12ItemArt item="net" mode="shop" /><span>防蟲紗網</span></div>
-                            <div className="text-[8px] md:text-[10px] text-slate-400 mt-1 font-bold">保護單一區塊<br/>庫存: {inventory.nets}</div>
+                            <div className="font-black text-sm md:text-base flex items-center gap-2"><Farm12ItemArt item="net" mode="shop" /><span>防蟲網</span></div>
+                            <div className="text-[8px] md:text-[10px] text-slate-400 mt-1 font-bold">擋住新來的菜蟲<br/>持有： {inventory.nets}</div>
                           </div>
                           <button onClick={() => { playEffect('coin'); buyItem('net', 100); }} className="bg-blue-100 text-blue-700 px-3 md:px-4 py-1.5 md:py-2 rounded-lg font-black text-xs hover:bg-blue-500 hover:text-white transition-all active:scale-95">$ 100</button>
                         </div>
@@ -1857,7 +1848,7 @@
                         <div className="p-3 md:p-4 rounded-xl md:rounded-2xl border-2 border-slate-100 flex justify-between items-center">
                           <div>
                             <div className="font-black text-sm md:text-base flex items-center gap-2"><Farm12ItemArt item="windbreak" mode="shop" /><span>防風網</span></div>
-                            <div className="text-[8px] md:text-[10px] text-slate-400 mt-1 font-bold">抵禦強風<br/>庫存: {inventory.windbreaks}</div>
+                            <div className="text-[8px] md:text-[10px] text-slate-400 mt-1 font-bold">抵禦強風<br/>持有： {inventory.windbreaks}</div>
                           </div>
                           <button onClick={() => { playEffect('coin'); buyItem('windbreak', 1000); }} className="bg-emerald-100 text-emerald-700 px-3 md:px-4 py-1.5 md:py-2 rounded-lg font-black text-xs hover:bg-emerald-500 hover:text-white transition-all active:scale-95">$ 1000</button>
                         </div>
@@ -1870,7 +1861,7 @@
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4 overflow-y-auto custom-scrollbar flex-1 pr-1 md:pr-2 pb-20 sm:pb-4">
                     {Object.entries(inventory.crops || {}).filter(([_, amt]) => amt > 0).length === 0 && !(inventory.eggs > 0) ? (
                       <div className="col-span-1 md:col-span-2 text-center text-slate-500 py-10 font-bold bg-slate-50 rounded-2xl border-2 border-dashed">
-                        倉庫空空如也！<br/>點選田裡成熟的作物，就會自動放進收成籃。
+                        農產包包裡還沒有收成。<br/>點選田裡成熟的作物，就會自動放進收成籃。
                       </div>
                     ) : (
                       <>
@@ -1878,7 +1869,7 @@
                         <div className="p-3 md:p-4 rounded-xl md:rounded-2xl border-2 border-amber-200 flex justify-between items-center bg-white">
                           <div className="flex items-center gap-3">
                             <Farm12UiIcon name="egg" className="story-egg" />
-                            <div><div className="font-black text-sm md:text-base">雞蛋</div><div className="text-xs text-slate-600">庫存 {inventory.eggs} 顆・單價 $120</div></div>
+                            <div><div className="font-black text-sm md:text-base">雞蛋</div><div className="text-xs text-slate-600">持有 {inventory.eggs} 顆・每顆 $120</div></div>
                           </div>
                           <button onClick={sellEggs} className="bg-amber-600 text-white px-3 py-2 rounded-lg font-black text-xs">全部出售</button>
                         </div>
@@ -1894,14 +1885,14 @@
                               <div>
                                 <div className="font-black text-sm md:text-base text-slate-800">{crop.name}</div>
                                 <div className="text-[10px] md:text-xs text-slate-500 font-bold mt-1">
-                                  庫存: <span className="text-indigo-600 font-black">{amount}</span> ｜ 單價: <span className="text-yellow-600">${crop.value.toLocaleString()}</span>
+                                  持有： <span className="text-indigo-600 font-black">{amount}</span> ｜ 售價： <span className="text-yellow-600">${crop.value.toLocaleString()}</span>
                                 </div>
                               </div>
                             </div>
                             <div className="flex flex-col gap-1.5 shrink-0">
                               <button onClick={() => sellCrop(cropId, 1, crop.value)} className="bg-yellow-100 text-yellow-700 px-3 py-1.5 rounded-lg font-black text-[10px] md:text-xs hover:bg-yellow-500 hover:text-white transition-all active:scale-95 border border-yellow-200">賣 1 個</button>
                               {amount > 1 && (
-                                <button onClick={() => sellCrop(cropId, amount, crop.value)} className="bg-yellow-500 text-white px-3 py-1.5 rounded-lg font-black text-[10px] md:text-xs hover:bg-yellow-600 transition-all active:scale-95 shadow-sm">全賣</button>
+                                <button onClick={() => sellCrop(cropId, amount, crop.value)} className="bg-yellow-500 text-white px-3 py-1.5 rounded-lg font-black text-[10px] md:text-xs hover:bg-yellow-600 transition-all active:scale-95 shadow-sm">全部出售</button>
                               )}
                             </div>
                           </div>
@@ -1926,7 +1917,7 @@
 
                 <div className="overflow-y-auto custom-scrollbar flex-1 pr-2 md:pr-4 pb-4">
                   <p className="text-[10px] md:text-xs font-bold text-slate-500 mb-4 md:mb-6">
-                    先看種植指南，收成一次就能解鎖完整作物故事。每包種子種滿 8 格；遊戲天數為簡化設定，非真實栽培日數。
+                    想種什麼，先翻翻這本小圖鑑。每包種子能種滿 8 格，首次收成後還能讀到作物故事。這裡的生長天數是遊戲設定，和真實種植所需時間不同。
                   </p>
 
                   <div className="space-y-6 md:space-y-8">
@@ -1965,7 +1956,7 @@
                                       <div><dt>收成單價</dt><dd>${crop.value.toLocaleString()}</dd></div>
                                       <div><dt>適用肥料</dt><dd>{({leaf:'氮肥',root:'磷肥',fruit:'鉀肥'})[crop.type]}・同類作物加快 1 天</dd></div>
                                     </dl>
-                                    <p className="story-guide-tip">每天澆水，雨天自動澆水。防蟲網擋菜蟲、防風網防颱風；雜草仍需清除。</p>
+                                    <p className="story-guide-tip">晴天記得澆水，雨天會自動澆好。防蟲網能擋住新來的菜蟲，防風網能抵禦颱風；田裡原有的菜蟲與雜草仍要清除。</p>
                                     <div className="story-crop-story">{isUnlocked ? <><strong>已收成・作物故事</strong><p>{crop.desc}</p></> : <p>首次收成後，解鎖作物故事。</p>}</div>
                                   </div>
 
@@ -1990,7 +1981,7 @@
                 <StorySprite sheet="village-atlas" columns={2} index={1} label="木造雞舍與母雞" className="story-coop-illustration" />
                 <small className="story-eyebrow">一起照顧小雞</small><h2 className="text-2xl font-black text-amber-950 mb-2">小雞的家</h2>
                 {!coop.built ? <>
-                  <p className="mb-4">從一隻母雞開始，最多擴建到三隻。每隻每天吃 1 份飼料，隔天產 1 顆蛋；忘記餵食也不會失去母雞。</p>
+                  <p className="mb-4">先迎接一隻母雞，再慢慢擴建成三隻的小家。每隻每天吃 1 份飼料，隔天就會留下 1 顆蛋。忘記餵食的那天不會產蛋，母雞仍會留在雞舍等你。</p>
                   <button onClick={buildCoop} disabled={gold < 3000} className="picturebook-primary w-full">建造雞舍・$3,000（附 2 份飼料）</button>
                 </> : <div className="space-y-4">
                   <p className="font-bold">{hungryHens.length ? `還有 ${hungryHens.length} 隻需要餵食` : '大家都吃飽了，明天來收蛋吧！'}</p>
@@ -2016,11 +2007,11 @@
                 <div className="text-5xl md:text-6xl mb-3 md:mb-4">🌙</div>
                 <h2 className="text-xl md:text-2xl font-black mb-3">睡前待辦</h2>
                 <p className="text-slate-500 mb-3 font-bold text-[10px] md:text-xs leading-relaxed">
-                  缺水會暫停生長；蟲害與雜草第一次未處理會暫停生長，第二次過夜仍未處理才會枯死。
+                  休息前，再看看田裡吧。缺水會讓作物暫停生長；蟲害或雜草若連續兩晚沒有清理，作物就會枯萎。
                 </p>
                 <div className="space-y-2 text-left mb-5 max-h-[30vh] overflow-y-auto custom-scrollbar" aria-label="各區睡前待辦">
                   {sleepChecklist.length === 0 ? (
-                    <p className="rounded-xl bg-emerald-50 p-3 text-center font-bold text-emerald-700 text-xs">全部照顧好了，可以安心休息！</p>
+                    <p className="rounded-xl bg-emerald-50 p-3 text-center font-bold text-emerald-700 text-xs">田裡的農務都完成了。</p>
                   ) : sleepChecklist.map(item => (
                     <button key={item.plotId} onClick={() => { setActivePlot(item.plotId); setShowModal(null); }} className="block w-full rounded-xl border border-amber-200 bg-amber-50 p-3 text-left hover:bg-amber-100 transition-colors">
                       <strong className="block text-sm text-amber-900">第 {item.plotId + 1} 區 → 前往處理</strong>
@@ -2038,7 +2029,7 @@
                     再巡一下
                   </button>
                   <button onClick={processNextDay} className="flex-1 bg-slate-800 text-white py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-sm md:text-base hover:bg-slate-700 transition-colors">
-                    確定睡覺
+                    休息，迎接明天
                   </button>
                 </div>
 
@@ -2058,10 +2049,10 @@
             <div className="story-overlay fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-50">
               <div className="story-paper bg-white p-8 md:p-10 rounded-[2.5rem] md:rounded-[3rem] max-w-sm w-full text-center shadow-2xl animate-in zoom-in">
                 <div className="text-6xl md:text-7xl mb-4 md:mb-6">🥇</div>
-                <h2 className="text-xl md:text-3xl font-black mb-2 uppercase">季度大賽</h2>
-                <p className="text-slate-400 text-[10px] md:text-xs mb-6 md:mb-8 font-bold">你在第 {day} 天的表現非常驚人，評審團給予了高度評價！</p>
+                <h2 className="text-xl md:text-3xl font-black mb-2 uppercase">百日農莊評選</h2>
+                <p className="text-slate-400 text-[10px] md:text-xs mb-6 md:mb-8 font-bold">來到第 {day} 天了！小鎮送來一筆獎金，金額是目前農莊資金的 20%。</p>
                 <div className="bg-slate-100 p-4 md:p-6 rounded-2xl md:rounded-3xl mb-6 md:mb-8">
-                  <div className="text-[9px] md:text-[10px] font-black text-slate-400 mb-1 uppercase">季度獎金</div>
+                  <div className="text-[9px] md:text-[10px] font-black text-slate-400 mb-1 uppercase">農莊獎金</div>
                   <div className="text-3xl md:text-4xl font-black text-yellow-600">${Math.floor(gold * 0.2).toLocaleString()}</div>
                 </div>
                 <button onClick={() => { setGold(g => g + Math.floor(g * 0.2)); setShowModal(null); playEffect('coin'); }} className="w-full bg-slate-800 text-white py-4 md:py-5 rounded-xl md:rounded-2xl font-black uppercase tracking-widest hover:bg-slate-700 transition-all">領取獎勵</button>
@@ -2073,22 +2064,22 @@
           {showModal === 'result' && (
             <div className="story-overlay fixed inset-0 bg-slate-900/95 backdrop-blur-xl flex items-center justify-center p-4 z-50">
               <div className="story-paper bg-white p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] max-w-lg w-full text-center shadow-2xl overflow-y-auto max-h-[90vh] hide-scrollbar">
-                <div className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-3 md:mb-4">365天經營結算</div>
-                <h1 className="text-4xl md:text-5xl font-black mb-6 md:mb-8 italic">農莊年度結算</h1>
+                <div className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-3 md:mb-4">這一年的農莊日記</div>
+                <h1 className="text-4xl md:text-5xl font-black mb-6 md:mb-8 italic">這一年，辛苦了</h1>
                 <div className="grid grid-cols-2 gap-3 md:gap-4 mb-8 md:mb-10">
                   <div className="bg-slate-50 p-6 md:p-8 rounded-2xl md:rounded-3xl border border-slate-100">
-                    <div className="text-[9px] md:text-[10px] font-black text-slate-400 mb-1 md:mb-2 uppercase">總資產</div>
+                    <div className="text-[9px] md:text-[10px] font-black text-slate-400 mb-1 md:mb-2 uppercase">結餘資金</div>
                     <div className="text-xl md:text-3xl font-black font-mono text-slate-800">${gold.toLocaleString()}</div>
                   </div>
                   <div className="bg-blue-600 p-6 md:p-8 rounded-2xl md:rounded-3xl text-white shadow-xl shadow-blue-200">
-                    <div className="text-[9px] md:text-[10px] font-black opacity-60 mb-1 md:mb-2 uppercase">最終評級</div>
+                    <div className="text-[9px] md:text-[10px] font-black opacity-60 mb-1 md:mb-2 uppercase">年度評等</div>
                     <div className="text-5xl md:text-6xl font-black">{gold > 1000000 ? 'S' : gold > 500000 ? 'A' : gold > 100000 ? 'B' : 'C'}</div>
                   </div>
                 </div>
                 <button onClick={() => {
                   localStorage.removeItem(Care.SAVE_KEY);
                   window.location.reload();
-                }} className="w-full bg-slate-800 text-white py-5 md:py-6 rounded-2xl md:rounded-3xl font-black text-sm md:text-base uppercase tracking-widest hover:bg-slate-700 active:scale-95 transition-all">刪除存檔並開啟下一個循環</button>
+                }} className="w-full bg-slate-800 text-white py-5 md:py-6 rounded-2xl md:rounded-3xl font-black text-sm md:text-base uppercase tracking-widest hover:bg-slate-700 active:scale-95 transition-all">刪除這份日記，重新開始</button>
               </div>
             </div>
           )}
