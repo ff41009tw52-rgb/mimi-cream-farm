@@ -134,3 +134,18 @@
 @keyframes storyWindGust{from{transform:translateX(0);opacity:0}35%{opacity:.65}to{transform:translateX(420%);opacity:0}}
 @media(max-width:760px){.story-weather-notice{flex-wrap:wrap}.story-weather-notice>div{flex-basis:calc(100% - 60px)}.story-weather-notice button{margin-left:auto;min-height:44px}.story-weather-notice strong{font-size:17px}}
 @media(prefers-reduced-motion:reduce){.story-weather-layer{display:none}}
+
+/* Rounded Traditional Chinese reading face, bundled with the game. */
+@font-face{font-family:'Farm Rounded';src:url('fonts/farm-rounded.woff') format('woff');font-style:normal;font-weight:400;font-display:swap}
+body,.farm12-picturebook,.story-home-footer{font-family:'Farm Rounded','Microsoft JhengHei','PingFang TC',sans-serif}
+.farm12-picturebook{font-weight:400;letter-spacing:.025em;line-height:1.8}
+.farm12-picturebook :is(button,input,select,textarea){font-family:inherit;letter-spacing:.025em}
+.farm12-picturebook :is(.font-black,.font-extrabold,h1,h2,h3,strong,b){font-weight:700}
+.farm12-picturebook :is(p,dd,.story-guide-tip,.story-crop-story){font-weight:400;line-height:1.85}
+.farm12-picturebook :is(.story-eyebrow,.picturebook-title small,.story-field-heading small,.story-village-heading small,.story-market-brand small){letter-spacing:.08em;line-height:1.7}
+.picturebook-title h1,.picturebook-start-panel h1{letter-spacing:.08em;font-weight:700}
+.story-building-highlight>span:last-child{outline:3px solid #8b6e30;outline-offset:4px;background:#fff6d7}
+.story-home-footer{display:flex;justify-content:center;padding:18px;background:#eef0d7;font-size:14px}
+.story-home-footer a{display:inline-flex;align-items:center;min-height:44px;padding:8px 20px;border-radius:8px;border:1px solid #c8d0ad;background:#fff9e9;color:#435437;text-decoration:none;line-height:1.6}
+.story-home-footer a:focus-visible{outline:3px solid #8c4929;outline-offset:3px}
+.story-home-footer a:hover{background:#e4ead5}

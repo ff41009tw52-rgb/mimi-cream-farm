@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>四季農莊：島嶼物語｜12-2 繪本版</title>
+  <title>四季農莊：島嶼物語</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -23,10 +23,10 @@
   .farm12-art-wrap.farm12-overview{pointer-events:none}
   .farm12-plot-crop-name{max-width:92%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:clamp(10px,2.4vw,14px)}
   @media(min-width:768px){.farm12-art-wrap.farm12-overview,.farm12-art-wrap.farm12-overview .farm12-art{width:78px;height:78px}}
-</style><link rel="stylesheet" href="assets/farm12/picturebook/theme-v2.css?v=20261002"><link rel="stylesheet" href="assets/farm12/picturebook/comfort-v3.css?v=20261002-normal"></head>
+</style><link rel="stylesheet" href="assets/farm12/picturebook/theme-v2.css?v=20261002"><link rel="stylesheet" href="assets/farm12/picturebook/comfort-v3.css?v=20261002-readable"></head>
 <body class="bg-slate-900 overflow-x-hidden">
 
-  <div id="root"></div><div class="farm12-version-switch"><span>12-2 繪本農莊</span><a href="index.html">遊戲首頁</a><a href="12-1.html">12-1 加強版</a><a href="12.html">原版</a></div>
+  <div id="root"></div><footer class="story-home-footer"><a href="index.html">返回遊戲首頁</a></footer>
 
   <script src="assets/farm12/picturebook/gameplay-v3.js?v=20261002-normal"></script>
   <script type="text/babel">
@@ -1038,7 +1038,7 @@
                   {tutorialStep >= 7 ? `🎓 進階任務 (自由順序)` : `🎓 新手任務 (${tutorialStep - 1}/5)`}
                 </div>
                 <div className="text-[10px] md:text-xs font-bold leading-relaxed">
-                  {tutorialStep === 2 && "第一步：請點擊右上角的「🛒 商店」，購買一包【地瓜葉】種子！"}
+                  {tutorialStep === 2 && "第一步：到「農莊生活」點選「田邊雜貨舖」，購買一包【地瓜葉】種子！"}
                   {tutorialStep === 3 && "第二步：太棒了！現在請在下方「工具袋」中，點選裝備剛剛購買的【地瓜葉】。"}
                   {tutorialStep === 4 && "第三步：請點擊畫面中的「第 1 區」農田，進入該區塊，並點擊任何一塊空地將種子種下！"}
                   {tutorialStep === 5 && <span>第四步：植物必須<span className="text-yellow-300 font-black text-sm md:text-sm mx-1">【每天】</span>澆水！請裝備下方的「💧 單格澆水」，將<span className="underline">所有剛種下的植物</span>都點擊澆滿水分。</span>}
@@ -1047,7 +1047,7 @@
                     <div className="flex flex-col gap-1.5 text-left bg-blue-700/50 p-2 rounded-xl mt-1.5">
                       <p className="text-yellow-100">請完成以下三項進階農務（不限順序）：</p>
                       <label className={`flex items-start gap-1.5 ${flags.tutSell ? 'opacity-50 line-through text-yellow-300' : ''}`}>
-                        <span>{flags.tutSell ? '✅' : '🔲'}</span> <span>去「🛒 商店」賣出剛收成的作物。</span>
+                        <span>{flags.tutSell ? '✅' : '🔲'}</span> <span>去「田邊雜貨舖」賣出剛收成的作物。</span>
                       </label>
                       <label className={`flex items-start gap-1.5 ${flags.tutFert ? 'opacity-50 line-through text-yellow-300' : ''}`}>
                         <span>{flags.tutFert ? '✅' : '🔲'}</span> <span>裝備【🧪 氮肥(葉菜)】並對地瓜葉施肥。</span>
@@ -1066,7 +1066,7 @@
           {!isGameStarted && (
             <div className="picturebook-opening fixed inset-0 flex items-center justify-center p-4 z-[100] overflow-y-auto hide-scrollbar">
               <div className="picturebook-start-panel p-6 md:p-8 rounded-[2.5rem] max-w-2xl w-full animate-in zoom-in duration-500 my-auto">
-                <div className="story-opening-art"><StorySprite sheet="village-atlas" columns={2} index={0} label="繪本農莊" /></div><div className="story-eyebrow">THE LITTLE FARM · 12-2</div><h1 className="text-3xl md:text-4xl font-black text-center mb-6 text-emerald-700">四季農莊</h1><p className="story-opening-subtitle">種一點蔬菜，照顧幾隻雞。<br/>在島嶼的四季裡，過自己的小日子。</p>
+                <div className="story-opening-art"><StorySprite sheet="village-atlas" columns={2} index={0} label="繪本農莊" /></div><div className="story-eyebrow">島嶼物語</div><h1 className="text-3xl md:text-4xl font-black text-center mb-6 text-emerald-700">四季農莊</h1><p className="story-opening-subtitle">種一點蔬菜，照顧幾隻雞。<br/>在島嶼的四季裡，過自己的小日子。</p>
 
                 <div className="story-opening-guide space-y-4 text-slate-700 font-bold text-sm bg-emerald-50 p-4 md:p-6 rounded-3xl mb-6 border-2 border-emerald-100 max-h-[40vh] overflow-y-auto hide-scrollbar">
                   <p className="text-sm md:text-base text-emerald-800">歡迎來到台灣專屬的農業經營模擬器！在這裡，你將體驗為期 365 天的農夫生活：</p>
@@ -1093,7 +1093,7 @@
                   />
                 </div>
 
-                <p className="story-start-rules">正常開局：$100、除草／驅蟲各 10 次。<br/>種子自行購買；舊測試進度另行保留，與正常經營分開存檔。</p>
+                <p className="story-start-rules">帶著 $100 和除草、驅蟲用品，<br/>到田邊雜貨舖挑選第一包種子吧。</p>
                 <div className="flex flex-col gap-3 md:gap-4">
                   <button
                     onClick={() => {
@@ -1142,7 +1142,7 @@
 
           {/* RWD 頂部資訊欄 */}
           <header className="picturebook-header relative z-40">
-            <div className="picturebook-title"><small>THE LITTLE FARM · 島嶼物語</small><h1>四季農莊</h1><span>{farmName || '我的農莊'}的田園日常</span></div>
+            <div className="picturebook-title"><small>島嶼物語</small><h1>四季農莊</h1><span>{farmName || '我的農莊'}的田園日常</span></div>
             <div className="picturebook-stats">
               <span className="picturebook-stat story-calendar"><Farm12UiIcon name="save" /><span><small>{seasonName}季日記</small><b>第 {day} 天</b></span></span>
               <span className="picturebook-stat"><Farm12UiIcon name={weather === 'typhoon' ? 'storm' : weather === 'rainy' ? 'rain' : 'sun'} /> {weather === 'typhoon' ? '颱風' : weather === 'rainy' ? '雨天' : '晴天'}</span>
@@ -1151,7 +1151,6 @@
             <div className="picturebook-actions">
               <button id="farm12-gallery-button" type="button" aria-haspopup="dialog" aria-controls="farm12-gallery-dialog" onClick={() => setShowModal('gallery')} className="picturebook-shop"><Farm12UiIcon name="book" />圖鑑</button>
               {schoolQuest && <button onClick={() => setShowQuestModal(true)} className="picturebook-shop"><Farm12UiIcon name="school" /> 委託 {schoolQuest.daysLeft} 天</button>}
-              <button onClick={() => setShowShop(true)} className={`picturebook-shop ${tutorialStep === 2 || (tutorialStep >= 7 && !flags.tutSell) ? 'ring-4 ring-blue-500 animate-pulse' : ''}`}><Farm12UiIcon name="cart" /> 商店</button>
               <button onClick={() => {
                 if (tutorialStep > 0 && tutorialStep !== 6) { setMessage('請先完成畫面下方的新手教學，才能結束這一天。'); return; }
                 setShowModal('sleep');
@@ -1249,7 +1248,7 @@
             <div className="picturebook-field" data-weather={weather} data-weather-motion={weatherMotion}>
               {Care.rainy(weather) && <div className="story-weather-layer" aria-hidden="true">{Array.from({length: 24}, (_, i) => <i key={i} className="story-rain-streak" style={{left: `${i * 4.3}%`, animationDelay: `${-(i % 9) * .19}s`, animationDuration: `${weather === 'typhoon' ? .65 + (i % 4) * .1 : 1.1 + (i % 4) * .13}s`}} />)}{weather === 'typhoon' && <><i className="story-wind-gust" /><i className="story-wind-gust story-wind-gust-second" /></>}</div>}
               {Care.rainy(weather) && <div className="story-weather-notice"><Farm12UiIcon name={weather === 'typhoon' ? 'storm' : 'rain'} /><div><strong>{weather === 'typhoon' ? '今天颱風來襲' : '今天下雨了'}</strong><p>{weather === 'typhoon' ? '雨水會自動澆田。今晚睡覺前架好防風網，隔天才結算災損。' : '新種下的作物也會自動澆水，可以專心照顧其他農務。'}</p></div><button onClick={() => setWeatherMotion(v => !v)} aria-pressed={!weatherMotion}>{weatherMotion ? '暫停動畫' : '播放動畫'}</button></div>}
-              <div className="story-field-heading"><div><small>A LITTLE CARE, EVERY DAY</small><h2>{activePlot === null ? '在田裡，慢慢長大' : `照顧第 ${activePlot + 1} 區`}</h2></div><span>{activePlot === null ? '點選農地，開始今日農務' : selectedTool === 'seed' ? `已選：${selectedSeed?.name || '種子'}` : `已選：${({water:'澆水壺',chili:'辣椒水',weed:'除草剪刀',fert_leaf:'氮肥',fert_root:'磷肥',fert_fruit:'鉀肥'})[selectedTool] || '農具'}`}</span></div>
+              <div className="story-field-heading"><div><small>每天照顧，慢慢長大</small><h2>{activePlot === null ? '在田裡，慢慢長大' : `照顧第 ${activePlot + 1} 區`}</h2></div><span>{activePlot === null ? '點選農地，開始今日農務' : selectedTool === 'seed' ? `已選：${selectedSeed?.name || '種子'}` : `已選：${({water:'澆水壺',chili:'辣椒水',weed:'除草剪刀',fert_leaf:'氮肥',fert_root:'磷肥',fert_fruit:'鉀肥'})[selectedTool] || '農具'}`}</span></div>
               {activePlot === null ? (
                 <div className="picturebook-plots">
                   {plots.map(plot => {
@@ -1391,11 +1390,11 @@
             </div>
             <aside className="story-village" aria-label="農莊小徑">
               <div className="story-village-heading"><small>沿著小徑走</small><h2>農莊生活</h2></div>
-              <button className="story-building" onClick={() => setShowShop(true)}>
+              <button id="farm12-shop-button" type="button" aria-haspopup="dialog" aria-controls="farm12-shop-dialog" className={`story-building ${tutorialStep === 2 || (tutorialStep >= 7 && !flags.tutSell) ? 'story-building-highlight' : ''}`} onClick={() => setShowShop(true)}>
                 <StorySprite sheet="village-atlas" columns={2} index={0} label="田邊雜貨舖" className="story-building-art" />
                 <span><strong>田邊雜貨舖</strong><small>買種子・賣收成</small></span>
               </button>
-              <button className="story-building" onClick={() => setShowModal('coop')}>
+              <button id="farm12-coop-button" type="button" aria-haspopup="dialog" aria-controls="farm12-coop-dialog" className="story-building" onClick={() => setShowModal('coop')}>
                 <StorySprite sheet="village-atlas" columns={2} index={1} label="小雞的家" className="story-building-art" />
                 <span><strong>小雞的家</strong><small>{coop.built ? (hungryHens.length ? `${hungryHens.length} 隻待餵食` : `${coop.hens.length} 隻吃飽了`) + `・${coop.eggs} 顆蛋` : '建造雞舍 $3,000'}</small></span>
               </button>
@@ -1516,7 +1515,7 @@
                     1. 找到成熟發光的作物。<br/>
                     2. <span className="text-red-600">【直接點擊】</span>該作物。<br/>
                     3. 作物就會自動飛進下方工具袋的<span className="text-red-600">【📥 收成籃】</span>存入庫存！<br/>
-                    4. 進入右上角「🛒 商店」的販賣區，把它們賣掉換錢吧！
+                    4. 進入「農莊生活」的「田邊雜貨舖」，切換到「賣出農產」，把它們賣掉換錢吧！
                   </p>
                 </div>
                 <button onClick={closeEventModal} className="w-full bg-yellow-500 text-white py-3 md:py-4 rounded-xl font-black text-sm md:text-base hover:bg-yellow-600 transition-colors">
@@ -1581,7 +1580,7 @@
                   </p>
                   <p className="text-slate-800 text-[10px] md:text-xs leading-relaxed font-black mt-3 bg-red-200 p-3 rounded-xl border border-red-300 shadow-inner">
                     💡 驅蟲步驟：<br/>
-                    1. 前往「🛒 商店」購買【辣椒水】。<br/>
+                    1. 前往「田邊雜貨舖」購買【辣椒水】。<br/>
                     2. 在下方工具袋裝備【🌶️ 辣椒水】。<br/>
                     3. 點擊有害蟲的格子進行驅逐！
                   </p>
@@ -1605,7 +1604,7 @@
                   </p>
                   <p className="text-slate-800 text-[10px] md:text-xs leading-relaxed font-black mt-3 bg-green-200 p-3 rounded-xl border border-green-300 shadow-inner">
                     💡 除草步驟：<br/>
-                    1. 前往「🛒 商店」購買【除草剪刀】。<br/>
+                    1. 前往「田邊雜貨舖」購買【除草剪刀】。<br/>
                     2. 在下方工具袋裝備【✂️ 除草剪刀】。<br/>
                     3. 點擊有雜草的格子進行割除！
                   </p>
@@ -1653,7 +1652,7 @@
                   )}
                   <p className="text-slate-800 text-[10px] md:text-xs leading-relaxed font-black mt-3 bg-blue-100 p-3 rounded-xl border border-blue-200 shadow-inner">
                     💡 防風網使用教學：<br/>
-                    1. {currentEvent.isFirst ? "已經有政府送的防風網了！若不夠可前往" : "前往"}右上角「🛒 商店」購買【🛡️ 防風網】。<br/>
+                    1. {currentEvent.isFirst ? "已經有政府送的防風網了！若不夠可前往" : "前往"}「農莊生活」的「田邊雜貨舖」購買【🛡️ 防風網】。<br/>
                     2. 進入你的農田區塊（例如第 1 區）。<br/>
                     3. 點選畫面上方的「架設防風網」。<br/><br/>
                     <span className="text-blue-700">⚠️ 特別注意：一張防風網可以保護【一整大塊農地（包含裡面的8小格）】，不需要每個格子都買喔！</span>
@@ -1744,10 +1743,10 @@
           {/* 商店彈窗 */}
           {showShop && (
             <div className="story-overlay fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-stretch sm:items-center justify-center p-0 sm:p-2 md:p-4 z-50">
-              <div className="story-market story-paper bg-white p-3 sm:p-4 md:p-8 rounded-none sm:rounded-[2rem] md:rounded-[2.5rem] max-w-2xl w-full shadow-2xl animate-in zoom-in duration-200 h-[100dvh] sm:h-auto max-h-[100dvh] sm:max-h-[94vh] flex flex-col">
+              <div id="farm12-shop-dialog" role="dialog" aria-modal="true" aria-label="田邊雜貨舖" className="story-market story-paper bg-white p-3 sm:p-4 md:p-8 rounded-none sm:rounded-[2rem] md:rounded-[2.5rem] max-w-2xl w-full shadow-2xl animate-in zoom-in duration-200 h-[100dvh] sm:h-auto max-h-[100dvh] sm:max-h-[94vh] flex flex-col">
                 <div className="flex justify-between items-center mb-4 border-b pb-3 md:pb-4 shrink-0">
                   <div>
-                    <div className="story-market-brand"><StorySprite sheet="village-atlas" columns={2} index={0} label="雜貨舖" /><div><small>FARMERS’ MARKET</small><h2 className="text-xl md:text-2xl font-black">田邊雜貨舖</h2></div></div>
+                    <div className="story-market-brand"><StorySprite sheet="village-atlas" columns={2} index={0} label="雜貨舖" /><div><small>種子・農具・新鮮收成</small><h2 className="text-xl md:text-2xl font-black">田邊雜貨舖</h2></div></div>
                     <div className="text-sm font-bold text-yellow-600 mt-1">擁有的金錢: ${gold.toLocaleString()}</div>
                   </div>
                   <div className="flex items-center gap-2 md:gap-3">
@@ -1986,10 +1985,10 @@
           {/* 小型雞舍：最多三隻，每隻各自記錄餵食與互動 */}
           {showModal === 'coop' && (
             <div className="story-overlay fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-              <div role="dialog" aria-modal="true" aria-label="小雞的家" className="story-paper picturebook-coop-modal w-full max-h-[90vh] overflow-y-auto text-center">
+              <div id="farm12-coop-dialog" role="dialog" aria-modal="true" aria-label="小雞的家" className="story-paper picturebook-coop-modal w-full max-h-[90vh] overflow-y-auto text-center">
                 <button className="float-right text-xl p-2" aria-label="關閉雞舍" onClick={() => setShowModal(null)}>×</button>
                 <StorySprite sheet="village-atlas" columns={2} index={1} label="木造雞舍與母雞" className="story-coop-illustration" />
-                <small className="story-eyebrow">A HOME FOR OUR HENS</small><h2 className="text-2xl font-black text-amber-950 mb-2">小雞的家</h2>
+                <small className="story-eyebrow">一起照顧小雞</small><h2 className="text-2xl font-black text-amber-950 mb-2">小雞的家</h2>
                 {!coop.built ? <>
                   <p className="mb-4">從一隻母雞開始，最多擴建到三隻。每隻每天吃 1 份飼料，隔天產 1 顆蛋；忘記餵食也不會失去母雞。</p>
                   <button onClick={buildCoop} disabled={gold < 3000} className="picturebook-primary w-full">建造雞舍・$3,000（附 2 份飼料）</button>
@@ -2033,7 +2032,7 @@
                     </button>
                   ))}
                 </div>
-                {coop.built && hungryHens.length > 0 && <button onClick={() => setShowModal('coop')} className="picturebook-coop-reminder">小雞舍：{hungryHens.length} 隻尚未餵食 → 前往照顧</button>}
+                {coop.built && hungryHens.length > 0 && <p className="picturebook-coop-reminder">小雞的家：還有 {hungryHens.length} 隻尚未餵食。選擇「再巡一下」，回到農莊生活照顧牠們。</p>}
                 <div className="flex gap-3 md:gap-4">
                   <button onClick={() => setShowModal(null)} className="flex-1 bg-slate-100 text-slate-600 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-sm md:text-base hover:bg-slate-200 transition-colors">
                     再巡一下
@@ -2044,7 +2043,6 @@
                 </div>
 
                 <div className="flex flex-col gap-3 md:gap-4 w-full mt-6 pt-6 border-t border-slate-100">
-                  <div className="text-[10px] md:text-xs font-black text-slate-500">{saveError ? '自動儲存失敗，請檢查瀏覽器設定' : `自動儲存：${lastSaveLabel}`}</div>
                   <div className="flex gap-3 md:gap-4">
                     <button onClick={handleSave} className="flex-1 bg-blue-100 text-blue-700 py-3 rounded-xl font-black text-sm hover:bg-blue-200 transition-colors active:scale-95 shadow-sm">
                       💾 儲存進度
@@ -2104,3 +2102,4 @@
 
 </body>
 </html>
+
