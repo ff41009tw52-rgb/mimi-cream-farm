@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>四季農莊：島嶼物語｜12-2 繪本版</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -23,13 +23,15 @@
   .farm12-art-wrap.farm12-overview{pointer-events:none}
   .farm12-plot-crop-name{max-width:92%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:clamp(10px,2.4vw,14px)}
   @media(min-width:768px){.farm12-art-wrap.farm12-overview,.farm12-art-wrap.farm12-overview .farm12-art{width:78px;height:78px}}
-</style><link rel="stylesheet" href="assets/farm12/picturebook/theme-v2.css?v=20261002"></head>
+</style><link rel="stylesheet" href="assets/farm12/picturebook/theme-v2.css?v=20261002"><link rel="stylesheet" href="assets/farm12/picturebook/comfort-v3.css?v=20261002"></head>
 <body class="bg-slate-900 overflow-x-hidden">
 
   <div id="root"></div><div class="farm12-version-switch"><span>12-2 繪本農莊</span><a href="index.html">遊戲首頁</a><a href="12-1.html">12-1 加強版</a><a href="12.html">原版</a></div>
 
+  <script src="assets/farm12/picturebook/gameplay-v3.js?v=20261002"></script>
   <script type="text/babel">
     const { useState, useEffect, useCallback, useRef } = React;
+    const Care = window.Farm12Care;
 
     // --- 音效引擎 ---
     const useAudio = () => {
@@ -102,10 +104,27 @@
       if (!crop) return null;
       const index = STORY_CROPS.indexOf(crop.id);
       if (index < 0) return null;
-      const mature = growth >= crop.days;
-      return <span className={'farm12-art-wrap farm12-' + mode + (mature ? ' story-mature' : ' story-seedling')} title={crop.name + (mature ? '・成熟' : '・幼苗')}>
-        <StorySprite sheet={mature ? 'crops-atlas' : 'sprouts-atlas'} index={index} label={crop.name} className="farm12-art" />
+      const stage = Care.cropStage(crop, growth);
+      return <span className={'farm12-art-wrap farm12-' + mode + ' story-' + stage} title={crop.name + '・' + Care.stageLabel(stage)}>
+        <StorySprite sheet={stage === 'mature' ? 'crops-atlas' : stage === 'growing' ? 'growth-atlas' : 'sprouts-atlas'} index={index} label={crop.name + '・' + Care.stageLabel(stage)} className="farm12-art" />
       </span>;
+    };
+    const HenCard = ({ hen, day, onRename, onPet }) => {
+      const [draft, setDraft] = useState(hen.name);
+      const [editing, setEditing] = useState(false);
+      useEffect(() => setDraft(hen.name), [hen.name]);
+      return <article className="story-hen-card">
+        <StorySprite sheet="hens-atlas" columns={3} index={hen.color + (hen.greetedDay === day ? 6 : hen.fedToday ? 3 : 0)} label={hen.name + (hen.fedToday ? '吃飽了' : '等待餵食')} className="story-hen-art" />
+        <div className="story-hen-info"><h3>{hen.name}</h3><p>{hen.fedToday ? '吃飽了，明天有蛋' : '肚子餓了，需要 1 份飼料'}</p>
+          <p>親密度 {hen.affection} / 10</p>
+          {editing ? <form onSubmit={e => { e.preventDefault(); if (draft.trim()) { onRename(hen.id, draft.trim()); setEditing(false); } }}>
+            <label htmlFor={'name-' + hen.id}>新名字（最多 8 字）</label>
+            <input id={'name-' + hen.id} value={draft} maxLength={8} onChange={e => setDraft(e.target.value)} autoFocus />
+            <button type="submit" className="picturebook-secondary" disabled={!draft.trim()}>儲存名字</button>
+          </form> : <button className="story-rename" onClick={() => setEditing(true)}>替牠取名</button>}
+          <button className="picturebook-secondary" onClick={() => onPet(hen.id)}>{hen.greetedDay === day ? '再摸摸牠' : '摸摸牠'}</button>
+        </div>
+      </article>;
     };
     const Farm12StatusArt = ({ type, mode = 'small', className = '' }) => <StorySprite sheet="ui-atlas" columns={5} index={type === 'pest' ? 7 : 8} label={type === 'pest' ? '菜蟲' : '雜草'} className={'farm12-status-art farm12-status-' + mode + ' ' + className} />;
     const STORY_TOOLS = { wateringCan:0, sprinkler:1, chili:2, weed:3, fert_leaf:4, fert_root:5, fert_fruit:6, net:7, windbreak:8 };
@@ -256,8 +275,11 @@
         scissors: 10, chili: 10, seeds: Object.fromEntries(Object.values(CROPS).flat().filter(Boolean).map(crop => [crop.id, 1])), crops: {}
       });
       const [gallery, setGallery] = useState({});
-      const [coop, setCoop] = useState({ built: false, feed: 0, fedToday: false, eggs: 0 });
+      const [coop, setCoop] = useState(() => Care.normalizeCoop());
 
+      const [coopMessage, setCoopMessage] = useState('');
+      const [careMessage, setCareMessage] = useState('');
+      const hungryHens = coop.hens.filter(hen => !hen.fedToday);
       const [selectedTool, setSelectedTool] = useState('water');
       const [bagFilter, setBagFilter] = useState('all');
       const [selectedSeed, setSelectedSeed] = useState(null);
@@ -465,7 +487,7 @@
             setGold(Math.max(100000, Number(state.gold) || 0));
             setInventory({ ...state.inventory, seeds: { ...(state.inventory?.seeds || {}), ...Object.fromEntries(Object.values(CROPS).flat().filter(Boolean).map(crop => [crop.id, Math.max(1, Number(state.inventory?.seeds?.[crop.id]) || 0)])) }, crops: state.inventory?.crops || {} });
             setGallery(Object.fromEntries(Object.entries(state.gallery || {}).map(([id, record]) => [id, { unlocked: !!record?.unlocked }])));
-            setCoop({ built: false, feed: 0, fedToday: false, eggs: 0, ...(state.coop || {}) });
+            setCoop(Care.normalizeCoop(state.coop || {}));
             setPlots(state.plots.map(plot => ({
               ...plot,
               slots: plot.slots.map(slot => {
@@ -473,7 +495,7 @@
                 return { ...rest, hazardDays: slot.hazardDays || 0 };
               })
             })));
-            setSchoolQuest(state.schoolQuest);
+            setSchoolQuest(Care.normalizeQuest(state.schoolQuest));
             setFlags(state.flags || { seenRain: false, seenTyphoon: false, seenQuest: false, seenBug: false, seenWeed: false, seenDay2Water: false, seenHarvest: false, seenAfterHarvest: false, seenQuestReward: false, seenForgotWater: false, tutSell: false, tutFert: false, tutNet: false });
             setTutorialStep(state.tutorialStep || 0);
             setLastSave(state.savedAt ? { at: state.savedAt, day: state.day } : null);
@@ -582,7 +604,9 @@
         const needsRescue = nextPlots.some(p => p.slots.some(s => s.crop && (s.hasBug || s.hasWeed) && s.hazardDays >= 1));
 
         setPlots(nextPlots);
-        setCoop(prev => prev.built ? { ...prev, eggs: prev.eggs + (prev.fedToday ? 1 : 0), fedToday: false } : prev);
+        setCoop(prev => Care.advanceCoopDay(prev));
+        setCoopMessage('');
+        setCareMessage('');
 
         let newQuest = null;
         if (schoolQuest) {
@@ -591,7 +615,7 @@
           if (nextDayNum > 5 && Math.random() < 0.15) {
             const seasonCrops = CROPS[nextSeason].slice(0, 2);
             const randomCrop = seasonCrops[Math.floor(Math.random() * seasonCrops.length)];
-            newQuest = { crop: randomCrop, required: 8, daysLeft: 5 };
+            newQuest = { crop: randomCrop, required: 8, daysLeft: Care.questDuration(randomCrop), durationDays: Care.questDuration(randomCrop), deadlineVersion: 2 };
             setSchoolQuest(newQuest);
           }
         }
@@ -889,33 +913,64 @@
         }
       };
 
+      const handlePlotCare = (plotId, kind, event) => {
+        const stockKey = kind === 'weed' ? 'scissors' : 'chili';
+        const result = Care.treatPlot(plots[plotId], kind, inventory[stockKey]);
+        const name = kind === 'weed' ? '除草' : '驅蟲';
+        const text = result.used ? `已${name} ${result.used} 格，消耗 ${result.used} 次。${result.remaining ? `耗材不足，還有 ${result.remaining} 格待處理；先處理了最需要補救的作物。` : '這一區處理好了！'}` : result.remaining ? `耗材不足，還有 ${result.remaining} 格需要${name}。` : `這一區不用${name}。`;
+        setCareMessage(text); setMessage(text);
+        if (!result.used) return;
+        setPlots(prev => prev.map(plot => plot.id === plotId ? result.plot : plot));
+        setInventory(prev => ({ ...prev, [stockKey]: prev[stockKey] - result.used }));
+        triggerActionFx(kind, event); playEffect('water');
+      };
+
       const buildCoop = () => {
-        if (coop.built) return;
-        if (gold < 3000) { setMessage('建造小雞舍需要 $3,000。'); return; }
+        if (coop.built || gold < 3000) return;
         setGold(g => g - 3000);
-        setCoop({ built: true, feed: 2, fedToday: false, eggs: 0 });
-        setMessage('小雞舍建好了！附兩份飼料，記得照顧母雞。');
+        setCoop(Care.normalizeCoop({ built: true, feed: 2 }));
+        setCoopMessage('小米搬進來了！附兩份飼料，也可以替牠取個新名字。');
         playEffect('coin');
       };
-
       const buyFeed = () => {
-        if (gold < 60) { setMessage('購買飼料需要 $60。'); return; }
-        setGold(g => g - 60);
-        setCoop(prev => ({ ...prev, feed: prev.feed + 1 }));
-        setMessage('購買一份雞飼料。');
+        const portions = coop.hens.length, price = portions * 60;
+        if (!portions || gold < price) return;
+        setGold(g => g - price);
+        setCoop(prev => ({ ...prev, feed: prev.feed + portions }));
+        setCoopMessage(`買好 ${portions} 份飼料，剛好夠全體母雞吃一天。`);
       };
-
       const feedHen = () => {
-        if (!coop.built || coop.fedToday || coop.feed < 1) return;
-        setCoop(prev => ({ ...prev, feed: prev.feed - 1, fedToday: true }));
-        setMessage('母雞吃飽了，明早來看看雞窩吧！');
+        const result = Care.feedCoop(coop);
+        if (!result.used) return;
+        setCoop(result.coop);
+        setCoopMessage(`餵飽 ${result.used} 隻母雞。${result.remaining ? `還有 ${result.remaining} 隻沒吃到，記得補買飼料。` : '明早來雞窩收蛋吧！'}`);
         playEffect('water');
+      };
+      const upgradeCoop = () => {
+        const price = Care.upgradePrice(coop);
+        if (!coop.built || !price || gold < price) return;
+        const hen = Care.makeHen(coop.hens.length);
+        setGold(g => g - price);
+        setCoop(prev => ({ ...prev, hens: [...prev.hens, hen] }));
+        setCoopMessage(`${hen.name}搬進新雞窩了！牠今天還沒吃飼料。`);
+        playEffect('coin');
+      };
+      const renameHen = (id, name) => {
+        setCoop(prev => ({ ...prev, hens: prev.hens.map(hen => hen.id === id ? { ...hen, name: name.slice(0, 8) } : hen) }));
+        setCoopMessage(`名字存好了，${name.slice(0, 8)}很喜歡牠的新名字。`);
+      };
+      const petHen = id => {
+        const hen = coop.hens.find(h => h.id === id);
+        if (!hen) return;
+        setCoop(prev => ({ ...prev, hens: prev.hens.map(h => h.id === id ? { ...h, greetedDay: day, affection: Math.min(10, h.affection + (h.greetedDay === day ? 0 : 1)) } : h) }));
+        setCoopMessage(hen.greetedDay === day ? `${hen.name}靠過來陪你。今天已增加過親密度，明天再來吧！` : `${hen.name}開心地拍拍翅膀！${hen.affection < 10 ? '親密度 +1。' : '牠已經非常信任你了。'}`);
       };
 
       const collectEggs = () => {
         if (coop.eggs < 1) return;
         setInventory(prev => ({ ...prev, eggs: (prev.eggs || 0) + coop.eggs }));
         setMessage(`收下 ${coop.eggs} 顆雞蛋，已放進農產包包。`);
+        setCoopMessage(`收下 ${coop.eggs} 顆雞蛋，已放進農產包包。`);
         setCoop(prev => ({ ...prev, eggs: 0 }));
         playEffect('coin');
       };
@@ -1026,6 +1081,7 @@
           `}</style>
 
           {/* 飛行作物動畫層 */}
+          {flyingCrops.length > 0 && <div className="story-harvest-toast" role="status"><Farm12UiIcon name="inbox" />{flyingCrops[flyingCrops.length - 1].cropName || '作物'} +1・已收入包包</div>}
           {flyingCrops.map(fc => (
             <FlyingCropComponent key={fc.id} data={fc} onRemove={removeFlyingCrop} />
           ))}
@@ -1077,7 +1133,7 @@
           {!isGameStarted && (
             <div className="picturebook-opening fixed inset-0 flex items-center justify-center p-4 z-[100] overflow-y-auto hide-scrollbar">
               <div className="picturebook-start-panel p-6 md:p-8 rounded-[2.5rem] max-w-2xl w-full animate-in zoom-in duration-500 my-auto">
-                <div className="story-opening-art"><StorySprite sheet="village-atlas" columns={2} index={0} label="繪本農莊" /></div><div className="story-eyebrow">THE LITTLE FARM · 12-2</div><h1 className="text-3xl md:text-4xl font-black text-center mb-6 text-emerald-700">四季農莊</h1><p className="story-opening-subtitle">種一點蔬菜，照顧一隻雞。<br/>在島嶼的四季裡，過自己的小日子。</p>
+                <div className="story-opening-art"><StorySprite sheet="village-atlas" columns={2} index={0} label="繪本農莊" /></div><div className="story-eyebrow">THE LITTLE FARM · 12-2</div><h1 className="text-3xl md:text-4xl font-black text-center mb-6 text-emerald-700">四季農莊</h1><p className="story-opening-subtitle">種一點蔬菜，照顧幾隻雞。<br/>在島嶼的四季裡，過自己的小日子。</p>
 
                 <div className="story-opening-guide space-y-4 text-slate-700 font-bold text-sm bg-emerald-50 p-4 md:p-6 rounded-3xl mb-6 border-2 border-emerald-100 max-h-[40vh] overflow-y-auto hide-scrollbar">
                   <p className="text-sm md:text-base text-emerald-800">歡迎來到台灣專屬的農業經營模擬器！在這裡，你將體驗為期 365 天的農夫生活：</p>
@@ -1210,7 +1266,7 @@
                           id: `seed_${id}`,
                           type: 'seed',
                           cropData: crop,
-                          label: `${crop.name}種子`,
+                          label: crop.name,
                           icon: <SeedBag crop={crop} />,
                           count: inventory.seeds[id]
                         };
@@ -1289,7 +1345,7 @@
                     return (
                       <button type="button"
                         key={plot.id}
-                        onClick={() => setActivePlot(plot.id)}
+                        onClick={() => { setActivePlot(plot.id); setCareMessage(''); }}
                         className={`picturebook-plot ${isHighlight ? 'ring-4 ring-blue-500 animate-pulse' : ''}`}
                       >
                         <div className="picturebook-plot-label">
@@ -1298,7 +1354,7 @@
                         </div>
                         <div className="picturebook-plot-soil" aria-hidden="true">
                           {plot.slots.map(slot => (
-                            <span key={slot.id} className="picturebook-soil-cell">
+                            <span key={slot.id} className="picturebook-soil-cell" data-watered={!!slot.crop && slot.isWatered}>
                               {slot.crop && <CropArt crop={slot.crop} growth={slot.growth} fallback={slot.crop.icon} mode="overview" />}
                               {slot.hasBug && <Farm12StatusArt type="pest" mode="small" className="picturebook-hazard" />}
                               {slot.hasWeed && <Farm12StatusArt type="weed" mode="small" className="picturebook-hazard" />}
@@ -1344,10 +1400,20 @@
                     </div>
                   </div>
 
+                  <div className="story-care-bar">
+                    <div className="story-care-actions">
+                      <button onClick={e => handlePlotCare(activePlot, 'weed', e)} disabled={!plots[activePlot].slots.some(s => s.crop && s.hasWeed)}><Farm12ItemArt item="weed" mode="inline" />全區除草 {plots[activePlot].slots.filter(s => s.crop && s.hasWeed).length} 格<span>剩 {inventory.scissors} 次</span></button>
+                      <button onClick={e => handlePlotCare(activePlot, 'chili', e)} disabled={!plots[activePlot].slots.some(s => s.crop && s.hasBug)}><Farm12ItemArt item="chili" mode="inline" />全區驅蟲 {plots[activePlot].slots.filter(s => s.crop && s.hasBug).length} 格<span>剩 {inventory.chili} 次</span></button>
+                    </div>
+                    <p role="status">{careMessage || '每處理 1 格消耗 1 次；耗材不足時，優先照顧需要補救的作物。'}</p>
+                  </div>
                   <div className="story-detail-soil grid grid-cols-4 relative z-10">
                       {plots[activePlot].slots.map(slot => (
                         <div
                           key={slot.id}
+                          role="button" tabIndex={0} data-watered={!!slot.crop && slot.isWatered}
+                          aria-label={`第 ${slot.id + 1} 格：${slot.crop ? slot.crop.name + '・' + Care.stageLabel(Care.cropStage(slot.crop, slot.growth)) : '空地'}${slot.isWatered ? '・已澆水' : '・未澆水'}${slot.hasBug ? '・有蟲害' : ''}${slot.hasWeed ? '・有雜草' : ''}`}
+                          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.currentTarget.click(); } }}
                           onClick={(e) => {
                              if (slot.crop && slot.growth >= slot.crop.days) {
                                  handleHarvestClick(e, activePlot, slot.id, slot.crop);
@@ -1375,7 +1441,8 @@
                                 fallback={slot.growth >= slot.crop.days ? slot.crop.icon : '🌱'}
                                 mode="field"
                               />
-                              <div className="absolute bottom-1 md:bottom-2 w-6 md:w-10 h-1 md:h-1 bg-slate-200/50 rounded-full overflow-hidden">
+                              <span className="story-growth-label">{Care.stageLabel(Care.cropStage(slot.crop, slot.growth))}</span>
+                              <div title={`生長 ${slot.growth} / ${slot.crop.days}`} className="absolute bottom-1 md:bottom-2 w-6 md:w-10 h-1 md:h-1 bg-slate-200/50 rounded-full overflow-hidden">
                                 <div className="h-full bg-green-400 transition-all" style={{ width: `${Math.min(100, (slot.growth / slot.crop.days) * 100)}%` }} />
                               </div>
                             </>
@@ -1403,7 +1470,7 @@
               </button>
               <button className="story-building" onClick={() => setShowModal('coop')}>
                 <StorySprite sheet="village-atlas" columns={2} index={1} label="小雞的家" className="story-building-art" />
-                <span><strong>小雞的家</strong><small>{coop.built ? (coop.fedToday ? '今天吃飽了' : '記得餵食') + `・${coop.eggs} 顆蛋` : '建造雞舍 $3,000'}</small></span>
+                <span><strong>小雞的家</strong><small>{coop.built ? (hungryHens.length ? `${hungryHens.length} 隻待餵食` : `${coop.hens.length} 隻吃飽了`) + `・${coop.eggs} 顆蛋` : '建造雞舍 $3,000'}</small></span>
               </button>
             </aside>
           </div>
@@ -1731,7 +1798,7 @@
                   <p className="font-black mt-3 text-yellow-800 text-xs md:text-sm bg-yellow-200 py-2 rounded-lg">
                     目前倉庫擁有：{inventory.crops?.[schoolQuest.crop.id] || 0} 個
                   </p>
-                  <p className="text-[10px] text-slate-500 mt-2 font-bold">交付可獲得3倍市價與神秘種子獎勵！<br/>(剩餘時間: {schoolQuest.daysLeft} 天)</p>
+                  <p className="text-[10px] text-slate-500 mt-2 font-bold">交付可獲得3倍市價與神秘種子獎勵！<br/>(期限：生長 {schoolQuest.crop.days} 天＋3 天緩衝；剩餘 {schoolQuest.daysLeft} 天)</p>
                 </div>
                 <div className="flex gap-3">
                   <button onClick={() => setShowQuestModal(false)} className="flex-1 bg-slate-200 py-3 md:py-4 rounded-xl font-bold text-slate-600 hover:bg-slate-300">稍後再來</button>
@@ -1933,7 +2000,7 @@
 
                 <div className="overflow-y-auto custom-scrollbar flex-1 pr-2 md:pr-4 pb-4">
                   <p className="text-[10px] md:text-xs font-bold text-slate-500 mb-4 md:mb-6">
-                    種植並收成四季作物，逐步點亮你的農業圖鑑！
+                    先看種植指南，收成一次就能解鎖完整作物故事。每包種子種滿 8 格；遊戲天數為簡化設定，非真實栽培日數。
                   </p>
 
                   <div className="space-y-6 md:space-y-8">
@@ -1955,29 +2022,25 @@
                               const isUnlocked = !!record?.unlocked;
 
                               return (
-                                <div key={crop?.id} className={`p-4 md:p-5 rounded-xl md:rounded-2xl border-2 flex items-start gap-4 md:gap-5 relative transition-all ${isUnlocked ? `${sBorder} ${sBg}` : 'border-slate-100 bg-slate-50 grayscale opacity-60'}`}>
+                                <div key={crop?.id} className={`p-4 md:p-5 rounded-xl md:rounded-2xl border-2 flex items-start gap-4 md:gap-5 relative transition-all ${isUnlocked ? `${sBorder} ${sBg}` : 'border-slate-100 bg-slate-50'}`}>
 
                                   <div className={`text-5xl md:text-6xl shrink-0 drop-shadow-sm mt-1 ${seasonKey === 'SPECIAL' && isUnlocked ? 'animate-pulse' : ''}`}>
-                                    {isUnlocked ? <CropArt crop={crop} growth={crop.days} mode="gallery" fallback={crop.icon} /> : '❓'}
+                                    <CropArt crop={crop} growth={crop.days} mode="gallery" fallback={crop.icon} />
                                   </div>
 
                                   <div className="flex-1 min-w-0">
                                     <div className={`font-black text-base md:text-lg ${seasonKey === 'SPECIAL' && isUnlocked ? 'text-purple-800' : 'text-slate-700'}`}>
-                                      {isUnlocked ? crop.name : '未知作物'}
+                                      {crop.name}
                                     </div>
 
-                                    {isUnlocked ? (
-                                      <>
-                                        <div className="text-[10px] md:text-[11px] text-indigo-700 font-black mt-1.5 bg-indigo-100/50 inline-block px-2 py-0.5 rounded border border-indigo-200">
-                                          ⏳ 生長期：{crop.days} 天 ｜ {crop.type === 'leaf' ? '🌿 葉菜類' : crop.type === 'root' ? '🥔 根莖類' : '🍎 瓜果類'}
-                                        </div>
-                                        <div className="text-[10px] md:text-[11px] text-slate-600 mt-2 leading-relaxed whitespace-pre-line font-medium">
-                                          {crop.desc}
-                                        </div>
-                                      </>
-                                    ) : (
-                                      <div className="text-[10px] md:text-xs font-bold text-slate-400 mt-1 md:mt-2 uppercase tracking-widest">未解鎖</div>
-                                    )}
+                                    <dl className="story-crop-guide">
+                                      <div><dt>生長天數</dt><dd>{crop.days} 天・{crop.type === 'leaf' ? '葉菜類' : crop.type === 'root' ? '根莖類' : '瓜果類'}</dd></div>
+                                      <div><dt>種子來源</dt><dd>{seasonKey === 'SPECIAL' ? ({golden_peach:'春季',crystal_melon:'夏季',giant_pumpkin:'秋季',white_strawberry:'冬季'})[crop.id] + '完成委託獎勵' : sName + '商店・$' + crop.price.toLocaleString()}</dd></div>
+                                      <div><dt>收成單價</dt><dd>${crop.value.toLocaleString()}</dd></div>
+                                      <div><dt>適用肥料</dt><dd>{({leaf:'氮肥',root:'磷肥',fruit:'鉀肥'})[crop.type]}・同類作物加快 1 天</dd></div>
+                                    </dl>
+                                    <p className="story-guide-tip">每天澆水，雨天自動澆水。防蟲網擋菜蟲、防風網防颱風；雜草仍需清除。</p>
+                                    <div className="story-crop-story">{isUnlocked ? <><strong>已收成・作物故事</strong><p>{crop.desc}</p></> : <p>首次收成後，解鎖作物故事。</p>}</div>
                                   </div>
 
                                 </div>
@@ -1993,30 +2056,29 @@
             </div>
           )}
 
-          {/* 小型雞舍 */}
+          {/* 小型雞舍：最多三隻，每隻各自記錄餵食與互動 */}
           {showModal === 'coop' && (
             <div className="story-overlay fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-              <div className="story-paper picturebook-coop-modal w-full max-w-md max-h-[90vh] overflow-y-auto text-center">
+              <div role="dialog" aria-modal="true" aria-label="小雞的家" className="story-paper picturebook-coop-modal w-full max-h-[90vh] overflow-y-auto text-center">
                 <button className="float-right text-xl p-2" aria-label="關閉雞舍" onClick={() => setShowModal(null)}>×</button>
                 <StorySprite sheet="village-atlas" columns={2} index={1} label="木造雞舍與母雞" className="story-coop-illustration" />
-                <small className="story-eyebrow">A HOME FOR OUR HEN</small><h2 className="text-2xl font-black text-amber-950 mb-2">小雞的家</h2>
-                {!coop.built ? (
-                  <>
-                    <p className="text-sm text-amber-900 mb-4">養一隻母雞。每天餵食，隔天就能在雞窩找到一顆蛋；忘記餵食也不會失去母雞。</p>
-                    <button onClick={buildCoop} disabled={gold < 3000} className="picturebook-primary w-full disabled:opacity-50">建造雞舍・$3,000（附 2 份飼料）</button>
-                  </>
-                ) : (
-                  <div className="space-y-3 text-sm text-amber-950">
-                    <p className="font-bold">{coop.fedToday ? '母雞今天吃飽了，明天會產蛋。' : '母雞今天還沒吃飼料。'}</p>
-                    <p>飼料 {coop.feed} 份・雞窩 {coop.eggs} 顆・包包 {inventory.eggs || 0} 顆</p>
-                    <div className="flex gap-2">
-                      <button onClick={feedHen} disabled={coop.fedToday || coop.feed < 1} className="picturebook-primary flex-1 disabled:opacity-50">{coop.fedToday ? '已餵食' : '餵食 1 份'}</button>
-                      <button onClick={buyFeed} disabled={gold < 60} className="picturebook-secondary flex-1 disabled:opacity-50">買飼料 $60</button>
-                    </div>
-                    <button onClick={collectEggs} disabled={coop.eggs < 1} className="picturebook-secondary w-full disabled:opacity-50 flex items-center justify-center gap-2"><Farm12UiIcon name="egg" className="story-egg" />收蛋 {coop.eggs} 顆到包包</button>
-                    <p className="text-xs">雞蛋可以在商店「賣出農產」，每顆 $120。</p>
+                <small className="story-eyebrow">A HOME FOR OUR HENS</small><h2 className="text-2xl font-black text-amber-950 mb-2">小雞的家</h2>
+                {!coop.built ? <>
+                  <p className="mb-4">從一隻母雞開始，最多擴建到三隻。每隻每天吃 1 份飼料，隔天產 1 顆蛋；忘記餵食也不會失去母雞。</p>
+                  <button onClick={buildCoop} disabled={gold < 3000} className="picturebook-primary w-full">建造雞舍・$3,000（附 2 份飼料）</button>
+                </> : <div className="space-y-4">
+                  <p className="font-bold">{hungryHens.length ? `還有 ${hungryHens.length} 隻需要餵食` : '大家都吃飽了，明天來收蛋吧！'}</p>
+                  <p>飼料 {coop.feed} 份・雞窩 {coop.eggs} 顆蛋・包包 {inventory.eggs || 0} 顆蛋</p>
+                  <div className="story-hens">{coop.hens.map(hen => <HenCard key={hen.id} hen={hen} day={day} onRename={renameHen} onPet={petHen} />)}</div>
+                  <div className="story-coop-actions">
+                    <button onClick={feedHen} disabled={!hungryHens.length || coop.feed < 1} className="picturebook-primary">{hungryHens.length ? (coop.feed ? `餵食 ${Math.min(hungryHens.length, coop.feed)} 份` : '請先購買飼料') : '全體已餵食'}</button>
+                    <button onClick={buyFeed} disabled={gold < 60 * coop.hens.length} className="picturebook-secondary">買 {coop.hens.length} 份飼料・${60 * coop.hens.length}</button>
                   </div>
-                )}
+                  <button onClick={collectEggs} disabled={coop.eggs < 1} className="picturebook-secondary w-full"><Farm12UiIcon name="egg" className="story-egg" />收蛋 {coop.eggs} 顆到包包</button>
+                  {coop.hens.length < 3 ? <button onClick={upgradeCoop} disabled={gold < Care.upgradePrice(coop)} className="picturebook-secondary w-full">擴建到 {coop.hens.length + 1} 隻・${Care.upgradePrice(coop).toLocaleString()}（含新母雞）</button> : <p>三隻母雞都到齊了，雞舍已完整擴建。</p>}
+                  <p className="story-guide-tip">每天首次摸摸增加 1 點親密度（上限 10），不影響產蛋。雞蛋可在商店出售，每顆 $120。</p>
+                </div>}
+                <p className="story-coop-feedback" role="status">{coopMessage}</p>
               </div>
             </div>
           )}
@@ -2043,7 +2105,7 @@
                     </button>
                   ))}
                 </div>
-                {coop.built && !coop.fedToday && <button onClick={() => setShowModal('coop')} className="picturebook-coop-reminder">小雞舍：今天尚未餵食 → 前往照顧</button>}
+                {coop.built && hungryHens.length > 0 && <button onClick={() => setShowModal('coop')} className="picturebook-coop-reminder">小雞舍：{hungryHens.length} 隻尚未餵食 → 前往照顧</button>}
                 <div className="flex gap-3 md:gap-4">
                   <button onClick={() => setShowModal(null)} className="flex-1 bg-slate-100 text-slate-600 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-sm md:text-base hover:bg-slate-200 transition-colors">
                     再巡一下

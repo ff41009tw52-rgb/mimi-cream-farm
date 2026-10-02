@@ -1,0 +1,118 @@
+/* 12-2 comfortable reading and care controls. */
+.farm12-picturebook{font-size:16px;line-height:1.65;letter-spacing:.025em;padding-bottom:48px!important}
+.farm12-picturebook :is(button,input,a,[role=button]){touch-action:manipulation}
+.farm12-picturebook button,.farm12-picturebook input{min-height:48px}
+.farm12-picturebook :is(button,a,[role=button]):focus-visible{outline:3px solid #8c4929;outline-offset:3px}
+.farm12-picturebook :is([class~="text-[8px]"],[class~="text-[9px]"],[class~="text-[10px]"],[class~="text-[11px]"],[class~="text-xs"]){font-size:14px!important;line-height:1.65!important;letter-spacing:.02em}
+.farm12-picturebook .story-paper :is(p,.text-sm){font-size:16px;line-height:1.8}
+.farm12-picturebook .story-paper [class*="text-slate-"],.farm12-picturebook .story-paper [class*="text-indigo-"],.farm12-picturebook .story-paper [class*="text-blue-"],.farm12-picturebook .story-paper [class*="text-purple-"]{color:#515b44}
+.farm12-picturebook .story-paper button{font-size:15px;line-height:1.5;min-height:48px;letter-spacing:.035em}
+.farm12-picturebook .story-paper input{font-size:16px;line-height:1.5}
+.picturebook-header{flex-wrap:wrap;gap:18px}
+.picturebook-title small,.picturebook-title>span{font-size:13px}
+.picturebook-title h1{font-size:38px}
+.picturebook-stats{flex-wrap:wrap;gap:12px;transform:none}
+.picturebook-stat{font-size:16px}.picturebook-stat small{font-size:13px}.picturebook-stat b{font-size:18px}
+.picturebook-actions button{font-size:15px;min-width:70px;min-height:74px;padding:8px 12px}
+.picturebook-save{font-size:14px;margin:12px auto 18px}
+.story-field-heading{align-items:start;margin:5px 8px 14px;flex-wrap:wrap}
+.story-field-heading small,.story-village-heading small,.story-bag-heading small{font-size:12px;letter-spacing:.09em}
+.story-field-heading h2{font-size:24px}.story-field-heading>span{font-size:14px;max-width:none;padding:7px 10px}
+.picturebook-plots{gap:16px 12px}
+.picturebook-plot{height:auto;min-height:300px;padding:18px 22px 24px;display:flex;flex-direction:column;justify-content:space-between;filter:drop-shadow(0 5px 3px #48502d22)}
+.picturebook-plot::before,.story-detail-soil::before{background-size:110% 126%;clip-path:inset(3% 2% 3% 2% round 16px)}
+.picturebook-plot-label{flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.picturebook-plot-label strong{font-size:13px;padding:4px 8px;transform:none}
+.picturebook-plot-label span{font-size:16px;line-height:1.6;overflow:visible;text-overflow:clip;white-space:normal;overflow-wrap:anywhere;padding:4px 8px;max-width:100%}
+.picturebook-plot-soil{height:158px;width:100%;flex:none;gap:4px;padding:0}
+.picturebook-soil-cell{border-radius:35%;transition:background-color .2s}
+.picturebook-soil-cell[data-watered=true]{background:#342b1c45;box-shadow:inset 0 0 9px #3e301e38}
+.picturebook-soil-cell .farm12-art-wrap.farm12-overview,.picturebook-soil-cell .farm12-art-wrap.farm12-overview .farm12-art{width:min(100%,70px);height:auto;aspect-ratio:1}
+.farm12-art{filter:drop-shadow(0 3px 2px #2e391c24)}
+.story-growing{transform:scale(.94)}
+.picturebook-plot-status{font-size:13px;margin:9px 0 0;gap:4px;width:100%;line-height:1.5}
+.picturebook-plot-status>span,.picturebook-plot-status>strong{font-size:13px;padding:4px 7px;white-space:normal}
+.picturebook-plot-status .farm12-ui-icon{width:19px;height:19px}
+.picturebook-locked{justify-content:center;gap:8px}.picturebook-locked>strong{font-size:18px}.picturebook-locked>small,.picturebook-locked>span{font-size:14px}
+.story-building strong{font-size:18px}.story-building small{font-size:14px;color:#525d40;line-height:1.6}.story-building>span:last-child{max-width:100%;padding:8px 12px}
+.story-bag-heading{flex-wrap:wrap;gap:12px}.story-bag-heading h2{font-size:21px}
+.story-bag-tabs{gap:4px}.story-bag-tabs button{font-size:15px;min-height:46px;padding:7px 16px}
+.picturebook-tools .grid>button{flex-basis:110px;min-width:110px;min-height:116px;padding:10px 6px}
+.picturebook-tools .grid>button>span:nth-child(2){font-size:14px!important;max-width:100%;white-space:normal;overflow-wrap:anywhere;line-height:1.6!important;letter-spacing:0}
+.picturebook-tools .grid>button>span:nth-child(3){font-size:13px;min-width:22px}
+.story-harvest-inner>div,.story-harvest-inner>div:last-child{font-size:14px!important}
+.picturebook-message{font-size:16px;padding:14px 16px;line-height:1.8}
+.story-care-bar{position:relative;z-index:1;margin:6px 0 16px;padding:12px;background:#faf5e6;border:1px solid #c9bfa2;border-radius:10px}
+.story-care-actions{display:flex;gap:10px;flex-wrap:wrap}
+.story-care-actions button{display:flex;gap:6px;align-items:center;justify-content:center;flex:1;flex-wrap:wrap;background:#edf0dc;color:#455938;border:1px solid #b9c6a2;border-radius:8px;padding:9px;font-size:16px;font-weight:700}
+.story-care-actions button span{font-size:13px;font-weight:500;white-space:nowrap}
+.story-care-bar p{font-size:14px;line-height:1.7;margin-top:10px;color:#5b6248}
+.story-detail{padding:12px 4px;min-height:0}
+.story-detail-soil{min-height:370px;padding:25px 20px 30px;gap:10px;grid-template-rows:repeat(2,minmax(130px,1fr))}
+.story-detail-soil>div[data-watered=true]{background:#30271977!important;box-shadow:inset 0 0 16px #201a1338!important;border-color:#b8be8b!important}
+.story-detail-soil>div{overflow:hidden;padding-bottom:20px}
+.story-detail-soil>div>span.story-growth-label{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);padding:1px 5px;border-radius:4px;background:#faf2dfe8;color:#4c583c!important;font-size:12px!important;line-height:1.5;white-space:nowrap;z-index:2}
+.story-detail .farm12-field,.story-detail .farm12-field .farm12-art{width:86px;height:86px;max-width:100%}
+.story-harvest-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:9996;background:#fff9e9;color:#425333;border:2px solid #a8b481;border-radius:12px;padding:12px 18px;font-size:17px;font-weight:800;box-shadow:0 6px 20px #24361633;pointer-events:none;max-width:90vw;width:max-content;text-align:center}
+.story-harvest-toast .farm12-ui-icon{margin-right:8px}
+.story-paper{scrollbar-gutter:stable}
+.story-market-brand small,.story-shop-shelves h3{font-size:13px}
+.story-market-tabs button{font-size:16px}
+.story-shop-shelves .text-slate-400{font-size:14px!important;color:#59634b!important}
+.story-shop-shelves .space-y-2>button>div:last-child{font-size:15px;flex-shrink:0;margin-left:8px}
+.story-shop-shelves .font-black.text-base{font-size:18px;line-height:1.6;flex-wrap:wrap}
+.story-crop-guide{font-size:14px;line-height:1.8;margin-top:10px}
+.story-crop-guide>div{display:grid;grid-template-columns:5em minmax(0,1fr);gap:6px;margin:5px 0}
+.story-crop-guide dt{color:#677154}.story-crop-guide dd{font-weight:700;color:#414f35}
+.farm12-picturebook .story-paper .story-guide-tip{font-size:14px;line-height:1.8;color:#586348;margin:12px 0}
+.story-crop-story{border-top:1px solid #d3ceb5;margin-top:14px;padding-top:12px;font-size:14px;line-height:1.8}
+.story-crop-story p{white-space:pre-line}
+.picturebook-coop-modal{max-width:820px!important}
+.story-coop-illustration{width:140px;height:140px}
+.story-hens{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;text-align:center}
+.story-hen-card{padding:12px;background:#fffaf0;border:1px solid #d7c8a9;border-radius:12px;min-width:0}
+.story-hen-art{width:150px;height:150px;max-width:100%;aspect-ratio:1}
+.story-hen-info h3{font-size:21px;font-weight:800;overflow-wrap:anywhere}
+.farm12-picturebook .story-paper .story-hen-info p{font-size:14px;margin:6px 0}
+.story-hen-info button{width:100%;margin-top:8px}
+.story-hen-info .story-rename{background:transparent;text-decoration:underline;text-underline-offset:4px;color:#5c654b}
+.story-hen-info label{display:block;font-size:13px;margin-top:10px}
+.story-hen-info input{width:100%;min-width:0;border:1px solid #b6b891;background:#fffef7;border-radius:6px;padding:8px;margin-top:5px}
+.story-coop-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.story-coop-feedback:not(:empty){padding:12px;margin-top:18px;border-radius:8px;background:#e8edda;color:#405135;font-size:16px}
+.picturebook-coop-reminder{font-size:15px;line-height:1.6}
+.story-eyebrow,.story-opening-subtitle{font-size:14px}
+.picturebook-start-panel label{font-size:14px!important}.picturebook-start-panel button{font-size:16px!important;line-height:1.6}
+.farm12-version-switch{flex-wrap:wrap;font-size:13px;gap:8px;padding:12px}.farm12-version-switch a{font-size:13px;min-height:44px;display:flex;align-items:center;padding:6px 12px}
+@media(max-width:1100px){.picturebook-header{justify-content:center}.picturebook-title{flex:1}.picturebook-actions{flex-wrap:wrap;justify-content:center}.picturebook-plot{padding:16px 14px 20px}.picturebook-plot-label{flex-direction:column;align-items:start}.picturebook-plot-label span{font-size:15px}.picturebook-plot-soil{height:145px}.story-building>span:last-child{min-width:0;width:100%}}
+@media(max-width:760px){
+ .farm12-picturebook{padding:16px 12px 32px!important}
+ .picturebook-header{display:flex;flex-direction:column;align-items:stretch;gap:15px}
+ .picturebook-title{text-align:center;flex:auto}.picturebook-title h1{font-size:34px}.picturebook-title small,.picturebook-title>span{font-size:13px}
+ .picturebook-stats{order:1;width:100%;gap:8px;padding:12px 8px;justify-content:space-around}
+ .picturebook-stat{font-size:15px}.picturebook-stat small{font-size:12px}.picturebook-stat b{font-size:16px}.picturebook-stat+.picturebook-stat{padding-left:7px}.picturebook-stat .farm12-ui-icon{width:24px;height:24px}
+ .picturebook-actions{order:2;max-width:100%;width:100%;flex-wrap:wrap;gap:8px}.picturebook-actions button{flex:1;min-width:64px;min-height:72px;padding:8px 4px;font-size:14px;white-space:nowrap}
+ .picturebook-save{text-align:center;font-size:13px;margin:14px 0 20px}
+ .story-field-heading{gap:10px;margin-bottom:12px}.story-field-heading h2{font-size:22px}.story-field-heading>span{font-size:14px;max-width:none;text-align:left}.story-field-heading small{font-size:11px}
+ .picturebook-plots{gap:12px 4px;margin:0 -4px}
+ .picturebook-plot{min-height:272px;height:auto;padding:14px 10px 18px}
+ .picturebook-plot-label{gap:5px;margin-bottom:6px}.picturebook-plot-label strong{font-size:12px}.picturebook-plot-label span{font-size:14px;padding:3px 5px;line-height:1.65;width:100%;letter-spacing:0}
+ .picturebook-plot-soil{height:120px;gap:2px}
+ .picturebook-soil-cell .farm12-art-wrap.farm12-overview,.picturebook-soil-cell .farm12-art-wrap.farm12-overview .farm12-art{width:100%;height:auto;max-width:52px}
+ .picturebook-plot-status{gap:4px;flex-direction:column;margin-top:8px}.picturebook-plot-status>span,.picturebook-plot-status>strong{font-size:12px;line-height:1.5;padding:3px 6px;max-width:100%}
+ .picturebook-locked>strong{font-size:16px}.picturebook-locked>span,.picturebook-locked>small{font-size:13px}
+ .story-village-heading h2{font-size:20px}.story-building strong{font-size:16px}.story-building small{font-size:13px}.story-building-art{width:145px;height:145px}.story-building>span:last-child{min-width:0;padding:8px 6px}
+ .story-bag-tabs button{padding:8px 13px;font-size:15px}.picturebook-tools .grid>button{flex-basis:106px;min-width:106px;min-height:116px}.story-bag-heading h2{font-size:20px}
+ .picturebook-message{font-size:15px;padding:12px}
+ .story-detail-soil{min-height:280px;grid-template-rows:repeat(2,minmax(105px,1fr));padding:18px 12px 25px;gap:5px}
+ .story-detail-soil>div{min-height:110px}.story-detail .farm12-field,.story-detail .farm12-field .farm12-art{width:62px;height:62px}
+ .story-detail-soil>div>span{font-size:12px!important}.story-care-actions{gap:7px}.story-care-actions button{font-size:14px;min-width:120px}.story-care-bar p{font-size:14px}
+ .story-market{padding:17px!important;margin:0;width:100%!important}.story-market-brand h2{font-size:22px;white-space:normal}.story-market-brand small{font-size:11px}.story-market>div:first-child>div:first-child>div:last-child{font-size:14px;margin-left:0;margin-top:7px}.story-market>div:first-child button{min-height:48px;min-width:48px;font-size:16px}
+ .story-shop-shelves .font-black.text-base{font-size:17px}.story-paper{max-height:92dvh!important}.story-paper h2{font-size:22px;line-height:1.5}
+ #farm12-gallery-dialog{padding:18px 14px}#farm12-gallery-dialog .farm12-gallery,#farm12-gallery-dialog .farm12-gallery .farm12-art{width:54px;height:54px;flex-basis:54px}#farm12-gallery-dialog .flex.items-start{gap:12px;padding:14px 10px}
+ .story-crop-guide>div{grid-template-columns:1fr;gap:0;margin:7px 0}.story-crop-guide dt{font-size:13px}.story-crop-guide dd{font-size:15px}
+ .picturebook-coop-modal{padding:18px 16px 24px}.story-hens{grid-template-columns:1fr}.story-hen-card{display:grid;grid-template-columns:94px minmax(0,1fr);gap:12px;text-align:left;align-items:start}.story-hen-art{width:94px;height:94px;margin-top:12px}.story-hen-info button{font-size:14px}.story-coop-actions{grid-template-columns:1fr}
+ .story-harvest-toast{bottom:16px;font-size:15px;padding:10px 12px}
+}
+@media(max-width:360px){.picturebook-stat .farm12-ui-icon{width:20px;height:20px}.picturebook-stat{gap:2px;font-size:14px}.picturebook-stat b{font-size:15px}.picturebook-stat+.picturebook-stat{padding-left:4px}.picturebook-plot-label span{font-size:13px}.picturebook-plot{padding-left:8px;padding-right:8px}.story-hen-card{grid-template-columns:70px minmax(0,1fr)}.story-hen-art{width:70px;height:70px}}
+@media(prefers-reduced-motion:reduce){.farm12-picturebook *{transition:none!important;animation:none!important}}

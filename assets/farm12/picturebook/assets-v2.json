@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-01",
+  "version": "2026-10-02-care",
   "style": "watercolor-picturebook",
   "files": [
     {
@@ -36,6 +36,37 @@
       "file": "village-atlas-v2.webp",
       "bytes": 292058,
       "sha256": "115a9ad3a4d38c3135465a691b8d85a7b3642914a9c1670d7acbac5b0cce4513"
+    },
+    {
+      "file": "growth-atlas-v2.webp",
+      "bytes": 419986,
+      "sha256": "c20fb8dc80d19415e2eb2c504a03fff9e86b886a41f7078fe08cb2ac1b71b8b6"
+    },
+    {
+      "file": "hens-atlas-v2.webp",
+      "bytes": 305304,
+      "sha256": "9e834064779b760139dc04f43e2179133418a008578ff642c0b38e6bedc00899"
     }
-  ]
+  ],
+  "atlases": {
+    "growth-atlas-v2.webp": {
+      "columns": 4,
+      "rows": 4,
+      "order": "Same crop order as crops-atlas-v2.webp"
+    },
+    "hens-atlas-v2.webp": {
+      "columns": 3,
+      "rows": 3,
+      "columnsDescribe": [
+        "white",
+        "brown",
+        "speckled"
+      ],
+      "rowsDescribe": [
+        "idle",
+        "eating",
+        "happy"
+      ]
+    }
+  }
 }
