@@ -36,7 +36,7 @@
   .farm12-art-wrap.farm12-overview{pointer-events:none}
   .farm12-plot-crop-name{max-width:92%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:clamp(10px,2.4vw,14px)}
   @media(min-width:768px){.farm12-art-wrap.farm12-overview,.farm12-art-wrap.farm12-overview .farm12-art{width:78px;height:78px}}
-</style><link rel="stylesheet" href="assets/farm12/picturebook/theme-v2.css?v=20261002"><link rel="stylesheet" href="assets/farm12/picturebook/comfort-v3.css?v=20261002-clear-art"></head>
+</style><link rel="stylesheet" href="assets/farm12/picturebook/theme-v2.css?v=20261002"><link rel="stylesheet" href="assets/farm12/picturebook/comfort-v3.css?v=20261002-care-visibility"></head>
 <body class="bg-slate-900 overflow-x-hidden">
 
   <div id="root"></div><footer class="story-home-footer"><a href="index.html">返回遊戲首頁</a></footer>
@@ -141,6 +141,38 @@
       </article>;
     };
     const Farm12StatusArt = ({ type, mode = 'small', className = '' }) => <StorySprite sheet="ui-atlas" columns={5} index={type === 'pest' ? 7 : 8} label={type === 'pest' ? '菜蟲' : '雜草'} className={'farm12-status-art farm12-status-' + mode + ' ' + className} />;
+    const hazardLevel = slot => !slot?.crop || slot.growth >= slot.crop.days || (!slot.hasBug && !slot.hasWeed) ? 'clear' : (slot.hazardDays || 0) >= 1 ? 'urgent' : 'notice';
+    const plotCareSummary = (plot, weather) => {
+      const planted = plot.slots.filter(slot => slot?.crop);
+      const growing = planted.filter(slot => slot.growth < slot.crop.days);
+      return { planted: planted.length, water: Care.rainy(weather) ? 0 : growing.filter(slot => !slot.isWatered).length,
+        bugs: growing.filter(slot => slot.hasBug).length, weeds: growing.filter(slot => slot.hasWeed).length,
+        urgent: growing.filter(slot => hazardLevel(slot) === 'urgent').length,
+        wind: weather === 'typhoon' && !plot.isWindbreaked ? growing.length : 0 };
+    };
+    const HazardBadges = ({ slot, overview = false }) => {
+      const level = hazardLevel(slot);
+      return <span className={'story-hazard-badges' + (overview ? ' is-overview' : '')} data-level={level}>
+        {level !== 'clear' && <>
+          {slot.hasBug && <span className="story-hazard-badge" title="有蟲，需要辣椒水"><Farm12StatusArt type="pest" /></span>}
+          {slot.hasWeed && <span className="story-hazard-badge" title="有雜草，需要除草剪刀"><Farm12StatusArt type="weed" /></span>}
+        </>}
+      </span>;
+    };
+    const PlotCareStatus = ({ plot, weather, detailed = false }) => {
+      const status = plotCareSummary(plot, weather);
+      const done = status.planted && !status.water && !status.bugs && !status.weeds && !status.wind;
+      return <div className={'story-plot-care-status' + (detailed ? ' is-detailed' : '')}>
+        {status.water > 0 && <span className="story-care-water"><Farm12UiIcon name="water" />缺水 {status.water} 株</span>}
+        {status.bugs > 0 && <span className="story-care-notice"><Farm12StatusArt type="pest" />有蟲 {status.bugs} 株</span>}
+        {status.weeds > 0 && <span className="story-care-notice"><Farm12StatusArt type="weed" />雜草 {status.weeds} 株</span>}
+        {status.urgent > 0 && <strong className="story-care-urgent">今天要處理 · {status.urgent} 株</strong>}
+        {status.wind > 0 && <span className="story-care-notice">今晚需要防風</span>}
+        {!!done && <span className="story-care-done">今天照顧好了</span>}
+        {!status.planted && <span className="story-care-empty">選好種子，就能播種</span>}
+        {detailed && status.bugs + status.weeds > 0 && <p className={status.urgent ? 'story-care-deadline is-urgent' : 'story-care-deadline'}>{status.urgent ? '標示「今天要處理」的作物已停長一天。今晚睡覺前，要把蟲害和雜草都清除，才能救回來。' : '蟲害或雜草會讓作物暫停生長。今天先處理好；若漏了一晚，隔天還有一次補救機會。'}</p>}
+      </div>;
+    };
     const STORY_TOOLS = { wateringCan:0, sprinkler:1, chili:2, weed:3, fert_leaf:4, fert_root:5, fert_fruit:6, net:7, windbreak:8 };
     const STORY_TOOL_NAMES = { wateringCan:'澆水壺', sprinkler:'灑水器', chili:'辣椒水', weed:'除草剪刀', fert_leaf:'氮肥', fert_root:'磷肥', fert_fruit:'鉀肥', net:'防蟲網', windbreak:'防風網' };
     const Farm12ItemArt = ({ item, mode = 'tool', className = '' }) => <StorySprite sheet="tools-atlas" columns={3} index={STORY_TOOLS[item] ?? 0} label={STORY_TOOL_NAMES[item] || '農具'} className={'farm12-item-art farm12-item-' + mode + ' ' + className} />;
@@ -862,6 +894,17 @@
         }
       };
 
+      const heldItem = selectedTool === 'seed' ? {
+        name: (selectedSeed?.name || '作物') + '種子', stock: inventory.seeds[selectedSeed?.id] || 0, unit: '包',
+        hint: '先進入完全空出的農地，再點空格；1 包種子會一次種滿 8 格。'
+      } : {
+        name: selectedTool === 'water' ? (day >= 20 ? '全區灑水器' : '澆水壺') : STORY_TOOL_NAMES[selectedTool],
+        item: selectedTool === 'water' ? (day >= 20 ? 'sprinkler' : 'wateringCan') : selectedTool,
+        stock: selectedTool === 'water' ? null : inventory[selectedTool === 'weed' ? 'scissors' : selectedTool] || 0,
+        unit: selectedTool.startsWith('fert_') ? '份' : '次',
+        hint: selectedTool === 'water' ? (Care.rainy(weather) ? '今天雨水已經澆好田，可以選其他工具照顧作物。' : day >= 20 ? '進入農地後，點一株未成熟作物，就能替整區澆水。' : '進入農地後，點一株缺水的作物，替它澆水。') : selectedTool === 'weed' ? '點有雜草的作物除草，每株消耗 1 次；進入農地後，也可使用「全區除草」。' : selectedTool === 'chili' ? '點有蟲的作物驅蟲，每株消耗 1 次；進入農地後，也可使用「全區驅蟲」。' : '點一株未成熟作物，替整區符合肥料種類的作物施肥；蟲害與雜草要先處理。'
+      };
+
       const handlePlotCare = (plotId, kind, event) => {
         const stockKey = kind === 'weed' ? 'scissors' : 'chili';
         const result = Care.treatPlot(plots[plotId], kind, inventory[stockKey]);
@@ -1226,6 +1269,7 @@
                       <button
                         key={tool.id}
                         aria-pressed={isSelected}
+                        aria-label={`${tool.label}${isSelected ? '，目前拿著' : ''}${tool.count !== undefined ? `，剩 ${tool.count} ${tool.type === 'seed' ? '包' : tool.id.startsWith('fert_') ? '份' : '次'}` : ''}`}
                         onClick={() => {
                           if (tool.type === 'seed') {
                             setSelectedTool('seed');
@@ -1241,9 +1285,10 @@
                         <span className="text-[8px] md:text-[10px] font-black mt-1 uppercase text-center w-full truncate">{tool.label}</span>
                         {tool.count !== undefined && (
                           <span className={`absolute -top-1.5 -right-1.5 md:-top-2 md:-right-2 text-[9px] md:text-[11px] font-bold text-white px-1.5 py-0.5 rounded-full shadow-md z-20 ${tool.count > 0 ? 'bg-blue-500' : 'bg-slate-400'}`}>
-                            {tool.count}
+                            {tool.count} {tool.type === 'seed' ? '包' : tool.id.startsWith('fert_') ? '份' : '次'}
                           </span>
                         )}
+                        {isSelected && <em className="story-tool-selected">拿著中</em>}
                       </button>
                     );
                   })}
@@ -1255,7 +1300,11 @@
             <div className="picturebook-field" data-weather={weather} data-weather-motion={weatherMotion}>
               {Care.rainy(weather) && <div className="story-weather-layer" aria-hidden="true">{Array.from({length: 24}, (_, i) => <i key={i} className="story-rain-streak" style={{left: `${i * 4.3}%`, animationDelay: `${-(i % 9) * .19}s`, animationDuration: `${weather === 'typhoon' ? .65 + (i % 4) * .1 : 1.1 + (i % 4) * .13}s`}} />)}{weather === 'typhoon' && <><i className="story-wind-gust" /><i className="story-wind-gust story-wind-gust-second" /></>}</div>}
               {Care.rainy(weather) && <div className="story-weather-notice"><Farm12UiIcon name={weather === 'typhoon' ? 'storm' : 'rain'} /><div><strong>{weather === 'typhoon' ? '今天颱風來襲' : '今天下雨了'}</strong><p>{weather === 'typhoon' ? '雨水會自動澆田。今晚睡覺前架好防風網，隔天才結算災損。' : '新種下的作物也會自動澆水，可以專心照顧其他農務。'}</p></div><button onClick={() => setWeatherMotion(v => !v)} aria-pressed={!weatherMotion}>{weatherMotion ? '暫停動畫' : '播放動畫'}</button></div>}
-              <div className="story-field-heading"><div><small>每天照顧，慢慢長大</small><h2>{activePlot === null ? '在田裡，慢慢長大' : `照顧第 ${activePlot + 1} 區`}</h2></div><span>{activePlot === null ? '點選農地，開始今日農務' : selectedTool === 'seed' ? `已選：${selectedSeed?.name || '種子'}` : `已選：${({water:'澆水壺',chili:'辣椒水',weed:'除草剪刀',fert_leaf:'氮肥',fert_root:'磷肥',fert_fruit:'鉀肥'})[selectedTool] || '農具'}`}</span></div>
+              <div className="story-field-heading"><div><small>每天照顧，慢慢長大</small><h2>{activePlot === null ? '在田裡，慢慢長大' : `照顧第 ${activePlot + 1} 區`}</h2></div></div>
+              <div className="story-held-tool" role="status" aria-live="polite" aria-atomic="true">
+                <span className="story-held-art" aria-hidden="true">{selectedTool === 'seed' ? <SeedBag crop={selectedSeed} /> : <Farm12ItemArt item={heldItem.item} />}</span>
+                <div><div className="story-held-title"><strong>目前拿著：{heldItem.name}</strong>{heldItem.stock !== null && <span className={heldItem.stock ? 'story-held-stock' : 'story-held-stock is-empty'}>剩 {heldItem.stock} {heldItem.unit}</span>}</div><p>{heldItem.stock === 0 ? '已經用完了，到田邊雜貨舖補充，或換一件工具吧。' : heldItem.hint}</p></div>
+              </div>
               {activePlot === null ? (
                 <div className="picturebook-plots">
                   {plots.map(plot => {
@@ -1278,9 +1327,6 @@
 
                     const plantedCount = plot.slots.filter(s => s?.crop).length;
                     const matureCount = plot.slots.filter(s => s?.crop && s.growth >= s.crop.days).length;
-                    const waterNeeded = weather === 'rainy' || weather === 'typhoon' ? 0 : plot.slots.filter(s => s?.crop && s.growth < s.crop.days && !s.isWatered).length;
-                    const bugCount = plot.slots.filter(s => s?.hasBug).length;
-                    const weedCount = plot.slots.filter(s => s?.hasWeed).length;
                     const cropNames = [...new Set(plot.slots.filter(s => s.crop).map(s => s.crop.name))];
                     const isHighlight = tutorialStep === 4 && plot.id === 0;
 
@@ -1288,6 +1334,7 @@
                       <button type="button"
                         key={plot.id}
                         onClick={() => { setActivePlot(plot.id); setCareMessage(''); }}
+                        data-care-level={plot.slots.some(slot => hazardLevel(slot) === 'urgent') ? 'urgent' : plot.slots.some(slot => hazardLevel(slot) === 'notice') ? 'notice' : 'clear'}
                         className={`picturebook-plot ${isHighlight ? 'ring-4 ring-blue-500 animate-pulse' : ''}`}
                       >
                         <div className="picturebook-plot-label">
@@ -1298,16 +1345,12 @@
                           {plot.slots.map(slot => (
                             <span key={slot.id} className="picturebook-soil-cell" data-watered={!!slot.crop && slot.isWatered}>
                               {slot.crop && <CropArt crop={slot.crop} growth={slot.growth} fallback={slot.crop.icon} mode="overview" />}
-                              {slot.hasBug && <Farm12StatusArt type="pest" mode="small" className="picturebook-hazard" />}
-                              {slot.hasWeed && <Farm12StatusArt type="weed" mode="small" className="picturebook-hazard" />}
+                              <HazardBadges slot={slot} overview />
                             </span>
                           ))}
                         </div>
-                        <div className="picturebook-plot-status">
-                          <span>{plantedCount}/8 {plantedCount && matureCount === plantedCount ? '可收成' : '種植中'}</span>
-                          {waterNeeded > 0 && <strong><Farm12UiIcon name="water" /> 待澆水 {waterNeeded} 格</strong>}
-                          {(bugCount > 0 || weedCount > 0) && <strong className="picturebook-danger">蟲害 {bugCount}・雜草 {weedCount}</strong>}
-                        </div>
+                        <div className="picturebook-plot-status"><span>{plantedCount}/8 {plantedCount ? matureCount === plantedCount ? '可收成' : '種植中' : '等待播種'}</span></div>
+                        <PlotCareStatus plot={plot} weather={weather} />
                       </button>
                     );
                   })}
@@ -1334,6 +1377,7 @@
                   </div>
 
                   <div className="story-care-bar">
+                    <PlotCareStatus plot={plots[activePlot]} weather={weather} detailed />
                     <div className="story-care-actions">
                       <button onClick={e => handlePlotCare(activePlot, 'weed', e)} disabled={!plots[activePlot].slots.some(s => s.crop && s.hasWeed)}><Farm12ItemArt item="weed" mode="inline" />全區除草 {plots[activePlot].slots.filter(s => s.crop && s.hasWeed).length} 格<span>剩 {inventory.scissors} 次</span></button>
                       <button onClick={e => handlePlotCare(activePlot, 'chili', e)} disabled={!plots[activePlot].slots.some(s => s.crop && s.hasBug)}><Farm12ItemArt item="chili" mode="inline" />全區驅蟲 {plots[activePlot].slots.filter(s => s.crop && s.hasBug).length} 格<span>剩 {inventory.chili} 次</span></button>
@@ -1344,8 +1388,8 @@
                       {plots[activePlot].slots.map(slot => (
                         <div
                           key={slot.id}
-                          role="button" tabIndex={0} data-watered={!!slot.crop && slot.isWatered}
-                          aria-label={`第 ${slot.id + 1} 格：${slot.crop ? slot.crop.name + '・' + Care.stageLabel(Care.cropStage(slot.crop, slot.growth)) : '空地'}${slot.isWatered ? '・已澆水' : '・未澆水'}${slot.hasBug ? '・有蟲害' : ''}${slot.hasWeed ? '・有雜草' : ''}`}
+                          role="button" tabIndex={0} data-hazard-level={hazardLevel(slot)} data-watered={!!slot.crop && slot.isWatered}
+                          aria-label={`第 ${slot.id + 1} 格：${slot.crop ? slot.crop.name + '・' + Care.stageLabel(Care.cropStage(slot.crop, slot.growth)) : '空地'}${slot.isWatered ? '・已澆水' : '・未澆水'}${slot.hasBug ? '・有蟲害' : ''}${slot.hasWeed ? '・有雜草' : ''}${hazardLevel(slot) === 'urgent' ? '・今天要處理，最後補救機會' : ''}`}
                           onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.currentTarget.click(); } }}
                           onClick={(e) => {
                              if (slot.crop && slot.growth >= slot.crop.days) {
@@ -1361,7 +1405,7 @@
                           }`}
                         >
                           {slot.isFertilized && (
-                            <div className="absolute top-1 left-1 md:top-2 md:left-2 bg-purple-100 border border-purple-300 text-purple-700 text-[8px] md:text-[10px] px-1 rounded shadow-sm font-black z-20 flex items-center gap-0.5 animate-in zoom-in">
+                            <div className="story-fertilized-tag">
                               <span>🧪</span><span className="hidden md:inline">已施肥</span>
                             </div>
                           )}
@@ -1383,12 +1427,8 @@
                             <span className={`${slot.isWatered ? 'text-amber-600/60' : 'text-amber-400/80'} text-[8px] md:text-[9px] font-black uppercase tracking-tighter`}>可種植</span>
                           )}
 
-                          {(!slot.crop || slot.growth < slot.crop.days) && (
-                            <div className="absolute top-1 right-1 md:top-2 md:right-2 flex flex-col gap-0.5 md:gap-1 items-center pointer-events-none">
-                              {slot.hasBug && <Farm12StatusArt type="pest" mode="small" className="animate-bounce" />}
-                              {slot.hasWeed && <Farm12StatusArt type="weed" mode="small" className="animate-pulse" />}
-                            </div>
-                          )}
+                          <HazardBadges slot={slot} />
+                          {hazardLevel(slot) !== 'clear' && <span className={'story-slot-care-label ' + (hazardLevel(slot) === 'urgent' ? 'is-urgent' : '')}>{hazardLevel(slot) === 'urgent' ? '今天要處理' : [slot.hasBug && '有蟲', slot.hasWeed && '雜草'].filter(Boolean).join('・')}</span>}
                         </div>
                       ))}
                   </div>

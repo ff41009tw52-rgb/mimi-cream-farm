@@ -136,7 +136,7 @@
 @media(prefers-reduced-motion:reduce){.story-weather-layer{display:none}}
 
 /* Rounded Traditional Chinese reading face, bundled with the game. */
-@font-face{font-family:'Farm Rounded';src:url('fonts/farm-rounded.woff?v=20261002-clear-art') format('woff');font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:'Farm Rounded';src:url('fonts/farm-rounded.woff?v=20261002-care-visibility') format('woff');font-style:normal;font-weight:400;font-display:swap}
 body,.farm12-picturebook,.story-home-footer{font-family:'Farm Rounded','Microsoft JhengHei','PingFang TC',sans-serif}
 .farm12-picturebook{font-weight:400;letter-spacing:.025em;line-height:1.8}
 .farm12-picturebook :is(button,input,select,textarea){font-family:inherit;letter-spacing:.025em}
@@ -183,3 +183,57 @@ body,.farm12-picturebook,.story-home-footer{font-family:'Farm Rounded','Microsof
 .picturebook-opening .story-start-rules{font-size:14px;line-height:1.85;text-align:left;padding:12px 14px;margin:0 0 18px;color:#4e5f40;background:#f0eddc}
 .picturebook-opening .picturebook-start-panel button{font-family:inherit;font-weight:600;font-size:17px!important;letter-spacing:.03em;line-height:1.6;min-height:52px}
 @media(max-width:600px){.picturebook-opening{padding:16px 12px!important}.picturebook-opening .picturebook-start-panel{max-width:100%!important;padding:20px 20px 24px!important}.picturebook-opening .story-opening-art{height:100px;margin-bottom:10px}.picturebook-opening .story-opening-art .story-sprite{width:100px;height:100px}.picturebook-opening .picturebook-start-panel h1{font-size:32px}.picturebook-opening .story-opening-subtitle{font-size:17px}.picturebook-opening .story-opening-description{font-size:15px;text-align:left}.picturebook-opening .story-opening-description br{display:none}.story-opening-steps{gap:6px}.story-opening-steps li{font-size:14px}.picturebook-opening .story-opening-time{text-align:left}.picturebook-opening .story-start-rules br{display:none}}
+
+/* Care signs remain distinct from green crop artwork at every growth stage. */
+.story-hazard-badges{position:absolute;top:6px;left:0;right:0;display:flex;justify-content:center;gap:5px;min-height:32px;pointer-events:none;z-index:3}
+.story-hazard-badge{display:inline-flex;align-items:center;justify-content:center;flex:none;width:32px;height:32px;border:2px solid #a17b32;border-radius:50%;background:#fffdf0;box-shadow:0 2px 3px #38251133}
+.story-hazard-badge .farm12-status-art{width:24px;height:24px;filter:none}
+.story-hazard-badges[data-level=urgent] .story-hazard-badge{border-color:#a04432;background:#fff4e9}
+.story-hazard-badges.is-overview{position:static;min-height:23px;gap:3px;margin-top:3px}
+.story-hazard-badges.is-overview .story-hazard-badge{width:23px;height:23px;border-width:1.5px}
+.story-hazard-badges.is-overview .farm12-status-art{width:18px;height:18px}
+.picturebook-soil-cell{display:flex;flex-direction:column;justify-content:center;align-items:center}
+.picturebook-plot-soil{height:auto;min-height:204px;grid-template-rows:repeat(2,minmax(96px,auto));gap:4px}
+.picturebook-plot[data-care-level=notice]{outline:2px solid #b9954d;outline-offset:-3px;border-radius:16px}
+.picturebook-plot[data-care-level=urgent]{outline:3px solid #a34b38;outline-offset:-3px;border-radius:16px}
+.story-plot-care-status{display:flex;flex-wrap:wrap;align-content:start;gap:6px;margin-top:8px;width:100%;text-align:left}
+.story-plot-care-status>span,.story-plot-care-status>strong{display:inline-flex;align-items:center;gap:4px;max-width:100%;padding:4px 7px;border:1px solid;border-radius:7px;font-size:14px;font-weight:500;line-height:1.6;letter-spacing:0}
+.story-plot-care-status .farm12-status-art,.story-plot-care-status .farm12-ui-icon{width:22px;height:22px;filter:none;flex:none}
+.story-care-water{color:#305b71;background:#edf6f5;border-color:#9abac5!important}
+.story-care-notice{color:#73511d;background:#fff3cf;border-color:#c1a261!important}
+.story-plot-care-status>.story-care-urgent{color:#873926;background:#fff0e5;border:2px solid #a9543e;font-weight:700}
+.story-care-done{color:#405d35;background:#f0f5e2;border-color:#a7b88b!important}
+.story-care-empty{color:#536047;background:#faf5e5;border-color:#ccc2a1!important}
+.story-plot-care-status.is-detailed{margin:0 0 14px}
+.story-plot-care-status .story-care-deadline{flex-basis:100%;margin:6px 0 0;padding:9px 12px;color:#73511d;background:#fff5dc;border-left:3px solid #b58e40;font-size:15px;line-height:1.8}
+.story-plot-care-status .story-care-deadline.is-urgent{color:#853b2b;background:#fff0e8;border-color:#a54f38}
+.story-detail-soil{grid-template-rows:repeat(2,minmax(190px,1fr));min-height:440px}
+.story-detail-soil>div{padding-top:38px;padding-bottom:56px;min-height:190px;overflow:hidden}
+.story-detail-soil>div[data-hazard-level=notice]{border:2px solid #c3a04e!important;background:#9e712e33!important}
+.story-detail-soil>div[data-hazard-level=urgent]{border:3px solid #af5640!important;background:#8e3f2633!important}
+.story-detail-soil>div>span.story-slot-care-label{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);max-width:98%;white-space:nowrap;padding:1px 3px;border:1px solid #ba964c;border-radius:4px;color:#704d1c!important;background:#fff3cf;font-size:12px!important;line-height:1.5;letter-spacing:0}
+.story-detail-soil>div>span.story-slot-care-label.is-urgent{color:#873926!important;background:#fff0e5;border-color:#ab553e;font-weight:700}
+.story-fertilized-tag{position:absolute;left:3px;top:42px;display:flex;align-items:center;gap:2px;color:#5c506b;background:#f8f0ff;border:1px solid #c4b3d0;border-radius:4px;padding:1px 3px;font-size:11px;z-index:2}
+.story-fertilized-tag .farm12-ui-icon{width:16px;height:16px}
+.story-held-tool{position:relative;z-index:5;display:flex;align-items:center;gap:13px;padding:14px 16px;margin:0 0 18px;border:2px solid #708256;border-radius:12px;background:#fffbee;color:#405235;box-shadow:0 3px 0 #c8d0ae}
+.story-held-art{display:grid;place-items:center;width:50px;height:50px;flex:none;background:#eff1de;border-radius:10px}
+.story-held-art .farm12-item-art{width:42px;height:42px}.story-held-tool>div{min-width:0;flex:1}
+.story-held-title{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}.story-held-title strong{font-size:17px;line-height:1.6;overflow-wrap:anywhere}
+.story-held-stock{font-size:14px;line-height:1.5;white-space:nowrap;border:1px solid #afbc98;background:#edf3df;border-radius:6px;padding:3px 8px}
+.story-held-stock.is-empty{color:#873926;background:#fff0e5;border-color:#b77763}
+.story-held-tool p{font-size:14px;line-height:1.8;margin:5px 0 0;color:#535f46}
+.picturebook-tools .grid>button[aria-pressed=true]{border:3px solid #657a48;background:#f2f5dc;box-shadow:inset 0 0 0 2px #fffdf2,0 3px 0 #b1be92;outline:2px solid #899b69;outline-offset:1px;padding-bottom:26px}
+.story-tool-selected{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-size:12px;line-height:1.5;font-style:normal;font-weight:700;white-space:nowrap;color:#fffdf0;background:#5c7144;border-radius:4px;padding:1px 8px}
+.picturebook-tools .grid>button>span:nth-child(3){font-size:12px;padding:2px 5px;white-space:nowrap}
+@media(max-width:760px){
+ .picturebook-plot{min-height:320px;justify-content:flex-start}.picturebook-plot-soil{min-height:150px;grid-template-rows:repeat(2,minmax(73px,auto));gap:3px}
+ .picturebook-soil-cell .farm12-art-wrap.farm12-overview,.picturebook-soil-cell .farm12-art-wrap.farm12-overview .farm12-art{max-width:44px}
+ .story-plot-care-status{gap:4px}.story-plot-care-status>span,.story-plot-care-status>strong{font-size:13px;padding:3px 5px}.story-plot-care-status .farm12-status-art,.story-plot-care-status .farm12-ui-icon{width:19px;height:19px}
+ .story-hazard-badges.is-overview{gap:2px;min-height:21px}.story-hazard-badges.is-overview .story-hazard-badge{width:20px;height:20px}.story-hazard-badges.is-overview .farm12-status-art{width:16px;height:16px}
+ .story-detail-soil{grid-template-rows:repeat(2,minmax(170px,1fr));min-height:380px;padding:18px 6px 20px;gap:5px}.story-detail-soil>div{min-height:170px;padding-top:36px;padding-bottom:56px}
+ .story-hazard-badges{gap:3px;min-height:27px}.story-hazard-badge{width:27px;height:27px}.story-hazard-badge .farm12-status-art{width:21px;height:21px}
+ .story-held-tool{align-items:start;gap:10px;padding:12px;margin-bottom:16px}.story-held-art{width:40px;height:40px}.story-held-art .farm12-item-art{width:35px;height:35px}.story-held-art .farm12-seedbag,.story-held-art .farm12-seedbag .farm12-art{width:38px;height:38px}.story-held-title strong{font-size:16px}.story-held-tool p{font-size:14px}
+ .picturebook-tools .grid>button[aria-pressed=true]{padding-bottom:27px;min-height:130px}
+}
+@media(max-width:360px){.story-hazard-badges.is-overview .story-hazard-badge{width:17px;height:17px}.story-hazard-badges.is-overview .farm12-status-art{width:14px;height:14px}.story-hazard-badge{width:24px;height:24px}.story-hazard-badge .farm12-status-art{width:18px;height:18px}.story-detail-soil>div>span.story-slot-care-label{font-size:11px!important}}
+@media(max-width:760px){.story-hazard-badges.is-overview{width:100%;flex-wrap:wrap;align-content:flex-start;min-height:42px}.picturebook-plot-soil{min-height:182px;grid-template-rows:repeat(2,minmax(89px,auto))}}
