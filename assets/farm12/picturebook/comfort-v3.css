@@ -136,7 +136,7 @@
 @media(prefers-reduced-motion:reduce){.story-weather-layer{display:none}}
 
 /* Rounded Traditional Chinese reading face, bundled with the game. */
-@font-face{font-family:'Farm Rounded';src:url('fonts/farm-rounded.woff?v=20261002-harvest-shop') format('woff');font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:'Farm Rounded';src:url('fonts/farm-rounded.woff?v=20261003-seasons') format('woff');font-style:normal;font-weight:400;font-display:swap}
 body,.farm12-picturebook,.story-home-footer{font-family:'Farm Rounded','Microsoft JhengHei','PingFang TC',sans-serif}
 .farm12-picturebook{font-weight:400;letter-spacing:.025em;line-height:1.8}
 .farm12-picturebook :is(button,input,select,textarea){font-family:inherit;letter-spacing:.025em}
@@ -264,3 +264,47 @@ body,.farm12-picturebook,.story-home-footer{font-family:'Farm Rounded','Microsof
 .story-sleep-coop-task>.farm12-ui-icon{width:32px;height:32px;flex:none}.story-sleep-coop-task>span{min-width:0;flex:1}.story-sleep-coop-task strong{display:block;font-size:16px;line-height:1.6}.story-sleep-coop-task small{display:block;font-size:14px;line-height:1.8;margin-top:3px}
 .story-sleep-coop-task:hover{background:#e8eed7}
 @media(max-width:760px){.story-seed-card{padding:14px}.story-seed-card h4{font-size:18px}.story-seed-facts{gap:6px}.story-seed-facts dd{font-size:15px}.story-harvest-toast>span{font-size:16px}.story-harvest-toast{bottom:12px;padding:10px 14px}}
+
+/* The same watercolour landscape follows the game's existing season calendar. */
+[data-season=SPRING]{--season-filter:saturate(.94) hue-rotate(9deg) brightness(1.06);--season-wash:linear-gradient(180deg,#f8e8de25,#e0efb624 56%,#f4e6d22b);--season-ink:#506c42;--season-paper:#f5f7e8;--season-edge:#a9bd8d;--season-particle:#eac8c0;--season-sky:#e8efda}
+[data-season=SUMMER]{--season-filter:saturate(1.25) hue-rotate(12deg) brightness(1.03);--season-wash:linear-gradient(150deg,#fff7bd50,transparent 44%,#4b8b6822);--season-ink:#35634f;--season-paper:#f1f7e4;--season-edge:#8eaf84;--season-particle:#e9ebb6;--season-sky:#ddebd4}
+[data-season=AUTUMN]{--season-filter:sepia(.46) saturate(1.32) hue-rotate(344deg) brightness(1.02);--season-wash:linear-gradient(180deg,#f6d19e30,#ce924329 70%,#ad73452b);--season-ink:#83592f;--season-paper:#fcf2dc;--season-edge:#c6a367;--season-particle:#b56e30;--season-sky:#eeddbd}
+[data-season=WINTER]{--season-filter:saturate(.38) hue-rotate(24deg) brightness(1.09);--season-wash:linear-gradient(180deg,#d5e3ee66,#d7e2db33 60%,#f1f3ed55);--season-ink:#526878;--season-paper:#f1f5f1;--season-edge:#a1b5b5;--season-particle:#dce4e0;--season-sky:#dce5e1}
+.farm12-picturebook[data-season]{isolation:isolate;background:var(--season-sky)!important}
+.farm12-picturebook[data-season]::before,.farm12-picturebook[data-season]::after{content:'';position:fixed;inset:0;pointer-events:none}
+.farm12-picturebook[data-season]::before{z-index:-2;background:url('meadow-v2.webp') center top/cover no-repeat;filter:var(--season-filter);transition:filter 1.2s ease}
+.farm12-picturebook[data-season]::after{z-index:-1;background:var(--season-wash);transition:background 1.2s ease}
+.story-season-ribbon{position:relative;z-index:5;display:flex;align-items:center;gap:18px;max-width:1280px;margin:16px auto 0;padding:16px 20px;border:1px solid var(--season-edge);border-radius:10px 18px 10px 18px;background:var(--season-paper);color:var(--season-ink);box-shadow:0 4px 0 #78865820;animation:storySeasonArrival .8s ease-out}
+.story-season-seal{display:grid;place-items:center;flex:none;width:62px;height:62px;border:1px solid var(--season-edge);outline:1px solid var(--season-edge);outline-offset:4px;border-radius:50%;font-family:'Farm Rounded',sans-serif;font-size:34px;background:#fffaf088;transform:rotate(-5deg)}
+.story-season-copy{flex:1;min-width:0}.story-season-copy small{font-size:13px;line-height:1.6;letter-spacing:.08em}.story-season-copy h2{font-size:23px;line-height:1.5;font-weight:700;margin:2px 0}.story-season-copy p{font-size:14px;line-height:1.8;margin:0;color:var(--season-ink)}
+.story-season-controls{display:flex;flex-direction:column;gap:5px;flex:none}.story-season-controls button{font-size:13px;line-height:1.5;padding:6px 12px;min-height:40px;border:1px solid var(--season-edge);border-radius:6px;background:#fffdf080;color:var(--season-ink)}
+.story-season-controls button:first-child{font-size:15px;font-weight:700;background:#fffdf0}.story-season-controls button:hover{background:#fffdf0}
+.story-season-atmosphere{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.story-season-particle{position:absolute;left:var(--drift-x);top:-35px;width:10px;height:15px;border-radius:80% 25% 70% 35%;background:var(--season-particle);opacity:.52;animation:storySeasonDrift var(--drift-time) linear infinite;animation-delay:var(--drift-delay);box-shadow:inset 1px 0 1px #fff7e1aa}
+[data-season=AUTUMN]>.story-season-particle{width:12px;height:20px;border-radius:80% 4% 80% 4%;opacity:.57}
+[data-season=AUTUMN]>.story-season-particle::after{content:'';position:absolute;left:5px;top:3px;height:14px;border-left:1px solid #79512466;transform:rotate(22deg)}
+.story-season-glow,.story-season-cloud,.story-season-mist{display:none;position:absolute;pointer-events:none}
+[data-season=SUMMER]>.story-season-glow{display:block;inset:0;background:radial-gradient(ellipse at 95% -10%,#fff7ba66,transparent 47%);opacity:.75}
+[data-season=SUMMER]>.story-season-cloud{display:block;left:-18%;top:1%;width:55%;height:100px;border-radius:50%;background:radial-gradient(ellipse,#fffef044,transparent 70%);filter:blur(8px);animation:storyCloudDrift 38s ease-in-out infinite alternate}
+[data-season=WINTER]>.story-season-mist{display:block;left:-20%;right:-20%;bottom:-35px;height:180px;background:radial-gradient(ellipse,#eef3f0aa,transparent 68%);filter:blur(12px);animation:storyWinterMist 22s ease-in-out infinite alternate}
+.story-season-atmosphere[data-motion=false] *{animation-play-state:paused!important}
+.story-season-atmosphere[data-weather=rainy] .story-season-glow,.story-season-atmosphere[data-weather=typhoon] .story-season-glow{display:none}
+.story-season-atmosphere[data-weather=typhoon] .story-season-particle,.story-season-atmosphere[data-weather=typhoon] .story-season-cloud{display:none}
+@keyframes storySeasonArrival{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@keyframes storySeasonDrift{0%{transform:translate(0,-4vh) rotate(0deg);opacity:0}10%{opacity:.55}85%{opacity:.5}100%{transform:translate(25px,105vh) rotate(280deg);opacity:0}}
+@keyframes storyCloudDrift{from{transform:translateX(0)}to{transform:translateX(115%)}}
+@keyframes storyWinterMist{from{transform:translateX(-3%);opacity:.5}to{transform:translateX(6%);opacity:.85}}
+.story-seasons-journal{width:min(960px,100%);max-height:92dvh;overflow-y:auto;padding:24px 28px;border-radius:18px}
+.story-seasons-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}.story-seasons-heading small{font-size:13px;color:#687457}.story-seasons-heading h2{font-size:29px;color:#425335;line-height:1.5}.story-seasons-heading button{padding:8px 13px;border:1px solid #bec6aa;border-radius:8px;background:#f0f3e4;color:#4c5d3e;white-space:nowrap}
+.story-seasons-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.story-season-card{overflow:hidden;border:1px solid var(--season-edge);border-radius:12px;background:var(--season-paper);color:var(--season-ink)}
+.story-season-landscape{height:155px;position:relative;overflow:hidden;isolation:isolate;background:var(--season-sky)}
+.story-season-landscape::before,.story-season-landscape::after{content:'';position:absolute;inset:0;pointer-events:none}.story-season-landscape::before{z-index:-2;background:url('meadow-v2.webp') center 23%/cover no-repeat;filter:var(--season-filter)}.story-season-landscape::after{z-index:-1;background:var(--season-wash)}
+.story-season-landscape>span{position:absolute;left:14px;top:12px;z-index:2;display:grid;place-items:center;width:43px;height:43px;border:1px solid var(--season-edge);border-radius:50%;background:var(--season-paper);font-size:25px}
+.story-season-atmosphere.is-miniature{position:absolute;z-index:1}.is-miniature .story-season-particle{animation-name:storyMiniDrift;--drift-time:12s!important}.is-miniature .story-season-mist{height:90px;bottom:-20px}.is-miniature .story-season-cloud{height:70px}
+@keyframes storyMiniDrift{0%{transform:translate(0,-20px) rotate(0);opacity:0}15%{opacity:.6}100%{transform:translate(20px,210px) rotate(220deg);opacity:0}}
+.story-season-card-copy{padding:12px 15px}.story-season-card-copy>div{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.story-season-card-copy h3{font-size:21px;color:var(--season-ink)}.story-season-card-copy>div>span{font-size:12px;color:var(--season-ink)}
+.farm12-picturebook .story-paper .story-season-card-copy p{font-size:14px;line-height:1.7;margin:6px 0;color:var(--season-ink)}.story-season-card-copy>small{display:block;font-size:13px;line-height:1.7;color:#58634d}
+@media(max-width:760px){.story-season-ribbon{gap:12px;padding:14px;flex-wrap:wrap;margin-top:10px}.story-season-seal{width:42px;height:42px;font-size:25px;outline-offset:2px}.story-season-copy h2{font-size:18px}.story-season-copy p{font-size:13px}.story-season-copy small{font-size:12px}.story-season-controls{width:100%;flex-direction:row;justify-content:flex-end}.story-season-controls button{min-height:44px}.story-seasons-journal{padding:18px 16px}.story-seasons-heading{align-items:start;gap:8px}.story-seasons-heading h2{font-size:25px}.story-seasons-heading small{font-size:12px}.story-seasons-grid{gap:12px}.story-season-landscape{height:130px}.story-season-card-copy{padding:10px}.story-season-card-copy h3{font-size:19px}.story-season-card-copy>div>span{font-size:11px}.story-season-particle{opacity:.4}}
+@media(max-width:480px){.story-seasons-grid{grid-template-columns:1fr}.story-season-landscape{height:145px}.story-season-controls button{flex:1}.story-season-copy h2{font-size:17px}}
+@media(prefers-reduced-motion:reduce){.story-season-atmosphere *{animation:none!important}.story-season-particle{display:none}.story-season-ribbon{animation:none!important}.farm12-picturebook[data-season]::before{transition:none}}

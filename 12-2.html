@@ -36,7 +36,7 @@
   .farm12-art-wrap.farm12-overview{pointer-events:none}
   .farm12-plot-crop-name{max-width:92%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:clamp(10px,2.4vw,14px)}
   @media(min-width:768px){.farm12-art-wrap.farm12-overview,.farm12-art-wrap.farm12-overview .farm12-art{width:78px;height:78px}}
-</style><link rel="stylesheet" href="assets/farm12/picturebook/theme-v2.css?v=20261002"><link rel="stylesheet" href="assets/farm12/picturebook/comfort-v3.css?v=20261002-harvest-shop"></head>
+</style><link rel="stylesheet" href="assets/farm12/picturebook/theme-v2.css?v=20261002"><link rel="stylesheet" href="assets/farm12/picturebook/comfort-v3.css?v=20261003-seasons"></head>
 <body class="bg-slate-900 overflow-x-hidden">
 
   <div id="root"></div><footer class="story-home-footer"><a href="index.html">返回遊戲首頁</a></footer>
@@ -112,6 +112,18 @@
       <span role={label ? 'img' : undefined} aria-label={label || undefined} aria-hidden={label ? undefined : true}
         className={'story-sprite ' + className}
         style={{ backgroundImage: `url(${STORY_ROOT}${sheet}-${STORY_CROP_SHEETS.has(sheet) ? 'v3' : 'v2'}.webp)`, backgroundSize: `${columns * 100}% ${columns * 100}%`, backgroundPosition: `${(index % columns) * 100 / (columns - 1)}% ${Math.floor(index / columns) * 100 / (columns - 1)}%` }} />
+    );
+    const STORY_SEASONS = {
+      SPRING: { name: '春', title: '春風把田野喚醒', days: '第 1—90 天', note: '嫩綠鋪滿小徑，花瓣隨風輕輕飄落。', hint: '從第一包種子開始，把田地慢慢照顧好。', mark: 'sprout' },
+      SUMMER: { name: '夏', title: '日光盛滿整座農莊', days: '第 91—180 天', note: '草木轉為濃綠，白雲走過暖暖的天空。', hint: '雨天可以省下澆水；颱風來時，記得架好防風網。', mark: 'sun' },
+      AUTUMN: { name: '秋', title: '把金色的日子收進籃裡', days: '第 181—270 天', note: '田野染上金褐色，幾片落葉捎來秋風。', hint: '收好成熟作物；秋天仍可能有颱風，要留意今日天氣。', mark: 'inbox' },
+      WINTER: { name: '冬', title: '薄霧裡，也有慢慢長大的日子', days: '第 271—365 天', note: '草地換上灰綠色，晨霧輕輕停在田邊。', hint: '雨水少了，晴天別忘了澆水，也記得照顧雞舍。', mark: 'cloud' }
+    };
+    const SeasonAtmosphere = ({ season, weather = 'sunny', motion = true, miniature = false }) => (
+      <div className={'story-season-atmosphere' + (miniature ? ' is-miniature' : '')} data-season={season} data-weather={weather} data-motion={motion} aria-hidden="true">
+        <i className="story-season-glow" /><i className="story-season-cloud" /><i className="story-season-mist" />
+        {(season === 'SPRING' || season === 'AUTUMN') && Array.from({ length: miniature ? 4 : 8 }, (_, i) => <i key={i} className="story-season-particle" style={{ '--drift-x': `${(i % 2 ? 90 : 2) + (i % 4) * 1.5}%`, '--drift-delay': `${-i * 2.7}s`, '--drift-time': `${18 + i % 4 * 3}s` }} />)}
+      </div>
     );
     const STORY_CROPS = ['sweetpotatoleaf','bokchoy','guava','waterspinach','loofah','mango','waterbamboo','taro','pomelo','whiteradish','cabbage','strawberry','golden_peach','crystal_melon','giant_pumpkin','white_strawberry'];
     const CropArt = ({ crop, growth = 0, mode = 'field' }) => {
@@ -307,6 +319,7 @@
       const [day, setDay] = useState(1);
       const [weather, setWeather] = useState('sunny');
       const [weatherMotion, setWeatherMotion] = useState(true);
+      const [seasonMotion, setSeasonMotion] = useState(true);
       const [gold, setGold] = useState(100);
 
       const [tutorialStep, setTutorialStep] = useState(0);
@@ -1098,7 +1111,8 @@
       };
 
       return (
-        <div className="farm12-picturebook min-h-screen p-3 md:p-5 text-slate-800 select-none relative overflow-x-hidden pb-24">
+        <div className="farm12-picturebook min-h-screen p-3 md:p-5 text-slate-800 select-none relative overflow-x-hidden pb-24" data-season={season}>
+          {isGameStarted && <SeasonAtmosphere season={season} weather={weather} motion={seasonMotion && !showModal && !showShop && !showQuestModal && !currentEvent} />}
 
           <style>{`
             @keyframes rainFall {
@@ -1231,6 +1245,11 @@
             </div>
           </header>
 
+          <section key={season} className="story-season-ribbon" aria-label="季節風景">
+            <span className="story-season-seal" aria-hidden="true">{STORY_SEASONS[season].name}</span>
+            <div className="story-season-copy"><small>{STORY_SEASONS[season].days}</small><h2>{STORY_SEASONS[season].title}</h2><p>{STORY_SEASONS[season].note}</p></div>
+            <div className="story-season-controls"><button type="button" aria-haspopup="dialog" aria-controls="story-seasons-dialog" onClick={() => setShowModal('seasons')}>四季手記</button><button type="button" aria-pressed={!seasonMotion} onClick={() => setSeasonMotion(value => !value)}>{seasonMotion ? '暫停風景動畫' : '播放風景動畫'}</button></div>
+          </section>
           <div role="status" className={`picturebook-save ${saveError ? 'text-red-700' : 'text-emerald-950'}`}>
             {saveError ? '自動儲存失敗，請檢查瀏覽器設定' : `自動儲存：${lastSaveLabel}`}
           </div>
@@ -2093,6 +2112,18 @@
           )}
 
           {/* 睡覺與存檔確認彈窗 */}
+          {showModal === 'seasons' && (
+            <div className="story-overlay fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+              <div id="story-seasons-dialog" role="dialog" aria-modal="true" aria-labelledby="story-seasons-title" className="story-paper story-seasons-journal">
+                <div className="story-seasons-heading"><div><small>島嶼的四季，各有自己的步調</small><h2 id="story-seasons-title">四季手記</h2></div><button type="button" onClick={() => setShowModal(null)} aria-label="關閉四季手記">回到農莊</button></div>
+                <div className="story-seasons-grid">{Object.entries(STORY_SEASONS).map(([key, info]) => <article key={key} data-season={key} className="story-season-card">
+                  <div className="story-season-landscape" role="img" aria-label={info.name + '季田園風景'}><SeasonAtmosphere season={key} motion={seasonMotion} miniature /><span>{info.name}</span></div>
+                  <div className="story-season-card-copy"><div><h3>{info.name}季</h3><span>{info.days}{key === season ? ' · 現在' : ''}</span></div><p>{info.note}</p><small>{info.hint}</small></div>
+                </article>)}</div>
+              </div>
+            </div>
+          )}
+
           {showModal === 'sleep' && (
             <div className="story-overlay fixed inset-0 bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-4 z-50">
               <div className="story-paper bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] max-w-sm w-full text-center shadow-2xl animate-in zoom-in duration-200 max-h-[90vh] overflow-y-auto custom-scrollbar">
