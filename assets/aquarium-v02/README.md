@@ -60,8 +60,10 @@ Lv.1–5 累計經驗門檻為 0／45／130／300／620。吃飼料 2、收取�
 ```
 AQUARIUM_CHROMIUM=/path/to/chromium AQUARIUM_ARTIFACTS=/path/to/artifacts node tests/aquarium/browser-v02.test.cjs
 AQUARIUM_CHROMIUM=/path/to/chromium AQUARIUM_ARTIFACTS=/path/to/artifacts node tests/aquarium/browser-v02-additional.test.cjs
+AQUARIUM_CHROMIUM=/path/to/chromium AQUARIUM_ARTIFACTS=/path/to/artifacts node tests/aquarium/browser-v02-longplay.test.cjs
+AQUARIUM_CHROMIUM=/path/to/chromium AQUARIUM_ARTIFACTS=/path/to/artifacts node tests/aquarium/browser-v02-online.test.cjs
 ```
 
 測試用 Playwright，腳本自帶伺服器。一般模式成長與經濟使用正式 simulation 加速時鐘；十魚效能使用實際 RAF、不加速。涵蓋正式開局／收入、五種魚以上行為、十魚十布置飼料金幣、裝飾／圖鑑／命名保存、V0.1 自動與手動 migration、實際 V0.1 程式存檔、手動快照／JSON 匯入／離線／多分頁／存檔損壞／容量不足／音效／測試隔離／重置。兩個平板 viewport 與手機採 hasTouch，實際點按商店／裝飾／圖鑑／資訊卡，檢查無橫向溢出與 44px 主要按鈕。
 
-本輪不部署、不合併 main、不修改首頁。未做實體 iPad Safari／Android 性能驗證或學生班級試玩，瀏覽器結果不是實機保證。
+正式入口為 `https://ff41009tw52-rgb.github.io/mimi-cream-farm/aquarium-v0.2.html`。V0.1 入口仍為 `aquarium-game.html`，首頁與其他遊戲保持原樣。上線測試腳本以獨立瀏覽器 context 檢查實際網站開局、V0.1 同源升級、購魚、改名、布置、刷新、單檔入口与兩種平板。未做實體 iPad Safari／Android 性能驗證或學生班級試玩，瀏覽器結果不是實機保證。
