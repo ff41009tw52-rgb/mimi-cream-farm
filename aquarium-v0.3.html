@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#eff5ef"><title>悠悠水族箱｜我的小小水世界</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/aquarium-v03/aquarium.css">
+<script defer src="assets/aquarium-v03/aquarium-data.js"></script>
+<script defer src="assets/aquarium-v03/aquarium-save.js"></script>
+<script defer src="assets/aquarium-v03/aquarium-world.js"></script>
+<script defer src="assets/aquarium-v03/aquarium.js"></script>
+</head>
+<body>
+<main class="app">
+<header class="header"><div class="brand"><span class="brand-icon" aria-hidden="true">≈</span><div><h1>悠悠水族箱</h1><p>我的小小水世界</p></div><span class="version">V0.3</span></div><button class="settings-button" id="settings" aria-label="開啟設定"><span aria-hidden="true">⚙</span> 設定</button></header>
+<section class="hud" aria-label="水族箱狀態">
+<div class="stat coins-stat"><span class="coin-icon" aria-hidden="true">＄</span><div><span class="stat-label">我的金幣</span><strong id="coins">20</strong></div></div>
+<div class="stat"><span class="drop-icon" aria-hidden="true"></span><div><span class="stat-label">水質 <span id="water-label">清澈</span></span><strong><span id="water">100</span><small>%</small></strong></div><div class="water-track"><i id="water-bar"></i></div></div>
+<div class="stat residents"><span class="residents-icon" aria-hidden="true">◌</span><div><span class="stat-label">魚缸住客</span><strong id="capacity">3 <small>/ 10</small></strong></div></div>
+<div class="level-stat"><span id="level">水族 Lv.1</span><div class="xp-track"><i id="xp-bar"></i></div><small id="next-unlock">下一位朋友：斑馬魚</small></div>
+<div class="save-status" id="save-status" role="status">正在準備水族箱…</div>
+</section>
+<section class="aquarium" aria-label="我的水族箱">
+<div class="tank-caption"><span><i></i> <b id="tank-name">小小水族箱</b></span><span id="tank-message">慢慢游，慢慢長大。</span></div>
+<canvas id="tank" tabindex="0" aria-label="水族箱。點魚查看狀態，點金幣收集；先按餵食，再點水面投放飼料。鍵盤可用下方魚兒名單查看，餵食模式按 Enter 投食。"></canvas>
+<div class="feeding-hint" id="feeding-hint" hidden>點一下水面，送上一小份飼料 <select id="food-type" aria-label="飼料種類"><option value="normal">一般飼料</option><option value="sinking">沉底飼料</option></select> <button id="stop-feed" aria-label="結束餵食">完成</button></div>
+<aside class="fish-card" id="fish-card" hidden aria-label="魚兒資訊"><button class="icon-button card-close" id="close-card" aria-label="關閉魚兒資訊">×</button><span class="eyebrow" id="fish-stage"></span><h2 id="fish-name"></h2><p id="fish-species"></p><div class="meter-label">飽食度 <b id="fish-hunger"></b></div><meter id="hunger-meter" min="0" max="100"></meter><div class="meter-label">成長 <b id="fish-growth"></b></div><meter id="growth-meter" min="0" max="100"></meter><p class="mood" id="fish-mood"></p><p class="personality" id="fish-personality"></p><p class="fish-color" id="fish-color"></p><p class="fish-extra" id="fish-extra"></p><div class="card-actions"><button id="rename">改名字</button><button id="rehome">送養</button></div></aside>
+<div id="decor-handles" class="decor-handles" hidden></div>
+<div class="edit-toolbar" id="edit-toolbar" hidden><span id="edit-label">點選布置，再左右移動</span><div><button id="edit-left" aria-label="向左移動裝飾">←</button><button id="edit-right" aria-label="向右移動裝飾">→</button><button id="edit-store">收起</button><button id="edit-done">完成布置</button></div></div>
+<div id="toast" role="status" class="toast" hidden></div>
+<div class="tank-base"><span>一缸小日常</span><span>照顧牠們，收集每一點快樂</span></div>
+</section>
+<section class="controls" aria-label="魚缸操作"><button id="feed" class="action primary" aria-pressed="false"><span class="action-icon" aria-hidden="true">⁙</span><span>餵食<small>給魚兒一點好吃的</small></span></button><button id="shop" class="action"><span class="action-icon" aria-hidden="true">⌂</span><span>商店<small>魚兒與魚缸布置</small></span></button><button id="clean" class="action"><span class="action-icon" aria-hidden="true">✧</span><span>清潔<small>讓水族箱亮晶晶</small></span></button></section>
+<div id="onboarding" class="onboarding" hidden><p id="onboarding-copy"></p><button id="onboarding-skip">跳過</button></div>
+<footer><p id="tip">點魚兒看狀態，點金幣收集。好好照顧，魚兒就會慢慢長大。</p><button id="encyclopedia" class="text-button">魚類圖鑑</button><button id="tank-menu" class="text-button">我的魚缸</button><button id="roster" class="text-button">我的魚兒</button><button id="collect-all" class="text-button" hidden>收取金幣</button></footer>
+</main>
+<dialog id="dialog"><div class="dialog-head"><div><span class="eyebrow" id="dialog-eyebrow">A LITTLE AQUATIC LIFE</span><h2 id="dialog-title"></h2></div><button class="icon-button" id="dialog-close" aria-label="關閉視窗">×</button></div><div id="dialog-content"></div></dialog>
+</body></html>
