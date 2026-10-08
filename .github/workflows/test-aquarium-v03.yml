@@ -1,0 +1,35 @@
+name: Test aquarium V0.3 save and portable build
+on:
+  push:
+    paths:
+      - 'aquarium-v0.3*.html'
+      - 'assets/aquarium-v03/**'
+      - 'scripts/build-aquarium-v03.py'
+      - 'tests/aquarium/*v03*'
+      - 'tests/aquarium/fixtures/**'
+      - '.github/workflows/test-aquarium-v03.yml'
+  pull_request:
+    paths:
+      - 'aquarium-v0.3*.html'
+      - 'assets/aquarium-v03/**'
+      - 'scripts/build-aquarium-v03.py'
+      - 'tests/aquarium/*v03*'
+      - 'tests/aquarium/fixtures/**'
+      - '.github/workflows/test-aquarium-v03.yml'
+jobs:
+  save-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check authoritative scripts and migration
+        run: |
+          for file in assets/aquarium-v03/*.js; do node --check "$file"; done
+          node tests/aquarium/schema-v03.test.cjs
+      - name: Verify the committed standalone matches the modular sources
+        run: |
+          python3 scripts/build-aquarium-v03.py
+          git diff --exit-code -- aquarium-v0.3-standalone.html
