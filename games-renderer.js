@@ -3,6 +3,19 @@
 
   const homepageFeatures = Object.freeze([
     Object.freeze({
+      id: 'fish-breathing-lab',
+      grades: Object.freeze(['4']),
+      gradeLabel: '四年級',
+      subject: 'life',
+      icon: 'fas fa-fish',
+      title: '🐟 魚兒呼吸實驗室',
+      description: '魚在水裡怎麼呼吸？動手慢放與拖動動畫，同步放大觀察口與鰓蓋，標記關鍵瞬間，再追蹤水流和氧氣，完成自己的觀察卡！',
+      url: 'fish-breathing.html',
+      actionLabel: '開始觀察呼吸',
+      actionIcon: 'fas fa-search-plus',
+      publishedAt: '2026-10-13T13:16:12+08:00'
+    }),
+    Object.freeze({
       id: 'aquatic-observation',
       grades: Object.freeze(['4']),
       gradeLabel: '四年級',
