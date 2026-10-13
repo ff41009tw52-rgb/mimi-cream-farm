@@ -64,24 +64,53 @@
   const f=fixed.getContext('2d');f.clip(path('M-300 -300H2000V1500H-300Z '+jaw+' '+cover),'evenodd');f.drawImage(image,0,0,1536,1024);
   const q=j.getContext('2d');q.translate(-30,-570);q.clip(path(jaw));q.drawImage(image,0,0,1536,1024);
   const l=lid.getContext('2d');l.translate(-270,-435);l.clip(path(cover));l.drawImage(image,0,0,1536,1024);
-  return{fixed,jaw:j,lid};
+  const gills=factory(160,250);gills.width=160;gills.height=250;
+  const g=gills.getContext('2d');g.translate(-270,-435);paintGills(g);
+  return{fixed,jaw:j,lid,gills};
  }
  const jawShift=x=>36*Math.pow(clamp(1-(x-60)/120),1.3);
  function motion(p){p=clamp(p,0,100);return{mouth:p<50?Math.pow(Math.max(0,Math.sin(Math.PI*p/50)),.85):0,cover:p>=50?Math.pow(Math.max(0,Math.sin(Math.PI*(p-50)/50)),.85):0};}
  function stroke(ctx,d,color,width,dashes=[]){ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.lineJoin='round';ctx.setLineDash(dashes);ctx.stroke(path(d));ctx.setLineDash([]);}
  function arrow(ctx,d,x,y,angle,color,width=10){stroke(ctx,d,color,width);ctx.save();ctx.translate(x,y);ctx.rotate(angle);ctx.fillStyle=color;ctx.fill(path('M0 0L-26 -13L-21 0L-26 13Z'));ctx.restore();}
+ // Layered gill arches with dense filaments, following the supplied textbook reference.
+ // The opening amplitude is intentionally exaggerated for classroom observation.
+ function paintGills(ctx){
+  ctx.save();ctx.clip(path(cover));
+  const bed=ctx.createLinearGradient(285,470,414,610);
+  bed.addColorStop(0,'#f0b8a5');bed.addColorStop(.45,'#a92d35');bed.addColorStop(1,'#efbaa4');
+  ctx.fillStyle=bed;ctx.fill(path(cover));
+  for(let layer=0;layer<4;layer++){
+   const x0=323-layer*9,bulge=49-layer*6,top=459+layer*12,span=194-layer*12;
+   const root=t=>[x0+Math.sin(Math.PI*t)*bulge,top+span*t];
+   for(let i=0;i<76;i++){
+    const t=i/75,[x,y]=root(t),len=(17+15*Math.sin(Math.PI*t))*(1-layer*.10);
+    const dx=len*(.65+.35*Math.sin(Math.PI*t)),dy=(t-.5)*len*.95;
+    const grad=ctx.createLinearGradient(x,y,x+dx,y+dy);
+    grad.addColorStop(0,layer%2?'#9c1f32':'#b32638');grad.addColorStop(.55,'#d94a57');grad.addColorStop(1,'#f18a88');
+    ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+dx*.58,y+dy*.25-2,x+dx,y+dy);
+    ctx.lineWidth=3.2;ctx.lineCap='round';ctx.strokeStyle='#8e2634';ctx.stroke();
+    ctx.lineWidth=1.9;ctx.strokeStyle=grad;ctx.stroke();
+   }
+   ctx.beginPath();for(let i=0;i<=40;i++){const [x,y]=root(i/40);if(i)ctx.lineTo(x,y);else ctx.moveTo(x,y);}
+   ctx.strokeStyle='#f39b91';ctx.lineWidth=4;ctx.stroke();
+   ctx.strokeStyle='#bb4149';ctx.lineWidth=1.3;ctx.stroke();
+  }
+  stroke(ctx,'M313 450Q371 437 403 499Q426 559 390 613Q362 653 310 667','#edc7a7',4);
+  ctx.restore();
+ }
  function draw(ctx,img,opts={}){
   const p=opts.progress??25,m=motion(p),w=ctx.canvas.width,h=ctx.canvas.height;
   const view=opts.closeup?[-65,395,640,355]:[-145,70,1800,875];
   ctx.clearRect(0,0,w,h);ctx.save();const scale=Math.min(w/view[2],h/view[3]);ctx.translate((w-view[2]*scale)/2,(h-view[3]*scale)/2);ctx.scale(scale,scale);ctx.translate(-view[0],-view[1]);
   if(!img){ctx.restore();return;}
-  if(m.mouth>.001){const edge=[[61,579],[80,583],[100,592],[121,603],[145,614],[175,622],[205,626],[240,628],[272,625]];ctx.beginPath();edge.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));edge.slice().reverse().forEach(([x,y])=>ctx.lineTo(x,y+m.mouth*jawShift(x)));ctx.closePath();const cavity=ctx.createLinearGradient(65,582,160,640);cavity.addColorStop(0,'#362d23');cavity.addColorStop(1,'#9f8c69');ctx.fillStyle=cavity;ctx.fill();}
-  ctx.fillStyle='#6b493a';ctx.fill(path(cover));
+  // Leave the mouth opening transparent so it always matches the page background.
   ctx.drawImage(img.fixed,0,0);
-  ctx.save();ctx.clip(path(cover));ctx.fillStyle='#aa6654';ctx.fill(path('M328 468Q410 543 321 638L293 634Q354 551 305 492Z'));
-  stroke(ctx,'M334 479Q398 551 317 635','#aa5c51',19);stroke(ctx,'M321 493Q375 552 305 623','#c87c67',12);
-  stroke(ctx,'M334 483L353 475M345 501L370 490M354 521L381 513M359 541L387 539M355 563L386 568M349 584L377 597M337 605L362 622M323 625L343 641','#ddb09b',2.5);ctx.restore();
-  ctx.save();ctx.globalAlpha=opts.cutaway?.16:1;ctx.drawImage(img.lid,270,435,160-m.cover*12,250);ctx.restore();
+  ctx.drawImage(img.gills,270,435);
+  ctx.save();ctx.globalAlpha=opts.cutaway?.04:1;
+  ctx.translate(270,435);ctx.scale(1-m.cover*.60,1);ctx.translate(-270,-435);
+  ctx.drawImage(img.lid,270,435);
+  if(m.cover>.01){ctx.globalAlpha=(opts.cutaway?.10:.95)*m.cover;stroke(ctx,'M314 445Q371 438 401 496Q424 551 393 608Q369 650 308 668','#f5dc9c',5);}
+  ctx.restore();
   if(m.mouth<.001)ctx.drawImage(img.jaw,30,570);else for(let x=0;x<310;x+=3){const sw=Math.min(3,310-x);ctx.drawImage(img.jaw,x,0,sw,170,30+x,570+m.mouth*jawShift(30+x+sw/2),sw+.25,170);}
   if(m.mouth>.02){ctx.globalAlpha=m.mouth*.75;stroke(ctx,'M65 578Q90 583 116 601','#9b7f50',2);ctx.globalAlpha=1;}
   const inlet=opts.inlet,inside=opts.inside,outlet=opts.outlet;
@@ -99,7 +128,6 @@
  }
  return {draw,motion,prepare};
 })();
-
 
 (()=>{
 'use strict';
