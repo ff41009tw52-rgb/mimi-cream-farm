@@ -1,6 +1,6 @@
 # 悠悠水族箱 V0.3 完成報告
 
-日期：2026-10-08。以已完成的 V0.2 為 Source of Truth 擴充，保留原 10 種魚、12 種布置、Canvas 與三個主要操作。
+功能驗證：2026-10-08；交付補完：2026-10-13。以已完成的 V0.2 為 Source of Truth 擴充，保留原 10 種魚、12 種布置、Canvas 與三個主要操作。
 
 ## 版本與交付
 
@@ -30,7 +30,15 @@
 | 存檔升級 | schema1→2→3，真實V0.2自動／手動檔與原V0.1程式進度均通過 |
 | 原功能 | 餵食、兩種飼料、清潔動畫／冷卻、音效、圖鑑、改名、送養、手動讀寫、JSON備份、離線、多分頁保護 |
 | 驗證 | 正式60分鐘養成、15魚＋15布置效能、三種尺寸與mouse／emulated touch／pen |
-| 交付 | 模組版、standalone、資料、測試、CI、20張實際截圖及本報告 |
+| 交付 | 模組版、standalone、資料、測試、CI、29張實際截圖、本報告與完整證據ZIP |
+
+## 2026-10-13 接續完成
+
+- 已補完先前中斷的 `aquarium-v0.3-evidence.zip`，內含本報告、29張實際截圖、原始測試JSON與可離線瀏覽的 `index.html` 畫面索引。
+- 保留2026-10-08的20張功能截圖與5張正式網站截圖；另於2026-10-13補拍晴空藍孔雀、1024×768、820×1180、390×844，共4張。
+- 新補拍先推進3秒動畫，再確認Canvas上出現實際配色、三種尺寸均有8隻魚的runtime；主要按鈕至少44px，沒有橫向溢出。補拍使用合法高階fixture，不能當成正常開局或正式經濟成果。
+- 當日重新抓取V0.3入口、standalone、5個assets、V0.1與V0.2入口，共9個正式網站檔案：全部HTTP200，逐位元組與本機來源一致。
+- 水族箱遊戲程式沒有新增修改；保留目前main中其他活動的後續更新。本次只更新交付報告並補齊證據。2026-10-08的完整流程、60分鐘經濟及效能數據沒有改標成當日重跑。
 
 ## 未完成
 
@@ -38,7 +46,7 @@
 
 viewport 與 emulated touch／pen 來自 Chromium，不能當作實機或學生測試結果。尚未取得學生的實際等待時間、課堂音量、實機耗電與溫度資料。
 
-功能和線上驗證完成後，工作環境連線中斷，額外證據ZIP尚未產生。20張截圖已保存；完整報告改以本Repository檔案交付。這不影響已發布遊戲。
+遊戲功能、發布及證據交付已完成。尚未完成的實機與學生試玩，需要在實際設備與課堂進行；目前沒有把模擬視窗的結果當作實機結果。
 
 ## 魚行為：POI、state、personality 如何合作
 
@@ -215,7 +223,7 @@ mouse另測，CDP產生可信的emulated touch與pen Pointer事件。裝飾handl
 
 ## 實際截圖
 
-20張已交付。以下sandbox連結供ChatGPT內開啟；全為實際程式畫面。
+原20張與追加9張均收錄於證據ZIP，全為實際程式畫面。以下原檔sandbox連結供ChatGPT內開啟；ZIP內的 `index.html` 與報告使用相對路徑，解壓後可直接瀏覽。
 
 | 編號 | 畫面 | 檔案 |
 |---:|---|---|
@@ -236,6 +244,16 @@ mouse另測，CDP產生可信的emulated touch與pen Pointer事件。裝飾handl
 | 15 | 手機 | [15-phone-390.png](sandbox:/workspace/scratch/666ccaf29757/artifacts-v03/15-phone-390.png) |
 
 額外：[正式60分鐘](sandbox:/workspace/scratch/666ccaf29757/artifacts-v03/normal-60-minutes.png)、[15魚＋15布置](sandbox:/workspace/scratch/666ccaf29757/artifacts-v03/15-fish-15-decor.png)、[魚兒商店](sandbox:/workspace/scratch/666ccaf29757/artifacts-v03/shop-fish.png)、[布置商店](sandbox:/workspace/scratch/666ccaf29757/artifacts-v03/shop-decor.png)、[圖鑑](sandbox:/workspace/scratch/666ccaf29757/artifacts-v03/encyclopedia.png)。
+
+追加畫面：
+
+| 日期 | 畫面 | ZIP內路徑 |
+|---|---|---|
+| 2026-10-08 | 正式網站主畫面、手動復原、1024／820／390尺寸 | `screenshots/published/online-*.png` |
+| 2026-10-13 | 晴空藍孔雀實際游動與魚卡 | `screenshots/followup/16-special-color-swimming.png` |
+| 2026-10-13 | 8魚橫式平板 | `screenshots/followup/17-tablet-1024-eight-fish.png` |
+| 2026-10-13 | 8魚直式平板 | `screenshots/followup/18-portrait-820-eight-fish.png` |
+| 2026-10-13 | 8魚手機畫面 | `screenshots/followup/19-phone-390-eight-fish.png` |
 
 ## 新增／修改檔案
 
@@ -266,4 +284,4 @@ mouse另測，CDP產生可信的emulated touch與pen Pointer事件。裝飾handl
 | tests/aquarium/fixtures/v02-real-manual.json | 真實V0.2手動檔 |
 | aquarium-v0.3-report.md | 完成報告 |
 
-重現指令見 [README](assets/aquarium-v03/README.md)。JSON證據曾保存於本次工作目錄，工作環境離線後未完成額外壓縮交付；本報告據實列出已確認結果與範圍。
+重現指令見 [README](assets/aquarium-v03/README.md)。證據ZIP內 `results/` 收錄原V0.2回歸、V0.3玩家流程、保存保護、行為／效能、正式經濟、響應式、standalone、正式網站驗證及本次補拍／HTTP檢查的JSON；`manifest.json` 列出每個檔案的SHA-256與大小。沒有收錄帳號憑證、上傳資訊或重複的Repository原始碼。
