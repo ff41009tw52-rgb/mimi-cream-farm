@@ -107,7 +107,7 @@
   ctx.drawImage(img.fixed,0,0);
   ctx.drawImage(img.gills,270,435);
   ctx.save();ctx.globalAlpha=opts.cutaway?.04:1;
-  ctx.translate(270,435);ctx.scale(1-m.cover*.60,1);ctx.translate(-270,-435);
+  ctx.translate(270,435);ctx.scale(1-m.cover*.30,1);ctx.translate(-270,-435);
   ctx.drawImage(img.lid,270,435);
   if(m.cover>.01){ctx.globalAlpha=(opts.cutaway?.10:.95)*m.cover;stroke(ctx,'M314 445Q371 438 401 496Q424 551 393 608Q369 650 308 668','#f5dc9c',5);}
   ctx.restore();
