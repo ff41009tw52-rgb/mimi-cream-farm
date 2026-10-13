@@ -3,6 +3,19 @@
 
   const homepageFeatures = Object.freeze([
     Object.freeze({
+      id: 'fish-breathing-review',
+      grades: Object.freeze(['4']),
+      gradeLabel: '四年級',
+      subject: 'life',
+      icon: 'fas fa-fish',
+      title: '🐟 魚兒呼吸複習站・簡易版',
+      description: '快速複習魚怎麼呼吸！調整播放速度，同步放大觀察嘴巴與鰓蓋，看看水流方向和魚鰓，隨時停在吸水或排水畫面。',
+      url: 'fish-breathing-review.html',
+      actionLabel: '開始輕鬆複習',
+      actionIcon: 'fas fa-play',
+      publishedAt: '2026-10-13T22:49:32+08:00'
+    }),
+    Object.freeze({
       id: 'fish-breathing-lab',
       grades: Object.freeze(['4']),
       gradeLabel: '四年級',
