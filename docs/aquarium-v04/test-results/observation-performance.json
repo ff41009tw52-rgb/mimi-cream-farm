@@ -1,0 +1,20 @@
+[
+  {
+    "topic": "anatomy",
+    "fps": 60.00300015000751,
+    "frames": 121,
+    "meanWorkMs": 0.6231404958665179
+  },
+  {
+    "topic": "swimming",
+    "fps": 60.003000150007495,
+    "frames": 121,
+    "meanWorkMs": 0.6578512396716344
+  },
+  {
+    "topic": "breathing",
+    "fps": 59.99999999999999,
+    "frames": 121,
+    "meanWorkMs": 0.5289256198323055
+  }
+]
