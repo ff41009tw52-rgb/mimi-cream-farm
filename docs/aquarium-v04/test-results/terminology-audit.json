@@ -1,0 +1,104 @@
+[
+  [
+    "魚缸住客",
+    "魚兒數量",
+    "主畫面直接說明數量",
+    "aquarium-v0.4.html"
+  ],
+  [
+    "魚兒資訊",
+    "魚兒資料",
+    "資訊卡及無障礙名稱一致",
+    "aquarium-v0.4.html"
+  ],
+  [
+    "水族 Lv.1",
+    "水族等級 1",
+    "不用英文縮寫",
+    "aquarium-v0.4.html"
+  ],
+  [
+    "A LITTLE AQUATIC LIFE",
+    "一起照顧水中的生命",
+    "移除無意義英文",
+    "aquarium-v0.4.html"
+  ],
+  [
+    "魚兒資訊卡",
+    "魚兒資料卡",
+    "資料卡名稱一致",
+    "assets/aquarium-v04/aquarium.js"
+  ],
+  [
+    "水族 Lv.",
+    "水族等級 ",
+    "等級名稱一致",
+    "assets/aquarium-v04/aquarium.js"
+  ],
+  [
+    "`Lv.${s.unlockLevel} 解鎖`",
+    "`等級 ${s.unlockLevel} 解鎖`",
+    "商店短按鈕",
+    "assets/aquarium-v04/aquarium.js"
+  ],
+  [
+    "水族升到 Lv.${state.level}！",
+    "水族升到等級 ${state.level}！",
+    "升級提示易讀",
+    "assets/aquarium-v04/aquarium.js"
+  ],
+  [
+    "小住客的家",
+    "魚兒的家",
+    "魚兒用詞一致",
+    "assets/aquarium-v04/aquarium.js"
+  ],
+  [
+    "下一位小住客",
+    "下一隻魚兒",
+    "魚兒用詞一致",
+    "assets/aquarium-v04/aquarium.js"
+  ],
+  [
+    "送養這位小住客？",
+    "送養這隻魚兒？",
+    "送養語境",
+    "assets/aquarium-v04/aquarium.js"
+  ],
+  [
+    "可用 JSON 匯入",
+    "可用存檔檔案匯入",
+    "不要求學生認識檔案格式",
+    "assets/aquarium-v04/aquarium.js"
+  ],
+  [
+    "下載 JSON 進度，之後可以匯入。",
+    "下載進度檔案，之後可以匯入。",
+    "備份說明簡化",
+    "assets/aquarium-v04/aquarium.js"
+  ],
+  [
+    "支援 V0.1／V0.2／V0.4 JSON，先驗證再取代。",
+    "也能讀取舊版本的進度檔案，確認後再匯入。",
+    "完整支援舊版、避免工程術語",
+    "assets/aquarium-v04/aquarium.js"
+  ],
+  [
+    "清潔水族箱",
+    "清潔魚缸",
+    "詳細名稱一致",
+    "assets/aquarium-v04/aquarium.js"
+  ],
+  [
+    "藍紅光帶的小住客",
+    "帶著藍紅光帶的魚兒",
+    "魚種介紹一致",
+    "assets/aquarium-v04/aquarium-data.js"
+  ],
+  [
+    "V0.3 養成資料不完整",
+    "養成資料不完整",
+    "驗證涵蓋 schema 3 版本",
+    "assets/aquarium-v04/aquarium-save.js"
+  ]
+]
