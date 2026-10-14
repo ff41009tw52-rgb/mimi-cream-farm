@@ -1,0 +1,69 @@
+{
+  "results": [
+    {
+      "name": "新玩家三步引導：有效投食、魚卡、商店；完成後刷新不再播放",
+      "passed": true
+    },
+    {
+      "name": "引導可以永久跳過、設定重新觀看",
+      "passed": true
+    },
+    {
+      "name": "真實 V0.2 自動/手動存檔升級：所有魚、名稱、時間、金幣、水質、XP、圖鑑、裝飾與原 key 保留",
+      "passed": true
+    },
+    {
+      "name": "V0.1 → 2 → 3 migration 保留魚與進度",
+      "passed": true
+    },
+    {
+      "name": "魚缸 Tier 1 → 2：扣 400、容量 12、布置 15、保存、魚完整與 Canvas 比例不變",
+      "passed": true
+    },
+    {
+      "name": "購買布置、滑鼠拖動、snap、箭頭微調、退出刷新後位置與底砂完全保留",
+      "passed": true
+    },
+    {
+      "name": "首次成魚只解鎖一次，商店選配色、魚與圖鑑保存；收入、成長與速度仍取同魚種資料",
+      "passed": true
+    },
+    {
+      "name": "首購/首次成魚成就只領一次；刷新、匯入同存檔的早期快照無法重領",
+      "passed": true
+    },
+    {
+      "name": "發現 5 種、放置 5 件、三種水草的永久成就與配色獎勵",
+      "passed": true
+    },
+    {
+      "name": "中英數改名、非法名稱拒絕、送養、音效設定、JSON 匯出、手動快照讀回",
+      "passed": true
+    },
+    {
+      "name": "水質下降、清潔漸變動畫與冷卻保留",
+      "passed": true
+    },
+    {
+      "name": "未知 schema、非法個性、損壞 V0.2 migration 保留原檔並停止覆寫",
+      "passed": true
+    },
+    {
+      "name": "離線 4 小時上限、收益 120 上限、刷新不重複結算",
+      "passed": true
+    },
+    {
+      "name": "多分頁更新後停止保存與模擬",
+      "passed": true
+    },
+    {
+      "name": "快速測試模式與正式 V0.4 key 隔離",
+      "passed": true
+    },
+    {
+      "name": "playtest 正式數值、本機匿名時間/操作摘要下載，普通模式不顯示工程資訊",
+      "passed": true
+    }
+  ],
+  "errors": []
+}

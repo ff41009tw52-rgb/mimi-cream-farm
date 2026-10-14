@@ -1,0 +1,40 @@
+name: Test aquarium V0.4.1 art and friendly controls
+on:
+  push:
+    paths: ['aquarium-v0.4*.html', 'assets/aquarium-v041/**', 'scripts/build-aquarium-v041.py', 'tests/aquarium/*v041*', '.github/workflows/test-aquarium-v041.yml']
+  pull_request:
+    paths: ['aquarium-v0.4*.html', 'assets/aquarium-v041/**', 'scripts/build-aquarium-v041.py', 'tests/aquarium/*v041*', '.github/workflows/test-aquarium-v041.yml']
+jobs:
+  patch-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate source and portable build
+        run: |
+          for file in assets/aquarium-v041/*.js; do node --check "$file"; done
+          node tests/aquarium/schema-v041.test.cjs
+          python3 scripts/build-aquarium-v041.py
+          git diff --exit-code -- aquarium-v0.4.1-standalone.html
+          cmp aquarium-v0.4.html aquarium-v0.4.1.html
+      - name: Prepare browser runtime
+        run: |
+          npm install --prefix /tmp/aquarium-v041-runtime playwright@1.58.2
+          /tmp/aquarium-v041-runtime/node_modules/.bin/playwright install --with-deps chromium
+          echo 'NODE_PATH=/tmp/aquarium-v041-runtime/node_modules' >> "$GITHUB_ENV"
+      - name: Play, observe and preserve progress
+        run: |
+          node tests/aquarium/browser-v041.test.cjs
+          node tests/aquarium/browser-v041-guards.test.cjs
+          node tests/aquarium/browser-v041-upgrade.test.cjs
+          node tests/aquarium/browser-v041-observation.test.cjs
+          node tests/aquarium/browser-v041-standalone.test.cjs
+          node tests/aquarium/browser-v041-life.test.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aquarium-v041-browser-evidence
+          path: artifacts/aquarium-v041/

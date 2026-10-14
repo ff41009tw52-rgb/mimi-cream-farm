@@ -1,0 +1,629 @@
+{
+  "fps": 60.00300015000753,
+  "p95": 16.700000000004366,
+  "longFrames": 0,
+  "max": 16.80000000000291,
+  "simulationAndDrawMeanMs": 1.0232686980626187,
+  "simulationAndDrawMaxMs": 7.700000000069849,
+  "fish": 15,
+  "decor": 15,
+  "foodAtStart": 4,
+  "coinsAtStart": 2,
+  "environmentVisits": 3,
+  "environmentActiveAtStart": 3,
+  "runtime": [
+    {
+      "id": "life-0",
+      "x": 0.24096479937550952,
+      "y": 0.45203843234440777,
+      "vx": -0.011296641481191742,
+      "vy": 0.03855985775292633,
+      "target": {
+        "x": 0.2075704251823809,
+        "y": 0.3938066522468844
+      },
+      "turn": -0.9999999999022277,
+      "heading": 0.30853144804863025,
+      "phase": 259.8148742289097,
+      "wander": 6.861627094688136,
+      "pause": 0,
+      "burst": 0,
+      "direction": -1,
+      "position": {
+        "x": 0.24096479937550952,
+        "y": 0.45203843234440777
+      },
+      "preferredDepth": [
+        0.17,
+        0.56
+      ],
+      "speed": 0.075,
+      "coinValue": 4,
+      "behavior": "停頓擺尾",
+      "behaviorState": "school",
+      "poi": null,
+      "poiWait": 8.117000000000111,
+      "poiRemaining": 0,
+      "poiReached": false,
+      "hiddenAmount": 0,
+      "environmentSeconds": 0,
+      "environmentVisits": 0,
+      "environmentVisitedNow": false,
+      "motionAngle": 8.138970740774061,
+      "magnitude": 0.0401805517468401
+    },
+    {
+      "id": "life-1",
+      "x": 0.3389215907201119,
+      "y": 0.26427127858816507,
+      "vx": 0.06294561619991498,
+      "vy": 0.0295027467003225,
+      "target": {
+        "x": 0.616319513403028,
+        "y": 0.49947906346036075
+      },
+      "turn": 0.9997708887396772,
+      "heading": 0.32702207674108463,
+      "phase": 268.32847973144123,
+      "wander": 5.439994593379063,
+      "pause": 0,
+      "burst": 0,
+      "direction": 1,
+      "position": {
+        "x": 0.3389215907201119,
+        "y": 0.26427127858816507
+      },
+      "preferredDepth": [
+        0.17,
+        0.56
+      ],
+      "speed": 0.075,
+      "coinValue": 4,
+      "behavior": "停頓擺尾",
+      "behaviorState": "school",
+      "poi": null,
+      "poiWait": 8.7003000000001,
+      "poiRemaining": 0,
+      "poiReached": false,
+      "hiddenAmount": 0,
+      "environmentSeconds": 0,
+      "environmentVisits": 0,
+      "environmentVisitedNow": false,
+      "motionAngle": 0.4382973427656757,
+      "magnitude": 0.06951663586257889
+    },
+    {
+      "id": "life-2",
+      "x": 0.5646932554475035,
+      "y": 0.31827717985445786,
+      "vx": 0.04199190944118473,
+      "vy": 0.019028386077824647,
+      "target": {
+        "x": 0.6627027649910667,
+        "y": 0.3985457498620012
+      },
+      "turn": 0.9999999999999994,
+      "heading": 0.19373546533744884,
+      "phase": 233.94493695914244,
+      "wander": 1.1490478288912038,
+      "pause": 0,
+      "burst": 0,
+      "direction": 1,
+      "position": {
+        "x": 0.5646932554475035,
+        "y": 0.31827717985445786
+      },
+      "preferredDepth": [
+        0.17,
+        0.56
+      ],
+      "speed": 0.075,
+      "coinValue": 4,
+      "behavior": "巡遊",
+      "behaviorState": "school",
+      "poi": null,
+      "poiWait": 21.484273285157073,
+      "poiRemaining": 0,
+      "poiReached": false,
+      "hiddenAmount": 0,
+      "environmentSeconds": 0,
+      "environmentVisits": 0,
+      "environmentVisitedNow": false,
+      "motionAngle": 0.4254654849608277,
+      "magnitude": 0.04610205998915244
+    },
+    {
+      "id": "life-3",
+      "x": 0.3400478475999341,
+      "y": 0.37157680788503633,
+      "vx": 0.05802531993266461,
+      "vy": 0.03900350758485654,
+      "target": {
+        "x": 0.5168372681908483,
+        "y": 0.5004564849987889
+      },
+      "turn": 0.9999999999999994,
+      "heading": 0.3197782650073839,
+      "phase": 231.3928472275695,
+      "wander": 6.232674033913033,
+      "pause": 0,
+      "burst": 0,
+      "direction": 1,
+      "position": {
+        "x": 0.3400478475999341,
+        "y": 0.37157680788503633
+      },
+      "preferredDepth": [
+        0.17,
+        0.56
+      ],
+      "speed": 0.075,
+      "coinValue": 4,
+      "behavior": "巡遊",
+      "behaviorState": "school",
+      "poi": null,
+      "poiWait": 29.66817092885377,
+      "poiRemaining": 0,
+      "poiReached": false,
+      "hiddenAmount": 0,
+      "environmentSeconds": 0,
+      "environmentVisits": 0,
+      "environmentVisitedNow": false,
+      "motionAngle": 0.5918103904485581,
+      "magnitude": 0.06991574470181983
+    },
+    {
+      "id": "life-4",
+      "x": 0.15913952312480728,
+      "y": 0.8504172683301345,
+      "vx": 0.014630582774393351,
+      "vy": -0.011744810013072015,
+      "target": {
+        "x": 0.3469363292058904,
+        "y": 0.889662367752596
+      },
+      "turn": 0.6721840749355318,
+      "heading": -0.3795461416486926,
+      "phase": 212.0595275882919,
+      "wander": 2.0346681567138916,
+      "pause": 0,
+      "burst": 0,
+      "direction": 1,
+      "position": {
+        "x": 0.15913952312480728,
+        "y": 0.8504172683301345
+      },
+      "preferredDepth": [
+        0.81,
+        0.9
+      ],
+      "speed": 0.032,
+      "coinValue": 5,
+      "behavior": "巡底",
+      "behaviorState": "explore",
+      "poi": null,
+      "poiWait": 29.161032210076108,
+      "poiRemaining": 0,
+      "poiReached": false,
+      "hiddenAmount": 0,
+      "environmentSeconds": 0,
+      "environmentVisits": 0,
+      "environmentVisitedNow": false,
+      "motionAngle": -13.24279069719258,
+      "magnitude": 0.018761516851297823
+    },
+    {
+      "id": "life-5",
+      "x": 0.21163308016785534,
+      "y": 0.915,
+      "vx": 0.03586144194477681,
+      "vy": 0.049528858475448835,
+      "target": {
+        "x": 0.3428568071465449,
+        "y": 0.8680992047619537
+      },
+      "turn": -0.18311072873362957,
+      "heading": 0.28818489100874206,
+      "phase": 194.6247706202782,
+      "wander": 2.794569512922075,
+      "pause": 0,
+      "burst": 0.8886123710048951,
+      "direction": 1,
+      "position": {
+        "x": 0.21163308016785534,
+        "y": 0.915
+      },
+      "preferredDepth": [
+        0.81,
+        0.9
+      ],
+      "speed": 0.032,
+      "coinValue": 5,
+      "behavior": "短衝",
+      "behaviorState": "explore",
+      "poi": null,
+      "poiWait": 57.27881333831178,
+      "poiRemaining": 0,
+      "poiReached": false,
+      "hiddenAmount": 0,
+      "environmentSeconds": 12.016199999999985,
+      "environmentVisits": 0,
+      "environmentVisitedNow": false,
+      "motionAngle": 0.9441101580420427,
+      "magnitude": 0.061148596388139916
+    },
+    {
+      "id": "life-6",
+      "x": 0.83699791209877,
+      "y": 0.2100602701396823,
+      "vx": 0.02387737706399166,
+      "vy": 0.02093763182418573,
+      "target": {
+        "x": 0.8778699234410914,
+        "y": 0.2614099999999995
+      },
+      "turn": 0.999635299036945,
+      "heading": 0.35446246786260244,
+      "phase": 190.92037217810432,
+      "wander": -5.166500000000008,
+      "pause": 0,
+      "burst": 0,
+      "direction": 1,
+      "position": {
+        "x": 0.83699791209877,
+        "y": 0.2100602701396823
+      },
+      "preferredDepth": [
+        0.23,
+        0.76
+      ],
+      "speed": 0.034,
+      "coinValue": 6,
+      "behavior": "追食",
+      "behaviorState": "feed",
+      "poi": null,
+      "poiWait": 15,
+      "poiRemaining": 0,
+      "poiReached": false,
+      "hiddenAmount": 0,
+      "environmentSeconds": 0,
+      "environmentVisits": 0,
+      "environmentVisitedNow": false,
+      "motionAngle": 7.003079980101478,
+      "magnitude": 0.03175710254196988
+    },
+    {
+      "id": "life-7",
+      "x": 0.5475513624259152,
+      "y": 0.4211264589251536,
+      "vx": -0.034312606626077206,
+      "vy": 0.05360001907905311,
+      "target": {
+        "x": 0.5156588554175845,
+        "y": 0.4591915016710719
+      },
+      "turn": -0.9999999999997929,
+      "heading": 0.39980334473044793,
+      "phase": 293.7230218522853,
+      "wander": 5.826002443484342,
+      "pause": 0,
+      "burst": 0,
+      "direction": -1,
+      "position": {
+        "x": 0.5475513624259152,
+        "y": 0.4211264589251536
+      },
+      "preferredDepth": [
+        0.16,
+        0.54
+      ],
+      "speed": 0.095,
+      "coinValue": 4,
+      "behavior": "巡遊",
+      "behaviorState": "explore",
+      "poi": null,
+      "poiWait": 38.14966499639801,
+      "poiRemaining": 0,
+      "poiReached": false,
+      "hiddenAmount": 0,
+      "environmentSeconds": 0,
+      "environmentVisits": 0,
+      "environmentVisitedNow": false,
+      "motionAngle": 8.423408567869139,
+      "magnitude": 0.06364210099258803
+    },
+    {
+      "id": "life-8",
+      "x": 0.6365815999941132,
+      "y": 0.648534001055341,
+      "vx": 0.010488792647535342,
+      "vy": -0.016667765185849396,
+      "target": {
+        "x": 0.8956486497039294,
+        "y": 0.26740999999999937
+      },
+      "turn": 0.8250272912904777,
+      "heading": -0.3991148131623896,
+      "phase": 198.7437878964119,
+      "wander": -1.0570506832412774,
+      "pause": 0,
+      "burst": 0,
+      "direction": 1,
+      "position": {
+        "x": 0.6365815999941132,
+        "y": 0.648534001055341
+      },
+      "preferredDepth": [
+        0.31,
+        0.73
+      ],
+      "speed": 0.026,
+      "coinValue": 10,
+      "behavior": "追食",
+      "behaviorState": "feed",
+      "poi": null,
+      "poiWait": 48.359317636384475,
+      "poiRemaining": 0,
+      "poiReached": false,
+      "hiddenAmount": 0,
+      "environmentSeconds": 12.016199999999975,
+      "environmentVisits": 0,
+      "environmentVisitedNow": false,
+      "motionAngle": 5.274064486548152,
+      "magnitude": 0.01969337877291768
+    },
+    {
+      "id": "life-9",
+      "x": 0.7508872008995685,
+      "y": 0.5782752400129171,
+      "vx": -0.006062609285881707,
+      "vy": -0.014973834818936197,
+      "target": {
+        "x": 0.1849755833600534,
+        "y": 0.6883478994939234
+      },
+      "turn": -0.9991295436975717,
+      "heading": -0.39937713771810307,
+      "phase": 179.3096149422732,
+      "wander": 3.8088904091664073,
+      "pause": 0,
+      "burst": 0,
+      "direction": -1,
+      "position": {
+        "x": 0.7508872008995685,
+        "y": 0.5782752400129171
+      },
+      "preferredDepth": [
+        0.31,
+        0.73
+      ],
+      "speed": 0.026,
+      "coinValue": 10,
+      "behavior": "巡遊",
+      "behaviorState": "explore",
+      "poi": null,
+      "poiWait": 35.887764015156634,
+      "poiRemaining": 0,
+      "poiReached": true,
+      "hiddenAmount": 0,
+      "environmentSeconds": 12.016199999999978,
+      "environmentVisits": 1,
+      "environmentVisitedNow": false,
+      "motionAngle": -1.955502683146616,
+      "magnitude": 0.016154595647618206
+    },
+    {
+      "id": "life-10",
+      "x": 0.4897475433665565,
+      "y": 0.44010875737227834,
+      "vx": -0.03461906449574155,
+      "vy": -0.0038160629111655396,
+      "target": {
+        "x": 0.30536244406614566,
+        "y": 0.2671565366895667
+      },
+      "turn": -0.9900134041588886,
+      "heading": -0.045540839343990266,
+      "phase": 190.34447686038433,
+      "wander": 4.540701769343685,
+      "pause": 0,
+      "burst": 0,
+      "direction": -1,
+      "position": {
+        "x": 0.4897475433665565,
+        "y": 0.44010875737227834
+      },
+      "preferredDepth": [
+        0.19,
+        0.59
+      ],
+      "speed": 0.029,
+      "coinValue": 9,
+      "behavior": "巡遊",
+      "behaviorState": "explore",
+      "poi": null,
+      "poiWait": 23.439696848979295,
+      "poiRemaining": 0,
+      "poiReached": false,
+      "hiddenAmount": 0,
+      "environmentSeconds": 0,
+      "environmentVisits": 0,
+      "environmentVisitedNow": false,
+      "motionAngle": -3.0318057842882924,
+      "magnitude": 0.03482875195441672
+    },
+    {
+      "id": "life-11",
+      "x": 0.6627378666652606,
+      "y": 0.32023790881771014,
+      "vx": 0.027014908605705094,
+      "vy": 0.05170061498699531,
+      "target": {
+        "x": 0.693954484674127,
+        "y": 0.4805389042387432
+      },
+      "turn": 0.9999999999999345,
+      "heading": 0.36769593942045525,
+      "phase": 241.21799635045952,
+      "wander": 4.383744256961448,
+      "pause": 0,
+      "burst": 0,
+      "direction": 1,
+      "position": {
+        "x": 0.6627378666652606,
+        "y": 0.32023790881771014
+      },
+      "preferredDepth": [
+        0.2,
+        0.6
+      ],
+      "speed": 0.061,
+      "coinValue": 5,
+      "behavior": "短衝",
+      "behaviorState": "explore",
+      "poi": null,
+      "poiWait": 9.833500000000088,
+      "poiRemaining": 0,
+      "poiReached": false,
+      "hiddenAmount": 0,
+      "environmentSeconds": 0,
+      "environmentVisits": 0,
+      "environmentVisitedNow": false,
+      "motionAngle": -5.193894460716049,
+      "magnitude": 0.05833317132651133
+    },
+    {
+      "id": "life-12",
+      "x": 0.12065244971566513,
+      "y": 0.715318987268061,
+      "vx": -0.0007166535308476691,
+      "vy": 0.024565614587200333,
+      "target": {
+        "x": 0.060000000000000005,
+        "y": 0.82
+      },
+      "turn": -0.99999999998527,
+      "heading": 0.3999999982052341,
+      "phase": 219.87780761849734,
+      "wander": -5.405944002627961,
+      "pause": 0,
+      "burst": 0,
+      "direction": -1,
+      "position": {
+        "x": 0.12065244971566513,
+        "y": 0.715318987268061
+      },
+      "preferredDepth": [
+        0.33,
+        0.73
+      ],
+      "speed": 0.042,
+      "coinValue": 6,
+      "behavior": "看看魚缸布置",
+      "behaviorState": "inspectDecoration",
+      "poi": {
+        "id": "decor-life-8",
+        "decoration": "wood",
+        "x": 0.060000000000000005,
+        "y": 0.82,
+        "tags": [
+          "wood",
+          "bottom",
+          "curiosity"
+        ],
+        "canHide": false,
+        "weight": 0.75
+      },
+      "poiWait": 30.158977601098087,
+      "poiRemaining": 2.333700000000023,
+      "poiReached": false,
+      "hiddenAmount": 0,
+      "environmentSeconds": 9.682900000000016,
+      "environmentVisits": 0,
+      "environmentVisitedNow": false,
+      "motionAngle": 1.5999610898250216,
+      "magnitude": 0.02457606584321718
+    },
+    {
+      "id": "life-13",
+      "x": 0.5326454400682675,
+      "y": 0.5531468308911957,
+      "vx": -0.048143169397116,
+      "vy": 0.030220627624587177,
+      "target": {
+        "x": 0.4092169171055858,
+        "y": 0.6451716843923423
+      },
+      "turn": -0.9999999982653416,
+      "heading": 0.3698961352494859,
+      "phase": 230.09378483956186,
+      "wander": 4.5282203809535115,
+      "pause": 0,
+      "burst": 0,
+      "direction": -1,
+      "position": {
+        "x": 0.5326454400682675,
+        "y": 0.5531468308911957
+      },
+      "preferredDepth": [
+        0.39,
+        0.68
+      ],
+      "speed": 0.057,
+      "coinValue": 6,
+      "behavior": "巡遊",
+      "behaviorState": "explore",
+      "poi": null,
+      "poiWait": 37.02251048600794,
+      "poiRemaining": 0,
+      "poiReached": true,
+      "hiddenAmount": 0,
+      "environmentSeconds": 7.716300000000037,
+      "environmentVisits": 1,
+      "environmentVisitedNow": false,
+      "motionAngle": -3.7021484735865364,
+      "magnitude": 0.0568423353990964
+    },
+    {
+      "id": "life-14",
+      "x": 0.26531216101241045,
+      "y": 0.7121769752233936,
+      "vx": 0.04723818421844064,
+      "vy": -0.03862822264474897,
+      "target": {
+        "x": 0.38321169556268103,
+        "y": 0.6073648099635562
+      },
+      "turn": 0.9999868574147731,
+      "heading": -0.23727889050848183,
+      "phase": 230.5938601813865,
+      "wander": 6.635398172976162,
+      "pause": 0,
+      "burst": 0,
+      "direction": 1,
+      "position": {
+        "x": 0.26531216101241045,
+        "y": 0.7121769752233936
+      },
+      "preferredDepth": [
+        0.3,
+        0.69
+      ],
+      "speed": 0.071,
+      "coinValue": 6,
+      "behavior": "巡遊",
+      "behaviorState": "explore",
+      "poi": null,
+      "poiWait": 39.712690541759414,
+      "poiRemaining": 0,
+      "poiReached": true,
+      "hiddenAmount": 0,
+      "environmentSeconds": 12.016099999999978,
+      "environmentVisits": 1,
+      "environmentVisitedNow": false,
+      "motionAngle": 5.597724694983493,
+      "magnitude": 0.06102119003221448
+    }
+  ],
+  "frames": 360
+}
