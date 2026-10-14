@@ -1,0 +1,37 @@
+name: Test aquarium V0.4 observation and saves
+on:
+  push:
+    paths: ['aquarium-v0.4*.html', 'assets/aquarium-v04/**', 'scripts/build-aquarium-v04.py', 'tests/aquarium/*v04*', '.github/workflows/test-aquarium-v04.yml']
+  pull_request:
+    paths: ['aquarium-v0.4*.html', 'assets/aquarium-v04/**', 'scripts/build-aquarium-v04.py', 'tests/aquarium/*v04*', '.github/workflows/test-aquarium-v04.yml']
+jobs:
+  observation-and-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate scripts, migrations and portable build
+        run: |
+          for file in assets/aquarium-v04/*.js; do node --check "$file"; done
+          node tests/aquarium/schema-v04.test.cjs
+          python3 scripts/build-aquarium-v04.py
+          git diff --exit-code -- aquarium-v0.4-standalone.html
+      - name: Prepare browser test runtime
+        run: |
+          npm install --prefix /tmp/aquarium-v04-runtime playwright@1.58.2
+          /tmp/aquarium-v04-runtime/node_modules/.bin/playwright install --with-deps chromium
+          echo 'NODE_PATH=/tmp/aquarium-v04-runtime/node_modules' >> "$GITHUB_ENV"
+      - name: Play the game, observe, and verify save protection
+        run: |
+          node tests/aquarium/browser-v04.test.cjs
+          node tests/aquarium/browser-v04-guards.test.cjs
+          node tests/aquarium/browser-v04-observation.test.cjs
+          node tests/aquarium/browser-v04-standalone.test.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aquarium-v04-browser-evidence
+          path: artifacts/aquarium-v04/
