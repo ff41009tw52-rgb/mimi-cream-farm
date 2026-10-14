@@ -1,0 +1,41 @@
+{
+  "at": "2026-10-14T07:58:40.765Z",
+  "base": "https://ff41009tw52-rgb.github.io/mimi-cream-farm/",
+  "browser": "153.0.8010.0",
+  "results": [
+    {
+      "test": "published bytes equal tested sources",
+      "matched": [
+        "aquarium-v0.4.html",
+        "aquarium-v0.4-standalone.html",
+        "assets/aquarium-v04/aquarium-data.js",
+        "assets/aquarium-v04/aquarium-observation-content.js",
+        "assets/aquarium-v04/aquarium-observation-renderer.js",
+        "assets/aquarium-v04/aquarium-observation.css",
+        "assets/aquarium-v04/aquarium-observation.js",
+        "assets/aquarium-v04/aquarium-save.js",
+        "assets/aquarium-v04/aquarium-world.js",
+        "assets/aquarium-v04/aquarium.css",
+        "assets/aquarium-v04/aquarium.js"
+      ]
+    },
+    {
+      "test": "published feeding, card entry, 3 topics, slow motion, cutaway, return and reload",
+      "passed": true
+    },
+    {
+      "test": "published touch 820x1180",
+      "passed": true
+    },
+    {
+      "test": "published touch 390x844",
+      "passed": true
+    },
+    {
+      "test": "real published V3 auto/manual migration, old files unchanged, shared V4 standalone progress and observation",
+      "passed": true
+    }
+  ],
+  "errors": [],
+  "failedRequests": []
+}

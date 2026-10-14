@@ -17,7 +17,7 @@
 
 保留 V0.1～V0.3、原始呼吸教學頁與其他網站檔案。沒有增加魚種、繁殖、疾病、AI、任務、背景音樂或問答測驗。
 
-實作 commit：[`3321110eb97a66bbad81f584f3ab13cdab5a0909`](https://github.com/ff41009tw52-rgb/mimi-cream-farm/commit/3321110eb97a66bbad81f584f3ab13cdab5a0909)。分支：`feat/aquarium-game-v04`。報告與證據以後續 docs commit 加入同一 PR。
+實作 commit：[`3321110eb97a66bbad81f584f3ab13cdab5a0909`](https://github.com/ff41009tw52-rgb/mimi-cream-farm/commit/3321110eb97a66bbad81f584f3ab13cdab5a0909)。分支：`feat/aquarium-game-v04`。[PR #68](https://github.com/ff41009tw52-rgb/mimi-cream-farm/pull/68) 已合併；合併 commit `c64a0cab4a7414b1d4a466ed7372778f8355de61`。報告與證據位於同一 PR。
 
 ## A. 用詞修繕
 
@@ -152,6 +152,7 @@
 | 遊戲速度隔離 | 同一進度、固定 10 秒，在 0.5×／2× 觀察下，魚成長、飽食、水質、產幣進度、金幣與主迴圈次數完全一致 |
 | 平板與手機 | Chromium touch 模擬 1024×768、820×1180、390×844：三主題均可操作、44px 控制、無橫向溢出、返回正常 |
 | 魚類行為 | 180 秒重現測試：快斑馬、慢金魚／神仙、鼠魚底層、個性、環境互動及沉底飼料行為保持 |
+| 正式部署 | 11 個發布檔逐位元相符；正式 V3 自動／手動承接、3 主題、觸控、返回刷新與 V4 單檔共用進度通過；無 JS／HTTP 錯誤 |
 | 離線單檔 | file:// 真實 V0.2 自動／手動升級、刷新、觀察呼吸透視通過；無外部網路請求 |
 
 效能：正常速度的真實 RAF 中，15 魚＋15 裝飾＋飼料＋金幣為 **60.0 FPS**，P95 幀間隔 **16.7 ms**，平均遊戲運算與繪圖 **0.57 ms**。三個觀察主題分別為 **60.0／60.0／60.0 FPS**。這是目前 Linux/headless Chromium 的量測，不等於每台平板的保證。
@@ -186,10 +187,10 @@
 - `tests/aquarium/schema-v04.test.cjs`
 - `tests/aquarium/v04-harness.cjs`
 
-另新增本報告、`docs/aquarium-v04/index.html`、15 張 `screenshots/*.png` 與 8 份 `test-results/*.json`。
+另新增本報告、`docs/aquarium-v04/index.html`、15 張 `screenshots/*.png` 與 9 份 `test-results/*.json`，另有 `release-verification.md`。
 
 ### 發布與尚未實測事項
 
-預定正式網址為本報告上方的 V0.4 獨立入口。PR 合併與線上檢查結果將記錄於 `docs/aquarium-v04/release-verification.md`，不能只用本機測試宣稱已部署。
+正式網址為本報告上方的 V0.4 獨立入口。[PR 自動測試](https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/38531238306) 與 [Pages 部署](https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/38531493150) 已成功。線上驗證見 [發布紀錄](docs/aquarium-v04/release-verification.md)。
 
 本次規格的用詞與觀察複習功能已完成。水中氧氣、設備、小事件屬尚未實作的原規劃，依本次範圍保留，不補成整套系統。實體 iPad／Android 平板、Safari／Firefox、真人音效聽感及四年級學生課堂實測尚未執行；沒有宣稱這些已通過。
