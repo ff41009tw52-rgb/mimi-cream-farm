@@ -1,0 +1,106 @@
+{
+  "version": "0.4.1-r2",
+  "checks": [
+    {
+      "key": "guppy",
+      "pixels": 11938,
+      "breathingChangedChannels": 1189,
+      "mirrorMeanError": 0.09549560546875,
+      "contextPreserved": true
+    },
+    {
+      "key": "goldfish",
+      "pixels": 16680,
+      "breathingChangedChannels": 2011,
+      "mirrorMeanError": 0.1025390625,
+      "contextPreserved": true
+    },
+    {
+      "key": "cory",
+      "pixels": 10046,
+      "breathingChangedChannels": 1278,
+      "mirrorMeanError": 0.05708984375,
+      "contextPreserved": true
+    },
+    {
+      "key": "zebra",
+      "pixels": 6072,
+      "breathingChangedChannels": 895,
+      "mirrorMeanError": 0.047568359375,
+      "contextPreserved": true
+    },
+    {
+      "key": "molly",
+      "pixels": 12947,
+      "breathingChangedChannels": 2054,
+      "mirrorMeanError": 0.06503662109375,
+      "contextPreserved": true
+    },
+    {
+      "key": "swordtail",
+      "pixels": 8561,
+      "breathingChangedChannels": 1140,
+      "mirrorMeanError": 0.05611572265625,
+      "contextPreserved": true
+    },
+    {
+      "key": "whitecloud",
+      "pixels": 6500,
+      "breathingChangedChannels": 840,
+      "mirrorMeanError": 0.045224609375,
+      "contextPreserved": true
+    },
+    {
+      "key": "cardinal",
+      "pixels": 7166,
+      "breathingChangedChannels": 974,
+      "mirrorMeanError": 0.0689453125,
+      "contextPreserved": true
+    },
+    {
+      "key": "angel",
+      "pixels": 15433,
+      "breathingChangedChannels": 1283,
+      "mirrorMeanError": 0.11661376953125,
+      "contextPreserved": true
+    },
+    {
+      "key": "betta",
+      "pixels": 20526,
+      "breathingChangedChannels": 1354,
+      "mirrorMeanError": 0.17615234375,
+      "contextPreserved": true
+    }
+  ],
+  "variants": [
+    {
+      "key": "guppy_sky",
+      "paletteChangedChannels": 35311
+    },
+    {
+      "key": "guppy_sunset",
+      "paletteChangedChannels": 35445
+    },
+    {
+      "key": "goldfish_cream",
+      "paletteChangedChannels": 49323
+    },
+    {
+      "key": "molly_pearl",
+      "paletteChangedChannels": 38729
+    },
+    {
+      "key": "angel_gold",
+      "paletteChangedChannels": 43905
+    },
+    {
+      "key": "betta_orchid",
+      "paletteChangedChannels": 59620
+    },
+    {
+      "key": "betta_dawn",
+      "paletteChangedChannels": 60394
+    }
+  ],
+  "errors": []
+}

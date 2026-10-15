@@ -1,5 +1,5 @@
 const {chromium}=require('playwright'),fs=require('node:fs'),path=require('node:path'),http=require('node:http');
-const ROOT=path.resolve(__dirname,'../..'),OUT=process.env.AQUARIUM_ARTIFACTS||path.join(ROOT,'artifacts/aquarium-v041'),KEY='aquarium_game_save_v4';
+const ROOT=path.resolve(__dirname,'../..'),OUT=process.env.AQUARIUM_ARTIFACTS||path.join(ROOT,'artifacts/aquarium-v041-r2'),KEY='aquarium_game_save_v4';
 async function harness(port){
  fs.mkdirSync(OUT,{recursive:true});const server=http.createServer((req,res)=>{const file=path.join(ROOT,decodeURIComponent(req.url.split('?')[0]));if(!file.startsWith(ROOT+path.sep))return res.writeHead(403).end();fs.readFile(file,(err,data)=>{if(err)return res.writeHead(404).end();res.setHeader('Content-Type',file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'text/html; charset=utf-8');res.end(data);});});await new Promise(r=>server.listen(port,'127.0.0.1',r));
  const browser=await chromium.launch({headless:true,executablePath:process.env.AQUARIUM_CHROMIUM,args:['--no-sandbox','--disable-dev-shm-usage']});const errors=[],results=[];let serial=0;
@@ -12,10 +12,11 @@ async function harness(port){
  const pass=(name,details)=>{results.push({name,passed:true,details});console.log('PASS',name,details||'');};
  const advance=(p,ms)=>p.clock.runFor(ms),closeDialog=p=>p.locator('#dialog-close').click();
  async function shop(p,tab='fish'){await p.locator('#shop').click();await p.locator('#tab-'+tab).click();}
- const shot=(p,name)=>p.screenshot({path:path.join(OUT,name+'.png'),fullPage:true});
+ async function settings(p){if(!await p.locator('#settings').isVisible())await p.locator('#more-menu').click();await p.locator('#settings').click();const tools=p.locator('.save-tools');if(await tools.count()&&!await tools.evaluate(e=>e.open))await tools.locator('summary').click();}
+ const shot=(p,name)=>{const jpeg=process.env.AQUARIUM_JPEG==='1';return p.screenshot({path:path.join(OUT,name+(jpeg?'.jpg':'.png')),type:jpeg?'jpeg':'png',...(jpeg?{quality:88}:{}),fullPage:true});};
  const legacy=()=>{const s=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/v02-real-save.json')));s.savedAt=Date.now();return s;};
  const saveResults=(name,data)=>fs.writeFileSync(path.join(OUT,name+'.json'),JSON.stringify(data,null,2));
  const close=async()=>{await browser.close();await new Promise(r=>server.close(r));};
- return {ROOT,OUT,KEY,browser,errors,results,read,create,pass,advance,closeDialog,shop,shot,legacy,saveResults,close};
+ return {ROOT,OUT,KEY,browser,errors,results,read,create,pass,advance,closeDialog,shop,settings,shot,legacy,saveResults,close};
 }
 module.exports={harness};
