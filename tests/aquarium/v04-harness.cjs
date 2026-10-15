@@ -7,7 +7,7 @@ async function harness(port){
  async function create({size={width:1440,height:960},state,key=KEY,seed={},query='debug=1',url,clock=true,cadence=0,touch=false}={}){
   const context=await browser.newContext({viewport:size,deviceScaleFactor:1,hasTouch:touch,acceptDownloads:true});const p=await context.newPage();p.on('pageerror',e=>errors.push(e.message));if(state!==undefined)seed={...seed,[key]:typeof state==='string'?state:JSON.stringify(state)};
   if(clock)await p.clock.install();await p.addInitScript(({values,cadence,serial})=>{if(!sessionStorage.getItem('seeded')){for(const[k,v]of Object.entries(values))localStorage.setItem(k,typeof v==='string'?v:JSON.stringify(v));sessionStorage.setItem('seeded','1');}Math.random=(()=>{let seed=812;return()=>{seed=seed*16807%2147483647;return seed/2147483647;};})();let counter=0;const navigation=+(sessionStorage.getItem('navigation')||0)+1;sessionStorage.setItem('navigation',navigation);Object.defineProperty(crypto,'randomUUID',{value:()=>`test-${serial}-${navigation}-${++counter}`});if(cadence){window.requestAnimationFrame=cb=>setTimeout(()=>cb(performance.now()),cadence);window.cancelAnimationFrame=id=>clearTimeout(id);}}, {values:seed,cadence,serial:++serial});
-  await p.goto(url||`http://127.0.0.1:${port}/aquarium-v0.4.html?${query}`);if(clock)await p.clock.pauseAt(new Date(Date.now()+600));return {p,context};
+  await p.goto(url||`http://127.0.0.1:${port}/aquarium-v0.4.0.html?${query}`);if(clock)await p.clock.pauseAt(new Date(Date.now()+600));return {p,context};
  }
  const pass=(name,details)=>{results.push({name,passed:true,details});console.log('PASS',name,details||'');};
  const advance=(p,ms)=>p.clock.runFor(ms),closeDialog=p=>p.locator('#dialog-close').click();

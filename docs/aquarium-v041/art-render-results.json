@@ -1,0 +1,90 @@
+[
+  {
+    "key": "guppy",
+    "moves": true,
+    "grows": true,
+    "flips": true
+  },
+  {
+    "key": "goldfish",
+    "moves": true,
+    "grows": true,
+    "flips": true
+  },
+  {
+    "key": "cory",
+    "moves": true,
+    "grows": true,
+    "flips": true
+  },
+  {
+    "key": "zebra",
+    "moves": true,
+    "grows": true,
+    "flips": true
+  },
+  {
+    "key": "molly",
+    "moves": true,
+    "grows": true,
+    "flips": true
+  },
+  {
+    "key": "swordtail",
+    "moves": true,
+    "grows": true,
+    "flips": true
+  },
+  {
+    "key": "whitecloud",
+    "moves": true,
+    "grows": true,
+    "flips": true
+  },
+  {
+    "key": "cardinal",
+    "moves": true,
+    "grows": true,
+    "flips": true
+  },
+  {
+    "key": "angel",
+    "moves": true,
+    "grows": true,
+    "flips": true
+  },
+  {
+    "key": "betta",
+    "moves": true,
+    "grows": true,
+    "flips": true
+  },
+  {
+    "variant": "guppy_sky",
+    "distinct": true
+  },
+  {
+    "variant": "guppy_sunset",
+    "distinct": true
+  },
+  {
+    "variant": "goldfish_cream",
+    "distinct": true
+  },
+  {
+    "variant": "molly_pearl",
+    "distinct": true
+  },
+  {
+    "variant": "angel_gold",
+    "distinct": true
+  },
+  {
+    "variant": "betta_orchid",
+    "distinct": true
+  },
+  {
+    "variant": "betta_dawn",
+    "distinct": true
+  }
+]
