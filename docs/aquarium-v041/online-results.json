@@ -1,0 +1,40 @@
+{
+  "at": "2026-10-15T00:15:50.252Z",
+  "base": "https://ff41009tw52-rgb.github.io/mimi-cream-farm/",
+  "browser": "153.0.8010.0",
+  "results": [
+    {
+      "test": "published bytes match tested sources",
+      "files": [
+        "aquarium-v0.4.html",
+        "aquarium-v0.4.1.html",
+        "aquarium-v0.4.1-standalone.html",
+        "aquarium-v0.4.0.html",
+        "assets/aquarium-v041/aquarium-data.js",
+        "assets/aquarium-v041/aquarium-fish-art.js",
+        "assets/aquarium-v041/aquarium-observation-content.js",
+        "assets/aquarium-v041/aquarium-observation-renderer.js",
+        "assets/aquarium-v041/aquarium-observation.css",
+        "assets/aquarium-v041/aquarium-observation.js",
+        "assets/aquarium-v041/aquarium-save.js",
+        "assets/aquarium-v041/aquarium-world.js",
+        "assets/aquarium-v041/aquarium.css",
+        "assets/aquarium-v041/aquarium.js"
+      ]
+    },
+    {
+      "test": "live V0.4 save and manual snapshot carried to official V0.4.1 alias",
+      "passed": true
+    },
+    {
+      "test": "live feed, more menu, fish card, observation3topics, shop and refresh",
+      "passed": true
+    },
+    {
+      "test": "portrait layout and published standalone share the same progress",
+      "passed": true
+    }
+  ],
+  "errors": [],
+  "failedRequests": []
+}

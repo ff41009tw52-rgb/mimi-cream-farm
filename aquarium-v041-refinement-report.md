@@ -88,3 +88,7 @@
 - 新增 `tests/aquarium/*v041*.cjs`、`.github/workflows/test-aquarium-v041.yml`。
 - 舊版 harness 與硬編碼入口改為 `aquarium-v0.4.0.html`，繼續驗證原 V0.4。
 - 新增本報告與 `docs/aquarium-v041/` 畫面、測試 JSON、前後對照展示頁。
+
+## 發布結果
+
+2026-10-15 已合併 [PR #69](https://github.com/ff41009tw52-rgb/mimi-cream-farm/pull/69) 並部署成功。V0.4 與 V0.4.1 兩套 GitHub 回歸測試均通過。正式網站的14個 HTML／JS／CSS 檔案與測試版本一致，線上餵食、商店、觀察、刷新及真正 V0.4 原存檔承接測試通過，沒有 JavaScript 錯誤或失敗請求。詳見 `docs/aquarium-v041/release-verification.md` 與 `online-results.json`。
