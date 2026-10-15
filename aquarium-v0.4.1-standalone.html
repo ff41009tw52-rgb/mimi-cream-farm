@@ -23,6 +23,11 @@
 .hud{grid-template-columns:1fr 1.2fr 1fr;gap:14px 24px;padding:16px 24px 10px}.level-stat{grid-column:1/3;display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;border-top:1px solid #e5eadc;padding-top:10px;font-size:12px}.level-stat .xp-track{width:96px;margin:0}.level-stat small{font-size:11px}.save-status{grid-column:3;grid-row:2;font-size:11px;padding-top:8px}.water-track{display:block;flex:1;max-width:90px}.stat-label{font-size:13px}.hud .stat strong{font-size:26px}footer{flex-wrap:wrap;gap:10px;margin-top:16px}footer p{width:100%;text-align:center;font-size:12px;line-height:1.7}.secondary-button{padding:10px 23px;min-height:48px;background:#e3ede1;border:1px solid #d0dfcb;border-radius:13px;font-size:14px;font-weight:700}#collect-all{font-size:14px;padding:10px 18px;border-radius:12px;background:#fff0c5;color:#84622b;text-decoration:none}.more-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.more-item{padding:24px 18px;background:#edf4e8;border:1px solid #d8e4d1;border-radius:16px;text-align:left}.more-item strong{font-size:19px}.more-item p{margin:8px 0 0;line-height:1.7;font-size:13px;color:#6d8471}.fish-card{width:240px;max-height:calc(100% - 98px);overflow-y:auto;overscroll-behavior:contain;padding:16px 18px 12px;top:52px}.fish-card>p{margin-bottom:8px}.fish-card .personality{font-size:12px;margin:8px 0}.fish-card .mood{font-size:12px;margin:8px 0}.fish-card .card-observe{margin:10px 0 8px;width:100%;min-height:48px;border-radius:11px;background:#28796d;color:#fff9e5;font-size:14px}.card-actions button{font-size:12px}.fish-detail{font-size:12px;line-height:1.7}.fish-detail summary{cursor:pointer;min-height:44px;padding:12px 0;color:#557b66;touch-action:manipulation}.fish-detail p{margin:7px 0}.fish-detail .variant-select{font-size:12px}.fish-preview{height:124px;background:linear-gradient(160deg,#edf7ed,#dceee7)}.shop-item .fish-brief{font-size:13px;min-height:44px;margin:2px 0 8px}.shop-item .buy{margin-top:0;font-size:14px}.shop-item h3{font-size:20px}.shop-item .fish-detail{margin-top:auto}.shop-item.locked .fish-detail{color:#718470}.shop-intro{font-size:14px;color:#537b62}.dialog-note{color:#6b8470;font-size:13px}.fish-detail-name{font-size:20px;font-weight:700}#manage-fish{padding:10px 20px;margin-top:12px}#dialog-content>.back-button{margin:10px}.fish-card .meter-label{font-size:12px}dialog::backdrop{backdrop-filter:none}
 @media(max-width:1050px){.hud{grid-template-columns:1fr 1.2fr 1fr;gap:10px 16px}.level-stat{grid-column:1/3}.save-status{grid-column:3;grid-row:2}.controls{margin-top:18px}.header{margin-bottom:16px}}
 @media(max-width:680px){.hud{padding:12px;gap:10px}.stat-label{font-size:11px}.hud .stat strong{font-size:22px}.water-track{display:none}.level-stat{gap:6px;font-size:11px;display:flex}.level-stat small{width:100%;font-size:10px}.level-stat .xp-track{width:60px}.save-status{font-size:9px}.secondary-button{font-size:13px;padding:9px 17px}.more-grid{grid-template-columns:1fr}.more-item{padding:17px}.shop-item .buy{font-size:12px}.shop-item .fish-brief{font-size:12px}.fish-preview{height:104px}.fish-card{width:220px;right:10px;top:48px;padding:14px;max-height:calc(100% - 88px)}.fish-card .card-observe{margin:8px 0}.fish-card .personality{font-size:11px}.fish-detail summary{font-size:11px}.shop-item h3{font-size:17px}footer p{font-size:11px}.fish-detail .variant-select{font-size:11px}}
+/* V0.4.1 refinement: quiet surfaces, readable guidance, clear action hierarchy. */
+body{background:radial-gradient(ellipse at 8% 20%,#dfece2aa,transparent 46%),radial-gradient(ellipse at 95% 3%,#fff5da,transparent 45%),#f1f4eb}.header-note{color:#8d9b88;font-size:12px;letter-spacing:2px}.brand-icon{background:linear-gradient(135deg,#458c79,#246f65);box-shadow:inset 0 1px 1px #b8d9bc,0 5px 12px #2a6e6120}.hud{background:linear-gradient(115deg,#fffef8,#fafbf2);box-shadow:0 5px 20px #56745108;border-color:#dce3d1}.aquarium{border-width:9px;border-color:#fffdf3;box-shadow:0 20px 45px #52766029,0 0 0 1px #d1dccb,inset 0 0 40px #43898722}.tank-caption{color:#387b75;text-shadow:0 1px #e4f3e7}.tank-base{background:linear-gradient(#e9dec2,#e1d2b2);border-top-color:#f7edcf;height:38px}.action{background:linear-gradient(#fffef7,#f5f6e9);border-color:#d6dfcd;box-shadow:0 4px 0 #d6dfca,0 7px 14px #47684b08}.action.primary{background:linear-gradient(135deg,#368879,#246e65);box-shadow:0 4px 0 #1e5e56,0 8px 15px #3d796120}.secondary-button{background:#e7eee0;border-color:#cfddc8;color:#476d59}.fish-card{border:1px solid #fffef8;background:linear-gradient(140deg,#fffef8fa,#f4f5e7fa);box-shadow:0 12px 35px #295f4e29}.fish-card .meter-label{font-size:13px}.fish-card p.mood{color:#426b52}.fish-card .personality{color:#4e7056}.card-actions button{background:#e6eddb}.toast{position:fixed;inset:auto auto 28px 50%;margin:0;transform:translateX(-50%);width:min(560px,calc(100vw - 32px));max-width:none;display:flex;align-items:center;gap:20px;padding:21px 20px 21px 24px;border:1px solid #d6dbbc;border-left:6px solid #6b9b7b;border-radius:19px;background:#fffdf1;color:#365d4e;font-size:18px;line-height:1.8;box-shadow:0 14px 55px #244b4b38;text-align:left;pointer-events:auto;z-index:100}.toast>span{flex:1;overflow-wrap:anywhere}.toast-close{flex-shrink:0;background:#eaf0df;border-radius:50%;width:44px;min-height:44px;font-size:24px;color:#55745a}.toast::backdrop{background:transparent}.onboarding{max-width:800px;gap:18px;padding:21px 24px;background:linear-gradient(130deg,#fff8df,#f2efd8);border:1px solid #dfd5ab;border-radius:20px;box-shadow:0 7px 18px #847b3d0a}.onboarding h2{font-size:20px;margin:0 0 6px;color:#6c613d}.onboarding p{font-size:16px;line-height:1.8;color:#776c49}.guide-step{flex-shrink:0;background:#e6d6a2;border-radius:50%;width:55px;height:55px;display:grid;place-items:center;color:#796330;font-size:15px;font-weight:700}.guide-actions{display:flex;flex-direction:column;flex-shrink:0;gap:5px}.onboarding #onboarding-next{padding:9px 16px;background:#7b8958;color:white;border-radius:11px;font-size:15px;text-decoration:none}.onboarding #onboarding-skip{font-size:12px;color:#8d815e}.feeding-hint{font-size:16px;padding:10px 12px 10px 18px;box-shadow:0 6px 24px #386c5429;color:#4f6c4d}.shop-intro#shop-message{padding:14px 17px;background:#eef3df;border:1px solid #d9e4c7;border-left:4px solid #8ea276;border-radius:0 12px 12px 0;font-size:16px;line-height:1.8;color:#496b4f}.shop-item{background:linear-gradient(155deg,#fffefa,#f8f9ef);border-color:#dce3d2;box-shadow:0 5px 13px #49694708;padding:17px}.fish-preview{background:radial-gradient(ellipse at 30% 10%,#f8f9e6,transparent 60%),linear-gradient(140deg,#e1efe1,#cfe7e1);border:1px solid #dae7d6;border-radius:15px;height:137px}.encyclopedia-grid .fish-preview{background:linear-gradient(135deg,#edf3df,#cee4db)}.shop-item .buy{box-shadow:0 3px 0 #205f54;letter-spacing:.5px}.shop-item.locked .buy{box-shadow:none}.tabs{background:#e8eedf;padding:5px;border-radius:15px}.tab{background:transparent;flex:1}.tab.active{box-shadow:0 4px 9px #1d68541a}.more-item{background:linear-gradient(130deg,#f2f7e9,#e9f0e1);box-shadow:0 4px 10px #55754c08;border-color:#d9e3cc}.achievement-card{background:linear-gradient(130deg,#fffef7,#f7f7e9);box-shadow:0 4px 12px #63744708}.achievement-card.completed{background:linear-gradient(120deg,#edf5e2,#e7f0da);border-color:#c5d5b5}.achievement-card h3{font-size:18px}.achievement-card p{font-size:14px;color:#667f5d}.achievement-card .achievement-detail{font-size:12px}.save-tools{margin-top:22px;border:1px solid #d5e0ca;border-radius:15px;background:#f3f6e9;padding:0 17px}.save-tools>summary{cursor:pointer;min-height:54px;padding:17px 2px;font-weight:700;color:#55704e;touch-action:manipulation}.save-tools .setting-row{background:#fffef7}.setting-row small{font-size:13px;line-height:1.7;color:#6b8067}.setting-row{border-radius:14px;border:1px solid #dfe6d5}.confirm-copy{font-size:18px;line-height:1.9;padding:17px 20px;border-left:4px solid #bcaa78;border-radius:0 14px 14px 0;background:#f5f0db;color:#5f674e}.confirm-actions{gap:14px}.confirm-actions button{font-size:16px;min-height:50px}.dialog-head h2{letter-spacing:1px}.name-error{font-size:15px}.roster-item{border-radius:14px;background:linear-gradient(120deg,#f1f6e8,#e9f1e1);padding:15px;margin-bottom:9px}.roster-item small{font-size:13px}.dialog-note{line-height:1.8}.tier-hero{background:linear-gradient(135deg,#e9f3df,#dcebe0);box-shadow:inset 0 1px #fff}.shop-item .fish-brief{color:#60775c}.shop-item.locked{background:#f0f2e9}.shop-item.locked .fish-preview{filter:saturate(.7)}
+@media(max-width:680px){.header-note{display:none}.aquarium{border-width:6px}.onboarding{display:grid;grid-template-columns:40px 1fr;gap:10px;padding:16px}.guide-step{width:40px;height:40px;font-size:12px}.onboarding h2{font-size:18px}.onboarding p{font-size:14px}.guide-actions{grid-column:2;flex-direction:row;gap:10px}.toast{font-size:16px;bottom:16px;gap:12px;padding:16px;line-height:1.8}.fish-preview{height:115px}.shop-item{padding:12px}.shop-intro#shop-message{font-size:15px;padding:12px}.feeding-hint{font-size:0;padding:7px 10px}.feeding-hint:before{font-size:14px}.setting-row small{font-size:12px}.confirm-copy{font-size:16px;padding:15px}.save-tools{padding:0 10px}.achievement-card p{font-size:13px}.achievement-card h3{font-size:16px}}
+
+.onboarding{margin:0 auto 20px}
 
 </style>
 <style>
@@ -34,6 +39,15 @@
 @media(min-width:851px) and (max-height:820px){.obs-header{padding:10px 20px}.obs-scroll{padding-top:10px}.obs-specimen{grid-template-columns:110px 1fr auto;padding:8px 0}.specimen-window{height:66px}.specimen-actions{flex-direction:row}.obs-topic-intro h3{margin-top:10px}.obs-workspace{margin-top:8px}.obs-figure #obs-svg{max-height:300px}.obs-specimen p{margin-top:3px}.obs-topic-intro p{font-size:13px}.obs-controls{padding-top:10px;margin-top:8px}.obs-detail .obs-review{margin-top:8px}.obs-selection{padding:9px 12px;min-height:90px}}
 
 .specimen-window canvas{object-fit:contain}.obs-specimen.is-enlarged .specimen-window{grid-column:1/-1;height:180px}.selected-part[data-part=gills]>g>path:first-child{stroke:#bc8730;stroke-width:3;vector-effect:non-scaling-stroke}
+
+/* Two distinct observation spaces. The player's fish is the first, full-size subject. */
+.obs-layers{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px 28px;background:#f5f6ec;border-bottom:1px solid #dbe5d7;flex-shrink:0}.obs-layers button{text-align:left;padding:13px 18px!important;border-radius:16px!important;background:#fffdf7!important}.obs-layers button[aria-pressed=true]{background:linear-gradient(120deg,#287d70,#388f83)!important;color:#fffef0!important;border-color:#287d70!important;box-shadow:0 5px 14px #28695b20}.obs-layers strong{display:block;font-size:19px}.obs-layers small{display:block;font-size:12px;margin-top:4px;opacity:.8}.own-fish-heading{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:16px}.own-fish-heading h3{font-size:28px;margin:2px 0 5px}.own-fish-heading p{font-size:15px;margin:0;color:#637e72}.own-fish-heading label{display:block;font-size:12px;margin-bottom:5px}.own-fish-heading select{max-width:250px;border:1px solid #c8d8ca;border-radius:12px;padding:8px;background:#fffef6;color:#315c60}.obs-specimen{display:block;padding:0;border:0}.specimen-window{height:auto!important;aspect-ratio:1000/520;max-height:46vh;border:1px solid #c2ddd5;box-shadow:inset 0 0 65px #d2eee8;border-radius:24px;background:radial-gradient(ellipse at 45% 20%,#eff9dfb0,transparent 55%),linear-gradient(165deg,#dcefe1,#a8d9d4 72%,#8bc5c5)}.specimen-window canvas{width:100%;height:100%;object-fit:contain}.own-hint{margin:16px 0 12px;padding:13px 17px;background:#edf3e4;border-left:4px solid #79a48b;border-radius:0 12px 12px 0;font-size:16px;line-height:1.7}.own-controls{display:flex;gap:10px;flex-wrap:wrap}.own-controls button{font-size:15px!important}.own-controls #obs-own-play{background:#2d8073;color:#fffdf0;min-width:92px}.own-footnote{font-size:12px;line-height:1.7;color:#718779;margin:14px 0}.obs-to-book{font-weight:700;color:#276f62!important;background:#f6f0d9!important}.book-intro{font-size:13px;color:#657e70;margin:0 0 12px;line-height:1.7}.obs-hint{font-size:15px;color:#365f54;line-height:1.8}.list-caption{font-size:11px;color:#738578;margin:0 0 8px}.obs-selection p{font-size:15px}.obs-review{font-size:14px;line-height:1.8;background:#eef3e7;padding:12px;border-radius:12px}.obs-review strong{font-size:12px;margin-bottom:5px}.obs-controls{gap:18px}.obs-speed{font-size:15px}.obs-ticks{font-size:12px}.obs-toggles button{font-size:13px!important}.obs-topic-intro p{font-size:15px}.obs-figure{background:radial-gradient(ellipse at 40% 20%,#f9f9df77,transparent 65%),linear-gradient(135deg,#e8f1df,#c6e6e0);box-shadow:inset 0 0 35px #f5f8e860}.obs-selection{border-left-width:4px}.obs-layers button:focus-visible{outline:3px solid #c7953e}#observation[data-topic=anatomy] .obs-controls{padding:9px 0;border-top:0;margin-top:0;justify-content:flex-end}#observation[data-topic=anatomy] #obs-label-toggle{background:transparent;border-color:transparent;color:#668071;font-size:12px!important}.obs-part-list button{border-radius:10px!important}.obs-return{box-shadow:0 2px 0 #dfE5d8}
+@media(max-width:850px){.obs-layers{padding:12px 20px}.obs-detail{display:block}.obs-part-list{grid-template-columns:repeat(3,1fr)}.obs-selection{margin-top:12px}.obs-review{margin-top:10px}.specimen-window{max-height:50vh}.obs-figure .svg-labels:not(#obs-breath-labels){display:block!important}}
+@media(max-width:540px){.obs-layers{padding:9px 12px;gap:7px}.obs-layers button{padding:10px!important}.obs-layers strong{font-size:16px}.obs-layers small{font-size:10px}.own-fish-heading{display:block;margin-bottom:12px}.own-fish-heading h3{font-size:24px}.own-fish-heading>div:last-child{display:flex;align-items:center;gap:10px;margin-top:13px}.own-fish-heading select{max-width:220px;flex:1;font-size:13px!important}.own-fish-heading label{white-space:nowrap}.specimen-window{aspect-ratio:1.35;max-height:none;border-radius:17px}.own-hint{font-size:15px;padding:11px 13px}.own-controls{display:grid;grid-template-columns:1fr 1fr;gap:7px}.own-controls button{font-size:13px!important;padding:9px!important}.own-footnote{font-size:11px}.obs-to-book{width:100%;font-size:13px!important}.obs-topic-intro p{font-size:14px}.obs-selection p,.obs-review{font-size:14px}.obs-figure .svg-labels:not(#obs-breath-labels){display:none!important}.obs-controls{gap:12px}.obs-speed{min-width:150px}.obs-breath-phases button{font-size:12px!important}}
+
+#obs-mine .specimen-window{width:100%;height:clamp(240px,38vh,390px)!important;aspect-ratio:auto;max-height:none}
+@media(max-width:540px){#obs-mine .specimen-window{height:260px!important}}
+@media(min-width:851px) and (max-height:1000px){#observation[data-layer=book] .obs-header{padding:12px 24px}#observation[data-layer=book] .obs-layers{padding:10px 24px}#observation[data-layer=book] .obs-layers button{padding:10px 16px!important}#observation[data-layer=book] #obs-svg{max-height:320px}#observation[data-layer=book] .obs-topic-intro h3{margin-top:12px}#observation[data-layer=book] .obs-topic-intro p{font-size:14px}#observation[data-layer=book] .obs-controls{padding-top:10px;margin-top:8px}#observation[data-layer=book] .obs-topview canvas{max-height:90px}}
 
 </style>
 
@@ -48,7 +62,7 @@
 </head>
 <body>
 <main class="app">
-<header class="header"><div class="brand"><span class="brand-icon" aria-hidden="true">≈</span><div><h1>悠悠水族箱</h1><p>我的小小水世界</p></div><span class="version">V0.4.1</span></div><button class="settings-button" id="settings" aria-label="開啟設定"><span aria-hidden="true">⚙</span> 設定</button></header>
+<header class="header"><div class="brand"><span class="brand-icon" aria-hidden="true">≈</span><div><h1>悠悠水族箱</h1><p>我的小小水世界</p></div><span class="version">V0.4.1</span></div><span class="header-note">把日常，養成喜歡的樣子</span></header>
 <section class="hud" aria-label="水族箱狀態">
 <div class="stat coins-stat"><span class="coin-icon" aria-hidden="true">＄</span><div><span class="stat-label">我的金幣</span><strong id="coins">20</strong></div></div>
 <div class="stat"><span class="drop-icon" aria-hidden="true"></span><div><span class="stat-label">水質 <span id="water-label">清澈</span></span><strong><span id="water">100</span><small>%</small></strong></div><div class="water-track"><i id="water-bar"></i></div></div>
@@ -56,6 +70,7 @@
 <div class="level-stat"><span id="level">養魚等級 1</span><div class="xp-track"><i id="xp-bar"></i></div><small id="next-unlock">下一級解鎖：斑馬魚</small></div>
 <div class="save-status" id="save-status" role="status">正在準備水族箱…</div>
 </section>
+<aside id="onboarding" class="onboarding" hidden aria-label="新手引導"><span id="onboarding-step" class="guide-step"></span><div><h2 id="onboarding-title"></h2><p id="onboarding-copy"></p></div><div class="guide-actions"><button id="onboarding-next">開始餵食</button><button id="onboarding-skip">稍後再看</button></div></aside>
 <section class="aquarium" aria-label="我的水族箱">
 <div class="tank-caption"><span><i></i> <b id="tank-name">小小水族箱</b></span><span id="tank-message">慢慢游，慢慢長大。</span></div>
 <canvas id="tank" tabindex="0" aria-label="水族箱。點魚查看狀態，點金幣收集；先按餵食，再點水面投放飼料。鍵盤可從更多功能的我的魚兒查看，餵食模式按 Enter 投食。"></canvas>
@@ -63,11 +78,11 @@
 <aside class="fish-card" id="fish-card" hidden aria-label="魚兒資料"><button class="icon-button card-close" id="close-card" aria-label="關閉魚兒資料">×</button><span class="eyebrow" id="fish-stage"></span><h2 id="fish-name"></h2><p id="fish-species"></p><div class="meter-label">飽足度 <b id="fish-hunger"></b></div><meter id="hunger-meter" min="0" max="100"></meter><div class="meter-label">成長進度 <b id="fish-growth"></b></div><meter id="growth-meter" min="0" max="100"></meter><p class="mood" id="fish-mood"></p><p class="personality" id="fish-personality"></p><button id="observe-fish" class="card-observe">觀察這隻魚</button><div class="card-actions"><button id="rename">改名字</button><button id="fish-more">更多資料</button></div></aside>
 <div id="decor-handles" class="decor-handles" hidden></div>
 <div class="edit-toolbar" id="edit-toolbar" hidden><span id="edit-label">點選布置，再左右移動</span><div><button id="edit-left" aria-label="向左移動裝飾">←</button><button id="edit-right" aria-label="向右移動裝飾">→</button><button id="edit-store">收回裝飾</button><button id="edit-done">完成布置</button></div></div>
-<div id="toast" role="status" class="toast" hidden></div>
+<div id="toast" role="status" popover="manual" class="toast" hidden></div>
 <div class="tank-base"><span>一缸小日常</span><span>照顧牠們，收集每一點快樂</span></div>
 </section>
 <section class="controls" aria-label="魚缸操作"><button id="feed" class="action primary" aria-pressed="false"><span class="action-icon" aria-hidden="true">⁙</span><span>餵食<small>給魚兒一點好吃的</small></span></button><button id="shop" class="action"><span class="action-icon" aria-hidden="true">⌂</span><span>商店<small>魚兒與魚缸布置</small></span></button><button id="clean" class="action"><span class="action-icon" aria-hidden="true">✧</span><span>清潔<small>讓水族箱亮晶晶</small></span></button></section>
-<div id="onboarding" class="onboarding" hidden><p id="onboarding-copy"></p><button id="onboarding-skip">跳過</button></div>
+
 <footer><p id="tip">點魚兒看狀態，點金幣收集。好好照顧，魚兒就會慢慢長大。</p><button id="observe-review" class="secondary-button">觀察魚兒</button><button id="more-menu" class="secondary-button" aria-haspopup="dialog">更多功能</button><button id="collect-all" class="text-button" hidden>收取金幣</button></footer>
 </main>
 <dialog id="dialog"><div class="dialog-head"><div><span class="eyebrow" id="dialog-eyebrow">一起照顧水中的生命</span><h2 id="dialog-title"></h2></div><button class="icon-button" id="dialog-close" aria-label="關閉視窗">×</button></div><div id="dialog-content"></div></dialog>
@@ -305,7 +320,7 @@ window.AquariumWorld=Object.freeze({buildPOI,tickEnvironment});
 (() => {
 'use strict';
 const topics = {
- anatomy: {tab:'外形與構造', title:'魚的外形與身體構造', intro:'魚的身體有不同的部分。我們可以觀察頭、軀幹，以及長在身體不同位置的鰭。', question:'魚的身體有哪些構造？這些構造有什麼作用？', hint:'點選魚身上的部位或下方名稱，看看它的位置與作用。', review:'魚的身體有頭、軀幹和各種鰭。不同的構造能幫助魚在水中生活。'},
+ anatomy: {tab:'外形與構造', title:'魚的外形與身體構造', intro:'魚的身體有不同的部分。我們可以觀察頭、軀幹，以及長在身體不同位置的鰭。', question:'魚的身體有哪些構造？這些構造有什麼作用？', hint:'先點圖上的構造，看看它的位置與作用。也可以用名稱清單找到同一個部位。', review:'魚的身體有頭、軀幹和各種鰭。不同的構造能幫助魚在水中生活。'},
  swimming: {tab:'游動', title:'魚是怎麼游動的？', intro:'魚會擺動身體與尾部，並利用不同的鰭相互配合，在水中前進、轉彎和維持平衡。', question:'魚游動時，哪些部位會跟著擺動？', hint:'觀察側面的各種鰭，再從俯視圖看看身體和尾部如何左右擺動。', review:'魚會利用身體和鰭的動作幫助游動，也會利用鰭調整方向與維持平衡。'},
  breathing: {tab:'呼吸', title:'魚是怎麼呼吸的？', intro:'水中有溶解的氧氣。魚利用口和鰓蓋的開合，讓水流經鰓，從水中取得氧氣。', question:'魚在水中，怎麼獲得呼吸需要的氧氣？', hint:'觀察口和鰓蓋的開合，開啟「看看鰓蓋裡面」看看水流經鰓的位置。', review:'魚利用鰓進行呼吸。水從口進入，流經鰓，再從鰓蓋後方的開口流出。'}
 };
@@ -334,93 +349,134 @@ window.AquariumObservationContent=Object.freeze({topics,parts,
 
 </script>
 <script>
-/* Original vector carp. Reuses the reviewed breathing page's eased mouth/cover cycle
-   and layered, orderly gill-filament approach; no textbook or raster texture copied. */
+/* Original vector teaching specimen. All anatomy, scales and gill filaments are
+   authored here; no external illustrations, textures or animation loop. */
 (() => {
 'use strict';
 const ns='http://www.w3.org/2000/svg';
 const names=window.AquariumObservationContent.parts;
-const coverPath='M222 191 Q267 174 285 216 Q310 263 267 304 L218 297 Q242 255 222 191Z';
-const outline='M126 247 Q169 192 269 171 Q418 127 554 199 Q605 228 654 246 L654 275 Q600 287 554 301 Q398 341 258 304 Q174 302 134 266Z';
+const bodyPath='M249 184 C326 150 407 144 483 171 C557 195 594 236 649 245 L649 274 C596 279 558 301 492 312 C413 327 322 325 251 299 C274 264 276 218 249 184 Z';
+const coverPath='M229 194 C251 183 275 197 286 219 C301 248 289 282 266 299 C250 302 233 299 219 293 C241 266 242 225 229 194 Z';
 const part=(id,markup)=>`<g data-part="${id}" class="fish-part" aria-label="${names[id].name}">${markup}</g>`;
+const shape=(d,fill='url(#obs-fin)',extra='')=>`<path class="part-paint deform" d="${d}" fill="${fill}" ${extra}/>`;
+function rayFan(ox,oy,ends){return `<path class="fin-rays deform" d="${ends.map(([x,y])=>`M${ox} ${oy} Q${(ox+x)/2} ${(oy+y)/2-3} ${x} ${y}`).join(' ')}"/>`;}
 function svgMarkup(){
- let scales='';for(let row=0;row<8;row++)for(let col=0;col<16;col++){
-  const x=275+col*23+(row%2)*11,y=179+row*19;
-  scales+=`<path d="M${x} ${y} q19 9 0 18"/>`;
- }
  let filaments='';
- for(let layer=0;layer<3;layer++){
-  let arch='';for(let i=0;i<=28;i++){
-   const t=i/28,x=232-layer*5+Math.sin(Math.PI*t)*(30-layer*4),y=198+layer*5+t*(94-layer*8),len=10+Math.sin(Math.PI*t)*9;
-   filaments+=`<path d="M${x} ${y} q${len*.55} -1 ${len} ${(t-.5)*12}" fill="none" stroke="${layer%2?'#d86f72':'#c65362'}" stroke-width="2.1"/>`;
-   arch+=(i?' L':'M')+x+' '+y;
-  }filaments+=`<path d="${arch}" fill="none" stroke="#a74555" stroke-width="3"/>`;
+ // Four separate crescent arches, each carrying orderly pairs of fine filaments.
+ for(let layer=0;layer<4;layer++){
+  const x0=232+layer*9,y0=211+layer*2,height=70-layer*5;
+  let arch='';
+  for(let i=0;i<=23;i++){
+   const t=i/23,x=x0+Math.sin(Math.PI*t)*(13-layer),y=y0+t*height,len=8+Math.sin(Math.PI*t)*8;
+   filaments+=`<path d="M${x.toFixed(2)} ${y.toFixed(2)} q${len*.58} -2 ${len} ${(t-.5)*8}" stroke="${['#b85764','#cb6872','#d57a7e','#df8b89'][layer]}" stroke-width="1.5"/>`;
+   arch+=(i?' L':'M')+x.toFixed(2)+' '+y.toFixed(2);
+  }
+  filaments+=`<path d="${arch}" stroke="#964653" stroke-width="2.3"/>`;
  }
  return `<svg id="obs-svg" viewBox="0 0 900 440" role="group" aria-label="可點選部位的硬骨魚構造示意圖" xmlns="${ns}">
- <defs><linearGradient id="obs-body" x2="0" y2="1"><stop stop-color="#87aaa0"/><stop offset=".5" stop-color="#c7d9b5"/><stop offset="1" stop-color="#f5edcc"/></linearGradient><linearGradient id="obs-fin" x2="0" y2="1"><stop stop-color="#86b8b0"/><stop offset="1" stop-color="#e2d5a4"/></linearGradient><clipPath id="obs-scales"><path d="${outline}"/></clipPath><clipPath id="obs-gill-clip"><path d="${coverPath}"/></clipPath><marker id="obs-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6Z" fill="#3b91b6"/></marker></defs>
+ <defs>
+ <linearGradient id="obs-body" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#648f83"/><stop offset=".27" stop-color="#a5bca1"/><stop offset=".58" stop-color="#d2d7af"/><stop offset=".82" stop-color="#eee6c5"/><stop offset="1" stop-color="#f8efda"/></linearGradient>
+ <linearGradient id="obs-head" x1=".1" y1="0" x2=".8" y2="1"><stop stop-color="#7f9d89"/><stop offset=".55" stop-color="#d2d5b3"/><stop offset="1" stop-color="#f3e7c8"/></linearGradient>
+ <linearGradient id="obs-fin" x1="0" y1="0" x2=".4" y2="1"><stop stop-color="#7ba799"/><stop offset=".55" stop-color="#b2c4a7"/><stop offset="1" stop-color="#e2d2a5"/></linearGradient>
+ <linearGradient id="obs-tail-fill" x1="0" y1=".5" x2="1" y2=".5"><stop stop-color="#95b3a0"/><stop offset=".68" stop-color="#cad1ab"/><stop offset="1" stop-color="#e4d9b8"/></linearGradient>
+ <radialGradient id="obs-eye"><stop offset=".4" stop-color="#f7e8ac"/><stop offset="1" stop-color="#b69c5f"/></radialGradient>
+ <linearGradient id="obs-gill-bed" x2="1" y2=".4"><stop stop-color="#f7e7cf"/><stop offset="1" stop-color="#efd0bb"/></linearGradient>
+ <pattern id="obs-scale-pattern" width="26" height="28" patternUnits="userSpaceOnUse"><path d="M-13 0 Q10 7 -13 14 M13 0 Q36 7 13 14 M0 14 Q23 21 0 28 M26 14 Q49 21 26 28" fill="none" stroke="#6e967d" stroke-width=".7" opacity=".4"/><path d="M-12 1 Q7 7 -12 13 M14 1 Q33 7 14 13 M1 15 Q20 21 1 27" fill="none" stroke="#fff8db" stroke-width=".65" opacity=".43"/></pattern>
+ <clipPath id="obs-scales"><path class="deform" d="${bodyPath}"/></clipPath><clipPath id="obs-gill-clip"><path d="${coverPath}"/></clipPath>
+ <marker id="obs-arrow" markerWidth="7" markerHeight="7" refX="5.8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M.7 .6 L6 3 L.7 5.4 L2 3 Z" fill="#3385a7"/></marker>
+ </defs>
+ <style>
+ #obs-svg .part-paint{stroke:#607f70;stroke-width:1.35;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+ #obs-svg .fin-rays{stroke:#617f70;stroke-width:.85;opacity:.56;fill:none;pointer-events:none}
+ #obs-svg .fish-part{cursor:pointer;touch-action:manipulation}
+ #obs-svg .selected-part .part-paint{stroke:#b48330;stroke-width:3;filter:drop-shadow(0 0 2px #e5ba5e80)}
+ #obs-svg .detail-line{fill:none;stroke:#648372;stroke-width:1.1;opacity:.62;pointer-events:none}
+ #obs-svg .svg-labels{font:500 18px "Microsoft JhengHei","PingFang TC",sans-serif;fill:#355d56}
+ #obs-svg .svg-labels path{stroke:#77978a;stroke-width:1.15;fill:none;pointer-events:none}
+ #obs-svg .svg-labels rect{fill:#fffdf3;stroke:#c0d2c0;stroke-width:1}
+ #obs-svg .svg-labels circle{fill:#fbfaf0;stroke:#739686;stroke-width:1.5}
+ #obs-svg .svg-labels text{pointer-events:none}
+ #obs-svg .svg-labels .selected-label rect{fill:#fbefcd;stroke:#bc913e;stroke-width:1.5}
+ #obs-svg .svg-labels .selected-label path{stroke:#b48330;stroke-width:2}
+ #obs-svg .svg-labels .selected-label circle{fill:#b48330;stroke:#fff9e6}
+ #obs-svg .svg-labels g:focus-visible rect{stroke:#b48330;stroke-width:3}
+ #obs-svg .hit-target{fill:transparent;stroke:transparent;stroke-width:18;pointer-events:all}
+ #obs-svg .gill-filaments{fill:none;stroke-linecap:round;pointer-events:none}
+ #obs-svg .covered-gills{pointer-events:none}
+ #obs-svg #obs-water{pointer-events:none}
+ </style>
  <g id="obs-fish-motion"><g id="obs-fish-view">
- ${part('dorsal','<path class="part-paint" d="M287 184 Q322 125 356 111 L382 126 Q431 140 477 167 L551 200 Q418 160 287 184Z" fill="url(#obs-fin)"/><path class="fin-rays" d="M314 178L350 119M345 175L374 127M377 172L398 140M411 174L426 150M444 180L454 164M478 185L485 174"/>')}
- <g id="obs-tail-motion">${part('caudal','<path class="part-paint" d="M628 244 Q694 230 778 188 Q774 224 747 258 Q780 292 780 325 Q700 283 628 277Z" fill="url(#obs-fin)"/><path class="fin-rays" d="M646 250L764 203M648 254L750 228M649 262L742 257M649 269L753 290M648 273L764 309"/>')}</g>
- ${part('anal','<path class="part-paint" d="M542 281 Q571 305 611 334 L622 301 L590 272Z" fill="url(#obs-fin)"/><path class="fin-rays" d="M554 288L609 326M566 286L615 312"/>')}
- ${part('pelvic','<path class="part-paint" d="M387 279 Q409 320 457 342 L458 317 L431 286Z" fill="url(#obs-fin)"/><path class="fin-rays" d="M401 288L449 333M413 288L450 321"/>')}
- ${part('trunk',`<path class="part-paint" d="M257 175 Q418 127 554 199 Q605 228 654 246 L654 275 Q600 287 554 301 Q398 341 251 304 Q279 250 257 175Z" fill="url(#obs-body)"/><g clip-path="url(#obs-scales)" class="scales">${scales}</g><path d="M288 250 Q460 238 630 260" fill="none" stroke="#839f96" stroke-width="2" opacity=".45"/>`)}
- ${part('head','<path class="part-paint" d="M126 247 Q172 191 257 175 Q279 219 265 267 L251 304 Q172 298 134 266Z" fill="url(#obs-body)"/>')}
- ${part('gills',`<g clip-path="url(#obs-gill-clip)"><path d="${coverPath}" fill="#f2c4b5"/>${filaments}</g>`)}
- ${part('cover',`<path id="obs-cover" class="part-paint" d="${coverPath}" fill="url(#obs-body)"/>`)}
- <g id="obs-chest-motion">${part('pectoral','<path class="part-paint" d="M253 260 Q284 266 336 308 Q303 325 264 290Z" fill="url(#obs-fin)"/><path class="fin-rays" d="M260 268L326 307M260 276L308 310M268 283L294 310"/>')}</g>
- <circle cx="184" cy="224" r="15" fill="#f8f1d6" stroke="#687f73" stroke-width="2"/><circle cx="183" cy="224" r="9" fill="#2a4e50"/><circle cx="180" cy="220" r="3.5" fill="white"/>
- ${part('mouth','<ellipse id="obs-mouth-gap" class="part-paint" cx="132" cy="252" rx="15" ry="3" fill="#b5deda"/><path id="obs-jaw" d="M120 253 Q135 269 164 265" fill="none" stroke="#79978b" stroke-width="4" stroke-linecap="round"/>')}
- <g id="obs-water" fill="none" stroke="#3b91b6" stroke-width="7" stroke-linecap="round" opacity=".8"><path id="obs-inlet" d="M65 265 Q86 253 119 252" marker-end="url(#obs-arrow)"/><path id="obs-inside" d="M151 254 Q196 245 249 248" stroke-dasharray="9 8" marker-end="url(#obs-arrow)"/><path id="obs-outlet" d="M286 268 Q337 300 394 304" marker-end="url(#obs-arrow)"/></g>
+ ${part('dorsal',shape('M290 177 C306 151 325 117 346 102 C354 102 358 112 366 119 C398 136 433 140 468 155 C504 170 532 185 556 203 C468 176 371 154 290 177 Z')+'<path class="fin-rays deform" d="M314 169 Q327 134 344 110 M333 163 Q341 139 353 119 M354 159 L365 127 M375 158 L380 134 M396 159 L396 140 M417 161 L413 144 M439 166 L430 149 M460 172 L449 157 M480 180 L469 165 M501 188 L489 175 M523 196 L510 187"/>')}
+ <g id="obs-tail-motion">${part('caudal',shape('M630 245 C682 239 730 204 779 181 C778 212 758 240 741 259 C761 277 779 306 783 337 C732 311 683 278 630 275 C638 266 639 255 630 245 Z','url(#obs-tail-fill)')+rayFan(642,259,[[772,190],[765,206],[754,221],[744,236],[734,249],[735,266],[747,282],[760,299],[773,324]]))}</g>
+ ${part('anal',shape('M548 290 C565 295 587 303 614 328 C622 317 620 306 612 298 L579 280 Z')+rayFan(557,289,[[610,323],[614,314],[610,305],[595,295]]))}
+ ${part('pelvic',shape('M399 294 C411 306 427 331 458 345 C465 338 460 326 452 316 L429 289 Z')+rayFan(407,297,[[455,340],[454,331],[448,320],[438,311]]))}
+ ${part('trunk',shape(bodyPath,'url(#obs-body)')+`<path class="deform" d="${bodyPath}" fill="url(#obs-scale-pattern)" pointer-events="none"/><path class="deform detail-line" d="M282 244 C381 232 461 239 528 249 C570 256 610 260 638 261" stroke-dasharray="2 3"/><path class="deform" d="M283 184 C363 159 432 161 487 181" fill="none" stroke="#e5ead0" stroke-width="2" opacity=".4" pointer-events="none"/>`)}
+ ${part('head',shape('M130 245 C150 229 155 212 179 203 C204 191 224 182 250 182 C268 200 279 231 270 266 L251 299 C214 299 179 287 151 271 L132 261 C137 255 138 250 130 245 Z','url(#obs-head)')+'<path class="detail-line" d="M151 237 C165 233 170 233 176 235 M200 207 C211 205 218 204 228 204 M152 270 C171 275 193 285 217 286"/>')}
+ ${part('gills',`<g clip-path="url(#obs-gill-clip)"><path class="part-paint" d="${coverPath}" fill="url(#obs-gill-bed)"/><g class="gill-filaments">${filaments}</g></g>`)}
+ ${part('cover',`<g id="obs-cover"><path class="part-paint" d="${coverPath}" fill="url(#obs-head)"/><path class="detail-line" d="M239 201 C262 205 280 229 279 250 C280 268 270 283 259 291 M231 287 C244 290 252 291 261 289"/><path d="M266 211 C285 231 292 263 272 287" fill="none" stroke="#f5edcf" stroke-width="2.5" opacity=".55"/></g>`)}
+ <g id="obs-chest-motion">${part('pectoral',shape('M257 258 C284 263 319 286 351 311 C325 321 297 309 279 292 C265 280 258 271 257 258 Z','url(#obs-fin)')+rayFan(261,264,[[344,310],[330,312],[314,307],[298,298],[282,284]])+'<ellipse class="hit-target" cx="298" cy="289" rx="43" ry="23"/>')}</g>
+ <g pointer-events="none"><circle cx="184" cy="224" r="13" fill="url(#obs-eye)" stroke="#647763" stroke-width="1.6"/><circle cx="184" cy="224" r="8.3" fill="#2c4842"/><circle cx="182" cy="222" r="5.2" fill="#182f2c"/><circle cx="180.5" cy="220.5" r="2.7" fill="#fffdf1"/><path d="M172 216 C178 209 189 209 197 218" fill="none" stroke="#cdd6b3" stroke-width="2"/></g>
+ ${part('mouth','<ellipse id="obs-mouth-gap" class="part-paint" cx="134" cy="252" rx="10" ry="2.5" fill="#d6ebe2"/><path id="obs-jaw" d="M125 254 Q139 265 158 265" fill="none" stroke="#79917a" stroke-width="2.6" stroke-linecap="round"/><path d="M149 260 Q143 274 151 279 M156 263 Q155 273 161 277" class="detail-line"/><ellipse class="hit-target" cx="135" cy="253" rx="17" ry="19"/>')}
+ <g id="obs-water" fill="none" stroke="#3385a7" stroke-width="3.2" stroke-linecap="round"><path id="obs-inlet" d="M67 254 C86 248 101 250 119 252" marker-end="url(#obs-arrow)"/><path id="obs-inside" d="M153 253 C180 247 207 247 237 251" stroke-dasharray="6 6" marker-end="url(#obs-arrow)"/><path id="obs-outlet" d="M283 269 C313 287 342 294 374 294" marker-end="url(#obs-arrow)"/></g>
  </g></g>
  <g id="obs-labels" class="svg-labels">
- ${label('head',155,130,190,192)}${label('trunk',488,75,465,165)}${label('mouth',62,223,122,246)}${label('cover',184,368,250,283)}${label('dorsal',331,62,353,126)}${label('pectoral',297,399,299,298)}${label('pelvic',442,399,431,320)}${label('anal',604,395,596,313)}${label('caudal',779,144,753,224)}
- </g><g id="obs-breath-labels" class="svg-labels">${label('mouth',100,183,132,245)}${label('cover',355,179,274,216)}${label('gills',340,358,260,254)}</g><g id="obs-direction" fill="none" stroke="#3b91b6" stroke-width="5"><path d="M514 365H367" marker-end="url(#obs-arrow)"/><text x="455" y="393" text-anchor="middle" stroke="none" fill="#397e98" font-size="17">前進方向</text></g>
+ ${label('head',154,142,195,197)}${label('trunk',485,95,460,191)}${label('mouth',64,218,132,245)}${label('cover',185,355,248,283)}${label('dorsal',329,56,349,122)}${label('pectoral',301,395,306,299)}${label('pelvic',451,395,440,329)}${label('anal',610,382,598,310)}${label('caudal',788,133,758,221)}
+ </g><g id="obs-breath-labels" class="svg-labels">${label('mouth',102,181,132,241)}${label('cover',345,184,274,219)}${label('gills',189,340,251,262)}</g>
+ <g id="obs-direction" fill="none" stroke="#3385a7" stroke-width="3.5"><path d="M516 366 H371" marker-end="url(#obs-arrow)"/><text x="447" y="397" text-anchor="middle" stroke="none" fill="#397e98" font-size="16">前進方向</text></g>
  </svg>`;
 }
-function label(id,x,y,px,py){return `<g data-label="${id}" data-part="${id}" role="button" tabindex="0" aria-label="觀察${names[id].name}"><path d="M${x} ${y+10} L${px} ${py}"/><circle cx="${px}" cy="${py}" r="3"/><rect x="${x-36}" y="${y-24}" width="72" height="42" rx="12"/><text x="${x}" y="${y+3}" text-anchor="middle">${names[id].name}</text></g>`;}
-// The easing is retained from fish-breathing-review.html, with a third explanatory phase.
+function label(id,x,y,px,py){const direction=py>y?1:-1,startY=y+direction*20,elbowY=startY+direction*13;return `<g data-label="${id}" data-part="${id}" role="button" tabindex="0" aria-label="觀察${names[id].name}"><path d="M${x} ${startY} L${x} ${elbowY} L${px} ${py}"/><circle cx="${px}" cy="${py}" r="3.5"/><rect x="${x-37}" y="${y-23}" width="74" height="46" rx="10"/><text x="${x}" y="${y+6}" text-anchor="middle">${names[id].name}</text></g>`;}
+// Same 4.8-second teaching cycle and phase boundaries as the observation controls.
 function breathCycle(seconds){const p=(seconds%4.8)/4.8;return {p,mouth:p<.5?Math.pow(Math.max(0,Math.sin(Math.PI*p/.5)),.85):0,cover:p>=.5?Math.pow(Math.max(0,Math.sin(Math.PI*(p-.5)/.5)),.85):0,phase:p<.32?0:p<.58?1:2};}
 function makeRenderer(host){
  host.innerHTML=svgMarkup();const $=id=>host.querySelector('#'+id),svg=$('obs-svg');
+ const parts=[...host.querySelectorAll('.fish-part')],labelsEls=[...host.querySelectorAll('[data-label]')];
+ // Absolute-coordinate paths are warped as one continuous body; fins stay attached.
+ const mesh=[...host.querySelectorAll('.deform')].map(el=>({el,base:el.getAttribute('d'),tokens:el.getAttribute('d').match(/[A-Za-z]|-?\d*\.?\d+/g)}));
+ let wasSwimming=false;
+ function bend(x,time){const a=Math.max(0,Math.min(1,(x-230)/550));return Math.sin(time*3.1-(x-230)/155)*a*a*35;}
  function draw({topic,time=0,partId=null,labels=true,water=true,cutaway=false,arrows=true,focus='all'}){
-  const breath=breathCycle(time),swim=topic==='swimming',breathe=topic==='breathing',wave=Math.sin(time*4.2),turn=swim&&focus==='turn';
+  const breath=breathCycle(time),swim=topic==='swimming',breathe=topic==='breathing',wave=Math.sin(time*3.1),turn=swim&&focus==='turn';
   const pose=turn?Math.cos(time*.65):1,advance=swim?-Math.sin(time*.65)*24:0;
-  svg.setAttribute('viewBox',breathe?'55 123 388 263':'0 0 900 440');
-  $('obs-fish-view').setAttribute('transform',swim?`translate(450 255) scale(${turn?pose:1} 1) skewX(${wave*1.4}) translate(-450 -255)`:'');
-  $('obs-fish-motion').setAttribute('transform',swim?`translate(${advance} ${wave*1.2})`:'');
-  $('obs-tail-motion').setAttribute('transform',swim?`translate(637 262) scale(${.88+Math.cos(time*4.2)*.12} 1) rotate(${wave*3}) translate(-637 -262)`:'');
-  $('obs-chest-motion').setAttribute('transform',swim?`rotate(${wave*7} 253 260)`:'');
-  $('obs-mouth-gap').setAttribute('ry',breathe?3+breath.mouth*10:3);
-  $('obs-jaw').setAttribute('transform',breathe?`rotate(${-breath.mouth*5} 164 252)`:'');
-  $('obs-cover').setAttribute('transform',breathe?`translate(225 200) scale(${1-breath.cover*.16} 1) translate(-225 -200)`:'');
-  $('obs-cover').style.opacity=breathe&&cutaway?'.16':'1';
-  host.querySelector('[data-part="gills"]').style.visibility=breathe?'visible':'hidden';
+  svg.setAttribute('viewBox',breathe?'48 141 375 226':'0 0 900 440');
+  $('obs-fish-view').setAttribute('transform',swim?`translate(450 255) scale(${turn?pose:1} 1) translate(-450 -255)`:'');
+  $('obs-fish-motion').setAttribute('transform',swim?`translate(${advance} ${wave*1.1})`:'');
+  if(swim){for(const m of mesh){let nextX=true,x=0;const d=m.tokens.map(token=>{if(/[A-Za-z]/.test(token)){nextX=true;return token;}if(nextX){x=+token;nextX=false;return token;}nextX=true;return (+token+bend(x,time)).toFixed(2);}).join(' ');m.el.setAttribute('d',d);}}
+  else if(wasSwimming){for(const m of mesh)m.el.setAttribute('d',m.base);}
+  wasSwimming=swim;
+  $('obs-tail-motion').setAttribute('transform','');
+  $('obs-chest-motion').setAttribute('transform',swim?`rotate(${wave*5} 257 258)`:'');
+  $('obs-mouth-gap').setAttribute('ry',breathe?2.5+breath.mouth*9.5:2.5);
+  $('obs-jaw').setAttribute('transform',breathe?`rotate(${-breath.mouth*7} 158 252)`:'');
+  // Opening rotates around the upper anterior hinge and exposes the posterior edge.
+  $('obs-cover').setAttribute('transform',breathe?`translate(232 201) rotate(${-breath.cover*3.5}) scale(${1-breath.cover*.19} 1) translate(-232 -201)`:'');
+  $('obs-cover').style.opacity=breathe&&cutaway?'.13':'1';
+  parts.find(el=>el.dataset.part==='gills').style.visibility=breathe?'visible':'hidden';
   $('obs-water').style.display=breathe&&water?'':'none';
-  for(const [id,phase] of [['obs-inlet',0],['obs-inside',1],['obs-outlet',2]])$(id).style.opacity=breath.phase===phase?'1':'.16';
+  for(const [id,phase] of [['obs-inlet',0],['obs-inside',1],['obs-outlet',2]])$(id).style.opacity=breath.phase===phase?'1':'.12';
   $('obs-inside').style.strokeDashoffset=String(-time*12);
   $('obs-labels').style.display=labels&&!breathe&&!swim?'':'none';
   $('obs-breath-labels').style.display=labels&&breathe?'':'none';
   $('obs-breath-labels').querySelector('[data-label="gills"]').style.display=cutaway?'':'none';
   $('obs-direction').style.display=swim&&arrows?'':'none';
   $('obs-direction').setAttribute('transform',turn&&pose<0?'translate(900 0) scale(-1 1)':'');
-  // Text direction is kept readable when the travel arrow reverses.
-  const dirText=$('obs-direction').querySelector('text');dirText.setAttribute('transform',turn&&pose<0?'translate(910 0) scale(-1 1)':'');
-  for(const el of host.querySelectorAll('.fish-part')){
-   const id=el.dataset.part,active=partId===id||swim&&((focus==='tail'&&id==='caudal')||(focus==='fins'&&['dorsal','pectoral','pelvic','anal'].includes(id)));
-   el.classList.toggle('selected-part',active);el.classList.toggle('covered-gills',id==='gills'&&!(breathe&&cutaway));
-  }
-  for(const el of host.querySelectorAll('[data-label]'))el.classList.toggle('selected-label',el.dataset.label===partId);
+  const dirText=$('obs-direction').querySelector('text');dirText.setAttribute('transform',turn&&pose<0?'translate(894 0) scale(-1 1)':'');
+  for(const el of parts){const id=el.dataset.part,active=partId===id||swim&&((focus==='tail'&&id==='caudal')||(focus==='fins'&&['dorsal','pectoral','pelvic','anal'].includes(id)));el.classList.toggle('selected-part',active);el.classList.toggle('covered-gills',id==='gills'&&!(breathe&&cutaway));}
+  for(const el of labelsEls)el.classList.toggle('selected-label',el.dataset.label===partId);
   return breath;
  }
  return {draw,svg};
 }
 function drawTopView(canvas,time,turn=false){
  const c=canvas.getContext('2d'),w=900,h=155;if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}c.clearRect(0,0,w,h);
- c.save();c.translate(450-Math.sin(time*.65)*30,78);if(turn){c.scale(Math.cos(time*.65),1);c.rotate(Math.sin(time*.65)*.35);}
- const points=[];for(let i=0;i<=28;i++){const x=-230+i*15,amp=Math.max(0,(x+175)/400);points.push([x,Math.sin(time*4.2-x/95)*amp*27,Math.sin(Math.PI*i/29)*31+5]);}
- c.beginPath();points.forEach(([x,y,r],i)=>i?c.lineTo(x,y-r):c.moveTo(x,y-r));[...points].reverse().forEach(([x,y,r])=>c.lineTo(x,y+r));c.closePath();c.fillStyle='#b8cfb0';c.fill();c.strokeStyle='#709b8f';c.lineWidth=2;c.stroke();
- const [tx,ty]=points.at(-1);c.beginPath();c.moveTo(tx-4,ty);c.lineTo(tx+53,ty-28);c.lineTo(tx+39,ty);c.lineTo(tx+53,ty+28);c.closePath();c.fillStyle='#8ebbb0';c.fill();
- for(const side of [-1,1]){c.beginPath();c.moveTo(-130,side*25);c.lineTo(-100,side*(47+Math.sin(time*4.2)*5));c.lineTo(-80,side*26);c.fill();}
+ c.save();c.translate(450-Math.sin(time*.65)*30,78);if(turn){c.scale(Math.cos(time*.65),.88);c.rotate(Math.sin(time*.65)*.1);}
+ const points=[];for(let i=0;i<=36;i++){const x=-230+i*12.3,a=Math.max(0,(x+170)/400),r=5+Math.pow(Math.sin(Math.PI*i/37),.9)*28;points.push([x,Math.sin(time*3.1-(x+230)/125)*a*a*31,r]);}
+ const gradient=c.createLinearGradient(0,-34,0,36);gradient.addColorStop(0,'#829f85');gradient.addColorStop(.5,'#d4d8af');gradient.addColorStop(1,'#9cb799');
+ c.beginPath();points.forEach(([x,y,r],i)=>i?c.lineTo(x,y-r):c.moveTo(x,y-r));[...points].reverse().forEach(([x,y,r])=>c.lineTo(x,y+r));c.closePath();c.fillStyle=gradient;c.fill();c.strokeStyle='#638775';c.lineWidth=1.5;c.stroke();
+ const [tx,ty]=points.at(-1);c.beginPath();c.moveTo(tx-5,ty-6);c.quadraticCurveTo(tx+25,ty-13,tx+57,ty-33);c.quadraticCurveTo(tx+54,ty-15,tx+38,ty);c.quadraticCurveTo(tx+54,ty+15,tx+57,ty+33);c.quadraticCurveTo(tx+25,ty+13,tx-5,ty+6);c.closePath();c.fillStyle='#bcc7a4';c.fill();c.stroke();
+ c.strokeStyle='#709382';c.lineWidth=.8;for(const dy of [-27,-16,16,27]){c.beginPath();c.moveTo(tx,ty);c.lineTo(tx+49,ty+dy);c.stroke();}
+ for(const side of [-1,1]){c.beginPath();c.moveTo(-140,side*24);c.quadraticCurveTo(-119,side*36,-93,side*(49+Math.sin(time*3.1)*5));c.quadraticCurveTo(-103,side*30,-119,side*27);c.closePath();c.fill();c.stroke();}
+ c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.setLineDash([4,6]);c.strokeStyle='#64887570';c.stroke();c.setLineDash([]);
  c.restore();
 }
 window.AquariumObservationRenderer=Object.freeze({makeRenderer,breathCycle,drawTopView});
@@ -434,19 +490,21 @@ window.AquariumObservationRenderer=Object.freeze({makeRenderer,breathCycle,drawT
 const C=window.AquariumObservationContent,R=window.AquariumObservationRenderer;
 const $=id=>document.getElementById(id);
 function create({getFish,drawSpecimen}){
+ let layer='mine',ownTime=0,ownPlaying=true,ownBreathing=false;
  let topic='anatomy',partId='dorsal',time=0,speed=1,playing=!matchMedia('(prefers-reduced-motion: reduce)').matches;
  let labels=true,arrows=true,water=true,cutaway=false,focus='all',zoom=1,tracking=true,fishId=null,phase=-1,opener=null,draws=0;
  const modal=document.createElement('dialog');modal.id='observation';modal.setAttribute('aria-labelledby','obs-title');
  modal.innerHTML=`<header class="obs-header"><div><span class="eyebrow">觀察身邊的生命</span><h2 id="obs-title">${C.title}</h2></div><button id="obs-return" class="obs-return">返回水族箱</button></header>
- <div class="obs-scroll"><nav class="obs-tabs" role="tablist" aria-label="觀察主題">${Object.entries(C.topics).map(([key,v])=>`<button role="tab" id="obs-tab-${key}" data-topic="${key}" aria-controls="obs-panel">${v.tab}</button>`).join('')}</nav>
- <section class="obs-specimen" aria-label="我養的魚兒"><div class="specimen-window"><canvas id="obs-specimen" width="360" height="180" aria-label="目前選取魚兒的遊戲外形與游動"></canvas></div><div><label for="obs-fish-choice">我養的魚兒</label><select id="obs-fish-choice"></select><p id="obs-fish-note"></p></div><div class="specimen-actions"><button id="obs-track" aria-pressed="true">追蹤魚兒</button><button id="obs-enlarge" aria-pressed="false">放大魚兒</button></div></section>
+ <nav class="obs-layers" aria-label="選擇觀察方式"><button id="obs-layer-mine" aria-pressed="true"><strong>看看我的魚</strong><small>放大看看牠的樣子</small></button><button id="obs-layer-book" aria-pressed="false"><strong>課本複習</strong><small>認識構造、游動與呼吸</small></button></nav>
+ <div class="obs-scroll"><section id="obs-mine" aria-label="看看我的魚"><div class="own-fish-heading"><div><span class="eyebrow">這是你養的魚</span><h3 id="obs-own-name"></h3><p id="obs-own-info"></p></div><div><label for="obs-fish-choice">換一隻觀察</label><select id="obs-fish-choice"></select></div></div><div class="obs-specimen"><div class="specimen-window"><canvas id="obs-specimen" width="1000" height="520" aria-label="目前選取魚兒的放大外形與動作"></canvas></div></div><p class="own-hint" id="obs-fish-note"></p><div class="own-controls"><button id="obs-own-play">暫停</button><button id="obs-enlarge" aria-pressed="false">放大魚兒</button><button id="obs-track" aria-pressed="true">跟隨這隻魚</button><button id="obs-own-breath" aria-pressed="false">觀察呼吸</button></div><p class="own-footnote">魚種、配色與名字都來自你的魚缸。這裡的放大動作方便觀察，不會改變魚兒的成長。</p><button id="obs-to-book" class="obs-to-book">到課本複習，認識魚的構造 →</button></section>
+ <section id="obs-book" hidden aria-label="課本複習"><p class="book-intro">這裡使用代表性的硬骨魚示意圖，幫助我們認識構造與生活方式。</p><nav class="obs-tabs" role="tablist" aria-label="課本複習主題">${Object.entries(C.topics).map(([key,v])=>`<button role="tab" id="obs-tab-${key}" data-topic="${key}" aria-controls="obs-panel">${v.tab}</button>`).join('')}</nav>
  <section id="obs-panel" role="tabpanel" aria-labelledby="obs-tab-anatomy"><div class="obs-topic-intro"><h3 id="obs-topic-title"></h3><p id="obs-intro"></p><p class="obs-question" id="obs-question"></p></div>
  <div class="obs-workspace"><figure class="obs-figure"><figcaption><span>${C.schematic}</span><span id="obs-view-name">側面觀察</span></figcaption><div id="obs-vector"></div><div class="obs-topview" id="obs-topview" hidden><span>俯視：看左右擺動</span><canvas id="obs-top-canvas" aria-label="由上往下看，身體與尾部左右擺動的游動示意"></canvas></div><p id="obs-caption"></p></figure>
- <aside class="obs-detail"><p class="obs-hint" id="obs-hint"></p><div id="obs-part-list" class="obs-part-list" aria-label="選擇構造"></div><div class="obs-selection" aria-live="polite"><h4 id="obs-part-name"></h4><p id="obs-part-description"></p></div><p class="obs-review"><strong>複習重點</strong><span id="obs-review"></span></p></aside></div>
+ <aside class="obs-detail"><p class="obs-hint" id="obs-hint"></p><p class="list-caption">也可以點名稱，找到同一個部位</p><div id="obs-part-list" class="obs-part-list" aria-label="構造名稱清單：也可以用名稱選取同一個部位"></div><div class="obs-selection" aria-live="polite"><h4 id="obs-part-name"></h4><p id="obs-part-description"></p></div><p class="obs-review"><strong>複習重點</strong><span id="obs-review"></span></p></aside></div>
  <div id="obs-swim-options" class="obs-option-row" hidden><button data-focus="all">整體游動</button><button data-focus="tail">觀察尾鰭</button><button data-focus="fins">觀察其他鰭</button><button data-focus="turn">觀察轉彎</button></div>
  <div id="obs-breath-phases" class="obs-breath-phases" hidden>${C.phases.map((text,i)=>`<button data-phase="${i}"><span>${i+1}</span>${text}</button>`).join('')}</div>
  <div class="obs-controls"><button id="obs-play" class="obs-play">暫停</button><label class="obs-speed" for="obs-speed">播放速度 <output id="obs-speed-value">1×</output><input id="obs-speed" type="range" min="0.5" max="2" step="0.5" value="1" list="obs-speed-ticks" aria-valuetext="1 倍速"><datalist id="obs-speed-ticks"><option value="0.5"></option><option value="1"></option><option value="1.5"></option><option value="2"></option></datalist><span class="obs-ticks"><span>0.5×</span><span>1×</span><span>1.5×</span><span>2×</span></span></label><div class="obs-toggles"><button id="obs-label-toggle" aria-pressed="true">隱藏構造名稱</button><button id="obs-arrow-toggle" aria-pressed="true" hidden>隱藏方向箭頭</button><button id="obs-water-toggle" aria-pressed="true" hidden>顯示水流</button><button id="obs-cutaway" aria-pressed="false" hidden>看看鰓蓋裡面</button></div></div>
- <p class="obs-footnote">播放速度只改變觀察示意，養魚遊戲仍照原本的速度進行。</p></section></div>`;
+ <p class="obs-footnote">播放速度只改變觀察示意，養魚遊戲仍照原本的速度進行。</p></section></section></div>`;
  document.body.append(modal);const renderer=R.makeRenderer($('obs-vector'));
  const on=(id,fn)=>$(id).addEventListener('click',fn);
  function describe(id){partId=id;$('obs-part-name').textContent=C.parts[id].name;$('obs-part-description').textContent=C.parts[id].description;for(const b of $('obs-part-list').children)b.setAttribute('aria-pressed',String(b.dataset.partChoice===id));paint();}
@@ -455,24 +513,27 @@ function create({getFish,drawSpecimen}){
   for(const b of modal.querySelectorAll('[data-topic]')){const active=b.dataset.topic===key;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;}
   $('obs-panel').setAttribute('aria-labelledby','obs-tab-'+key);$('obs-topic-title').textContent=v.title;$('obs-intro').textContent=v.intro;$('obs-question').textContent=v.question;$('obs-hint').textContent=v.hint;$('obs-review').textContent=v.review;
   $('obs-caption').textContent=key==='breathing'?C.breathingNote:C.diagramNote;$('obs-view-name').textContent=key==='breathing'?'頭部放大':key==='swimming'?'側面與俯視觀察':'側面觀察';
-  $('obs-topview').hidden=key!=='swimming';$('obs-swim-options').hidden=key!=='swimming';$('obs-breath-phases').hidden=key!=='breathing';$('obs-arrow-toggle').hidden=key!=='swimming';$('obs-water-toggle').hidden=key!=='breathing';$('obs-cutaway').hidden=key!=='breathing';$('obs-label-toggle').hidden=key==='swimming';$('obs-part-list').hidden=key==='swimming';
+  $('obs-play').hidden=key==='anatomy';modal.querySelector('.obs-speed').hidden=key==='anatomy';modal.querySelector('.obs-footnote').hidden=key==='anatomy';modal.querySelector('.list-caption').hidden=key==='swimming';$('obs-topview').hidden=key!=='swimming';$('obs-swim-options').hidden=key!=='swimming';$('obs-breath-phases').hidden=key!=='breathing';$('obs-arrow-toggle').hidden=key!=='swimming';$('obs-water-toggle').hidden=key!=='breathing';$('obs-cutaway').hidden=key!=='breathing';$('obs-label-toggle').hidden=key==='swimming';$('obs-part-list').hidden=key==='swimming';
   modal.dataset.topic=key;partList();if(partId)describe(partId);else{$('obs-part-name').textContent='身體與鰭相互配合';$('obs-part-description').textContent=C.swimHints.all;}
   syncControls();paint();
  }
  function syncControls(){
-  modal.querySelector('.obs-specimen').classList.toggle('is-enlarged',zoom>1);
+  $('obs-own-play').textContent=ownPlaying?'暫停':'播放';$('obs-own-breath').setAttribute('aria-pressed',String(ownBreathing));$('obs-own-breath').textContent=ownBreathing?'回到游動':'觀察呼吸';$('obs-track').hidden=ownBreathing;$('obs-fish-note').textContent=ownBreathing?'仔細看頭部：口和鰓蓋會輪流開合。想看裡面的鰓與水流，可以到「課本複習」。':'看看牠的尾鰭和胸鰭怎麼動。按「暫停」停下來看，也可以放大。';
   $('obs-play').textContent=playing?'暫停':'播放';$('obs-play').setAttribute('aria-label',playing?'暫停觀察動畫':'播放觀察動畫');
   for(const [id,value] of [['obs-label-toggle',labels],['obs-arrow-toggle',arrows],['obs-water-toggle',water],['obs-cutaway',cutaway],['obs-track',tracking],['obs-enlarge',zoom>1]])$(id).setAttribute('aria-pressed',String(value));
-  $('obs-label-toggle').textContent=labels?'隱藏構造名稱':'顯示構造名稱';$('obs-water-toggle').textContent=water?'隱藏水流':'顯示水流';$('obs-arrow-toggle').textContent=arrows?'隱藏方向箭頭':'顯示方向箭頭';$('obs-enlarge').textContent=zoom>1?'還原大小':'放大魚兒';
+  $('obs-label-toggle').textContent=labels?'隱藏構造名稱':'顯示構造名稱';$('obs-water-toggle').textContent=water?'隱藏水流':'顯示水流';$('obs-arrow-toggle').textContent=arrows?'隱藏方向箭頭':'顯示方向箭頭';$('obs-enlarge').textContent=zoom>1?'縮小魚兒':'放大魚兒';$('obs-track').textContent=tracking?'跟隨中：魚兒留在中央':'跟隨這隻魚';
   for(const b of modal.querySelectorAll('[data-focus]'))b.setAttribute('aria-pressed',String(b.dataset.focus===focus));
  }
- function paint(){if(!modal.open)return;draws++;const b=renderer.draw({topic,time,partId,labels,water,cutaway,arrows,focus});
+ function paint(){if(!modal.open)return;draws++;if(layer==='mine'){drawSpecimen($('obs-specimen'),fishId,{tracking:tracking||ownBreathing,zoom,time:ownTime,playing:ownPlaying,breathing:ownBreathing});return;}const b=renderer.draw({topic,time,partId,labels,water,cutaway,arrows,focus});
   if(topic==='breathing'&&phase!==b.phase){phase=b.phase;for(const el of modal.querySelectorAll('[data-phase]')){const active=Number(el.dataset.phase)===phase;el.classList.toggle('current-phase',active);el.setAttribute('aria-pressed',String(active));} $('obs-hint').textContent=C.phaseHints[phase];}
   if(topic==='swimming')R.drawTopView($('obs-top-canvas'),time,focus==='turn');
-  drawSpecimen($('obs-specimen'),fishId,{tracking,zoom,time,playing});
+
  }
- function fishChoices(preferred){const fishes=getFish();$('obs-fish-choice').replaceChildren();for(const f of fishes){const option=document.createElement('option');option.value=f.id;option.textContent=f.name+' · '+f.speciesName;$('obs-fish-choice').append(option);}fishId=fishes.some(f=>f.id===preferred)?preferred:fishes[0]?.id||null;$('obs-fish-choice').value=fishId||'';$('obs-fish-note').textContent=C.specimenNote;}
- function open(id){opener=document.activeElement;fishChoices(id);time=0;phase=-1;speed=1;zoom=1;tracking=true;labels=arrows=water=true;cutaway=false;playing=!matchMedia('(prefers-reduced-motion: reduce)').matches;$('obs-speed').value='1';$('obs-speed').setAttribute('aria-valuetext','1 倍速');$('obs-speed-value').textContent='1×';if(!modal.open)modal.showModal();document.body.classList.add('observation-open');setTopic('anatomy');$('obs-return').focus();}
+ function fishChoices(preferred){const fishes=getFish();$('obs-fish-choice').replaceChildren();for(const f of fishes){const option=document.createElement('option');option.value=f.id;option.textContent=f.name+' · '+f.speciesName;$('obs-fish-choice').append(option);}fishId=fishes.some(f=>f.id===preferred)?preferred:fishes[0]?.id||null;$('obs-fish-choice').value=fishId||'';fishInfo();}
+ function fishInfo(){const f=getFish().find(f=>f.id===fishId);$('obs-own-name').textContent=f?.name||'我的魚兒';$('obs-own-info').textContent=f?`${f.speciesName} · ${f.variantName} · 個性：${f.personalityName}`:'';}
+ function setLayer(next){layer=next;modal.dataset.layer=layer;$('obs-mine').hidden=layer!=='mine';$('obs-book').hidden=layer!=='book';for(const key of ['mine','book'])$('obs-layer-'+key).setAttribute('aria-pressed',String(layer===key));if(layer==='book')setTopic(topic);syncControls();paint();modal.querySelector('.obs-scroll').scrollTop=0;}
+ on('obs-layer-mine',()=>setLayer('mine'));on('obs-layer-book',()=>setLayer('book'));on('obs-to-book',()=>setLayer('book'));on('obs-own-play',()=>{ownPlaying=!ownPlaying;syncControls();paint();});on('obs-own-breath',()=>{ownBreathing=!ownBreathing;ownTime=0;syncControls();paint();});
+ function open(id){opener=document.activeElement;ownTime=0;ownPlaying=true;ownBreathing=false;fishChoices(id);time=0;phase=-1;speed=1;zoom=1;tracking=true;labels=arrows=water=true;cutaway=false;playing=!matchMedia('(prefers-reduced-motion: reduce)').matches;$('obs-speed').value='1';$('obs-speed').setAttribute('aria-valuetext','1 倍速');$('obs-speed-value').textContent='1×';if(!modal.open)modal.showModal();document.body.classList.add('observation-open');topic='anatomy';setLayer('mine');$('obs-return').focus();}
  on('obs-return',()=>modal.close());modal.addEventListener('close',()=>{document.body.classList.remove('observation-open');opener?.focus();});
  for(const b of modal.querySelectorAll('[data-topic]'))b.addEventListener('click',()=>setTopic(b.dataset.topic));
  modal.querySelector('.obs-tabs').addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();const keys=Object.keys(C.topics);let i=keys.indexOf(topic);i=e.key==='Home'?0:e.key==='End'?2:(i+(e.key==='ArrowRight'?1:2))%3;setTopic(keys[i]);$('obs-tab-'+keys[i]).focus();});
@@ -483,8 +544,8 @@ function create({getFish,drawSpecimen}){
  on('obs-play',()=>{playing=!playing;syncControls();paint();});
  $('obs-speed').addEventListener('input',e=>{speed=Math.max(.5,Math.min(2,Number(e.target.value)||1));$('obs-speed-value').textContent=speed+'×';$('obs-speed').setAttribute('aria-valuetext',speed+' 倍速');});
  on('obs-label-toggle',()=>{labels=!labels;syncControls();paint();});on('obs-arrow-toggle',()=>{arrows=!arrows;syncControls();paint();});on('obs-water-toggle',()=>{water=!water;syncControls();paint();});on('obs-cutaway',()=>{cutaway=!cutaway;if(!cutaway&&partId==='gills')partId='cover';syncControls();describe(partId||'cover');});
- on('obs-track',()=>{tracking=!tracking;syncControls();paint();});on('obs-enlarge',()=>{zoom=zoom>1?1:1.55;syncControls();paint();});$('obs-fish-choice').addEventListener('change',e=>{fishId=e.target.value;paint();});
- return {open,tick(dt){if(!modal.open)return;if(playing)time+=Math.max(0,Math.min(.1,dt))*speed;paint();},debug:()=>({open:modal.open,topic,partId,time,speed,playing,labels,arrows,water,cutaway,focus,zoom,tracking,fishId,draws,phase})};
+ on('obs-track',()=>{tracking=!tracking;syncControls();paint();});on('obs-enlarge',()=>{zoom=zoom>1?1:1.55;syncControls();paint();});$('obs-fish-choice').addEventListener('change',e=>{fishId=e.target.value;ownTime=0;fishInfo();paint();});
+ return {open,tick(dt){if(!modal.open)return;if(layer==='mine'){if(ownPlaying)ownTime+=Math.max(0,Math.min(.1,dt));}else if(topic!=='anatomy'&&playing)time+=Math.max(0,Math.min(.1,dt))*speed;paint();},debug:()=>({open:modal.open,layer,ownTime,ownPlaying,ownBreathing,topic,partId,time,speed,playing,labels,arrows,water,cutaway,focus,zoom,tracking,fishId,draws,phase})};
 }
 window.AquariumObservation=Object.freeze({create});
 })();
@@ -508,13 +569,13 @@ const forms={
  guppy:{body:'M-27 0 C-17 -4 -11 -12 5 -12 C19 -13 31 -7 37 -2 Q42 1 36 5 C23 14 9 13 -3 9 Q-18 3 -27 3Z',tail:'M-24 -2 C-36 -10 -44 -25 -56 -28 Q-64 -14 -60 -1 Q-65 16 -56 29 C-42 24 -33 9 -24 3Z',dorsal:'M-12 -8 Q-13 -23 -1 -26 Q9 -25 20 -8 C8 -10 -1 -5 -12 -8Z',anal:'M-13 6 Q-14 19 -3 21 L10 9Z',pectoral:'M16 2 C6 0 -3 9 1 16 Q9 19 19 5Z',root:[-25,1],eye:[30,-3,3.0],gill:'M22 -7 Q17 0 22 7',mouth:'M36 2 Q39 3 40 1',height:13},
  goldfish:{body:'M-27 0 C-24 -5 -22 -12 -14 -19 C-2 -29 18 -24 29 -14 Q38 -8 39 0 Q39 11 29 18 C11 30 -10 26 -22 13Z',tail:'M-24 -3 C-34 -14 -43 -29 -58 -29 C-59 -18 -48 -4 -39 0 Q-55 9 -60 24 Q-57 32 -51 31 C-37 29 -27 16 -23 5 Q-39 8 -44 16 C-39 6 -32 3 -24 2Z',dorsal:'M-19 -14 Q-16 -35 -5 -35 Q4 -33 6 -29 Q18 -31 24 -15Z',anal:'M-13 16 Q-14 29 -2 32 Q8 28 13 18Z',pectoral:'M17 6 C4 4 -9 17 -4 25 Q5 32 22 10Z',root:[-25,0],eye:[30,-6,3.9],gill:'M23 -13 C15 -7 15 7 23 13',mouth:'M37 3 Q41 5 42 2',height:25},
  cory:{body:'M-29 1 C-20 -3 -15 -14 0 -16 Q17 -20 30 -6 Q38 0 38 8 C34 14 20 16 8 15 L-14 12 Q-25 8 -29 1Z',tail:'M-27 0 L-52 -17 Q-54 -6 -44 0 Q-51 9 -51 16 L-27 5Z',dorsal:'M-16 -8 Q-13 -23 -4 -30 Q5 -29 12 -12Z',anal:'M-17 9 L-23 21 Q-12 22 -2 12Z',pectoral:'M22 9 Q6 6 -2 21 Q8 25 25 12Z',root:[-28,2],eye:[26,-3,3.5],gill:'M19 -7 Q15 2 23 10',mouth:'M33 11 Q37 13 39 10',height:18},
- zebra:{body:'M-30 0 C-18 -4 -9 -10 8 -10 Q27 -10 39 -1 Q40 1 36 4 C17 14 -6 9 -19 4Z',tail:'M-28 0 L-50 -14 Q-49 -5 -42 0 Q-48 6 -49 14 L-28 3Z',dorsal:'M-9 -7 Q-7 -20 2 -21 L15 -8Z',anal:'M-12 6 L-13 17 Q-3 18 10 8Z',pectoral:'M20 3 Q9 3 7 13 Q15 15 23 5Z',root:[-29,1],eye:[31,-2,2.8],gill:'M24 -6 Q20 0 24 6',mouth:'M37 1 L40 1',height:11},
- molly:{body:'M-29 1 C-17 -4 -19 -15 -4 -20 Q15 -25 29 -12 Q35 -6 38 -2 Q42 1 37 5 C26 21 9 23 -4 17 Q-19 10 -29 4Z',tail:'M-27 -1 Q-39 -11 -51 -19 Q-59 -1 -51 19 Q-38 14 -27 5Z',dorsal:'M-18 -10 Q-14 -31 -1 -33 Q14 -32 23 -13 Q4 -19 -18 -10Z',anal:'M-15 11 Q-19 23 -8 26 L9 16Z',pectoral:'M18 5 Q4 3 -2 17 Q4 24 21 9Z',root:[-28,2],eye:[30,-4,3.2],gill:'M23 -10 Q15 1 23 11',mouth:'M37 1 Q40 2 41 0',height:22},
- swordtail:{body:'M-30 0 C-17 -2 -9 -12 8 -13 Q26 -12 38 -3 Q43 0 38 4 C20 15 2 14 -14 6Z',tail:'M-28 -1 L-49 -20 Q-47 -6 -41 0 Q-43 8 -51 16 L-63 29 Q-41 21 -29 5Z',dorsal:'M-11 -9 Q-8 -28 2 -29 Q11 -25 18 -10Z',anal:'M-14 7 L-17 19 Q-7 21 9 10Z',pectoral:'M20 3 Q7 1 3 14 Q11 20 23 6Z',root:[-29,1],eye:[31,-3,3.0],gill:'M24 -8 Q19 0 24 8',mouth:'M38 1 Q40 2 42 0',height:14},
- whitecloud:{body:'M-30 1 C-16 -5 -5 -11 11 -10 Q29 -10 39 -1 Q40 1 37 4 C20 11 3 11 -13 5Z',tail:'M-28 0 L-51 -15 Q-49 -4 -42 0 Q-48 6 -50 15 L-28 3Z',dorsal:'M-9 -7 Q-9 -20 2 -23 Q10 -18 15 -8Z',anal:'M-13 6 L-11 18 Q0 17 11 8Z',pectoral:'M21 3 Q9 3 6 12 Q15 16 24 5Z',root:[-29,1],eye:[31,-2,2.8],gill:'M24 -6 Q20 0 24 6',mouth:'M38 1 L40 1',height:11},
- cardinal:{body:'M-29 0 C-16 -3 -8 -12 9 -12 Q28 -11 39 -1 Q42 1 36 5 C19 14 -1 12 -16 5Z',tail:'M-27 0 L-49 -14 Q-48 -5 -41 0 Q-47 7 -48 14 L-27 3Z',dorsal:'M-9 -8 L-4 -23 Q4 -24 14 -9Z',anal:'M-15 6 L-15 19 Q-3 20 13 9Z',pectoral:'M21 3 Q11 2 7 12 Q16 16 24 5Z',root:[-28,1],eye:[31,-2,2.9],gill:'M24 -7 Q20 0 24 7',mouth:'M38 1 L40 1',height:13},
- angel:{body:'M-23 0 Q-16 -13 -6 -23 Q6 -30 18 -21 Q28 -15 33 -7 L39 -1 Q40 2 35 5 Q26 14 16 22 Q3 30 -9 19 Q-19 10 -23 0Z',tail:'M-21 -2 Q-34 -12 -46 -17 Q-42 0 -46 18 Q-32 13 -21 4Z',dorsal:'M-19 -5 Q-20 -26 -13 -49 Q-11 -54 -9 -53 Q-4 -36 3 -30 Q16 -27 25 -13Z',anal:'M-18 8 Q-20 26 -10 49 Q-7 54 -6 51 Q1 31 12 25 L25 11Z',pectoral:'M23 4 Q7 1 1 15 Q14 19 26 8Z',root:[-22,1],eye:[30,-4,3.2],gill:'M24 -12 Q16 -2 23 10',mouth:'M37 1 Q39 2 41 0',height:29},
- betta:{body:'M-26 0 C-18 -4 -12 -14 4 -14 C18 -15 31 -9 38 -2 Q42 1 37 5 C27 14 10 15 -3 11 Q-18 5 -26 4Z',tail:'M-22 -3 C-34 -21 -44 -34 -55 -27 Q-63 -27 -60 -18 Q-68 -14 -62 -5 Q-69 2 -62 9 Q-66 18 -57 21 Q-60 31 -51 31 Q-46 37 -40 30 C-29 26 -25 13 -21 5Z',dorsal:'M-15 -9 C-17 -24 -9 -33 1 -32 Q6 -37 11 -29 Q18 -31 20 -23 Q28 -20 28 -8 Q5 -8 -15 -9Z',anal:'M-18 7 Q-24 23 -15 29 Q-17 37 -8 34 Q-2 39 4 33 Q11 37 16 30 Q24 31 26 22 L28 8Z',pectoral:'M22 2 C9 0 1 12 5 19 Q14 22 25 6Z',root:[-23,1],eye:[31,-3,3.1],gill:'M25 -9 Q18 0 25 9',mouth:'M38 1 Q40 2 42 0',height:15}
+ zebra:{body:'M-30 0 C-20 -1 -10 -8 7 -9 Q24 -10 33 -5 L39 -1 Q41 1 37 3 C26 9 10 11 -3 7 Q-19 2 -30 3Z',tail:'M-28 0 L-50 -14 Q-49 -5 -42 0 Q-48 6 -49 14 L-28 3Z',dorsal:'M-7 -6 Q-5 -17 1 -21 Q6 -19 10 -13 L16 -7 Q3 -8 -7 -6Z',anal:'M-11 5 L-10 16 Q-1 17 12 7Z',pectoral:'M22 2 C14 1 7 7 5 12 Q14 13 24 4Z',root:[-29,1],eye:[31,-2,2.8],gill:'M24 -6 Q20 0 24 6',mouth:'M37 1 L40 1',height:11},
+ molly:{body:'M-29 1 C-20 -1 -18 -12 -7 -18 Q9 -25 24 -16 Q32 -11 35 -5 L39 -2 Q42 0 38 3 C32 15 21 23 7 21 Q-13 18 -22 8Z',tail:'M-27 -1 C-36 -5 -42 -15 -51 -19 Q-56 -11 -56 -1 Q-57 10 -51 19 C-40 18 -34 9 -27 5Z',dorsal:'M-19 -8 C-18 -18 -15 -27 -9 -31 L-5 -29 L0 -33 L4 -31 L9 -32 L13 -27 Q20 -22 25 -13 Q3 -17 -19 -8Z',anal:'M-14 10 Q-17 19 -11 25 Q-3 23 8 16Z',pectoral:'M18 5 Q4 3 -2 17 Q4 24 21 9Z',root:[-28,2],eye:[30,-4,3.2],gill:'M23 -10 Q15 1 23 11',mouth:'M37 1 Q40 2 41 0',height:22},
+ swordtail:{body:'M-30 0 Q-21 -1 -11 -8 C3 -17 24 -12 34 -6 L39 -2 Q43 0 38 3 C24 12 7 14 -7 9 Q-20 3 -30 3Z',tail:'M-28 -1 Q-39 -7 -49 -20 Q-49 -10 -42 -1 Q-41 7 -48 14 L-63 29 Q-51 26 -42 19 Q-34 13 -28 5Z',dorsal:'M-10 -8 Q-9 -23 -1 -29 Q5 -26 8 -23 L18 -10 Q4 -12 -10 -8Z',anal:'M-14 6 Q-16 16 -11 19 L10 9Z',pectoral:'M20 3 Q7 1 3 14 Q11 20 23 6Z',root:[-29,1],eye:[31,-3,3.0],gill:'M24 -8 Q19 0 24 8',mouth:'M38 1 Q40 2 42 0',height:14},
+ whitecloud:{body:'M-30 1 C-20 -1 -10 -8 6 -9 Q25 -10 34 -5 L39 -1 Q41 1 37 3 C25 10 11 10 -2 7 Q-19 3 -30 3Z',tail:'M-28 0 Q-39 -5 -51 -15 Q-50 -7 -43 0 Q-43 7 -50 15 Q-37 12 -28 3Z',dorsal:'M-8 -6 L-7 -16 Q-4 -21 1 -23 L7 -18 L15 -7 Q2 -8 -8 -6Z',anal:'M-12 5 L-10 17 Q0 17 12 7Z',pectoral:'M21 3 Q9 3 6 12 Q15 16 24 5Z',root:[-29,1],eye:[31,-2,2.8],gill:'M24 -6 Q20 0 24 6',mouth:'M38 1 L40 1',height:11},
+ cardinal:{body:'M-29 0 C-18 -2 -10 -8 3 -10 Q21 -13 32 -6 L39 -1 Q42 1 37 4 C24 12 11 14 -3 9 Q-19 3 -29 3Z',tail:'M-27 0 L-49 -14 Q-48 -5 -41 0 Q-47 7 -48 14 L-27 3Z',dorsal:'M-8 -7 L-4 -23 Q2 -24 6 -18 L14 -8Z M-21 -4 Q-21 -9 -17 -10 Q-12 -10 -12 -6Z',anal:'M-15 5 Q-17 11 -14 18 Q-3 20 14 8Z',pectoral:'M22 2 Q13 3 7 11 Q17 13 24 4Z',root:[-28,1],eye:[31,-2,2.9],gill:'M24 -7 Q20 0 24 7',mouth:'M38 1 L40 1',height:13},
+ angel:{body:'M-23 0 Q-17 -12 -7 -23 Q2 -30 11 -26 Q21 -24 27 -13 L32 -7 L38 -2 Q41 0 37 3 L32 5 Q24 15 15 24 Q3 31 -7 22 Q-18 12 -23 0Z',tail:'M-21 -2 Q-32 -10 -46 -17 Q-43 -7 -44 0 Q-43 10 -46 18 Q-32 14 -21 4Z',dorsal:'M-20 -3 C-21 -20 -18 -38 -12 -52 Q-10 -55 -9 -51 C-7 -40 -3 -34 4 -29 Q15 -26 25 -13 Q4 -17 -20 -3Z',anal:'M-19 7 C-22 22 -17 41 -9 51 Q-7 54 -6 49 Q-1 33 11 25 L26 10 Q4 16 -19 7Z',pectoral:'M24 3 Q13 1 1 12 Q8 18 18 12 L27 6Z',root:[-22,1],eye:[30,-4,3.2],gill:'M24 -12 Q16 -2 23 10',mouth:'M37 1 Q39 2 41 0',height:29},
+ betta:{body:'M-26 0 C-18 -2 -12 -12 1 -14 Q21 -17 32 -8 L38 -2 Q42 0 38 4 Q29 12 15 14 Q-1 15 -15 7 L-26 4Z',tail:'M-22 -3 C-29 -14 -39 -29 -48 -29 Q-55 -33 -57 -26 Q-65 -27 -61 -18 Q-68 -15 -63 -8 Q-69 -2 -63 5 Q-68 12 -61 17 Q-64 24 -56 25 Q-57 33 -49 31 Q-44 37 -38 29 C-28 25 -24 14 -21 5Z',dorsal:'M-16 -8 C-19 -20 -12 -31 -4 -31 Q1 -36 7 -30 Q13 -34 17 -27 Q23 -28 24 -21 Q30 -16 28 -8 Q8 -8 -16 -8Z',anal:'M-18 7 C-22 18 -22 24 -16 28 Q-18 35 -10 33 Q-5 39 1 33 Q7 38 12 32 Q20 34 22 27 Q27 28 27 20 L29 7 Q9 12 -18 7Z',pectoral:'M23 2 C15 0 5 7 4 14 Q5 20 11 19 Q20 17 26 5Z',root:[-23,1],eye:[31,-3,3.1],gill:'M25 -9 Q18 0 25 9',mouth:'M38 1 Q40 2 42 0',height:15}
 };
 // Each species has its own palette; variants are derived from AquariumData.
 const colors={
@@ -524,6 +585,37 @@ const paletteCache=new Map();
 function palette(key,variant){const cacheKey=key+':'+variant;if(paletteCache.has(cacheKey))return paletteCache.get(cacheKey);const base=colors[key],v=window.AquariumData?.VARIANTS?.[variant];const valid=v?.species===key;const body=valid?v.color:base[0],tail=valid?v.tail:base[1],light=valid?v.accent:base[2],dark=valid?tint(body,'#263d4b',.48):base[3];const p={body,tail,light,dark,edge:tint(dark,'#789b91',.2),white:tint(light,'#ffffff',.53),deep:tint(body,dark,key==='goldfish'?.36:.48),finDark:tint(tail,'#445367',.3)};paletteCache.set(cacheKey,p);return p;}
 function rayPath(root,ends){const p=new Path2D();for(const [x,y] of ends){p.moveTo(root[0],root[1]);p.quadraticCurveTo((root[0]+x)*.5,y*.68,x,y);}return p;}
 function scalesPath(height){const p=new Path2D();for(let row=0;row<5;row++)for(let col=0;col<8;col++){const x=-18+col*5+(row%2)*2.5,y=(row-2)*height*.29;p.moveTo(x,y-2);p.quadraticCurveTo(x+3.1,y,x,y+2);}return p;}
+const anatomy={
+ guppy:{dorsal:[3,-8],anal:[4,8],pectoral:[19,5],mouth:[38,2,.67],gill:[22,0,7]},
+ goldfish:{dorsal:[3,-8],anal:[4,8],pectoral:[19,5],mouth:[38,3,1.05],gill:[22,0,12]},
+ cory:{dorsal:[3,-8],anal:[4,8],pectoral:[19,5],mouth:[36,11,.9],gill:[20,2,8]},
+ zebra:{dorsal:[5,-7],anal:[0,7],pectoral:[22,3],mouth:[38,1,.46],gill:[23,0,5.4]},
+ molly:{dorsal:[1,-15],anal:[-2,15],pectoral:[20,6],mouth:[38,-1,.7],gill:[22,0,10.5]},
+ swordtail:{dorsal:[3,-10],anal:[-1,8],pectoral:[21,4],mouth:[39,0,.56],gill:[23,0,7]},
+ whitecloud:{dorsal:[4,-7],anal:[0,7],pectoral:[22,3],mouth:[38,1,.44],gill:[23,0,5.2]},
+ cardinal:{dorsal:[4,-8],anal:[0,8],pectoral:[22,3],mouth:[38,1,.43],gill:[23,1,5.9]},
+ angel:{dorsal:[-5,-20],anal:[-4,18],pectoral:[24,4],mouth:[38,0,.62],gill:[23,-1,9]},
+ betta:{dorsal:[3,-11],anal:[3,11],pectoral:[23,3],mouth:[39,0,.7],gill:[24,0,8]}
+};
+// Fin-edge samples follow the species silhouette. Interpolation happens once,
+// leaving only cached paths and small affine movements in the animation loop.
+const finEdges={
+ zebra:{tail:[[-50,-14],[-46,-7],[-42,0],[-46,7],[-49,14]],dorsal:[[-6,-15],[1,-21],[8,-16],[15,-8]],anal:[[-10,16],[-2,16],[10,9]]},
+ molly:{tail:[[-51,-19],[-55,-10],[-56,0],[-55,10],[-51,19]],dorsal:[[-17,-22],[-9,-31],[0,-33],[9,-32],[17,-23],[24,-14]],anal:[[-13,24],[-5,23],[7,17]]},
+ swordtail:{tail:[[-49,-20],[-46,-10],[-42,0],[-48,14],[-63,29]],dorsal:[[-9,-19],[-1,-29],[8,-23],[17,-11]],anal:[[-12,18],[-5,17],[8,10]]},
+ whitecloud:{tail:[[-51,-15],[-47,-8],[-43,0],[-46,8],[-50,15]],dorsal:[[-7,-16],[1,-23],[7,-18],[14,-8]],anal:[[-10,17],[-3,16],[10,8]]},
+ cardinal:{tail:[[-49,-14],[-45,-7],[-41,0],[-45,8],[-48,14]],dorsal:[[-4,-23],[2,-22],[8,-15],[13,-9]],anal:[[-15,17],[-7,19],[3,15],[13,9]]},
+ angel:{tail:[[-46,-17],[-44,-9],[-44,0],[-44,10],[-46,18]],dorsal:[[-12,-52],[-10,-43],[-4,-34],[5,-29],[15,-23],[24,-14]],anal:[[-9,51],[-9,39],[-4,30],[9,26],[24,12]]},
+ betta:{tail:[[-48,-29],[-57,-26],[-61,-18],[-63,-8],[-63,5],[-61,17],[-56,25],[-49,31],[-38,29]],dorsal:[[-15,-23],[-6,-31],[3,-32],[12,-30],[19,-25],[25,-19],[28,-9]],anal:[[-18,22],[-15,29],[-8,34],[1,34],[12,32],[22,27],[27,20]]}
+};
+function finRayLayers(root,edge){
+ const dark=new Path2D(),light=new Path2D();
+ for(let segment=0;segment<edge.length-1;segment++)for(let n=0;n<4;n++){
+  const t=n/4,ex=edge[segment][0]*(1-t)+edge[segment+1][0]*t,ey=edge[segment][1]*(1-t)+edge[segment+1][1]*t;
+  const p=n%3===0?light:dark;p.moveTo(...root);p.bezierCurveTo(root[0]+(ex-root[0])*.32,root[1]+(ey-root[1])*.2,ex,ey*.85,ex,ey);
+ }
+ return {dark,light};
+}
 for(const [key,f] of Object.entries(forms)){
  for(const name of ['body','tail','dorsal','anal','pectoral','gill','mouth'])f[name]=path(f[name]);
  f.scales=scalesPath(f.height);
@@ -531,7 +623,21 @@ for(const [key,f] of Object.entries(forms)){
  f.tailRays=rayPath(f.root,ends);
  f.dorsalRays=rayPath([8,-6],key==='angel'?[[-13,-47],[-12,-38],[-11,-29],[-5,-29],[5,-26],[14,-21]]:key==='betta'?[[-13,-22],[-7,-29],[0,-30],[8,-28],[15,-23],[21,-19]]:[[-13,-19],[-7,-25],[-1,-27],[5,-25],[11,-21],[17,-15]]);
  f.analRays=rayPath([8,7],key==='angel'?[[-10,47],[-11,37],[-9,28],[-4,25],[4,25]]:key==='betta'?[[-16,26],[-9,31],[-1,32],[7,31],[15,27],[22,21]]:[[-13,17],[-7,22],[0,22],[6,18]]);
- f.pectoralRays=rayPath([19,5],[[0,13],[4,17],[9,18],[14,13]]);
+ f.pectoralRays=rayPath(anatomy[key].pectoral,[[0,13],[4,17],[9,18],[14,13]]);
+ f.fineRays={};for(const name of ['tail','dorsal','anal','pectoral']){
+  const root=name==='tail'?f.root:anatomy[key][name];
+  const fallback=name==='tail'?ends:name==='dorsal'?[[-13,-19],[-7,-25],[-1,-27],[5,-25],[11,-21],[17,-15]]:name==='anal'?[[-13,17],[-7,22],[0,22],[6,18]]:[[3,12],[5,17],[11,18],[18,10]];
+  const edge=finEdges[key]?.[name]||fallback;
+  if(!finEdges[key]){
+   // Preserve the established three reference species' dense fan texture.
+   const dark=new Path2D(),light=new Path2D(),points=[];
+   if(name==='tail'){const top=key==='goldfish'?-29:key==='guppy'?-29:-19,bottom=key==='goldfish'?32:key==='guppy'?30:19;for(let i=0;i<29;i++)points.push([-64+Math.abs(i-14)*.12,top+(bottom-top)*i/28]);}
+   else for(let i=0;i<25;i++)points.push([-24+i*2.4,name==='dorsal'?-40:name==='anal'?36:25]);
+   points.forEach(([ex,ey],i)=>{const q=i%3===0?light:dark;q.moveTo(...root);q.bezierCurveTo(root[0]+(ex-root[0])*.32,root[1]+(ey-root[1])*.2,ex+(name==='tail'?3:0),ey*.8,ex,ey);});
+   f.fineRays[name]={dark,light};
+  }else f.fineRays[name]=finRayLayers(root,edge);
+  if(finEdges[key]?.[name])f[name+'Rays']=rayPath(root,edge);
+ }
 }
 const detail={
  guppyBand:path('M-23 1 Q-1 7 27 1'),guppySpots:path('M-53 -16a2 2 0 1 0 .01 0 M-48 -7a2.2 2.2 0 1 0 .01 0 M-54 4a2.3 2.3 0 1 0 .01 0 M-49 15a2.2 2.2 0 1 0 .01 0 M-42 0a1.5 1.5 0 1 0 .01 0 M-55 22a1.7 1.7 0 1 0 .01 0'),
@@ -545,6 +651,11 @@ const detail={
  mollHighlight:path('M-22 1 Q0 -13 27 -5'),mollBelly:path('M-19 8 Q2 20 28 9'),
  swordStripe:path('M-26 1 Q0 -3 27 1'),swordEdge:path('M-41 9 Q-49 19 -61 28'),
  highlight:path('M-17 -4 Q3 -17 22 -7'),belly:path('M-16 6 Q3 16 25 6'),
+ zebraFinBars:path('M-48 -10 L-33 -2 M-47 -6 L-32 0 M-46 7 L-32 2 M-47 11 L-33 3'),
+ angelFinBars:path('M-15 -47 Q-12 -27 -10 -15 L-5 -17 Q-7 -34 -10 -50Z M-17 15 Q-16 36 -9 49 L-7 43 Q-11 27 -10 17Z M2 -32 L5 -15 L10 -15 L8 -29Z M2 16 L1 35 L7 28 L8 15Z'),
+ swordLateral:path('M-27 2 C-13 1 5 1 24 3'),
+ cloudCopper:path('M-24 -2 Q-1 -10 22 -5'),
+ bettaShoulder:path('M-16 0 Q-2 -9 17 -7'),
  bettaGill:path('M22 -7 Q15 -1 20 7'),bettaLip:path('M33 -9 Q26 -12 17 -9')
 };
 function articulated(c,f,name,p,phase){
@@ -561,7 +672,7 @@ function articulated(c,f,name,p,phase){
 }
 function markings(c,key,p){
  const f=forms[key];c.save();c.clip(f.body);
- c.globalAlpha*=key==='molly'?.24:.14;line(c,f.scales,p.light,.6);c.restore();
+ c.globalAlpha*=key==='molly'?.12:.14;line(c,f.scales,p.light,.6);c.restore();
  c.save();c.clip(f.body);
  switch(key){
  case 'guppy':c.globalAlpha*=.78;line(c,detail.guppyBand,p.light,3.2);break;
@@ -586,7 +697,7 @@ function threads(c,key,phase,p){
  c.strokeStyle=p.dark;c.lineWidth=.85;c.beginPath();c.moveTo(35,11);c.quadraticCurveTo(40,16,44,13);c.moveTo(32,12);c.quadraticCurveTo(32,19,37,18);c.moveTo(38,10);c.quadraticCurveTo(43,11,45,8);c.stroke();
  }
 }
-function draw(c,key,x,y,size,turn=1,angle=0,phase=0,variant='normal'){
+function originalDraw(c,key,x,y,size,turn=1,angle=0,phase=0,variant='normal'){
  const f=forms[key];if(!f)return;const p=palette(key,variant),t=Math.max(-1,Math.min(1,Number.isFinite(turn)?turn:1)),width=.15+.85*Math.abs(t);
  c.save();c.translate(x,y);c.rotate(angle*.35);c.scale(size/100,size/100);
  // An edge-on silhouette retains a little width as the existing turn value crosses
@@ -608,8 +719,129 @@ function draw(c,key,x,y,size,turn=1,angle=0,phase=0,variant='normal'){
  oval(c,ex,ey,er+.7,er+.65,tint(p.dark,p.body,.4));oval(c,ex+.08,ey-.05,er,er,p.light);oval(c,ex+.48,ey,er*.68,er*.78,'#243b43');oval(c,ex+.85,ey-.9,er*.25,er*.25,'#fffdf0');oval(c,ex-.55,ey+.8,er*.11,er*.11,'#a2d9d1');
  line(c,f.mouth,p.dark,.72);c.restore();c.restore();
 }
+
+// R2: a continuous curved caudal axis carries the body, tail and fin roots.
+// Static pigment/scale layers are rasterized once at observation resolution;
+// broad overlapping strips bend the posterior without rebuilding paths per frame.
+const refined=new Set(Object.keys(forms));
+const bodyLayers=new Map();
+const sheen=path('M-25 1 C-13 -5 0 -15 18 -10 Q27 -8 30 -4 C14 -7 -4 -3 -25 3Z');
+const bellySheen=path('M-22 5 C-3 14 17 19 32 6 C22 24 -3 23 -22 5Z');
+const headContours=path('M20 -11 Q28 -12 34 -5 M26 8 Q31 10 35 6');
+function radial(c,x,y,r,color,clear='rgba(255,255,255,0)') { const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,color);g.addColorStop(1,clear);return g; }
+function bodyLayer(key,variant,p){
+ const id=key+':'+variant;if(bodyLayers.has(id))return bodyLayers.get(id);
+ const f=forms[key],top=Math.min(-33,-f.height-5),height=Math.max(66,f.height*2+10);
+ const canvas=new OffscreenCanvas(672,height*8),c=canvas.getContext('2d');
+ c.scale(8,8);c.translate(36,-top);
+ fill(c,f.body,gradient(c,-5,-f.height,9,f.height,[[0,tint(p.deep,p.light,.12)],[.15,tint(p.body,p.light,.34)],[.38,p.body],[.68,tint(p.body,p.light,.13)],[.85,p.deep],[1,tint(p.deep,p.dark,.55)]]),tint(p.deep,p.body,.5),.35);
+ c.save();c.clip(f.body);
+ // Volumetric flank: a broad pearly shoulder and a cooler translucent belly.
+ c.fillStyle=radial(c,6,-f.height*.32,f.height*1.6,tint(p.light,'#ffffff',.24)+'78');c.fillRect(-34,top,80,height);
+ c.fillStyle=radial(c,22,f.height*.35,f.height*.85,p.deep+'80',p.deep+'00');c.fillRect(-34,top,80,height);
+ c.globalAlpha=.15;fill(c,sheen,p.white);c.globalAlpha=.1;fill(c,bellySheen,p.white);c.globalAlpha=1;
+ markings(c,key,p);
+ // Species-specific pigment sits inside the same cached volume as the scales.
+ if(key==='molly'){
+  c.globalAlpha=.14;for(let i=0;i<32;i++){const xx=-15+(i*5.61)%37,yy=-15+(i*3.17)%29;oval(c,xx,yy,.23,.45,p.light);}
+ }else if(key==='swordtail'){
+  c.globalAlpha=.2;line(c,detail.swordLateral,p.dark,.7);
+ }else if(key==='whitecloud'){
+  c.globalAlpha=.25;line(c,detail.cloudCopper,p.tail,1.1);
+ }else if(key==='cardinal'){
+  c.globalAlpha=.28;line(c,detail.neonBlue,p.white,.35);
+ }else if(key==='betta'){
+  c.globalAlpha=.21;line(c,detail.bettaShoulder,p.light,1.4);
+  c.globalAlpha=.3;line(c,detail.bettaGill,p.dark,1.15);
+ }
+ c.globalAlpha=1;
+ // Staggered crescent scales follow the flank; they fade at the face and belly.
+ if(key!=='cory')for(let row=-3;row<=3;row++)for(let col=0;col<10;col++){
+  const sx=-25+col*4.7+(row%2)*2.35,sy=row*f.height*.23;
+  if(sx>19)continue;const a=(1-Math.abs(row)/5)*(key==='molly'?.09:key==='angel'?.1:.14);
+  c.globalAlpha=a;c.strokeStyle=p.dark;c.lineWidth=.34;c.beginPath();c.moveTo(sx,sy-1.7);c.quadraticCurveTo(sx+3,sy,sx,sy+1.7);c.stroke();
+  c.globalAlpha=a*1.65;c.strokeStyle=p.white;c.lineWidth=.28;c.beginPath();c.moveTo(sx-.5,sy-1.4);c.quadraticCurveTo(sx+1.8,sy-.8,sx+1.7,sy+.1);c.stroke();
+ }
+ if(key==='cory'){
+  // Interlocking bony scutes are elongated plates rather than round fish scales.
+  for(let i=0;i<7;i++){const sx=-23+i*5.6;c.globalAlpha=.24;c.strokeStyle=p.dark;c.lineWidth=.55;c.beginPath();c.moveTo(sx,-11);c.quadraticCurveTo(sx+5,-1,sx+1,9);c.stroke();c.globalAlpha=.3;c.strokeStyle=p.white;c.lineWidth=.65;c.beginPath();c.moveTo(sx+1,-10);c.quadraticCurveTo(sx+5,-2,sx+2,1);c.stroke();}
+  c.globalAlpha=.2;for(let i=0;i<44;i++){const sx=-23+(i*7.13)%50,sy=-13+(i*3.77)%25;oval(c,sx,sy,.42+(i%3)*.13,.37,p.dark);}
+ }
+ c.globalAlpha=.17;line(c,headContours,p.white,.7);c.restore();
+ const layer={canvas,top,height};bodyLayers.set(id,layer);return layer;
+}
+function axis(x,phase){const u=Math.max(0,(12-x)/43);return Math.sin(phase-u*1.25)*3.1*u*u;}
+function slope(x,phase){return (axis(x+.2,phase)-axis(x-.2,phase))/.4;}
+function atRoot(c,x,y,phase,fn){c.save();c.translate(x,y+axis(x,phase));c.rotate(Math.atan(slope(x,phase)));c.translate(-x,-y);fn();c.restore();}
+function curvedBody(c,key,variant,p,phase){
+ const {canvas:layer,top,height}=bodyLayer(key,variant,p);
+ // A stable face plus a finely sampled smooth backbone. Overlap prevents pinholes.
+ for(let left=-34;left<12;left+=2.5){const right=Math.min(12,left+2.5),mid=(left+right)/2;c.save();c.translate(mid,axis(mid,phase));c.rotate(Math.atan(slope(mid,phase)));c.drawImage(layer,(left+36)*8,0,(right-left+.2)*8,height*8,left-mid-.1,top,right-left+.2,height);c.restore();}
+ c.drawImage(layer,48*8,0,288,height*8,12,top,36,height);
+}
+function fineFin(c,key,f,name,p,phase){
+ const tail=name==='tail',root=tail?f.root:anatomy[key][name];
+ atRoot(c,...root,phase,()=>{
+  const flutter=Math.sin(phase*(tail?1:name==='pectoral'?1.7:.72)+(name==='anal'?1.9:0));
+  c.translate(...root);c.rotate(flutter*(tail?.12:name==='pectoral'?.14:.038));c.scale(tail?.94+.06*Math.cos(phase):1,1);c.translate(-root[0],-root[1]);
+  c.globalAlpha*=key==='cardinal'?(tail?.48:.38):key==='zebra'?(tail?.66:.48):key==='betta'?(tail?.9:.78):tail?.85:.62;
+  const g=gradient(c,root[0],root[1],tail?-60:0,tail?20:32,[[0,p.body+'ea'],[.28,p.tail+'dd'],[.72,tint(p.tail,p.light,.31)+'b0'],[1,p.light+'44']]);
+  fill(c,f[name],g,p.finDark+'65',.38);
+  c.save();c.clip(f[name]);
+  // Broad folds under very fine alternating rays give membranes their thickness.
+  c.globalAlpha*=.32;line(c,f[name+'Rays'],p.finDark,1.6);c.globalAlpha*=1.75;line(c,f[name+'Rays'],p.light,.55);
+  c.globalAlpha=.33;
+  line(c,f.fineRays[name].dark,p.finDark,.25);line(c,f.fineRays[name].light,p.white,.3);
+  // Long fins have deeper folds; clear little shoaling fish keep delicate membranes.
+  if(key==='betta'){
+   c.globalAlpha=.23;line(c,f[name+'Rays'],p.dark,1.15);
+   c.globalAlpha=.3;line(c,f[name],p.light,1.2);
+  }else if(key==='angel'){
+   c.globalAlpha=.28;line(c,f[name],p.white,.8);
+   if(name==='dorsal'||name==='anal'){c.globalAlpha=.31;fill(c,detail.angelFinBars,p.dark);}
+  }else if(key==='whitecloud'&&(tail||name==='dorsal'||name==='anal')){
+   c.globalAlpha=.65;line(c,f[name],p.light,1.8);
+   c.globalAlpha=.4;line(c,f[name+'Rays'],p.tail,.85);
+  }else if(key==='swordtail'&&tail){c.globalAlpha=.7;line(c,detail.swordEdge,p.dark,1.15);}
+  else if(key==='zebra'&&tail){c.globalAlpha=.22;line(c,detail.zebraFinBars,p.dark,.65);}
+  else if(key==='molly'&&name==='dorsal'){
+   c.globalAlpha=.3;for(let row=0;row<3;row++)for(let col=0;col<7;col++)oval(c,-14+col*4.6,-16-row*4.5,.45,.65,p.light);
+  }
+  if(tail&&key==='guppy'){c.globalAlpha=.3;fill(c,detail.guppySpots,p.dark);c.globalAlpha=.16;line(c,detail.guppySpots,p.light,.8);}
+  c.restore();
+ });
+}
+function pelvic(c,key,p,phase){if(key==='angel'||key==='betta')return;atRoot(c,7,10,phase,()=>{c.globalAlpha*=.48;const fin=path(key==='goldfish'?'M9 16 Q5 21 0 30 Q10 29 15 18Z':key==='cory'?'M7 12 Q-1 20 2 22 Q10 22 14 13Z':'M8 8 Q1 17 2 19 Q9 17 13 10Z');fill(c,fin,gradient(c,10,8,3,28,[[0,p.body],[1,p.light+'55']]),p.finDark+'70',.4);c.globalAlpha*=.6;line(c,fin,p.light,.4);});}
+function breathPose(seconds){const phase=seconds*2*PI*.63;return {mouthOpen:(.5+.5*Math.sin(phase))**2,gillOpen:(.5+.5*Math.sin(phase-.85))**2};}
+function breathingHead(c,key,f,p,pose,emphasis){
+ const op=pose.gillOpen*(emphasis?1:0.48),[mx,my,base]=anatomy[key].mouth;
+ // Mouth aperture changes height; the lower lip moves rather than blinking a line.
+ const open=.13+pose.mouthOpen*(emphasis?2.5:.7)*Math.min(1,base/.67);
+ oval(c,mx,my+.2,base+.35,open*.72,p.deep);oval(c,mx+.28,my+.1,base*.62,open*.51,'#473b39');
+ c.strokeStyle=tint(p.body,p.light,.5);c.lineWidth=.68;c.beginPath();c.moveTo(mx-1.6,my-open*.55);c.quadraticCurveTo(mx+.8,my-open*.82,mx+1,my-open*.25);c.stroke();
+ c.strokeStyle=p.dark;c.lineWidth=.58;c.beginPath();c.moveTo(mx-1.5,my+open*.6);c.quadraticCurveTo(mx+.2,my+open*.95,mx+1,my+open*.35);c.stroke();
+ // The operculum is a separate curved flap: a dark slit appears under its aft rim.
+ const [gx,gy,gh]=anatomy[key].gill;
+ c.save();c.translate(gx+4,gy-gh*.7);c.rotate(-op*.075);c.translate(-gx-4,-gy+gh*.7);
+ const flap=new Path2D();flap.moveTo(gx+5,gy-gh);flap.bezierCurveTo(gx-4-op*1.5,gy-gh*.7,gx-4-op*2.1,gy+gh*.7,gx+4,gy+gh);flap.quadraticCurveTo(gx+10,gy+gh*.4,gx+5,gy-gh);flap.closePath();
+ c.save();c.translate(-op*1.5,.15);fill(c,flap,p.deep+'b0');c.restore();c.save();c.globalAlpha*=.55;fill(c,flap,gradient(c,gx-4,gy,gx+10,gy,[[0,tint(p.body,p.deep,.3)],[.35,tint(p.body,p.light,.32)],[1,p.body]]));c.restore();
+ c.strokeStyle=p.deep+'80';c.lineWidth=.55;c.beginPath();c.moveTo(gx+5,gy-gh);c.bezierCurveTo(gx-4-op*1.5,gy-gh*.7,gx-4-op*2.1,gy+gh*.7,gx+4,gy+gh);c.stroke();
+ c.strokeStyle=p.white+'55';c.lineWidth=.5;c.beginPath();c.moveTo(gx+4,gy-gh*.82);c.bezierCurveTo(gx-2-op*1.3,gy-gh*.5,gx-2-op*1.5,gy+gh*.45,gx+3,gy+gh*.8);c.stroke();c.restore();
+}
+function draw(c,key,x,y,size,turn=1,angle=0,phase=0,variant='normal',options={}){
+ if(!refined.has(key))return originalDraw(c,key,x,y,size,turn,angle,phase,variant);
+ const f=forms[key];if(!f)return;const p=palette(key,variant),t=Math.max(-1,Math.min(1,Number.isFinite(turn)?turn:1)),width=.15+.85*Math.abs(t);
+ c.save();c.translate(x,y);c.rotate(angle*.35);c.scale(size/100*(t<0?-1:1)*width,size/100);c.lineCap='round';c.lineJoin='round';
+ for(const name of ['tail','dorsal','anal'])fineFin(c,key,f,name,p,phase);
+ pelvic(c,key,p,phase);curvedBody(c,key,variant,p,phase);
+ const pose=breathPose(options.breathTime??phase*.22);breathingHead(c,key,f,p,pose,!!options.breathing&&!!options.breathEmphasis);
+ c.save();c.globalAlpha*=.3+.7*width;fineFin(c,key,f,'pectoral',p,phase);c.restore();threads(c,key,phase,p);
+ const [ex,ey,oldr]=f.eye,er=oldr*.77;c.save();c.globalAlpha*=.3+.7*width;
+ oval(c,ex,ey,er+1,er+.9,p.deep+'90');oval(c,ex,ey,er+.45,er+.35,tint(p.body,p.light,.45));oval(c,ex,ey,er,er,p.dark);
+ oval(c,ex+.1,ey-.04,er*.84,er*.87,gradient(c,ex,ey-er,ex,ey+er,[[0,p.light],[.45,tint(p.body,p.light,.45)],[1,p.deep]]));oval(c,ex+.38,ey,er*.59,er*.7,'#183038');oval(c,ex+.8,ey-.7,er*.2,er*.2,'#fffef5');oval(c,ex-.55,ey+.8,er*.09,er*.09,'#b5e8dd');c.restore();c.restore();
+}
 const hitBounds=Object.freeze({guppy:{left:-64,right:42,top:-30,bottom:31},goldfish:{left:-63,right:43,top:-37,bottom:35},cory:{left:-55,right:46,top:-32,bottom:26},zebra:{left:-53,right:41,top:-23,bottom:20},molly:{left:-58,right:42,top:-35,bottom:29},swordtail:{left:-65,right:43,top:-31,bottom:32},whitecloud:{left:-54,right:41,top:-25,bottom:21},cardinal:{left:-52,right:42,top:-25,bottom:22},angel:{left:-49,right:42,top:-55,bottom:57},betta:{left:-68,right:43,top:-37,bottom:40}});
-window.AquariumFishArt=Object.freeze({draw,hitBounds,version:'0.4.1'});
+window.AquariumFishArt=Object.freeze({draw,hitBounds,breathPose,version:'0.4.1-r2'});
 })();
 
 </script>
@@ -683,7 +915,8 @@ function initialize(){
 }
 function makeRuntime(f,i=0){const s=SPECIES[f.species],x=rand(.14,.86),y=rand(...s.depth);return {x,y,vx:(i%2?-.5:.5)*s.speed,vy:0,target:{x:rand(.15,.85),y},turn:i%2?-1:1,heading:0,phase:rand(0,6.28),wander:rand(2,6),pause:0,burst:0,direction:i%2?-1:1,position:{x,y},preferredDepth:s.depth,speed:s.speed,coinValue:s.values[stage(f.growth)],behavior:'巡遊',behaviorState:'explore',poi:null,poiWait:rand(12,32),poiRemaining:0,poiReached:false,hiddenAmount:0,environmentSeconds:0,environmentVisits:0};}
 function rebuildRuntime(){runtime.clear();food=[];effects=[];cleaning=null;selected=null;$('fish-card').hidden=true;state.fishes.forEach((f,i)=>runtime.set(f.id,makeRuntime(f,i)));}
-function toast(text,ms=3000){clearTimeout(toastTimer);$('toast').textContent=text;$('toast').hidden=false;toastTimer=setTimeout(()=>$('toast').hidden=true,ms);}
+function dismissToast(){const t=$('toast');clearTimeout(toastTimer);if(t.matches(':popover-open'))t.hidePopover();t.hidden=true;}
+function toast(text,ms=6000){clearTimeout(toastTimer);const t=$('toast'),copy=document.createElement('span');copy.textContent=text;const close=button('×',dismissToast,'toast-close');close.setAttribute('aria-label','關閉提示');t.replaceChildren(copy,close);t.hidden=false;try{t.showPopover();}catch(e){/* Older browsers use the fixed-position fallback. */}toastTimer=setTimeout(dismissToast,Math.max(ms,Math.min(14000,text.length*180)));}
 function updateUI(){
  $('tank-name').textContent=TANK_TIERS[state.tankTier-1].name;$('tank-message').textContent=selected&&runtime.get(selected)?runtime.get(selected).behavior:'慢慢游，慢慢長大。';
  $('coins').textContent=state.coins.toLocaleString();$('water').textContent=Math.round(state.waterQuality);$('water-bar').style.width=`${state.waterQuality}%`;$('water-label').textContent=state.waterQuality>=70?'清澈':state.waterQuality>=40?'待清潔':'有點混濁';
@@ -714,30 +947,30 @@ function clean(){
 }
 function buy(species){
  if(conflict)return;const s=SPECIES[species];if(state.level<s.unlockLevel){shopMessage(`養魚等級達到 ${s.unlockLevel}，就能購買${s.name}。`);return;}if(state.fishes.length>=state.tankCapacity){shopMessage('魚缸住滿了！可以升級魚缸，或到魚兒管理中送養。');return;}if(state.coins<s.price){shopMessage('金幣不足，先收集魚兒帶來的金幣吧。');return;}
- const variant=shopVariants.get(species)||'normal';if(variant!=='normal'&&!state.unlockedVariants.includes(variant)){shopMessage('先完成配色的解鎖條件吧。');return;}
+ const variant=shopVariants.get(species)||'normal';if(variant!=='normal'&&!state.unlockedVariants.includes(variant)){shopMessage('這個配色還沒解鎖。可以到魚類圖鑑查看需要完成的條件。');return;}
  state.coins-=s.price;const first=!state.collection[species];const total=(state.collection[species]?.total||0);const f=newFish(species,total,variant);state.fishes.push(f);syncFish(f);runtime.set(f.id,makeRuntime(f,state.fishes.length));
  const history=state.collection[species];state.collection[species]={total:Math.min(9999,total+1),highestStage:history?.highestStage||0,adults:history?.adults||0,variants:[...new Set([...(history?.variants||['normal']),variant])]};state.stats.purchases++;metric('buy');evaluateGoals();gainXP(first?12:2);sound('buy');
  if(first){diagnostics.discoveries++;effects.push({x:.5,y:.4,text:`圖鑑新增：${s.name}`,life:3});toast(`圖鑑新增：${s.name}`,3500);}markDirty(true);updateUI();renderShop();shopMessage(`歡迎${f.name}！目前 ${state.fishes.length} / ${state.tankCapacity} 隻，剩下 ${state.coins} 金幣。`);
 }
-function shopMessage(text){const e=$('shop-message');if(e)e.textContent=text;else toast(text);}
+function shopMessage(text){const e=$('shop-message');if(e){e.textContent=text;e.scrollIntoView({block:'nearest'});}else toast(text);}
 function openDialog(title,mode){if(editing)finishEditing();closeCard();dialogMode=mode;$('dialog-title').textContent=title;$('dialog-content').replaceChildren();if(!dialog.open)dialog.showModal();}
 function button(text,handler,cls=''){const b=document.createElement('button');b.type='button';b.textContent=text;b.className=cls;b.addEventListener('click',handler);return b;}
 function shop(){if(editing)finishEditing();metric('shop');advanceOnboarding(2);openDialog('商店','shop');renderShop();}
-function settings(){openDialog('設定','settings');const list=document.createElement('div');list.className='settings-list';
+function settings(){const expanded=document.querySelector('.save-tools')?.open||false;openDialog('設定','settings');const list=document.createElement('div');list.className='settings-list';
   function row(title,desc,label,fn,danger=false){const r=document.createElement('div');r.className='setting-row';const p=document.createElement('p');p.textContent=title;const small=document.createElement('small');small.textContent=desc;p.append(small);r.append(p,button(label,fn,danger?'danger':''));list.append(r);}
   row('手動存檔','額外保留現在這一刻；自動存檔仍會持續。','存檔',()=>{if(save(true)){dialog.close();}});
   row('讀取手動存檔','回到上次手動保存的時間點。','讀檔',()=>confirmAction('讀取手動存檔？','目前進度將被手動存檔取代。確定要繼續嗎？',()=>loadSaved(true)));
   row('重新讀取自動存檔','讀取最近一次自動保存的進度。','讀取',()=>confirmAction('讀取自動存檔？','目前尚未保存的變更將被取代。確定要繼續嗎？',()=>loadSaved(false)));
   row('重置遊戲','重新開始，魚兒與金幣都會回到最初。','重置',()=>{resetStep=1;confirmAction('確定要重新開始嗎？','重置後，將重新獲得三隻幼魚與 20 金幣；圖鑑與布置也會重新開始。',()=>{resetStep=2;confirmAction('最後確認：刪除目前進度','目前的魚、水族箱與金幣進度將被刪除，且無法復原。',reset,true);},true);},true);
   row('音效',state.soundEnabled?'柔和的操作音效已開啟。':'音效已關閉。',state.soundEnabled?'關閉':'開啟',()=>{state.soundEnabled=!state.soundEnabled;markDirty(true);settings();});
-  row('我的魚缸','升級同一個魚缸，或重新布置魚兒的家。','查看',tankMenu);
-  row('成就','留住每一個養成的小里程碑。','查看',achievements);
+
+
   row('重新觀看新手引導','三個小步驟，也可以隨時跳過。','重看',()=>{dialog.close();state.onboarding={completed:false,skipped:false,step:0};renderOnboarding();markDirty(true);});
   if(CONFIG.PLAYTEST)row('本次試玩摘要','只記錄本機匿名操作次數與時間。','匯出試玩摘要',exportSession);
-  row('魚類圖鑑','看看已遇見的魚，以及下一位新朋友。','查看',encyclopedia);
+
   row('下載存檔','下載進度檔案，之後可以載入。','下載',exportSave);
   row('載入存檔檔案','選擇進度檔案，確認後再載入。','選擇檔案',chooseImport);
-  const note=document.createElement('p');note.className='dialog-note';note.textContent='進度保存在這台裝置的瀏覽器。使用相同瀏覽器回來，就能繼續照顧魚兒。';$('dialog-content').append(list,note);
+  const note=document.createElement('p');note.className='dialog-note';note.textContent='進度保存在這台裝置的瀏覽器。使用相同瀏覽器回來，就能繼續照顧魚兒。';const saveTools=document.createElement('details');saveTools.className='save-tools';saveTools.open=expanded;const heading=document.createElement('summary');heading.textContent='存檔與進度';saveTools.append(heading);const advanced=document.createElement('div');advanced.className='settings-list';for(const r of [...list.children]){if(!['音效','重新觀看新手引導','本次試玩摘要'].some(t=>r.querySelector('p').firstChild.textContent===t))advanced.append(r);}saveTools.append(advanced);$('dialog-content').append(list,note,saveTools);
 }
 function confirmAction(title,copy,fn,danger=false){openDialog(title,'confirm');const p=document.createElement('p');p.className='confirm-copy';p.textContent=copy;const actions=document.createElement('div');actions.className='confirm-actions';actions.append(button('取消',()=>{resetStep=0;dialog.close();}),button(danger?'確認重置':'確定讀取',fn,'confirm'+(danger?' danger':'')));$('dialog-content').append(p,actions);}
 function loadSaved(manual){
@@ -754,7 +987,7 @@ function loadSaved(manual){
     if(!saved)saveBlocked=wasBlocked;
     updateUI();dialog.close();
     if(!saved){if(saveBlocked)saveLabel();toast('已讀取備份，但目前無法儲存。原自動存檔已保留，請確認瀏覽器有可用空間後重試。',6000);return;}
-    toast('✓ 已讀取存檔。');
+    toast('已載入存檔，可以繼續照顧魚兒了。');
   }
   catch(e){if(!manual)saveBlocked=true;saveLabel();dialog.close();toast('這份存檔目前無法讀取，原資料已保留。',5000);}
 }
@@ -762,7 +995,7 @@ function reset(){if(resetStep!==2)return;try{localStorage.removeItem(CONFIG.SAVE
   clearTimeout(saveTimer);state=fresh();saveBlocked=conflict=false;resetStep=0;state.fishes.forEach(syncFish);rebuildRuntime();buildBackground();setFeeding(false);save();updateUI();dialog.close();renderOnboarding();toast('新的一缸，新的開始。');
 }
 const fishBrief={guppy:'小巧活潑，展開繽紛的大尾巴。',goldfish:'圓潤的身體，慢慢擺動尾鰭。',cory:'在底砂巡游，尋找沉底飼料。',zebra:'帶著水平條紋，輕快地游。',molly:'深色魚身，穩穩地游動。',swordtail:'尾鰭下方有細長的劍狀延伸。',whitecloud:'細細的色帶，喜歡靠近同伴。',cardinal:'藍紅相映的小型群游魚。',angel:'高高的魚鰭，姿態優雅。',betta:'飄逸的長鰭，喜歡獨自巡游。'};
-function moreMenu(){openDialog('更多功能','more');const list=document.createElement('div');list.className='more-grid';for(const [id,title,desc,fn]of [['roster','我的魚兒','看看狀態、改名字與管理魚兒',roster],['encyclopedia','魚類圖鑑','收藏魚種與特別配色',encyclopedia],['tank-menu','我的魚缸','升級魚缸與調整布置',tankMenu],['achievements','成就','查看進度與領取獎勵',achievements]]){const b=button('',fn,'more-item');b.id=id;const label=document.createElement('strong');label.textContent=title;b.append(label,paragraph(desc));list.append(b);}$('dialog-content').append(list);}
+function moreMenu(){openDialog('更多功能','more');const list=document.createElement('div');list.className='more-grid';for(const [id,title,desc,fn]of [['roster','我的魚兒','看看狀態、改名字與管理魚兒',roster],['encyclopedia','魚類圖鑑','收藏魚種與特別配色',encyclopedia],['tank-menu','我的魚缸','升級魚缸與調整布置',tankMenu],['achievements','成就','查看進度與領取獎勵',achievements],['settings','設定','音效、新手引導與存檔',settings]]){const b=button('',fn,'more-item');b.id=id;const label=document.createElement('strong');label.textContent=title;b.append(label,paragraph(desc));list.append(b);}$('dialog-content').append(list);}
 function fishMore(){const f=state.fishes.find(f=>f.id===selected);if(!f)return;openDialog('更多魚兒資料','fish-more');const minutes=Math.max(0,Math.floor((Date.now()-f.createdAt)/60000));$('dialog-content').append(paragraph(f.name+' · '+SPECIES[f.species].name,'fish-detail-name'),paragraph(`活動水層：${SPECIES[f.species].depthName}`),paragraph(`已養時間：${minutes>=60?Math.floor(minutes/60)+' 小時 '+minutes%60+' 分鐘':minutes+' 分鐘'}`),paragraph(`心情：${mood(f)}`),paragraph(`配色：${f.variant==='normal'?'普通配色':VARIANTS[f.variant].name}`),paragraph(PERSONALITIES[f.personality].desc));const manage=button('管理魚兒',()=>manageFish(f.id),'place-button');manage.id='manage-fish';$('dialog-content').append(manage,button('回到魚兒資料',()=>{dialog.close();selectFish(f.id);},'back-button'));}
 function manageFish(id){const f=state.fishes.find(f=>f.id===id);if(!f)return;openDialog('管理魚兒','manage');$('dialog-content').append(paragraph(f.name+' · '+SPECIES[f.species].name),paragraph('送養後，魚兒會離開魚缸，圖鑑紀錄會保留。魚缸至少保留三隻魚。','dialog-note'));const b=button('送養這隻魚',()=>{selected=id;rehomeFish();},'place-button danger');b.id='rehome';b.disabled=state.fishes.length<=3;$('dialog-content').append(b,button('返回我的魚兒',roster,'back-button'));}
 function roster(){openDialog('我的魚兒','roster');state.fishes.forEach(f=>{const b=button('',()=>{dialog.close();selectFish(f.id);},'roster-item');const name=document.createElement('span');name.textContent=`${f.name} · ${SPECIES[f.species].name}`;const detail=document.createElement('small');detail.textContent=`${stageName(f.growth)} · 飽足度 ${Math.round(f.hunger)}%`;b.append(name,detail);$('dialog-content').append(b);});}
@@ -890,12 +1123,13 @@ function syncEditorHandles(){
 }
 function beginDecorDrag(e,id){if(!editing||conflict||e.button>0)return;e.preventDefault();const item=state.placedDecorations.find(d=>d.id===id);if(!item)return;editSelection=id;drag={id,pointerId:e.pointerId,startX:item.normX,moved:false,offset:(e.clientX-canvas.getBoundingClientRect().left)/W-item.normX};e.currentTarget.setPointerCapture(e.pointerId);updateEditorLabel();syncEditorHandles();}
 function moveDecorDrag(e){if(!drag||drag.pointerId!==e.pointerId)return;e.preventDefault();const nextX=clamp((e.clientX-canvas.getBoundingClientRect().left)/W-drag.offset,.06,.94);if(Math.abs(nextX-drag.startX)*W<4&&!drag.moved)return;drag.moved=true;editPreview={id:drag.id,x:clamp((e.clientX-canvas.getBoundingClientRect().left)/W-drag.offset,.06,.94)};editCacheDirty=true;}
-function endDecorDrag(e){if(!drag||drag.pointerId!==e.pointerId)return;e.preventDefault();if(!drag.moved){drag=null;editPreview=null;updateEditorLabel();return;}const item=state.placedDecorations.find(d=>d.id===drag.id),x=editPreview?.x??item.normX,index=nearestSnap(x),next={...item,normX:snapX(index),snapIndex:index};const changed=canPlace(next);if(changed){Object.assign(item,next);metric('place');markDirty(true);}else toast('這裡有點擠，換個位置看看。');drag=null;editPreview=null;editCacheDirty=false;buildBackground();updateEditorLabel();}
+function endDecorDrag(e){if(!drag||drag.pointerId!==e.pointerId)return;e.preventDefault();if(!drag.moved){drag=null;editPreview=null;updateEditorLabel();return;}const item=state.placedDecorations.find(d=>d.id===drag.id),x=editPreview?.x??item.normX,index=nearestSnap(x),next={...item,normX:snapX(index),snapIndex:index};const changed=canPlace(next);if(changed){Object.assign(item,next);metric('place');markDirty(true);}else placementReminder();drag=null;editPreview=null;editCacheDirty=false;buildBackground();updateEditorLabel();}
 function cancelDecorDrag(){if(!drag)return;drag=null;editPreview=null;editCacheDirty=false;buildBackground();updateEditorLabel();}
-function nudgeDecoration(delta){if(conflict)return;const item=state.placedDecorations.find(d=>d.id===editSelection);if(!item)return;const index=clamp(item.snapIndex+delta,0,CONFIG.SNAP_SLOTS-1),next={...item,normX:snapX(index),snapIndex:index};if(!canPlace(next)){toast('這裡有點擠，換個位置看看。');return;}Object.assign(item,next);metric('place');buildBackground();markDirty(true);updateEditorLabel();}
+function nudgeDecoration(delta){if(conflict)return;const item=state.placedDecorations.find(d=>d.id===editSelection);if(!item)return;const index=clamp(item.snapIndex+delta,0,CONFIG.SNAP_SLOTS-1),next={...item,normX:snapX(index),snapIndex:index};if(!canPlace(next)){placementReminder();return;}Object.assign(item,next);metric('place');buildBackground();markDirty(true);updateEditorLabel();}
+function placementReminder(){openDialog('這裡放不下裝飾','placement');$('dialog-content').append(paragraph('裝飾已留在原來的位置，沒有遺失。可以換到較空的位置，或先收回另一件裝飾。','confirm-copy'),button('回去調整布置',()=>{dialog.close();startEditing();},'confirm'));}
 function storeSelectedDecoration(){if(conflict)return;state.placedDecorations=state.placedDecorations.filter(d=>d.id!==editSelection);editSelection=null;drag=null;editPreview=null;buildBackground();markDirty(true);updateEditorLabel();toast('已收回裝飾，仍保留在布置收藏裡。');}
 function renderOnboarding(){
- const tutorial=state.onboarding,active=!tutorial.completed;$('onboarding').hidden=!active;const copy=['先餵餵看魚兒吧。','點一隻魚兒看看牠的狀態。','之後可以在這裡遇見新魚，也能布置魚缸。'];$('onboarding-copy').textContent=active?`${tutorial.step+1} / 3 · ${copy[tutorial.step]}`:'';
+ const tutorial=state.onboarding,active=!tutorial.completed;$('onboarding').hidden=!active;const titles=['先餵餵看魚兒','認識你養的魚','看看商店裡有什麼'];const copy=['按「餵食」，再點一下魚缸水面。魚兒會游過來吃！','點一隻魚兒，就能看名字和飽足度，也能放大觀察。','金幣出現時，點一下就能收取。存夠金幣，再到商店買魚或布置。'];$('onboarding-title').textContent=active?titles[tutorial.step]:'';$('onboarding-step').textContent=`${tutorial.step+1} / 3`;$('onboarding-copy').textContent=active?copy[tutorial.step]:'';$('onboarding-next').textContent=['開始餵食','找一隻魚兒','前往商店'][Math.min(2,tutorial.step)];
  $('feed').classList.toggle('onboarding-highlight',active&&tutorial.step===0);canvas.classList.toggle('onboarding-highlight',active&&tutorial.step===1);$('shop').classList.toggle('onboarding-highlight',active&&tutorial.step===2);if(session)session.onboardingCompleted=tutorial.completed;
 }
 function advanceOnboarding(step){if(state.onboarding.completed||state.onboarding.step!==step)return;state.onboarding.step++;if(state.onboarding.step===3)state.onboarding.completed=true;renderOnboarding();markDirty(true);}
@@ -908,7 +1142,7 @@ function exportSession(){if(!session)return;persistSession();const blob=new Blob
 
 function step(dt){
  simTime+=dt;state.stats.playSeconds+=dt;if(state.waterQuality>=70)state.stats.goodWaterSeconds+=dt;if(session)session.elapsedSeconds+=dt;diagnostics.frames++;diagnostics.frameMax=Math.max(diagnostics.frameMax,dt);state.waterQuality=clamp(state.waterQuality-dt*CONFIG.WATER_PER_SECOND*(1+state.fishes.length*.18));dirty=true;
- if(cleaning){cleaning.elapsed+=dt;const progress=Math.min(1,cleaning.elapsed/CONFIG.CLEAN_SECONDS);state.waterQuality=cleaning.from+(cleaning.to-cleaning.from)*(progress*progress*(3-2*progress));if(progress===1){cleaning=null;food=[];gainXP(2);markDirty(true);toast('水族箱乾淨多了！');}}
+ if(cleaning){cleaning.elapsed+=dt;const progress=Math.min(1,cleaning.elapsed/CONFIG.CLEAN_SECONDS);state.waterQuality=cleaning.from+(cleaning.to-cleaning.from)*(progress*progress*(3-2*progress));if(progress===1){cleaning=null;food=[];gainXP(2);markDirty(true);toast('水族箱乾淨多了！魚兒可以繼續自在地游動。');}}
  for(let i=food.length-1;i>=0;i--){const p=food[i];if(p.y<.91){p.y=Math.min(.91,p.y+CONFIG.FOOD_SINK_SPEED*(p.kind==='sinking'?3.2:1)*dt);p.x=clamp(p.x+Math.sin(simTime+p.phase)*.003*dt,.05,.95);}else{p.bottom+=dt;if(p.bottom>CONFIG.FOOD_BOTTOM_SECONDS){food.splice(i,1);state.waterQuality=clamp(state.waterQuality-1.2);markDirty();}}}
  const claimed=new Set();let important=false;
  for(const f of state.fishes){
@@ -970,21 +1204,21 @@ function fishHitScore(f,x,y){
  return Infinity;
 }
 function drawDecoration(c,id,x,y,width,height){
- const d=DECORATIONS[id];if(!d)return;c.save();c.translate(x,y);c.scale(width/100,height/100);
- if(d.kind==='substrate'){path(c,'M-57 -31 L-24 -48 L59 -33 L25 -8Z',d.color,'#9caf9d',1);for(let i=0;i<14;i++)ellipse(c,-40+(i*17)%84,-30-(i%3)*3,2,1,id==='black'?'#bac6b6':'#cdbb8f');}
+ const d=DECORATIONS[id];if(!d)return;c.save();c.translate(x,y);c.scale(width/100,height/100);const material=c.createLinearGradient(-30,-100,38,0);material.addColorStop(0,d.kind==='plant'?'#b2d2a8':id==='wood'?'#c4ad82':'#d7dec7');material.addColorStop(.38,d.color);material.addColorStop(1,id==='wood'?'#7f7056':d.kind==='plant'?'#518774':'#82978a');
+ if(d.kind==='substrate'){path(c,'M-57 -31 L-24 -48 L59 -33 L25 -8Z',material,'#9caf9d',1);for(let i=0;i<14;i++)ellipse(c,-40+(i*17)%84,-30-(i%3)*3,2,1,id==='black'?'#bac6b6':'#cdbb8f');}
  else if(d.kind==='plant'){
   if(id==='moss'){ellipse(c,0,-12,43,18,'#739978');for(let i=0;i<14;i++)ellipse(c,-36+i*5.5,-13-(i%3)*6,9,8,i%2?'#93b38b':'#80a482');}
-  else{for(const [offset,lean,scale]of [[-20,-13,.75],[0,8,1],[22,16,.62]]){c.save();c.translate(offset,0);c.scale(.85,scale);path(c,`M0 0 Q-9 -50 ${lean} -98`,null,d.color,3);for(let j=1;j<6;j++){const yy=-j*16,xx=lean*j/6,side=j%2?1:-1;path(c,`M${xx} ${yy} Q${xx+side*30} ${yy+8} ${xx+side*26} ${yy-20} Q${xx+side*8} ${yy-27} ${xx} ${yy-6}Z`,j%2?d.color:'#8cbea0');}c.restore();}}
+  else{for(const [offset,lean,scale]of [[-20,-13,.75],[0,8,1],[22,16,.62]]){c.save();c.translate(offset,0);c.scale(.85,scale);path(c,`M0 0 Q-9 -50 ${lean} -98`,null,d.color,3);for(let j=1;j<6;j++){const yy=-j*16,xx=lean*j/6,side=j%2?1:-1;path(c,`M${xx} ${yy} Q${xx+side*30} ${yy+8} ${xx+side*26} ${yy-20} Q${xx+side*8} ${yy-27} ${xx} ${yy-6}Z`,material);path(c,`M${xx} ${yy-3} Q${xx+side*13} ${yy-5} ${xx+side*23} ${yy-18}`,null,'#d7e8b877',.7);for(let v=0;v<3;v++)path(c,`M${xx+side*(6+v*4)} ${yy-4-v*3} l${side*4} -7`,null,'#d9eacb44',.45);}c.restore();}}
  }else if(id==='smallrock'||id==='bigrock'){
-  path(c,'M-49 0 L-45 -45 Q-19 -108 10 -99 L45 -42 L49 0Z',d.color);path(c,'M-45 -45 L-7 -85 L10 -99 L9 -36Z','#dbe1cd66');path(c,'M9 -36 L45 -42 L49 0 L-7 0Z','#81968e33');
+  path(c,'M-49 0 L-45 -45 Q-19 -108 10 -99 L45 -42 L49 0Z',material);path(c,'M-45 -45 L-7 -85 L10 -99 L9 -36Z','#dbe1cd66');path(c,'M9 -36 L45 -42 L49 0 L-7 0Z','#81968e33');c.save();c.clip(new Path2D('M-49 0 L-45 -45 Q-19 -108 10 -99 L45 -42 L49 0Z'));for(let i=0;i<42;i++)ellipse(c,-48+(i*29)%97,-5-(i*17)%92,i%3*.65+.45,.6,i%2?'#ecedd03d':'#59766b25');path(c,'M-24 -72 L-19 -50 L-27 -32 M9 -35 L14 -21 L7 -8',null,'#637c7333',.8);c.restore();
  }else if(id==='wood'){
-  path(c,'M-50 -3 Q-27 -43 -43 -82 L-28 -93 Q0 -42 35 -61 L48 -46 Q17 -20 2 -8 L-28 0Z',d.color,'#806e56',2);path(c,'M-28 -74 Q-14 -38 24 -43 M-30 -39 Q-3 -15 26 -28',null,'#d4b58a',2);ellipse(c,0,-15,13,5,'#6c9b7c');
+  path(c,'M-50 -3 Q-27 -43 -43 -82 L-28 -93 Q0 -42 35 -61 L48 -46 Q17 -20 2 -8 L-28 0Z',material,'#806e56',2);path(c,'M-28 -74 Q-14 -38 24 -43 M-30 -39 Q-3 -15 26 -28',null,'#d4b58a',2);for(let i=0;i<5;i++)path(c,`M${-35+i*3} ${-72+i*5} Q${-24+i*2} ${-34+i*2} ${11+i*3} ${-38+i*2}`,null,i%2?'#73655166':'#e2c79988',.65);ellipse(c,0,-15,13,5,'#6c9b7c');
  }else if(id==='cave'){
-  path(c,'M-54 0 Q-53 -79 -16 -96 Q28 -112 53 0Z',d.color,'#8e9f94',1.5);path(c,'M-22 0 Q-30 -63 3 -64 Q28 -62 29 0Z','#587f77');path(c,'M-22 0 Q-20 -51 5 -54 Q16 -53 25 -28',null,'#c7d3b855',4);ellipse(c,-31,-75,12,7,'#92ae8c');
+  path(c,'M-54 0 Q-53 -79 -16 -96 Q28 -112 53 0Z',material,'#8e9f94',1.5);path(c,'M-22 0 Q-30 -63 3 -64 Q28 -62 29 0Z','#587f77');path(c,'M-22 0 Q-20 -51 5 -54 Q16 -53 25 -28',null,'#c7d3b855',4);ellipse(c,-31,-75,12,7,'#92ae8c');
  }else if(id==='ship'){
-  path(c,'M-59 -31 Q-36 12 35 0 L58 -37 L-9 -26Z',d.color,'#876c52',2);path(c,'M-31 -30 L-30 -87 M-5 -30 L-6 -74',null,'#8e785d',4);path(c,'M-30 -85 L11 -65 L-29 -59Z','#d4c9a5');path(c,'M-6 -70 L28 -54 L-5 -49Z','#b9c7ad');for(const xx of [-35,-8,18])ellipse(c,xx,-16,5,7,'#726b58');path(c,'M-47 -7 L37 -7',null,'#d2b18a',2);
+  path(c,'M-59 -31 Q-36 12 35 0 L58 -37 L-9 -26Z',material,'#876c52',2);path(c,'M-31 -30 L-30 -87 M-5 -30 L-6 -74',null,'#8e785d',4);path(c,'M-30 -85 L11 -65 L-29 -59Z','#d4c9a5');path(c,'M-6 -70 L28 -54 L-5 -49Z','#b9c7ad');for(const xx of [-35,-8,18])ellipse(c,xx,-16,5,7,'#726b58');path(c,'M-47 -7 L37 -7',null,'#d2b18a',2);
  }else if(id==='chest'){
-  path(c,'M-39 -7 L-37 -54 L35 -54 L40 -7Z',d.color,'#8f6c42',2);path(c,'M-39 -54 Q-41 -94 1 -96 Q39 -88 35 -54Z','#c3a369','#967d51',2);path(c,'M-23 -89 L-21 -11 M21 -87 L22 -11 M-36 -54 L35 -54',null,'#eed595',5);path(c,'M-4 -58 L9 -58 L9 -40 L-4 -40Z','#f3d786');ellipse(c,3,-48,1.4,2,'#b18a46');
+  path(c,'M-39 -7 L-37 -54 L35 -54 L40 -7Z',material,'#8f6c42',2);path(c,'M-39 -54 Q-41 -94 1 -96 Q39 -88 35 -54Z','#c3a369','#967d51',2);path(c,'M-23 -89 L-21 -11 M21 -87 L22 -11 M-36 -54 L35 -54',null,'#eed595',5);path(c,'M-4 -58 L9 -58 L9 -40 L-4 -40Z','#f3d786');ellipse(c,3,-48,1.4,2,'#b18a46');
  }
  c.restore();
 }
@@ -992,15 +1226,19 @@ function decorLayout(item){const d=DECORATIONS[item.decoration],x=editPreview?.i
 
 function buildBackground(){
   bg=document.createElement('canvas');bg.width=Math.round(W*dpr);bg.height=Math.round(H*dpr);const c=bg.getContext('2d');c.scale(dpr,dpr);
-  const g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,'#c6efdf');g.addColorStop(.2,'#aee2dd');g.addColorStop(.68,'#70c4ca');g.addColorStop(1,'#67b8bb');c.fillStyle=g;c.fillRect(0,0,W,H);
-  for(let i=0;i<4;i++){c.save();c.globalAlpha=.12;c.fillStyle='#ffffdf';c.beginPath();c.moveTo(W*(.05+i*.27),0);c.lineTo(W*(.17+i*.27),0);c.lineTo(W*(.37+i*.23),H*.86);c.lineTo(W*(.19+i*.23),H*.86);c.fill();c.restore();}
+  const g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,'#d1efdf');g.addColorStop(.2,'#b4e2db');g.addColorStop(.68,'#83c7c6');g.addColorStop(1,'#6aadb3');c.fillStyle=g;c.fillRect(0,0,W,H);
+  const glow=c.createRadialGradient(W*.35,0,0,W*.35,H*.12,W*.65);glow.addColorStop(0,'#fff9d855');glow.addColorStop(1,'#fff9d800');c.fillStyle=glow;c.fillRect(0,0,W,H);
+  for(let i=0;i<4;i++){c.save();const ray=c.createLinearGradient(0,0,0,H*.85);ray.addColorStop(0,'#fffde72b');ray.addColorStop(1,'#fffde700');c.fillStyle=ray;c.beginPath();c.moveTo(W*(.05+i*.27),0);c.lineTo(W*(.17+i*.27),0);c.lineTo(W*(.37+i*.23),H*.86);c.lineTo(W*(.19+i*.23),H*.86);c.fill();c.restore();}
+  // Distant reeds and soft caustics are part of the cached backdrop, never rebuilt per frame.
+  c.save();c.globalAlpha=.14;for(const side of [0,1])for(let i=0;i<7;i++){const x=W*(side? .89+i*.018:.02+i*.019),height=H*(.17+(i%3)*.055);path(c,`M${x} ${H*.9} Q${x-13} ${H*.9-height*.5} ${x+8} ${H*.9-height}`,null,'#367b75',4);for(let j=1;j<4;j++){const y=H*.9-height*j/4;path(c,`M${x} ${y} Q${x-24} ${y-14} ${x-17} ${y-30} Q${x+1} ${y-21} ${x} ${y}`,'#3b837a');}}c.restore();
   path(c,`M0 38 Q${W*.17} 18 ${W*.32} 34 T${W*.67} 28 T${W} 34 L${W} 0 L0 0Z`,'#e4f8e980');path(c,`M0 37 Q${W*.17} 17 ${W*.32} 33 T${W*.67} 27 T${W} 33`,null,'#ffffff75',2);
   // Distant landscape and fine sand, rendered once per resize.
   path(c,`M0 ${H*.84} Q${W*.25} ${H*.72} ${W*.49} ${H*.86} Q${W*.8} ${H*.7} ${W} ${H*.79} L${W} ${H} L0 ${H}Z`,'#67b8b5');
   path(c,`M0 ${H*.9} Q${W*.19} ${H*.84} ${W*.4} ${H*.9} Q${W*.77} ${H*.84} ${W} ${H*.9} L${W} ${H} L0 ${H}Z`,DECORATIONS[state.substrate].color);
   path(c,`M0 ${H*.94} Q${W*.27} ${H*.88} ${W*.56} ${H*.94} T${W} ${H*.94} L${W} ${H} L0 ${H}Z`,DECORATIONS[state.substrate].color);
   let seed=99;const random=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
-  for(let i=0;i<240;i++){ellipse(c,random()*W,(.915+random()*.085)*H,random()*1.5+.4,.5+random()*.5,state.substrate==='black'?(i%2?'#4e6561':'#a5b4a3'):(i%2?'#d2c59e':'#fcf0d3'));}
+  c.save();c.globalAlpha=.16;for(let i=0;i<5;i++)path(c,`M0 ${H*(.925+i*.014)} Q${W*.3} ${H*(.9+i*.016)} ${W*.6} ${H*(.93+i*.013)} T${W} ${H*(.92+i*.014)}`,null,'#fff5d4',1.4);c.restore();
+  for(let i=0;i<340;i++){ellipse(c,random()*W,(.915+random()*.085)*H,random()*1.5+.4,.5+random()*.5,state.substrate==='black'?(i%2?'#4e6561':'#a5b4a3'):(i%2?'#d2c59e':'#fcf0d3'));}
   for(const item of [...state.placedDecorations].sort((a,b)=>Number(DECORATIONS[a.decoration].kind!=='plant')-Number(DECORATIONS[b.decoration].kind!=='plant'))){const pos=decorLayout(item);drawDecoration(c,item.decoration,pos.x,pos.y,pos.width,pos.height);}
   foreground=document.createElement('canvas');foreground.width=bg.width;foreground.height=bg.height;const front=foreground.getContext('2d');front.scale(dpr,dpr);
   for(const item of state.placedDecorations){const d=DECORATIONS[item.decoration];if(!d.canHide)continue;const p=decorLayout(item);front.save();drawDecoration(front,item.decoration,p.x,p.y,p.width,p.height);front.globalCompositeOperation='destination-out';if(item.decoration==='cave'){front.translate(p.x,p.y);front.scale(p.width/100,p.height/100);path(front,'M-22 0 Q-30 -63 3 -64 Q28 -62 29 0Z','#000');}else{front.clearRect(p.x-p.width*.31,p.y-p.height*.19,p.width*.65,p.height*.08);}front.restore();}
@@ -1026,14 +1264,17 @@ function draw(){if(!state||!bg||!bg.width||!bg.height)return;ctx.clearRect(0,0,W
 }
 let specimenPose=null;
 const observation=window.AquariumObservation.create({
- getFish:()=>state.fishes.map(f=>({...f,speciesName:SPECIES[f.species].name})),
- drawSpecimen:(target,id,{tracking,zoom,playing})=>{
+ getFish:()=>state.fishes.map(f=>({...f,speciesName:SPECIES[f.species].name,personalityName:PERSONALITIES[f.personality].name,variantName:f.variant==='normal'?'普通配色':VARIANTS[f.variant].name})),
+ drawSpecimen:(target,id,{tracking,zoom,playing,time,breathing})=>{
   const c=target.getContext('2d'),f=state.fishes.find(f=>f.id===id);c.clearRect(0,0,target.width,target.height);if(!f)return;
-  // Follow the real fish without changing its simulation. Pausing freezes the preview pose.
   if(playing||specimenPose?.id!==id)specimenPose={id,...runtime.get(id)};
-  const r=specimenPose,x=tracking?180:100+r.x*160,y=tracking?90:60+r.y*60;
-  drawFish(c,f.species,x,y,Math.min(108,f.size*1.5)*zoom,r.turn||1,r.heading||0,r.phase||0,f.variant);
+  const r=specimenPose,b=window.AquariumFishArt.hitBounds[f.species],fit=Math.min(44000/(b.bottom-b.top),82000/(b.right-b.left)),size=Math.min(Math.min(Math.max(350,f.size*4),fit*.65)*zoom,fit);
+  const marginX=Math.max(Math.abs(b.left),b.right)*size/100+30,marginY=Math.max(Math.abs(b.top),b.bottom)*size/100+25;
+  const x=tracking?target.width*.52:clamp(r.x*target.width,marginX,target.width-marginX),y=tracking?target.height*.48:clamp(r.y*target.height,marginY,target.height-marginY);
+  const turn=breathing?(r.turn<0?-1:1):r.turn;
+  window.AquariumFishArt.draw(c,f.species,x,y,size,turn,r.heading,r.phase,f.variant,{breathing:true,breathTime:time,breathEmphasis:breathing});
  }
+
 });
 function openObservation(id){if(editing)finishEditing();setFeeding(false);observation.open(id);}
 $('observe-fish').onclick=()=>openObservation(selected);
@@ -1045,8 +1286,8 @@ canvas.addEventListener('click',e=>{if(editing)return;const rect=canvas.getBound
   const hit=state.fishes.map(f=>({f,score:fishHitScore(f,x,y)})).filter(h=>Number.isFinite(h.score)).sort((a,b)=>a.score-b.score)[0];if(hit)selectFish(hit.f.id);else closeCard();
 });
 canvas.addEventListener('keydown',e=>{if(feeding&&(e.key==='Enter'||e.key===' ')){e.preventDefault();feed(.5);}if(e.key==='Escape'){setFeeding(false);closeCard();}});
-$('feed').onclick=()=>setFeeding(!feeding);$('stop-feed').onclick=()=>setFeeding(false);$('close-card').onclick=closeCard;$('shop').onclick=shop;$('clean').onclick=clean;$('settings').onclick=settings;$('more-menu').onclick=moreMenu;$('fish-more').onclick=fishMore;$('rename').onclick=renameFish;$('collect-all').onclick=()=>[...state.drops].forEach(collect);
-$('dialog-close').onclick=()=>dialog.close();$('edit-done').onclick=finishEditing;$('edit-left').onclick=()=>nudgeDecoration(-1);$('edit-right').onclick=()=>nudgeDecoration(1);$('edit-store').onclick=storeSelectedDecoration;$('onboarding-skip').onclick=()=>skipOnboarding();dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
+$('feed').onclick=()=>setFeeding(!feeding);$('stop-feed').onclick=()=>setFeeding(false);$('close-card').onclick=closeCard;$('shop').onclick=shop;$('clean').onclick=clean;$('more-menu').onclick=moreMenu;$('fish-more').onclick=fishMore;$('rename').onclick=renameFish;$('collect-all').onclick=()=>[...state.drops].forEach(collect);
+$('dialog-close').onclick=()=>dialog.close();$('edit-done').onclick=finishEditing;$('edit-left').onclick=()=>nudgeDecoration(-1);$('edit-right').onclick=()=>nudgeDecoration(1);$('edit-store').onclick=storeSelectedDecoration;$('onboarding-skip').onclick=()=>skipOnboarding();$('onboarding-next').onclick=()=>{if(state.onboarding.step===0){setFeeding(true);canvas.focus();}else if(state.onboarding.step===1)roster();else shop();};dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
 // Visibility catches mobile backgrounding; pagehide is an extra best-effort flush.
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(dirty)save();hiddenAt=Date.now();}else{lastFrame=0;if(hiddenAt&&!conflict){offline((Date.now()-hiddenAt)/1000);save();updateUI();}hiddenAt=0;}});
 window.addEventListener('pagehide',()=>{if(dirty)save();});window.addEventListener('beforeunload',()=>{if(dirty)save();});

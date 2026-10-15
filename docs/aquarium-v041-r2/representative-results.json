@@ -1,0 +1,24 @@
+{
+  "art": [
+    {
+      "k": "guppy",
+      "flip": true,
+      "growth": true,
+      "motion": true
+    },
+    {
+      "k": "goldfish",
+      "flip": true,
+      "growth": true,
+      "motion": true
+    },
+    {
+      "k": "cory",
+      "flip": true,
+      "growth": true,
+      "motion": true
+    }
+  ],
+  "eaten": 3,
+  "errors": []
+}

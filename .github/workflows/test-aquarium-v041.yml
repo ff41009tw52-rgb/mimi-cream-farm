@@ -1,9 +1,9 @@
 name: Test aquarium V0.4.1 art and friendly controls
 on:
   push:
-    paths: ['aquarium-v0.4*.html', 'assets/aquarium-v041/**', 'scripts/build-aquarium-v041.py', 'tests/aquarium/*v041*', '.github/workflows/test-aquarium-v041.yml']
+    paths: ['aquarium-v0.4*.html', 'assets/aquarium-v041-r2/**', 'scripts/build-aquarium-v041.py', 'tests/aquarium/*v041*', '.github/workflows/test-aquarium-v041.yml']
   pull_request:
-    paths: ['aquarium-v0.4*.html', 'assets/aquarium-v041/**', 'scripts/build-aquarium-v041.py', 'tests/aquarium/*v041*', '.github/workflows/test-aquarium-v041.yml']
+    paths: ['aquarium-v0.4*.html', 'assets/aquarium-v041-r2/**', 'scripts/build-aquarium-v041.py', 'tests/aquarium/*v041*', '.github/workflows/test-aquarium-v041.yml']
 jobs:
   patch-regression:
     runs-on: ubuntu-latest
@@ -15,7 +15,7 @@ jobs:
           node-version: '22'
       - name: Validate source and portable build
         run: |
-          for file in assets/aquarium-v041/*.js; do node --check "$file"; done
+          for file in assets/aquarium-v041-r2/*.js; do node --check "$file"; done
           node tests/aquarium/schema-v041.test.cjs
           python3 scripts/build-aquarium-v041.py
           git diff --exit-code -- aquarium-v0.4.1-standalone.html
@@ -27,6 +27,8 @@ jobs:
           echo 'NODE_PATH=/tmp/aquarium-v041-runtime/node_modules' >> "$GITHUB_ENV"
       - name: Play, observe and preserve progress
         run: |
+          node tests/aquarium/browser-v041-representative.test.cjs
+          node tests/aquarium/browser-v041-guidance.test.cjs
           node tests/aquarium/browser-v041.test.cjs
           node tests/aquarium/browser-v041-guards.test.cjs
           node tests/aquarium/browser-v041-upgrade.test.cjs
@@ -37,4 +39,4 @@ jobs:
         if: always()
         with:
           name: aquarium-v041-browser-evidence
-          path: artifacts/aquarium-v041/
+          path: artifacts/aquarium-v041-r2/

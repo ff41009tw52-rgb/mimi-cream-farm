@@ -1,0 +1,45 @@
+{
+  "version": "0.4.1",
+  "topic": "anatomy",
+  "playingVisible": true,
+  "speedVisible": true,
+  "specimenSize": {
+    "x": 129,
+    "y": 195.5,
+    "width": 180,
+    "height": 98,
+    "top": 195.5,
+    "right": 309,
+    "bottom": 293.5,
+    "left": 129
+  },
+  "diagramSize": {
+    "x": 135,
+    "y": 467.6875,
+    "width": 895,
+    "height": 437.546875,
+    "top": 467.6875,
+    "right": 1030,
+    "bottom": 905.234375,
+    "left": 135
+  },
+  "visibleButtons": [
+    "返回水族箱",
+    "外形與構造",
+    "游動",
+    "呼吸",
+    "追蹤魚兒",
+    "放大魚兒",
+    "頭",
+    "軀幹",
+    "口",
+    "鰓蓋",
+    "背鰭",
+    "胸鰭",
+    "腹鰭",
+    "臀鰭",
+    "尾鰭",
+    "暫停",
+    "隱藏構造名稱"
+  ]
+}
