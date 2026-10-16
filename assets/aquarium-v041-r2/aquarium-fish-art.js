@@ -25,7 +25,7 @@ const forms={
 };
 // Local anatomy corrections only. The guppy and swordtail artwork represents
 // ornamental males; no sex field or breeding logic is introduced.
-forms.cory.adipose=path('M-26 -1 Q-24 -7 -20 -11 Q-19 -5 -16 -5 L-20 -2Z');
+forms.cory.adipose=path('M-17 -5 L-21 -12 Q-24 -8 -26 -1 L-20 -2Z');
 forms.cardinal.adipose=path('M-21 -4 Q-21 -9 -17 -10 Q-12 -10 -12 -6Z');
 const pelvicForms={goldfish:path('M9 16 Q5 21 0 30 Q10 29 15 18Z'),cory:path('M7 12 Q-1 20 2 22 Q10 22 14 13Z'),molly:path('M9 18 Q2 24 2 28 Q11 27 15 19Z'),default:path('M8 8 Q1 17 2 19 Q9 17 13 10Z')};
 function highlight(c,shape){c.save();c.globalAlpha=.85;fill(c,shape,'#fff3a566','#246e61',1.25);c.restore();}
@@ -265,7 +265,7 @@ function fineFin(c,key,f,name,p,phase,selected=false){
  });
 }
 function pelvic(c,key,p,phase,selected=false){if(key==='angel'||key==='betta')return;atRoot(c,7,10,phase,()=>{c.globalAlpha*=.48;const fin=pelvicForms[key]||pelvicForms.default;fill(c,fin,gradient(c,10,8,3,28,[[0,p.body],[1,p.light+'55']]),p.finDark+'70',.4);c.globalAlpha*=.6;line(c,fin,p.light,.4);if(selected)highlight(c,fin);});}
-function adipose(c,key,p,phase,selected=false){const fin=forms[key].adipose;if(!fin)return;atRoot(c,-20,-4,phase,()=>{c.globalAlpha*=.65;fill(c,fin,p.body+'9c',p.finDark+'85',.45);if(key==='cory')line(c,path('M-26 -1 Q-24 -7 -20 -11'),p.finDark,.7);if(selected)highlight(c,fin);});}
+function adipose(c,key,p,phase,selected=false){const fin=forms[key].adipose;if(!fin)return;atRoot(c,-20,-4,phase,()=>{c.globalAlpha*=.65;fill(c,fin,p.body+'9c',p.finDark+'85',.45);if(key==='cory')line(c,path('M-17 -5 L-21 -12'),p.finDark,.7);if(selected)highlight(c,fin);});}
 function breathPose(seconds){const phase=seconds*2*PI*.63;return {mouthOpen:(.5+.5*Math.sin(phase))**2,gillOpen:(.5+.5*Math.sin(phase-.85))**2};}
 function breathingHead(c,key,f,p,pose,emphasis){
  const op=pose.gillOpen*(emphasis?1:0.48),[mx,my,base]=anatomy[key].mouth;
