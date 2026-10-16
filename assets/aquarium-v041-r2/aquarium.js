@@ -82,7 +82,7 @@ function selectFish(id){if(editing)return;metric('fish');advanceOnboarding(1);se
 function closeCard(){selected=null;$('fish-card').hidden=true;}
 function setFeeding(on){feeding=on;$('feed').setAttribute('aria-pressed',String(on));$('feeding-hint').hidden=!on;canvas.style.cursor=on?'crosshair':'pointer';if(on)closeCard();}
 function feed(x){
- if(conflict)return;if(simTime-feedAt<CONFIG.FEED_COOLDOWN)return;if(food.length+CONFIG.FOOD_PER_DROP>CONFIG.MAX_FOOD){toast('飼料還很多，先讓魚兒吃完吧！');return;}
+ if(conflict)return;if(simTime-feedAt<CONFIG.FEED_COOLDOWN)return;if(food.length+CONFIG.FOOD_PER_DROP>CONFIG.MAX_FOOD){toast('魚缸裡還有飼料！等魚兒吃完，再餵下一次。');return;}
  feedAt=simTime;const kind=$('food-type').value;for(let i=0;i<CONFIG.FOOD_PER_DROP;i++)food.push({id:uid(),x:clamp(x+(i-1)*.017,.06,.94),y:.08+i*.006,bottom:0,phase:rand(0,7),kind});effects.push({x,y:.08,text:'',life:1,kind:'ripple'});sound('feed');metric('feed');advanceOnboarding(0);dirty=true;
 }
 function collect(c){
@@ -93,12 +93,12 @@ function collect(c){
   const anim=el.animate([{transform:'translate(0,0)',opacity:1},{transform:`translate(${hud.left-rect.left-c.x*W}px,${hud.top-rect.top-c.y*H}px) scale(.5)`,opacity:.3}],{duration:620,easing:'cubic-bezier(.25,.6,.35,1)'});anim.finished.then(()=>el.remove(),()=>el.remove());gainXP(1);sound('coin');markDirty(true);updateUI();
 }
 function clean(){
- if(conflict||cleaning)return;if(state.waterQuality>90){toast('現在很乾淨，不需要整理。');return;}
+ if(conflict||cleaning)return;if(state.waterQuality>90){toast('水質很好，現在不用清潔。可以先餵魚或觀察魚兒。');return;}
  const remaining=Math.ceil((state.cleanReadyAt-Date.now())/1000);if(remaining>0){toast(`剛整理過了，再等 ${remaining} 秒吧。`);return;}
  metric('clean');cleaning={elapsed:0,from:state.waterQuality,to:clamp(state.waterQuality+CONFIG.CLEAN_EFFICIENCY)};state.cleanReadyAt=Date.now()+(CONFIG.CLEAN_SECONDS+CONFIG.CLEAN_COOLDOWN)*1000;sound('clean');markDirty(true);updateUI();
 }
 function buy(species){
- if(conflict)return;const s=SPECIES[species];if(state.level<s.unlockLevel){shopMessage(`養魚等級達到 ${s.unlockLevel}，就能購買${s.name}。`);return;}if(state.fishes.length>=state.tankCapacity){shopMessage('魚缸住滿了！可以升級魚缸，或到魚兒管理中送養。');return;}if(state.coins<s.price){shopMessage('金幣不足，先收集魚兒帶來的金幣吧。');return;}
+ if(conflict)return;const s=SPECIES[species];if(state.level<s.unlockLevel){shopMessage(`養魚等級達到 ${s.unlockLevel}，就能購買${s.name}。`);return;}if(state.fishes.length>=state.tankCapacity){shopMessage('魚缸住滿了！可以升級魚缸，或到魚兒管理中送養。');return;}if(state.coins<s.price){shopMessage('金幣還不夠！先回魚缸收集金幣，再來購買。');return;}
  const variant=shopVariants.get(species)||'normal';if(variant!=='normal'&&!state.unlockedVariants.includes(variant)){shopMessage('這個配色還沒解鎖。可以到魚類圖鑑查看需要完成的條件。');return;}
  state.coins-=s.price;const first=!state.collection[species];const total=(state.collection[species]?.total||0);const f=newFish(species,total,variant);state.fishes.push(f);syncFish(f);runtime.set(f.id,makeRuntime(f,state.fishes.length));
  const history=state.collection[species];state.collection[species]={total:Math.min(9999,total+1),highestStage:history?.highestStage||0,adults:history?.adults||0,variants:[...new Set([...(history?.variants||['normal']),variant])]};state.stats.purchases++;metric('buy');evaluateGoals();gainXP(first?12:2);sound('buy');
@@ -148,7 +148,7 @@ function reset(){if(resetStep!==2)return;try{localStorage.removeItem(CONFIG.SAVE
 }
 const fishBrief={guppy:'小巧活潑，展開繽紛的大尾巴。',goldfish:'圓潤的身體，慢慢擺動尾鰭。',cory:'在底砂巡游，尋找沉底飼料。',zebra:'帶著水平條紋，輕快地游。',molly:'深色魚身，穩穩地游動。',swordtail:'尾鰭下方有細長的劍狀延伸。',whitecloud:'細細的色帶，喜歡靠近同伴。',cardinal:'藍紅相映的小型群游魚。',angel:'高高的魚鰭，姿態優雅。',betta:'飄逸的長鰭，喜歡獨自巡游。'};
 function moreMenu(){openDialog('更多功能','more');const list=document.createElement('div');list.className='more-grid';for(const [id,title,desc,fn]of [['roster','我的魚兒','看看狀態、改名字與管理魚兒',roster],['encyclopedia','魚類圖鑑','收藏魚種與特別配色',encyclopedia],['tank-menu','我的魚缸','升級魚缸與調整布置',tankMenu],['achievements','成就','查看進度與領取獎勵',achievements],['settings','設定','音效、新手引導與存檔',settings]]){const b=button('',fn,'more-item');b.id=id;const label=document.createElement('strong');label.textContent=title;b.append(label,paragraph(desc));list.append(b);}$('dialog-content').append(list);}
-function fishMore(){const f=state.fishes.find(f=>f.id===selected);if(!f)return;openDialog('更多魚兒資料','fish-more');const minutes=Math.max(0,Math.floor((Date.now()-f.createdAt)/60000));$('dialog-content').append(paragraph(f.name+' · '+SPECIES[f.species].name,'fish-detail-name'),paragraph(`活動水層：${SPECIES[f.species].depthName}`),paragraph(`已養時間：${minutes>=60?Math.floor(minutes/60)+' 小時 '+minutes%60+' 分鐘':minutes+' 分鐘'}`),paragraph(`心情：${mood(f)}`),paragraph(`配色：${f.variant==='normal'?'普通配色':VARIANTS[f.variant].name}`),paragraph(PERSONALITIES[f.personality].desc));const manage=button('管理魚兒',()=>manageFish(f.id),'place-button');manage.id='manage-fish';$('dialog-content').append(manage,button('回到魚兒資料',()=>{dialog.close();selectFish(f.id);},'back-button'));}
+function fishMore(){const f=state.fishes.find(f=>f.id===selected);if(!f)return;openDialog('更多魚兒資料','fish-more');const minutes=Math.max(0,Math.floor((Date.now()-f.createdAt)/60000));$('dialog-content').append(paragraph(f.name+' · '+SPECIES[f.species].name,'fish-detail-name'),paragraph(`活動水層：${SPECIES[f.species].depthName}`),paragraph(`已養時間：${minutes>=60?Math.floor(minutes/60)+' 小時 '+minutes%60+' 分鐘':minutes+' 分鐘'}`),paragraph(`心情：${mood(f)}`),paragraph(`配色：${f.variant==='normal'?'普通配色':VARIANTS[f.variant].name}`),paragraph(PERSONALITIES[f.personality].desc));const manage=button('管理魚兒',()=>manageFish(f.id),'place-button');manage.id='manage-fish';$('dialog-content').append(paragraph('魚鰭觀察：'+window.AquariumObservationContent.fishFinNotes[f.species],'fish-fin-summary'),manage,button('回到魚兒資料',()=>{dialog.close();selectFish(f.id);},'back-button'));}
 function manageFish(id){const f=state.fishes.find(f=>f.id===id);if(!f)return;openDialog('管理魚兒','manage');$('dialog-content').append(paragraph(f.name+' · '+SPECIES[f.species].name),paragraph('送養後，魚兒會離開魚缸，圖鑑紀錄會保留。魚缸至少保留三隻魚。','dialog-note'));const b=button('送養這隻魚',()=>{selected=id;rehomeFish();},'place-button danger');b.id='rehome';b.disabled=state.fishes.length<=3;$('dialog-content').append(b,button('返回我的魚兒',roster,'back-button'));}
 function roster(){openDialog('我的魚兒','roster');state.fishes.forEach(f=>{const b=button('',()=>{dialog.close();selectFish(f.id);},'roster-item');const name=document.createElement('span');name.textContent=`${f.name} · ${SPECIES[f.species].name}`;const detail=document.createElement('small');detail.textContent=`${stageName(f.growth)} · 飽足度 ${Math.round(f.hunger)}%`;b.append(name,detail);$('dialog-content').append(b);});}
 function gainXP(amount,notify=true){
@@ -183,7 +183,7 @@ function renderShop(){
 function buyDecoration(id){
  if(conflict)return;const d=DECORATIONS[id],owned=state.purchasedDecorations[id]||0;
  if(d.kind==='substrate'&&owned){state.substrate=id;buildBackground();markDirty(true);renderShop();shopMessage(`已換上${d.name}。`);return;}
- if(state.coins<d.price){shopMessage('金幣不足，先收集魚兒帶來的金幣吧。');return;}if(owned>=99){shopMessage('這件裝飾已經收藏很多了。');return;}
+ if(state.coins<d.price){shopMessage('金幣還不夠！先回魚缸收集金幣，再來購買。');return;}if(owned>=99){shopMessage('這件裝飾已經收藏很多了。');return;}
  state.coins-=d.price;state.purchasedDecorations[id]=owned+1;let placed=true;
  if(d.kind==='substrate')state.substrate=id;else placed=placeDecoration(id);
  evaluateGoals();buildBackground();sound('buy');markDirty(true);updateUI();renderShop();
