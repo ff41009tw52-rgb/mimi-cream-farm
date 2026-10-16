@@ -20,6 +20,7 @@ jobs:
         run: |
           for file in assets/aquarium-v042/*.js; do node --check "$file"; done
           node tests/aquarium/source-v042.test.cjs
+          cmp aquarium-v0.4.html aquarium-v0.4.2.html
           python3 scripts/build-aquarium-v042.py
           git diff --exit-code -- aquarium-v0.4.2-standalone.html
       - name: Prepare browser runtime

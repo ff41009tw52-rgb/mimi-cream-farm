@@ -19,7 +19,7 @@ jobs:
           node tests/aquarium/schema-v041.test.cjs
           python3 scripts/build-aquarium-v041.py
           git diff --exit-code -- aquarium-v0.4.1-standalone.html
-          cmp aquarium-v0.4.html aquarium-v0.4.1.html
+          cmp aquarium-v0.4.html aquarium-v0.4.2.html
       - name: Prepare browser runtime
         run: |
           npm install --prefix /tmp/aquarium-v041-runtime playwright@1.58.2

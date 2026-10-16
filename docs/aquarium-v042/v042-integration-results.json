@@ -1,0 +1,29 @@
+{
+  "samePixels": 32,
+  "onePreparedRig": true,
+  "noBackgroundRender": true,
+  "speedRange": [
+    0.25,
+    2
+  ],
+  "unchangedGameAtDifferentSpeeds": true,
+  "responsive": [
+    {
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "width": 820,
+      "height": 1180
+    },
+    {
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "errors": []
+}
