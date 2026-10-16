@@ -27,6 +27,7 @@ jobs:
           echo 'NODE_PATH=/tmp/aquarium-v041-runtime/node_modules' >> "$GITHUB_ENV"
       - name: Play, observe and preserve progress
         run: |
+          node tests/aquarium/browser-v041-fin-anatomy.test.cjs
           node tests/aquarium/browser-v041-representative.test.cjs
           node tests/aquarium/browser-v041-guidance.test.cjs
           node tests/aquarium/browser-v041.test.cjs
