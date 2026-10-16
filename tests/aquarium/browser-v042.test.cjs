@@ -27,7 +27,13 @@ const {harness}=require('./v041-harness.cjs'),assert=require('node:assert/strict
  await lesson.locator('#play-toggle').click();const paused=(await read(p)).observation.breathing;await advance(p,1000);assert.equal((await read(p)).observation.breathing.progress,paused.progress);assert.equal((await read(p)).observation.breathing.draws,paused.draws);
  await p.locator('#obs-tab-anatomy').click();assert(!(await read(p)).observation.breathing.active);assert(!await p.locator('#obs-play').isVisible());assert(!await p.locator('#obs-label-toggle').isVisible());await p.locator('#obs-display-options summary').click();await p.locator('#obs-label-toggle').click();assert(!await p.locator('#obs-labels').isVisible());await p.locator('#obs-label-toggle').click();
  for(const part of ['head','trunk','mouth','cover','dorsal','pectoral','pelvic','anal','caudal']){await p.locator(`[data-part-choice=${part}]`).click();assert.equal((await read(p)).observation.partId,part);}await p.locator('.obs-scroll').evaluate(e=>e.scrollTop=0);await shot(p,'v042-anatomy');
- await p.locator('#obs-tab-swimming').click();assert.equal(await p.locator('[data-focus=fins]').count(),0);await p.locator('[data-focus=tail]').click();await advance(p,500);const body=await p.locator('[data-part=trunk] .part-paint').getAttribute('d');await advance(p,500);assert.notEqual(await p.locator('[data-part=trunk] .part-paint').getAttribute('d'),body);await p.locator('[data-focus=turn]').click();await advance(p,2000);await shot(p,'v042-swimming');
+ assert.equal(await p.locator('#obs-tab-swimming').count(),0,'游動分頁已移除');
+ assert.equal(await p.locator('.obs-tabs [role=tab]').count(),2,'只保留外形與呼吸兩頁');
+ assert.equal(await p.locator('#obs-play').count(),0);assert.equal(await p.locator('#obs-speed').count(),0);assert.equal(await p.locator('#obs-swim-options').count(),0);
+ await p.locator('#obs-tab-breathing').click();assert.equal((await read(p)).observation.topic,'breathing');
+ await p.locator('#obs-tab-anatomy').click();assert.equal((await read(p)).observation.topic,'anatomy');
+ await p.locator('#obs-tab-anatomy').focus();await p.keyboard.press('ArrowRight');assert.equal((await read(p)).observation.topic,'breathing');
+ await p.keyboard.press('ArrowRight');assert.equal((await read(p)).observation.topic,'anatomy');await shot(p,'v042-two-lessons');
  await p.locator('#obs-return').click();const draws=(await read(p)).observation.breathing.draws;await advance(p,1000);assert.equal((await read(p)).observation.breathing.draws,draws);
  for(let i=0;i<8;i++){await p.locator('#observe-review').click();await p.locator('#obs-own-breath').click();await advance(p,100);await p.locator('#obs-return').click();}
  assert.equal((await read(p)).observation.breathing.preparations,1);assert.equal(await p.locator('#obs-breathing-lesson').count(),1);assert.equal(await p.locator('#observation').count(),1);

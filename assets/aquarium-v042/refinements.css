@@ -23,3 +23,12 @@
 #observation[data-topic=breathing][data-layer=book] .book-intro{display:none}
 #obs-breathing-lesson{margin-top:8px;min-width:0}
 @media(max-width:680px){.toast{font-size:17px;inset:12px auto auto 50%;padding:15px 16px;gap:10px}.onboarding h2{font-size:20px}.onboarding p{font-size:17px}.shop-intro#shop-message{font-size:17px}.confirm-copy{font-size:17px}}
+
+/* Classroom observation: two lesson tabs, larger reading text on mobile. */
+#observation .obs-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+#observation .obs-tabs button{font-size:17px;line-height:1.4}
+#observation .book-intro{font-size:16px;line-height:1.75}
+#observation .obs-topic-intro p{font-size:16px;line-height:1.75}
+#observation .obs-figure figcaption{font-size:14px}
+#observation .obs-review{font-size:15px;line-height:1.75}
+@media(max-width:680px){#observation .obs-tabs button{font-size:16px;padding:11px 8px}#observation .book-intro{font-size:16px}#observation .obs-topic-intro h3{font-size:21px}#observation .obs-topic-intro p{font-size:16px}}
