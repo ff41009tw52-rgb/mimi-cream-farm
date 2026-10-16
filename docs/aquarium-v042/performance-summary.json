@@ -1,0 +1,15 @@
+{
+  "fps": 57.669550144173826,
+  "p95": 16.80000000000291,
+  "longFrames": 0,
+  "max": 33.400000000001455,
+  "simulationAndDrawMeanMs": 2.4498559077825903,
+  "simulationAndDrawMaxMs": 23,
+  "fish": 15,
+  "decor": 15,
+  "foodAtStart": 8,
+  "coinsAtStart": 2,
+  "environmentVisits": 4,
+  "environmentActiveAtStart": 2,
+  "frames": 346
+}

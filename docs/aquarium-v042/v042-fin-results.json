@@ -1,0 +1,6494 @@
+{
+  "checks": [
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "parts": [
+        "dorsal",
+        "pectoral",
+        "pelvic",
+        "anal",
+        "tail"
+      ],
+      "highlight": true,
+      "enlarged": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "parts": [
+        "dorsal",
+        "pectoral",
+        "pelvic",
+        "anal",
+        "tail"
+      ],
+      "highlight": true,
+      "enlarged": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "parts": [
+        "dorsal",
+        "pectoral",
+        "pelvic",
+        "anal",
+        "tail",
+        "adipose"
+      ],
+      "highlight": true,
+      "enlarged": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "parts": [
+        "dorsal",
+        "pectoral",
+        "pelvic",
+        "anal",
+        "tail"
+      ],
+      "highlight": true,
+      "enlarged": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "parts": [
+        "dorsal",
+        "pectoral",
+        "pelvic",
+        "anal",
+        "tail"
+      ],
+      "highlight": true,
+      "enlarged": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "parts": [
+        "dorsal",
+        "pectoral",
+        "pelvic",
+        "anal",
+        "tail"
+      ],
+      "highlight": true,
+      "enlarged": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "parts": [
+        "dorsal",
+        "pectoral",
+        "pelvic",
+        "anal",
+        "tail"
+      ],
+      "highlight": true,
+      "enlarged": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "parts": [
+        "dorsal",
+        "pectoral",
+        "pelvic",
+        "anal",
+        "tail",
+        "adipose"
+      ],
+      "highlight": true,
+      "enlarged": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "parts": [
+        "dorsal",
+        "pectoral",
+        "pelvic",
+        "anal",
+        "tail"
+      ],
+      "highlight": true,
+      "enlarged": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "parts": [
+        "dorsal",
+        "pectoral",
+        "pelvic",
+        "anal",
+        "tail"
+      ],
+      "highlight": true,
+      "enlarged": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "parts": [
+        "dorsal",
+        "pectoral",
+        "pelvic",
+        "anal",
+        "tail"
+      ],
+      "highlight": true,
+      "enlarged": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "parts": [
+        "dorsal",
+        "pectoral",
+        "pelvic",
+        "anal",
+        "tail"
+      ],
+      "highlight": true,
+      "enlarged": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "parts": [
+        "dorsal",
+        "pectoral",
+        "pelvic",
+        "anal",
+        "tail"
+      ],
+      "highlight": true,
+      "enlarged": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "parts": [
+        "dorsal",
+        "pectoral",
+        "pelvic",
+        "anal",
+        "tail"
+      ],
+      "highlight": true,
+      "enlarged": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "parts": [
+        "dorsal",
+        "pectoral",
+        "pelvic",
+        "anal",
+        "tail"
+      ],
+      "highlight": true,
+      "enlarged": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "parts": [
+        "dorsal",
+        "pectoral",
+        "pelvic",
+        "anal",
+        "tail"
+      ],
+      "highlight": true,
+      "enlarged": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "parts": [
+        "dorsal",
+        "pectoral",
+        "pelvic",
+        "anal",
+        "tail"
+      ],
+      "highlight": true,
+      "enlarged": true
+    }
+  ],
+  "geometry": [
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "adipose",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "adipose",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "adipose",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "adipose",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "adipose",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "adipose",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "adipose",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "cory",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "adipose",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "zebra",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "swordtail",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "whitecloud",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "adipose",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "adipose",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "adipose",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "adipose",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "adipose",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "adipose",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "adipose",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "cardinal",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "adipose",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "normal",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sky",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "guppy",
+      "variant": "guppy_sunset",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "goldfish",
+      "variant": "goldfish_cream",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "molly",
+      "variant": "molly_pearl",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "angel",
+      "variant": "angel_gold",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_orchid",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 180,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 180,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 180,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 180,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 340,
+      "turn": -1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 340,
+      "turn": -1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 340,
+      "turn": 1,
+      "phase": 0,
+      "part": "tail",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "dorsal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pectoral",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "pelvic",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "anal",
+      "visible": true
+    },
+    {
+      "species": "betta",
+      "variant": "betta_dawn",
+      "size": 340,
+      "turn": 1,
+      "phase": 1.3,
+      "part": "tail",
+      "visible": true
+    }
+  ],
+  "errors": []
+}

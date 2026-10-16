@@ -1,0 +1,11 @@
+{
+  "checks": {
+    "fileProtocol": true,
+    "realV02Migration": true,
+    "manualMigration": true,
+    "refresh": true,
+    "noExternalRequests": true,
+    "observation": true
+  },
+  "errors": []
+}

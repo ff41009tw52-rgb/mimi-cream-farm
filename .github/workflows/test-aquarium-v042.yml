@@ -1,0 +1,47 @@
+name: Test aquarium V0.4.2 preserved art and original breathing lesson
+on:
+  push:
+    paths: ['aquarium-v0.4*.html', 'assets/aquarium-v042/**', 'tests/aquarium/**', 'scripts/build-aquarium-v042.py', '.github/workflows/test-aquarium-v042.yml']
+  pull_request:
+    paths: ['aquarium-v0.4*.html', 'assets/aquarium-v042/**', 'tests/aquarium/**', 'scripts/build-aquarium-v042.py', '.github/workflows/test-aquarium-v042.yml']
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      AQUARIUM_ENTRY: aquarium-v0.4.2.html
+      AQUARIUM_ARTIFACTS: artifacts/aquarium-v042
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Preserve completed work and validate portable build
+        run: |
+          for file in assets/aquarium-v042/*.js; do node --check "$file"; done
+          node tests/aquarium/source-v042.test.cjs
+          cmp aquarium-v0.4.html aquarium-v0.4.2.html
+          python3 scripts/build-aquarium-v042.py
+          git diff --exit-code -- aquarium-v0.4.2-standalone.html
+      - name: Prepare browser runtime
+        run: |
+          npm install --prefix /tmp/aquarium-v042-runtime playwright@1.58.2
+          /tmp/aquarium-v042-runtime/node_modules/.bin/playwright install --with-deps chromium
+          echo 'NODE_PATH=/tmp/aquarium-v042-runtime/node_modules' >> "$GITHUB_ENV"
+      - name: Original lesson comparison and fin interactions
+        run: |
+          node tests/aquarium/browser-v042.test.cjs
+          node tests/aquarium/browser-v042-fins.test.cjs
+      - name: Preserved gameplay, saves, standalone and performance
+        run: |
+          node tests/aquarium/browser-v041.test.cjs
+          node tests/aquarium/browser-v041-guards.test.cjs
+          node tests/aquarium/browser-v042-upgrade.test.cjs
+          node tests/aquarium/browser-v042-standalone.test.cjs
+          node tests/aquarium/browser-v041-guidance.test.cjs
+          node tests/aquarium/browser-v041-life.test.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aquarium-v042-browser-evidence
+          path: artifacts/aquarium-v042/
