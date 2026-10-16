@@ -7,7 +7,7 @@
 - 截圖與比較：https://ff41009tw52-rgb.github.io/mimi-cream-farm/docs/aquarium-v041-r2/
 - 初版保留：https://ff41009tw52-rgb.github.io/mimi-cream-farm/aquarium-v0.4.1-initial.html
 - 分支：`feat/aquarium-v041-observation-refinement`
-- PR：待填入實際建立結果。
+- PR：[#70](https://github.com/ff41009tw52-rgb/mimi-cream-farm/pull/70)。
 
 ## 實際盤點
 
@@ -138,4 +138,13 @@
 
 ## 發布驗證
 
-待完成 PR、CI 與正式網站驗證後填入實際結果。
+- [PR #70](https://github.com/ff41009tw52-rgb/mimi-cream-farm/pull/70) 已合併；程式提交 `03b13b0b2500bc1f6feb9da59f2fa14aead07355`，合併提交 `640af06e0873bcffefcb5385b16c38f860f935ce`。
+- [V0.4.1 自動測試](https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/38773713454) 與 [V0.4 回歸測試](https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/38773713759) 均通過。
+- [GitHub Pages 發布](https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/38774445536) 的 build、report-build-status、deploy 均成功。
+- 正式入口維持 https://ff41009tw52-rgb.github.io/mimi-cream-farm/aquarium-v0.4.html ，頁面顯示 V0.4.1。
+- 已在正式站用瀏覽器從 V0.4.0 入口進入新版：金幣 20、魚數 3／10、水質 100%、小彩／小金／小點的名字和魚種均保留；小彩的「怕生」個性保留，成長進度正常累積。重整後可讀取並自動存檔。
+- 正式站實際點選「小彩 → 觀察這隻魚」，預設進入「看看我的魚」，顯示小彩、孔雀魚、普通配色及怕生個性；切換課本複習後，構造頁沒有播放或速度控制。游動與呼吸頁有各自操作，滑桿可切換至 2×。
+- 正式圖集可開啟，24 個圖片元素全部成功載入（包含重複展示的新舊比較，共 22 個圖片檔）。
+- 額外規劃的 37 檔逐位元線上比對，因執行環境網路核准取消而未完成，不列為通過。改以正式瀏覽器操作驗證上線結果；完整存檔欄位與手動快照的精確比較已由本機及 CI 測試驗證，沒有宣稱在正式站再次逐欄比較。
+
+本輪要求的遊戲整合、發布、截圖及比較圖均已交付。上述實體裝置與教材原圖核對限制仍保留。
