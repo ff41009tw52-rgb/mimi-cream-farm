@@ -7,8 +7,10 @@
 - 開發分支：`feat/aquarium-v042-completion`
 - 整合 PR：[#73](https://github.com/ff41009tw52-rgb/mimi-cream-farm/pull/73)
 - 功能驗收 commit：`c6f4ad1788b677a189c378af23cb73299a47ccdd`
+- 最終交付 commit：`3c83d9d2ca03981fc6aec4337c7fc7269e356e12`
+- PR #73 已於 2026-10-16 合併，merge commit：`ea329ea0ec407788ba9d8467d50c4cbd418e2828`
 - 新版：[aquarium-v0.4.2.html](https://ff41009tw52-rgb.github.io/mimi-cream-farm/aquarium-v0.4.2.html)
-- 正式入口：[aquarium-v0.4.html](https://ff41009tw52-rgb.github.io/mimi-cream-farm/aquarium-v0.4.html)，本 PR 將其更新為同一份 V0.4.2 HTML；合併後由原 GitHub Pages 流程部署。
+- 正式入口：[aquarium-v0.4.html](https://ff41009tw52-rgb.github.io/mimi-cream-farm/aquarium-v0.4.html)，已更新為同一份 V0.4.2 HTML；[GitHub Pages 建置與部署成功](https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/38900924310)。
 - [實際截圖與原站比較](https://ff41009tw52-rgb.github.io/mimi-cream-farm/docs/aquarium-v042/index.html)
 
 ## A. 已有成果承接
@@ -108,12 +110,12 @@
 
 ### 實際執行結果
 
-功能 commit `c6f4ad1` 的以下 PR 測試全部通過：
+功能 commit `c6f4ad1` 與最終交付 commit `3c83d9d` 的四組 PR 測試均全部通過。下列為最終交付的驗收紀錄；本報告截圖及效能數值保留自功能 commit 的實測輸出：
 
-- [V0.4.2 原呼吸教材與完整遊戲驗收](https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/38867768165)
-- [V0.4.1 既有回歸](https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/38867768199)
-- [V0.4 既有回歸](https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/38867768158)
-- [V0.3 存檔與離線版](https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/38867768215)
+- [V0.4.2 原呼吸教材與完整遊戲驗收](https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/38900315601)
+- [V0.4.1 既有回歸](https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/38900315611)
+- [V0.4 既有回歸](https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/38900315563)
+- [V0.3 存檔與離線版](https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/38900315670)
 
 包含餵食追食、收金幣、商店、裝飾、清潔、成長、成就、改名、送養、手動與自動存檔、讀檔／匯出匯入、配色解鎖、防重複領獎、多分頁衝突、儲存失敗保護及離線版。新增呼吸畫面一致性、0.25×／2× 時間差異、暫停、重複進出只建立一份快取、離開不繪製、遊戲時鐘不受影響等驗證。
 
@@ -149,6 +151,10 @@ GitHub Actions Chromium、真實 requestAnimationFrame；非實體平板。每�
 1440×900、1024×768、820×1180、390×844 的呼吸教材、控制項、魚鰭放大、提示字級、44px 操作尺寸與無橫向溢出檢查通過。原版遊戲的觸控魚身、商店、圖鑑、改名及布置也通過。
 
 [效能資料](docs/aquarium-v042/capacity-performance.json) · [整合測試](docs/aquarium-v042/v042-integration-results.json) · [存檔承接](docs/aquarium-v042/upgrade-results.json) · [離線版測試](docs/aquarium-v042/standalone-results.json)
+
+### 上線核對
+
+部署後實際 HTTP 讀取正式入口、V0.4.2、V0.4.1、V0.4.0、原呼吸教材、抽出的原圖及截圖集，皆回應 200，且內容與交付檔案逐位元一致。正式版已更新；原呼吸教材與回退頁未改動。
 
 ### 尚未完成／驗證限制
 
