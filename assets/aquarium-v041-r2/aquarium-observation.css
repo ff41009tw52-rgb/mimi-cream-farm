@@ -15,3 +15,16 @@
 #obs-mine .specimen-window{width:100%;height:clamp(240px,38vh,390px)!important;aspect-ratio:auto;max-height:none}
 @media(max-width:540px){#obs-mine .specimen-window{height:260px!important}}
 @media(min-width:851px) and (max-height:1000px){#observation[data-layer=book] .obs-header{padding:12px 24px}#observation[data-layer=book] .obs-layers{padding:10px 24px}#observation[data-layer=book] .obs-layers button{padding:10px 16px!important}#observation[data-layer=book] #obs-svg{max-height:320px}#observation[data-layer=book] .obs-topic-intro h3{margin-top:12px}#observation[data-layer=book] .obs-topic-intro p{font-size:14px}#observation[data-layer=book] .obs-controls{padding-top:10px;margin-top:8px}#observation[data-layer=book] .obs-topview canvas{max-height:90px}}
+
+
+/* 2026-10-16：魚種鰭部提示、簡化觀察控制。 */
+.own-fin-guide{margin:12px 0 16px;padding:16px 19px;background:#f2f6eb;border:1px solid #cadfca;border-left:5px solid #438e7d;border-radius:15px}
+.own-fin-guide h4{font-size:18px;line-height:1.5;margin:0 0 7px;color:#215f57}
+.own-fin-guide p{font-size:16px;line-height:1.8;margin:0;color:#345f59}
+.own-fin-guide small{display:block;font-size:12px;line-height:1.7;color:#60796f;margin-top:8px}
+.obs-own-extra,.obs-advanced{margin-top:10px;color:#315f58}
+.obs-own-extra summary,.obs-advanced summary{cursor:pointer;padding:10px 13px;min-height:44px;display:list-item;font-size:15px;font-weight:600;background:#f3f6eb;border:1px solid #d5e5d8;border-radius:10px}
+.obs-own-extra[open] button,.obs-advanced[open] button{margin:9px 0 3px 8px}
+#observation .obs-hint{font-size:16px;line-height:1.75}
+#observation .obs-selection p{font-size:16px;line-height:1.75}
+@media(max-width:540px){.own-fin-guide{padding:13px 14px}.own-fin-guide h4{font-size:17px}.own-fin-guide p{font-size:15px}.own-fin-guide small{font-size:12px}.obs-own-extra summary,.obs-advanced summary{font-size:15px}}

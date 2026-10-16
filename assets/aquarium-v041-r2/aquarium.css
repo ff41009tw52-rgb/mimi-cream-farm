@@ -21,3 +21,12 @@ body{background:radial-gradient(ellipse at 8% 20%,#dfece2aa,transparent 46%),rad
 @media(max-width:680px){.header-note{display:none}.aquarium{border-width:6px}.onboarding{display:grid;grid-template-columns:40px 1fr;gap:10px;padding:16px}.guide-step{width:40px;height:40px;font-size:12px}.onboarding h2{font-size:18px}.onboarding p{font-size:14px}.guide-actions{grid-column:2;flex-direction:row;gap:10px}.toast{font-size:16px;bottom:16px;gap:12px;padding:16px;line-height:1.8}.fish-preview{height:115px}.shop-item{padding:12px}.shop-intro#shop-message{font-size:15px;padding:12px}.feeding-hint{font-size:0;padding:7px 10px}.feeding-hint:before{font-size:14px}.setting-row small{font-size:12px}.confirm-copy{font-size:16px;padding:15px}.save-tools{padding:0 10px}.achievement-card p{font-size:13px}.achievement-card h3{font-size:16px}}
 
 .onboarding{margin:0 auto 20px}
+
+
+/* 2026-10-16：提示文字與閱讀性微調，不改遊戲機制。 */
+.toast{font-size:18px;line-height:1.65;padding:17px 48px 17px 20px;max-width:min(570px,calc(100vw - 24px));background:#fffdf2;border:2px solid #88ae8d;box-shadow:0 12px 32px #244b5038}
+.toast-close{min-width:44px;min-height:44px;font-size:21px}
+.onboarding h2{font-size:22px}.onboarding p{font-size:17px;line-height:1.75}
+.shop-intro#shop-message{font-size:17px;line-height:1.8}
+.fish-fin-summary{background:#eff4e6;border-left:4px solid #77a88e;padding:12px 15px;font-size:15px;line-height:1.8;border-radius:0 10px 10px 0}
+@media(max-width:680px){.toast{font-size:17px;padding:15px 44px 15px 16px}.onboarding h2{font-size:19px}.onboarding p{font-size:16px}.shop-intro#shop-message{font-size:16px}.feeding-hint:before{font-size:15px}.feeding-hint select,.feeding-hint button{font-size:14px}.fish-fin-summary{font-size:14px}}

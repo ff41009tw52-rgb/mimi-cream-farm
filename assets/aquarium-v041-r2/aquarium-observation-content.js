@@ -18,7 +18,20 @@ const parts = {
  caudal:{name:'尾鰭', description:'位於身體後方，擺動時能幫助魚向前游動。'},
  gills:{name:'鰓', description:'位於鰓蓋內側，是魚從水中取得氧氣、進行氣體交換的重要構造。'}
 };
-window.AquariumObservationContent=Object.freeze({topics,parts,
+// 典型魚種形態提示；遊戲魚圖為簡化示意，不等於逐鰭解剖標示。
+const fishFinNotes=Object.freeze({
+ guppy:"看魚尾後方寬大的尾鰭，以及背部的背鰭。雄孔雀魚的臀鰭會變成細長形，和雌魚不同。",
+ goldfish:"背上可以找到背鰭，身體後方是尾鰭。金魚品系很多，也有沒有背鰭或尾鰭分成雙尾的品系。",
+ cory:"背上有三角形背鰭，頭部後方兩側有胸鰭。真正的鼠魚在背鰭後方還有小小的脂鰭。",
+ zebra:"背部有較小的背鰭，身體後下方有臀鰭，最後是分叉的尾鰭。",
+ molly:"背鰭長在背上，胸鰭在頭後方兩側。黑摩利的臀鰭外形可能因雌雄不同而有差異。",
+ swordtail:"背上有背鰭，身體末端是尾鰭。雄紅劍魚的尾鰭下方會延長，形成像劍的形狀。",
+ whitecloud:"身體背部有背鰭，後下方有臀鰭；最後方的尾鰭呈分叉狀。",
+ cardinal:"背上可以找到背鰭，身體後下方是臀鰭。真正的紅蓮燈在背鰭後方還有小脂鰭，藍色亮帶不是魚鰭。",
+ angel:"背鰭向上延伸，臀鰭往下展開；前下方細長如絲的兩條，是成對的腹鰭。",
+ betta:"尾鰭像扇子展開，腹部後段有大片臀鰭；頭部後下方較細長的兩條是腹鰭，不是臀鰭。"
+});
+window.AquariumObservationContent=Object.freeze({topics,parts,fishFinNotes,
  title:'觀察魚兒', schematic:'構造示意圖',
  specimenNote:'這是你養的魚兒，沿用遊戲中的魚種外形與配色。下方教材另使用代表性的硬骨魚示意圖。',
  diagramNote:'以代表性硬骨魚說明構造；不同魚種的外形、鰭形和游動方式會有差異。',
