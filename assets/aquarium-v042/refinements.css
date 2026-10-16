@@ -1,0 +1,25 @@
+/* V0.4.2: restrained refinements; shared V0.4.1 assets remain a rollback. */
+.aquarium{border-color:#fffdf5;box-shadow:0 16px 35px #3c72551f,0 0 0 1px #cbdcd1,inset 0 2px 8px #fff9}
+.tank-base{background:linear-gradient(#efe3c9,#e6d7b7);border-top-color:#fff2d8}
+.shop-item,.collection-card,.achievement-card{border-color:#cfdfcf;background:linear-gradient(145deg,#fffef8,#f4f7ec);box-shadow:0 4px 12px #527c6010,inset 0 1px #fff}
+.shop-item .fish-preview{background:radial-gradient(ellipse at 50% 15%,#f8f9df,#d6ece4);border:1px solid #d7e6d6}
+.decor-item .fish-preview{background:linear-gradient(145deg,#f3f4e4,#e4ead9)}
+.shop-item.locked{background:#edf1e7;box-shadow:none}
+.buy,.action.primary,.tab.active{background:linear-gradient(145deg,#328577,#28796d)}
+.tabs{padding:5px;border-radius:16px;background:#e9f0e4}.tab{flex:1}
+.toast{inset:16px auto auto 50%;font-size:18px;line-height:1.75;padding:18px 20px;max-height:30dvh;overflow:auto;background:#fffdf1;border:1px solid #9bb69a;border-left:6px solid #538c72;box-shadow:0 12px 32px #244b5030}
+.toast-close{flex-shrink:0;min-width:44px;min-height:44px}
+.onboarding h2{font-size:22px}.onboarding p{font-size:17px;line-height:1.75}
+.shop-intro#shop-message{font-size:18px;line-height:1.75;color:#365d4e}
+.confirm-copy{font-size:18px;color:#435c4c}.dialog-note{color:#58705e}
+#observation .obs-advanced{margin:12px 0;color:#315f58}
+#observation .obs-advanced summary{cursor:pointer;padding:10px 14px;min-height:44px;font-size:16px;font-weight:600;background:#f1f5e9;border:1px solid #ccdfd0;border-radius:12px}
+#observation .obs-advanced[open]>button{margin:10px 0 0}
+#observation .obs-hint,#observation .obs-selection p{font-size:17px;line-height:1.75}
+#observation .obs-selection{background:linear-gradient(120deg,#f8f1d9,#f8f4e6)}
+#observation .obs-figure{background:linear-gradient(145deg,#eff6e7,#d6eeeb);box-shadow:inset 0 1px #fff9}
+#observation .own-fins p{font-size:17px;line-height:1.75}
+#observation .own-fins .own-footnote{font-size:14px}
+#observation[data-topic=breathing][data-layer=book] .book-intro{display:none}
+#obs-breathing-lesson{margin-top:8px;min-width:0}
+@media(max-width:680px){.toast{font-size:17px;inset:12px auto auto 50%;padding:15px 16px;gap:10px}.onboarding h2{font-size:20px}.onboarding p{font-size:17px}.shop-intro#shop-message{font-size:17px}.confirm-copy{font-size:17px}}
