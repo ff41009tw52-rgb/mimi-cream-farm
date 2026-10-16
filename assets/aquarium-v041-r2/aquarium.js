@@ -417,14 +417,15 @@ function draw(){if(!state||!bg||!bg.width||!bg.height)return;ctx.clearRect(0,0,W
 let specimenPose=null;
 const observation=window.AquariumObservation.create({
  getFish:()=>state.fishes.map(f=>({...f,speciesName:SPECIES[f.species].name,personalityName:PERSONALITIES[f.personality].name,variantName:f.variant==='normal'?'普通配色':VARIANTS[f.variant].name})),
- drawSpecimen:(target,id,{tracking,zoom,playing,time,breathing})=>{
+ drawSpecimen:(target,id,{tracking,zoom,playing,time,breathing,highlightPart})=>{
   const c=target.getContext('2d'),f=state.fishes.find(f=>f.id===id);c.clearRect(0,0,target.width,target.height);if(!f)return;
   if(playing||specimenPose?.id!==id)specimenPose={id,...runtime.get(id)};
   const r=specimenPose,b=window.AquariumFishArt.hitBounds[f.species],fit=Math.min(44000/(b.bottom-b.top),82000/(b.right-b.left)),size=Math.min(Math.min(Math.max(350,f.size*4),fit*.65)*zoom,fit);
   const marginX=Math.max(Math.abs(b.left),b.right)*size/100+30,marginY=Math.max(Math.abs(b.top),b.bottom)*size/100+25;
   const x=tracking?target.width*.52:clamp(r.x*target.width,marginX,target.width-marginX),y=tracking?target.height*.48:clamp(r.y*target.height,marginY,target.height-marginY);
   const turn=breathing?(r.turn<0?-1:1):r.turn;
-  window.AquariumFishArt.draw(c,f.species,x,y,size,turn,r.heading,r.phase,f.variant,{breathing:true,breathTime:time,breathEmphasis:breathing});
+  window.AquariumFishArt.draw(c,f.species,x,y,size,turn,r.heading,r.phase,f.variant,{breathing:true,breathTime:time,breathEmphasis:breathing,highlightPart});
+  if(highlightPart){const part=window.AquariumFishArt.getFinInfo(f.species).parts.find(p=>p.id===highlightPart);if(part){c.fillStyle='#246e61';c.font='600 24px sans-serif';c.textAlign='left';c.fillText('正在觀察：'+part.name,24,36);}}
  }
 
 });

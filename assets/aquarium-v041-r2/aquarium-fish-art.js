@@ -12,17 +12,23 @@ function oval(c,x,y,rx,ry,color) { c.beginPath();c.ellipse(x,y,rx,ry,0,0,2*PI);c
 function gradient(c,x1,y1,x2,y2,stops) { const g=c.createLinearGradient(x1,y1,x2,y2);stops.forEach(([at,col])=>g.addColorStop(at,col));return g; }
 function tint(hex,other,amount) { const a=hex.replace('#',''),b=other.replace('#','');return '#'+[0,2,4].map(i=>Math.round(parseInt(a.slice(i,i+2),16)*(1-amount)+parseInt(b.slice(i,i+2),16)*amount).toString(16).padStart(2,'0')).join(''); }
 const forms={
- guppy:{body:'M-27 0 C-17 -4 -11 -12 5 -12 C19 -13 31 -7 37 -2 Q42 1 36 5 C23 14 9 13 -3 9 Q-18 3 -27 3Z',tail:'M-24 -2 C-36 -10 -44 -25 -56 -28 Q-64 -14 -60 -1 Q-65 16 -56 29 C-42 24 -33 9 -24 3Z',dorsal:'M-12 -8 Q-13 -23 -1 -26 Q9 -25 20 -8 C8 -10 -1 -5 -12 -8Z',anal:'M-13 6 Q-14 19 -3 21 L10 9Z',pectoral:'M16 2 C6 0 -3 9 1 16 Q9 19 19 5Z',root:[-25,1],eye:[30,-3,3.0],gill:'M22 -7 Q17 0 22 7',mouth:'M36 2 Q39 3 40 1',height:13},
+ guppy:{body:'M-27 0 C-17 -4 -11 -12 5 -12 C19 -13 31 -7 37 -2 Q42 1 36 5 C23 14 9 13 -3 9 Q-18 3 -27 3Z',tail:'M-24 -2 C-36 -10 -44 -25 -56 -28 Q-64 -14 -60 -1 Q-65 16 -56 29 C-42 24 -33 9 -24 3Z',dorsal:'M-12 -8 Q-13 -23 -1 -26 Q9 -25 20 -8 C8 -10 -1 -5 -12 -8Z',anal:'M1 8 Q-8 10 -21 14 L-21 15 Q-8 14 3 11Z',pectoral:'M16 2 C6 0 -3 9 1 16 Q9 19 19 5Z',root:[-25,1],eye:[30,-3,3.0],gill:'M22 -7 Q17 0 22 7',mouth:'M36 2 Q39 3 40 1',height:13},
  goldfish:{body:'M-27 0 C-24 -5 -22 -12 -14 -19 C-2 -29 18 -24 29 -14 Q38 -8 39 0 Q39 11 29 18 C11 30 -10 26 -22 13Z',tail:'M-24 -3 C-34 -14 -43 -29 -58 -29 C-59 -18 -48 -4 -39 0 Q-55 9 -60 24 Q-57 32 -51 31 C-37 29 -27 16 -23 5 Q-39 8 -44 16 C-39 6 -32 3 -24 2Z',dorsal:'M-19 -14 Q-16 -35 -5 -35 Q4 -33 6 -29 Q18 -31 24 -15Z',anal:'M-13 16 Q-14 29 -2 32 Q8 28 13 18Z',pectoral:'M17 6 C4 4 -9 17 -4 25 Q5 32 22 10Z',root:[-25,0],eye:[30,-6,3.9],gill:'M23 -13 C15 -7 15 7 23 13',mouth:'M37 3 Q41 5 42 2',height:25},
  cory:{body:'M-29 1 C-20 -3 -15 -14 0 -16 Q17 -20 30 -6 Q38 0 38 8 C34 14 20 16 8 15 L-14 12 Q-25 8 -29 1Z',tail:'M-27 0 L-52 -17 Q-54 -6 -44 0 Q-51 9 -51 16 L-27 5Z',dorsal:'M-16 -8 Q-13 -23 -4 -30 Q5 -29 12 -12Z',anal:'M-17 9 L-23 21 Q-12 22 -2 12Z',pectoral:'M22 9 Q6 6 -2 21 Q8 25 25 12Z',root:[-28,2],eye:[26,-3,3.5],gill:'M19 -7 Q15 2 23 10',mouth:'M33 11 Q37 13 39 10',height:18},
  zebra:{body:'M-30 0 C-20 -1 -10 -8 7 -9 Q24 -10 33 -5 L39 -1 Q41 1 37 3 C26 9 10 11 -3 7 Q-19 2 -30 3Z',tail:'M-28 0 L-50 -14 Q-49 -5 -42 0 Q-48 6 -49 14 L-28 3Z',dorsal:'M-7 -6 Q-5 -17 1 -21 Q6 -19 10 -13 L16 -7 Q3 -8 -7 -6Z',anal:'M-11 5 L-10 16 Q-1 17 12 7Z',pectoral:'M22 2 C14 1 7 7 5 12 Q14 13 24 4Z',root:[-29,1],eye:[31,-2,2.8],gill:'M24 -6 Q20 0 24 6',mouth:'M37 1 L40 1',height:11},
  molly:{body:'M-29 1 C-20 -1 -18 -12 -7 -18 Q9 -25 24 -16 Q32 -11 35 -5 L39 -2 Q42 0 38 3 C32 15 21 23 7 21 Q-13 18 -22 8Z',tail:'M-27 -1 C-36 -5 -42 -15 -51 -19 Q-56 -11 -56 -1 Q-57 10 -51 19 C-40 18 -34 9 -27 5Z',dorsal:'M-19 -8 C-18 -18 -15 -27 -9 -31 L-5 -29 L0 -33 L4 -31 L9 -32 L13 -27 Q20 -22 25 -13 Q3 -17 -19 -8Z',anal:'M-14 10 Q-17 19 -11 25 Q-3 23 8 16Z',pectoral:'M18 5 Q4 3 -2 17 Q4 24 21 9Z',root:[-28,2],eye:[30,-4,3.2],gill:'M23 -10 Q15 1 23 11',mouth:'M37 1 Q40 2 41 0',height:22},
- swordtail:{body:'M-30 0 Q-21 -1 -11 -8 C3 -17 24 -12 34 -6 L39 -2 Q43 0 38 3 C24 12 7 14 -7 9 Q-20 3 -30 3Z',tail:'M-28 -1 Q-39 -7 -49 -20 Q-49 -10 -42 -1 Q-41 7 -48 14 L-63 29 Q-51 26 -42 19 Q-34 13 -28 5Z',dorsal:'M-10 -8 Q-9 -23 -1 -29 Q5 -26 8 -23 L18 -10 Q4 -12 -10 -8Z',anal:'M-14 6 Q-16 16 -11 19 L10 9Z',pectoral:'M20 3 Q7 1 3 14 Q11 20 23 6Z',root:[-29,1],eye:[31,-3,3.0],gill:'M24 -8 Q19 0 24 8',mouth:'M38 1 Q40 2 42 0',height:14},
+ swordtail:{body:'M-30 0 Q-21 -1 -11 -8 C3 -17 24 -12 34 -6 L39 -2 Q43 0 38 3 C24 12 7 14 -7 9 Q-20 3 -30 3Z',tail:'M-28 -1 Q-39 -7 -49 -20 Q-49 -10 -42 -1 Q-41 7 -48 14 L-63 29 Q-51 26 -42 19 Q-34 13 -28 5Z',dorsal:'M-10 -8 Q-9 -23 -1 -29 Q5 -26 8 -23 L18 -10 Q4 -12 -10 -8Z',anal:'M0 9 Q-10 12 -23 16 L-23 17 Q-9 16 3 12Z',pectoral:'M20 3 Q7 1 3 14 Q11 20 23 6Z',root:[-29,1],eye:[31,-3,3.0],gill:'M24 -8 Q19 0 24 8',mouth:'M38 1 Q40 2 42 0',height:14},
  whitecloud:{body:'M-30 1 C-20 -1 -10 -8 6 -9 Q25 -10 34 -5 L39 -1 Q41 1 37 3 C25 10 11 10 -2 7 Q-19 3 -30 3Z',tail:'M-28 0 Q-39 -5 -51 -15 Q-50 -7 -43 0 Q-43 7 -50 15 Q-37 12 -28 3Z',dorsal:'M-8 -6 L-7 -16 Q-4 -21 1 -23 L7 -18 L15 -7 Q2 -8 -8 -6Z',anal:'M-12 5 L-10 17 Q0 17 12 7Z',pectoral:'M21 3 Q9 3 6 12 Q15 16 24 5Z',root:[-29,1],eye:[31,-2,2.8],gill:'M24 -6 Q20 0 24 6',mouth:'M38 1 L40 1',height:11},
- cardinal:{body:'M-29 0 C-18 -2 -10 -8 3 -10 Q21 -13 32 -6 L39 -1 Q42 1 37 4 C24 12 11 14 -3 9 Q-19 3 -29 3Z',tail:'M-27 0 L-49 -14 Q-48 -5 -41 0 Q-47 7 -48 14 L-27 3Z',dorsal:'M-8 -7 L-4 -23 Q2 -24 6 -18 L14 -8Z M-21 -4 Q-21 -9 -17 -10 Q-12 -10 -12 -6Z',anal:'M-15 5 Q-17 11 -14 18 Q-3 20 14 8Z',pectoral:'M22 2 Q13 3 7 11 Q17 13 24 4Z',root:[-28,1],eye:[31,-2,2.9],gill:'M24 -7 Q20 0 24 7',mouth:'M38 1 L40 1',height:13},
+ cardinal:{body:'M-29 0 C-18 -2 -10 -8 3 -10 Q21 -13 32 -6 L39 -1 Q42 1 37 4 C24 12 11 14 -3 9 Q-19 3 -29 3Z',tail:'M-27 0 L-49 -14 Q-48 -5 -41 0 Q-47 7 -48 14 L-27 3Z',dorsal:'M-8 -7 L-4 -23 Q2 -24 6 -18 L14 -8Z',anal:'M-15 5 Q-17 11 -14 18 Q-3 20 14 8Z',pectoral:'M22 2 Q13 3 7 11 Q17 13 24 4Z',root:[-28,1],eye:[31,-2,2.9],gill:'M24 -7 Q20 0 24 7',mouth:'M38 1 L40 1',height:13},
  angel:{body:'M-23 0 Q-17 -12 -7 -23 Q2 -30 11 -26 Q21 -24 27 -13 L32 -7 L38 -2 Q41 0 37 3 L32 5 Q24 15 15 24 Q3 31 -7 22 Q-18 12 -23 0Z',tail:'M-21 -2 Q-32 -10 -46 -17 Q-43 -7 -44 0 Q-43 10 -46 18 Q-32 14 -21 4Z',dorsal:'M-20 -3 C-21 -20 -18 -38 -12 -52 Q-10 -55 -9 -51 C-7 -40 -3 -34 4 -29 Q15 -26 25 -13 Q4 -17 -20 -3Z',anal:'M-19 7 C-22 22 -17 41 -9 51 Q-7 54 -6 49 Q-1 33 11 25 L26 10 Q4 16 -19 7Z',pectoral:'M24 3 Q13 1 1 12 Q8 18 18 12 L27 6Z',root:[-22,1],eye:[30,-4,3.2],gill:'M24 -12 Q16 -2 23 10',mouth:'M37 1 Q39 2 41 0',height:29},
  betta:{body:'M-26 0 C-18 -2 -12 -12 1 -14 Q21 -17 32 -8 L38 -2 Q42 0 38 4 Q29 12 15 14 Q-1 15 -15 7 L-26 4Z',tail:'M-22 -3 C-29 -14 -39 -29 -48 -29 Q-55 -33 -57 -26 Q-65 -27 -61 -18 Q-68 -15 -63 -8 Q-69 -2 -63 5 Q-68 12 -61 17 Q-64 24 -56 25 Q-57 33 -49 31 Q-44 37 -38 29 C-28 25 -24 14 -21 5Z',dorsal:'M-16 -8 C-19 -20 -12 -31 -4 -31 Q1 -36 7 -30 Q13 -34 17 -27 Q23 -28 24 -21 Q30 -16 28 -8 Q8 -8 -16 -8Z',anal:'M-18 7 C-22 18 -22 24 -16 28 Q-18 35 -10 33 Q-5 39 1 33 Q7 38 12 32 Q20 34 22 27 Q27 28 27 20 L29 7 Q9 12 -18 7Z',pectoral:'M23 2 C15 0 5 7 4 14 Q5 20 11 19 Q20 17 26 5Z',root:[-23,1],eye:[31,-3,3.1],gill:'M25 -9 Q18 0 25 9',mouth:'M38 1 Q40 2 42 0',height:15}
 };
+// Local anatomy corrections only. The guppy and swordtail artwork represents
+// ornamental males; no sex field or breeding logic is introduced.
+forms.cory.adipose=path('M-17 -5 L-21 -12 Q-24 -8 -26 -1 L-20 -2Z');
+forms.cardinal.adipose=path('M-21 -4 Q-21 -9 -17 -10 Q-12 -10 -12 -6Z');
+const pelvicForms={goldfish:path('M9 16 Q5 21 0 30 Q10 29 15 18Z'),cory:path('M7 12 Q-1 20 2 22 Q10 22 14 13Z'),molly:path('M9 18 Q2 24 2 28 Q11 27 15 19Z'),default:path('M8 8 Q1 17 2 19 Q9 17 13 10Z')};
+function highlight(c,shape){c.save();c.globalAlpha=.85;fill(c,shape,'#fff3a566','#246e61',1.25);c.restore();}
 // Each species has its own palette; variants are derived from AquariumData.
 const colors={
  guppy:['#75c9bc','#ee956f','#fff0ad','#3a8c88'],goldfish:['#f7af42','#f19539','#fff0b4','#c96e28'],cory:['#c2bfa2','#a3af95','#f6eed0','#748877'],zebra:['#a9c7cd','#9dc7be','#f1e6b2','#36566f'],molly:['#344951','#516d75','#a1bdb8','#142c37'],swordtail:['#eb8656','#de744d','#ffd79c','#ac4e3a'],whitecloud:['#b7bba1','#dc7758','#fff4bc','#72877d'],cardinal:['#69a8bc','#9fb8bb','#b3eef0','#33778c'],angel:['#d3dac7','#b0c4b4','#fff5d6','#6b8580'],betta:['#568bb5','#ad79ae','#d6dfef','#435e96']
@@ -134,11 +140,11 @@ function markings(c,key,p){
  }
  c.restore();
 }
-function threads(c,key,phase,p){
+function threads(c,key,phase,p,selected=false){
  if(key==='angel'){
- c.strokeStyle=p.white;c.lineWidth=1.05;c.beginPath();c.moveTo(19,15);c.bezierCurveTo(17,32,23+Math.sin(phase*.6)*2,44,30+Math.sin(phase*.6)*2,51);c.moveTo(13,18);c.bezierCurveTo(10,33,12+Math.sin(phase*.6+.7)*3,46,18+Math.sin(phase*.6+.7)*2,55);c.stroke();
+ c.strokeStyle=selected?'#246e61':p.white;c.lineWidth=selected?2.4:1.05;c.beginPath();c.moveTo(19,15);c.bezierCurveTo(17,32,23+Math.sin(phase*.6)*2,44,30+Math.sin(phase*.6)*2,51);c.moveTo(13,18);c.bezierCurveTo(10,33,12+Math.sin(phase*.6+.7)*3,46,18+Math.sin(phase*.6+.7)*2,55);c.stroke();
  }else if(key==='betta'){
- c.strokeStyle=p.light;c.lineWidth=1.35;c.beginPath();c.moveTo(19,9);c.bezierCurveTo(12,19,12+Math.sin(phase*.8)*2,25,6+Math.sin(phase*.8)*2,28);c.moveTo(15,10);c.bezierCurveTo(8,18,8+Math.sin(phase*.8+.8)*2,24,2+Math.sin(phase*.8+.8)*2,26);c.stroke();
+ c.strokeStyle=selected?'#246e61':p.light;c.lineWidth=selected?2.4:1.35;c.beginPath();c.moveTo(19,9);c.bezierCurveTo(12,19,12+Math.sin(phase*.8)*2,25,6+Math.sin(phase*.8)*2,28);c.moveTo(15,10);c.bezierCurveTo(8,18,8+Math.sin(phase*.8+.8)*2,24,2+Math.sin(phase*.8+.8)*2,26);c.stroke();
  }else if(key==='cory'){
  c.strokeStyle=p.dark;c.lineWidth=.85;c.beginPath();c.moveTo(35,11);c.quadraticCurveTo(40,16,44,13);c.moveTo(32,12);c.quadraticCurveTo(32,19,37,18);c.moveTo(38,10);c.quadraticCurveTo(43,11,45,8);c.stroke();
  }
@@ -225,7 +231,7 @@ function curvedBody(c,key,variant,p,phase){
  for(let left=-34;left<12;left+=2.5){const right=Math.min(12,left+2.5),mid=(left+right)/2;c.save();c.translate(mid,axis(mid,phase));c.rotate(Math.atan(slope(mid,phase)));c.drawImage(layer,(left+36)*8,0,(right-left+.2)*8,height*8,left-mid-.1,top,right-left+.2,height);c.restore();}
  c.drawImage(layer,48*8,0,288,height*8,12,top,36,height);
 }
-function fineFin(c,key,f,name,p,phase){
+function fineFin(c,key,f,name,p,phase,selected=false){
  const tail=name==='tail',root=tail?f.root:anatomy[key][name];
  atRoot(c,...root,phase,()=>{
   const flutter=Math.sin(phase*(tail?1:name==='pectoral'?1.7:.72)+(name==='anal'?1.9:0));
@@ -255,9 +261,11 @@ function fineFin(c,key,f,name,p,phase){
   }
   if(tail&&key==='guppy'){c.globalAlpha=.3;fill(c,detail.guppySpots,p.dark);c.globalAlpha=.16;line(c,detail.guppySpots,p.light,.8);}
   c.restore();
+  if(selected)highlight(c,f[name]);
  });
 }
-function pelvic(c,key,p,phase){if(key==='angel'||key==='betta')return;atRoot(c,7,10,phase,()=>{c.globalAlpha*=.48;const fin=path(key==='goldfish'?'M9 16 Q5 21 0 30 Q10 29 15 18Z':key==='cory'?'M7 12 Q-1 20 2 22 Q10 22 14 13Z':'M8 8 Q1 17 2 19 Q9 17 13 10Z');fill(c,fin,gradient(c,10,8,3,28,[[0,p.body],[1,p.light+'55']]),p.finDark+'70',.4);c.globalAlpha*=.6;line(c,fin,p.light,.4);});}
+function pelvic(c,key,p,phase,selected=false){if(key==='angel'||key==='betta')return;atRoot(c,7,10,phase,()=>{c.globalAlpha*=.48;const fin=pelvicForms[key]||pelvicForms.default;fill(c,fin,gradient(c,10,8,3,28,[[0,p.body],[1,p.light+'55']]),p.finDark+'70',.4);c.globalAlpha*=.6;line(c,fin,p.light,.4);if(selected)highlight(c,fin);});}
+function adipose(c,key,p,phase,selected=false){const fin=forms[key].adipose;if(!fin)return;atRoot(c,-20,-4,phase,()=>{c.globalAlpha*=.65;fill(c,fin,p.body+'9c',p.finDark+'85',.45);if(key==='cory')line(c,path('M-17 -5 L-21 -12'),p.finDark,.7);if(selected)highlight(c,fin);});}
 function breathPose(seconds){const phase=seconds*2*PI*.63;return {mouthOpen:(.5+.5*Math.sin(phase))**2,gillOpen:(.5+.5*Math.sin(phase-.85))**2};}
 function breathingHead(c,key,f,p,pose,emphasis){
  const op=pose.gillOpen*(emphasis?1:0.48),[mx,my,base]=anatomy[key].mouth;
@@ -278,14 +286,19 @@ function draw(c,key,x,y,size,turn=1,angle=0,phase=0,variant='normal',options={})
  if(!refined.has(key))return originalDraw(c,key,x,y,size,turn,angle,phase,variant);
  const f=forms[key];if(!f)return;const p=palette(key,variant),t=Math.max(-1,Math.min(1,Number.isFinite(turn)?turn:1)),width=.15+.85*Math.abs(t);
  c.save();c.translate(x,y);c.rotate(angle*.35);c.scale(size/100*(t<0?-1:1)*width,size/100);c.lineCap='round';c.lineJoin='round';
- for(const name of ['tail','dorsal','anal'])fineFin(c,key,f,name,p,phase);
- pelvic(c,key,p,phase);curvedBody(c,key,variant,p,phase);
+ for(const name of ['tail','dorsal','anal'])fineFin(c,key,f,name,p,phase,options.highlightPart===name);
+ adipose(c,key,p,phase,options.highlightPart==='adipose');
+ pelvic(c,key,p,phase,options.highlightPart==='pelvic');curvedBody(c,key,variant,p,phase);
  const pose=breathPose(options.breathTime??phase*.22);breathingHead(c,key,f,p,pose,!!options.breathing&&!!options.breathEmphasis);
- c.save();c.globalAlpha*=.3+.7*width;fineFin(c,key,f,'pectoral',p,phase);c.restore();threads(c,key,phase,p);
+ c.save();c.globalAlpha*=.3+.7*width;fineFin(c,key,f,'pectoral',p,phase,options.highlightPart==='pectoral');c.restore();threads(c,key,phase,p,options.highlightPart==='pelvic');
  const [ex,ey,oldr]=f.eye,er=oldr*.77;c.save();c.globalAlpha*=.3+.7*width;
  oval(c,ex,ey,er+1,er+.9,p.deep+'90');oval(c,ex,ey,er+.45,er+.35,tint(p.body,p.light,.45));oval(c,ex,ey,er,er,p.dark);
  oval(c,ex+.1,ey-.04,er*.84,er*.87,gradient(c,ex,ey-er,ex,ey+er,[[0,p.light],[.45,tint(p.body,p.light,.45)],[1,p.deep]]));oval(c,ex+.38,ey,er*.59,er*.7,'#183038');oval(c,ex+.8,ey-.7,er*.2,er*.2,'#fffef5');oval(c,ex-.55,ey+.8,er*.09,er*.09,'#b5e8dd');c.restore();c.restore();
 }
+const finNames=Object.freeze({dorsal:'背鰭',pectoral:'胸鰭',pelvic:'腹鰭',anal:'臀鰭',tail:'尾鰭',adipose:'脂鰭'});
+const finDescriptions=Object.freeze({dorsal:'在背部，幫助魚維持穩定。',pectoral:'在鰓蓋後方的身體兩側，協助調整方向與姿態。',pelvic:'在腹側，是成對的鰭；側面觀察時可能互相遮住。',anal:'在身體後段的腹側，通常能協助維持穩定。',tail:'在身體最後方，和身體一起擺動，幫助魚前進。',adipose:'背鰭與尾鰭之間的小鰭。不是每一種魚都有脂鰭。'});
+const appearanceNotes=Object.freeze({guppy:'這個造型參考雄孔雀魚：尾鰭寬大，臀鰭細長；雌魚的臀鰭通常呈扇形。',goldfish:'圓潤魚身與展開的尾鰭是觀賞金魚的造型；金魚有許多不同品種。',cory:'嘴邊有觸鬚，背鰭後方還有一片小脂鰭。這裡是常見鼠魚的概括造型。',zebra:'細長魚身有水平條紋，魚鰭較小；沒有脂鰭。',molly:'這個造型保留扇形臀鰭。黑摩利雌魚通常有扇形臀鰭，雄魚的臀鰭較細長。',swordtail:'這個造型參考雄紅劍魚：尾鰭下緣延長成劍狀，臀鰭細長；雌魚通常沒有長劍尾。',whitecloud:'細長魚身有明顯色帶，鰭帶紅色；沒有脂鰭。',cardinal:'藍色亮帶和紅色體側是特色，背鰭後方還有一片小脂鰭。',angel:'背鰭與臀鰭高而長；腹部兩條細長的絲狀構造是腹鰭。',betta:'這裡採長鰭觀賞鬥魚的造型；腹側前方的細長鰭是腹鰭，後方大片的是臀鰭。'});
+function getFinInfo(key){if(!forms[key])return null;return {note:appearanceNotes[key],parts:Object.keys(finNames).filter(id=>id!=='adipose'||!!forms[key].adipose).map(id=>({id,name:finNames[id],description:id==='anal'&&(key==='guppy'||key==='swordtail')?'圖中是雄魚細長的臀鰭，又稱交接器；雌魚的臀鰭通常呈扇形。':id==='pelvic'&&key==='angel'?'腹側的兩條細長鰭是腹鰭，不是觸鬚。':finDescriptions[id]}))};}
 const hitBounds=Object.freeze({guppy:{left:-64,right:42,top:-30,bottom:31},goldfish:{left:-63,right:43,top:-37,bottom:35},cory:{left:-55,right:46,top:-32,bottom:26},zebra:{left:-53,right:41,top:-23,bottom:20},molly:{left:-58,right:42,top:-35,bottom:29},swordtail:{left:-65,right:43,top:-31,bottom:32},whitecloud:{left:-54,right:41,top:-25,bottom:21},cardinal:{left:-52,right:42,top:-25,bottom:22},angel:{left:-49,right:42,top:-55,bottom:57},betta:{left:-68,right:43,top:-37,bottom:40}});
-window.AquariumFishArt=Object.freeze({draw,hitBounds,breathPose,version:'0.4.1-r2'});
+window.AquariumFishArt=Object.freeze({draw,hitBounds,breathPose,getFinInfo,version:'0.4.1-r2-anatomy'});
 })();
