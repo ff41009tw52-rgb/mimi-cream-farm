@@ -93,7 +93,7 @@ function collect(c){
   const anim=el.animate([{transform:'translate(0,0)',opacity:1},{transform:`translate(${hud.left-rect.left-c.x*W}px,${hud.top-rect.top-c.y*H}px) scale(.5)`,opacity:.3}],{duration:620,easing:'cubic-bezier(.25,.6,.35,1)'});anim.finished.then(()=>el.remove(),()=>el.remove());gainXP(1);sound('coin');markDirty(true);updateUI();
 }
 function clean(){
- if(conflict||cleaning)return;if(state.waterQuality>90){toast('水質很好，現在不用清潔。可以先餵魚或觀察魚兒。');return;}
+ if(conflict||cleaning)return;if(state.waterQuality>90){toast('魚缸很乾淨，現在不用清潔。可以先餵魚或觀察魚兒。');return;}
  const remaining=Math.ceil((state.cleanReadyAt-Date.now())/1000);if(remaining>0){toast(`剛整理過了，再等 ${remaining} 秒吧。`);return;}
  metric('clean');cleaning={elapsed:0,from:state.waterQuality,to:clamp(state.waterQuality+CONFIG.CLEAN_EFFICIENCY)};state.cleanReadyAt=Date.now()+(CONFIG.CLEAN_SECONDS+CONFIG.CLEAN_COOLDOWN)*1000;sound('clean');markDirty(true);updateUI();
 }
