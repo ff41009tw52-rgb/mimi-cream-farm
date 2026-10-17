@@ -1,0 +1,173 @@
+{
+  "featureCommit": "d52a95a54e4ff293ea86b78de99e96186c4a47ee",
+  "sourceWorkflowRun": "https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/38987556766",
+  "physicalDevicesTested": false,
+  "screenshotCount": 30,
+  "files": [
+    {
+      "path": "v05-1024-tank.webp",
+      "bytes": 303194,
+      "sha256": "f3c4b705a96bd460643e7fbf1b8ed5e425665311fe8e00cb15958279a4e7d683"
+    },
+    {
+      "path": "v05-1440-breathing.webp",
+      "bytes": 354750,
+      "sha256": "79c23eef8f5bbc3833c6b3690b6add6d2343c79042b11176232492000d142290"
+    },
+    {
+      "path": "v05-18-fish.webp",
+      "bytes": 507780,
+      "sha256": "500878ee0f34bc788eb6a0ae00f3853deb9ed01d5622143b8ff7f4e4e4d51ffb"
+    },
+    {
+      "path": "v05-390-anatomy.webp",
+      "bytes": 139830,
+      "sha256": "70a16bdf4e906c78e1df4460fcd4e6f4589e5ba382b364ec23ec5bd6581747e5"
+    },
+    {
+      "path": "v05-390-breathing.webp",
+      "bytes": 160194,
+      "sha256": "099e7dcf40cd4fbcb0272d463183ed820422685cc364dd33c9f9b3f4ea41aa79"
+    },
+    {
+      "path": "v05-390-guide.webp",
+      "bytes": 174754,
+      "sha256": "5392fc3372a2458f4e37873cb85750f866bf21e2b2cdb769ffacf716caa1773e"
+    },
+    {
+      "path": "v05-390-home.webp",
+      "bytes": 175044,
+      "sha256": "2c203fad79cce809277cdb9e6531b9cf736cb98cb04639b7e31ce0fbab7cfdf8"
+    },
+    {
+      "path": "v05-390-import.webp",
+      "bytes": 151534,
+      "sha256": "e0b6cdeb766378fbbe40b0de3511620c872458cd881538f9e65ff494a2e204d8"
+    },
+    {
+      "path": "v05-390-tank.webp",
+      "bytes": 154650,
+      "sha256": "342b92055e6b6618582d6cc83fd03495b5daad43bfd56e5a506adb39005bf686"
+    },
+    {
+      "path": "v05-820-tank.webp",
+      "bytes": 325670,
+      "sha256": "317c9f32dd20a6a95a6abab7e603611a9f51971ecf0549a3a637848f66016217"
+    },
+    {
+      "path": "v05-anatomy-anal.webp",
+      "bytes": 430526,
+      "sha256": "1d396c71d8d8d0cedec25397abeeb001ab0152a7b4018c092f0bcb84e2726826"
+    },
+    {
+      "path": "v05-anatomy-caudal.webp",
+      "bytes": 429622,
+      "sha256": "43d89437768cf045805ae00b1d6e7a0f4b42444a835d76e1d5ec4193e0a0ed4e"
+    },
+    {
+      "path": "v05-anatomy-cover.webp",
+      "bytes": 429466,
+      "sha256": "24741b52228106acc17fb723aa3febf28137096777d53e3178a84ff1a88b938d"
+    },
+    {
+      "path": "v05-anatomy-dorsal.webp",
+      "bytes": 428350,
+      "sha256": "df0cf1b7e5ebe783fc2e730675ce81801f73ec490b89be45899551736abeb4ee"
+    },
+    {
+      "path": "v05-anatomy-head.webp",
+      "bytes": 426358,
+      "sha256": "9f58f45f32b6918897c86ee1c276e1d07da83d828101bf1d5aec0a49221fb681"
+    },
+    {
+      "path": "v05-anatomy-mouth.webp",
+      "bytes": 427888,
+      "sha256": "243bf7cbc77283d01c81a842b3e747b3d8717dbb573d1aad81d6a297e5791b35"
+    },
+    {
+      "path": "v05-anatomy-pectoral.webp",
+      "bytes": 433808,
+      "sha256": "31b7197a47dce1e436c7b1bb282441fc4cc60960f1924293a7f36f3804fb5afa"
+    },
+    {
+      "path": "v05-anatomy-pelvic.webp",
+      "bytes": 427754,
+      "sha256": "9ae290bcc8ea96cea9543756da1892d21351ab08e512840b9cc190666ecc3e05"
+    },
+    {
+      "path": "v05-anatomy-trunk.webp",
+      "bytes": 412786,
+      "sha256": "4366041a4faa14e0e36530288b20c439449198658c97abfb2f6ec67e8b42e467"
+    },
+    {
+      "path": "v05-decor.webp",
+      "bytes": 367516,
+      "sha256": "1970a0694f3dff572f7a1aeb645a55c8f39298be04c12f9fcf9e86c744b249db"
+    },
+    {
+      "path": "v05-encyclopedia.webp",
+      "bytes": 362912,
+      "sha256": "60a9ca2eab6b937433affba88b4161b69ca1df4794eb3c9b968a4ee9c19f8715"
+    },
+    {
+      "path": "v05-fish-card.webp",
+      "bytes": 451454,
+      "sha256": "2044bb51da2cc5258bfa819d4a5e3071f28edc502f0b2f144c29069751eba2a3"
+    },
+    {
+      "path": "v05-guide.webp",
+      "bytes": 464458,
+      "sha256": "69693abee9b27ae7a8f0a90d89164714f8902cb5ccdd8bf24d7875ad03cda88a"
+    },
+    {
+      "path": "v05-home.webp",
+      "bytes": 270610,
+      "sha256": "73ee8138c49175e8b7b167bb31b75a18c77f27759235ad6426d866e3571bf0b0"
+    },
+    {
+      "path": "v05-offline.webp",
+      "bytes": 328446,
+      "sha256": "ed3c5ae8a35afd0e724049fd95f208c019b13d5d8f535fc2dd0a09b501db0861"
+    },
+    {
+      "path": "v05-regression.json",
+      "bytes": 384,
+      "sha256": "acc794cb159ae1be621be9f4d6039ea48fa04b723bbc9b12ab987f57688592eb"
+    },
+    {
+      "path": "v05-results.json",
+      "bytes": 847,
+      "sha256": "5f8b0775f91bd0e705d96b05f6ecad2bedca4cbc75d65c672f00ec9a7f83b934"
+    },
+    {
+      "path": "v05-shop.webp",
+      "bytes": 337486,
+      "sha256": "bb8dab43730d4b97b9b27ec9cd073aca1638ce024c0e58286ff12fe6985d1986"
+    },
+    {
+      "path": "v05-welcome.webp",
+      "bytes": 313674,
+      "sha256": "566149a262f6a02c51102c6ec1caf067414f0b332ce837e845a273c1ca3ec461"
+    },
+    {
+      "path": "webkit-390-breathing.webp",
+      "bytes": 113010,
+      "sha256": "0c51f8ae1902f5175cbbde203e225aab1f21b8c6572e0d813a75a19521ae0d24"
+    },
+    {
+      "path": "webkit-390-import.webp",
+      "bytes": 129270,
+      "sha256": "355e7f05966cdcbe55773a80dca305aabc7b6cc78cb4afdb6f52327643f8cef2"
+    },
+    {
+      "path": "webkit-820-anatomy.webp",
+      "bytes": 286852,
+      "sha256": "fb54dcd77d87a90db42fe2b9aab51528d1e94dc669f4872e39df21b553391886"
+    },
+    {
+      "path": "webkit-results.json",
+      "bytes": 155,
+      "sha256": "b8956146c35f0d048a53b1bdc9c6ff16b28fed569d8a521c37a356bf1cebb751"
+    }
+  ]
+}

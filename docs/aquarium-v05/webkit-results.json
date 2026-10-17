@@ -1,0 +1,7 @@
+{
+  "engine": "Playwright WebKit on Linux, not a physical iPhone/iPad",
+  "jsonPicker": true,
+  "carp": true,
+  "originalBreathing": true,
+  "errors": []
+}

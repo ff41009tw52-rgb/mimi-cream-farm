@@ -1,0 +1,18 @@
+{
+  "offlineGrowthWithoutWater": true,
+  "noRepeatedOfflineIncome": true,
+  "foodExpiresWithoutPenalty": true,
+  "bottomFeeding": true,
+  "allTenFins": true,
+  "fileOffline": true,
+  "performance": {
+    "fps": 59.99999999999999,
+    "fish": 18,
+    "decor": 15,
+    "food": 3,
+    "coins": 1,
+    "meanWorkMs": 2.935537190082019,
+    "range": 0.7011757278432528
+  },
+  "errors": []
+}
