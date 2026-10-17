@@ -1,0 +1,15 @@
+const vm=require('node:vm'),fs=require('node:fs'),assert=require('node:assert/strict'),crypto=require('node:crypto');
+const read=p=>fs.readFileSync(p,'utf8');
+function context(v5){const c=vm.createContext({window:{},location:{search:''},URLSearchParams,crypto:{randomUUID:()=>crypto.randomUUID()},Date,Math,structuredClone});vm.runInContext(read(v5?'assets/aquarium-v05/aquarium-data.js':'assets/aquarium-v041-r2/aquarium-data.js'),c);vm.runInContext(read('assets/aquarium-v041-r2/aquarium-save.js'),c);if(v5)vm.runInContext(read('assets/aquarium-v05/aquarium-save.js'),c);return c.window;}
+const old=context(false),current=context(true),plain=x=>JSON.parse(JSON.stringify(x));
+const v2=JSON.parse(read('tests/aquarium/fixtures/v02-real-save.json'));v2.savedAt=Date.now();
+const v1={...v2,schemaVersion:1,fishes:v2.fishes.filter(f=>['guppy','goldfish','cory'].includes(f.species)).map(f=>({...f,coinProgress:Math.min(24,f.coinProgress)}))};
+const v3=plain(old.AquariumSave.validate(v2));v3.gameVersion='0.4.2';v3.stats.goodWaterSeconds=931;v3.achievements.clearWater={completed:true,rewardClaimed:true};
+for(const raw of [v1,v2,v3]){const input=JSON.stringify(raw),s=plain(current.AquariumSave.validate(raw));assert.equal(JSON.stringify(raw),input);assert.equal(s.schemaVersion,4);assert(!('waterQuality'in s));assert(!('cleanReadyAt'in s));assert(!('goodWaterSeconds'in s.stats));assert.equal(s.tankName,'我的小水族箱');assert(s.onboarding.completed);assert.equal(s.onboarding.step,4);assert.equal(s.coins,raw.coins);assert.deepEqual(s.fishes.map(f=>[f.id,f.name,f.growth,f.hunger]),raw.fishes.map(f=>[f.id,f.name,f.growth,f.hunger]));if(raw===v3){assert.equal(s.stats.careSeconds,931);assert.deepEqual(s.achievements.clearWater,raw.achievements.clearWater);}assert.deepEqual(plain(current.AquariumSave.validate(s)),s);}
+const s=plain(current.AquariumSave.validate(v3));s.tankName='小星水族箱A1';s.onboarding={step:2,completed:false,skipped:false,welcomed:true,paused:true,coinHintShown:true};assert.deepEqual(plain(current.AquariumSave.validate(s)),s);
+for(const patch of [{tankName:'<b>魚</b>'},{tankName:'這是超過十個中文字的水族箱'},{onboarding:{...s.onboarding,step:4}},{stats:{...s.stats,careSeconds:NaN}},{fishes:[s.fishes[0],s.fishes[0]]}])assert.throws(()=>current.AquariumSave.validate({...s,...patch}));
+const achievement=current.AquariumData.ACHIEVEMENTS.find(a=>a.id==='clearWater');assert.equal(achievement.name,'細心照顧');assert.equal(achievement.goal,1800);assert.equal(achievement.reward.coins,10);
+assert.deepEqual(plain(current.AquariumData.SPECIES),plain(old.AquariumData.SPECIES));assert.deepEqual(plain(current.AquariumData.VARIANTS),plain(old.AquariumData.VARIANTS));assert(!('WATER_PER_SECOND'in current.AquariumData.CONFIG));
+const baseline=JSON.parse(read('tests/aquarium/fixtures/v05-preserved-hashes.json'));for(const [p,h] of Object.entries(baseline))assert.equal(crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex'),h,p);
+console.log('PASS schema 1/2/3 → 4, name/tutorial validation, no input mutation, rewards/metrics and preserved art/breathing/rollback');
+module.exports={v1,v2,v3,current,plain};
