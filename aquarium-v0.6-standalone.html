@@ -1146,7 +1146,7 @@ const diagnostics={writes:0,eaten:0,spawned:0,frames:0,frameMax:0,costTotal:0,co
 let audioCtx=null,audioLast=-99,audioEatLast=-99,shopTab='fish';
 let foreground,poiCache={byId:new Map(),bySpecies:{}},editing=false,editSelection=null,drag=null,editPreview=null,editCacheDirty=false;
 const shopVariants=new Map(),editorHandles=new Map();
-const session=CONFIG.PLAYTEST?{version:'0.4',elapsedSeconds:0,first:{feed:null,fish:null,shop:null,buy:null,place:null},counts:{feed:0,shop:0,buy:0,place:0},onboardingCompleted:false,jsErrors:0,frames:0,longFrames:0,frameMsTotal:0}:null;
+const session=CONFIG.PLAYTEST?{version:'0.6',elapsedSeconds:0,first:{feed:null,fish:null,shop:null,buy:null,place:null},counts:{feed:0,shop:0,buy:0,place:0},onboardingCompleted:false,jsErrors:0,frames:0,longFrames:0,frameMsTotal:0}:null;
 const levelFor=x=>CONFIG.LEVEL_XP.reduce((l,v,i)=>x>=v?i+1:l,1);
 const zones={left:'左側',center:'中央',right:'右側'};
 
@@ -1201,8 +1201,8 @@ function selectFish(id){if(editing)return;metric('fish');selected=id;$('fish-car
 function closeCard(){selected=null;$('fish-card').hidden=true;}
 let selectedFeed=null;
 function renderFeedChoices(){const root=$('feed-choices');if(!root)return;for(const id of Object.keys(FEEDS)){const b=$('feed-'+id);if(b){b.setAttribute('aria-pressed',String(selectedFeed===id));b.querySelector('small').textContent=`剩餘 ${state.feedInventory[id]} 份`;}}$('feed-current').textContent=selectedFeed?`已選 ${FEEDS[selectedFeed].name} · 剩餘 ${state.feedInventory[selectedFeed]} 份`:'先選擇一種飼料';}
-function setFeeding(on){feeding=on;selectedFeed=null;$('feed').setAttribute('aria-pressed',String(on));$('feeding-hint').hidden=!on;canvas.style.cursor=on?'crosshair':'pointer';if(on){closeCard();tutorial.report('feedOpened');}else $('surface-cue').hidden=true;renderFeedChoices();}
-function selectFeed(id){if(!feeding||!FEEDS[id])return;selectedFeed=id;renderFeedChoices();tutorial.report('selected:'+id);$('surface-cue').hidden=false;canvas.focus({preventScroll:true});}
+function setFeeding(on){feeding=on;selectedFeed=null;$('feed').setAttribute('aria-pressed',String(on));$('feeding-hint').hidden=!on;canvas.style.cursor=on?'crosshair':'pointer';if(on){closeCard();tutorial.report('feedOpened');}else $('surface-cue').hidden=true;renderFeedChoices();if(on&&innerWidth<=1050)requestAnimationFrame(()=>{if(feeding)$('feed-choices').scrollIntoView({block:'center'});});}
+function selectFeed(id){if(!feeding||!FEEDS[id])return;selectedFeed=id;renderFeedChoices();tutorial.report('selected:'+id);$('surface-cue').hidden=false;canvas.focus({preventScroll:true});if(innerWidth<=1050)requestAnimationFrame(()=>{if(feeding)canvas.scrollIntoView({block:'start'});});}
 function feed(x,confirmed=false){
  if(conflict||saveBlocked)return;if(!selectedFeed){toast('先選擇一種飼料，再點魚缸水面。');return;}
  const kind=selectedFeed;
@@ -1423,7 +1423,7 @@ function stepTank(dt){
   if(stage(f.growth)!==previousStage){recordAdult(f);evaluateGoals();effects.push({x:r.x,y:r.y,text:`長成${f.growthStage}！`,life:2.8});gainXP(8);important=true;}
   let target=null,best=Infinity;
   if(f.hunger<91){for(const p of food){if(FOOD_FOR[f.species]!==p.kind||claimed.has(p.id)||p.y<s.depth[0]-(s.bottomDweller?.13:.12)||p.y>s.depth[1]+.1)continue;
-    const distance=Math.hypot((p.x-r.x)*W,(p.y-r.y)*H),score=distance*(s.foodPreference==='bottom'&&p.y>.86?.38:1);if(score<best&&distance<Math.max(W*.5,260)){target=p;best=score;}}
+    const distance=Math.hypot((p.x-r.x)*W,(p.y-r.y)*H),score=distance*(s.foodPreference==='bottom'&&p.y>.86?.38:1);if(score<best&&distance<Math.hypot(W,H)){target=p;best=score;}}
   }
   const atEnvironment=tickEnvironment(r,f,s,dt,poiCache,!!target);if(atEnvironment){r.environmentSeconds+=dt;diagnostics.environmentSeconds+=dt;}if(r.environmentVisitedNow){r.environmentVisits++;diagnostics.environmentVisits++;}
   r.wander-=dt;r.pause=Math.max(0,r.pause-dt);const wasBurst=r.burst>0;r.burst=Math.max(0,r.burst-dt);if(wasBurst&&r.burst===0&&s.bottomDweller&&!target)r.pause=rand(...s.pauseDuration);
@@ -1574,7 +1574,7 @@ window.addEventListener('storage',e=>{if(e.key===CONFIG.SAVE_KEY){if(!started){r
 document.addEventListener('pointerdown',()=>enableAudio(),{passive:true});document.addEventListener('keydown',()=>enableAudio());
 if(CONFIG.TEST_MODE)document.querySelector('.version').textContent='V0.6 測試';
 if(session){window.addEventListener('error',()=>session.jsErrors++);window.addEventListener('unhandledrejection',()=>session.jsErrors++);}
-const tutorial=window.AquariumTutorial.create({getState:()=>state,changed:()=>markDirty(true),notify:toast,grant:grantGift,ensureFeeding:kind=>{setFeeding(true);if(kind){selectedFeed=kind;renderFeedChoices();}}});
+const tutorial=window.AquariumTutorial.create({getState:()=>state,changed:()=>markDirty(true),notify:toast,grant:grantGift,ensureFeeding:kind=>{setFeeding(true);if(kind){selectedFeed=kind;renderFeedChoices();if(innerWidth<=1050)requestAnimationFrame(()=>canvas.scrollIntoView({block:'start'}));}}});
 const sourceKeys=()=>[[CONFIG.SAVE_KEY,CONFIG.MANUAL_KEY],[CONFIG.V5_KEY,CONFIG.V5_MANUAL_KEY],[CONFIG.V4_KEY,CONFIG.V4_MANUAL_KEY],...(!CONFIG.TEST_MODE?[[CONFIG.V3_KEY,CONFIG.V3_MANUAL_KEY],[CONFIG.V2_KEY,CONFIG.V2_MANUAL_KEY],[CONFIG.LEGACY_KEY,CONFIG.LEGACY_MANUAL_KEY]]:[])];
 function findStored(){for(const [key,manual]of sourceKeys()){const raw=localStorage.getItem(key);if(raw)return {key,manual,raw};}return null;}
 function refreshHome(){
@@ -1609,8 +1609,8 @@ function chooseFile(){
 
 const giftRewards={starter:{general:8},smallLesson:{small:5},fishCard:{coins:10},level2:{small:3},level4:{protein:3}};
 function giftKey(id=state.saveId){return CONFIG.SAVE_KEY+'_gifts_'+id;}
-function readGifts(id=state.saveId){const raw=localStorage.getItem(giftKey(id));if(!raw)return {ids:[],emergencyAt:0};const v=JSON.parse(raw);if(!v||!Array.isArray(v.ids)||v.ids.some(x=>!window.AquariumSave.GIFT_IDS.includes(x))||typeof v.emergencyAt!=='number'||!Number.isFinite(v.emergencyAt)||v.emergencyAt<0)throw Error('贈禮帳本無法讀取');return v;}
-function mergeGiftLedger(next){const ledger=readGifts(next.saveId);next.gifts=[...new Set([...next.gifts,...ledger.ids])];next.emergencyAt=Math.max(next.emergencyAt,ledger.emergencyAt);}
+function readGifts(id=state.saveId){const raw=localStorage.getItem(giftKey(id));if(!raw)return {ids:[],emergencyAt:0};const v=JSON.parse(raw);if(!v||!Array.isArray(v.ids)||v.ids.some(x=>!window.AquariumSave.GIFT_IDS.includes(x))||typeof v.emergencyAt!=='number'||!Number.isFinite(v.emergencyAt)||v.emergencyAt<0||v.emergencyAt>Number.MAX_SAFE_INTEGER)throw Error('贈禮帳本無法讀取');return v;}
+function mergeGiftLedger(next){const ledger=readGifts(next.saveId);next.gifts=[...new Set([...next.gifts,...ledger.ids])];next.emergencyAt=Math.max(next.emergencyAt,ledger.emergencyAt);localStorage.setItem(giftKey(next.saveId),JSON.stringify({ids:next.gifts,emergencyAt:next.emergencyAt}));}
 function grantGift(id){
  if(conflict||saveBlocked)return false;let previous,ledgerRaw;
  try{const ledger=readGifts();if(state.gifts.includes(id)||ledger.ids.includes(id)){state.gifts=[...new Set([...state.gifts,...ledger.ids])];return true;}
