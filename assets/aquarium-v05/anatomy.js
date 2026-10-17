@@ -4,7 +4,7 @@
 const imageUrl=new URL('../aquarium-v042/carp-review.webp',document.currentScript?.src||location.href).href;
 const regions={
  head:{path:'M65 557 Q190 465 326 416 Q407 502 400 604 Q360 674 230 650 Q95 629 65 580 Z',point:[210,535],label:[145,280]},
- trunk:{path:'M408 420 Q625 258 954 377 Q1140 471 1266 469 L1275 605 Q1060 705 580 727 L414 645 Q455 546 408 420 Z',point:[850,525],label:[875,910]},
+ trunk:{path:'M408 420 Q625 258 954 377 Q1140 471 1266 469 L1275 605 Q1060 705 580 727 L414 645 Q455 546 408 420 Z',point:[850,525],label:[1110,145]},
  mouth:{path:'M60 558 Q84 561 112 584 L136 642 L113 656 L102 604 L61 590 Z',point:[85,582],label:[115,795]},
  cover:{path:'M317 423 Q396 461 404 535 Q410 608 364 646 Q307 674 238 647 Q351 619 355 530 Q355 468 317 423 Z',point:[365,551],label:[388,265]},
  dorsal:{path:'M590 310 Q671 188 742 174 Q854 283 960 310 Q1068 356 1115 437 Q846 321 590 310 Z',point:[792,284],label:[815,110]},
