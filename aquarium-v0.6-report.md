@@ -10,6 +10,19 @@
 | 小型魚飼料 | 10 份 | 10 金幣 | 1 | 鼠魚、斑馬魚、白雲山魚、紅蓮燈 |
 | 高蛋白飼料 | 10 份 | 14 金幣 | 4 | 神仙魚、鬥魚 |
 
+| 魚種 | 可食用飼料 |
+|---|---|
+| 孔雀魚 | 綜合飼料 |
+| 金魚 | 綜合飼料 |
+| 黑摩利 | 綜合飼料 |
+| 紅劍魚 | 綜合飼料 |
+| 鼠魚 | 小型魚飼料 |
+| 斑馬魚 | 小型魚飼料 |
+| 白雲山魚 | 小型魚飼料 |
+| 紅蓮燈 | 小型魚飼料 |
+| 神仙魚 | 高蛋白飼料 |
+| 鬥魚 | 高蛋白飼料 |
+
 所有飼料使用相同投放與沉降速度，僅顏色不同；一次水面點擊扣 1 份並產生 3 顆。魚只追逐與吃對應食物，碰到其他食物沒有飽足度收益。分類是簡化遊戲規則，不代表真實魚類只能吃單一食物。殘餌自然消失，沒有水質、死亡或繁殖懲罰。
 
 ## 贈禮與實際操作步驟
@@ -69,7 +82,7 @@ V0.1–V0.5 先經原有驗證器再轉為 schema 5。新版使用獨立 `aquari
 
 ## 驗收結果與證據
 
-功能提交：`3bceaeb79a53836914db5f5018f043b535bdf3fd`。完整自動化與截圖保留於 `tests/aquarium-v06/`、`docs/aquarium-v06/` 及 Actions artifact。
+功能提交：`6367cfc29e49a21627c34e2a3c588bb3c0e16643`。截圖與首輪完整 CI 的來源提交為 `3bceaeb79a53836914db5f5018f043b535bdf3fd`；後續只修正下述手動快照邊界，不變更正常遊戲畫面。完整自動化與截圖保留於 `tests/aquarium-v06/`、`docs/aquarium-v06/` 及 Actions artifact。
 
 | 測試 | 結果與範圍 |
 |---|---|
@@ -89,11 +102,24 @@ V0.1–V0.5 先經原有驗證器再轉為 schema 5。新版使用獨立 `aquari
 
 本次測試曾發現鼠魚在水面投餌距離較遠時無法及時尋食，已將所有符合飼料種類的魚之搜尋範圍延伸至魚缸範圍，保留原游動行為與相同飼料沉降速度。另補強匯入禮物紀錄的持久合併及存檔失敗後魚兒繪圖狀態回復。
 
+PR 自動審查指出：自動存檔成功、手動快照失敗時可能回復較舊記憶體狀態。已將自動存檔提交狀態在第一筆成功時立刻更新，後續手動快照失敗會保留最新自動存檔與原手動快照，並顯示明確提示。新增真正模擬僅手動鍵超出儲存額度的測試，確認畫面狀態、最新自動存檔及重新整理後完全一致；本機回歸與修正後完整 CI 均通過，審查討論已解決。
+
+## 實際畫面
+
+![農場式第一份飼料贈禮](docs/aquarium-v06/welcome-gift.webp)
+
+![手機觸控選料與水面操作區（Linux WebKit）](docs/aquarium-v06/webkit-390-food.webp)
+
+![18 隻魚舊進度免費分成兩缸](docs/aquarium-v06/legacy-two-tanks.webp)
+
+完整 22 張畫面可由下方截圖集開啟；來源、尺寸與 CI 提交記錄在 gallery.json。
+
 ## PR、預覽與交付
 
 - [PR #77](https://github.com/ff41009tw52-rgb/mimi-cream-farm/pull/77)
-- [功能 Commit](https://github.com/ff41009tw52-rgb/mimi-cream-farm/commit/3bceaeb79a53836914db5f5018f043b535bdf3fd)
-- [最終功能 CI](https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/39020418676)：全部通過
+- [功能 Commit](https://github.com/ff41009tw52-rgb/mimi-cream-farm/commit/6367cfc29e49a21627c34e2a3c588bb3c0e16643)
+- [手動存檔修正後 CI](https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/39021293680)：全部通過，包含手動快照額度保護
+- [首輪完整功能 CI](https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/39020418676)：全部通過
 - [獨立私人預覽](https://youyou-aquarium-v06-preview.ff41009tw52.chatgpt.site/)
 - [實際遊戲、手機與平板截圖集](https://youyou-aquarium-v06-preview.ff41009tw52.chatgpt.site/screenshots/)
 - 原始截圖／結果索引：`docs/aquarium-v06/gallery.json`、`v06-results.json`、`extra-results.json`、`webkit-results.json`；22 張實際截圖。

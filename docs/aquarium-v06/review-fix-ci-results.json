@@ -1,0 +1,18 @@
+{
+  "featureCommit": "6367cfc29e49a21627c34e2a3c588bb3c0e16643",
+  "workflowRunId": 39021293680,
+  "url": "https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/39021293680",
+  "conclusion": "success",
+  "checks": [
+    "schema and unchanged V0.5 regression",
+    "offline bundle matches sources",
+    "all ten species assigned food",
+    "real-action tutorial and persistent gifts",
+    "economy, three tanks and four viewport sizes",
+    "JSON, quota failure and multi-tab conflict",
+    "partial manual snapshot quota consistency",
+    "Linux WebKit mobile/tablet touch and native file chooser"
+  ],
+  "physicalDevicesTested": false,
+  "openReviewThreads": 0
+}
