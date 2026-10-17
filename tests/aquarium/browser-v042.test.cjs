@@ -38,7 +38,34 @@ const {harness}=require('./v041-harness.cjs'),assert=require('node:assert/strict
  for(let i=0;i<8;i++){await p.locator('#observe-review').click();await p.locator('#obs-own-breath').click();await advance(p,100);await p.locator('#obs-return').click();}
  assert.equal((await read(p)).observation.breathing.preparations,1);assert.equal(await p.locator('#obs-breathing-lesson').count(),1);assert.equal(await p.locator('#observation').count(),1);
  // Exact persistent state at identical elapsed game time, independent of breathing speed.
- const states=[];for(const speed of ['0.25','2']){const v=await create({state:{...initial,savedAt:Date.now()+60000},cadence:100});await v.p.locator('#observe-review').click();await v.p.locator('#obs-own-breath').click();await v.p.locator('#show-intake').click();await v.p.locator('#speed-slider').fill(speed);await v.p.locator('#play-toggle').click();await advance(v.p,10000);const d=await read(v.p);states.push({water:d.state.waterQuality,fish:d.state.fishes.map(f=>[f.growth,f.hunger,f.coinProgress]),coins:d.state.coins,drops:d.state.drops,frames:d.diagnostics.frames});await v.context.close();}assert.deepEqual(states[0],states[1]);
+ const delta=(after,before)=>Number((after-before).toFixed(8));
+ const states=[];
+ for(const speed of ['0.25','2']){
+  const v=await create({state:{...initial,savedAt:Date.now()+60000},cadence:100});
+  await v.p.locator('#observe-review').click();
+  await v.p.locator('#obs-own-breath').click();
+  await v.p.locator('#show-intake').click();
+  await v.p.locator('#speed-slider').fill(speed);
+  await v.p.locator('#play-toggle').click();
+  // Navigation can run one extra frame before the harness pauses the clock.
+  // Compare changes over the same controlled 10 seconds, not startup totals.
+  const before=await read(v.p);
+  await advance(v.p,10000);
+  const d=await read(v.p);
+  states.push({
+   water:delta(d.state.waterQuality,before.state.waterQuality),
+   fish:d.state.fishes.map((f,i)=>{
+    const previous=before.state.fishes[i];
+    return [delta(f.growth,previous.growth),delta(f.hunger,previous.hunger),delta(f.coinProgress,previous.coinProgress)];
+   }),
+   coins:d.state.coins-before.state.coins,
+   drops:d.state.drops,
+   frames:d.diagnostics.frames-before.diagnostics.frames
+  });
+  assert.equal(states.at(-1).frames,100,'Both breathing speeds must simulate exactly 100 controlled frames');
+  await v.context.close();
+ }
+ assert.deepEqual(states[0],states[1]);
  // Four touch viewport sizes: full original lesson, controls, notices and preserved fin UI.
  const responsive=[];for(const size of [{width:1440,height:900},{width:1024,height:768},{width:820,height:1180},{width:390,height:844}]){const v=await create({size,touch:true}),r=v.p;await r.locator('#onboarding-skip').tap();await r.locator('#clean').tap();const toast=await r.locator('#toast').boundingBox();const controls=await r.locator('.controls').first().boundingBox();assert(toast.y+toast.height<=controls.y||toast.y>=controls.y+controls.height,'Toast does not cover primary actions');assert(await r.locator('#toast').evaluate(e=>parseFloat(getComputedStyle(e).fontSize)>=17));await shot(r,'v042-'+size.width+'-toast');await r.locator('.toast-close').tap();await shot(r,'v042-'+size.width+'-tank');await r.locator('#observe-review').tap();await r.locator('#obs-own-breath').tap();await r.locator('#show-outflow').tap();await r.locator('#show-cutaway').check();await r.locator('#speed-slider').fill('0.25');await r.locator('.obs-scroll').evaluate(e=>e.scrollTop=0);await shot(r,'v042-'+size.width+'-breathing');assert(await r.locator('.obs-scroll').evaluate(e=>e.scrollWidth<=e.clientWidth+1));assert(await r.locator('#obs-breathing-lesson').evaluate(e=>e.shadowRoot.querySelector('.panel').scrollWidth<=e.clientWidth+1));assert(await r.locator('#obs-breathing-lesson button').evaluateAll(es=>es.every(e=>e.getBoundingClientRect().height>=44)));await r.locator('#head-canvas').scrollIntoViewIfNeeded();await shot(r,'v042-'+size.width+'-head');await r.locator('#obs-layer-mine').tap();await r.locator('#obs-own-extra summary').tap();await r.locator('#obs-enlarge').tap();await r.locator('#obs-own-fins summary').tap();await r.locator('[data-own-part=pectoral]').tap();await shot(r,'v042-'+size.width+'-fin');assert(await r.locator('#obs-own-active-part').isVisible());responsive.push(size);await v.context.close();}
  assert.deepEqual(errors,[]);h.saveResults('v042-integration-results',{samePixels:a.length,onePreparedRig:true,noBackgroundRender:true,speedRange:[.25,2],unchangedGameAtDifferentSpeeds:true,responsive,errors});
