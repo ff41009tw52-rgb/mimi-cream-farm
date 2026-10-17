@@ -1,0 +1,15 @@
+{
+  "assets/aquarium-v042/aquarium.js": "e9e3ed59943f849ee217eb326258a241e4ac893e6a2a86f75be4dfc7fdb4111d",
+  "assets/aquarium-v042/breathing-review.js": "e7ac1c71d97916d07b75c4d8a861fa716fd8d9edcd4f33ad44325a1ce6f09faf",
+  "assets/aquarium-v042/breathing-template.js": "ab28da479b51445bd1de0f27cdd68a3d2018c111651c9e687385effefc18ff40",
+  "assets/aquarium-v042/breathing-renderer.js": "d33bca0b6f8d38510ea8f0cb171d69848415512a9dbf69eba46c8e2d91eca87e",
+  "assets/aquarium-v042/aquarium-observation.js": "f823c16ed2dbfc494d907b980fc5f591fa60f9e2573687691136bfceb73d4706",
+  "assets/aquarium-v042/carp-review.webp": "f4822df45b0f1a31b4ca0a80fe5ad832679470877ce544a413c27ed2aa6d06c7",
+  "assets/aquarium-v042/version.js": "cb393f1397264c1a41207fb2f6b77faf648b18b08c87443665c90e4adaf4ff76",
+  "assets/aquarium-v042/refinements.css": "40226d083d8eb1e87a31df015b5852aab4e88f19ee4f9ab2c3854a8e3e1a76ac",
+  "assets/aquarium-v041-r2/aquarium-fish-art.js": "565010005df999bb350d7bdbdcea60836cad287d26d5eafaafd936d5d6f3eec5",
+  "fish-breathing-review.html": "433f7424d70433471cef2a8904fc4be4ff6884358c333a5c035ce8617cf959e0",
+  "aquarium-v0.4.2.html": "d58034c08b80de60e1736dc83cf4b58fca81c93ed16c0b53b06533aa1b5a66ce",
+  "aquarium-v0.4.2-standalone.html": "e9282c8c4322b076c363be4d651b1a12183f2398e3eab50c90a638abeac58fa9",
+  "aquarium-v0.4.1.html": "c1fc21333d996216fceed64cb1e989b9ab5887a41eb7fb97847c7106dc623a77"
+}

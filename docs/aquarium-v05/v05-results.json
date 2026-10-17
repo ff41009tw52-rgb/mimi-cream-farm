@@ -1,0 +1,46 @@
+{
+  "results": [
+    {
+      "name": "首頁零寫入、命名、四步真實事件、暫停接續、JSON 匯出及錯檔保護",
+      "passed": true
+    },
+    {
+      "name": "V0.4.2 顯式承接、原鍵與手動備份保留、成就帳本防重領、原水質 0 仍成長產幣",
+      "passed": true
+    },
+    {
+      "name": "匯入預覽取消不寫入、確認後保留備份、多分頁及儲存失敗保護",
+      "passed": true
+    }
+  ],
+  "sizes": [
+    {
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "width": 820,
+      "height": 1180
+    },
+    {
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "nineCarpParts": [
+    "head",
+    "trunk",
+    "mouth",
+    "cover",
+    "dorsal",
+    "pectoral",
+    "pelvic",
+    "anal",
+    "caudal"
+  ],
+  "errors": []
+}

@@ -1,0 +1,43 @@
+name: Test aquarium V0.5 homepage, migration and teaching
+on:
+  push:
+    paths: ['aquarium-v0.5*.html', 'assets/aquarium-v05/**', 'tests/aquarium/**', 'scripts/build-aquarium-v05.py', '.github/workflows/test-aquarium-v05.yml']
+  pull_request:
+    paths: ['aquarium-v0.5*.html', 'assets/aquarium-v05/**', 'tests/aquarium/**', 'scripts/build-aquarium-v05.py', '.github/workflows/test-aquarium-v05.yml']
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      AQUARIUM_ENTRY: aquarium-v0.5.html
+      AQUARIUM_ARTIFACTS: artifacts/aquarium-v05
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate saved-data migration and preserved assets
+        run: |
+          for file in assets/aquarium-v05/*.js; do node --check "$file"; done
+          node tests/aquarium/schema-v05.test.cjs
+          cmp aquarium-v0.4.html aquarium-v0.5.html
+          python3 scripts/build-aquarium-v05.py
+          git diff --exit-code -- aquarium-v0.5-standalone.html
+      - name: Prepare browsers
+        run: |
+          npm install --prefix /tmp/aquarium-v05-runtime playwright@1.58.2
+          /tmp/aquarium-v05-runtime/node_modules/.bin/playwright install --with-deps chromium webkit
+          echo 'NODE_PATH=/tmp/aquarium-v05-runtime/node_modules' >> "$GITHUB_ENV"
+      - name: Play, import, migrate, teach and inspect four sizes
+        run: node tests/aquarium/browser-v05.test.cjs
+      - name: Regress feeding, no-water offline progress, fins, performance and standalone
+        run: node tests/aquarium/browser-v05-regression.test.cjs
+      - name: Check WebKit touch file picker and teaching
+        env:
+          AQUARIUM_BROWSER: webkit
+        run: node tests/aquarium/browser-v05-mobile.test.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aquarium-v05-evidence
+          path: artifacts/aquarium-v05/
