@@ -155,3 +155,18 @@ GitHub Actions Linux 瀏覽器與模擬觸控，**未做實體 iPhone／iPad／A
 - 新增本報告與 `docs/aquarium-v05/` 的 30 張無損壓縮實際截圖、圖集及三份測試 JSON。
 
 本次四項核心工程已完成。尚未執行的實體裝置與學生試用如上列明；沒有新增管理系統、帳號或存檔槽。
+
+## 11. 正式發佈後核對與舊版測試穩定性
+
+PR #75 已合併為 `5a3855404c3611a7e46f3e3d1aef4409bdb19c77`，[GitHub Pages 發佈工作](https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/38998467579) 成功。正式入口、V0.5 入口、離線版、V0.4.2 回退頁、報告與圖集均回傳 HTTP 200，且與提交內容逐位元相符。
+
+合併後重跑時，舊版 V0.4.2 的呼吸速度獨立性測試因啟動時多跑一幀（100／101 幀）而失敗。兩個瀏覽器頁面的載入完成時間不同，測試原本比較絕對累積量，將啟動時間誤差視為呼吸速度影響。本輪改為在設定速度後各取基準，再比較受控 10 秒內的成長、飽足、產幣、水質、金幣及幀數變化；仍嚴格要求兩組各跑 100 幀並比較相同增量，僅將浮點差值取至小數點後八位。遊戲程式與原呼吸教材不變。
+
+
+### 接續驗收完成
+
+修正提交 `ca191ac437ec259507f79afd5760d40f2571d587` 的三組 PR 驗收均已通過：[V0.4](https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/38998671608)、[V0.4.2 原呼吸教材與完整養成回歸](https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/38998671445)、[V0.5 首頁、匯入、教學與觸控驗收](https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/38998671447)。Codex 自動審查已完成，無發現問題與待解決討論。
+
+正式站另核對 53 個程式、圖片及圖集相關資源，全數 HTTP 成功且與 Repository 內容逐位元一致。工程報告、30 張截圖圖集與離線版皆已公開提供。測試穩定性修正與本節透過 [PR #76](https://github.com/ff41009tw52-rgb/mimi-cream-farm/pull/76) 交付；不修改遊戲玩法或原教材。
+
+剩餘範圍僅為實體 iPhone／iPad／Android、實機 Safari 與學生現場試用；尚未執行，不能以 Linux 模擬通過替代。
