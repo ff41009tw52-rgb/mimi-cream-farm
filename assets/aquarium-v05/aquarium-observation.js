@@ -22,8 +22,8 @@ function create({getFish,drawSpecimen}){
  document.body.append(modal);const renderer=R.makeRenderer($('obs-vector')),breathing=window.AquariumBreathingReview.create($('obs-breathing-lesson'));
  const lessonSiblings=[...$('obs-panel').children].filter(e=>e.id!=='obs-breathing-lesson');
  const on=(id,fn)=>$(id).addEventListener('click',fn);
- function describe(id){partId=id;$('obs-part-name').textContent=C.parts[id].name;$('obs-part-description').textContent=C.parts[id].description;for(const b of $('obs-part-list').children)b.setAttribute('aria-pressed',String(b.dataset.partChoice===id));paint();}
- function partList(){const ids=Object.keys(C.parts).filter(id=>id!=='gills');$('obs-part-list').replaceChildren();for(const id of ids){const b=document.createElement('button');b.textContent=C.parts[id].name;b.dataset.partChoice=id;b.setAttribute('aria-pressed',String(partId===id));b.addEventListener('click',()=>describe(id));$('obs-part-list').append(b);}}
+ function describe(id,reveal=false){partId=id;$('obs-part-name').textContent=C.parts[id].name;$('obs-part-description').textContent=C.parts[id].description;for(const b of $('obs-part-list').children)b.setAttribute('aria-pressed',String(b.dataset.partChoice===id));paint();if(reveal)$('obs-vector').scrollIntoView({block:'start',behavior:'instant'});}
+ function partList(){const ids=Object.keys(C.parts).filter(id=>id!=='gills');$('obs-part-list').replaceChildren();for(const id of ids){const b=document.createElement('button');b.textContent=C.parts[id].name;b.dataset.partChoice=id;b.setAttribute('aria-pressed',String(partId===id));b.addEventListener('click',()=>describe(id,true));$('obs-part-list').append(b);}}
  function setTopic(key){
   if(!Object.hasOwn(lessonTopics,key))return;
   topic=key;partId='dorsal';
@@ -71,7 +71,7 @@ function create({getFish,drawSpecimen}){
   const next=e.key==='Home'?0:e.key==='End'?keys.length-1:(i+(e.key==='ArrowRight'?1:-1)+keys.length)%keys.length;
   setTopic(keys[next]);$('obs-tab-'+keys[next]).focus();
  });
- const choosePart=e=>{const hit=e.target.closest('[data-part]');if(hit&&topic==='anatomy'&&hit.dataset.part!=='gills')describe(hit.dataset.part);};
+ const choosePart=e=>{const hit=e.target.closest('[data-part]');if(hit&&topic==='anatomy'&&hit.dataset.part!=='gills')describe(hit.dataset.part,true);};
  $('obs-vector').addEventListener('click',choosePart);$('obs-vector').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();choosePart(e);}});
  on('obs-label-toggle',()=>{labels=!labels;syncControls();paint();});
  on('obs-enlarge',()=>{zoom=zoom>1?1:1.55;syncControls();paint();revealOwnFin();});$('obs-fish-choice').addEventListener('change',e=>{fishId=e.target.value;ownTime=0;fishInfo();paint();});

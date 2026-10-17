@@ -16,7 +16,7 @@ const regions={
 function makeRenderer(host){
  const C=window.AquariumObservationContent;
  host.innerHTML=`<svg class="carp-anatomy" viewBox="0 65 1536 930" role="group" aria-label="鯉魚身體構造，點選標記認識部位"><image href="${window.AQUARIUM_BREATHING_IMAGE||imageUrl}" x="0" y="0" width="1536" height="1024"/>${Object.entries(regions).map(([id,r],i)=>`<g data-part="${id}" role="button" tabindex="0" aria-label="${C.parts[id].name}"><path class="carp-region" d="${r.path}"/><g class="carp-label"><path class="carp-leader" d="M${r.point.join(' ')} L${r.label.join(' ')}"/><rect x="${r.label[0]-83}" y="${r.label[1]-31}" width="166" height="62" rx="22"/><text x="${r.label[0]}" y="${r.label[1]+11}">${i+1} ${C.parts[id].name}</text></g><circle class="carp-point" cx="${r.point[0]}" cy="${r.point[1]}" r="19"/></g>`).join('')}</svg><p class="carp-current" aria-live="polite"></p>`;
- return {draw({partId,labels}){host.querySelectorAll('[data-part]').forEach(g=>{g.classList.toggle('selected',g.dataset.part===partId);g.setAttribute('aria-pressed',String(g.dataset.part===partId));});host.classList.toggle('hide-carp-labels',!labels);host.querySelector('.carp-current').textContent='正在觀察：'+C.parts[partId].name;}};
+ return {draw({partId,labels}){host.querySelectorAll('[data-part]').forEach(g=>{g.classList.toggle('selected',g.dataset.part===partId);g.setAttribute('aria-pressed',String(g.dataset.part===partId));});host.classList.toggle('hide-carp-labels',!labels);host.querySelector('.carp-current').textContent=C.parts[partId].name+'：'+C.parts[partId].description;}};
 }
 window.AquariumObservationRenderer=Object.freeze({makeRenderer,regions});
 })();

@@ -99,6 +99,8 @@ body{background:radial-gradient(ellipse at 8% 20%,#dfece2aa,transparent 46%),rad
 @media(max-width:1050px){.home{gap:26px;padding:32px 24px}.home-start{padding:24px}.home-features{grid-template-columns:1fr;gap:6px}.home-features article{display:flex;gap:12px;align-items:baseline}.onboarding{grid-template-columns:48px 1fr}.guide-actions{grid-column:2;flex-direction:row;flex-wrap:wrap}.hud{grid-template-columns:1fr 1fr}.save-status{text-align:left}.level-stat{grid-column:auto}}
 @media(max-width:680px){.home{display:block;padding:28px 20px}.home-intro>h1{margin:12px 0 8px}.home-subtitle{margin:10px 0 18px;font-size:20px}.home-copy{font-size:17px;line-height:1.8}.home-art{margin-top:18px}.home-features{margin:18px 0 24px}.home-features h2{font-size:17px;white-space:nowrap}.home-features p{font-size:15px}.home-start{padding:22px 20px}.home-start h2{font-size:23px;margin-bottom:20px}.home-start button{font-size:18px}.onboarding{padding:17px 14px;gap:10px}.onboarding h2{font-size:20px}.onboarding p{font-size:18px!important}.guide-actions{grid-column:1/-1}.guide-actions button{flex:1;font-size:15px;padding:8px}.controls{gap:12px}.controls .action{min-width:0;flex:1;justify-content:center;padding:14px 16px;font-size:19px}.action small{display:none}.tank-caption{left:14px;right:14px}.tank-caption>span:last-child{display:none}.hud{gap:14px;padding:18px}.carp-label text{font-size:38px}.obs-part-list{gap:8px}.obs-part-list button{font-size:18px}.obs-selection p{font-size:18px}.obs-figure figcaption{font-size:15px}.obs-workspace{gap:16px}.onboarding-highlight{outline-width:3px!important;outline-offset:3px}.feeding-hint{font-size:14px}.feeding-hint:before{display:none}}
 
+.carp-anatomy{max-height:460px}.carp-current{font-size:18px!important;font-weight:500;line-height:1.8}.obs-figure:has(.carp-anatomy){align-self:start}
+
 </style>
 
 
@@ -454,7 +456,7 @@ const regions={
 function makeRenderer(host){
  const C=window.AquariumObservationContent;
  host.innerHTML=`<svg class="carp-anatomy" viewBox="0 65 1536 930" role="group" aria-label="鯉魚身體構造，點選標記認識部位"><image href="${window.AQUARIUM_BREATHING_IMAGE||imageUrl}" x="0" y="0" width="1536" height="1024"/>${Object.entries(regions).map(([id,r],i)=>`<g data-part="${id}" role="button" tabindex="0" aria-label="${C.parts[id].name}"><path class="carp-region" d="${r.path}"/><g class="carp-label"><path class="carp-leader" d="M${r.point.join(' ')} L${r.label.join(' ')}"/><rect x="${r.label[0]-83}" y="${r.label[1]-31}" width="166" height="62" rx="22"/><text x="${r.label[0]}" y="${r.label[1]+11}">${i+1} ${C.parts[id].name}</text></g><circle class="carp-point" cx="${r.point[0]}" cy="${r.point[1]}" r="19"/></g>`).join('')}</svg><p class="carp-current" aria-live="polite"></p>`;
- return {draw({partId,labels}){host.querySelectorAll('[data-part]').forEach(g=>{g.classList.toggle('selected',g.dataset.part===partId);g.setAttribute('aria-pressed',String(g.dataset.part===partId));});host.classList.toggle('hide-carp-labels',!labels);host.querySelector('.carp-current').textContent='正在觀察：'+C.parts[partId].name;}};
+ return {draw({partId,labels}){host.querySelectorAll('[data-part]').forEach(g=>{g.classList.toggle('selected',g.dataset.part===partId);g.setAttribute('aria-pressed',String(g.dataset.part===partId));});host.classList.toggle('hide-carp-labels',!labels);host.querySelector('.carp-current').textContent=C.parts[partId].name+'：'+C.parts[partId].description;}};
 }
 window.AquariumObservationRenderer=Object.freeze({makeRenderer,regions});
 })();
@@ -635,8 +637,8 @@ function create({getFish,drawSpecimen}){
  document.body.append(modal);const renderer=R.makeRenderer($('obs-vector')),breathing=window.AquariumBreathingReview.create($('obs-breathing-lesson'));
  const lessonSiblings=[...$('obs-panel').children].filter(e=>e.id!=='obs-breathing-lesson');
  const on=(id,fn)=>$(id).addEventListener('click',fn);
- function describe(id){partId=id;$('obs-part-name').textContent=C.parts[id].name;$('obs-part-description').textContent=C.parts[id].description;for(const b of $('obs-part-list').children)b.setAttribute('aria-pressed',String(b.dataset.partChoice===id));paint();}
- function partList(){const ids=Object.keys(C.parts).filter(id=>id!=='gills');$('obs-part-list').replaceChildren();for(const id of ids){const b=document.createElement('button');b.textContent=C.parts[id].name;b.dataset.partChoice=id;b.setAttribute('aria-pressed',String(partId===id));b.addEventListener('click',()=>describe(id));$('obs-part-list').append(b);}}
+ function describe(id,reveal=false){partId=id;$('obs-part-name').textContent=C.parts[id].name;$('obs-part-description').textContent=C.parts[id].description;for(const b of $('obs-part-list').children)b.setAttribute('aria-pressed',String(b.dataset.partChoice===id));paint();if(reveal)$('obs-vector').scrollIntoView({block:'start',behavior:'instant'});}
+ function partList(){const ids=Object.keys(C.parts).filter(id=>id!=='gills');$('obs-part-list').replaceChildren();for(const id of ids){const b=document.createElement('button');b.textContent=C.parts[id].name;b.dataset.partChoice=id;b.setAttribute('aria-pressed',String(partId===id));b.addEventListener('click',()=>describe(id,true));$('obs-part-list').append(b);}}
  function setTopic(key){
   if(!Object.hasOwn(lessonTopics,key))return;
   topic=key;partId='dorsal';
@@ -684,7 +686,7 @@ function create({getFish,drawSpecimen}){
   const next=e.key==='Home'?0:e.key==='End'?keys.length-1:(i+(e.key==='ArrowRight'?1:-1)+keys.length)%keys.length;
   setTopic(keys[next]);$('obs-tab-'+keys[next]).focus();
  });
- const choosePart=e=>{const hit=e.target.closest('[data-part]');if(hit&&topic==='anatomy'&&hit.dataset.part!=='gills')describe(hit.dataset.part);};
+ const choosePart=e=>{const hit=e.target.closest('[data-part]');if(hit&&topic==='anatomy'&&hit.dataset.part!=='gills')describe(hit.dataset.part,true);};
  $('obs-vector').addEventListener('click',choosePart);$('obs-vector').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();choosePart(e);}});
  on('obs-label-toggle',()=>{labels=!labels;syncControls();paint();});
  on('obs-enlarge',()=>{zoom=zoom>1?1:1.55;syncControls();paint();revealOwnFin();});$('obs-fish-choice').addEventListener('change',e=>{fishId=e.target.value;ownTime=0;fishInfo();paint();});
