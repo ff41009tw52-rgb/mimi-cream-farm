@@ -8,3 +8,5 @@
 /* Two primary values; explicitly reset the former water-column grid positions. */
 .hud .level-stat{grid-column:3;grid-row:1;border-top:0;padding-top:0}.hud .save-status{grid-column:4;grid-row:1}.residents strong{white-space:nowrap}
 @media(max-width:1050px){.hud{grid-template-columns:1fr 1fr}.hud .level-stat{grid-column:1;grid-row:2;border-top:1px solid #e5eadc;padding-top:10px}.hud .save-status{grid-column:2;grid-row:2;text-align:right}}
+
+.home-art canvas{min-height:0}
