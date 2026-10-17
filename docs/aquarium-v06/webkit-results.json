@@ -1,0 +1,8 @@
+{
+  "engine": "Playwright WebKit on Linux",
+  "touchFeeding": true,
+  "jsonPicker": true,
+  "originalBreathing": true,
+  "physicalDevicesTested": false,
+  "errors": []
+}

@@ -1,0 +1,96 @@
+{
+  "screenshotSource": "19 local Chromium 153 screenshots; 3 Linux WebKit screenshots from successful GitHub Actions run 39020418676, feature commit 3bceaeb79a53836914db5f5018f043b535bdf3fd.",
+  "physicalDevicesTested": false,
+  "items": [
+    {
+      "file": "home-desktop.webp",
+      "caption": "V0.6 首頁"
+    },
+    {
+      "file": "welcome-gift.webp",
+      "caption": "第一份飼料贈禮"
+    },
+    {
+      "file": "feeding-surface-guide.webp",
+      "caption": "真正操作的餵食教學"
+    },
+    {
+      "file": "mobile-water-target.webp",
+      "caption": "手機自動帶回水面"
+    },
+    {
+      "file": "feed-shop-guide.webp",
+      "caption": "飼料購買教學"
+    },
+    {
+      "file": "fish-food-card.webp",
+      "caption": "魚兒資料卡與食物"
+    },
+    {
+      "file": "legacy-two-tanks.webp",
+      "caption": "18 隻舊魚免費分缸"
+    },
+    {
+      "file": "three-tanks.webp",
+      "caption": "三魚缸切換入口"
+    },
+    {
+      "file": "thirty-fish-simulation.webp",
+      "caption": "三十隻魚同步推進"
+    },
+    {
+      "file": "standalone-offline.webp",
+      "caption": "完全離線版"
+    },
+    {
+      "file": "size-390-home.webp",
+      "caption": "390×844 手機首頁"
+    },
+    {
+      "file": "size-390-tank.webp",
+      "caption": "390×844 手機魚缸"
+    },
+    {
+      "file": "size-390-feeding.webp",
+      "caption": "390×844 手機飼料選擇"
+    },
+    {
+      "file": "size-390-anatomy.webp",
+      "caption": "390×844 外形教材"
+    },
+    {
+      "file": "size-390-breathing.webp",
+      "caption": "390×844 原呼吸教材"
+    },
+    {
+      "file": "size-1024-tank.webp",
+      "caption": "1024×768 橫式平板"
+    },
+    {
+      "file": "size-820-tank.webp",
+      "caption": "820×1180 直式平板"
+    },
+    {
+      "file": "carp-anatomy.webp",
+      "caption": "保留原版精緻鯉魚"
+    },
+    {
+      "file": "original-breathing.webp",
+      "caption": "保留原版呼吸教材"
+    },
+    {
+      "file": "webkit-390-food.webp",
+      "caption": "WebKit 手機觸控選料與水面"
+    },
+    {
+      "file": "webkit-820-shop.webp",
+      "caption": "WebKit 平板飼料購買"
+    },
+    {
+      "file": "webkit-390-breathing.webp",
+      "caption": "WebKit 手機原版呼吸教材"
+    }
+  ],
+  "ciRun": "https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/39020418676",
+  "featureCommit": "3bceaeb79a53836914db5f5018f043b535bdf3fd"
+}
