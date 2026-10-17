@@ -1,4 +1,4 @@
-/* 悠悠水族箱 V0.6 — homepage gate, schema 4 and feeding-based progression. */
+/* 悠悠水族箱 V0.6 — gift tutorial, schema 5 and shared multi-tank progression. */
 (() => {
 'use strict';
 const {CONFIG,SPECIES,DECORATIONS,PERSONALITIES,TANK_TIERS,VARIANTS,ACHIEVEMENTS,FEEDS,FOOD_FOR,TANK_OFFERS}=window.AquariumData;
@@ -37,14 +37,16 @@ function snapshot(){return {...JSON.parse(JSON.stringify(state)),schemaVersion:5
 function save(manual=false){
   clearTimeout(saveTimer);saveTimer=0;
   if(!started||saveBlocked||conflict){saveLabel();if(manual)toast('目前無法儲存進度。原存檔已保留。');return false;}
+  let autoSaved=false;
   try{
     const payload=snapshot(),json=JSON.stringify(payload);
     localStorage.setItem(CONFIG.SAVE_KEY,json);diagnostics.writes++;
+    state.savedAt=lastSaved=payload.savedAt;lastPersistedState=json;dirty=false;autoSaved=true;
     if(manual){localStorage.setItem(CONFIG.MANUAL_KEY,json);diagnostics.writes++;}
-    state.savedAt=lastSaved=payload.savedAt;lastPersistedState=json;dirty=false;saveLabel();persistSession();
+    saveLabel();persistSession();
     if(manual)toast('✓ 遊戲已儲存，可隨時讀取這個時間點。');
     return true;
-  }catch(error){if(lastPersistedState){state=validate(JSON.parse(lastPersistedState));rebuildRuntime();updateUI();}$('save-status').textContent='⚠ 目前無法儲存進度';$('save-status').classList.add('error');if(manual)toast('儲存失敗，請確認瀏覽器有可用空間。');return false;}
+  }catch(error){if(!autoSaved&&lastPersistedState){state=validate(JSON.parse(lastPersistedState));rebuildRuntime();updateUI();}$('save-status').textContent=autoSaved?'⚠ 自動存檔已完成，手動存檔失敗':'⚠ 目前無法儲存進度';$('save-status').classList.add('error');if(manual)toast(autoSaved?'最新進度已自動儲存；手動存檔未更新，請確認瀏覽器有可用空間。':'儲存失敗，請確認瀏覽器有可用空間。');return false;}
 }
 function markDirty(important=false){if(!started)return;if(batching){dirty=true;return;}dirty=true;if(important){save();return;}if(!saveTimer&&!saveBlocked&&!conflict)saveTimer=setTimeout(()=>save(),CONFIG.SAVE_DEBOUNCE_MS);}
 function saveLabel(){const e=$('save-status');e.classList.toggle('error',saveBlocked||conflict);e.textContent=conflict?'⚠ 另一分頁已更新，請重新讀取':saveBlocked?'⚠ 原存檔已保留，暫停儲存':lastSaved?`✓ 已自動存檔 ${timeLabel(lastSaved)}`:'尚未儲存';}
