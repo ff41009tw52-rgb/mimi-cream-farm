@@ -29,6 +29,8 @@ jobs:
           echo 'NODE_PATH=/tmp/aquarium-v05-runtime/node_modules' >> "$GITHUB_ENV"
       - name: Play, import, migrate, teach and inspect four sizes
         run: node tests/aquarium/browser-v05.test.cjs
+      - name: Regress feeding, no-water offline progress, fins, performance and standalone
+        run: node tests/aquarium/browser-v05-regression.test.cjs
       - name: Check WebKit touch file picker and teaching
         env:
           AQUARIUM_BROWSER: webkit
