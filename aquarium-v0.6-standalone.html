@@ -180,6 +180,10 @@ body{background:radial-gradient(ellipse at 8% 20%,#dfece2aa,transparent 46%),rad
 @media(max-width:1059px){.fish-care-tip{font-size:15px;line-height:1.6}}
 
 #onboarding #onboarding-success{font-size:15px!important;color:#32694d;font-weight:600;margin-top:4px}
+/* Keep the existing return control reachable while reading a long fish card. */
+.fish-card .card-close{position:sticky;top:0;right:0;float:right;margin:-6px -6px 0 4px;background:#f5f7e9;z-index:2}
+#tutorial-coin-target{width:54px;height:54px;min-width:54px;min-height:54px;padding:0;border-radius:50%;background:#fff6c622;font-size:0}
+#tutorial-coin-target::after{content:'點這枚金幣';position:absolute;top:calc(100% + 5px);left:50%;transform:translateX(-50%);white-space:nowrap;background:#fff9dc;border-radius:10px;padding:3px 8px;font-size:16px;line-height:1.5;box-shadow:0 2px 8px #65744422}
 
 </style>
 
