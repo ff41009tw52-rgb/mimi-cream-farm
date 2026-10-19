@@ -117,6 +117,62 @@ body{background:radial-gradient(ellipse at 8% 20%,#dfece2aa,transparent 46%),rad
 .tutorial-shop-copy{background:#fff3c4;border-left:4px solid #c8a63d;border-radius:12px;padding:16px;font-size:19px;line-height:1.8}
 .feeding-hint{display:block}.tank-viewport{position:relative}.food-rule{font-size:15px;line-height:1.7;color:#617b68}
 
+/* Compact real-action tutorial and a one-viewport desktop play area. */
+#onboarding{align-items:center;grid-template-columns:48px minmax(0,1fr) auto;gap:11px;padding:11px 16px;margin:0 0 10px;min-width:0}
+#onboarding .guide-step{width:43px;height:43px}
+#onboarding h2{font-size:19px;line-height:1.35;margin:0}
+#onboarding p{font-size:16px!important;line-height:1.52;margin:4px 0 0}
+#onboarding .guide-actions{max-width:none;grid-column:auto;flex-direction:row;align-items:center}
+#onboarding #onboarding-gift{font-size:15px;line-height:1.3;min-height:44px;padding:8px 12px}
+.fish-care-tip{font-size:13px;line-height:1.5;color:#477966;margin:2px 0 8px}
+.fish-card{max-height:calc(100% - 60px);overflow-y:auto}
+@media (min-width:1060px) and (min-height:680px){
+ #game.app{height:100dvh;max-height:100dvh;overflow:hidden;display:flex;flex-direction:column;gap:7px;padding:10px 24px 9px}
+ #game .header{flex:0 0 auto;margin:0;min-height:39px}
+ #game .brand-icon{width:40px;height:40px;font-size:36px;border-radius:12px}
+ #game .brand h1{font-size:21px;letter-spacing:2px}
+ #game .brand p{display:none}
+ #game .hud{flex:0 0 auto;min-height:50px;padding:8px 15px;gap:9px;margin:0}
+ #game .stat strong{font-size:22px}
+ #game #tank-selector{flex:0 0 auto;padding:1px 2px 3px;gap:8px;min-height:0}
+ #game #tank-selector button{min-height:39px;min-width:140px;padding:5px 12px;font-size:14px;border-radius:12px}
+ #game #tank-selector p{font-size:12px;margin:1px 0 0}
+ #game #onboarding{flex:0 0 auto;margin:0}
+ #game .aquarium{flex:1 1 0;display:flex;flex-direction:column;min-height:190px;overflow:hidden;border-width:5px}
+ #game .tank-viewport{flex:1 1 0;min-height:0;position:relative}
+ #game .tank-viewport #tank{height:100%;min-height:0;max-height:none}
+ #game .tank-base{height:26px;min-height:26px;flex:0 0 26px}
+ #game .controls{flex:0 0 auto;margin:0;gap:12px}
+ #game .controls .action{min-height:47px;min-width:185px;padding:6px 16px;font-size:17px;gap:9px}
+ #game .controls .action small{display:none}
+ #game footer{flex:0 0 auto;margin:0;min-height:40px;gap:10px}
+ #game footer p{display:none}
+ #game footer button{min-height:40px;padding:6px 12px}
+ #game .aquarium:has(#feeding-hint:not([hidden])){overflow:hidden}
+ #game .feeding-hint{position:absolute;right:9px;bottom:10px;left:auto;top:auto;width:min(355px,40%);max-height:calc(100% - 20px);overflow-y:auto;margin:0;padding:10px 12px;font-size:14px}
+ #game .feeding-hint>strong{font-size:14px;line-height:1.4}
+ #game #feed-choices{grid-template-columns:1fr;gap:5px;margin:7px 0}
+ #game #feed-choices button{min-height:48px;display:flex;flex-wrap:wrap;align-items:center;gap:3px 6px;font-size:14px;padding:6px 8px}
+ #game #feed-choices button small{font-size:13px}
+ #game #feed-choices button span{font-size:11px;line-height:1.4;width:100%}
+ #game .feeding-hint .food-rule{font-size:11px;line-height:1.4;margin:3px 0}
+ #game .feeding-hint #feed-current{font-size:13px!important;margin:4px 0}
+ #game .feeding-actions{gap:6px}
+ #game .feeding-actions button{min-height:35px;font-size:12px;padding:5px 8px}
+}
+@media(max-width:1059px){
+ #onboarding{grid-template-columns:44px minmax(0,1fr);padding:12px 13px;gap:9px}
+ #onboarding .guide-actions{grid-column:2}
+ #onboarding p{font-size:17px!important;line-height:1.55}
+ #onboarding h2{font-size:19px}
+}
+@media(max-width:680px){
+ #onboarding{margin:0 0 12px;padding:12px;gap:9px}
+ #onboarding p{font-size:17px!important}
+ #onboarding #onboarding-gift{width:100%;font-size:16px}
+ .fish-care-tip{font-size:12px}
+}
+
 </style>
 
 
@@ -149,21 +205,21 @@ body{background:radial-gradient(ellipse at 8% 20%,#dfece2aa,transparent 46%),rad
 <div class="save-status" id="save-status" role="status">正在準備水族箱…</div>
 </section>
 <nav id="tank-selector" aria-label="選擇魚缸"></nav>
-<aside id="onboarding" class="onboarding" hidden aria-label="新手教學"><span id="onboarding-step" class="guide-step"></span><div><h2 id="onboarding-title"></h2><p id="onboarding-copy"></p></div><div class="guide-actions"><button id="onboarding-gift" hidden>收下小型魚飼料 ×5 份</button><button id="onboarding-action"></button><button id="onboarding-pause">暫停教學</button><button id="onboarding-skip">略過教學</button></div></aside>
+<aside id="onboarding" class="onboarding" hidden aria-label="新手教學"><span id="onboarding-step" class="guide-step"></span><div><h2 id="onboarding-title"></h2><p id="onboarding-copy"></p></div><div class="guide-actions" hidden><button id="onboarding-gift" hidden>收下小型魚飼料 ×5 份</button></div></aside>
 <section class="aquarium" aria-label="我的水族箱">
 <div class="tank-caption"><span><i></i> <b id="tank-name">小小水族箱</b></span><span id="tank-message">慢慢游，慢慢長大。</span></div>
 <div class="tank-viewport"><canvas id="tank" tabindex="0" aria-label="水族箱。點魚查看狀態，點金幣收集；先按餵食，再點水面投放飼料。鍵盤可從更多功能的我的魚兒查看，餵食模式按 Enter 投食。"></canvas>
 <div id="surface-cue" hidden aria-hidden="true">↓ 點這裡的水面，把飼料送進水裡</div></div>
 <div class="feeding-hint" id="feeding-hint" hidden><strong>按餵食 → 選飼料 → 點一下魚缸上方的水面</strong><div id="feed-choices"><button id="feed-general" data-feed="general" aria-pressed="false"><b>綜合飼料</b><small>剩餘 0 份</small><span>孔雀魚、金魚、黑摩利、紅劍魚</span></button><button id="feed-small" data-feed="small" aria-pressed="false"><b>小型魚飼料</b><small>剩餘 0 份</small><span>鼠魚、斑馬魚、白雲山魚、紅蓮燈</span></button><button id="feed-protein" data-feed="protein" aria-pressed="false"><b>高蛋白飼料</b><small>剩餘 0 份</small><span>神仙魚、鬥魚</span></button></div><p class="food-rule">飼料分類是遊戲的簡化規則，真實魚類的食物選擇更多樣。</p><p id="feed-current" aria-live="polite">先選一種飼料</p><div class="feeding-actions"><button id="feed-shop">前往飼料商店</button><button id="stop-feed">結束餵食</button></div></div>
-<aside class="fish-card" id="fish-card" hidden aria-label="魚兒資料"><button class="icon-button card-close" id="close-card" aria-label="關閉魚兒資料">×</button><span class="eyebrow" id="fish-stage"></span><h2 id="fish-name"></h2><p id="fish-species"></p><div class="meter-label">飽足度 <b id="fish-hunger"></b></div><meter id="hunger-meter" min="0" max="100"></meter><div class="meter-label">成長進度 <b id="fish-growth"></b></div><meter id="growth-meter" min="0" max="100"></meter><p class="mood" id="fish-mood"></p><p class="personality" id="fish-personality"></p><p id="fish-food"></p><button id="observe-fish" class="card-observe">觀察這隻魚</button><div class="card-actions"><button id="rename">改名字</button><button id="fish-more">更多資料</button></div></aside>
+<aside class="fish-card" id="fish-card" hidden aria-label="魚兒資料"><button class="icon-button card-close" id="close-card" aria-label="關閉魚兒資料">×</button><span class="eyebrow" id="fish-stage"></span><h2 id="fish-name"></h2><p id="fish-species"></p><div class="meter-label">飽足度 <b id="fish-hunger"></b></div><meter id="hunger-meter" min="0" max="100"></meter><p class="fish-care-tip">飽足度越低，越需要餵食。</p><div class="meter-label">成長進度 <b id="fish-growth"></b></div><meter id="growth-meter" min="0" max="100"></meter><p class="fish-care-tip">吃飽後會慢慢長大，也會逐漸帶來金幣。</p><p class="mood" id="fish-mood"></p><p class="personality" id="fish-personality"></p><p id="fish-food"></p><button id="observe-fish" class="card-observe">觀察這隻魚</button><div class="card-actions"><button id="rename">改名字</button><button id="fish-more">更多資料</button></div></aside>
 <div id="decor-handles" class="decor-handles" hidden></div>
 <div class="edit-toolbar" id="edit-toolbar" hidden><span id="edit-label">點選布置，再左右移動</span><div><button id="edit-left" aria-label="向左移動裝飾">←</button><button id="edit-right" aria-label="向右移動裝飾">→</button><button id="edit-store">收回裝飾</button><button id="edit-done">完成布置</button></div></div>
 
 <div class="tank-base"><span>一缸小日常</span><span>照顧牠們，收集每一點快樂</span></div>
 </section>
-<section class="controls" aria-label="魚缸操作"><button id="feed" class="action primary" aria-pressed="false"><span class="action-icon" aria-hidden="true">⁙</span><span>餵食<small>給魚兒一點好吃的</small></span></button><button id="shop" class="action"><span class="action-icon" aria-hidden="true">⌂</span><span>商店<small>魚兒與魚缸布置</small></span></button></section>
+<section class="controls" aria-label="魚缸操作"><button id="feed" class="action primary" aria-pressed="false"><span class="action-icon" aria-hidden="true">⁙</span><span>餵食<small>選飼料，再點水面</small></span></button><button id="shop" class="action"><span class="action-icon" aria-hidden="true">⌂</span><span>商店<small>購買魚兒、飼料與布置</small></span></button></section>
 
-<footer><p id="tip">點魚兒看狀態，點金幣收集。好好照顧，魚兒就會慢慢長大。</p><button id="roster-shortcut" class="secondary-button">我的魚兒</button><button id="observe-review" class="secondary-button">觀察魚兒</button><button id="more-menu" class="secondary-button" aria-haspopup="dialog">更多功能</button><button id="collect-all" class="text-button" hidden>收取金幣</button></footer>
+<footer><p id="tip">點魚兒看資料；看到金幣時，點一下就能收取。餵飽魚兒，牠們就會慢慢長大。</p><button id="roster-shortcut" class="secondary-button">我的魚兒</button><button id="observe-review" class="secondary-button">觀察魚兒</button><button id="more-menu" class="secondary-button" aria-haspopup="dialog">更多功能</button><button id="collect-all" class="text-button" hidden>收取金幣</button></footer>
 </main>
 <dialog id="dialog"><div class="dialog-head"><div><span class="eyebrow" id="dialog-eyebrow">一起照顧水中的生命</span><h2 id="dialog-title"></h2></div><button class="icon-button" id="dialog-close" aria-label="關閉視窗">×</button></div><div id="dialog-content"></div></dialog>
 <div id="toast" role="status" popover="manual" class="toast" hidden></div>
@@ -1096,28 +1152,26 @@ window.AquariumFishArt=Object.freeze({draw,hitBounds,breathPose,getFinInfo,versi
 (() => {
 'use strict';
 const steps=[
- {title:'第一步：按下餵食！',copy:'先找到魚缸下方的「餵食」按鈕，按一下，準備給魚兒吃東西。',target:'feed',event:'feedOpened'},
- {title:'第二步：選擇飼料！',copy:'先選擇「綜合飼料」，孔雀魚和金魚都可以吃。不同魚兒有不同的飼料，要記得選擇適合牠們的食物。',target:'feed-general',event:'selected:general'},
- {title:'第三步：點一下魚缸的水面！',copy:'已經選好飼料了！現在請直接點一下魚缸裡的水面，飼料就會掉進水裡，魚兒會游過來吃。不是再按一次餵食，也不是按魚兒的身體，只要點魚缸的水面就可以了！',target:'tank',event:'fed:general',success:'成功了！你把飼料放進水裡了！再看看孔雀魚和金魚會不會游過來吃。'},
- {title:'再送你一份飼料！',copy:'你已經學會餵魚了！再送你小型魚飼料 ×5 份，這次試著餵餵看鼠魚吧！',target:'onboarding-gift',event:'smallGift'},
- {title:'替鼠魚準備食物',copy:'先按下真正的「餵食」按鈕。鼠魚吃小型魚飼料，和孔雀魚、金魚的飼料不同。',target:'feed',event:'feedOpened'},
- {title:'選擇小型魚飼料',copy:'請選擇「小型魚飼料」。記得先選好飼料，再點水面！',target:'feed-small',event:'selected:small'},
- {title:'再點一下魚缸水面',copy:'現在直接點魚缸裡的水面，送一份小型魚飼料給鼠魚。不用點中鼠魚。',target:'tank',event:'fed:small',success:'太好了！你已經知道怎麼替不同魚兒選擇飼料了。'},
- {title:'認識你的魚兒',copy:'點一下魚兒，或打開「我的魚兒」名單並選一隻，看看名字、飽足度和牠適合的食物。完成後送你 10 金幣！',target:'tank',event:'fishOpened'},
- {title:'到商店補充飼料',copy:'按下魚缸下方的「商店」。剛才送你的 10 金幣，可以用來補充飼料。',target:'shop',event:'shopOpened'},
- {title:'找到飼料商品',copy:'按商店的「飼料」分頁，看看每包數量、價格和目前庫存。',target:'tab-feed',event:'feedShopOpened'},
- {title:'買第一包飼料',copy:'選擇綜合飼料，按「購買」。買其他已解鎖、適合目前魚兒的飼料也可以。真的買成功才算完成喔！',target:'buy-feed-general',event:'feedBought',success:'現在你會自己補充飼料了！以後飼料快用完時，記得到商店購買。'},
- {title:'看看魚的科學祕密',copy:'關閉商店後，按「觀察魚兒」。這裡可以認識魚的身體構造，還能看到魚是怎麼呼吸的。',target:'observe-review',event:'observationOpened',success:'你已經學會經營自己的水族箱了！慢慢養魚，享受你的小小水世界。'}];
+ {title:'按下「餵食」',copy:'請先按魚缸下方的「餵食」，準備給魚兒吃東西。',target:'feed',event:'feedOpened'},
+ {title:'選擇「綜合飼料」',copy:'請選「綜合飼料」。在這個遊戲裡，孔雀魚和金魚吃這種飼料。',target:'feed-general',event:'selected:general'},
+ {title:'點一下魚缸上方的水面',copy:'選好飼料後，請點魚缸上方標示的水面，飼料就會掉進水裡。不用點魚兒，也不用再按一次「餵食」。',target:'tank',event:'fed:general',success:'成功投放飼料了！看看孔雀魚和金魚會不會游過來吃。'},
+ {title:'試試另一種飼料',copy:'收下小型魚飼料 ×5 份，再試著餵餵看鼠魚。',target:'onboarding-gift',event:'smallGift'},
+ {title:'再按一次「餵食」',copy:'請按魚缸下方的「餵食」，準備投放另一種飼料。',target:'feed',event:'feedOpened'},
+ {title:'選擇小型魚飼料',copy:'請選「小型魚飼料」。在這個遊戲裡，鼠魚吃這種飼料。',target:'feed-small',event:'selected:small'},
+ {title:'點水面，餵餵鼠魚',copy:'點一下魚缸上方標示的水面，放入小型魚飼料。不用點中鼠魚。',target:'tank',event:'fed:small',success:'太好了！你已經知道怎麼替不同魚兒選擇飼料了。'},
+ {title:'看看你的魚兒',copy:'點魚缸裡的一隻魚，或按「我的魚兒」選擇魚兒。看看牠的飽足度、成長進度及適合的飼料。吃飽了，魚兒才會慢慢長大並帶來金幣。',target:'tank',event:'fishOpened'},
+ {title:'打開商店',copy:'按魚缸下方的「商店」，準備購買飼料。',target:'shop',event:'shopOpened'},
+ {title:'看看飼料商店',copy:'打開商店的「飼料」分頁，查看每包價格和目前庫存。',target:'tab-feed',event:'feedShopOpened'},
+ {title:'購買一包飼料',copy:'挑一種目前魚兒能吃的飼料，按「購買」。購買成功後，庫存就會增加。',target:'buy-feed-general',event:'feedBought',success:'現在你會自己補充飼料了！以後飼料快用完時，記得到商店購買。'},
+ {title:'觀察魚的構造與呼吸',copy:'關閉商店，再按「觀察魚兒」，看看魚的身體構造和呼吸方式。',target:'observe-review',event:'observationOpened',success:'新手教學完成！記得照顧魚兒、收取金幣，讓水族箱慢慢熱鬧起來。'}];
 function create({getState,changed,notify,grant,ensureFeeding}){
- const $=id=>document.getElementById(id);let active=false;
- const welcome=document.createElement('dialog');welcome.id='tutorial-welcome';welcome.innerHTML='<h2>歡迎來到悠悠水族箱！</h2><p>這裡有孔雀魚、金魚和鼠魚，牠們正在等你照顧！我們先學會怎麼餵食，再慢慢認識其他功能。</p><div class="gift-card">第一份照顧禮物<strong>綜合飼料 ×8 份</strong></div><div class="welcome-actions"><button id="tutorial-begin">收下飼料，開始學習！</button><button id="tutorial-skip">跳過教學，直接遊玩</button></div>';document.body.append(welcome);
- function render(){document.getElementById('tutorial-dialog-copy')?.remove();const o=getState().onboarding,running=active&&!o.completed&&o.welcomed&&!o.paused;$('onboarding').hidden=!running;document.querySelectorAll('.onboarding-highlight').forEach(e=>e.classList.remove('onboarding-highlight'));$('surface-cue').hidden=true;if(!running)return;const s=steps[o.step];$('onboarding-step').textContent=(o.step+1)+' / '+steps.length;$('onboarding-title').textContent=s.title;$('onboarding-copy').textContent=s.copy;$('onboarding-action').textContent='找到操作位置';$('onboarding-gift').hidden=o.step!==3;$(s.target)?.classList.add('onboarding-highlight');$('surface-cue').hidden=![2,6].includes(o.step);if(['tab-feed','buy-feed-general'].includes(s.target)&&$('dialog').open){const p=document.createElement('p');p.id='tutorial-dialog-copy';p.className='tutorial-shop-copy';p.textContent=s.copy;$('dialog-content').prepend(p);}}
- function skip(){if(!grant('starter')||!grant('smallLesson'))return;Object.assign(getState().onboarding,{step:12,completed:true,skipped:true,welcomed:true,paused:false});welcome.close();changed();render();}
- $('tutorial-begin').onclick=()=>{if(!grant('starter'))return;Object.assign(getState().onboarding,{welcomed:true,paused:false});welcome.close();changed();render();};$('tutorial-skip').onclick=skip;$('onboarding-skip').onclick=skip;
+ const $=id=>document.getElementById(id);let active=false,lastLocatedStep=-1;
+ const welcome=document.createElement('dialog');welcome.id='tutorial-welcome';welcome.innerHTML='<h2>歡迎來到悠悠水族箱！</h2><p>這裡有孔雀魚、金魚和鼠魚，牠們正在等你照顧！我們先學會怎麼餵食，再慢慢認識其他功能。</p><div class="gift-card">第一份照顧禮物<strong>綜合飼料 ×8 份</strong></div><div class="welcome-actions"><button id="tutorial-begin">收下飼料，開始學習！</button></div>';document.body.append(welcome);
+ function render(){document.getElementById('tutorial-dialog-copy')?.remove();const o=getState().onboarding,running=active&&!o.completed&&o.welcomed&&!o.paused;$('onboarding').hidden=!running;document.querySelectorAll('.onboarding-highlight').forEach(e=>e.classList.remove('onboarding-highlight'));$('surface-cue').hidden=true;if(!running)return;const s=steps[o.step];$('onboarding-step').textContent=(o.step+1)+' / '+steps.length;$('onboarding-title').textContent=s.title;$('onboarding-copy').textContent=s.copy;$('onboarding-gift').hidden=o.step!==3;$('onboarding-gift').parentElement.hidden=o.step!==3;$(s.target)?.classList.add('onboarding-highlight');$('surface-cue').hidden=![2,6].includes(o.step);if(o.step!==lastLocatedStep){lastLocatedStep=o.step;requestAnimationFrame(()=>{const target=$(s.target);if(!target||target.closest('[hidden]'))return;const bounds=target.getBoundingClientRect();if(bounds.top<0||bounds.bottom>innerHeight)target.scrollIntoView({block:'nearest',behavior:'smooth'});});}if(['tab-feed','buy-feed-general'].includes(s.target)&&$('dialog').open){const p=document.createElement('p');p.id='tutorial-dialog-copy';p.className='tutorial-shop-copy';p.textContent=s.copy;$('dialog-content').prepend(p);}}
+ $('tutorial-begin').onclick=()=>{if(!grant('starter'))return;Object.assign(getState().onboarding,{welcomed:true,paused:false});welcome.close();changed();render();};
  $('onboarding-gift').onclick=()=>{if(grant('smallLesson'))api.report('smallGift');};
- welcome.addEventListener('cancel',()=>{getState().onboarding.paused=true;changed();render();});$('onboarding-pause').onclick=()=>{getState().onboarding.paused=true;changed();render();notify('教學已暫停，到設定可以接續。');};
- $('onboarding-action').onclick=()=>{const o=getState().onboarding;if(o.completed)return;const e=$(steps[o.step].target);e?.scrollIntoView({block:'center',behavior:'smooth'});e?.focus({preventScroll:true});};
- const api={render,setActive(on){active=on;if(!on)welcome.close();const o=getState().onboarding;if(on&&o.welcomed&&!o.paused&&[1,2,5,6].includes(o.step))ensureFeeding(o.step===2?'general':o.step===6?'small':null);render();if(on&&!o.completed&&!o.welcomed&&!o.paused&&!welcome.open)welcome.showModal();},report(event){const o=getState().onboarding;if(!active||o.completed||!o.welcomed||o.paused||steps[o.step].event!==event)return false;if(o.step===7&&!grant('fishCard'))return false;const s=steps[o.step];o.step++;if(o.step===12)o.completed=true;changed();render();if(s.success)notify(s.success);return true;},replay(){Object.assign(getState().onboarding,{step:0,completed:false,skipped:false,welcomed:false,paused:false});changed();this.setActive(true);},resume(){getState().onboarding.paused=false;const n=getState().onboarding.step;if([1,2,5,6].includes(n))ensureFeeding(n===2?'general':n===6?'small':null);changed();this.setActive(true);},coin(){const o=getState().onboarding;if(!active||o.coinHintShown)return;o.coinHintShown=true;changed();notify('魚兒帶來金幣了！點一下就能收取。');}};return api;
+ welcome.addEventListener('cancel',e=>e.preventDefault());
+ const api={render,setActive(on){active=on;if(!on)welcome.close();const o=getState().onboarding;if(on&&o.paused&&!o.completed){o.paused=false;changed();}if(on&&o.welcomed&&!o.paused&&[1,2,5,6].includes(o.step))ensureFeeding(o.step===2?'general':o.step===6?'small':null);render();if(on&&!o.completed&&!o.welcomed&&!o.paused&&!welcome.open)welcome.showModal();},report(event){const o=getState().onboarding;if(!active||o.completed||!o.welcomed||o.paused||steps[o.step].event!==event)return false;if(o.step===7&&!grant('fishCard'))return false;const s=steps[o.step];o.step++;if(o.step===12)o.completed=true;changed();render();if(s.success)notify(s.success);return true;},replay(){Object.assign(getState().onboarding,{step:0,completed:false,skipped:false,welcomed:false,paused:false});lastLocatedStep=-1;changed();this.setActive(true);},resume(){getState().onboarding.paused=false;const n=getState().onboarding.step;if([1,2,5,6].includes(n))ensureFeeding(n===2?'general':n===6?'small':null);changed();this.setActive(true);},coin(){const o=getState().onboarding;if(!active||o.coinHintShown)return;o.coinHintShown=true;changed();notify('魚兒吃得飽，就會慢慢帶來金幣！看到魚缸裡的金幣，點一下就能收取。');}};return api;
 }
 window.AquariumTutorial=Object.freeze({create,steps});
 })();
@@ -1245,7 +1299,7 @@ function settings(){const expanded=document.querySelector('.save-tools')?.open||
 
 
   row('水族箱名稱',state.tankName,'改名字',renameTank);
-  row('接續新手教學','按餵食、選飼料、點水面；可以暫停或略過。','接續',()=>{dialog.close();tutorial.resume();});
+  row('接續新手教學','繼續未完成的操作教學。','接續',()=>{dialog.close();tutorial.resume();});
   row('重新觀看新手引導','從第一步開始，魚兒與進度都會保留。','重看',()=>{dialog.close();tutorial.replay();});
   row('返回首頁','先保存進度，之後可按繼續遊玩。','返回首頁',goHome);
   if(CONFIG.PLAYTEST)row('本次試玩摘要','只記錄本機匿名操作次數與時間。','匯出試玩摘要',exportSession);
@@ -1306,7 +1360,7 @@ function renderShop(){
   }
   if(state.placedDecorations.length){const placed=document.createElement('div');placed.className='placed-list';placed.append(paragraph('目前的布置','placed-title'));for(const item of state.placedDecorations){const row=document.createElement('div');row.className='placed-row';row.append(paragraph(`${DECORATIONS[item.decoration].name} · ${item.normX<.34?'左側':item.normX>.66?'右側':'中央'}`),button('收回裝飾',()=>{if(conflict)return;state.placedDecorations=state.placedDecorations.filter(d=>d.id!==item.id);buildBackground();markDirty(true);renderShop();},'text-button'));placed.append(row);}root.append(placed);}
  }
- tutorial.render();root.append(paragraph(shopTab==='fish'?'好好照顧、收取金幣、遇見新魚，養魚等級就會逐漸提升。':'可以自由布置魚缸！按「調整布置」，拖動裝飾就能改變位置。','dialog-note'));
+ tutorial.render();root.append(paragraph(shopTab==='fish'?'好好餵魚、收取金幣，養魚等級就會逐漸提升。':shopTab==='feed'?'飼料用完時，可以在這裡購買。先看看每包價格及庫存。':'按「調整布置」，就能移動魚缸裡的裝飾。','dialog-note'));
 }
 // Ownership is recorded before placement. A full tank keeps the purchase in inventory.
 function buyDecoration(id){
@@ -1591,7 +1645,7 @@ function activate(candidate,{backup=null,elapsed=0,manualSource=null}={}){
  try{next=validate(candidate);if(backup)backupCurrent(backup);mergeRewardLedger(next);mergeGiftLedger(next);next.savedAt=Date.now();localStorage.setItem(CONFIG.SAVE_KEY,JSON.stringify(next));}
  catch(e){toast('目前無法保存新進度，原本存檔仍保留。請確認瀏覽器有可用空間，再試一次。',8000);return false;}
  clearTimeout(saveTimer);saveTimer=0;state=next;started=true;dirty=false;saveBlocked=conflict=false;lastSaved=next.savedAt;lastFrame=0;simTime=0;saveAccumulator=0;feedAt=-99;
- $('home').hidden=true;$('game').hidden=false;setFeeding(false);allFish().forEach(syncFish);rebuildRuntime();resize();buildBackground();
+ $('home').hidden=true;$('game').hidden=false;window.scrollTo(0,0);setFeeding(false);allFish().forEach(syncFish);rebuildRuntime();resize();buildBackground();
  if(elapsed)offline(elapsed);evaluateGoals(false);save();checkLevelGifts();updateUI();tutorial.setActive(true);
  if(manualSource){try{const raw=localStorage.getItem(manualSource);if(raw&&!localStorage.getItem(CONFIG.MANUAL_KEY)){const m=validate(JSON.parse(raw));m.saveId=next.saveId;localStorage.setItem(CONFIG.MANUAL_KEY,JSON.stringify(m));}}catch(e){toast('進度已承接，舊手動存檔仍保留；可下載舊版備份後再匯入。');}}
  return true;
