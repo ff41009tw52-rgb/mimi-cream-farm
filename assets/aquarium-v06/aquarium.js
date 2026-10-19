@@ -119,7 +119,7 @@ function settings(){const expanded=document.querySelector('.save-tools')?.open||
 
 
   row('水族箱名稱',state.tankName,'改名字',renameTank);
-  row('接續新手教學','按餵食、選飼料、點水面；可以暫停或略過。','接續',()=>{dialog.close();tutorial.resume();});
+  row('接續新手教學','繼續未完成的操作教學。','接續',()=>{dialog.close();tutorial.resume();});
   row('重新觀看新手引導','從第一步開始，魚兒與進度都會保留。','重看',()=>{dialog.close();tutorial.replay();});
   row('返回首頁','先保存進度，之後可按繼續遊玩。','返回首頁',goHome);
   if(CONFIG.PLAYTEST)row('本次試玩摘要','只記錄本機匿名操作次數與時間。','匯出試玩摘要',exportSession);
@@ -180,7 +180,7 @@ function renderShop(){
   }
   if(state.placedDecorations.length){const placed=document.createElement('div');placed.className='placed-list';placed.append(paragraph('目前的布置','placed-title'));for(const item of state.placedDecorations){const row=document.createElement('div');row.className='placed-row';row.append(paragraph(`${DECORATIONS[item.decoration].name} · ${item.normX<.34?'左側':item.normX>.66?'右側':'中央'}`),button('收回裝飾',()=>{if(conflict)return;state.placedDecorations=state.placedDecorations.filter(d=>d.id!==item.id);buildBackground();markDirty(true);renderShop();},'text-button'));placed.append(row);}root.append(placed);}
  }
- tutorial.render();root.append(paragraph(shopTab==='fish'?'好好照顧、收取金幣、遇見新魚，養魚等級就會逐漸提升。':'可以自由布置魚缸！按「調整布置」，拖動裝飾就能改變位置。','dialog-note'));
+ tutorial.render();root.append(paragraph(shopTab==='fish'?'好好餵魚、收取金幣，養魚等級就會逐漸提升。':shopTab==='feed'?'飼料用完時，可以在這裡購買。先看看每包價格及庫存。':'按「調整布置」，就能移動魚缸裡的裝飾。','dialog-note'));
 }
 // Ownership is recorded before placement. A full tank keeps the purchase in inventory.
 function buyDecoration(id){
@@ -465,7 +465,7 @@ function activate(candidate,{backup=null,elapsed=0,manualSource=null}={}){
  try{next=validate(candidate);if(backup)backupCurrent(backup);mergeRewardLedger(next);mergeGiftLedger(next);next.savedAt=Date.now();localStorage.setItem(CONFIG.SAVE_KEY,JSON.stringify(next));}
  catch(e){toast('目前無法保存新進度，原本存檔仍保留。請確認瀏覽器有可用空間，再試一次。',8000);return false;}
  clearTimeout(saveTimer);saveTimer=0;state=next;started=true;dirty=false;saveBlocked=conflict=false;lastSaved=next.savedAt;lastFrame=0;simTime=0;saveAccumulator=0;feedAt=-99;
- $('home').hidden=true;$('game').hidden=false;setFeeding(false);allFish().forEach(syncFish);rebuildRuntime();resize();buildBackground();
+ $('home').hidden=true;$('game').hidden=false;window.scrollTo(0,0);setFeeding(false);allFish().forEach(syncFish);rebuildRuntime();resize();buildBackground();
  if(elapsed)offline(elapsed);evaluateGoals(false);save();checkLevelGifts();updateUI();tutorial.setActive(true);
  if(manualSource){try{const raw=localStorage.getItem(manualSource);if(raw&&!localStorage.getItem(CONFIG.MANUAL_KEY)){const m=validate(JSON.parse(raw));m.saveId=next.saveId;localStorage.setItem(CONFIG.MANUAL_KEY,JSON.stringify(m));}}catch(e){toast('進度已承接，舊手動存檔仍保留；可下載舊版備份後再匯入。');}}
  return true;
