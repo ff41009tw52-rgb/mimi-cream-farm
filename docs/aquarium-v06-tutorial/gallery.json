@@ -1,0 +1,105 @@
+{
+  "featureCommit": "634ab024412d3c1f42d225ad39af580af0f34182",
+  "source": "Local Chromium 138 automated real-operation screenshots, 2026-10-19; no physical devices.",
+  "physicalDevicesTested": false,
+  "items": [
+    {
+      "file": "task-1366-1-feed-button.webp",
+      "caption": "任務一：真正的餵食按鈕"
+    },
+    {
+      "file": "task-1366-1-water.webp",
+      "caption": "任務一：選好飼料後點水面"
+    },
+    {
+      "file": "task-1366-2-small-gift.webp",
+      "caption": "任務二：另一種飼料與鼠魚"
+    },
+    {
+      "file": "task-1366-3-fish-card.webp",
+      "caption": "任務三：飽足、成長與食物"
+    },
+    {
+      "file": "task-1366-4-coin.webp",
+      "caption": "任務四：立即練習收金幣"
+    },
+    {
+      "file": "task-1366-5-feed-shop.webp",
+      "caption": "任務五：購買適合的飼料"
+    },
+    {
+      "file": "task-1366-6-fish-shop.webp",
+      "caption": "任務六：查看價格並買新魚"
+    },
+    {
+      "file": "task-1366-6-new-fish.webp",
+      "caption": "新魚真正加入魚缸"
+    },
+    {
+      "file": "task-1366-7-complete.webp",
+      "caption": "1366×768 桌面完整遊戲畫面"
+    },
+    {
+      "file": "task-1440-7-complete.webp",
+      "caption": "1440×900 桌面單畫面"
+    },
+    {
+      "file": "task-390-1-water.webp",
+      "caption": "手機：餵食水面引導"
+    },
+    {
+      "file": "task-390-2-small-gift.webp",
+      "caption": "手機：小型飼料贈禮"
+    },
+    {
+      "file": "task-390-3-fish-card.webp",
+      "caption": "手機：飽足度與成長說明"
+    },
+    {
+      "file": "task-390-3-food-details.webp",
+      "caption": "手機：資料卡內查看適合飼料"
+    },
+    {
+      "file": "task-390-4-coin.webp",
+      "caption": "手機：實際收金幣"
+    },
+    {
+      "file": "task-390-5-feed-shop.webp",
+      "caption": "手機：飼料購買"
+    },
+    {
+      "file": "task-390-6-fish-shop.webp",
+      "caption": "手機：購魚教學"
+    },
+    {
+      "file": "task-390-7-complete.webp",
+      "caption": "手機：完成後自由養成"
+    },
+    {
+      "file": "task-820-7-complete.webp",
+      "caption": "820×1180 直式平板"
+    },
+    {
+      "file": "task-1024-7-complete.webp",
+      "caption": "1024×768 橫式平板"
+    },
+    {
+      "file": "support-feed-5.webp",
+      "caption": "飼料：不足時只補差額"
+    },
+    {
+      "file": "support-feed-100.webp",
+      "caption": "飼料：足夠時不補助"
+    },
+    {
+      "file": "support-fish-5.webp",
+      "caption": "購魚：不足時只補差額"
+    },
+    {
+      "file": "support-fish-100.webp",
+      "caption": "購魚：足夠時不補助"
+    }
+  ],
+  "ciRun": "https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/39204367451",
+  "ciConclusion": "success"
+}
