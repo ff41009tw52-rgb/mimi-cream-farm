@@ -1729,7 +1729,7 @@ function paintHomeFish(){const c=$('home-fish').getContext('2d');c.clearRect(0,0
 function backupCurrent(tag){const stored=findStored();if(stored)localStorage.setItem(CONFIG.SAVE_KEY+'_'+tag,stored.raw);}
 function activate(candidate,{backup=null,elapsed=0,manualSource=null}={}){
  let next;
- try{next=validate(candidate);if(backup)backupCurrent(backup);const recovered=next.saveId?recoverTutorialTransaction(next.saveId):null;if(recovered)next=validate(recovered);mergeRewardLedger(next);mergeGiftLedger(next);next.savedAt=Date.now();localStorage.setItem(CONFIG.SAVE_KEY,JSON.stringify(next));}
+ try{next=validate(candidate);if(backup)backupCurrent(backup);const recovered=next.saveId?recoverTutorialTransaction(next.saveId):null;if(recovered&&!backup)next=validate(recovered);mergeRewardLedger(next);mergeGiftLedger(next);next.savedAt=Date.now();localStorage.setItem(CONFIG.SAVE_KEY,JSON.stringify(next));}
  catch(e){toast('目前無法保存新進度，原本存檔仍保留。請確認瀏覽器有可用空間，再試一次。',8000);return false;}
  clearTimeout(saveTimer);saveTimer=0;state=next;started=true;dirty=false;saveBlocked=conflict=false;lastSaved=next.savedAt;lastFrame=0;simTime=0;saveAccumulator=0;feedAt=-99;
  $('home').hidden=true;$('game').hidden=false;window.scrollTo(0,0);setFeeding(false);allFish().forEach(syncFish);rebuildRuntime();resize();buildBackground();
@@ -1761,7 +1761,7 @@ function readGifts(id=state.saveId){
 function ledgerRecord(ledger,next=state){return {ids:[...new Set([...ledger.ids,...next.gifts])],emergencyAt:Math.max(ledger.emergencyAt,next.emergencyAt),tutorialEvents:[...new Set([...(ledger.tutorialEvents||[]),...(!next.onboarding.review?next.onboarding.events:[])])],supportAmounts:{feed:Math.max(ledger.supportAmounts?.feed||0,next.onboarding.supportAmounts.feed),fish:Math.max(ledger.supportAmounts?.fish||0,next.onboarding.supportAmounts.fish)}};}
 function recoverTutorialTransaction(id){
  const ledger=readGifts(id);if(!ledger.pending)return null;const pending=validate(ledger.pending),raw=localStorage.getItem(CONFIG.SAVE_KEY),current=raw?JSON.parse(raw):null;
- const needsCommit=!current||current.saveId!==id||current.onboarding?.transactionId!==pending.onboarding.transactionId&&current.savedAt<=pending.savedAt;
+ const needsCommit=!current||current.saveId!==id||current.onboarding?.transactionId!==pending.onboarding.transactionId;
  if(needsCommit)localStorage.setItem(CONFIG.SAVE_KEY,JSON.stringify(pending));
  const clean={...ledger};delete clean.pending;localStorage.setItem(giftKey(id),JSON.stringify(clean));return needsCommit?pending:null;
 }
