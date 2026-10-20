@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#eff5ef"><title>悠悠水族箱｜我的小小水世界</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/aquarium-v041-r2/aquarium.css">
+<link rel="stylesheet" href="assets/aquarium-v041-r2/aquarium-observation.css">
+<link rel="stylesheet" href="assets/aquarium-v042/refinements.css">
+<link rel="stylesheet" href="assets/aquarium-v05/aquarium.css">
+<link rel="stylesheet" href="assets/aquarium-v06/aquarium.css">
+<script defer src="assets/aquarium-v05/aquarium-data.js"></script>
+<script defer src="assets/aquarium-v06/content.js"></script>
+
+<script defer src="assets/aquarium-v041-r2/aquarium-save.js"></script>
+<script defer src="assets/aquarium-v05/aquarium-save.js"></script>
+<script defer src="assets/aquarium-v06/data.js"></script>
+<script defer src="assets/aquarium-v06/save.js"></script>
+<script defer src="assets/aquarium-v041-r2/aquarium-world.js"></script>
+<script defer src="assets/aquarium-v041-r2/aquarium-observation-content.js"></script>
+<script defer src="assets/aquarium-v05/anatomy.js"></script>
+<script defer src="assets/aquarium-v042/breathing-renderer.js"></script>
+<script defer src="assets/aquarium-v042/breathing-template.js"></script>
+<script defer src="assets/aquarium-v042/breathing-review.js"></script>
+<script defer src="assets/aquarium-v05/aquarium-observation.js"></script>
+<script defer src="assets/aquarium-v041-r2/aquarium-fish-art.js"></script>
+<script defer src="assets/aquarium-v06/fish-art-extra.js"></script>
+<script defer src="assets/aquarium-v06/tutorial.js"></script>
+<script defer src="assets/aquarium-v06/decor-art.js"></script>
+<script defer src="assets/aquarium-v06/decor-extra.js"></script>
+<script defer src="assets/aquarium-v06/aquarium.js"></script>
+
+</head>
+<body>
+<section id="home" class="home" aria-labelledby="home-title">
+<div class="home-intro"><span class="eyebrow">一缸屬於你的日常 · V0.6</span><h1 id="home-title">悠悠水族箱</h1><p class="home-subtitle">我的小小水世界 · 淡水魚觀察遊戲</p><p class="home-copy">養育不同的魚兒，觀察牠們的成長，收集金幣布置水族箱，還能探索魚的身體構造與呼吸方式。</p><div class="home-art" aria-hidden="true"><canvas id="home-fish" width="760" height="300"></canvas></div><div class="home-features"><article><h2>養育魚兒</h2><p>餵食、陪伴與成長。</p></article><article><h2>收集布置</h2><p>收集金幣，購買魚兒與裝飾。</p></article><article><h2>科學觀察</h2><p>認識魚的身體構造與呼吸方式。</p></article></div></div>
+<div class="home-start"><span class="eyebrow">從這裡開始</span><h2>打造自己的小水世界</h2><label for="tank-new-name">水族箱名稱 <small>最多 10 個字</small></label><input id="tank-new-name" class="name-input" maxlength="20" placeholder="我的小水族箱" autocomplete="off"><p id="home-error" role="status"></p><button id="home-new" class="home-primary">開始新的水族箱</button><button id="home-continue" hidden>繼續上次的遊戲</button><p id="home-summary"></p><p class="home-local">不需要帳號。進度會自動儲存在這台手機的瀏覽器；下次使用相同瀏覽器開啟，按「繼續上次的遊戲」即可接續。不要清除網站資料；請勿清除瀏覽器的網站資料，以免失去進度。</p></div></section>
+<main class="app" id="game" hidden>
+<header class="header"><div class="brand"><span class="brand-icon" aria-hidden="true">≈</span><div><h1>悠悠水族箱</h1><p>我的小小水世界</p></div><span class="version">V0.6</span></div><span class="header-note">把日常，養成喜歡的樣子</span></header>
+<section class="hud" aria-label="水族箱狀態">
+<div class="stat coins-stat"><span class="coin-icon" aria-hidden="true">＄</span><div><span class="stat-label">我的金幣</span><strong id="coins">20</strong></div></div>
+<div class="stat residents"><span class="residents-icon" aria-hidden="true">◌</span><div><span class="stat-label">魚兒數量</span><strong id="capacity">3 <small>/ 5</small></strong></div></div>
+<div class="level-stat"><span id="level">養魚等級 1</span><div class="xp-track"><i id="xp-bar"></i></div><small id="next-unlock">下一級解鎖：斑馬魚</small></div>
+<div class="save-status" id="save-status" role="status">正在準備水族箱…</div>
+</section>
+<nav id="tank-selector" aria-label="選擇魚缸"></nav>
+<aside id="onboarding" class="onboarding" hidden aria-label="新手教學"><span id="onboarding-step" class="guide-step"></span><div><h2 id="onboarding-title"></h2><p id="onboarding-copy"></p></div><div class="guide-actions" hidden><button id="onboarding-gift" hidden>收下小型魚飼料 ×5 份</button></div></aside>
+<section class="aquarium" aria-label="我的水族箱">
+<div class="tank-caption"><span><i></i> <b id="tank-name">小小水族箱</b></span></div>
+<div class="tank-viewport"><canvas id="tank" tabindex="0" aria-label="水族箱。點魚查看狀態，點金幣收集；先按餵食，再點水面投放飼料。鍵盤可從更多功能的我的魚兒查看，餵食模式按 Enter 投食。"></canvas>
+<div id="surface-cue" hidden aria-hidden="true">↓ 點這裡的水面，把飼料送進水裡</div></div>
+<div class="feeding-hint" id="feeding-hint" hidden><strong>按餵食 → 選飼料 → 點一下魚缸上方的水面</strong><div id="feed-choices"><button id="feed-general" data-feed="general" aria-pressed="false"><b>綜合飼料</b><small>剩餘 0 份</small><span>孔雀魚、金魚、黑摩利、紅劍魚、月光魚</span></button><button id="feed-small" data-feed="small" aria-pressed="false"><b>小型魚飼料</b><small>剩餘 0 份</small><span>鼠魚、斑馬魚、白雲山魚、紅蓮燈、三角燈</span></button><button id="feed-protein" data-feed="protein" aria-pressed="false"><b>高蛋白飼料</b><small>剩餘 0 份</small><span>神仙魚、鬥魚、蜜糖麗麗魚、酷利泥鰍、玻利維亞鳳凰</span></button></div><p class="food-rule">飼料分類是遊戲的簡化規則，真實魚類的食物選擇更多樣。</p><p id="feed-current" aria-live="polite">先選一種飼料</p><div class="feeding-actions"><button id="feed-shop">前往飼料商店</button><button id="stop-feed">結束餵食</button></div></div>
+<aside class="fish-card" id="fish-card" hidden aria-label="魚兒資料"><button class="icon-button card-close" id="close-card" aria-label="關閉魚兒資料">×</button><span class="eyebrow" id="fish-stage"></span><h2 id="fish-name"></h2><p id="fish-species"></p><div class="meter-label">飽足度 <b id="fish-hunger"></b></div><meter id="hunger-meter" min="0" max="100"></meter><p class="fish-care-tip">飽足度表示魚兒吃得飽不飽。數值變低時，就需要餵食。</p><div class="meter-label">成長進度 <b id="fish-growth"></b></div><meter id="growth-meter" min="0" max="100"></meter><p class="fish-care-tip">魚兒吃飽後會慢慢長大，從幼魚變成成魚。</p><p class="mood" id="fish-mood"></p><p class="personality" id="fish-personality"></p><p id="fish-food"></p><p class="fish-care-tip">每種魚都有適合牠的飼料，餵食前可以先看看這裡。</p><button id="observe-fish" class="card-observe">觀察這隻魚</button><div class="card-actions"><button id="rename">改名字</button><button id="fish-more">更多資料</button></div></aside>
+<div id="decor-handles" class="decor-handles" hidden></div>
+<div class="edit-toolbar" id="edit-toolbar" hidden><span id="edit-label">點選布置，再左右移動</span><div><button id="edit-left" aria-label="向左移動裝飾">←</button><button id="edit-right" aria-label="向右移動裝飾">→</button><button id="edit-store">收回裝飾</button><button id="edit-done">完成布置</button></div></div>
+
+<div class="tank-base" aria-hidden="true"></div>
+</section>
+<section class="controls" aria-label="魚缸操作"><button id="feed" class="action primary" aria-pressed="false"><span class="action-icon" aria-hidden="true">⁙</span><span>餵食<small>選飼料，再點水面</small></span></button><button id="shop" class="action"><span class="action-icon" aria-hidden="true">⌂</span><span>商店<small>購買魚兒、飼料與布置</small></span></button><button id="more-menu" class="action" aria-haspopup="dialog"><span class="action-icon" aria-hidden="true">≡</span><span>更多<small>魚兒、觀察與布置</small></span></button></section>
+
+
+</main>
+<dialog id="dialog"><div class="dialog-head"><div><span class="eyebrow" id="dialog-eyebrow">一起照顧水中的生命</span><h2 id="dialog-title"></h2></div><button class="icon-button" id="dialog-close" aria-label="關閉視窗">×</button></div><div id="dialog-content"></div></dialog>
+<div id="toast" role="status" popover="manual" class="toast" hidden></div>
+</body></html>

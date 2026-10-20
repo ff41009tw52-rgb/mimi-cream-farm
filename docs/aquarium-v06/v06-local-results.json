@@ -1,0 +1,111 @@
+{
+  "results": [
+    {
+      "name": "12-step real-action gift tutorial, correct click target, 3 pellets/1 stock, food shop, original science and no replay rewards",
+      "passed": true
+    },
+    {
+      "name": "All ten species eat their assigned 4+4+2 food, each successful surface drop consumes one stock and creates three pellets",
+      "passed": true
+    },
+    {
+      "name": "Wrong-food confirmation, no wrong eating, zero-stock protection, emergency rescue and refresh-proof cooldown",
+      "passed": true
+    },
+    {
+      "name": "5→7→9→10 upgrades, independent names, two empty tank purchases, safe fish movement, shared currency",
+      "passed": true
+    },
+    {
+      "name": "Full tanks block buying/moving, insufficient funds block upgrades and level gifts persist without duplication",
+      "passed": true
+    },
+    {
+      "name": "All 30 fish progress with one rendered tank, single global clock, all-tank offline reward once",
+      "passed": true
+    },
+    {
+      "name": "20 normal minutes of actual simulation: initial fish stay productive and feed costs are affordable",
+      "passed": true,
+      "details": {
+        "minutes": 20,
+        "first65Minute": 6,
+        "coins": 338,
+        "stock": {
+          "general": 8,
+          "small": 5,
+          "protein": 0
+        },
+        "hunger": [
+          46.40037361107619,
+          46.40037361107619,
+          46.40037361107619
+        ]
+      }
+    },
+    {
+      "name": "30-fish real-time mobile rendering performance",
+      "passed": true,
+      "details": {
+        "fish": 30,
+        "tanks": 3,
+        "decorationsPerTank": 20,
+        "renderedTanks": 1,
+        "fps": 46.38702155632232,
+        "meanWorkMs": 4.818716577543095
+      }
+    },
+    {
+      "name": "JSON round trip, invalid-file protection, rewind gift ledger and quota-safe feeding",
+      "passed": true
+    },
+    {
+      "name": "Fully bundled file:// feeding and original breathing lesson",
+      "passed": true
+    }
+  ],
+  "sizes": [
+    {
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "width": 820,
+      "height": 1180
+    },
+    {
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "economy": {
+    "minutes": 20,
+    "first65Minute": 6,
+    "coins": 338,
+    "stock": {
+      "general": 8,
+      "small": 5,
+      "protein": 0
+    },
+    "hunger": [
+      46.40037361107619,
+      46.40037361107619,
+      46.40037361107619
+    ]
+  },
+  "performance": {
+    "fish": 30,
+    "tanks": 3,
+    "decorationsPerTank": 20,
+    "renderedTanks": 1,
+    "fps": 46.38702155632232,
+    "meanWorkMs": 4.818716577543095
+  },
+  "engine": "chromium",
+  "physicalDevicesTested": false,
+  "errors": []
+}

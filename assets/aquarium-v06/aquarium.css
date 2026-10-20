@@ -1,0 +1,170 @@
+/* V0.6: large controls, a surface target and shared resources without crowding the tank. */
+#tank-selector{display:flex;gap:10px;overflow-x:auto;padding:8px 4px 16px;scroll-snap-type:x proximity}#tank-selector button{flex:0 0 auto;min-width:150px;min-height:64px;padding:12px 18px;border:1px solid #b9d1c1;border-radius:18px;background:#fffdf4;font-size:17px;scroll-snap-align:start}#tank-selector p{font-size:14px;margin:6px 0 0}#tank-selector [aria-pressed=true]{background:#2a7b6c;color:#fff}
+.feeding-hint{position:relative;inset:auto;transform:none;max-width:none;width:auto;margin:12px;z-index:5;background:#fffbed;border:2px solid #c3d5b5;border-radius:18px;padding:18px;font-size:18px;box-shadow:0 8px 20px #45715c12}.feeding-hint:before{display:none}#feed-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}#feed-choices button{min-height:100px;background:#f2f8ea;border:2px solid #c6d6bb;border-radius:14px;padding:12px;text-align:left;display:grid;gap:6px;font-size:18px}#feed-choices small{font-size:17px;color:#316d5a}#feed-choices span{font-size:14px;line-height:1.6;color:#526c5d}#feed-choices [aria-pressed=true]{background:#fff0b3;border-color:#ac8d2f}.feeding-actions{display:flex;gap:10px;flex-wrap:wrap}.feeding-actions button{min-height:48px;font-size:17px;padding:10px 16px;border-radius:12px}#feed-current{font-size:18px!important}.gift-card{background:#fff0bd;border:2px dashed #cda95a;border-radius:18px;padding:20px;margin:20px 0;font-size:20px;text-align:center}.gift-card strong{display:block;font-size:26px;margin-top:8px}.feed-bag{display:grid;place-items:center;width:70px;height:80px;border-radius:10px 10px 24px 24px;color:#fff;font-size:26px;margin:8px auto}.new-tank-offer{padding:18px;margin:18px 0;border:1px solid #c3d9bc;border-radius:18px;background:#f4f8eb}
+#surface-cue{position:absolute;top:8%;left:4%;right:4%;height:19%;border:3px dashed #f5c34e;border-radius:18px;background:#fffbd022;color:#245d53;font-size:18px;font-weight:bold;text-align:center;padding:12px;pointer-events:none;z-index:4}#surface-cue[hidden]{display:none}.aquarium:has(#feeding-hint:not([hidden])){overflow:visible}.onboarding{scroll-margin-top:16px}button{touch-action:manipulation}.guide-actions{max-width:300px}#onboarding-gift{background:#f7df91;border-radius:12px;font-size:18px}.controls,.feeding-actions{padding-bottom:env(safe-area-inset-bottom)}.app{padding-bottom:max(22px,env(safe-area-inset-bottom))}#fish-food{font-size:18px;color:#286c5b}
+@media(max-width:680px){#feed-choices{grid-template-columns:1fr}#feed-choices button{min-height:72px;grid-template-columns:1fr auto}#feed-choices span{grid-column:1/-1}.feeding-hint{padding:14px;margin:10px;font-size:18px}#tank-selector button{min-width:145px}.guide-actions{max-width:none}#surface-cue{font-size:17px;padding:8px}.onboarding p{font-size:18px!important}.onboarding{max-height:none}footer{gap:8px;flex-wrap:wrap}}
+.tutorial-shop-copy{background:#fff3c4;border-left:4px solid #c8a63d;border-radius:12px;padding:16px;font-size:19px;line-height:1.8}
+.feeding-hint{display:block}.tank-viewport{position:relative}.food-rule{font-size:15px;line-height:1.7;color:#617b68}
+
+/* Compact real-action tutorial and a one-viewport desktop play area. */
+#onboarding{align-items:center;grid-template-columns:48px minmax(0,1fr) auto;gap:11px;padding:11px 16px;margin:0 0 10px;min-width:0}
+#onboarding .guide-step{width:43px;height:43px}
+#onboarding h2{font-size:19px;line-height:1.35;margin:0}
+#onboarding p{font-size:16px!important;line-height:1.52;margin:4px 0 0}
+#onboarding .guide-actions{max-width:none;grid-column:auto;flex-direction:row;align-items:center}
+#onboarding #onboarding-gift{font-size:15px;line-height:1.3;min-height:44px;padding:8px 12px}
+.fish-care-tip{font-size:13px;line-height:1.5;color:#477966;margin:2px 0 8px}
+.fish-card{max-height:calc(100% - 60px);overflow-y:auto}
+@media (min-width:1060px) and (min-height:680px){
+ #game.app{height:100dvh;max-height:100dvh;overflow:hidden;display:flex;flex-direction:column;gap:7px;padding:10px 24px 9px}
+ #game .header{flex:0 0 auto;margin:0;min-height:39px}
+ #game .brand-icon{width:40px;height:40px;font-size:36px;border-radius:12px}
+ #game .brand h1{font-size:21px;letter-spacing:2px}
+ #game .brand p{display:none}
+ #game .hud{flex:0 0 auto;min-height:50px;padding:8px 15px;gap:9px;margin:0}
+ #game .stat strong{font-size:22px}
+ #game #tank-selector{flex:0 0 auto;padding:1px 2px 3px;gap:8px;min-height:0}
+ #game #tank-selector button{min-height:39px;min-width:140px;padding:5px 12px;font-size:14px;border-radius:12px}
+ #game #tank-selector p{font-size:12px;margin:1px 0 0}
+ #game #onboarding{flex:0 0 auto;margin:0}
+ #game .aquarium{flex:1 1 0;display:flex;flex-direction:column;min-height:190px;overflow:hidden;border-width:5px}
+ #game .tank-viewport{flex:1 1 0;min-height:0;position:relative}
+ #game .tank-viewport #tank{height:100%;min-height:0;max-height:none}
+ #game .tank-base{height:26px;min-height:26px;flex:0 0 26px}
+ #game .controls{flex:0 0 auto;margin:0;gap:12px}
+ #game .controls .action{min-height:47px;min-width:185px;padding:6px 16px;font-size:17px;gap:9px}
+ #game .controls .action small{display:none}
+ #game footer{flex:0 0 auto;margin:0;min-height:40px;gap:10px}
+ #game footer p{display:none}
+ #game footer button{min-height:40px;padding:6px 12px}
+ #game .aquarium:has(#feeding-hint:not([hidden])){overflow:hidden}
+ #game .feeding-hint{position:absolute;right:9px;bottom:10px;left:auto;top:auto;width:min(355px,40%);max-height:calc(100% - 20px);overflow-y:auto;margin:0;padding:10px 12px;font-size:14px}
+ #game .feeding-hint>strong{font-size:14px;line-height:1.4}
+ #game #feed-choices{grid-template-columns:1fr;gap:5px;margin:7px 0}
+ #game #feed-choices button{min-height:48px;display:flex;flex-wrap:wrap;align-items:center;gap:3px 6px;font-size:14px;padding:6px 8px}
+ #game #feed-choices button small{font-size:13px}
+ #game #feed-choices button span{font-size:11px;line-height:1.4;width:100%}
+ #game .feeding-hint .food-rule{font-size:11px;line-height:1.4;margin:3px 0}
+ #game .feeding-hint #feed-current{font-size:13px!important;margin:4px 0}
+ #game .feeding-actions{gap:6px}
+ #game .feeding-actions button{min-height:35px;font-size:12px;padding:5px 8px}
+}
+@media(max-width:1059px){
+ #onboarding{grid-template-columns:44px minmax(0,1fr);padding:12px 13px;gap:9px}
+ #onboarding .guide-actions{grid-column:2}
+ #onboarding p{font-size:17px!important;line-height:1.55}
+ #onboarding h2{font-size:19px}
+}
+@media(max-width:680px){
+ #onboarding{margin:0 0 12px;padding:12px;gap:9px}
+ #onboarding p{font-size:17px!important}
+ #onboarding #onboarding-gift{width:100%;font-size:16px}
+ .fish-care-tip{font-size:12px}
+}
+/* A real existing coin is targeted without covering the rest of the aquarium. */
+#tutorial-coin-target{position:absolute;z-index:7;transform:translate(-50%,-50%);min-height:48px;min-width:100px;border:3px solid #c49522;border-radius:24px;background:#fff1b5;color:#325f4d;font-size:17px;box-shadow:0 0 0 8px #fff3a777}
+#tutorial-coin-target[hidden]{display:none}
+#onboarding .guide-step{font-size:14px;white-space:nowrap}
+#onboarding .guide-actions[hidden]{display:none}
+@media(max-width:1059px){.fish-care-tip{font-size:15px;line-height:1.6}}
+
+#onboarding #onboarding-success{font-size:15px!important;color:#32694d;font-weight:600;margin-top:4px}
+/* Keep the existing return control reachable while reading a long fish card. */
+.fish-card .card-close{position:sticky;top:0;right:0;float:right;margin:-6px -6px 0 4px;background:#f5f7e9;z-index:2}
+#tutorial-coin-target{width:54px;height:54px;min-width:54px;min-height:54px;padding:0;border-radius:50%;background:#fff6c622;font-size:0}
+#tutorial-coin-target::after{content:'點這枚金幣';position:absolute;top:calc(100% + 5px);left:50%;transform:translateX(-50%);white-space:nowrap;background:#fff9dc;border-radius:10px;padding:3px 8px;font-size:16px;line-height:1.5;box-shadow:0 2px 8px #65744422}
+
+/* V0.6 merchandise polish: purely visual; no changes to feeding or item ownership. */
+#game .tank-caption #tank-name{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#game .tank-caption>span:first-child{max-width:100%;min-width:0}
+#game .tank-base{display:block}
+#dialog .shop-grid .feed-item,#dialog .shop-grid .decor-item{
+ border:1px solid #cbdccb;background:linear-gradient(155deg,#fffef9 0%,#f3f8ec 100%);
+ box-shadow:0 9px 22px #3e73521a,0 2px 4px #486d5310;
+ border-radius:19px;padding:15px;gap:9px;transition:border-color .18s,box-shadow .18s
+}
+#dialog .shop-grid .feed-item:hover,#dialog .shop-grid .decor-item:hover{border-color:#94bba7;box-shadow:0 12px 24px #3e735524}
+#dialog .shop-grid .feed-item h3,#dialog .shop-grid .decor-item h3{margin:2px 0 0;font-size:19px;line-height:1.4;color:#214c4b}
+#dialog .shop-grid .feed-item p,#dialog .shop-grid .decor-item p{min-height:0;margin:0;flex:none;line-height:1.6}
+#dialog .shop-grid .feed-item .buy,#dialog .shop-grid .decor-item .buy{width:100%;min-height:48px;border-radius:12px;font-size:15px;margin-top:auto}
+#dialog .shop-grid .feed-item .feed-display{height:182px;display:grid;place-items:center;overflow:hidden;position:relative;border-radius:15px;background:radial-gradient(ellipse at 50% 100%,#a4cec45c,transparent 66%),linear-gradient(135deg,#edf7eb,#dceee7);border:1px solid #cce0d4}
+#dialog .shop-grid .feed-item .feed-display:before,#dialog .shop-grid .feed-item .feed-display:after{content:"";position:absolute;border:1px solid #ffffffa0;border-radius:50%;width:13px;height:13px;top:23px;left:24px}
+#dialog .shop-grid .feed-item .feed-display:after{width:8px;height:8px;top:64px;right:26px;left:auto}
+#dialog .shop-grid .feed-item .feed-bag{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;width:114px;height:158px;margin:0;background:linear-gradient(114deg,#ffffff40 0 11%,transparent 34%),linear-gradient(180deg,color-mix(in srgb,var(--feed-main),#ffffff 23%),var(--feed-main) 75%,color-mix(in srgb,var(--feed-main),#173c36 17%));border:1px solid #ffffffa3;border-radius:9px 9px 15px 15px;box-shadow:inset 3px 0 5px #ffffff38,inset -4px 0 7px #233c3344,0 11px 14px #30594b37;transform:rotate(-2deg)}
+#dialog .shop-grid .feed-item .feed-bag:before{content:"";position:absolute;left:5px;right:5px;top:7px;height:3px;border-top:1px solid #ffffffa6;border-bottom:1px solid #214c4b38}
+#dialog .shop-grid .feed-item .feed-bag:after{content:"";position:absolute;left:12px;right:12px;bottom:7px;height:4px;border-radius:100%;background:#183e3938}
+#dialog .shop-grid .feed-item .feed-seal{width:91%;height:11px;flex-shrink:0;border-radius:5px 5px 2px 2px;background:repeating-linear-gradient(90deg,#ffffff30 0 3px,#1f4e3821 3px 6px);margin:2px 0 3px}
+#dialog .shop-grid .feed-item .feed-brand{font-size:10px;font-weight:800;letter-spacing:.5px;color:#fffdf2;text-shadow:0 1px 3px #264c5277}
+#dialog .shop-grid .feed-item .feed-fishmark{width:68px;height:38px;color:#fef8da;filter:drop-shadow(0 1px 1px #25544a66)}
+#dialog .shop-grid .feed-item .feed-bag-window{height:32px;width:70px;border-radius:15px;background:radial-gradient(circle at 13px 10px,#d6ae71 0 2px,transparent 2.5px),radial-gradient(circle at 29px 19px,#f0d7ac 0 2.4px,transparent 3px),radial-gradient(circle at 52px 13px,#b97e4c 0 2px,transparent 2.8px),radial-gradient(circle at 40px 25px,#e4c58d 0 2px,transparent 3px),#f8efd4d9;border:3px solid #fff5d2a8;box-shadow:inset 0 2px 6px #6c6d4740}
+#dialog .shop-grid .feed-item .feed-pack-count{color:#fffef7;font-size:11px;font-weight:800;letter-spacing:1px;margin-top:3px;text-shadow:0 1px #294e466e}
+#dialog .shop-grid .feed-item .feed-species{font-size:13px;color:#5a7364;line-height:1.65;background:#edf4e8;border-radius:9px;padding:7px 9px;min-height:52px}
+#dialog .shop-grid .feed-item .feed-package-detail{font-size:13px;color:#587368}
+#dialog .shop-grid .feed-item .feed-stock{display:inline-flex;align-self:flex-start;width:auto;font-size:12px;font-weight:750;color:#2d6f62;background:#e0eee2;border-radius:9px;padding:5px 9px}
+#dialog .shop-grid .decor-item .decor-showcase{height:184px;position:relative;display:grid;place-items:center;overflow:hidden;border-radius:15px;background:radial-gradient(ellipse at 50% 120%,#b4d5c0,transparent 72%),linear-gradient(150deg,#eff8ee,#dfeee6);border:1px solid #d3e3d4}
+#dialog .shop-grid .decor-item .decor-showcase[data-material="substrate"]{background:linear-gradient(180deg,#e9f4e8,#d6e9dc)}
+#dialog .shop-grid .decor-item .decor-preview{width:100%;max-width:280px;height:auto;max-height:163px;object-fit:contain;background:transparent!important;border:0!important;border-radius:0}
+#dialog .shop-grid .decor-item .decor-category{position:absolute;left:10px;top:10px;color:#3a7968;background:#fffdf2dd;border:1px solid #bcd7c5;border-radius:100px;padding:3px 9px;font-size:11px;font-weight:700}
+#dialog .shop-grid .decor-item .decor-description{font-size:13px;color:#667d6f;min-height:40px;line-height:1.7}
+#dialog .shop-grid .decor-item .decor-stock{font-size:12px!important;font-weight:700;color:#557365!important;background:#e6efe3;padding:7px 9px;border-radius:9px}
+#dialog .shop-grid .decor-item .decor-stock.is-using{background:#dbefe3;color:#27695a!important}
+#dialog .shop-grid .decor-item .place-button{width:100%;min-height:42px;font-size:13px}
+@media(max-width:680px){
+ #dialog .shop-grid .feed-item,#dialog .shop-grid .decor-item{padding:10px;gap:7px;border-radius:15px}
+ #dialog .shop-grid .feed-item .feed-display,#dialog .shop-grid .decor-item .decor-showcase{height:146px}
+ #dialog .shop-grid .feed-item .feed-bag{transform:scale(.82) rotate(-2deg)}
+ #dialog .shop-grid .feed-item h3,#dialog .shop-grid .decor-item h3{font-size:16px}
+ #dialog .shop-grid .feed-item .feed-species{font-size:12px;min-height:0}
+ #dialog .shop-grid .feed-item .feed-stock,#dialog .shop-grid .decor-item .decor-stock{font-size:11px!important}
+ #dialog .shop-grid .feed-item .buy,#dialog .shop-grid .decor-item .buy{font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){#dialog .shop-grid .feed-item,#dialog .shop-grid .decor-item{transition:none}}
+
+/* Preserve the functional tank name on narrow screens after removing the decorative right caption. */
+#game .tank-caption>span:first-child{display:inline-flex;align-items:center;min-width:0;gap:5px}
+/* Existing merchandise layout stays intact; these styles only support the placement lesson. */
+#feature-hint{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid #c8d9bb;border-radius:12px;background:#f6f6e7;color:#376652;flex:0 0 auto}
+#feature-hint[hidden]{display:none}#feature-hint p{font-size:15px;line-height:1.5;margin:0;flex:1}#feature-hint button{min-height:44px;white-space:nowrap;padding:6px 12px}
+.decor-handles{z-index:4;inset:0}.decor-handle.selected{border:2px solid #fff4a9;background:#fff6ba18;box-shadow:0 0 0 2px #54816c88}.decor-handle:focus-visible{outline:3px solid #f4cb61;outline-offset:2px}
+#tutorial-edit{min-height:44px}#edit-label{font-size:15px}.edit-toolbar{z-index:6}.edit-toolbar button{font-size:15px}
+@media(max-width:680px){#feature-hint{flex-wrap:wrap}#feature-hint p{flex-basis:100%;font-size:16px}#feature-hint button{flex:1}.edit-toolbar{top:42px}.edit-toolbar button{padding:6px 8px}.edit-toolbar>div{gap:4px}}
+
+/* Shop canvases must not inherit the aquarium canvas min-height on mobile. */
+#dialog .shop-grid .decor-item .decor-preview{min-height:0;display:block;grid-area:auto;align-self:center;aspect-ratio:12/7;margin:0}
+
+/* Fish habitat guidance is part of science review, not a water-quality mechanic. */
+#dialog .freshwater-guide{border-left:4px solid #80afa3;background:#edf6ed;border-radius:7px;padding:11px 13px;margin:8px 0 16px;color:#32685e;line-height:1.75;font-size:14px}
+#dialog .fish-habitat{color:#356a5d;font-weight:650;font-size:14px}
+
+/* V0.6: unify primary actions and reduce observation clutter. */
+#game .controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:min(760px,100%);max-width:100%;margin:7px auto 8px;gap:12px}
+#game .controls>.action{min-width:0;width:100%;min-height:56px;justify-content:center;padding:9px 12px;gap:10px;border-radius:15px;font-size:19px;line-height:1.35}
+#game .controls>.action .action-icon{font-size:26px;line-height:1;width:29px}
+#game .controls>.action small{display:none}
+#game .controls>#more-menu{background:#edf6ec;border-color:#b8d5c5;color:#245f58}
+#game .controls>#more-menu .action-icon{color:#428e79}
+#observation #obs-own-play,#observation #obs-fish-note,#observation #obs-own-extra,#observation .own-controls:has(#obs-own-play){display:none!important}
+#observation .own-direct-zoom{display:flex;justify-content:flex-start;align-items:center;margin:12px 0}
+#observation .own-direct-zoom #obs-enlarge{min-height:44px;padding:9px 18px;border-radius:12px;background:#eaf3e9;color:#275c56;border:1px solid #a9cbb9;font-weight:700;font-size:15px}
+@media(min-width:1060px) and (min-height:680px){#game .controls{margin:3px auto;gap:12px}#game .controls>.action{min-width:0;min-height:46px;padding:6px 14px;font-size:18px}}
+@media(max-width:680px){#game .controls{gap:7px;width:100%;margin-top:12px}#game .controls>.action{min-width:0;min-height:54px;padding:7px 5px;font-size:16px;gap:4px;flex-direction:column}#game .controls>.action .action-icon{font-size:18px;height:17px}#observation .own-direct-zoom #obs-enlarge{width:100%;min-height:46px}}
+
+/* One-step fish management in the roster. */
+#dialog .roster-manage-row{display:flex;align-items:center;gap:9px;margin:7px 0}
+#dialog .roster-manage-row .roster-item{flex:1;min-width:0;text-align:left;margin:0}
+#dialog .roster-manage-row .roster-manage{min-height:46px;flex:0 0 auto;border-radius:11px;border:1px solid #bfd4c5;background:#ebf4e8;color:#2c6758;font-size:14px;font-weight:750;padding:9px 14px}
+@media(max-width:540px){#dialog .roster-manage-row{gap:5px}#dialog .roster-manage-row .roster-manage{font-size:13px;padding:8px 11px}}
+/* Catalog expansion keeps existing cards and the three main controls. */
+.decor-filters{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 18px}
+.decor-filter{flex:1 1 120px;min-height:44px;padding:10px 12px;border-radius:12px;border:1px solid #c8d7c2;background:#f4f6e9;color:#37685e;font:inherit}
+.decor-filter[aria-pressed="true"]{background:#2e8172;color:#fffdf0}
+.fish-knowledge{margin:12px 0;font-size:16px;line-height:1.7;text-align:left}
+.fish-knowledge summary{cursor:pointer;padding:8px 0;color:#346d60}
+.purchase-form{max-width:520px;margin:auto;display:grid;gap:10px}
+.purchase-form .fish-preview{min-height:0;width:240px;height:140px;max-width:100%;margin:auto;grid-area:auto}
+.purchase-price{font-weight:600;text-align:center;margin:0}
+.purchase-form label{font-size:18px;color:#315e54}
+.purchase-form .name-input{width:100%;box-sizing:border-box;font-size:20px;scroll-margin:20px}
+.purchase-form .confirm-actions{position:sticky;bottom:0;background:#fffdf3;padding:12px 0 max(12px,env(safe-area-inset-bottom));gap:10px}
+.purchase-form .confirm-actions button{min-height:48px;min-width:100px}
+@supports(height:100dvh){#dialog{max-height:calc(100dvh - 24px)}}

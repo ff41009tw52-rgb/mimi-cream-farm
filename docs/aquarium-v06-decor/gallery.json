@@ -1,0 +1,367 @@
+{
+  "commit": "2e1644c138c03e2fa3fa5536e9521edaa73e9477",
+  "ciRun": "39358368359",
+  "screenshots": [
+    {
+      "file": "decor-1440-river.webp",
+      "title": "1440px：河砂",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "decor-1440-white.webp",
+      "title": "1440px：白砂",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "decor-1440-black.webp",
+      "title": "1440px：黑砂",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "decor-1440-plants.webp",
+      "title": "1440px：小水草／高水草／莫絲",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "decor-1440-rocks.webp",
+      "title": "1440px：小石頭／大石頭／洞穴",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "decor-1440-woodwork.webp",
+      "title": "1440px：沉木／沉船／寶箱",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "decor-1440-shop-top.webp",
+      "title": "1440px：布置商店",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "decor-1440-shop-objects.webp",
+      "title": "1440px：造景商品",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "decor-1440-shop-plants.webp",
+      "title": "1440px：水草商品",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "decor-1440-shop-bottom.webp",
+      "title": "1440px：洞穴／沉船／寶箱商品",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "decor-390-river.webp",
+      "title": "390px：河砂",
+      "width": 390,
+      "height": 1045
+    },
+    {
+      "file": "decor-390-white.webp",
+      "title": "390px：白砂",
+      "width": 390,
+      "height": 1045
+    },
+    {
+      "file": "decor-390-black.webp",
+      "title": "390px：黑砂",
+      "width": 390,
+      "height": 1045
+    },
+    {
+      "file": "decor-390-plants.webp",
+      "title": "390px：小水草／高水草／莫絲",
+      "width": 390,
+      "height": 1045
+    },
+    {
+      "file": "decor-390-rocks.webp",
+      "title": "390px：小石頭／大石頭／洞穴",
+      "width": 390,
+      "height": 1045
+    },
+    {
+      "file": "decor-390-woodwork.webp",
+      "title": "390px：沉木／沉船／寶箱",
+      "width": 390,
+      "height": 1045
+    },
+    {
+      "file": "decor-390-shop-top.webp",
+      "title": "390px：布置商店",
+      "width": 390,
+      "height": 1045
+    },
+    {
+      "file": "decor-390-shop-objects.webp",
+      "title": "390px：造景商品",
+      "width": 390,
+      "height": 1045
+    },
+    {
+      "file": "decor-390-shop-plants.webp",
+      "title": "390px：水草商品",
+      "width": 390,
+      "height": 1045
+    },
+    {
+      "file": "decor-390-shop-bottom.webp",
+      "title": "390px：洞穴／沉船／寶箱商品",
+      "width": 390,
+      "height": 1045
+    },
+    {
+      "file": "decor-lesson-1366-open.webp",
+      "title": "1366px：第七項：打開商店",
+      "width": 1366,
+      "height": 768
+    },
+    {
+      "file": "decor-lesson-1366-buy.webp",
+      "title": "1366px：真正購買並放置",
+      "width": 1366,
+      "height": 768
+    },
+    {
+      "file": "decor-lesson-1366-select.webp",
+      "title": "1366px：選取與移動裝飾",
+      "width": 1366,
+      "height": 768
+    },
+    {
+      "file": "decor-lesson-1366-moved.webp",
+      "title": "1366px：位置變更成功",
+      "width": 1366,
+      "height": 768
+    },
+    {
+      "file": "decor-lesson-1366-complete.webp",
+      "title": "1366px：完成八項教學後的完整遊戲",
+      "width": 1366,
+      "height": 768
+    },
+    {
+      "file": "decor-lesson-1440-open.webp",
+      "title": "1440px：第七項：打開商店",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "decor-lesson-1440-buy.webp",
+      "title": "1440px：真正購買並放置",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "decor-lesson-1440-select.webp",
+      "title": "1440px：選取與移動裝飾",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "decor-lesson-1440-moved.webp",
+      "title": "1440px：位置變更成功",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "decor-lesson-1440-complete.webp",
+      "title": "1440px：完成八項教學後的完整遊戲",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "decor-lesson-390-open.webp",
+      "title": "390px：第七項：打開商店",
+      "width": 390,
+      "height": 1166
+    },
+    {
+      "file": "decor-lesson-390-buy.webp",
+      "title": "390px：真正購買並放置",
+      "width": 390,
+      "height": 1192
+    },
+    {
+      "file": "decor-lesson-390-select.webp",
+      "title": "390px：選取與移動裝飾",
+      "width": 390,
+      "height": 1192
+    },
+    {
+      "file": "decor-lesson-390-moved.webp",
+      "title": "390px：位置變更成功",
+      "width": 390,
+      "height": 1216
+    },
+    {
+      "file": "decor-lesson-390-complete.webp",
+      "title": "390px：完成八項教學後的完整遊戲",
+      "width": 390,
+      "height": 1045
+    },
+    {
+      "file": "decor-lesson-820-open.webp",
+      "title": "820px：第七項：打開商店",
+      "width": 820,
+      "height": 1359
+    },
+    {
+      "file": "decor-lesson-820-buy.webp",
+      "title": "820px：真正購買並放置",
+      "width": 820,
+      "height": 1359
+    },
+    {
+      "file": "decor-lesson-820-select.webp",
+      "title": "820px：選取與移動裝飾",
+      "width": 820,
+      "height": 1359
+    },
+    {
+      "file": "decor-lesson-820-moved.webp",
+      "title": "820px：位置變更成功",
+      "width": 820,
+      "height": 1386
+    },
+    {
+      "file": "decor-lesson-820-complete.webp",
+      "title": "820px：完成八項教學後的完整遊戲",
+      "width": 820,
+      "height": 1267
+    },
+    {
+      "file": "decor-lesson-1024-open.webp",
+      "title": "1024px：第七項：打開商店",
+      "width": 1024,
+      "height": 1062
+    },
+    {
+      "file": "decor-lesson-1024-buy.webp",
+      "title": "1024px：真正購買並放置",
+      "width": 1024,
+      "height": 1062
+    },
+    {
+      "file": "decor-lesson-1024-select.webp",
+      "title": "1024px：選取與移動裝飾",
+      "width": 1024,
+      "height": 1062
+    },
+    {
+      "file": "decor-lesson-1024-moved.webp",
+      "title": "1024px：位置變更成功",
+      "width": 1024,
+      "height": 1089
+    },
+    {
+      "file": "decor-lesson-1024-complete.webp",
+      "title": "1024px：完成八項教學後的完整遊戲",
+      "width": 1024,
+      "height": 970
+    },
+    {
+      "file": "decor-820-plants.webp",
+      "title": "820px 平板：缸內布置",
+      "width": 820,
+      "height": 1267
+    },
+    {
+      "file": "decor-820-shop-objects.webp",
+      "title": "820px 平板：商店造景",
+      "width": 820,
+      "height": 1267
+    },
+    {
+      "file": "decor-1024-plants.webp",
+      "title": "1024px 平板：缸內布置",
+      "width": 1024,
+      "height": 970
+    },
+    {
+      "file": "decor-1024-shop-objects.webp",
+      "title": "1024px 平板：商店造景",
+      "width": 1024,
+      "height": 970
+    },
+    {
+      "file": "task-1366-7-complete.webp",
+      "title": "1366px：從新遊戲實際完成全部八項任務",
+      "width": 1366,
+      "height": 768
+    },
+    {
+      "file": "task-1440-7-complete.webp",
+      "title": "1440px：從新遊戲實際完成全部八項任務",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "task-390-7-complete.webp",
+      "title": "390px：從新遊戲實際完成全部八項任務",
+      "width": 390,
+      "height": 1045
+    },
+    {
+      "file": "task-820-7-complete.webp",
+      "title": "820px：從新遊戲實際完成全部八項任務",
+      "width": 820,
+      "height": 1267
+    },
+    {
+      "file": "task-1024-7-complete.webp",
+      "title": "1024px：從新遊戲實際完成全部八項任務",
+      "width": 1024,
+      "height": 970
+    },
+    {
+      "file": "task-390-1-water.webp",
+      "title": "保留的餵食水面引導",
+      "width": 390,
+      "height": 1741
+    },
+    {
+      "file": "task-390-3-fish-card.webp",
+      "title": "保留的飽足與成長說明",
+      "width": 390,
+      "height": 1166
+    },
+    {
+      "file": "task-390-5-feed-shop.webp",
+      "title": "保留的三款飼料包與商店",
+      "width": 390,
+      "height": 1166
+    },
+    {
+      "file": "decor-support-5.webp",
+      "title": "5 金幣買小水草：僅補足差額",
+      "width": 1440,
+      "height": 960
+    },
+    {
+      "file": "decor-support-100.webp",
+      "title": "100 金幣買小水草：不補助",
+      "width": 1440,
+      "height": 960
+    },
+    {
+      "file": "decor-performance-30.webp",
+      "title": "手機：三缸三十魚及多件布置",
+      "width": 390,
+      "height": 1045
+    }
+  ],
+  "physicalDevicesTested": false
+}

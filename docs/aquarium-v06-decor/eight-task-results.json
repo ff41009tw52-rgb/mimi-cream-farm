@@ -1,0 +1,252 @@
+{
+  "results": [
+    {
+      "size": {
+        "width": 1366,
+        "height": 768
+      },
+      "eightTasks": true,
+      "reload": true,
+      "realCoin": true,
+      "realFeedPurchase": true,
+      "realFishPurchase": true,
+      "desktopSingleScreen": true
+    },
+    {
+      "size": {
+        "width": 1440,
+        "height": 900
+      },
+      "eightTasks": true,
+      "reload": true,
+      "realCoin": true,
+      "realFeedPurchase": true,
+      "realFishPurchase": true,
+      "desktopSingleScreen": true
+    },
+    {
+      "size": {
+        "width": 390,
+        "height": 844
+      },
+      "eightTasks": true,
+      "reload": true,
+      "realCoin": true,
+      "realFeedPurchase": true,
+      "realFishPurchase": true,
+      "desktopSingleScreen": false
+    },
+    {
+      "size": {
+        "width": 820,
+        "height": 1180
+      },
+      "eightTasks": true,
+      "reload": true,
+      "realCoin": true,
+      "realFeedPurchase": true,
+      "realFishPurchase": true,
+      "desktopSingleScreen": false
+    },
+    {
+      "size": {
+        "width": 1024,
+        "height": 768
+      },
+      "eightTasks": true,
+      "reload": true,
+      "realCoin": true,
+      "realFeedPurchase": true,
+      "realFishPurchase": true,
+      "desktopSingleScreen": false
+    }
+  ],
+  "migrationRows": [
+    {
+      "old": 0,
+      "newStep": 0,
+      "events": [],
+      "completed": false
+    },
+    {
+      "old": 1,
+      "newStep": 1,
+      "events": [
+        "general.open"
+      ],
+      "completed": false
+    },
+    {
+      "old": 2,
+      "newStep": 2,
+      "events": [
+        "general.open",
+        "general.select"
+      ],
+      "completed": false
+    },
+    {
+      "old": 3,
+      "newStep": 3,
+      "events": [
+        "general.open",
+        "general.select",
+        "general.drop"
+      ],
+      "completed": false
+    },
+    {
+      "old": 4,
+      "newStep": 4,
+      "events": [
+        "general.open",
+        "general.select",
+        "general.drop",
+        "small.gift"
+      ],
+      "completed": false
+    },
+    {
+      "old": 5,
+      "newStep": 5,
+      "events": [
+        "general.open",
+        "general.select",
+        "general.drop",
+        "small.gift",
+        "small.open"
+      ],
+      "completed": false
+    },
+    {
+      "old": 6,
+      "newStep": 6,
+      "events": [
+        "general.open",
+        "general.select",
+        "general.drop",
+        "small.gift",
+        "small.open",
+        "small.select"
+      ],
+      "completed": false
+    },
+    {
+      "old": 7,
+      "newStep": 7,
+      "events": [
+        "general.open",
+        "general.select",
+        "general.drop",
+        "small.gift",
+        "small.open",
+        "small.select",
+        "small.drop"
+      ],
+      "completed": false
+    },
+    {
+      "old": 8,
+      "newStep": 8,
+      "events": [
+        "general.open",
+        "general.select",
+        "general.drop",
+        "small.gift",
+        "small.open",
+        "small.select",
+        "small.drop",
+        "fish.card"
+      ],
+      "completed": false
+    },
+    {
+      "old": 9,
+      "newStep": 8,
+      "events": [
+        "general.open",
+        "general.select",
+        "general.drop",
+        "small.gift",
+        "small.open",
+        "small.select",
+        "small.drop",
+        "fish.card",
+        "feed.shop"
+      ],
+      "completed": false
+    },
+    {
+      "old": 10,
+      "newStep": 8,
+      "events": [
+        "general.open",
+        "general.select",
+        "general.drop",
+        "small.gift",
+        "small.open",
+        "small.select",
+        "small.drop",
+        "fish.card",
+        "feed.shop",
+        "feed.tab"
+      ],
+      "completed": false
+    },
+    {
+      "old": 11,
+      "newStep": 8,
+      "events": [
+        "general.open",
+        "general.select",
+        "general.drop",
+        "small.gift",
+        "small.open",
+        "small.select",
+        "small.drop",
+        "fish.card",
+        "feed.shop",
+        "feed.tab",
+        "feed.buy"
+      ],
+      "completed": false
+    },
+    {
+      "old": 12,
+      "newStep": 21,
+      "events": [
+        "general.open",
+        "general.select",
+        "general.drop",
+        "small.gift",
+        "small.open",
+        "small.select",
+        "small.drop",
+        "fish.card",
+        "coin.collect",
+        "feed.shop",
+        "feed.tab",
+        "feed.buy",
+        "fish.shop",
+        "fish.tab",
+        "fish.buy",
+        "decor.shop",
+        "decor.tab",
+        "decor.buy",
+        "decor.edit",
+        "decor.move",
+        "observe"
+      ],
+      "completed": true
+    }
+  ],
+  "deficitOnlySupport": true,
+  "noDuplicateSupport": true,
+  "atomicRollback": true,
+  "crashRecovery": true,
+  "oldJsonProtection": true,
+  "fullTankFallback": true,
+  "reviewWithoutResources": true,
+  "physicalDevicesTested": false,
+  "errors": []
+}

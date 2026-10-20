@@ -1,0 +1,9 @@
+{
+  "mobileAutoScroll": true,
+  "importedGiftLedger": true,
+  "multiTabConflict": true,
+  "partialManualQuota": true,
+  "errors": [],
+  "featureCommit": "6367cfc29e49a21627c34e2a3c588bb3c0e16643",
+  "source": "local Chromium regression, including partial manual snapshot quota failure"
+}
