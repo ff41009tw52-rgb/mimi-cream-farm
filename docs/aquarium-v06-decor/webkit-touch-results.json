@@ -1,0 +1,51 @@
+{
+  "out": [
+    {
+      "size": {
+        "width": 1366,
+        "height": 768
+      },
+      "engine": "webkit",
+      "input": "touch selection + move button",
+      "realDevice": false
+    },
+    {
+      "size": {
+        "width": 1440,
+        "height": 900
+      },
+      "engine": "webkit",
+      "input": "touch selection + move button",
+      "realDevice": false
+    },
+    {
+      "size": {
+        "width": 390,
+        "height": 844
+      },
+      "engine": "webkit",
+      "input": "touch selection + move button",
+      "realDevice": false
+    },
+    {
+      "size": {
+        "width": 820,
+        "height": 1180
+      },
+      "engine": "webkit",
+      "input": "touch selection + move button",
+      "realDevice": false
+    },
+    {
+      "size": {
+        "width": 1024,
+        "height": 768
+      },
+      "engine": "webkit",
+      "input": "touch selection + move button",
+      "realDevice": false
+    }
+  ],
+  "errors": [],
+  "physicalDevicesTested": false
+}

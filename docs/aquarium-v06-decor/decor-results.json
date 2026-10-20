@@ -1,0 +1,77 @@
+{
+  "results": [
+    {
+      "size": {
+        "width": 1440,
+        "height": 900
+      },
+      "shopCards": 12,
+      "overflow": false,
+      "physicalDevice": false
+    },
+    {
+      "size": {
+        "width": 390,
+        "height": 844
+      },
+      "shopCards": 12,
+      "overflow": false,
+      "physicalDevice": false
+    },
+    {
+      "size": {
+        "width": 820,
+        "height": 1180
+      },
+      "shopCards": 12,
+      "overflow": false,
+      "physicalDevice": false
+    },
+    {
+      "size": {
+        "width": 1024,
+        "height": 768
+      },
+      "shopCards": 12,
+      "overflow": false,
+      "physicalDevice": false
+    },
+    {
+      "size": {
+        "width": 1366,
+        "height": 768
+      },
+      "shopCards": 12,
+      "overflow": false,
+      "physicalDevice": false
+    },
+    {
+      "realClockSeconds": 60,
+      "mobileFish": 10,
+      "fps": 59.9880023995201,
+      "backgroundRebuilds": 0
+    },
+    {
+      "fish": 5,
+      "virtualMinutes": 2,
+      "backgroundRebuilds": 0,
+      "meanFrameCostMs": 0
+    },
+    {
+      "fish": 10,
+      "virtualMinutes": 2,
+      "backgroundRebuilds": 0,
+      "meanFrameCostMs": 0
+    },
+    {
+      "fish": 30,
+      "virtualMinutes": 2,
+      "backgroundRebuilds": 0,
+      "meanFrameCostMs": 0
+    }
+  ],
+  "atomicDecorationSupport": true,
+  "migrationVersion": 3,
+  "physicalDevicesTested": false,
+  "errors": []
+}

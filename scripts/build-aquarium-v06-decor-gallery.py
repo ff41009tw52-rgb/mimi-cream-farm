@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Archive real CI screenshots as a small review gallery, with no external assets."""
 from pathlib import Path
-import argparse,json,html
+import argparse,json,html,io
 from PIL import Image
 p=argparse.ArgumentParser();p.add_argument('artifacts',type=Path);p.add_argument('--commit',required=True);p.add_argument('--run',required=True);a=p.parse_args()
 out=Path(__file__).resolve().parent.parent/'docs/aquarium-v06-decor';out.mkdir(parents=True,exist_ok=True)
@@ -11,12 +11,19 @@ for width in [1440,390]:
 for width in [1366,1440,390,820,1024]:
  for key,title in [('open','第七項：打開商店'),('buy','真正購買並放置'),('select','選取與移動裝飾'),('moved','位置變更成功'),('complete','完成八項教學後的完整遊戲')]:rows.append((f'decor-lesson-{width}-{key}',f'{width}px：{title}'))
 for width in [820,1024]:rows.extend([(f'decor-{width}-plants',f'{width}px 平板：缸內布置'),(f'decor-{width}-shop-objects',f'{width}px 平板：商店造景')])
+rows.extend([(f'task-{width}-7-complete',f'{width}px：從新遊戲實際完成全部八項任務') for width in [1366,1440,390,820,1024]])
+rows.extend([('task-390-1-water','保留的餵食水面引導'),('task-390-3-fish-card','保留的飽足與成長說明'),('task-390-5-feed-shop','保留的三款飼料包與商店')])
 rows.extend([('decor-support-5','5 金幣買小水草：僅補足差額'),('decor-support-100','100 金幣買小水草：不補助'),('decor-performance-30','手機：三缸三十魚及多件布置')])
 items=[]
 for stem,title in rows:
  src=a.artifacts/(stem+'.png')
  if not src.exists():continue
- im=Image.open(src).convert('RGB');im.save(out/(stem+'.webp'),'WEBP',quality=86,method=6)
+ im=Image.open(src).convert('RGB')
+ encoded=io.BytesIO();im.save(encoded,'WEBP',quality=86,method=6)
+ payload=encoded.getvalue()
+ assert payload, f'Empty screenshot encoding: {src}'
+ Image.open(io.BytesIO(payload)).verify()
+ (out/(stem+'.webp')).write_bytes(payload)
  items.append({'file':stem+'.webp','title':title,'width':im.width,'height':im.height})
 meta={'commit':a.commit,'ciRun':a.run,'screenshots':items,'physicalDevicesTested':False};(out/'gallery.json').write_text(json.dumps(meta,ensure_ascii=False,indent=2))
 figures=''.join(f'<figure><a href="{x["file"]}"><img loading="lazy" src="{x["file"]}" alt="{html.escape(x["title"])}"></a><figcaption>{html.escape(x["title"])}</figcaption></figure>' for x in items)
