@@ -185,6 +185,52 @@ body{background:radial-gradient(ellipse at 8% 20%,#dfece2aa,transparent 46%),rad
 #tutorial-coin-target{width:54px;height:54px;min-width:54px;min-height:54px;padding:0;border-radius:50%;background:#fff6c622;font-size:0}
 #tutorial-coin-target::after{content:'點這枚金幣';position:absolute;top:calc(100% + 5px);left:50%;transform:translateX(-50%);white-space:nowrap;background:#fff9dc;border-radius:10px;padding:3px 8px;font-size:16px;line-height:1.5;box-shadow:0 2px 8px #65744422}
 
+/* V0.6 merchandise polish: purely visual; no changes to feeding or item ownership. */
+#game .tank-caption #tank-name{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#game .tank-caption>span:first-child{max-width:100%;min-width:0}
+#game .tank-base{display:block}
+#dialog .shop-grid .feed-item,#dialog .shop-grid .decor-item{
+ border:1px solid #cbdccb;background:linear-gradient(155deg,#fffef9 0%,#f3f8ec 100%);
+ box-shadow:0 9px 22px #3e73521a,0 2px 4px #486d5310;
+ border-radius:19px;padding:15px;gap:9px;transition:border-color .18s,box-shadow .18s
+}
+#dialog .shop-grid .feed-item:hover,#dialog .shop-grid .decor-item:hover{border-color:#94bba7;box-shadow:0 12px 24px #3e735524}
+#dialog .shop-grid .feed-item h3,#dialog .shop-grid .decor-item h3{margin:2px 0 0;font-size:19px;line-height:1.4;color:#214c4b}
+#dialog .shop-grid .feed-item p,#dialog .shop-grid .decor-item p{min-height:0;margin:0;flex:none;line-height:1.6}
+#dialog .shop-grid .feed-item .buy,#dialog .shop-grid .decor-item .buy{width:100%;min-height:48px;border-radius:12px;font-size:15px;margin-top:auto}
+#dialog .shop-grid .feed-item .feed-display{height:182px;display:grid;place-items:center;overflow:hidden;position:relative;border-radius:15px;background:radial-gradient(ellipse at 50% 100%,#a4cec45c,transparent 66%),linear-gradient(135deg,#edf7eb,#dceee7);border:1px solid #cce0d4}
+#dialog .shop-grid .feed-item .feed-display:before,#dialog .shop-grid .feed-item .feed-display:after{content:"";position:absolute;border:1px solid #ffffffa0;border-radius:50%;width:13px;height:13px;top:23px;left:24px}
+#dialog .shop-grid .feed-item .feed-display:after{width:8px;height:8px;top:64px;right:26px;left:auto}
+#dialog .shop-grid .feed-item .feed-bag{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;width:114px;height:158px;margin:0;background:linear-gradient(114deg,#ffffff40 0 11%,transparent 34%),linear-gradient(180deg,color-mix(in srgb,var(--feed-main),#ffffff 23%),var(--feed-main) 75%,color-mix(in srgb,var(--feed-main),#173c36 17%));border:1px solid #ffffffa3;border-radius:9px 9px 15px 15px;box-shadow:inset 3px 0 5px #ffffff38,inset -4px 0 7px #233c3344,0 11px 14px #30594b37;transform:rotate(-2deg)}
+#dialog .shop-grid .feed-item .feed-bag:before{content:"";position:absolute;left:5px;right:5px;top:7px;height:3px;border-top:1px solid #ffffffa6;border-bottom:1px solid #214c4b38}
+#dialog .shop-grid .feed-item .feed-bag:after{content:"";position:absolute;left:12px;right:12px;bottom:7px;height:4px;border-radius:100%;background:#183e3938}
+#dialog .shop-grid .feed-item .feed-seal{width:91%;height:11px;flex-shrink:0;border-radius:5px 5px 2px 2px;background:repeating-linear-gradient(90deg,#ffffff30 0 3px,#1f4e3821 3px 6px);margin:2px 0 3px}
+#dialog .shop-grid .feed-item .feed-brand{font-size:10px;font-weight:800;letter-spacing:.5px;color:#fffdf2;text-shadow:0 1px 3px #264c5277}
+#dialog .shop-grid .feed-item .feed-fishmark{width:68px;height:38px;color:#fef8da;filter:drop-shadow(0 1px 1px #25544a66)}
+#dialog .shop-grid .feed-item .feed-bag-window{height:32px;width:70px;border-radius:15px;background:radial-gradient(circle at 13px 10px,#d6ae71 0 2px,transparent 2.5px),radial-gradient(circle at 29px 19px,#f0d7ac 0 2.4px,transparent 3px),radial-gradient(circle at 52px 13px,#b97e4c 0 2px,transparent 2.8px),radial-gradient(circle at 40px 25px,#e4c58d 0 2px,transparent 3px),#f8efd4d9;border:3px solid #fff5d2a8;box-shadow:inset 0 2px 6px #6c6d4740}
+#dialog .shop-grid .feed-item .feed-pack-count{color:#fffef7;font-size:11px;font-weight:800;letter-spacing:1px;margin-top:3px;text-shadow:0 1px #294e466e}
+#dialog .shop-grid .feed-item .feed-species{font-size:13px;color:#5a7364;line-height:1.65;background:#edf4e8;border-radius:9px;padding:7px 9px;min-height:52px}
+#dialog .shop-grid .feed-item .feed-package-detail{font-size:13px;color:#587368}
+#dialog .shop-grid .feed-item .feed-stock{display:inline-flex;align-self:flex-start;width:auto;font-size:12px;font-weight:750;color:#2d6f62;background:#e0eee2;border-radius:9px;padding:5px 9px}
+#dialog .shop-grid .decor-item .decor-showcase{height:184px;position:relative;display:grid;place-items:center;overflow:hidden;border-radius:15px;background:radial-gradient(ellipse at 50% 120%,#b4d5c0,transparent 72%),linear-gradient(150deg,#eff8ee,#dfeee6);border:1px solid #d3e3d4}
+#dialog .shop-grid .decor-item .decor-showcase[data-material="substrate"]{background:linear-gradient(180deg,#e9f4e8,#d6e9dc)}
+#dialog .shop-grid .decor-item .decor-preview{width:100%;max-width:280px;height:auto;max-height:163px;object-fit:contain;background:transparent!important;border:0!important;border-radius:0}
+#dialog .shop-grid .decor-item .decor-category{position:absolute;left:10px;top:10px;color:#3a7968;background:#fffdf2dd;border:1px solid #bcd7c5;border-radius:100px;padding:3px 9px;font-size:11px;font-weight:700}
+#dialog .shop-grid .decor-item .decor-description{font-size:13px;color:#667d6f;min-height:40px;line-height:1.7}
+#dialog .shop-grid .decor-item .decor-stock{font-size:12px!important;font-weight:700;color:#557365!important;background:#e6efe3;padding:7px 9px;border-radius:9px}
+#dialog .shop-grid .decor-item .decor-stock.is-using{background:#dbefe3;color:#27695a!important}
+#dialog .shop-grid .decor-item .place-button{width:100%;min-height:42px;font-size:13px}
+@media(max-width:680px){
+ #dialog .shop-grid .feed-item,#dialog .shop-grid .decor-item{padding:10px;gap:7px;border-radius:15px}
+ #dialog .shop-grid .feed-item .feed-display,#dialog .shop-grid .decor-item .decor-showcase{height:146px}
+ #dialog .shop-grid .feed-item .feed-bag{transform:scale(.82) rotate(-2deg)}
+ #dialog .shop-grid .feed-item h3,#dialog .shop-grid .decor-item h3{font-size:16px}
+ #dialog .shop-grid .feed-item .feed-species{font-size:12px;min-height:0}
+ #dialog .shop-grid .feed-item .feed-stock,#dialog .shop-grid .decor-item .decor-stock{font-size:11px!important}
+ #dialog .shop-grid .feed-item .buy,#dialog .shop-grid .decor-item .buy{font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){#dialog .shop-grid .feed-item,#dialog .shop-grid .decor-item{transition:none}}
+
 </style>
 
 
@@ -219,7 +265,7 @@ body{background:radial-gradient(ellipse at 8% 20%,#dfece2aa,transparent 46%),rad
 <nav id="tank-selector" aria-label="選擇魚缸"></nav>
 <aside id="onboarding" class="onboarding" hidden aria-label="新手教學"><span id="onboarding-step" class="guide-step"></span><div><h2 id="onboarding-title"></h2><p id="onboarding-copy"></p></div><div class="guide-actions" hidden><button id="onboarding-gift" hidden>收下小型魚飼料 ×5 份</button></div></aside>
 <section class="aquarium" aria-label="我的水族箱">
-<div class="tank-caption"><span><i></i> <b id="tank-name">小小水族箱</b></span><span id="tank-message">慢慢游，慢慢長大。</span></div>
+<div class="tank-caption"><span><i></i> <b id="tank-name">小小水族箱</b></span></div>
 <div class="tank-viewport"><canvas id="tank" tabindex="0" aria-label="水族箱。點魚查看狀態，點金幣收集；先按餵食，再點水面投放飼料。鍵盤可從更多功能的我的魚兒查看，餵食模式按 Enter 投食。"></canvas>
 <div id="surface-cue" hidden aria-hidden="true">↓ 點這裡的水面，把飼料送進水裡</div></div>
 <div class="feeding-hint" id="feeding-hint" hidden><strong>按餵食 → 選飼料 → 點一下魚缸上方的水面</strong><div id="feed-choices"><button id="feed-general" data-feed="general" aria-pressed="false"><b>綜合飼料</b><small>剩餘 0 份</small><span>孔雀魚、金魚、黑摩利、紅劍魚</span></button><button id="feed-small" data-feed="small" aria-pressed="false"><b>小型魚飼料</b><small>剩餘 0 份</small><span>鼠魚、斑馬魚、白雲山魚、紅蓮燈</span></button><button id="feed-protein" data-feed="protein" aria-pressed="false"><b>高蛋白飼料</b><small>剩餘 0 份</small><span>神仙魚、鬥魚</span></button></div><p class="food-rule">飼料分類是遊戲的簡化規則，真實魚類的食物選擇更多樣。</p><p id="feed-current" aria-live="polite">先選一種飼料</p><div class="feeding-actions"><button id="feed-shop">前往飼料商店</button><button id="stop-feed">結束餵食</button></div></div>
@@ -227,7 +273,7 @@ body{background:radial-gradient(ellipse at 8% 20%,#dfece2aa,transparent 46%),rad
 <div id="decor-handles" class="decor-handles" hidden></div>
 <div class="edit-toolbar" id="edit-toolbar" hidden><span id="edit-label">點選布置，再左右移動</span><div><button id="edit-left" aria-label="向左移動裝飾">←</button><button id="edit-right" aria-label="向右移動裝飾">→</button><button id="edit-store">收回裝飾</button><button id="edit-done">完成布置</button></div></div>
 
-<div class="tank-base"><span>一缸小日常</span><span>照顧牠們，收集每一點快樂</span></div>
+<div class="tank-base" aria-hidden="true"></div>
 </section>
 <section class="controls" aria-label="魚缸操作"><button id="feed" class="action primary" aria-pressed="false"><span class="action-icon" aria-hidden="true">⁙</span><span>餵食<small>選飼料，再點水面</small></span></button><button id="shop" class="action"><span class="action-icon" aria-hidden="true">⌂</span><span>商店<small>購買魚兒、飼料與布置</small></span></button></section>
 
@@ -1310,7 +1356,7 @@ function rebuildRuntime(){allFish().forEach(syncFish);tankContexts.clear();const
 function dismissToast(){const t=$('toast');clearTimeout(toastTimer);if(t.matches(':popover-open'))t.hidePopover();t.hidden=true;}
 function toast(text,ms=6000){if(simulatingBackground)return;clearTimeout(toastTimer);const t=$('toast'),copy=document.createElement('span');copy.textContent=text;const close=button('×',dismissToast,'toast-close');close.setAttribute('aria-label','關閉提示');t.replaceChildren(copy,close);t.hidden=false;try{t.showPopover();}catch(e){/* Older browsers use the fixed-position fallback. */}toastTimer=setTimeout(dismissToast,Math.max(ms,Math.min(14000,text.length*180)));}
 function updateUI(){if(!state)return;renderTankSelector();renderFeedChoices();
- $('tank-name').textContent=state.tankName;$('tank-message').textContent=selected&&runtime.get(selected)?runtime.get(selected).behavior:'慢慢游，慢慢長大。';
+ $('tank-name').textContent=state.tankName;
  $('coins').textContent=state.coins.toLocaleString();
  $('capacity').replaceChildren(document.createTextNode(`${state.fishes.length} `),Object.assign(document.createElement('small'),{textContent:`/ ${state.tankCapacity}`}));
  $('level').textContent=`養魚等級 ${state.level}`;const floor=CONFIG.LEVEL_XP[state.level-1],ceiling=CONFIG.LEVEL_XP[state.level];$('xp-bar').style.width=`${ceiling?(state.xp-floor)/(ceiling-floor)*100:100}%`;
@@ -1445,7 +1491,7 @@ function renderShop(){
   for(const [id,s]of Object.entries(SPECIES).sort(([,a],[,b])=>Number(state.level<a.unlockLevel)-Number(state.level<b.unlockLevel)||a.unlockLevel-b.unlockLevel)){const locked=state.level<s.unlockLevel,card=document.createElement('article');card.className='shop-item'+(locked?' locked':'');const h=document.createElement('h3');h.textContent=s.name;const b=button(locked?`養魚等級 ${s.unlockLevel} 解鎖`:`購買 · ${s.price} 金幣`,()=>buy(id),'buy');b.disabled=locked;b.dataset.species=id;const preview=previewFish(id,locked,shopVariants.get(id)||'normal');card.append(preview,h,paragraph(fishBrief[id],'fish-brief'),b);const detail=document.createElement('details');detail.className='fish-detail';const summary=document.createElement('summary');summary.textContent='詳細介紹與配色';detail.append(summary,paragraph(s.desc),paragraph(`${s.depthName} · ${s.growthLabel}成長`,'shop-detail'));appendVariantChoices(detail,id,preview);card.append(detail);grid.append(card);}
  }else if(shopTab==='feed'){renderFeedShop(grid);
  }else{
-  for(const [id,d]of Object.entries(DECORATIONS)){const card=document.createElement('article');card.className='shop-item decor-item';card.dataset.decoration=id;const p=document.createElement('canvas');p.className='fish-preview';p.width=240;p.height=140;p.setAttribute('aria-label',d.name);drawDecoration(p.getContext('2d'),id,120,117,90,80);const h=document.createElement('h3');h.textContent=d.name;const owned=state.purchasedDecorations[id]||0,used=state.placedDecorations.filter(p=>p.decoration===id).length;card.append(p,h,paragraph(d.desc),paragraph(d.kind==='substrate'?(state.substrate===id?'目前使用中':owned?'已收藏':'尚未購買'):`已收藏 ${owned} · 可放置 ${owned-used}`,'shop-detail'));
+  for(const [id,d]of Object.entries(DECORATIONS)){const card=document.createElement('article');card.className='shop-item decor-item';card.dataset.decoration=id;const p=document.createElement('canvas');p.className='fish-preview decor-preview';p.width=240;p.height=140;p.setAttribute('role','img');p.setAttribute('aria-label',d.name+'的商品預覽');drawDecorShopPreview(p,id);const h=document.createElement('h3');h.textContent=d.name;const owned=state.purchasedDecorations[id]||0,used=state.placedDecorations.filter(p=>p.decoration===id).length;const previewBox=document.createElement('div');previewBox.className='decor-showcase';previewBox.dataset.material=d.kind;previewBox.append(p);const category=document.createElement('span');category.className='decor-category';category.textContent=d.kind==='substrate'?'底砂材質':d.kind==='plant'?'水草布置':'魚缸擺件';previewBox.append(category);const status=paragraph(d.kind==='substrate'?(state.substrate===id?'目前使用中':owned?'已收藏':'尚未購買'):`已收藏 ${owned} · 可放置 ${owned-used}`,'shop-detail decor-stock');if(d.kind==='substrate'&&state.substrate===id)status.classList.add('is-using');card.append(previewBox,h,paragraph(d.desc,'decor-description'),status);
    const action=button(d.kind==='substrate'&&owned?(state.substrate===id?'使用中':'換上底砂'):`${d.price} 金幣 · ${d.kind==='substrate'?'購買並換上':'購買並放置'}`,()=>buyDecoration(id),'buy');action.dataset.buyDecor=id;action.disabled=d.kind==='substrate'&&state.substrate===id;card.append(action);
    if(d.kind!=='substrate'){const place=button('放入魚缸',()=>placementDialog(id),'place-button');place.hidden=owned<=used;place.disabled=owned<=used;place.dataset.placeDecor=id;card.append(place);}grid.append(card);
   }
@@ -1628,6 +1674,29 @@ function fishHitScore(f,x,y){
  if(px>=Math.min(-27,left*scale*width)&&px<=Math.max(27,right*scale*width)&&py>=Math.min(-25,b.top*scale)&&py<=Math.max(25,b.bottom*scale))return 2+Math.hypot(px,py)/100;
  return Infinity;
 }
+// Larger, legible merchandise previews. Aquarium-world art stays unchanged.
+function drawDecorShopPreview(canvas,id){
+ const d=DECORATIONS[id],c=canvas.getContext('2d'),w=canvas.width,h=canvas.height;
+ c.clearRect(0,0,w,h);
+ if(d.kind==='substrate'){
+  const palette=id==='white'?['#f4edd2','#dedcc6','#fcf8e6']:id==='black'?['#5e756d','#344e50','#899b8d']:['#d6bc8c','#b89b70','#f1ddb0'];
+  const layer=c.createLinearGradient(0,40,0,h);layer.addColorStop(0,palette[2]);layer.addColorStop(.5,palette[0]);layer.addColorStop(1,palette[1]);
+  c.beginPath();c.moveTo(10,67);c.bezierCurveTo(46,46,81,76,121,63);c.bezierCurveTo(165,49,192,57,230,72);c.lineTo(230,125);c.quadraticCurveTo(230,131,221,131);c.lineTo(19,131);c.quadraticCurveTo(10,131,10,124);c.closePath();
+  c.fillStyle=layer;c.fill();c.strokeStyle='#61776a65';c.lineWidth=1.1;c.stroke();
+  c.save();c.clip();
+  for(let i=0;i<178;i++){
+   const x=13+((i*79+id.length*17)%213),y=70+((i*47+(i%7)*11)%61);
+   c.fillStyle=i%4===0?palette[1]:i%4===1?palette[2]:i%4===2?'#ffffff75':'#60746b55';
+   c.beginPath();c.ellipse(x,y,.7+i%3*.55,.55+i%2*.4,i*.4,0,Math.PI*2);c.fill();
+  }
+  c.restore();
+  c.beginPath();c.moveTo(14,94);c.quadraticCurveTo(120,87,226,98);c.strokeStyle='#ffffff55';c.lineWidth=2;c.stroke();
+ }else{
+  const shadow=c.createRadialGradient(120,123,12,120,123,80);shadow.addColorStop(0,'#56776e30');shadow.addColorStop(1,'#56776e00');
+  c.fillStyle=shadow;c.beginPath();c.ellipse(120,121,90,17,0,0,Math.PI*2);c.fill();
+  drawDecoration(c,id,120,121,116,106);
+ }
+}
 function drawDecoration(c,id,x,y,width,height){
  const d=DECORATIONS[id];if(!d)return;c.save();c.translate(x,y);c.scale(width/100,height/100);const material=c.createLinearGradient(-30,-100,38,0);material.addColorStop(0,d.kind==='plant'?'#b2d2a8':id==='wood'?'#c4ad82':'#d7dec7');material.addColorStop(.38,d.color);material.addColorStop(1,id==='wood'?'#7f7056':d.kind==='plant'?'#518774':'#82978a');
  if(d.kind==='substrate'){path(c,'M-57 -31 L-24 -48 L59 -33 L25 -8Z',material,'#9caf9d',1);for(let i=0;i<14;i++)ellipse(c,-40+(i*17)%84,-30-(i%3)*3,2,1,id==='black'?'#bac6b6':'#cdbb8f');}
@@ -1807,7 +1876,31 @@ function prepareLessonFish(){
 function reviewPurchase(kind,done){const b=button(kind==='fish'?'看看購魚流程（不消費）':'看看購買與庫存（不消費）',()=>{done();dialog.close();tutorial.render();},'place-button');b.id='tutorial-review-purchase';$('dialog-content').append(b);return b;}
 function checkLevelGifts(){if(state.level>=2&&!state.gifts.includes('level2')){if(grantGift('level2'))toast('養魚等級 2：送你小型魚飼料 ×3 份，鼠魚、斑馬魚、白雲山魚和紅蓮燈都適用。');}if(state.level>=4&&!state.gifts.includes('level4')){if(grantGift('level4'))toast('你解鎖了高蛋白飼料！神仙魚和鬥魚可以吃這種飼料，記得在商店補充喔！');}}
 function feedShop(){shopTab='feed';shop();tutorial.report('feedShopOpened');tutorial.render();}
-function renderFeedShop(grid){for(const [id,d]of Object.entries(FEEDS)){const card=document.createElement('article');card.className='shop-item feed-item';const h=document.createElement('h3');h.textContent=d.name;const dot=document.createElement('span');dot.className='feed-bag';dot.style.background=d.color;dot.textContent='10';const names=d.species.map(x=>SPECIES[x].name).join('、');const b=button(state.level<d.level?`養魚等級 ${d.level} 解鎖`:`購買 · ${d.price} 金幣`,()=>buyFeed(id),'buy');b.id='buy-feed-'+id;b.disabled=state.level<d.level;card.append(dot,h,paragraph(names),paragraph(`每包 ${d.pack} 份 · ${d.price} 金幣`),paragraph(`現有庫存：${state.feedInventory[id]} 份`,'feed-stock'),b);grid.append(card);}const help=button('申請緊急飼料',emergencyFeed,'place-button');help.id='emergency-feed';grid.append(help,paragraph('遊戲將食物簡化為三類，不代表真實魚類只能吃這一種。飼料不足且金幣不足時，每 10 分鐘可申請適用的救急份量。','dialog-note'));}
+function renderFeedShop(grid){
+ for(const [id,d] of Object.entries(FEEDS)){
+  const card=document.createElement('article');card.className='shop-item feed-item';card.dataset.feed=id;
+  const display=document.createElement('div');display.className='feed-display';display.style.setProperty('--feed-main',d.color);
+  const bag=document.createElement('div');bag.className='feed-bag';bag.dataset.feed=id;bag.setAttribute('role','img');bag.setAttribute('aria-label',d.name+'的袋裝飼料示意圖');
+  const brand=document.createElement('span');brand.className='feed-brand';brand.textContent='悠悠水族箱';
+  const seal=document.createElement('span');seal.className='feed-seal';seal.setAttribute('aria-hidden','true');
+  const fishMark=document.createElementNS('http://www.w3.org/2000/svg','svg');fishMark.setAttribute('viewBox','0 0 80 48');fishMark.setAttribute('aria-hidden','true');fishMark.classList.add('feed-fishmark');
+  const body=document.createElementNS('http://www.w3.org/2000/svg','path');body.setAttribute('d','M10 24Q35 -2 59 24Q35 50 10 24Z M58 24L73 8V40Z');body.setAttribute('fill','currentColor');
+  const eye=document.createElementNS('http://www.w3.org/2000/svg','circle');eye.setAttribute('cx','25');eye.setAttribute('cy','20');eye.setAttribute('r','2.2');eye.setAttribute('fill','#285b50');fishMark.append(body,eye);
+  const windowEl=document.createElement('span');windowEl.className='feed-bag-window';windowEl.setAttribute('aria-hidden','true');
+  const pack=document.createElement('span');pack.className='feed-pack-count';pack.textContent=d.pack+' 份裝';
+  bag.append(seal,brand,fishMark,windowEl,pack);display.append(bag);
+  const h=document.createElement('h3');h.textContent=d.name;
+  const names=d.species.map(x=>SPECIES[x].name).join('、');
+  const suitable=paragraph(names,'feed-species');suitable.setAttribute('aria-label','適合魚種：'+names);
+  const detail=paragraph(`每包 ${d.pack} 份 · ${d.price} 金幣`,'feed-package-detail');
+  const stock=paragraph(`現有庫存：${state.feedInventory[id]} 份`,'feed-stock');
+  const b=button(state.level<d.level?`養魚等級 ${d.level} 解鎖`:`購買 · ${d.price} 金幣`,()=>buyFeed(id),'buy');
+  b.id='buy-feed-'+id;b.disabled=state.level<d.level;
+  card.append(display,h,suitable,detail,stock,b);grid.append(card);
+ }
+ const help=button('申請緊急飼料',emergencyFeed,'place-button');help.id='emergency-feed';
+ grid.append(help,paragraph('遊戲將食物簡化為三類，不代表真實魚類只能吃這一種。飼料不足且金幣不足時，每 10 分鐘可申請適用的救急份量。','dialog-note'));
+}
 function buyFeed(id){
  if(conflict||saveBlocked||protectedBusy)return;const d=FEEDS[id];if(!d||state.level<d.level)return;
  const suitable=state.fishes.some(f=>FOOD_FOR[f.species]===id);
