@@ -11,14 +11,14 @@ const steps=[
  {task:2,target:'feed',event:'feedOpened',copy:'再按「餵食」，準備替鼠魚選擇食物。'},
  {task:2,target:'feed-small',event:'selected:small',copy:'選擇「小型魚飼料」。看看剩餘數量和適合的魚兒。'},
  {task:2,target:'tank',event:'fed:small',copy:'點一下魚缸上方的水面，放入小型魚飼料。不用點中鼠魚。',success:'很好！現在你知道怎麼替不同的魚兒選擇飼料了。'},
- {task:3,target:'roster-shortcut',event:'fishOpened',copy:'點一下魚缸裡的魚，或按「我的魚兒」。看看牠的飽足度、成長進度和適合的飼料。'},
+ {task:3,target:'more-menu',event:'fishOpened',copy:'按「更多」→「我的魚兒」，選一條魚，看看牠的飽足度、成長進度和適合的飼料。'},
  {task:4,target:'tutorial-coin-target',event:'coinCollected',copy:'魚兒吃得飽，就會慢慢帶來金幣。點一下魚缸裡標示的金幣，把它收起來。',success:'做得好！收集金幣後，就能購買飼料、新魚和裝飾。'},
  {task:5,target:'shop',event:'shopOpened',copy:'飼料用完時，可以到商店購買。先按「商店」，我們試一次吧！'},
  {task:5,target:'tab-feed',shopTab:'feed',event:'feedShopOpened',copy:'選擇「飼料」分頁，看看每包價格和現有庫存。'},
  {task:5,target:'buy-feed-general',shopTab:'feed',event:'feedBought',copy:'選一種目前魚缸裡的魚能吃的飼料，按「購買」，看看庫存增加。',success:'現在你會自己補充飼料了！以後快用完時，記得到商店購買。'},
  {task:6,target:'shop',event:'shopOpened',copy:'除了原本的魚兒，也可以到商店買新魚。我們一起試試吧！'},
  {task:6,target:'tab-fish',shopTab:'fish',event:'fishShopOpened',copy:'選擇「魚兒」分頁，看看目前等級已解鎖的魚和價格。'},
- {task:6,target:'tutorial-fish-buy',shopTab:'fish',event:'fishBought',copy:'挑一條已解鎖的魚，按「購買」。每缸空間有限，升級可增加容量：5 → 7 → 9 → 10 隻。',success:'新魚加入了！好好餵食、收集金幣，讓水族箱慢慢成長。'},
+ {task:6,target:'tutorial-fish-buy',shopTab:'fish',event:'fishBought',copy:'挑一條已解鎖的魚，按「購買」，幫牠取名字，再確認購買。每缸空間有限，升級可增加容量：5 → 7 → 9 → 10 隻。',success:'新魚加入了！好好餵食、收集金幣，讓水族箱慢慢成長。'},
  {task:7,target:'shop',event:'shopOpened',copy:'除了養魚，也可以買水草、石頭和其他裝飾。先按「商店」看看吧！'},
  {task:7,target:'tab-decor',shopTab:'decor',event:'decorShopOpened',copy:'按一下「布置」，看看可以放進水族箱的裝飾。'},
  {task:7,target:'tutorial-decor-buy',shopTab:'decor',event:'decorBought',copy:'選一件喜歡的裝飾，按「購買並放置」，它就會出現在魚缸裡。先試試便宜的小水草吧！',success:'裝飾放好了！現在試著調整它的位置。'},
@@ -53,10 +53,13 @@ function create({getState,commit,notify,grant,ensureFeeding,prepareCoin,prepareF
    else if(o.step===14){const status=prepareFish();if(status?.review){target=reviewPurchase('fish',()=>api.report('fishBought',{viewOnly:true}));copy=o.review?'複習購魚流程：看解鎖狀態、價格和購買按鈕，不需要再次消費。':'魚缸都住滿了！這次先查看購魚流程。日後升級或移魚空出位置，再迎接新魚。';}
     else if(status?.move){target=status.move;copy='這個魚缸住滿了。先切換到有空位的魚缸，再買新魚。';}
     else target=document.querySelector('.buy[data-species]:not(:disabled)');}
-   else if(o.step===17){const status=prepareDecor();if(status?.review){target=reviewPurchase('decor',()=>api.report('decorBought',{viewOnly:true}));copy=o.review?'複習先看看商品與放置方式，不需要再次購買。接著練習移動裝飾。':'已經有布置或目前空間不足，這次直接使用現有裝飾練習，不必再購買。';}else target=document.querySelector('[data-buy-decor="smallplant"]');}
+   else if(o.step===17){const status=prepareDecor();if(status?.review){target=reviewPurchase('decor',()=>api.report('decorBought',{viewOnly:true}));copy=o.review?'複習先看看商品與放置方式，不需要再次購買。接著練習移動裝飾。':'已經有布置或目前空間不足，這次直接使用現有裝飾練習，不必再購買。';}else {target=document.querySelector('[data-buy-decor="smallplant"]')||$('decor-category-plants');if(target?.id==='decor-category-plants')copy='先選「水草」分類，找找便宜的小水草。';}}
    if(shopOpen){const p=document.createElement('p');p.id='tutorial-dialog-copy';p.className='tutorial-shop-copy';p.textContent=s.task+' / 8 '+tasks[s.task-1]+' '+copy;$('dialog-content').prepend(p);}
   }
   if(o.step===18||o.step===19){const status=prepareEditing();target=status.target;if(status.copy)copy=status.copy;}
+  if(s.task===3&&$('dialog').open){if($('roster')){target=$('roster');copy='按「我的魚兒」，就能找到正在照顧的魚。';}else if(document.querySelector('.roster-item')){target=document.querySelector('.roster-item');copy='點一條魚的名字，看看飽足度、成長進度與適合的飼料。';}}
+  if(o.step===14&&$('purchase-fish-name')){target=$('purchase-fish-name');copy='幫新魚取個名字，再按「確認購買」。取消不會扣金幣。';}
+  if($('purchase-see-fish')){target=$('purchase-see-fish');copy='新魚已加入！按「去看看牠」認識新朋友，再接續教學。';}
    if(s.task===8&&$('dialog').open&&$('more-observe')){target=$('more-observe');copy='按「觀察魚兒」，看看魚的外形與呼吸方式。';}
   if(o.review&&s.task<=2)copy+='（複習不消耗飼料，也不再贈送物資。）';
   if($('dialog').open&&target&&!$('dialog').contains(target)){target=$('dialog-close');copy='先按視窗右上角 ×，回到魚缸，再繼續教學標示的操作。';}

@@ -154,3 +154,17 @@
 #dialog .roster-manage-row .roster-item{flex:1;min-width:0;text-align:left;margin:0}
 #dialog .roster-manage-row .roster-manage{min-height:46px;flex:0 0 auto;border-radius:11px;border:1px solid #bfd4c5;background:#ebf4e8;color:#2c6758;font-size:14px;font-weight:750;padding:9px 14px}
 @media(max-width:540px){#dialog .roster-manage-row{gap:5px}#dialog .roster-manage-row .roster-manage{font-size:13px;padding:8px 11px}}
+/* Catalog expansion keeps existing cards and the three main controls. */
+.decor-filters{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 18px}
+.decor-filter{flex:1 1 120px;min-height:44px;padding:10px 12px;border-radius:12px;border:1px solid #c8d7c2;background:#f4f6e9;color:#37685e;font:inherit}
+.decor-filter[aria-pressed="true"]{background:#2e8172;color:#fffdf0}
+.fish-knowledge{margin:12px 0;font-size:16px;line-height:1.7;text-align:left}
+.fish-knowledge summary{cursor:pointer;padding:8px 0;color:#346d60}
+.purchase-form{max-width:520px;margin:auto;display:grid;gap:10px}
+.purchase-form .fish-preview{min-height:0;width:240px;height:140px;max-width:100%;margin:auto;grid-area:auto}
+.purchase-price{font-weight:600;text-align:center;margin:0}
+.purchase-form label{font-size:18px;color:#315e54}
+.purchase-form .name-input{width:100%;box-sizing:border-box;font-size:20px;scroll-margin:20px}
+.purchase-form .confirm-actions{position:sticky;bottom:0;background:#fffdf3;padding:12px 0 max(12px,env(safe-area-inset-bottom));gap:10px}
+.purchase-form .confirm-actions button{min-height:48px;min-width:100px}
+@supports(height:100dvh){#dialog{max-height:calc(100dvh - 24px)}}
