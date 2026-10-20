@@ -15,12 +15,20 @@ assert.equal(Object.keys(D.FOOD_FOR).length,10);assert.deepEqual(plain(Object.va
 const migrationRows=[];
 for(let n=0;n<=12;n++){
  const old=plain(starter);old.onboarding={step:n,completed:n===12,skipped:false,welcomed:n>0,paused:n===5,coinHintShown:false};old.gifts=['starter','smallLesson','fishCard'];old.coins=37;
- const untouched=JSON.stringify(old),next=S.validate(old);assert.equal(JSON.stringify(old),untouched);assert.equal(next.coins,37);assert(next.gifts.includes('fishCard'));assert.equal(next.onboarding.version,2);assert.equal(next.onboarding.step,n===12?16:Math.min(n,8));
+ const untouched=JSON.stringify(old),next=S.validate(old);assert.equal(JSON.stringify(old),untouched);assert.equal(next.coins,37);assert(next.gifts.includes('fishCard'));assert.equal(next.onboarding.version,3);assert.equal(next.onboarding.step,n===12?21:Math.min(n,8));
  if(n>8&&n<12)assert(next.onboarding.events.includes('feed.shop'));
  if(n>10)assert(next.onboarding.events.includes('feed.buy'));
  assert.deepEqual(plain(S.validate(plain(next))),plain(next));migrationRows.push({old:n,newStep:next.onboarding.step,events:plain(next.onboarding.events),completed:next.onboarding.completed});
 }
 for(const mutate of [o=>o.version=9,o=>o.events.push('invented'),o=>o.events=['general.open'],o=>o.review=true,o=>o.supportAmounts.feed=15]){const bad=plain(starter);mutate(bad.onboarding);assert.throws(()=>S.validate(bad));}
+// All version-2 checkpoints retain event evidence; completed seven-task saves stay completed.
+const v2keys=S.TUTORIAL_KEYS.filter(k=>!k.startsWith('decor.'));
+for(let n=0;n<=16;n++){
+ const old=plain(starter);old.coins=77;old.gifts=['starter','smallLesson','fishCard','feedSupport','fishSupport'];
+ old.onboarding={...S.newOnboarding(),version:2,step:n,events:v2keys.slice(0,n),completed:n===16,everCompleted:n===16,welcomed:true,supportAmounts:{feed:3,fish:9}};delete old.onboarding.hints;
+ const original=JSON.stringify(old),next=S.validate(old);assert.equal(JSON.stringify(old),original);assert.equal(next.coins,77);assert.equal(next.onboarding.step,n===16?21:n);assert.equal(next.onboarding.supportAmounts.decor,0);assert.equal(next.onboarding.completed,n===16);assert.deepEqual(plain(S.validate(plain(next))),plain(next));
+}
+console.log('PASS all 17 seven-task checkpoints migrate to version 3 without resetting completed saves or existing receipts');
 const hashes=JSON.parse(fs.readFileSync('tests/aquarium/fixtures/v05-preserved-hashes.json'));for(const [p,h]of Object.entries(hashes))assert.equal(crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex'),h,p);
 console.log('PASS schema 5, old 18-fish free split, compensation, strict validation, 4+4+2 foods and original materials');
 module.exports={context,plain,v5,large,starter:plain(starter),migrationRows};

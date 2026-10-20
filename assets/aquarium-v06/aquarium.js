@@ -4,7 +4,7 @@
 const {CONFIG,SPECIES,DECORATIONS,PERSONALITIES,TANK_TIERS,VARIANTS,ACHIEVEMENTS,FEEDS,FOOD_FOR,TANK_OFFERS}=window.AquariumData;
 const {validate,personalityFor,snapX,nearestSnap}=window.AquariumSave;
 const {buildPOI,tickEnvironment}=window.AquariumWorld;
-let protectedBusy=false;
+let protectedBusy=false,practiceDecor=null,hintShownThisSession=false;
 const coinInterval=s=>s.coinInterval*CONFIG.COIN_SCALE;
 const growthTime=s=>s.growthTime*CONFIG.GROWTH_SCALE;
 const $=id=>document.getElementById(id), clamp=(v,a=0,b=100)=>Math.min(b,Math.max(a,v));
@@ -17,7 +17,7 @@ const tankContexts=new Map();
 let state, W=1000,H=500,dpr=1, bg, runtime=new Map(), food=[],effects=[],selected=null,feeding=false;
 let dirty=false,saveTimer=0,lastSaved=0,saveBlocked=false,conflict=false,simTime=0,feedAt=-99;
 let uiAccumulator=0,saveAccumulator=0,lastFrame=0,hiddenAt=0,toastTimer,dialogMode='',resetStep=0;
-const diagnostics={writes:0,eaten:0,spawned:0,frames:0,frameMax:0,costTotal:0,costMax:0,bursts:0,pauses:0,discoveries:0,sounds:0,environmentVisits:0,environmentSeconds:0,variantUnlocks:0,achievementCompletions:0,achievementRewards:0};
+const diagnostics={backgroundBuilds:0,backgroundMs:0,writes:0,eaten:0,spawned:0,frames:0,frameMax:0,costTotal:0,costMax:0,bursts:0,pauses:0,discoveries:0,sounds:0,environmentVisits:0,environmentSeconds:0,variantUnlocks:0,achievementCompletions:0,achievementRewards:0};
 let audioCtx=null,audioLast=-99,audioEatLast=-99,shopTab='fish';
 let foreground,poiCache={byId:new Map(),bySpecies:{}},editing=false,editSelection=null,drag=null,editPreview=null,editCacheDirty=false;
 const shopVariants=new Map(),editorHandles=new Map();
@@ -65,7 +65,7 @@ function bindTank(t){const c=tankContexts.get(t.id);runtime=c.runtime;food=c.foo
 function rebuildRuntime(){allFish().forEach(syncFish);tankContexts.clear();const active=state.activeTankId;for(const t of state.tanks){state.activeTankId=t.id;tankContexts.set(t.id,{runtime:new Map(t.fishes.map((f,i)=>[f.id,makeRuntime(f,i)])),food:[],effects:[],poiCache:buildPOI(t.placedDecorations,DECORATIONS,decorLayout,W,H)});}state.activeTankId=active;bindTank(state.tanks.find(t=>t.id===active));selected=null;$('fish-card').hidden=true;}
 function dismissToast(){const t=$('toast');clearTimeout(toastTimer);if(t.matches(':popover-open'))t.hidePopover();t.hidden=true;}
 function toast(text,ms=6000){if(simulatingBackground)return;clearTimeout(toastTimer);const t=$('toast'),copy=document.createElement('span');copy.textContent=text;const close=button('×',dismissToast,'toast-close');close.setAttribute('aria-label','關閉提示');t.replaceChildren(copy,close);t.hidden=false;try{t.showPopover();}catch(e){/* Older browsers use the fixed-position fallback. */}toastTimer=setTimeout(dismissToast,Math.max(ms,Math.min(14000,text.length*180)));}
-function updateUI(){if(!state)return;renderTankSelector();renderFeedChoices();
+function updateUI(){if(!state)return;checkFeatureHints();renderTankSelector();renderFeedChoices();
  $('tank-name').textContent=state.tankName;
  $('coins').textContent=state.coins.toLocaleString();
  $('capacity').replaceChildren(document.createTextNode(`${state.fishes.length} `),Object.assign(document.createElement('small'),{textContent:`/ ${state.tankCapacity}`}));
@@ -107,11 +107,13 @@ function collect(c){
  }))return;
  effects.push({x:c.x,y:c.y,text:reward?'+'+reward:'練習完成',life:1.5});sound('coin');updateUI();tutorial.finish(beforeStep,advanced);tutorial.render();
 }
-function supportAvailable(id,cost){return state.coins>=cost||(!state.onboarding.review&&!state.gifts.includes(id)&&tutorial.expects(id==='feedSupport'?'feedBought':'fishBought'));}
+function supportKind(id){return id==='feedSupport'?'feed':id==='fishSupport'?'fish':'decor';}
+function supportEvent(id){return supportKind(id)+'Bought';}
+function supportAvailable(id,cost){return state.coins>=cost||(!state.onboarding.review&&!state.gifts.includes(id)&&tutorial.expects(supportEvent(id)));}
 function applySupport(id,cost){
  if(state.coins>=cost)return 0;
- if(state.onboarding.review||state.gifts.includes(id)||!tutorial.expects(id==='feedSupport'?'feedBought':'fishBought'))return -1;
- const amount=cost-state.coins;state.coins+=amount;state.gifts.push(id);state.onboarding.supportAmounts[id==='feedSupport'?'feed':'fish']=amount;return amount;
+ if(state.onboarding.review||state.gifts.includes(id)||!tutorial.expects(supportEvent(id)))return -1;
+ const amount=cost-state.coins;state.coins+=amount;state.gifts.push(id);state.onboarding.supportAmounts[supportKind(id)]=amount;return amount;
 }
 function buy(species){
  if(conflict||saveBlocked||protectedBusy)return;const speciesData=SPECIES[species];if(!speciesData)return;
@@ -195,8 +197,8 @@ function paragraph(text,cls=''){const p=document.createElement('p');p.className=
 function previewFish(id,unknown=false,variant='normal'){const c=document.createElement('canvas');c.className='fish-preview';c.width=240;c.height=140;c.setAttribute('aria-label',unknown?'尚未發現的魚':SPECIES[id].name);const context=c.getContext('2d');if(unknown)context.globalAlpha=.12;drawFish(context,id,120,76,SPECIES[id].shape==='angel'?88:100,1,0,.7,variant);return c;}
 function renderShop(){
  if(!dialog.open||dialogMode!=='shop')return;const root=$('dialog-content');root.replaceChildren();const tabs=document.createElement('div');tabs.className='tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','商店分類');
- for(const [id,label]of [['fish','魚兒'],['feed','飼料'],['decor','布置']]){const b=button(label,()=>{shopTab=id;renderShop();if(id==='feed')tutorial.report('feedShopOpened');if(id==='fish')tutorial.report('fishShopOpened');tutorial.render();},'tab'+(shopTab===id?' active':''));b.id='tab-'+id;b.setAttribute('role','tab');b.setAttribute('aria-selected',String(shopTab===id));tabs.append(b);}
- const intro=paragraph(`養魚等級 ${state.level} · ${state.coins} 金幣 · ${shopTab==='fish'?'遇見下一隻魚兒。':shopTab==='feed'?'選擇適合魚兒的食物。':'購買後會自動放入魚缸。'}`,'shop-intro');intro.id='shop-message';intro.setAttribute('role','status');const grid=document.createElement('div');grid.className='shop-grid';grid.setAttribute('role','tabpanel');grid.setAttribute('aria-labelledby','tab-'+shopTab);root.append(tabs);const shortcuts=document.createElement('div');shortcuts.className='shop-shortcuts';shortcuts.append(button('我的魚缸',tankMenu,'place-button'));if(shopTab==='decor')shortcuts.append(button('調整布置',startEditing,'place-button'));root.append(shortcuts,intro,grid);
+ for(const [id,label]of [['fish','魚兒'],['feed','飼料'],['decor','布置']]){const b=button(label,()=>{shopTab=id;renderShop();if(id==='feed')tutorial.report('feedShopOpened');if(id==='fish')tutorial.report('fishShopOpened');if(id==='decor')tutorial.report('decorShopOpened');tutorial.render();},'tab'+(shopTab===id?' active':''));b.id='tab-'+id;b.setAttribute('role','tab');b.setAttribute('aria-selected',String(shopTab===id));tabs.append(b);}
+ const intro=paragraph(`養魚等級 ${state.level} · ${state.coins} 金幣 · ${shopTab==='fish'?'遇見下一隻魚兒。':shopTab==='feed'?'選擇適合魚兒的食物。':'購買後會自動放入魚缸。'}`,'shop-intro');intro.id='shop-message';intro.setAttribute('role','status');const grid=document.createElement('div');grid.className='shop-grid';grid.setAttribute('role','tabpanel');grid.setAttribute('aria-labelledby','tab-'+shopTab);root.append(tabs);const shortcuts=document.createElement('div');shortcuts.className='shop-shortcuts';shortcuts.append(button('我的魚缸',tankMenu,'place-button'));if(shopTab==='decor')shortcuts.append(Object.assign(button('調整布置',()=>{if(tutorial.expects('decorEditing')){dialog.close();tutorial.render();}else startEditing();},'place-button'),{id:'shop-edit-decor'}));root.append(shortcuts,intro,grid);
  if(shopTab==='fish'){
   for(const [id,s]of Object.entries(SPECIES).sort(([,a],[,b])=>Number(state.level<a.unlockLevel)-Number(state.level<b.unlockLevel)||a.unlockLevel-b.unlockLevel)){const locked=state.level<s.unlockLevel,card=document.createElement('article');card.className='shop-item'+(locked?' locked':'');const h=document.createElement('h3');h.textContent=s.name;const b=button(locked?`養魚等級 ${s.unlockLevel} 解鎖`:`購買 · ${s.price} 金幣`,()=>buy(id),'buy');b.disabled=locked;b.dataset.species=id;const preview=previewFish(id,locked,shopVariants.get(id)||'normal');card.append(preview,h,paragraph(fishBrief[id],'fish-brief'),b);const detail=document.createElement('details');detail.className='fish-detail';const summary=document.createElement('summary');summary.textContent='詳細介紹與配色';detail.append(summary,paragraph(s.desc),paragraph(`${s.depthName} · ${s.growthLabel}成長`,'shop-detail'));appendVariantChoices(detail,id,preview);card.append(detail);grid.append(card);}
  }else if(shopTab==='feed'){renderFeedShop(grid);
@@ -209,20 +211,35 @@ function renderShop(){
  }
  tutorial.render();root.append(paragraph(shopTab==='fish'?'好好餵魚、收取金幣，養魚等級就會逐漸提升。':shopTab==='feed'?'飼料用完時，可以在這裡購買。先看看每包價格及庫存。':'按「調整布置」，就能移動魚缸裡的裝飾。','dialog-note'));
 }
-// Ownership is recorded before placement. A full tank keeps the purchase in inventory.
+// Placement, support, ownership and event evidence form one recoverable transaction.
 function buyDecoration(id){
- if(conflict||saveBlocked)return;const d=DECORATIONS[id],owned=state.purchasedDecorations[id]||0;
- if(d.kind==='substrate'&&owned){state.substrate=id;buildBackground();markDirty(true);renderShop();shopMessage(`已換上${d.name}。`);return;}
- if(state.coins<d.price){shopMessage('金幣還不夠！先回魚缸收集金幣，再來購買。');return;}if(owned>=99){shopMessage('這件裝飾已經收藏很多了。');return;}
- state.coins-=d.price;state.purchasedDecorations[id]=owned+1;let placed=true;
- if(d.kind==='substrate')state.substrate=id;else placed=placeDecoration(id);
- evaluateGoals();buildBackground();sound('buy');markDirty(true);updateUI();renderShop();
- shopMessage(d.kind==='substrate'?`已換上${d.name}。`:placed?`已放入${d.name}！想換位置，可以按「調整布置」。`:`已購買${d.name}，暫時放在庫存。魚缸空間不足，可以收回裝飾或升級魚缸。`);
+ if(conflict||saveBlocked||protectedBusy)return;const d=DECORATIONS[id];if(!d)return;const owned=state.purchasedDecorations[id]||0;
+ if(state.onboarding.review&&tutorial.task()===7){shopMessage('複習不需要再次購買，請使用教學標示的查看流程。');return;}
+ if(d.kind==='substrate'&&owned){if(!protectedTransaction(()=>{state.substrate=id;}))return;buildBackground();renderShop();shopMessage(`已換上${d.name}。`);return;}
+ const lesson=tutorial.expects('decorBought')&&d.kind!=='substrate';
+ if(owned>=99){shopMessage('這件裝飾已經收藏很多了。');return;}
+ if(lesson&&!availableDecorPosition(id)){shopMessage('這裡暫時放不下。可以使用現有布置練習移動，不需要多花金幣。');tutorial.render();return;}
+ if(!(lesson?supportAvailable('decorSupport',d.price):state.coins>=d.price)){shopMessage('金幣還不夠！先回魚缸收集金幣，再來購買。');return;}
+ const previous=state.onboarding.step;let placed=false,advanced=false,subsidy=0;
+ if(!protectedTransaction(()=>{
+  subsidy=lesson?applySupport('decorSupport',d.price):0;if(subsidy<0)return false;
+  state.coins-=d.price;state.purchasedDecorations[id]=owned+1;
+  if(d.kind==='substrate'){state.substrate=id;placed=true;}else placed=placeDecoration(id);
+  if(lesson&&!placed)return false;
+  evaluateGoals(false);if(lesson&&placed)advanced=tutorial.record('decorBought');
+ }))return;
+ buildBackground();sound('buy');updateUI();
+ if(advanced){dialog.close();tutorial.finish(previous,true);}else renderShop();
+ const message=d.kind==='substrate'?`已換上${d.name}。`:placed?`已放入${d.name}！想換位置，可以按「調整布置」。`:`已購買${d.name}，暫時放在庫存。魚缸空間不足，可以收回裝飾或升級魚缸。`;
+ if(subsidy)toast('金幣還差一點，已幫你補足這次需要的金額！');else if(!advanced)shopMessage(message);
+}
+function availableDecorPosition(id){
+ if(state.placedDecorations.length>=TANK_TIERS[state.tankTier-1].decorCapacity)return null;
+ for(const lane of [0,1])for(const index of [2,13,4,11,6,9,0,15,1,14,3,12,5,10,7,8]){const candidate={decoration:id,normX:snapX(index),snapIndex:index,lane};if(canPlace(candidate))return candidate;}return null;
 }
 function placeDecoration(id){
  if(conflict||(state.purchasedDecorations[id]||0)<=state.placedDecorations.filter(p=>p.decoration===id).length||state.placedDecorations.length>=TANK_TIERS[state.tankTier-1].decorCapacity)return false;
- const order=[2,13,4,11,6,9,0,15,1,14,3,12,5,10,7,8];let item;
- for(const lane of [0,1]){for(const index of order){const candidate={id:uid(),decoration:id,normX:snapX(index),snapIndex:index,lane};if(canPlace(candidate)){item=candidate;break;}}if(item)break;}
+ const position=availableDecorPosition(id),item=position?{...position,id:uid()}:null;
  if(!item)return false;state.placedDecorations.push(item);metric('place');return true;
 }
 function placementDialog(id){
@@ -291,25 +308,37 @@ function variantCollection(id){
 function canPlace(item,ignoreId=item.id){
  const d=DECORATIONS[item.decoration];return !state.placedDecorations.some(other=>{if(other.id===ignoreId||other.lane!==item.lane)return false;const q=DECORATIONS[other.decoration];if(q.kind!==d.kind)return false;const spacing=(q.footprint+d.footprint)*(d.kind==='plant'?.29:.36);return Math.abs(other.normX-item.normX)<spacing;});
 }
+function editableDecorations(){return practiceDecor?[practiceDecor]:state.placedDecorations;}
 function startEditing(id){
+ if(state.onboarding.review&&tutorial.task()===7&&!practiceDecor)practiceDecor={id:'practice-decor',decoration:'smallplant',normX:snapX(7),snapIndex:7,lane:0};
  dialog.close();closeCard();setFeeding(false);editing=true;editSelection=typeof id==='string'?id:null;editPreview=null;drag=null;for(const r of runtime.values()){r.poi=null;r.poiWait=Math.max(r.poiWait,15);r.pause=0;}
- $('edit-toolbar').hidden=false;$('decor-handles').hidden=false;canvas.classList.add('editing');buildBackground();updateEditorLabel();updateUI();draw();
+ $('edit-toolbar').hidden=false;$('decor-handles').hidden=false;canvas.classList.add('editing');buildBackground();updateEditorLabel();updateUI();draw();tutorial.report('decorEditing');tutorial.render();
 }
 function finishEditing(){
- if(!editing)return;editing=false;drag=null;editPreview=null;editSelection=null;$('edit-toolbar').hidden=true;$('decor-handles').hidden=true;canvas.classList.remove('editing');buildBackground();markDirty(true);updateUI();
+ if(!editing)return;editing=false;practiceDecor=null;drag=null;editPreview=null;editSelection=null;$('edit-toolbar').hidden=true;$('decor-handles').hidden=true;canvas.classList.remove('editing');buildBackground();markDirty(true);updateUI();tutorial.render();
 }
-function updateEditorLabel(){const item=state.placedDecorations.find(d=>d.id===editSelection);$('edit-label').textContent=item?`正在布置：${DECORATIONS[item.decoration].name}`:'點選一件布置，左右拖動';for(const id of ['edit-left','edit-right','edit-store'])$(id).disabled=!item;for(const [id,handle]of editorHandles)handle.classList.toggle('selected',id===editSelection);}
+function updateEditorLabel(){const item=editableDecorations().find(d=>d.id===editSelection);$('edit-label').textContent=item?`正在布置：${DECORATIONS[item.decoration].name}`:'點選一件布置，左右拖動';for(const id of ['edit-left','edit-right','edit-store'])$(id).disabled=!item;for(const [id,handle]of editorHandles){handle.classList.toggle('selected',id===editSelection);handle.style.zIndex=String(id===editSelection?3:1);}}
 function syncEditorHandles(){
- if(!editing)return;const container=$('decor-handles'),ids=new Set(state.placedDecorations.map(d=>d.id));for(const [id,b]of editorHandles)if(!ids.has(id)){b.remove();editorHandles.delete(id);}
- for(const item of state.placedDecorations){let b=editorHandles.get(item.id);if(!b){b=button('',()=>{editSelection=item.id;updateEditorLabel();},'decor-handle');b.dataset.decorId=item.id;b.setAttribute('aria-label','選取'+DECORATIONS[item.decoration].name);b.addEventListener('pointerdown',e=>beginDecorDrag(e,item.id));b.addEventListener('pointermove',moveDecorDrag);b.addEventListener('pointerup',endDecorDrag);b.addEventListener('pointercancel',cancelDecorDrag);container.append(b);editorHandles.set(item.id,b);}const p=decorLayout(item);b.style.left=(p.x-Math.max(44,p.width*1.1)/2)+'px';b.style.top=(p.y-Math.max(44,p.height))+'px';b.style.width=Math.max(44,p.width*1.1)+'px';b.style.height=Math.max(44,p.height)+'px';b.style.zIndex=String(item.id===editSelection?3:1);}
+ if(!editing)return;const container=$('decor-handles'),ids=new Set(editableDecorations().map(d=>d.id));for(const [id,b]of editorHandles)if(!ids.has(id)){b.remove();editorHandles.delete(id);}
+ for(const item of editableDecorations()){let b=editorHandles.get(item.id);if(!b){b=button('',()=>{editSelection=item.id;updateEditorLabel();tutorial.render();},'decor-handle');b.dataset.decorId=item.id;b.id='decor-handle-'+item.id;b.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();editSelection=item.id;nudgeDecoration(e.key==='ArrowLeft'?-1:1);}});b.setAttribute('aria-label','選取'+DECORATIONS[item.decoration].name);b.addEventListener('pointerdown',e=>beginDecorDrag(e,item.id));b.addEventListener('pointermove',moveDecorDrag);b.addEventListener('pointerup',endDecorDrag);b.addEventListener('pointercancel',cancelDecorDrag);container.append(b);editorHandles.set(item.id,b);}const p=decorLayout(item);b.style.left=(p.x-Math.max(44,p.width*1.1)/2)+'px';b.style.top=(p.y-Math.max(44,p.height))+'px';b.style.width=Math.max(44,p.width*1.1)+'px';b.style.height=Math.max(44,p.height)+'px';b.style.zIndex=String(item.id===editSelection?3:1);}
 }
-function beginDecorDrag(e,id){if(!editing||conflict||e.button>0)return;e.preventDefault();const item=state.placedDecorations.find(d=>d.id===id);if(!item)return;editSelection=id;drag={id,pointerId:e.pointerId,startX:item.normX,moved:false,offset:(e.clientX-canvas.getBoundingClientRect().left)/W-item.normX};e.currentTarget.setPointerCapture(e.pointerId);updateEditorLabel();syncEditorHandles();}
+function beginDecorDrag(e,id){if(!editing||conflict||e.button>0)return;e.preventDefault();const item=editableDecorations().find(d=>d.id===id);if(!item)return;editSelection=id;drag={id,pointerId:e.pointerId,startX:item.normX,moved:false,offset:(e.clientX-canvas.getBoundingClientRect().left)/W-item.normX};e.currentTarget.setPointerCapture(e.pointerId);updateEditorLabel();syncEditorHandles();tutorial.render();}
 function moveDecorDrag(e){if(!drag||drag.pointerId!==e.pointerId)return;e.preventDefault();const nextX=clamp((e.clientX-canvas.getBoundingClientRect().left)/W-drag.offset,.06,.94);if(Math.abs(nextX-drag.startX)*W<4&&!drag.moved)return;drag.moved=true;editPreview={id:drag.id,x:clamp((e.clientX-canvas.getBoundingClientRect().left)/W-drag.offset,.06,.94)};editCacheDirty=true;}
-function endDecorDrag(e){if(!drag||drag.pointerId!==e.pointerId)return;e.preventDefault();if(!drag.moved){drag=null;editPreview=null;updateEditorLabel();return;}const item=state.placedDecorations.find(d=>d.id===drag.id),x=editPreview?.x??item.normX,index=nearestSnap(x),next={...item,normX:snapX(index),snapIndex:index};const changed=canPlace(next);if(changed){Object.assign(item,next);metric('place');markDirty(true);}else placementReminder();drag=null;editPreview=null;editCacheDirty=false;buildBackground();updateEditorLabel();}
+function endDecorDrag(e){if(!drag||drag.pointerId!==e.pointerId)return;e.preventDefault();if(!drag.moved){drag=null;editPreview=null;updateEditorLabel();return;}const item=editableDecorations().find(d=>d.id===drag.id),x=editPreview?.x??item.normX,index=nearestSnap(x),next={...item,normX:snapX(index),snapIndex:index};const changed=(practiceDecor||canPlace(next))&&next.normX!==item.normX;if(changed)commitDecorMove(item,next);else if(next.normX!==item.normX)placementReminder();drag=null;editPreview=null;editCacheDirty=false;buildBackground();updateEditorLabel();tutorial.render();}
 function cancelDecorDrag(){if(!drag)return;drag=null;editPreview=null;editCacheDirty=false;buildBackground();updateEditorLabel();}
-function nudgeDecoration(delta){if(conflict)return;const item=state.placedDecorations.find(d=>d.id===editSelection);if(!item)return;const index=clamp(item.snapIndex+delta,0,CONFIG.SNAP_SLOTS-1),next={...item,normX:snapX(index),snapIndex:index};if(!canPlace(next)){placementReminder();return;}Object.assign(item,next);metric('place');buildBackground();markDirty(true);updateEditorLabel();}
+function nudgeDecoration(delta){
+ if(conflict||saveBlocked)return;const item=editableDecorations().find(d=>d.id===editSelection);if(!item)return;
+ let next=null;for(let index=item.snapIndex+delta;index>=0&&index<CONFIG.SNAP_SLOTS;index+=delta){const candidate={...item,normX:snapX(index),snapIndex:index};if(practiceDecor||canPlace(candidate)){next=candidate;break;}}
+ if(!next){toast('這一側暫時沒有空位，試試另一側或另一件裝飾。');return;}
+ commitDecorMove(item,next);buildBackground();updateEditorLabel();tutorial.render();
+}
+function commitDecorMove(item,next){
+ if(next.normX===item.normX)return false;const before=state.onboarding.step;let advanced=false;
+ if(!protectedTransaction(()=>{if(!practiceDecor)Object.assign(item,next);advanced=tutorial.record('decorMoved');}))return false;
+ if(practiceDecor)Object.assign(practiceDecor,next);metric('place');tutorial.finish(before,advanced);return true;
+}
 function placementReminder(){openDialog('這裡放不下裝飾','placement');$('dialog-content').append(paragraph('裝飾已留在原來的位置，沒有遺失。可以換到較空的位置，或先收回另一件裝飾。','confirm-copy'),button('回去調整布置',()=>{dialog.close();startEditing();},'confirm'));}
-function storeSelectedDecoration(){if(conflict)return;state.placedDecorations=state.placedDecorations.filter(d=>d.id!==editSelection);editSelection=null;drag=null;editPreview=null;buildBackground();markDirty(true);updateEditorLabel();toast('已收回裝飾，仍保留在布置收藏裡。');}
+function storeSelectedDecoration(){if(practiceDecor){toast('這是複習用的裝飾，不會加入收藏。');return;}if(conflict)return;state.placedDecorations=state.placedDecorations.filter(d=>d.id!==editSelection);editSelection=null;drag=null;editPreview=null;buildBackground();markDirty(true);updateEditorLabel();toast('已收回裝飾，仍保留在布置收藏裡。');}
 function renderOnboarding(){tutorial.render();}
 const sessionStartedAt=Date.now();
 function metric(kind){if(!session)return;if(Object.hasOwn(session.counts,kind))session.counts[kind]++;if(Object.hasOwn(session.first,kind)&&session.first[kind]===null)session.first[kind]=+session.elapsedSeconds.toFixed(2);}
@@ -384,22 +413,15 @@ function fishHitScore(f,x,y){
  if(px>=Math.min(-27,left*scale*width)&&px<=Math.max(27,right*scale*width)&&py>=Math.min(-25,b.top*scale)&&py<=Math.max(25,b.bottom*scale))return 2+Math.hypot(px,py)/100;
  return Infinity;
 }
-// Larger, legible merchandise previews. Aquarium-world art stays unchanged.
+// Retain merchandise framing; the object and material renderers also draw the aquarium.
 function drawDecorShopPreview(canvas,id){
  const d=DECORATIONS[id],c=canvas.getContext('2d'),w=canvas.width,h=canvas.height;
  c.clearRect(0,0,w,h);
  if(d.kind==='substrate'){
-  const palette=id==='white'?['#f4edd2','#dedcc6','#fcf8e6']:id==='black'?['#5e756d','#344e50','#899b8d']:['#d6bc8c','#b89b70','#f1ddb0'];
-  const layer=c.createLinearGradient(0,40,0,h);layer.addColorStop(0,palette[2]);layer.addColorStop(.5,palette[0]);layer.addColorStop(1,palette[1]);
+  const palette=window.AquariumDecorArt.palettes[id];
   c.beginPath();c.moveTo(10,67);c.bezierCurveTo(46,46,81,76,121,63);c.bezierCurveTo(165,49,192,57,230,72);c.lineTo(230,125);c.quadraticCurveTo(230,131,221,131);c.lineTo(19,131);c.quadraticCurveTo(10,131,10,124);c.closePath();
-  c.fillStyle=layer;c.fill();c.strokeStyle='#61776a65';c.lineWidth=1.1;c.stroke();
-  c.save();c.clip();
-  for(let i=0;i<178;i++){
-   const x=13+((i*79+id.length*17)%213),y=70+((i*47+(i%7)*11)%61);
-   c.fillStyle=i%4===0?palette[1]:i%4===1?palette[2]:i%4===2?'#ffffff75':'#60746b55';
-   c.beginPath();c.ellipse(x,y,.7+i%3*.55,.55+i%2*.4,i*.4,0,Math.PI*2);c.fill();
-  }
-  c.restore();
+  c.fillStyle=palette.top;c.fill();c.strokeStyle='#61776a65';c.lineWidth=1.1;c.stroke();
+  c.save();c.clip();c.translate(10,45);window.AquariumDecorArt.sand(c,id,220,86);c.restore();
   c.beginPath();c.moveTo(14,94);c.quadraticCurveTo(120,87,226,98);c.strokeStyle='#ffffff55';c.lineWidth=2;c.stroke();
  }else{
   const shadow=c.createRadialGradient(120,123,12,120,123,80);shadow.addColorStop(0,'#56776e30');shadow.addColorStop(1,'#56776e00');
@@ -407,28 +429,11 @@ function drawDecorShopPreview(canvas,id){
   drawDecoration(c,id,120,121,116,106);
  }
 }
-function drawDecoration(c,id,x,y,width,height){
- const d=DECORATIONS[id];if(!d)return;c.save();c.translate(x,y);c.scale(width/100,height/100);const material=c.createLinearGradient(-30,-100,38,0);material.addColorStop(0,d.kind==='plant'?'#b2d2a8':id==='wood'?'#c4ad82':'#d7dec7');material.addColorStop(.38,d.color);material.addColorStop(1,id==='wood'?'#7f7056':d.kind==='plant'?'#518774':'#82978a');
- if(d.kind==='substrate'){path(c,'M-57 -31 L-24 -48 L59 -33 L25 -8Z',material,'#9caf9d',1);for(let i=0;i<14;i++)ellipse(c,-40+(i*17)%84,-30-(i%3)*3,2,1,id==='black'?'#bac6b6':'#cdbb8f');}
- else if(d.kind==='plant'){
-  if(id==='moss'){ellipse(c,0,-12,43,18,'#739978');for(let i=0;i<14;i++)ellipse(c,-36+i*5.5,-13-(i%3)*6,9,8,i%2?'#93b38b':'#80a482');}
-  else{for(const [offset,lean,scale]of [[-20,-13,.75],[0,8,1],[22,16,.62]]){c.save();c.translate(offset,0);c.scale(.85,scale);path(c,`M0 0 Q-9 -50 ${lean} -98`,null,d.color,3);for(let j=1;j<6;j++){const yy=-j*16,xx=lean*j/6,side=j%2?1:-1;path(c,`M${xx} ${yy} Q${xx+side*30} ${yy+8} ${xx+side*26} ${yy-20} Q${xx+side*8} ${yy-27} ${xx} ${yy-6}Z`,material);path(c,`M${xx} ${yy-3} Q${xx+side*13} ${yy-5} ${xx+side*23} ${yy-18}`,null,'#d7e8b877',.7);for(let v=0;v<3;v++)path(c,`M${xx+side*(6+v*4)} ${yy-4-v*3} l${side*4} -7`,null,'#d9eacb44',.45);}c.restore();}}
- }else if(id==='smallrock'||id==='bigrock'){
-  path(c,'M-49 0 L-45 -45 Q-19 -108 10 -99 L45 -42 L49 0Z',material);path(c,'M-45 -45 L-7 -85 L10 -99 L9 -36Z','#dbe1cd66');path(c,'M9 -36 L45 -42 L49 0 L-7 0Z','#81968e33');c.save();c.clip(new Path2D('M-49 0 L-45 -45 Q-19 -108 10 -99 L45 -42 L49 0Z'));for(let i=0;i<42;i++)ellipse(c,-48+(i*29)%97,-5-(i*17)%92,i%3*.65+.45,.6,i%2?'#ecedd03d':'#59766b25');path(c,'M-24 -72 L-19 -50 L-27 -32 M9 -35 L14 -21 L7 -8',null,'#637c7333',.8);c.restore();
- }else if(id==='wood'){
-  path(c,'M-50 -3 Q-27 -43 -43 -82 L-28 -93 Q0 -42 35 -61 L48 -46 Q17 -20 2 -8 L-28 0Z',material,'#806e56',2);path(c,'M-28 -74 Q-14 -38 24 -43 M-30 -39 Q-3 -15 26 -28',null,'#d4b58a',2);for(let i=0;i<5;i++)path(c,`M${-35+i*3} ${-72+i*5} Q${-24+i*2} ${-34+i*2} ${11+i*3} ${-38+i*2}`,null,i%2?'#73655166':'#e2c79988',.65);ellipse(c,0,-15,13,5,'#6c9b7c');c.save();c.translate(-25,-68);c.rotate(-.5);for(let n=0;n<3;n++){c.beginPath();c.ellipse(0,0,2+n*2,4+n*3,0,0,Math.PI*2);c.strokeStyle='#e5cea344';c.lineWidth=.65;c.stroke();}c.restore();
- }else if(id==='cave'){
-  path(c,'M-54 0 Q-53 -79 -16 -96 Q28 -112 53 0Z',material,'#8e9f94',1.5);path(c,'M-22 0 Q-30 -63 3 -64 Q28 -62 29 0Z','#587f77');path(c,'M-22 0 Q-20 -51 5 -54 Q16 -53 25 -28',null,'#c7d3b855',4);ellipse(c,-31,-75,12,7,'#92ae8c');
- }else if(id==='ship'){
-  path(c,'M-59 -31 Q-36 12 35 0 L58 -37 L-9 -26Z',material,'#876c52',2);path(c,'M-31 -30 L-30 -87 M-5 -30 L-6 -74',null,'#8e785d',4);path(c,'M-30 -85 L11 -65 L-29 -59Z','#d4c9a5');path(c,'M-6 -70 L28 -54 L-5 -49Z','#b9c7ad');for(const xx of [-35,-8,18])ellipse(c,xx,-16,5,7,'#726b58');path(c,'M-47 -7 L37 -7',null,'#d2b18a',2);
- }else if(id==='chest'){
-  path(c,'M-39 -7 L-37 -54 L35 -54 L40 -7Z',material,'#8f6c42',2);path(c,'M-39 -54 Q-41 -94 1 -96 Q39 -88 35 -54Z','#c3a369','#967d51',2);path(c,'M-23 -89 L-21 -11 M21 -87 L22 -11 M-36 -54 L35 -54',null,'#eed595',5);path(c,'M-4 -58 L9 -58 L9 -40 L-4 -40Z','#f3d786');ellipse(c,3,-48,1.4,2,'#b18a46');
- }
- c.restore();
-}
-function decorLayout(item){const d=DECORATIONS[item.decoration],x=editPreview?.id===item.id?editPreview.x:item.normX;return {x:x*W,y:H*(d.kind==='plant'?.936+item.lane*.009:.948+item.lane*.014),width:Math.min(115,W*(d.kind==='plant'?.1:.11)),height:H*Math.min(x>.34&&x<.66?.23:.35,d.height||.13)};}
+function drawDecoration(c,id,x,y,width,height){window.AquariumDecorArt.draw(c,id,x,y,width,height);}
+function decorLayout(item){const d=DECORATIONS[item.decoration],x=editPreview?.id===item.id?editPreview.x:item.normX;return {x:x*W,y:H*(d.kind==='plant'?.936+item.lane*.009:.948+item.lane*.014),width:Math.min(115,Math.max(44,W*(d.kind==='plant'?.1:.11))),height:Math.max(d.kind==='plant'?26:24,H*Math.min(x>.34&&x<.66?.23:.35,d.height||.13))};}
 
 function buildBackground(){
+  const buildStarted=performance.now();diagnostics.backgroundBuilds++;
   bg=document.createElement('canvas');bg.width=Math.round(W*dpr);bg.height=Math.round(H*dpr);const c=bg.getContext('2d');c.scale(dpr,dpr);
   const g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,'#d9f1e2');g.addColorStop(.2,'#bce5dc');g.addColorStop(.68,'#91cecc');g.addColorStop(1,'#73b6ba');c.fillStyle=g;c.fillRect(0,0,W,H);
   const glow=c.createRadialGradient(W*.35,0,0,W*.35,H*.12,W*.65);glow.addColorStop(0,'#fff9d855');glow.addColorStop(1,'#fff9d800');c.fillStyle=glow;c.fillRect(0,0,W,H);
@@ -440,15 +445,13 @@ function buildBackground(){
   c.save();c.globalAlpha=.22;for(let i=0;i<9;i++){const x=W*(.07+i*.105);path(c,`M${x} ${17+i%3*8} q${W*.025} -4 ${W*.05} 0`,null,'#fffce4',1.3);}c.restore();
   // Distant landscape and fine sand, rendered once per resize.
   path(c,`M0 ${H*.84} Q${W*.25} ${H*.72} ${W*.49} ${H*.86} Q${W*.8} ${H*.7} ${W} ${H*.79} L${W} ${H} L0 ${H}Z`,'#67b8b5');
-  path(c,`M0 ${H*.9} Q${W*.19} ${H*.84} ${W*.4} ${H*.9} Q${W*.77} ${H*.84} ${W} ${H*.9} L${W} ${H} L0 ${H}Z`,DECORATIONS[state.substrate].color);
-  path(c,`M0 ${H*.94} Q${W*.27} ${H*.88} ${W*.56} ${H*.94} T${W} ${H*.94} L${W} ${H} L0 ${H}Z`,DECORATIONS[state.substrate].color);
-  let seed=99;const random=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
-  c.save();c.globalAlpha=.16;for(let i=0;i<5;i++)path(c,`M0 ${H*(.925+i*.014)} Q${W*.3} ${H*(.9+i*.016)} ${W*.6} ${H*(.93+i*.013)} T${W} ${H*(.92+i*.014)}`,null,'#fff5d4',1.4);c.restore();
-  for(let i=0;i<340;i++){ellipse(c,random()*W,(.915+random()*.085)*H,random()*1.5+.4,.5+random()*.5,state.substrate==='black'?(i%2?'#4e6561':'#a5b4a3'):(i%2?'#d2c59e':'#fcf0d3'));}
-  for(const item of [...state.placedDecorations].sort((a,b)=>Number(DECORATIONS[a.decoration].kind!=='plant')-Number(DECORATIONS[b.decoration].kind!=='plant'))){const pos=decorLayout(item);drawDecoration(c,item.decoration,pos.x,pos.y,pos.width,pos.height);}
+  const sandShape=new Path2D(`M0 ${H*.9} Q${W*.19} ${H*.84} ${W*.4} ${H*.9} Q${W*.77} ${H*.84} ${W} ${H*.9} L${W} ${H} L0 ${H}Z`);
+  c.save();c.clip(sandShape);c.translate(0,H*.84);window.AquariumDecorArt.sand(c,state.substrate,W,H*.16);c.restore();
+  for(const item of [...state.placedDecorations,...(practiceDecor?[practiceDecor]:[])].sort((a,b)=>Number(DECORATIONS[a.decoration].kind!=='plant')-Number(DECORATIONS[b.decoration].kind!=='plant'))){const pos=decorLayout(item);drawDecoration(c,item.decoration,pos.x,pos.y,pos.width,pos.height);}
   foreground=document.createElement('canvas');foreground.width=bg.width;foreground.height=bg.height;const front=foreground.getContext('2d');front.scale(dpr,dpr);
   for(const item of state.placedDecorations){const d=DECORATIONS[item.decoration];if(!d.canHide)continue;const p=decorLayout(item);front.save();drawDecoration(front,item.decoration,p.x,p.y,p.width,p.height);front.globalCompositeOperation='destination-out';if(item.decoration==='cave'){front.translate(p.x,p.y);front.scale(p.width/100,p.height/100);path(front,'M-22 0 Q-30 -63 3 -64 Q28 -62 29 0Z','#000');}else{front.clearRect(p.x-p.width*.31,p.y-p.height*.19,p.width*.65,p.height*.08);}front.restore();}
   if(state.tankTier>=2){for(let i=0;i<state.tankTier+1;i++)ellipse(c,W*(.22+i*.15),H*.96,3.5,2,'#f6ecc2');}
+  diagnostics.backgroundMs+=performance.now()-buildStarted;
   poiCache=buildPOI(state.placedDecorations,DECORATIONS,decorLayout,W,H);if(tankContexts.has(state.activeTankId))tankContexts.get(state.activeTankId).poiCache=poiCache;syncEditorHandles();
 
 }
@@ -462,7 +465,7 @@ function draw(){if(!state||!bg||!bg.width||!bg.height)return;ctx.clearRect(0,0,W
     ctx.save();ctx.globalAlpha=1-r.hiddenAmount*.65;drawFish(ctx,f.species,x,y+Math.sin(r.phase*.4)*1.7,f.size,r.turn,r.heading,r.phase,f.variant);ctx.restore();
   }
   if(foreground)ctx.drawImage(foreground,0,0,W,H);
-  if(editing&&editSelection){const item=state.placedDecorations.find(d=>d.id===editSelection);if(item){const p=decorLayout(item);ctx.save();ctx.strokeStyle='#fffde6';ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.strokeRect(p.x-p.width*.55-5,p.y-p.height-5,p.width*1.1+10,p.height+12);ctx.restore();}}
+  if(editing&&editSelection){const item=editableDecorations().find(d=>d.id===editSelection);if(item){const p=decorLayout(item);ctx.save();ctx.strokeStyle='#fffde6';ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.strokeRect(p.x-p.width*.55-5,p.y-p.height-5,p.width*1.1+10,p.height+12);ctx.restore();}}
   for(const coin of state.drops){const x=coin.x*W,y=coin.y*H+Math.sin(simTime*2+coin.x*5)*3;ctx.shadowColor='#fff3a7';ctx.shadowBlur=12;ellipse(ctx,x,y,14,14,'#edbd49');ctx.shadowBlur=0;ctx.lineWidth=2;ctx.strokeStyle='#fff0b3';ctx.beginPath();ctx.arc(x,y,10.5,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#fff6c6';ctx.font='bold 17px sans-serif';ctx.textAlign='center';ctx.fillText('＄',x,y+6);}
   for(const e of effects){ctx.save();if(e.kind==='ripple'){ctx.strokeStyle=`rgba(255,255,240,${e.life})`;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(e.x*W,e.y*H,(1-e.life)*50+5,(1-e.life)*10+3,0,0,Math.PI*2);ctx.stroke();}else{ctx.globalAlpha=Math.min(1,e.life);ctx.textAlign='center';ctx.font='bold 14px "Microsoft JhengHei", sans-serif';ctx.lineWidth=4;ctx.strokeStyle='#effcf5';const yy=e.y*H-20-(1.5-e.life)*16;ctx.strokeText(e.text,e.x*W,yy);ctx.fillStyle='#45836e';ctx.fillText(e.text,e.x*W,yy);}ctx.restore();}
 }
@@ -500,7 +503,7 @@ window.addEventListener('storage',e=>{if(e.key===CONFIG.SAVE_KEY||started&&e.key
 document.addEventListener('pointerdown',()=>enableAudio(),{passive:true});document.addEventListener('keydown',()=>enableAudio());
 if(CONFIG.TEST_MODE)document.querySelector('.version').textContent='V0.6 測試';
 if(session){window.addEventListener('error',()=>session.jsErrors++);window.addEventListener('unhandledrejection',()=>session.jsErrors++);}
-const tutorial=window.AquariumTutorial.create({getState:()=>state,commit:protectedTransaction,notify:toast,grant:applyTutorialGift,prepareCoin:prepareLessonCoin,prepareFish:prepareLessonFish,prepareFood:prepareLessonFood,reviewPurchase,ensureFeeding:kind=>{setFeeding(true);if(kind){selectedFeed=kind;renderFeedChoices();if(innerWidth<=1050)requestAnimationFrame(()=>canvas.scrollIntoView({block:'start'}));}}});
+const tutorial=window.AquariumTutorial.create({getState:()=>state,commit:protectedTransaction,notify:toast,grant:applyTutorialGift,prepareCoin:prepareLessonCoin,prepareFish:prepareLessonFish,prepareFood:prepareLessonFood,prepareDecor:prepareLessonDecor,prepareEditing:prepareLessonEditing,reviewPurchase,ensureFeeding:kind=>{setFeeding(true);if(kind){selectedFeed=kind;renderFeedChoices();if(innerWidth<=1050)requestAnimationFrame(()=>canvas.scrollIntoView({block:'start'}));}}});
 const sourceKeys=()=>[[CONFIG.SAVE_KEY,CONFIG.MANUAL_KEY],[CONFIG.V5_KEY,CONFIG.V5_MANUAL_KEY],[CONFIG.V4_KEY,CONFIG.V4_MANUAL_KEY],...(!CONFIG.TEST_MODE?[[CONFIG.V3_KEY,CONFIG.V3_MANUAL_KEY],[CONFIG.V2_KEY,CONFIG.V2_MANUAL_KEY],[CONFIG.LEGACY_KEY,CONFIG.LEGACY_MANUAL_KEY]]:[])];
 function findStored(){for(const [key,manual]of sourceKeys()){let raw=localStorage.getItem(key);if(raw){if(key===CONFIG.SAVE_KEY){const candidate=JSON.parse(raw);if(candidate.saveId){recoverTutorialTransaction(candidate.saveId);raw=localStorage.getItem(key);}}return {key,manual,raw};}}return null;}
 function refreshHome(){
@@ -539,9 +542,11 @@ function readGifts(id=state.saveId){
  const raw=localStorage.getItem(giftKey(id));if(!raw)return {ids:[],emergencyAt:0,tutorialEvents:[]};const v=JSON.parse(raw);
  if(!v||!Array.isArray(v.ids)||v.ids.some(x=>!window.AquariumSave.GIFT_IDS.includes(x))||typeof v.emergencyAt!=='number'||!Number.isFinite(v.emergencyAt)||v.emergencyAt<0||v.emergencyAt>Number.MAX_SAFE_INTEGER||v.tutorialEvents&&(!Array.isArray(v.tutorialEvents)||v.tutorialEvents.some(x=>!window.AquariumSave.TUTORIAL_KEYS.includes(x))))throw Error('贈禮帳本無法讀取');
  if(v.supportAmounts&&(!Number.isInteger(v.supportAmounts.feed)||v.supportAmounts.feed<0||v.supportAmounts.feed>14||!Number.isInteger(v.supportAmounts.fish)||v.supportAmounts.fish<0||v.supportAmounts.fish>CONFIG.MAX_COINS))throw Error('購物補助紀錄不完整');
+ if(v.hints&&(!Array.isArray(v.hints)||v.hints.some(k=>!window.AquariumSave.HINT_IDS.includes(k))))throw Error('功能提示紀錄不完整');
+ if(v.supportAmounts?.decor!==undefined&&(!Number.isInteger(v.supportAmounts.decor)||v.supportAmounts.decor<0||v.supportAmounts.decor>CONFIG.MAX_COINS))throw Error('布置補助紀錄不完整');
  if(v.pending&&validate(v.pending).saveId!==id)throw Error('交易進度與贈禮帳本不符');return v;
 }
-function ledgerRecord(ledger,next=state){return {ids:[...new Set([...ledger.ids,...next.gifts])],emergencyAt:Math.max(ledger.emergencyAt,next.emergencyAt),tutorialEvents:[...new Set([...(ledger.tutorialEvents||[]),...(!next.onboarding.review?next.onboarding.events:[])])],supportAmounts:{feed:Math.max(ledger.supportAmounts?.feed||0,next.onboarding.supportAmounts.feed),fish:Math.max(ledger.supportAmounts?.fish||0,next.onboarding.supportAmounts.fish)}};}
+function ledgerRecord(ledger,next=state){return {hints:[...new Set([...(ledger.hints||[]),...next.onboarding.hints])],ids:[...new Set([...ledger.ids,...next.gifts])],emergencyAt:Math.max(ledger.emergencyAt,next.emergencyAt),tutorialEvents:[...new Set([...(ledger.tutorialEvents||[]),...(!next.onboarding.review?next.onboarding.events:[])])],supportAmounts:{feed:Math.max(ledger.supportAmounts?.feed||0,next.onboarding.supportAmounts.feed),fish:Math.max(ledger.supportAmounts?.fish||0,next.onboarding.supportAmounts.fish),decor:Math.max(ledger.supportAmounts?.decor||0,next.onboarding.supportAmounts.decor)}};}
 function recoverTutorialTransaction(id){
  const ledger=readGifts(id);if(!ledger.pending)return null;const pending=validate(ledger.pending),raw=localStorage.getItem(CONFIG.SAVE_KEY),current=raw?JSON.parse(raw):null;
  const needsCommit=!current||current.saveId!==id||current.onboarding?.transactionId!==pending.onboarding.transactionId;
@@ -550,8 +555,8 @@ function recoverTutorialTransaction(id){
 }
 function mergeGiftLedger(next){
  const ledger=readGifts(next.saveId);next.gifts=[...new Set([...next.gifts,...ledger.ids])];next.emergencyAt=Math.max(next.emergencyAt,ledger.emergencyAt);
- const o=next.onboarding;if(!o.review){o.events=[...new Set([...o.events,...(ledger.tutorialEvents||[])])];if(o.everCompleted||next.gifts.includes('tutorialComplete'))o.events=[...window.AquariumSave.TUTORIAL_KEYS];const n=window.AquariumSave.TUTORIAL_KEYS.findIndex(k=>!o.events.includes(k));o.step=n<0?16:n;o.completed=n<0;o.everCompleted||=o.completed;if(o.completed&&!next.gifts.includes('tutorialComplete'))next.gifts.push('tutorialComplete');}
- o.supportAmounts={feed:Math.max(o.supportAmounts.feed,ledger.supportAmounts?.feed||0),fish:Math.max(o.supportAmounts.fish,ledger.supportAmounts?.fish||0)};
+ const o=next.onboarding;o.hints=[...new Set([...o.hints,...(ledger.hints||[])])];if(!o.review){o.events=[...new Set([...o.events,...(ledger.tutorialEvents||[])])];if(o.everCompleted||next.gifts.includes('tutorialComplete'))o.events=[...window.AquariumSave.TUTORIAL_KEYS];const n=window.AquariumSave.TUTORIAL_KEYS.findIndex(k=>!o.events.includes(k));o.step=n<0?window.AquariumSave.TUTORIAL_KEYS.length:n;o.completed=n<0;o.everCompleted||=o.completed;if(o.completed&&!next.gifts.includes('tutorialComplete'))next.gifts.push('tutorialComplete');}
+ o.supportAmounts={feed:Math.max(o.supportAmounts.feed,ledger.supportAmounts?.feed||0),fish:Math.max(o.supportAmounts.fish,ledger.supportAmounts?.fish||0),decor:Math.max(o.supportAmounts.decor,ledger.supportAmounts?.decor||0)};
  if(next.gifts.includes('demoCollected'))for(const t of next.tanks)t.drops=t.drops.filter(c=>c.id!=='tutorial-demo-'+next.saveId);
  localStorage.setItem(giftKey(next.saveId),JSON.stringify(ledgerRecord(ledger,next)));
 }
@@ -583,7 +588,32 @@ function prepareLessonFish(){
  const available=state.tanks.find(t=>t.fishes.length<TANK_TIERS[t.tier-1].capacity);if(!available)return {review:true};
  const move=button('切換到 '+available.name,()=>{dialog.close();switchTank(available.id);shopTab='fish';shop();tutorial.render();},'place-button');move.id='tutorial-room-help';$('dialog-content').append(move);return {move};
 }
-function reviewPurchase(kind,done){const b=button(kind==='fish'?'看看購魚流程（不消費）':'看看購買與庫存（不消費）',()=>{done();dialog.close();tutorial.render();},'place-button');b.id='tutorial-review-purchase';$('dialog-content').append(b);return b;}
+function prepareLessonDecor(){
+ const starter={river:1,smallplant:2,smallrock:1};
+ const already=Object.entries(state.purchasedDecorations).some(([id,n])=>n>(starter[id]||0));
+ return {review:state.onboarding.review||already||!availableDecorPosition('smallplant')};
+}
+function prepareLessonEditing(){
+ if(!editing)return {target:$('tutorial-edit'),copy:'按「調整布置」，再選取一件裝飾，試著移動位置。'};
+ const item=editableDecorations().find(d=>d.id===editSelection)||editableDecorations()[0];
+ return {target:item?editorHandles.get(item.id):$('edit-done')};
+}
+function showFeatureHint(id,text,action){
+ if(state.onboarding.hints.includes(id)||!started||protectedBusy||conflict||saveBlocked)return false;
+ if(!protectedTransaction(()=>state.onboarding.hints.push(id)))return false;
+ let box=$('feature-hint');if(!box){box=document.createElement('aside');box.id='feature-hint';box.setAttribute('role','status');document.querySelector('#game footer').before(box);}
+ box.replaceChildren(paragraph(text));if(action)box.append(button('我的魚缸',()=>{box.hidden=true;tankMenu();},'place-button'));
+ box.append(button('知道了',()=>{box.hidden=true;},'place-button'));box.hidden=false;return true;
+}
+function checkFeatureHints(){
+ if(!started||!state.onboarding.completed||state.onboarding.review||protectedBusy||$('feature-hint')&&!$('feature-hint').hidden)return;
+ const o=state.onboarding,next=TANK_TIERS[state.tankTier];
+ if(!o.hints.includes('backup'))hintShownThisSession=showFeatureHint('backup','遊戲會自動保存進度。也可以到「更多功能」下載存檔，換裝置時再匯入。');
+ else if(state.level>=4&&state.tanks.length===1&&!o.hints.includes('tank2'))hintShownThisSession=showFeatureHint('tank2','現在可以開啟新的魚缸了！每缸最多十隻、可獨立命名，金幣與飼料共用。',true);
+ else if(next&&state.level>=next.level&&state.coins>=next.price&&!o.hints.includes('upgrade'))hintShownThisSession=showFeatureHint('upgrade','你的魚缸可以升級了！升級後，就能養更多魚兒。',true);
+}
+const editShortcut=button('調整布置',()=>startEditing(),'footer-button');editShortcut.id='tutorial-edit';document.querySelector('#game footer').append(editShortcut);
+function reviewPurchase(kind,done){const b=button(kind==='fish'?'看看購魚流程（不消費）':kind==='decor'?'使用現有布置練習（不消費）':'看看購買與庫存（不消費）',()=>{done();dialog.close();tutorial.render();},'place-button');b.id='tutorial-review-purchase';$('dialog-content').append(b);return b;}
 function checkLevelGifts(){if(state.level>=2&&!state.gifts.includes('level2')){if(grantGift('level2'))toast('養魚等級 2：送你小型魚飼料 ×3 份，鼠魚、斑馬魚、白雲山魚和紅蓮燈都適用。');}if(state.level>=4&&!state.gifts.includes('level4')){if(grantGift('level4'))toast('你解鎖了高蛋白飼料！神仙魚和鬥魚可以吃這種飼料，記得在商店補充喔！');}}
 function feedShop(){shopTab='feed';shop();tutorial.report('feedShopOpened');tutorial.render();}
 function renderFeedShop(grid){
@@ -626,7 +656,7 @@ function emergencyFeed(){if(conflict||saveBlocked)return;let before,raw;try{cons
 function renderTankSelector(){const root=$('tank-selector');if(!root)return;const signature=state.tanks.map(t=>[t.id,t.name,t.tier,t.fishes.length,t.drops.length,t.id===state.activeTankId].join('|')).join(';');if(root.dataset.signature===signature)return;root.dataset.signature=signature;root.replaceChildren();for(const t of state.tanks){const b=button('',()=>switchTank(t.id),'tank-switch');b.dataset.tankId=t.id;b.setAttribute('aria-pressed',String(t.id===state.activeTankId));const name=document.createElement('strong');name.textContent=t.name;b.append(name,paragraph(`${t.fishes.length} / ${TANK_TIERS[t.tier-1].capacity} 隻 · 魚缸 ${t.tier} 級${t.drops.length?' · 有金幣':''}`));root.append(b);}const add=button('＋ 新魚缸',tankMenu,'tank-add');root.append(add);}
 function switchTank(id){if(conflict||saveBlocked||id===state.activeTankId||!state.tanks.some(t=>t.id===id))return;if(editing)finishEditing();if($('observation')?.open)$('obs-return').click();setFeeding(false);closeCard();state.activeTankId=id;bindTank(state.tanks.find(t=>t.id===id));specimenPose=null;feedAt=-99;buildBackground();save();updateUI();draw();tutorial.render();}
 function renderTankOffers(){const offer=TANK_OFFERS.find(o=>o.number===state.tanks.length+1);if(!offer)return;const box=document.createElement('section');box.className='new-tank-offer';const b=button(state.level<offer.level?`養魚等級 ${offer.level} 可解鎖`:`購買第 ${offer.number} 個魚缸 · ${offer.price} 金幣`,()=>{if(conflict||saveBlocked||state.level<offer.level||state.tanks.length>=CONFIG.MAX_TANKS)return;if(state.coins<offer.price){toast('再存一些金幣，就能迎接新的小水世界。');return;}confirmAction('購買新的空魚缸？',`${offer.price} 金幣，起始可養 5 隻魚，之後可升級至 10 隻。`,()=>{if(conflict||saveBlocked||state.tanks.length!==offer.number-1||state.coins<offer.price||state.level<offer.level)return;state.coins-=offer.price;const t=window.AquariumSave.emptyTank(uid(),`第 ${offer.number} 個魚缸`);state.tanks.push(t);tankContexts.set(t.id,{runtime:new Map(),food:[],effects:[],poiCache:buildPOI([],DECORATIONS,decorLayout,W,H)});if(save()){dialog.close();switchTank(t.id);toast('新魚缸準備好了！可在設定命名，或從其他魚缸移入魚兒。');}});$('dialog-content').querySelector('.confirm').textContent='確認購買';},'buy');b.id='buy-tank';b.disabled=state.level<offer.level;box.append(paragraph(`下一個魚缸：第 ${offer.number} 缸 · 養魚等級 ${offer.level} · ${offer.price} 金幣`),b);$('dialog-content').append(box);}
-function moveFish(id){const f=state.fishes.find(f=>f.id===id);if(!f)return;const source=state.activeTankId;openDialog('移動魚兒','move');$('dialog-content').append(paragraph(`替${f.name}選一個新的家。名字、成長、飽足度、個性及配色都會保留。`));for(const t of state.tanks.filter(t=>t.id!==source)){const cap=TANK_TIERS[t.tier-1].capacity;const b=button(`${t.name} · ${t.fishes.length} / ${cap} 隻`,()=>confirmAction('確認移動魚兒？',`${f.name}將搬到${t.name}，不收取費用。`,()=>{if(conflict||saveBlocked)return;const from=state.tanks.find(q=>q.id===source),to=state.tanks.find(q=>q.id===t.id),fish=from.fishes.find(q=>q.id===id);if(!fish||to.fishes.length>=TANK_TIERS[to.tier-1].capacity){toast('目標魚缸已滿，魚兒仍在原缸。');return;}from.fishes=from.fishes.filter(q=>q.id!==id);to.fishes.push(fish);if(save()){tankContexts.get(source).runtime.delete(id);tankContexts.get(t.id).runtime.set(id,makeRuntime(fish,to.fishes.length));closeCard();dialog.close();updateUI();toast('魚兒已安全搬家！');}}),'place-button');b.dataset.moveTo=t.id;b.disabled=t.fishes.length>=cap;$('dialog-content').append(b);}if(state.tanks.length<2)$('dialog-content').append(paragraph('擁有第二個魚缸後，就能替魚兒搬家。'));}
+function moveFish(id){if(state.tanks.length>1)showFeatureHint('move','想讓魚兒住進另一個魚缸嗎？你可以把牠移過去，不需要重新購買。');const f=state.fishes.find(f=>f.id===id);if(!f)return;const source=state.activeTankId;openDialog('移動魚兒','move');$('dialog-content').append(paragraph(`替${f.name}選一個新的家。名字、成長、飽足度、個性及配色都會保留。`));for(const t of state.tanks.filter(t=>t.id!==source)){const cap=TANK_TIERS[t.tier-1].capacity;const b=button(`${t.name} · ${t.fishes.length} / ${cap} 隻`,()=>confirmAction('確認移動魚兒？',`${f.name}將搬到${t.name}，不收取費用。`,()=>{if(conflict||saveBlocked)return;const from=state.tanks.find(q=>q.id===source),to=state.tanks.find(q=>q.id===t.id),fish=from.fishes.find(q=>q.id===id);if(!fish||to.fishes.length>=TANK_TIERS[to.tier-1].capacity){toast('目標魚缸已滿，魚兒仍在原缸。');return;}from.fishes=from.fishes.filter(q=>q.id!==id);to.fishes.push(fish);if(save()){tankContexts.get(source).runtime.delete(id);tankContexts.get(t.id).runtime.set(id,makeRuntime(fish,to.fishes.length));closeCard();dialog.close();updateUI();toast('魚兒已安全搬家！');}}),'place-button');b.dataset.moveTo=t.id;b.disabled=t.fishes.length>=cap;$('dialog-content').append(b);}if(state.tanks.length<2)$('dialog-content').append(paragraph('擁有第二個魚缸後，就能替魚兒搬家。'));}
 for(const id of Object.keys(FEEDS))$('feed-'+id).onclick=()=>selectFeed(id);
 $('feed-shop').onclick=feedShop;$('roster-shortcut').onclick=roster;
 $('home-new').onclick=newTank;$('home-import').onclick=chooseFile;

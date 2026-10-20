@@ -2,26 +2,32 @@
 (() => {
 'use strict';
 const legacy=window.AquariumV05Save,{CONFIG,FEEDS,TANK_TIERS,SPECIES}=window.AquariumData;
-const GIFT_IDS=['starter','smallLesson','fishCard','level2','level4','migration','lessonGeneralRecovery','lessonSmallRecovery','demoCoin','demoCollected','feedSupport','fishSupport','tutorialComplete'];
+const GIFT_IDS=['starter','smallLesson','fishCard','level2','level4','migration','lessonGeneralRecovery','lessonSmallRecovery','demoCoin','demoCollected','feedSupport','fishSupport','tutorialComplete','decorSupport'];
 const clone=x=>JSON.parse(JSON.stringify(x));
 const finite=(x,a,b)=>typeof x==='number'&&Number.isFinite(x)&&x>=a&&x<=b;
 const integer=(x,a,b)=>Number.isInteger(x)&&finite(x,a,b);
 const tankKeys={fishes:'fishes',drops:'drops',tankTier:'tier',tankName:'name',purchasedDecorations:'purchasedDecorations',placedDecorations:'placedDecorations',substrate:'substrate'};
-// Versioned event evidence keeps the old 12 operations distinct from seven tasks.
-const TUTORIAL_KEYS=['general.open','general.select','general.drop','small.gift','small.open','small.select','small.drop','fish.card','coin.collect','feed.shop','feed.tab','feed.buy','fish.shop','fish.tab','fish.buy','observe'];
-const OLD_KEYS=[...TUTORIAL_KEYS.slice(0,8),'feed.shop','feed.tab','feed.buy','observe'];
-function newOnboarding(){return {version:2,step:0,events:[],completed:false,everCompleted:false,review:false,skipped:false,welcomed:false,paused:false,coinHintShown:false,supportAmounts:{feed:0,fish:0},transactionId:''};}
+// Version 3 inserts decoration evidence before observation; old numbers are never reinterpreted.
+const V2_KEYS=['general.open','general.select','general.drop','small.gift','small.open','small.select','small.drop','fish.card','coin.collect','feed.shop','feed.tab','feed.buy','fish.shop','fish.tab','fish.buy','observe'];
+const TUTORIAL_KEYS=[...V2_KEYS.slice(0,15),'decor.shop','decor.tab','decor.buy','decor.edit','decor.move','observe'];
+const OLD_KEYS=[...V2_KEYS.slice(0,8),'feed.shop','feed.tab','feed.buy','observe'];
+const HINT_IDS=['upgrade','tank2','move','backup'];
+function newOnboarding(){return {version:3,step:0,events:[],completed:false,everCompleted:false,review:false,skipped:false,welcomed:false,paused:false,coinHintShown:false,supportAmounts:{feed:0,fish:0,decor:0},hints:[],transactionId:''};}
 function normalizeOnboarding(o){
  if(!o||typeof o!=='object')throw Error('新手教學資料不完整。');
  if(o.version===undefined){
   if(!integer(o.step,0,12)||['completed','skipped','welcomed','paused','coinHintShown'].some(k=>typeof o[k]!=='boolean')||o.completed!==(o.step===12)||(o.skipped&&!o.completed))throw Error('舊教學資料不完整。');
   const events=o.completed?[...TUTORIAL_KEYS]:OLD_KEYS.slice(0,o.step);
-  return {...newOnboarding(),events,step:o.completed?16:TUTORIAL_KEYS.findIndex(k=>!events.includes(k)),completed:o.completed,everCompleted:o.completed,welcomed:o.welcomed,coinHintShown:o.coinHintShown};
+  return {...newOnboarding(),events,step:o.completed?TUTORIAL_KEYS.length:TUTORIAL_KEYS.findIndex(k=>!events.includes(k)),completed:o.completed,everCompleted:o.completed,welcomed:o.welcomed,coinHintShown:o.coinHintShown};
  }
- if(o.version!==2||!Array.isArray(o.events)||new Set(o.events).size!==o.events.length||o.events.some(k=>!TUTORIAL_KEYS.includes(k))||['completed','everCompleted','review','skipped','welcomed','paused','coinHintShown'].some(k=>typeof o[k]!=='boolean'))throw Error('新教學資料不完整。');
- const first=TUTORIAL_KEYS.findIndex(k=>!o.events.includes(k)),step=first<0?16:first;
- if(o.step!==step||o.completed!==(step===16)||(o.review&&!o.everCompleted)||o.skipped||!integer(o.supportAmounts?.feed,0,14)||!integer(o.supportAmounts?.fish,0,CONFIG.MAX_COINS)||typeof o.transactionId!=='string'||o.transactionId.length>120)throw Error('教學事件與進度不一致。');
- return {...newOnboarding(),...o,events:[...o.events],supportAmounts:{...o.supportAmounts},paused:false};
+ const prior=o.version===2,keys=prior?V2_KEYS:TUTORIAL_KEYS;
+ if(![2,3].includes(o.version)||!Array.isArray(o.events)||new Set(o.events).size!==o.events.length||o.events.some(k=>!keys.includes(k))||['completed','everCompleted','review','skipped','welcomed','paused','coinHintShown'].some(k=>typeof o[k]!=='boolean'))throw Error('新教學資料不完整。');
+ const first=keys.findIndex(k=>!o.events.includes(k)),step=first<0?keys.length:first;
+ if(o.step!==step||o.completed!==(step===keys.length)||(o.review&&!o.everCompleted)||o.skipped||!integer(o.supportAmounts?.feed,0,14)||!integer(o.supportAmounts?.fish,0,CONFIG.MAX_COINS)||typeof o.transactionId!=='string'||o.transactionId.length>120)throw Error('教學事件與進度不一致。');
+ if(!prior&&(!integer(o.supportAmounts.decor,0,CONFIG.MAX_COINS)||!Array.isArray(o.hints)||new Set(o.hints).size!==o.hints.length||o.hints.some(k=>!HINT_IDS.includes(k))))throw Error('布置教學或功能提示紀錄不完整。');
+ const events=prior&&(o.completed||o.everCompleted&&!o.review)?[...TUTORIAL_KEYS]:[...o.events];
+ const n=TUTORIAL_KEYS.findIndex(k=>!events.includes(k));
+ return {...newOnboarding(),...o,version:3,events,step:n<0?TUTORIAL_KEYS.length:n,completed:n<0,supportAmounts:{decor:0,...o.supportAmounts},hints:[...(o.hints||[])],paused:false};
 }
 function attach(s){for(const [key,field]of Object.entries(tankKeys))Object.defineProperty(s,key,{configurable:true,enumerable:false,get(){return s.tanks.find(t=>t.id===s.activeTankId)[field];},set(v){s.tanks.find(t=>t.id===s.activeTankId)[field]=v;}});Object.defineProperty(s,'tankCapacity',{configurable:true,enumerable:false,get(){return TANK_TIERS[s.tankTier-1].capacity;}});return s;}
 function emptyTank(id,name,tier=1){return {id,name,tier,fishes:[],drops:[],purchasedDecorations:{river:1},placedDecorations:[],substrate:'river'};}
@@ -56,5 +62,5 @@ function validate(raw){
  return attach({...s,schemaVersion:5,gameVersion:'0.6',tanks,activeTankId:r.activeTankId,feedInventory:inventory,feedPurchases:purchases,gifts:[...r.gifts],emergencyAt:r.emergencyAt,migration,onboarding:{...o}});
 }
 function freshFromLegacy(raw,name){const s=migrate(raw);s.coins=CONFIG.START_COINS;s.tanks=[{...s.tanks[0],id:'tank-1',name:legacy.tankName(name),tier:1}];s.activeTankId='tank-1';s.feedInventory={general:0,small:0,protein:0};s.gifts=[];s.migration=null;s.onboarding=newOnboarding();return validate(s);}
-window.AquariumSave=Object.freeze({...legacy,validate,attach,emptyTank,freshFromLegacy,GIFT_IDS,TUTORIAL_KEYS,newOnboarding,normalizeOnboarding});
+window.AquariumSave=Object.freeze({...legacy,validate,attach,emptyTank,freshFromLegacy,GIFT_IDS,TUTORIAL_KEYS,HINT_IDS,newOnboarding,normalizeOnboarding});
 })();

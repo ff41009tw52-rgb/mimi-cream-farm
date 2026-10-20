@@ -1,4 +1,4 @@
-name: Test aquarium V0.6 feeding, gift tutorial and multi-tank
+name: Test aquarium V0.6 feeding, decor tutorial and multi-tank
 on:
   push:
     paths: ['aquarium-v0.6*.html', 'assets/aquarium-v06/**', 'tests/aquarium-v06/**', 'scripts/build-aquarium-v06.py', '.github/workflows/test-aquarium-v06.yml']
@@ -28,6 +28,7 @@ jobs:
           git diff --exit-code -- aquarium-v0.6-standalone.html
       - name: Prepare browsers
         run: |
+          sudo apt-get update && sudo apt-get install -y fonts-noto-cjk
           npm install --prefix /tmp/aquarium-v06-runtime playwright@1.58.2
           /tmp/aquarium-v06-runtime/node_modules/.bin/playwright install --with-deps chromium webkit
           echo 'NODE_PATH=/tmp/aquarium-v06-runtime/node_modules' >> "$GITHUB_ENV"
@@ -36,11 +37,15 @@ jobs:
           node tests/aquarium-v06/browser.test.cjs
           node tests/aquarium-v06/extra.test.cjs
           node tests/aquarium-v06/tutorial.test.cjs
+          node tests/aquarium-v06/decor.test.cjs
+          node tests/aquarium-v06/decor-mobile.test.cjs
       - name: Check WebKit touch input, all tanks and food picker
         env:
           AQUARIUM_BROWSER: webkit
           AQUARIUM_ARTIFACTS: artifacts/aquarium-v06/webkit
-        run: node tests/aquarium-v06/mobile.test.cjs
+        run: |
+          node tests/aquarium-v06/mobile.test.cjs
+          node tests/aquarium-v06/decor-mobile.test.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
