@@ -2,9 +2,9 @@ const {harness}=require('./harness.cjs'),{context,plain,starter}=require('./sche
 const tank=s=>s.tanks.find(t=>t.id===s.activeTankId);
 (async()=>{
  const h=await harness(8835),w=context(),S=w.AquariumSave,D=w.AquariumData,results=[];
- const at=(step=21,{coins=5000,review=false}={})=>{const s=plain(starter);s.savedAt=Date.now();s.coins=coins;s.gifts=['starter','smallLesson','level2','level4'];s.feedInventory={general:20,small:20,protein:20};s.onboarding={...S.newOnboarding(),events:S.TUTORIAL_KEYS.slice(0,step),step,welcomed:true,completed:step===21,everCompleted:step===21||review,review,hints:['backup','upgrade','tank2']};return s;};
+ const at=(step=21,{coins=5000,review=false}={})=>{const s=plain(starter);s.savedAt=Date.now();s.coins=coins;s.tanks[0].substrate='river';s.tanks[0].purchasedDecorations={river:1,smallplant:2,smallrock:1};s.tanks[0].placedDecorations=s.tanks[0].placedDecorations.slice(0,3);s.gifts=['starter','smallLesson','level2','level4'];s.feedInventory={general:20,small:20,protein:20};s.onboarding={...S.newOnboarding(),events:S.TUTORIAL_KEYS.slice(0,step),step,welcomed:true,completed:step===21,everCompleted:step===21||review,review,hints:['backup','upgrade','tank2']};return s;};
  const stage=async p=>(await h.read(p)).state.onboarding.step;
- async function open(p,s){const v=await h.create(s);await v.p.locator('#home-continue').click();return v;}
+ async function open(p,s){if(s.state)S.validate(s.state);const v=await h.create(s);await v.p.locator('#home-continue').click();return v;}
  // Screenshot each real material and each type at actual tank scale, plus the intact shop framing.
  const groups=[['river',[]],['white',[]],['black',[]],['plants',['smallplant','tallplant','moss']],['rocks',['smallrock','bigrock','cave']],['woodwork',['wood','ship','chest']]];
  for(const size of [{width:1440,height:900},{width:390,height:844},{width:820,height:1180},{width:1024,height:768},{width:1366,height:768}]){
