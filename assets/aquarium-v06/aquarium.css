@@ -135,3 +135,16 @@
 /* Fish habitat guidance is part of science review, not a water-quality mechanic. */
 #dialog .freshwater-guide{border-left:4px solid #80afa3;background:#edf6ed;border-radius:7px;padding:11px 13px;margin:8px 0 16px;color:#32685e;line-height:1.75;font-size:14px}
 #dialog .fish-habitat{color:#356a5d;font-weight:650;font-size:14px}
+
+/* V0.6: unify primary actions and reduce observation clutter. */
+#game .controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:min(760px,100%);max-width:100%;margin:7px auto 8px;gap:12px}
+#game .controls>.action{min-width:0;width:100%;min-height:56px;justify-content:center;padding:9px 12px;gap:10px;border-radius:15px;font-size:19px;line-height:1.35}
+#game .controls>.action .action-icon{font-size:26px;line-height:1;width:29px}
+#game .controls>.action small{display:none}
+#game .controls>#more-menu{background:#edf6ec;border-color:#b8d5c5;color:#245f58}
+#game .controls>#more-menu .action-icon{color:#428e79}
+#observation #obs-own-play,#observation #obs-fish-note,#observation #obs-own-extra,#observation .own-controls:has(#obs-own-play){display:none!important}
+#observation .own-direct-zoom{display:flex;justify-content:flex-start;align-items:center;margin:12px 0}
+#observation .own-direct-zoom #obs-enlarge{min-height:44px;padding:9px 18px;border-radius:12px;background:#eaf3e9;color:#275c56;border:1px solid #a9cbb9;font-weight:700;font-size:15px}
+@media(min-width:1060px) and (min-height:680px){#game .controls{margin:3px auto;gap:12px}#game .controls>.action{min-width:0;min-height:46px;padding:6px 14px;font-size:18px}}
+@media(max-width:680px){#game .controls{gap:7px;width:100%;margin-top:12px}#game .controls>.action{min-width:0;min-height:54px;padding:7px 5px;font-size:16px;gap:4px;flex-direction:column}#game .controls>.action .action-icon{font-size:18px;height:17px}#observation .own-direct-zoom #obs-enlarge{width:100%;min-height:46px}}
