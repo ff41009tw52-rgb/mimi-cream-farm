@@ -11,7 +11,7 @@
 - 新魚圖鑑補充水域、外形、活動水層、真實食性、習性及飼養提醒；明示淡水不代表能任意混養，遊戲飼料分類不是真實食性的唯一選項。資料參考 Seriously Fish 的 Xiphophorus maculatus、Trigonostigma heteromorpha、Trichogaster chuna、Pangio semicincta、Mikrogeophagus altispinosus 物種頁，商品及圖鑑附來源連結。
 - 內容模組在舊驗證器取得物種目錄前載入；schema 5 與教學 version 3 維持相容，既有魚 ID、名字、個性、成長、配色、魚缸及獎勵不改寫。舊「魚類觀察家」仍以發現十種魚解鎖，不回收既得獎勵。未增加帳號、雲端、學生 JSON 匯出匯入或生存懲罰。
 
-本次驗證：本機語法、schema 1–5／舊七任務轉換及原教材雜湊已通過；新增購魚交易與十二種布置持久保存測試，並更新既有十五魚食物、八任務及五種尺寸回歸測試。GitHub Actions 結果於完成後補記。未執行實體 iPhone／iPad／Android 或虛擬鍵盤實機測試。
+本次驗證：本機語法、schema 1–5／舊七任務轉換及原教材雜湊已通過；新增購魚交易與十二種布置持久保存測試，並更新既有十五魚食物、八任務及五種尺寸回歸測試。GitHub Actions [39515046723](https://github.com/ff41009tw52-rgb/mimi-cream-farm/actions/runs/39515046723) 全部通過，功能提交 [`16dfe77a`](https://github.com/ff41009tw52-rgb/mimi-cream-farm/commit/16dfe77a0a73943387a22e091ce9f88e3c65e383)。包含十五魚正確食物、二十四商品、五種尺寸、Chromium／WebKit、八任務及離線版；模擬手機三缸三十魚實測約 60 FPS（GitHub Runner，不代表實機效能）。預覽沿用 https://youyou-aquarium-v06-preview.ff41009tw52.chatgpt.site/ 。未執行實體 iPhone／iPad／Android 或虛擬鍵盤實機測試。
 
 以下保留前次工程紀錄，歷史測試不代替本次測試。
 
