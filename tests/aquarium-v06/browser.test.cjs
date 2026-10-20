@@ -23,8 +23,37 @@ const {harness}=require('./harness.cjs'),{context,plain,v5,large}=require('./sch
  }
  assert.equal(new Set(meals.map(m=>m.species)).size,10);pass('All ten species eat their assigned 4+4+2 food, each successful surface drop consumes one stock and creates three pellets');
  const wrongState=seeded({count:1}),wrong=await h.create({state:wrongState,cadence:100}),wp=wrong.p;await wp.locator('#home-continue').click();await feed(wp,'small');assert(await wp.locator('#dialog').isVisible());assert.equal((await read(wp)).state.feedInventory.small,100);await wp.getByRole('button',{name:'取消',exact:true}).click();assert.equal((await read(wp)).food.length,0);await wp.locator('#tank').click({position:{x:150,y:55}});await wp.locator('#dialog-content .confirm').click();await advance(wp,90000);assert.equal((await read(wp)).diagnostics.eaten,0);assert.equal((await read(wp)).state.feedInventory.small,99);assert.equal((await read(wp)).food.length,0);await wrong.context.close();
- const empty=seeded({coins:0});empty.feedInventory={general:0,small:0,protein:0};const ev=await h.create({state:empty}),ep=ev.p;await ep.locator('#home-continue').click();await feed(ep,'general');assert.equal((await read(ep)).food.length,0);assert.equal((await read(ep)).state.feedInventory.general,0);await ep.locator('#feed-shop').click();await ep.locator('#emergency-feed').click();assert((await read(ep)).state.feedInventory.general>0);assert((await read(ep)).state.feedInventory.small>0);const emergencyAt=(await read(ep)).state.emergencyAt;await ep.locator('#emergency-feed').click();assert.equal((await read(ep)).state.emergencyAt,emergencyAt);await ev.context.close();
- const blocked=await h.create({state:empty,seed:{[KEY+'_gifts_'+empty.saveId]:{ids:empty.gifts,emergencyAt:Date.now()}}});await blocked.p.locator('#home-continue').click();await blocked.p.locator('#shop').click();await blocked.p.locator('#tab-feed').click();await blocked.p.locator('#emergency-feed').click();assert.equal((await read(blocked.p)).state.feedInventory.general,0);await blocked.p.reload();await blocked.p.locator('#home-continue').click();assert.equal((await read(blocked.p)).state.feedInventory.general,0);await blocked.context.close();pass('Wrong-food confirmation, no wrong eating, zero-stock protection, emergency rescue and refresh-proof cooldown');
+
+ // Removing the emergency-food button must not strand players at zero food / zero coins.
+ const empty=seeded({coins:0,hunger:0});
+ empty.feedInventory={general:0,small:0,protein:0};
+ for(const f of empty.tanks[0].fishes)f.coinProgress=D.SPECIES[f.species].coinInterval*D.CONFIG.COIN_SCALE-1;
+ const ev=await h.create({state:empty,cadence:100}),ep=ev.p;await ep.locator('#home-continue').click();
+ await ep.locator('#shop').click();await ep.locator('#tab-feed').click();
+ assert.equal(await ep.locator('#emergency-feed').count(),0,'no emergency food button');
+ assert.match(await ep.locator('#dialog-content').innerText(),/遊戲的簡化分類/);
+ await h.closeDialog(ep);
+ await advance(ep,20000);
+ assert((await read(ep)).state.drops.length>0,'hungry fish must still produce fallback coins when no food can be afforded');
+ assert((await read(ep)).state.drops.every(c=>c.value===1),'fallback coin is worth exactly 1');
+ await ep.locator('#feed').click();await ep.locator('#feed-general').click();
+ const noFoodBefore=(await read(ep)).state.feedInventory.general;
+ const cashBefore=(await read(ep)).state.coins;
+ const coin=(await read(ep)).state.drops[0],rect2=await ep.locator('#tank').boundingBox();
+ await ep.locator('#tank').click({position:{x:coin.x*rect2.width,y:coin.y*rect2.height}});
+ assert.equal((await read(ep)).state.coins,cashBefore+1,'coin remains collectable while feeding');
+ assert.equal((await read(ep)).state.feedInventory.general,noFoodBefore,'collecting cannot consume fish food');
+ assert.equal(await ep.locator('#feed').getAttribute('aria-pressed'),'true','feeding mode remains available');
+ await ep.evaluate(()=>{
+  const target=aquariumDebug().runtime[0],canvas=document.querySelector('#tank'),rect=canvas.getBoundingClientRect();
+  canvas.dispatchEvent(new MouseEvent('click',{bubbles:true,clientX:rect.left+target.x*rect.width,clientY:rect.top+target.y*rect.height}));
+ });
+ assert(await ep.locator('#fish-card').isVisible(),'fish card opens during feeding');
+ assert.equal((await read(ep)).state.feedInventory.general,noFoodBefore);
+ assert.equal(await ep.locator('#collect-all').count(),0,'no bulk collection shortcut');
+ await ev.context.close();
+ pass('Remove emergency food and bulk collect, keep fish/coins clickable during feeding and preserve a minimal no-food income');
+
  const legacy=await h.create({state:large,key:'aquarium_game_save_v5'}),lp=legacy.p;await lp.locator('#home-continue').click();const migrated=(await read(lp)).state;assert.deepEqual(migrated.tanks.map(t=>t.fishes.length),[10,8]);assert.equal(await lp.evaluate(()=>JSON.parse(localStorage.getItem('aquarium_game_save_v5')).fishes.length),18);assert.equal(migrated.migration.compensation,5970);await shot(lp,'legacy-two-tanks');await legacy.context.close();
  const multi=await h.create({state:seeded({tier:1})}),mp=multi.p;await mp.locator('#home-continue').click();async function tankMenu(){await mp.locator('#more-menu').click();await mp.locator('#tank-menu').click();}
  await tankMenu();for(const capacity of [7,9,10]){await mp.locator('#upgrade-tank').click();assert.equal((await read(mp)).state.tankCapacity,capacity);}assert.equal((await read(mp)).state.coins,4220);assert.equal(await mp.locator('#upgrade-tank').count(),0);await mp.locator('#buy-tank').click();await mp.locator('.confirm').click();assert.equal((await read(mp)).state.tanks.length,2);assert.equal((await read(mp)).state.fishes.length,0);const second=(await read(mp)).state.activeTankId;await mp.locator('[data-tank-id="tank-0"]').click();const original=(await read(mp)).state.fishes[0];await mp.locator('#roster-shortcut').click();await mp.locator('.roster-item').first().click();await mp.locator('#fish-more').click();await mp.locator('#manage-fish').click();await mp.getByRole('button',{name:'移動到其他魚缸'}).click();await mp.locator(`[data-move-to="${second}"]`).click();await mp.locator('.confirm').click();const after=(await read(mp)).state;assert.equal(after.tanks.find(t=>t.id===second).fishes[0].id,original.id);for(const k of ['name','growth','hunger','personality','variant'])assert.equal(after.tanks.find(t=>t.id===second).fishes[0][k],original[k]);await mp.locator(`[data-tank-id="${second}"]`).click();await openSettings(mp);await mp.getByRole('button',{name:'改名字',exact:true}).click();await mp.locator('#tank-rename').fill('第二個小世界');await mp.getByRole('button',{name:'保存名稱'}).click();assert.equal((await read(mp)).state.tankName,'第二個小世界');await tankMenu();await mp.locator('#buy-tank').click();await mp.locator('.confirm').click();assert.equal((await read(mp)).state.tanks.length,3);await tankMenu();assert.equal(await mp.locator('#buy-tank').count(),0);await h.closeDialog(mp);await shot(mp,'three-tanks');pass('5→7→9→10 upgrades, independent names, two empty tank purchases, safe fish movement, shared currency');await multi.context.close();
@@ -34,7 +63,14 @@ const {harness}=require('./harness.cjs'),{context,plain,v5,large}=require('./sch
  const thirtyState=seeded({count:10,tanks:3,hunger:85}),thirty=await h.create({state:thirtyState,cadence:100}),tp=thirty.p;await tp.locator('#home-continue').click();const start=(await read(tp)).state.stats.playSeconds;await advance(tp,120000);const grown=(await read(tp)).state;assert(grown.tanks.every(t=>t.fishes.every(f=>f.growth>0&&f.hunger<85)));assert(grown.tanks.every(t=>t.drops.length>0));assert(Math.abs(grown.stats.playSeconds-start-120)<.2);await shot(tp,'thirty-fish-simulation');await thirty.context.close();
  const offline=seeded({count:10,tanks:3,coins:0,hunger:85});offline.savedAt=Date.now()-3600000;const ov=await h.create({state:offline}),op=ov.p;await op.locator('#home-continue').click();assert.equal((await read(op)).state.coins,120);assert((await read(op)).state.tanks.every(t=>t.fishes.every(f=>f.growth>0)));await op.reload();await op.locator('#home-continue').click();assert.equal((await read(op)).state.coins,120);await ov.context.close();pass('All 30 fish progress with one rendered tank, single global clock, all-tank offline reward once');
  const economyState=seeded({count:3,coins:20,level:1,hunger:68,tier:1});economyState.feedInventory={general:8,small:5,protein:0};const economy=await h.create({state:economyState,cadence:100}),ec=economy.p;await ec.locator('#home-continue').click();let first65=null;
- for(let minute=1;minute<=20;minute++){await advance(ec,60000);if(!(await ec.locator('#collect-all').isHidden()))await ec.locator('#collect-all').click();if(!first65&&(await read(ec)).state.coins>=65)first65=minute;}
+ for(let minute=1;minute<=20;minute++){
+ await advance(ec,60000);
+ for(const coin of [...(await read(ec)).state.drops]){
+  const box=await ec.locator('#tank').boundingBox();
+  await ec.locator('#tank').click({position:{x:coin.x*box.width,y:coin.y*box.height}});
+ }
+ if(!first65&&(await read(ec)).state.coins>=65)first65=minute;
+}
  const economyResult={minutes:20,first65Minute:first65,coins:(await read(ec)).state.coins,level:(await read(ec)).state.level,xp:(await read(ec)).state.xp,stock:(await read(ec)).state.feedInventory,hunger:(await read(ec)).state.fishes.map(f=>f.hunger)};assert(first65&&first65<=8);assert(economyResult.coins>=150);assert(economyResult.hunger.every(v=>v>=45));await economy.context.close();pass('20 normal minutes of actual simulation: initial fish stay productive and feed costs are affordable',economyResult);
  const perfState=plain(thirtyState);for(const [index,t]of perfState.tanks.entries()){t.purchasedDecorations={river:1,smallplant:10,smallrock:10};t.placedDecorations=Array.from({length:20},(_,i)=>({id:'perf-decor-'+index+'-'+i,decoration:i<10?'smallplant':'smallrock',normX:.06+.88*(i%10)/15,snapIndex:i%10,lane:i<10?0:1}));}const pv=await h.create({state:perfState,clock:false,size:{width:390,height:844}});await pv.p.locator('#home-continue').click();const performanceResult=await pv.p.evaluate(()=>new Promise(resolve=>{const start=performance.now(),initial=aquariumDebug().diagnostics;let frames=0;function tick(now){frames++;if(now-start<4000){requestAnimationFrame(tick);return;}const d=aquariumDebug().diagnostics;resolve({fish:30,tanks:3,decorationsPerTank:20,renderedTanks:document.querySelectorAll('#tank').length,fps:frames*1000/(now-start),meanWorkMs:(d.costTotal-initial.costTotal)/(d.frames-initial.frames)});}requestAnimationFrame(tick);}));assert(performanceResult.fps>=25);assert(performanceResult.meanWorkMs<20);assert.equal(performanceResult.renderedTanks,1);await pv.context.close();pass('30-fish real-time mobile rendering performance',performanceResult);
  // Real native JSON picker round-trip preserves all tanks and never replaces progress on bad files.
