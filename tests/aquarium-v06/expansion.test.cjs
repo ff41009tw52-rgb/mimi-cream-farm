@@ -12,7 +12,7 @@ const assert=require('node:assert/strict'),{harness}=require('./harness.cjs'),{c
    const coins=(await h.read(p)).state.coins;await p.locator('#purchase-confirm').evaluate(b=>{b.click();b.click();});const after=(await h.read(p)).state;assert.equal(after.fishes.length,4+i);assert.equal(after.coins,coins-D.SPECIES[id].price);assert.equal(after.fishes.at(-1).name,'小彩 A1♥');assert(!after.gifts.includes('fishSupport'));assert(await p.locator('#purchase-see-fish').isVisible());
    if(i===0){await p.locator('#purchase-see-fish').click();assert(await p.locator('#fish-card').isVisible());assert.match(await p.locator('#fish-card').innerText(),/小彩 A1♥/);await p.locator('#close-card').click();await h.shop(p);}else await p.locator('#purchase-keep-shopping').click();
   }
-  const saved=plain((await h.read(p)).state);await p.reload();await p.locator('#home-continue').click();const loaded=(await h.read(p)).state;assert.deepEqual(loaded.fishes.map(f=>[f.id,f.name,f.species]),saved.fishes.map(f=>[f.id,f.name,f.species]));assert.deepEqual(plain(S.validate(saved)).fishes.map(f=>f.species),saved.fishes.map(f=>f.species));
+  const saved=plain((await h.read(p)).state);await p.reload();await p.locator('#home-continue').click();const loaded=(await h.read(p)).state;assert.deepEqual(loaded.fishes.map(f=>[f.id,f.name,f.species]),saved.fishes.map(f=>[f.id,f.name,f.species]));assert.deepEqual(plain(S.validate(saved)).tanks[0].fishes.map(f=>f.species),saved.fishes.map(f=>f.species));
   const info=await p.evaluate(ids=>ids.map(id=>AquariumFishArt.getFinInfo(id)),fish);assert(info.every(x=>x.note&&x.parts.length===5&&x.parts.every(p=>p.description)));
   await h.shot(p,'expansion-tank-'+size.width);await v.context.close();
  }
