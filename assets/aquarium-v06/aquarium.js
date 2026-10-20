@@ -180,7 +180,7 @@ function loadSaved(manual){
 }
 function reset(){if(resetStep!==2)return;resetStep=0;activate(fresh(),{backup:'before_new'});dialog.close();}
 const fishBrief={guppy:'小巧活潑，展開繽紛的大尾巴。',goldfish:'圓潤的身體，慢慢擺動尾鰭。',cory:'在底砂巡游，尋找沉底飼料。',zebra:'帶著水平條紋，輕快地游。',molly:'深色魚身，穩穩地游動。',swordtail:'尾鰭下方有細長的劍狀延伸。',whitecloud:'細細的色帶，喜歡靠近同伴。',cardinal:'藍紅相映的小型群游魚。',angel:'高高的魚鰭，姿態優雅。',betta:'飄逸的長鰭，喜歡獨自巡游。'};
-function moreMenu(){openDialog('更多功能','more');const list=document.createElement('div');list.className='more-grid';for(const [id,title,desc,fn]of [['roster','我的魚兒','看看狀態、改名字與管理魚兒',roster],['more-observe','觀察魚兒','查看魚兒外形與課本呼吸教材',()=>{dialog.close();openObservation(selected);}],['encyclopedia','魚類圖鑑','收藏魚種與特別配色',encyclopedia],['tank-menu','我的魚缸','升級魚缸與調整布置',tankMenu],['quick-decor','調整布置','移動魚缸內的裝飾',()=>{dialog.close();startEditing();}],['achievements','成就','查看進度與領取獎勵',achievements],['settings','設定','音效、新手引導與本機存檔',settings]]){const b=button('',fn,'more-item');b.id=id;const label=document.createElement('strong');label.textContent=title;b.append(label,paragraph(desc));list.append(b);}$('dialog-content').append(list);tutorial.render();}
+function moreMenu(){openDialog('更多功能','more');const list=document.createElement('div');list.className='more-grid';for(const [id,title,desc,fn]of [['roster','我的魚兒','看看狀態、改名字與管理魚兒',roster],['more-observe','觀察魚兒','查看魚兒外形與課本呼吸教材',()=>{dialog.close();openObservation(selected);}],['encyclopedia','魚類圖鑑','收藏魚種與特別配色',encyclopedia],['tank-menu','我的魚缸','升級魚缸與調整布置',tankMenu],['tutorial-edit','調整布置','移動魚缸內的裝飾',()=>{dialog.close();startEditing();}],['achievements','成就','查看進度與領取獎勵',achievements],['settings','設定','音效、新手引導與本機存檔',settings]]){const b=button('',fn,'more-item');b.id=id;const label=document.createElement('strong');label.textContent=title;b.append(label,paragraph(desc));list.append(b);}$('dialog-content').append(list);tutorial.render();}
 function fishMore(){const f=state.fishes.find(f=>f.id===selected);if(!f)return;openDialog('更多魚兒資料','fish-more');const minutes=Math.max(0,Math.floor((Date.now()-f.createdAt)/60000));$('dialog-content').append(paragraph(f.name+' · '+SPECIES[f.species].name,'fish-detail-name'),paragraph(`生活水域：淡水${['guppy','molly'].includes(f.species)?'（也能適應一定程度半鹹水）':''}`,'fish-habitat'),paragraph(`活動水層：${SPECIES[f.species].depthName}`),paragraph(`已養時間：${minutes>=60?Math.floor(minutes/60)+' 小時 '+minutes%60+' 分鐘':minutes+' 分鐘'}`),paragraph(`心情：${mood(f)}`),paragraph(`配色：${f.variant==='normal'?'普通配色':VARIANTS[f.variant].name}`),paragraph(PERSONALITIES[f.personality].desc));const manage=button('管理魚兒',()=>manageFish(f.id),'place-button');manage.id='manage-fish';$('dialog-content').append(manage,button('回到魚兒資料',()=>{dialog.close();selectFish(f.id);},'back-button'));}
 function manageFish(id){const f=state.fishes.find(f=>f.id===id);if(!f)return;openDialog('管理魚兒','manage');$('dialog-content').append(paragraph(f.name+' · '+SPECIES[f.species].name),paragraph('送養後，魚兒會離開魚缸，圖鑑紀錄會保留。所有魚缸合計至少保留三隻魚。','dialog-note'));$('dialog-content').append(button('移動到其他魚缸',()=>moveFish(id),'place-button'));const b=button('送養這隻魚',()=>{selected=id;rehomeFish();},'place-button danger');b.id='rehome';b.disabled=allFish().length<=3;$('dialog-content').append(b,button('返回我的魚兒',roster,'back-button'));}
 function roster(){openDialog('我的魚兒','roster');if(!state.fishes.length){const other=state.tanks.find(t=>t.fishes.length);$('dialog-content').append(paragraph('這個魚缸目前沒有魚兒。'));if(other)$('dialog-content').append(button('查看 '+other.name+' 的魚兒',()=>{dialog.close();switchTank(other.id);roster();},'place-button'));}state.fishes.forEach(f=>{const b=button('',()=>{dialog.close();selectFish(f.id);},'roster-item');const name=document.createElement('span');name.textContent=`${f.name} · ${SPECIES[f.species].name}`;const detail=document.createElement('small');detail.textContent=`${stageName(f.growth)} · 飽足度 ${Math.round(f.hunger)}%`;b.append(name,detail);$('dialog-content').append(b);});}
@@ -623,26 +623,25 @@ function prepareLessonDecor(){
  return {review:state.onboarding.review||state.onboarding.decorReuse||state.gifts.includes('decorSupport')||already||!availableDecorPosition('smallplant')};
 }
 function prepareLessonEditing(){
- if(dialog.open)return {target:$('dialog-close'),copy:'先按視窗右上角 ×，回到魚缸，再按「調整布置」。'};
- if(!editing)return {target:$('tutorial-edit'),copy:'按「調整布置」，再選取一件裝飾，試著移動位置。'};
+ if(dialog.open){if(dialogMode==='more'&&$('tutorial-edit'))return {target:$('tutorial-edit'),copy:'在「更多」選單選「調整布置」，再移動魚缸裡的裝飾。'};return {target:$('dialog-close'),copy:'先按視窗右上角 ×，回到魚缸。'};}
+ if(!editing)return {target:$('more-menu'),copy:'按「更多」→「調整布置」，再選取裝飾，試著移動位置。'};
  const item=editableDecorations().find(d=>d.id===editSelection)||editableDecorations()[0];
  return {target:item?editorHandles.get(item.id):$('edit-done')};
 }
 function showFeatureHint(id,text,action){
  if(state.onboarding.hints.includes(id)||!started||protectedBusy||conflict||saveBlocked)return false;
  if(!protectedTransaction(()=>state.onboarding.hints.push(id)))return false;
- let box=$('feature-hint');if(!box){box=document.createElement('aside');box.id='feature-hint';box.setAttribute('role','status');document.querySelector('#game footer').before(box);}
+ let box=$('feature-hint');if(!box){box=document.createElement('aside');box.id='feature-hint';box.setAttribute('role','status');document.querySelector('#game .controls').before(box);}
  box.replaceChildren(paragraph(text));if(action)box.append(button('我的魚缸',()=>{box.hidden=true;tankMenu();},'place-button'));
  box.append(button('知道了',()=>{box.hidden=true;},'place-button'));box.hidden=false;return true;
 }
 function checkFeatureHints(){
  if(!started||!state.onboarding.completed||protectedBusy||$('feature-hint')&&!$('feature-hint').hidden)return;
  const o=state.onboarding,next=TANK_TIERS[state.tankTier];
- if(!o.hints.includes('backup'))showFeatureHint('backup','遊戲會自動保存進度。也可以到「更多功能」下載存檔，換裝置時再匯入。');
+ if(!o.hints.includes('backup'))showFeatureHint('backup','遊戲會自動保存在這台手機的瀏覽器。下次使用相同瀏覽器開啟，按「繼續上次的遊戲」即可接續。');
  else if(state.level>=4&&state.tanks.length===1&&!o.hints.includes('tank2'))showFeatureHint('tank2','現在可以開啟新的魚缸了！每缸最多十隻、可獨立命名，金幣與飼料共用。',true);
  else if(next&&state.level>=next.level&&state.coins>=next.price&&!o.hints.includes('upgrade'))showFeatureHint('upgrade','你的魚缸可以升級了！升級後，就能養更多魚兒。',true);
 }
-const editShortcut=button('調整布置',()=>startEditing(),'secondary-button');editShortcut.id='tutorial-edit';document.querySelector('#game footer').append(editShortcut);
 function reviewPurchase(kind,done){const b=button(kind==='fish'?'看看購魚流程（不消費）':kind==='decor'?'使用現有布置練習（不消費）':'看看購買與庫存（不消費）',()=>{done();dialog.close();tutorial.render();},'place-button');b.id='tutorial-review-purchase';$('dialog-content').append(b);return b;}
 function checkLevelGifts(){if(state.level>=2&&!state.gifts.includes('level2')){if(grantGift('level2'))toast('養魚等級 2：送你小型魚飼料 ×3 份，鼠魚、斑馬魚、白雲山魚和紅蓮燈都適用。');}if(state.level>=4&&!state.gifts.includes('level4')){if(grantGift('level4'))toast('你解鎖了高蛋白飼料！神仙魚和鬥魚可以吃這種飼料，記得在商店補充喔！');}}
 function feedShop(){shopTab='feed';shop();tutorial.report('feedShopOpened');tutorial.render();}
