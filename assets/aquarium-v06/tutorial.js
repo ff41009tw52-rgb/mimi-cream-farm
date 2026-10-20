@@ -58,6 +58,7 @@ function create({getState,commit,notify,grant,ensureFeeding,prepareCoin,prepareF
   }
   if(o.step===18||o.step===19){const status=prepareEditing();target=status.target;if(status.copy)copy=status.copy;}
   if(o.review&&s.task<=2)copy+='（複習不消耗飼料，也不再贈送物資。）';
+  if($('dialog').open&&target&&!$('dialog').contains(target)){target=$('dialog-close');copy='先按視窗右上角 ×，回到魚缸，再繼續教學標示的操作。';}
   $('onboarding-copy').textContent=copy;target?.classList.add('onboarding-highlight');$('surface-cue').hidden=![2,6].includes(o.step);
   const signature=o.step+':'+target?.id+':'+$('dialog').open;if(signature!==lastLocated){lastLocated=signature;requestAnimationFrame(()=>{if(!target||target.closest('[hidden]'))return;const b=target.getBoundingClientRect();if(b.top<0||b.bottom>innerHeight)target.scrollIntoView({block:'nearest',behavior:'smooth'});});}
  }

@@ -240,6 +240,9 @@ body{background:radial-gradient(ellipse at 8% 20%,#dfece2aa,transparent 46%),rad
 #tutorial-edit{min-height:44px}#edit-label{font-size:15px}.edit-toolbar{z-index:6}.edit-toolbar button{font-size:15px}
 @media(max-width:680px){#feature-hint{flex-wrap:wrap}#feature-hint p{flex-basis:100%;font-size:16px}#feature-hint button{flex:1}.edit-toolbar{top:42px}.edit-toolbar button{padding:6px 8px}.edit-toolbar>div{gap:4px}}
 
+/* Shop canvases must not inherit the aquarium canvas min-height on mobile. */
+#dialog .shop-grid .decor-item .decor-preview{min-height:0;display:block;grid-area:auto;align-self:center;aspect-ratio:12/7;margin:0}
+
 </style>
 
 
@@ -1298,6 +1301,7 @@ function create({getState,commit,notify,grant,ensureFeeding,prepareCoin,prepareF
   }
   if(o.step===18||o.step===19){const status=prepareEditing();target=status.target;if(status.copy)copy=status.copy;}
   if(o.review&&s.task<=2)copy+='（複習不消耗飼料，也不再贈送物資。）';
+  if($('dialog').open&&target&&!$('dialog').contains(target)){target=$('dialog-close');copy='先按視窗右上角 ×，回到魚缸，再繼續教學標示的操作。';}
   $('onboarding-copy').textContent=copy;target?.classList.add('onboarding-highlight');$('surface-cue').hidden=![2,6].includes(o.step);
   const signature=o.step+':'+target?.id+':'+$('dialog').open;if(signature!==lastLocated){lastLocated=signature;requestAnimationFrame(()=>{if(!target||target.closest('[hidden]'))return;const b=target.getBoundingClientRect();if(b.top<0||b.bottom>innerHeight)target.scrollIntoView({block:'nearest',behavior:'smooth'});});}
  }
@@ -1830,7 +1834,13 @@ function drawDecorShopPreview(canvas,id){
  }
 }
 function drawDecoration(c,id,x,y,width,height){window.AquariumDecorArt.draw(c,id,x,y,width,height);}
-function decorLayout(item){const d=DECORATIONS[item.decoration],x=editPreview?.id===item.id?editPreview.x:item.normX;return {x:x*W,y:H*(d.kind==='plant'?.936+item.lane*.009:.948+item.lane*.014),width:Math.min(115,Math.max(44,W*(d.kind==='plant'?.1:.11))),height:Math.max(d.kind==='plant'?26:24,H*Math.min(x>.34&&x<.66?.23:.35,d.height||.13))};}
+function decorLayout(item){
+ const d=DECORATIONS[item.decoration],x=editPreview?.id===item.id?editPreview.x:item.normX;
+ const base=Math.min(115,Math.max(44,W*(d.kind==='plant'?.1:.11))),width=item.decoration==='smallrock'?Math.max(36,base*.82):base;
+ const limit=H*(x>.34&&x<.66?.23:.35),ratios={smallrock:.62,bigrock:.87,cave:.91,wood:.84,ship:.68,chest:.82};
+ const height=d.kind==='ground'?Math.max(24,Math.min(limit,width*ratios[item.decoration])):Math.max(26,H*Math.min(x>.34&&x<.66?.23:.35,d.height||.13));
+ return {x:x*W,y:H*(d.kind==='plant'?.936+item.lane*.009:.948+item.lane*.014),width,height};
+}
 
 function buildBackground(){
   const buildStarted=performance.now();diagnostics.backgroundBuilds++;
@@ -1994,6 +2004,7 @@ function prepareLessonDecor(){
  return {review:state.onboarding.review||state.onboarding.decorReuse||state.gifts.includes('decorSupport')||already||!availableDecorPosition('smallplant')};
 }
 function prepareLessonEditing(){
+ if(dialog.open)return {target:$('dialog-close'),copy:'先按視窗右上角 ×，回到魚缸，再按「調整布置」。'};
  if(!editing)return {target:$('tutorial-edit'),copy:'按「調整布置」，再選取一件裝飾，試著移動位置。'};
  const item=editableDecorations().find(d=>d.id===editSelection)||editableDecorations()[0];
  return {target:item?editorHandles.get(item.id):$('edit-done')};
@@ -2012,7 +2023,7 @@ function checkFeatureHints(){
  else if(state.level>=4&&state.tanks.length===1&&!o.hints.includes('tank2'))showFeatureHint('tank2','現在可以開啟新的魚缸了！每缸最多十隻、可獨立命名，金幣與飼料共用。',true);
  else if(next&&state.level>=next.level&&state.coins>=next.price&&!o.hints.includes('upgrade'))showFeatureHint('upgrade','你的魚缸可以升級了！升級後，就能養更多魚兒。',true);
 }
-const editShortcut=button('調整布置',()=>startEditing(),'footer-button');editShortcut.id='tutorial-edit';document.querySelector('#game footer').append(editShortcut);
+const editShortcut=button('調整布置',()=>startEditing(),'secondary-button');editShortcut.id='tutorial-edit';document.querySelector('#game footer').append(editShortcut);
 function reviewPurchase(kind,done){const b=button(kind==='fish'?'看看購魚流程（不消費）':kind==='decor'?'使用現有布置練習（不消費）':'看看購買與庫存（不消費）',()=>{done();dialog.close();tutorial.render();},'place-button');b.id='tutorial-review-purchase';$('dialog-content').append(b);return b;}
 function checkLevelGifts(){if(state.level>=2&&!state.gifts.includes('level2')){if(grantGift('level2'))toast('養魚等級 2：送你小型魚飼料 ×3 份，鼠魚、斑馬魚、白雲山魚和紅蓮燈都適用。');}if(state.level>=4&&!state.gifts.includes('level4')){if(grantGift('level4'))toast('你解鎖了高蛋白飼料！神仙魚和鬥魚可以吃這種飼料，記得在商店補充喔！');}}
 function feedShop(){shopTab='feed';shop();tutorial.report('feedShopOpened');tutorial.render();}

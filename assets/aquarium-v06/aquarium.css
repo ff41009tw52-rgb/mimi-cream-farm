@@ -128,3 +128,6 @@
 .decor-handles{z-index:4;inset:0}.decor-handle.selected{border:2px solid #fff4a9;background:#fff6ba18;box-shadow:0 0 0 2px #54816c88}.decor-handle:focus-visible{outline:3px solid #f4cb61;outline-offset:2px}
 #tutorial-edit{min-height:44px}#edit-label{font-size:15px}.edit-toolbar{z-index:6}.edit-toolbar button{font-size:15px}
 @media(max-width:680px){#feature-hint{flex-wrap:wrap}#feature-hint p{flex-basis:100%;font-size:16px}#feature-hint button{flex:1}.edit-toolbar{top:42px}.edit-toolbar button{padding:6px 8px}.edit-toolbar>div{gap:4px}}
+
+/* Shop canvases must not inherit the aquarium canvas min-height on mobile. */
+#dialog .shop-grid .decor-item .decor-preview{min-height:0;display:block;grid-area:auto;align-self:center;aspect-ratio:12/7;margin:0}
