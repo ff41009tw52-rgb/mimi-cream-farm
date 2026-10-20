@@ -7,7 +7,7 @@ p=argparse.ArgumentParser();p.add_argument('artifacts',type=Path);p.add_argument
 out=Path(__file__).resolve().parent.parent/'docs/aquarium-v06-decor';out.mkdir(parents=True,exist_ok=True)
 rows=[]
 for width in [1440,390]:
- for key,title in [('river','河砂'),('white','白砂'),('black','黑砂'),('plants','小水草／高水草／莫絲'),('rocks','小石頭／大石頭／洞穴'),('woodwork','沉木／沉船／寶箱'),('shop-top','布置商店'),('shop-objects','造景商品')]:rows.append((f'decor-{width}-{key}',f'{width}px：{title}'))
+ for key,title in [('river','河砂'),('white','白砂'),('black','黑砂'),('plants','小水草／高水草／莫絲'),('rocks','小石頭／大石頭／洞穴'),('woodwork','沉木／沉船／寶箱'),('shop-top','布置商店'),('shop-objects','造景商品'),('shop-plants','水草商品'),('shop-bottom','洞穴／沉船／寶箱商品')]:rows.append((f'decor-{width}-{key}',f'{width}px：{title}'))
 for width in [1366,1440,390,820,1024]:
  for key,title in [('open','第七項：打開商店'),('buy','真正購買並放置'),('select','選取與移動裝飾'),('moved','位置變更成功'),('complete','完成八項教學後的完整遊戲')]:rows.append((f'decor-lesson-{width}-{key}',f'{width}px：{title}'))
 for width in [820,1024]:rows.extend([(f'decor-{width}-plants',f'{width}px 平板：缸內布置'),(f'decor-{width}-shop-objects',f'{width}px 平板：商店造景')])
