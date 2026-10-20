@@ -617,7 +617,7 @@ function showFeatureHint(id,text,action){
  box.append(button('知道了',()=>{box.hidden=true;},'place-button'));box.hidden=false;return true;
 }
 function checkFeatureHints(){
- if(!started||!state.onboarding.completed||state.onboarding.review||protectedBusy||$('feature-hint')&&!$('feature-hint').hidden)return;
+ if(!started||!state.onboarding.completed||protectedBusy||$('feature-hint')&&!$('feature-hint').hidden)return;
  const o=state.onboarding,next=TANK_TIERS[state.tankTier];
  if(!o.hints.includes('backup'))showFeatureHint('backup','遊戲會自動保存進度。也可以到「更多功能」下載存檔，換裝置時再匯入。');
  else if(state.level>=4&&state.tanks.length===1&&!o.hints.includes('tank2'))showFeatureHint('tank2','現在可以開啟新的魚缸了！每缸最多十隻、可獨立命名，金幣與飼料共用。',true);
