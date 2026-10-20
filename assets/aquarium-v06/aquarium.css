@@ -131,3 +131,7 @@
 
 /* Shop canvases must not inherit the aquarium canvas min-height on mobile. */
 #dialog .shop-grid .decor-item .decor-preview{min-height:0;display:block;grid-area:auto;align-self:center;aspect-ratio:12/7;margin:0}
+
+/* Fish habitat guidance is part of science review, not a water-quality mechanic. */
+#dialog .freshwater-guide{border-left:4px solid #80afa3;background:#edf6ed;border-radius:7px;padding:11px 13px;margin:8px 0 16px;color:#32685e;line-height:1.75;font-size:14px}
+#dialog .fish-habitat{color:#356a5d;font-weight:650;font-size:14px}
