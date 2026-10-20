@@ -73,3 +73,49 @@
 .fish-card .card-close{position:sticky;top:0;right:0;float:right;margin:-6px -6px 0 4px;background:#f5f7e9;z-index:2}
 #tutorial-coin-target{width:54px;height:54px;min-width:54px;min-height:54px;padding:0;border-radius:50%;background:#fff6c622;font-size:0}
 #tutorial-coin-target::after{content:'點這枚金幣';position:absolute;top:calc(100% + 5px);left:50%;transform:translateX(-50%);white-space:nowrap;background:#fff9dc;border-radius:10px;padding:3px 8px;font-size:16px;line-height:1.5;box-shadow:0 2px 8px #65744422}
+
+/* V0.6 merchandise polish: purely visual; no changes to feeding or item ownership. */
+#game .tank-caption #tank-name{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#game .tank-caption>span:first-child{max-width:100%;min-width:0}
+#game .tank-base{display:block}
+#dialog .shop-grid .feed-item,#dialog .shop-grid .decor-item{
+ border:1px solid #cbdccb;background:linear-gradient(155deg,#fffef9 0%,#f3f8ec 100%);
+ box-shadow:0 9px 22px #3e73521a,0 2px 4px #486d5310;
+ border-radius:19px;padding:15px;gap:9px;transition:border-color .18s,box-shadow .18s
+}
+#dialog .shop-grid .feed-item:hover,#dialog .shop-grid .decor-item:hover{border-color:#94bba7;box-shadow:0 12px 24px #3e735524}
+#dialog .shop-grid .feed-item h3,#dialog .shop-grid .decor-item h3{margin:2px 0 0;font-size:19px;line-height:1.4;color:#214c4b}
+#dialog .shop-grid .feed-item p,#dialog .shop-grid .decor-item p{min-height:0;margin:0;flex:none;line-height:1.6}
+#dialog .shop-grid .feed-item .buy,#dialog .shop-grid .decor-item .buy{width:100%;min-height:48px;border-radius:12px;font-size:15px;margin-top:auto}
+#dialog .shop-grid .feed-item .feed-display{height:182px;display:grid;place-items:center;overflow:hidden;position:relative;border-radius:15px;background:radial-gradient(ellipse at 50% 100%,#a4cec45c,transparent 66%),linear-gradient(135deg,#edf7eb,#dceee7);border:1px solid #cce0d4}
+#dialog .shop-grid .feed-item .feed-display:before,#dialog .shop-grid .feed-item .feed-display:after{content:"";position:absolute;border:1px solid #ffffffa0;border-radius:50%;width:13px;height:13px;top:23px;left:24px}
+#dialog .shop-grid .feed-item .feed-display:after{width:8px;height:8px;top:64px;right:26px;left:auto}
+#dialog .shop-grid .feed-item .feed-bag{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;width:114px;height:158px;margin:0;background:linear-gradient(114deg,#ffffff40 0 11%,transparent 34%),linear-gradient(180deg,color-mix(in srgb,var(--feed-main),#ffffff 23%),var(--feed-main) 75%,color-mix(in srgb,var(--feed-main),#173c36 17%));border:1px solid #ffffffa3;border-radius:9px 9px 15px 15px;box-shadow:inset 3px 0 5px #ffffff38,inset -4px 0 7px #233c3344,0 11px 14px #30594b37;transform:rotate(-2deg)}
+#dialog .shop-grid .feed-item .feed-bag:before{content:"";position:absolute;left:5px;right:5px;top:7px;height:3px;border-top:1px solid #ffffffa6;border-bottom:1px solid #214c4b38}
+#dialog .shop-grid .feed-item .feed-bag:after{content:"";position:absolute;left:12px;right:12px;bottom:7px;height:4px;border-radius:100%;background:#183e3938}
+#dialog .shop-grid .feed-item .feed-seal{width:91%;height:11px;flex-shrink:0;border-radius:5px 5px 2px 2px;background:repeating-linear-gradient(90deg,#ffffff30 0 3px,#1f4e3821 3px 6px);margin:2px 0 3px}
+#dialog .shop-grid .feed-item .feed-brand{font-size:10px;font-weight:800;letter-spacing:.5px;color:#fffdf2;text-shadow:0 1px 3px #264c5277}
+#dialog .shop-grid .feed-item .feed-fishmark{width:68px;height:38px;color:#fef8da;filter:drop-shadow(0 1px 1px #25544a66)}
+#dialog .shop-grid .feed-item .feed-bag-window{height:32px;width:70px;border-radius:15px;background:radial-gradient(circle at 13px 10px,#d6ae71 0 2px,transparent 2.5px),radial-gradient(circle at 29px 19px,#f0d7ac 0 2.4px,transparent 3px),radial-gradient(circle at 52px 13px,#b97e4c 0 2px,transparent 2.8px),radial-gradient(circle at 40px 25px,#e4c58d 0 2px,transparent 3px),#f8efd4d9;border:3px solid #fff5d2a8;box-shadow:inset 0 2px 6px #6c6d4740}
+#dialog .shop-grid .feed-item .feed-pack-count{color:#fffef7;font-size:11px;font-weight:800;letter-spacing:1px;margin-top:3px;text-shadow:0 1px #294e466e}
+#dialog .shop-grid .feed-item .feed-species{font-size:13px;color:#5a7364;line-height:1.65;background:#edf4e8;border-radius:9px;padding:7px 9px;min-height:52px}
+#dialog .shop-grid .feed-item .feed-package-detail{font-size:13px;color:#587368}
+#dialog .shop-grid .feed-item .feed-stock{display:inline-flex;align-self:flex-start;width:auto;font-size:12px;font-weight:750;color:#2d6f62;background:#e0eee2;border-radius:9px;padding:5px 9px}
+#dialog .shop-grid .decor-item .decor-showcase{height:184px;position:relative;display:grid;place-items:center;overflow:hidden;border-radius:15px;background:radial-gradient(ellipse at 50% 120%,#b4d5c0,transparent 72%),linear-gradient(150deg,#eff8ee,#dfeee6);border:1px solid #d3e3d4}
+#dialog .shop-grid .decor-item .decor-showcase[data-material="substrate"]{background:linear-gradient(180deg,#e9f4e8,#d6e9dc)}
+#dialog .shop-grid .decor-item .decor-preview{width:100%;max-width:280px;height:auto;max-height:163px;object-fit:contain;background:transparent!important;border:0!important;border-radius:0}
+#dialog .shop-grid .decor-item .decor-category{position:absolute;left:10px;top:10px;color:#3a7968;background:#fffdf2dd;border:1px solid #bcd7c5;border-radius:100px;padding:3px 9px;font-size:11px;font-weight:700}
+#dialog .shop-grid .decor-item .decor-description{font-size:13px;color:#667d6f;min-height:40px;line-height:1.7}
+#dialog .shop-grid .decor-item .decor-stock{font-size:12px!important;font-weight:700;color:#557365!important;background:#e6efe3;padding:7px 9px;border-radius:9px}
+#dialog .shop-grid .decor-item .decor-stock.is-using{background:#dbefe3;color:#27695a!important}
+#dialog .shop-grid .decor-item .place-button{width:100%;min-height:42px;font-size:13px}
+@media(max-width:680px){
+ #dialog .shop-grid .feed-item,#dialog .shop-grid .decor-item{padding:10px;gap:7px;border-radius:15px}
+ #dialog .shop-grid .feed-item .feed-display,#dialog .shop-grid .decor-item .decor-showcase{height:146px}
+ #dialog .shop-grid .feed-item .feed-bag{transform:scale(.82) rotate(-2deg)}
+ #dialog .shop-grid .feed-item h3,#dialog .shop-grid .decor-item h3{font-size:16px}
+ #dialog .shop-grid .feed-item .feed-species{font-size:12px;min-height:0}
+ #dialog .shop-grid .feed-item .feed-stock,#dialog .shop-grid .decor-item .decor-stock{font-size:11px!important}
+ #dialog .shop-grid .feed-item .buy,#dialog .shop-grid .decor-item .buy{font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){#dialog .shop-grid .feed-item,#dialog .shop-grid .decor-item{transition:none}}
