@@ -132,7 +132,7 @@ function buy(species){
  const actions=document.createElement('div');actions.className='confirm-actions';const cancel=button('取消',()=>{if(!completed)shop();});cancel.id='purchase-cancel';const confirm=button('確認購買',()=>form.requestSubmit(),'confirm');confirm.id='purchase-confirm';
  actions.append(cancel,confirm);form.append(previewFish(species,false,variant),paragraph(s.name+' · '+s.price+' 金幣','purchase-price'),label,input,paragraph('最多 12 個字，可用中文、英文、數字及常用名字符號。','dialog-note'),error,actions);$('dialog-content').append(form);
  form.addEventListener('submit',e=>{e.preventDefault();if(completed||confirm.disabled)return;let name;try{name=validFishName(input.value);}catch(err){error.textContent=err.message;input.focus();return;}confirm.disabled=true;const ok=completeFishPurchase(species,name,tankId,variant);if(ok)completed=true;else {confirm.disabled=false;error.textContent='購買尚未完成，請確認金幣、空位與存檔狀態後再試。';}});
- input.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.isComposing)e.preventDefault();});input.addEventListener('focus',()=>setTimeout(()=>input.isConnected&&input.scrollIntoView({block:'nearest'}),180));tutorial.render();
+ input.addEventListener('input',()=>{error.textContent='';});input.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.isComposing)e.preventDefault();});input.addEventListener('focus',()=>setTimeout(()=>input.isConnected&&input.scrollIntoView({block:'nearest'}),180));tutorial.render();
 }
 function completeFishPurchase(species,name,tankId,variant){
  if(conflict||saveBlocked||protectedBusy)return;const speciesData=SPECIES[species];if(!speciesData)return;
@@ -680,7 +680,7 @@ function checkFeatureHints(){
  else if(next&&state.level>=next.level&&state.coins>=next.price&&!o.hints.includes('upgrade'))showFeatureHint('upgrade','你的魚缸可以升級了！升級後，就能養更多魚兒。',true);
 }
 function reviewPurchase(kind,done){const b=button(kind==='fish'?'看看購魚流程（不消費）':kind==='decor'?'使用現有布置練習（不消費）':'看看購買與庫存（不消費）',()=>{done();dialog.close();tutorial.render();},'place-button');b.id='tutorial-review-purchase';$('dialog-content').append(b);return b;}
-function checkLevelGifts(){if(state.level>=2&&!state.gifts.includes('level2')){if(grantGift('level2'))toast('養魚等級 2：送你小型魚飼料 ×3 份，鼠魚、斑馬魚、白雲山魚和紅蓮燈都適用。');}if(state.level>=4&&!state.gifts.includes('level4')){if(grantGift('level4'))toast('你解鎖了高蛋白飼料！神仙魚和鬥魚可以吃這種飼料，記得在商店補充喔！');}}
+function checkLevelGifts(){if(state.level>=2&&!state.gifts.includes('level2')){if(grantGift('level2'))toast('養魚等級 2：送你小型魚飼料 ×3 份，鼠魚、斑馬魚、白雲山魚、紅蓮燈和三角燈都適用。');}if(state.level>=4&&!state.gifts.includes('level4')){if(grantGift('level4'))toast('你解鎖了高蛋白飼料！神仙魚、鬥魚、蜜糖麗麗魚、酷利泥鰍和玻利維亞鳳凰都適用，記得在商店補充喔！');}}
 function feedShop(){shopTab='feed';shop();tutorial.report('feedShopOpened');tutorial.render();}
 function renderFeedShop(grid){
  for(const [id,d] of Object.entries(FEEDS)){
