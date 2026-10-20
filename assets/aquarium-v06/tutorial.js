@@ -24,7 +24,7 @@ const steps=[
  {task:7,target:'tutorial-decor-buy',shopTab:'decor',event:'decorBought',copy:'選一件喜歡的裝飾，按「購買並放置」，它就會出現在魚缸裡。先試試便宜的小水草吧！',success:'裝飾放好了！現在試著調整它的位置。'},
  {task:7,target:'tutorial-edit',event:'decorEditing',copy:'按「調整布置」，再選取一件裝飾。'},
  {task:7,target:'decor-handles',event:'decorMoved',copy:'選一件裝飾，左右拖到另一個位置。也可以用方向鍵或上方 ← → 按鈕移動。',success:'完成了！以後你可以自由布置自己的水族箱。'},
- {task:8,target:'observe-review' ,event:'observationOpened',copy:'按下「觀察魚兒」，認識魚的身體構造，還能看看牠們怎麼呼吸。',success:'恭喜你完成新手教學！記得餵食、觀察魚兒、收集金幣，讓你的水族箱慢慢成長。'}
+ {task:8,target:'more-menu' ,event:'observationOpened',copy:'按「更多」→「觀察魚兒」，認識魚的身體構造與呼吸。',success:'恭喜你完成新手教學！記得餵食、觀察魚兒、收集金幣，讓你的水族箱慢慢成長。'}
 ];
 function create({getState,commit,notify,grant,ensureFeeding,prepareCoin,prepareFish,prepareFood,prepareDecor,prepareEditing,reviewPurchase}){
  const $=id=>document.getElementById(id);let active=false,lastLocated='';
@@ -57,6 +57,7 @@ function create({getState,commit,notify,grant,ensureFeeding,prepareCoin,prepareF
    if(shopOpen){const p=document.createElement('p');p.id='tutorial-dialog-copy';p.className='tutorial-shop-copy';p.textContent=s.task+' / 8 '+tasks[s.task-1]+' '+copy;$('dialog-content').prepend(p);}
   }
   if(o.step===18||o.step===19){const status=prepareEditing();target=status.target;if(status.copy)copy=status.copy;}
+   if(s.task===8&&$('dialog').open&&$('more-observe')){target=$('more-observe');copy='按「觀察魚兒」，看看魚的外形與呼吸方式。';}
   if(o.review&&s.task<=2)copy+='（複習不消耗飼料，也不再贈送物資。）';
   if($('dialog').open&&target&&!$('dialog').contains(target)){target=$('dialog-close');copy='先按視窗右上角 ×，回到魚缸，再繼續教學標示的操作。';}
   $('onboarding-copy').textContent=copy;target?.classList.add('onboarding-highlight');$('surface-cue').hidden=![2,6].includes(o.step);
