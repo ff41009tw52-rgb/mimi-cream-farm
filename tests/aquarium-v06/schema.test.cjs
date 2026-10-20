@@ -26,7 +26,7 @@ const v2keys=S.TUTORIAL_KEYS.filter(k=>!k.startsWith('decor.'));
 for(let n=0;n<=16;n++){
  const old=plain(starter);old.coins=77;old.gifts=['starter','smallLesson','fishCard','feedSupport','fishSupport'];
  old.onboarding={...S.newOnboarding(),version:2,step:n,events:v2keys.slice(0,n),completed:n===16,everCompleted:n===16,welcomed:true,supportAmounts:{feed:3,fish:9}};delete old.onboarding.hints;
- const original=JSON.stringify(old),next=S.validate(old);assert.equal(JSON.stringify(old),original);assert.equal(next.coins,77);assert.equal(next.onboarding.step,n===16?21:n);assert.equal(next.onboarding.supportAmounts.decor,0);assert.equal(next.onboarding.completed,n===16);assert.deepEqual(plain(S.validate(plain(next))),plain(next));
+ const original=JSON.stringify(old),next=S.validate(old);assert.equal(JSON.stringify(old),original);assert.equal(next.coins,77);assert.equal(next.onboarding.step,n===16?21:n);assert.equal(next.onboarding.supportAmounts.decor,0);assert.equal(next.onboarding.decorReuse,true);assert.equal(next.onboarding.completed,n===16);assert.deepEqual(plain(S.validate(plain(next))),plain(next));
 }
 console.log('PASS all 17 seven-task checkpoints migrate to version 3 without resetting completed saves or existing receipts');
 const hashes=JSON.parse(fs.readFileSync('tests/aquarium/fixtures/v05-preserved-hashes.json'));for(const [p,h]of Object.entries(hashes))assert.equal(crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex'),h,p);
