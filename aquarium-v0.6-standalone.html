@@ -231,6 +231,9 @@ body{background:radial-gradient(ellipse at 8% 20%,#dfece2aa,transparent 46%),rad
 }
 @media(prefers-reduced-motion:reduce){#dialog .shop-grid .feed-item,#dialog .shop-grid .decor-item{transition:none}}
 
+/* Preserve the functional tank name on narrow screens after removing the decorative right caption. */
+#game .tank-caption>span:first-child{display:inline-flex;align-items:center;min-width:0;gap:5px}
+
 </style>
 
 
