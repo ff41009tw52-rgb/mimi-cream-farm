@@ -30,8 +30,8 @@
 </head>
 <body>
 <section id="home" class="home" aria-labelledby="home-title">
-<div class="home-intro"><span class="eyebrow">一缸屬於你的日常 · V0.6</span><h1 id="home-title">悠悠水族箱</h1><p class="home-subtitle">我的小小水世界</p><p class="home-copy">養育不同的魚兒，觀察牠們的成長，收集金幣布置水族箱，還能探索魚的身體構造與呼吸方式。</p><div class="home-art" aria-hidden="true"><canvas id="home-fish" width="760" height="300"></canvas></div><div class="home-features"><article><h2>養育魚兒</h2><p>餵食、陪伴與成長。</p></article><article><h2>收集布置</h2><p>收集金幣，購買魚兒與裝飾。</p></article><article><h2>科學觀察</h2><p>認識魚的身體構造與呼吸方式。</p></article></div></div>
-<div class="home-start"><span class="eyebrow">從這裡開始</span><h2>打造自己的小水世界</h2><label for="tank-new-name">水族箱名稱 <small>最多 10 個字</small></label><input id="tank-new-name" class="name-input" maxlength="20" placeholder="我的小水族箱" autocomplete="off"><p id="home-error" role="status"></p><button id="home-new" class="home-primary">開始新的水族箱</button><button id="home-continue" hidden>繼續上次的遊戲</button><p id="home-summary"></p><button id="home-import">從手機讀取存檔</button><p class="home-local">不用帳號密碼。進度保存在這台裝置；下載 JSON 存檔，就能帶到其他裝置繼續。</p></div></section>
+<div class="home-intro"><span class="eyebrow">一缸屬於你的日常 · V0.6</span><h1 id="home-title">悠悠水族箱</h1><p class="home-subtitle">我的小小水世界 · 淡水魚觀察遊戲</p><p class="home-copy">養育不同的魚兒，觀察牠們的成長，收集金幣布置水族箱，還能探索魚的身體構造與呼吸方式。</p><div class="home-art" aria-hidden="true"><canvas id="home-fish" width="760" height="300"></canvas></div><div class="home-features"><article><h2>養育魚兒</h2><p>餵食、陪伴與成長。</p></article><article><h2>收集布置</h2><p>收集金幣，購買魚兒與裝飾。</p></article><article><h2>科學觀察</h2><p>認識魚的身體構造與呼吸方式。</p></article></div></div>
+<div class="home-start"><span class="eyebrow">從這裡開始</span><h2>打造自己的小水世界</h2><label for="tank-new-name">水族箱名稱 <small>最多 10 個字</small></label><input id="tank-new-name" class="name-input" maxlength="20" placeholder="我的小水族箱" autocomplete="off"><p id="home-error" role="status"></p><button id="home-new" class="home-primary">開始新的水族箱</button><button id="home-continue" hidden>繼續上次的遊戲</button><p id="home-summary"></p><button id="home-import">從手機讀取存檔</button><p class="home-local">不需要帳號。進度會自動儲存在這台手機的瀏覽器；下次使用相同瀏覽器開啟，按「繼續上次的遊戲」即可接續。不要清除網站資料；需要備份時可到設定下載存檔。</p></div></section>
 <main class="app" id="game" hidden>
 <header class="header"><div class="brand"><span class="brand-icon" aria-hidden="true">≈</span><div><h1>悠悠水族箱</h1><p>我的小小水世界</p></div><span class="version">V0.6</span></div><span class="header-note">把日常，養成喜歡的樣子</span></header>
 <section class="hud" aria-label="水族箱狀態">
@@ -55,7 +55,7 @@
 </section>
 <section class="controls" aria-label="魚缸操作"><button id="feed" class="action primary" aria-pressed="false"><span class="action-icon" aria-hidden="true">⁙</span><span>餵食<small>選飼料，再點水面</small></span></button><button id="shop" class="action"><span class="action-icon" aria-hidden="true">⌂</span><span>商店<small>購買魚兒、飼料與布置</small></span></button></section>
 
-<footer><p id="tip">點魚兒看資料；看到金幣時，點一下就能收取。餵飽魚兒，牠們就會慢慢長大。</p><button id="roster-shortcut" class="secondary-button">我的魚兒</button><button id="observe-review" class="secondary-button">觀察魚兒</button><button id="more-menu" class="secondary-button" aria-haspopup="dialog">更多功能</button><button id="collect-all" class="text-button" hidden>收取金幣</button></footer>
+<footer><p id="tip">點魚兒看資料；看到金幣時，點一下就能收取。餵飽魚兒，牠們就會慢慢長大。</p><button id="roster-shortcut" class="secondary-button">我的魚兒</button><button id="observe-review" class="secondary-button">觀察魚兒</button><button id="more-menu" class="secondary-button" aria-haspopup="dialog">更多功能</button></footer>
 </main>
 <dialog id="dialog"><div class="dialog-head"><div><span class="eyebrow" id="dialog-eyebrow">一起照顧水中的生命</span><h2 id="dialog-title"></h2></div><button class="icon-button" id="dialog-close" aria-label="關閉視窗">×</button></div><div id="dialog-content"></div></dialog>
 <div id="toast" role="status" popover="manual" class="toast" hidden></div>
