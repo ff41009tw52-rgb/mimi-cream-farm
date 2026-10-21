@@ -19,18 +19,18 @@ const knowledge={
  bolivian:{scientific:'Mikrogeophagus altispinosus',habitat:'玻利維亞與巴西馬德拉河上游流域的淡水水域。',body:'身體側扁，體側有深色斑，背鰭前段較高，鰭緣帶暖紅色。',diet:'從底砂找小型無脊椎動物與有機食物，飼養時提供多樣、適口的食物。',habit:'常在底層覓食，繁殖護幼時會有領域性。',care:'常見飼養水溫約 24～28°C；留足底層活動空間與視線遮蔽，避免擁擠。',source:'mikrogeophagus-altispinosus'}
 };
 const decor={
- crypt:{name:'矮椒草',kind:'plant',height:.17,price:40,unlockLevel:1,color:'#77946b',tags:['plant'],footprint:.075,anchor:.82,desc:'皺葉貼近砂面，形成柔和的小葉叢。'},
- pebbles:{name:'鵝卵石堆',kind:'ground',height:.09,ratio:.58,price:45,unlockLevel:1,color:'#b1b6a8',tags:['rock','bottom'],footprint:.1,anchor:.4,desc:'幾顆圓滑石頭，堆出自然的高低。'},
- anubias:{name:'水榕',kind:'plant',height:.2,price:75,unlockLevel:2,color:'#42785e',tags:['plant','wood'],footprint:.09,anchor:.8,desc:'厚厚的深綠圓葉，從橫向根莖伸展。'},
- lava:{name:'火山石',kind:'ground',height:.12,ratio:.8,price:85,unlockLevel:2,color:'#866e65',tags:['rock','bottom'],footprint:.1,anchor:.4,desc:'紅褐色的孔洞岩面，有粗獷的自然感。'},
- urn:{name:'陶甕',kind:'ground',height:.14,ratio:.9,price:100,unlockLevel:2,color:'#c28d6c',tags:['shelter','bottom'],footprint:.11,anchor:.45,canHide:true,desc:'溫暖陶色與深深的甕口，像一個小小避風港。'},
+ crypt:{name:'矮椒草',kind:'plant',height:.17,price:40,unlockLevel:1,color:'#77946b',tags:['plant'],footprint:.075,anchor:.82,desc:'皺皺的葉片貼近底砂，像一小叢綠色植物。'},
+ pebbles:{name:'鵝卵石堆',kind:'ground',height:.09,ratio:.58,price:45,unlockLevel:1,color:'#b1b6a8',tags:['rock','bottom'],footprint:.1,anchor:.4,desc:'幾顆圓圓的石頭疊在一起，很有自然的感覺。'},
+ anubias:{name:'水榕',kind:'plant',height:.2,price:75,unlockLevel:2,color:'#42785e',tags:['plant','wood'],footprint:.09,anchor:.8,desc:'深綠色的圓葉片，從根莖向外長出來。'},
+ lava:{name:'火山石',kind:'ground',height:.12,ratio:.8,price:85,unlockLevel:2,color:'#866e65',tags:['rock','bottom'],footprint:.1,anchor:.4,desc:'紅褐色的石頭上有許多小孔，像天然的水中造景。'},
+ urn:{name:'陶甕',kind:'ground',height:.14,ratio:.9,price:100,unlockLevel:2,color:'#c28d6c',tags:['shelter','bottom'],footprint:.11,anchor:.45,canHide:true,desc:'陶土色的小甕，開口像魚兒可以躲藏的小屋。'},
  amazon:{name:'皇冠草',kind:'plant',height:.31,price:125,unlockLevel:3,color:'#6b9a65',tags:['plant','tallPlant'],footprint:.09,anchor:.88,desc:'寬長葉片從中心向外展開，像綠色皇冠。'},
- riccia:{name:'鹿角苔',kind:'plant',height:.1,price:105,unlockLevel:3,color:'#8cb26b',tags:['plant','bottom'],footprint:.085,anchor:.55,desc:'分叉的小葉狀體，交織成淺綠色矮墊。'},
- seiryu:{name:'青龍石',kind:'ground',height:.17,ratio:1.04,price:135,unlockLevel:3,color:'#82918d',tags:['rock','bottom'],footprint:.1,anchor:.4,desc:'灰藍岩體帶著淺色紋路與高低稜線。'},
- arch:{name:'石拱門',kind:'ground',height:.17,ratio:.85,price:155,unlockLevel:3,color:'#a4ae98',tags:['shelter','rock'],footprint:.14,anchor:.5,canHide:true,desc:'兩根石柱托住拱頂，中央留出明亮通道。'},
- rotala:{name:'紅宮廷',kind:'plant',height:.29,price:185,unlockLevel:4,color:'#b37d75',tags:['plant','tallPlant'],footprint:.09,anchor:.85,desc:'細莖與成對小葉，帶來柔和的紅綠層次。'},
+ riccia:{name:'鹿角苔',kind:'plant',height:.1,price:105,unlockLevel:3,color:'#8cb26b',tags:['plant','bottom'],footprint:.085,anchor:.55,desc:'細小的分叉構造聚在一起，像一塊淺綠色地毯。'},
+ seiryu:{name:'青龍石',kind:'ground',height:.17,ratio:1.04,price:135,unlockLevel:3,color:'#82918d',tags:['rock','bottom'],footprint:.1,anchor:.4,desc:'灰藍色的石頭有淺色紋路，表面凹凸不平。'},
+ arch:{name:'石拱門',kind:'ground',height:.17,ratio:.85,price:155,unlockLevel:3,color:'#a4ae98',tags:['shelter','rock'],footprint:.14,anchor:.5,canHide:true,desc:'兩根石柱撐起一道拱門，中間留著可以穿過的空間。'},
+ rotala:{name:'紅宮廷',kind:'plant',height:.29,price:185,unlockLevel:4,color:'#b37d75',tags:['plant','tallPlant'],footprint:.09,anchor:.85,desc:'細長的莖上有一對對小葉，帶著柔和的紅綠色。'},
  branchwood:{name:'分枝沉木',kind:'ground',height:.21,ratio:1.05,price:220,unlockLevel:4,color:'#9a7a58',tags:['wood','shelter','curiosity'],footprint:.14,anchor:.45,desc:'向左右舒展的曲枝，像水中的小樹。'},
- lighthouse:{name:'小燈塔',kind:'ground',height:.22,ratio:1.35,price:330,unlockLevel:5,color:'#d9cbb1',tags:['curiosity'],footprint:.1,anchor:.45,desc:'奶油白的小塔配上磚紅屋頂，守著水中的故事。'}
+ lighthouse:{name:'小燈塔',kind:'ground',height:.22,ratio:1.35,price:330,unlockLevel:5,color:'#d9cbb1',tags:['curiosity'],footprint:.1,anchor:.45,desc:'奶油白的燈塔配上紅色屋頂，讓水族箱更有特色。'}
 };
 const category=(id,d)=>d.kind==='substrate'?'sand':d.kind==='plant'?'plants':['cave','ship','chest','urn','arch','lighthouse'].includes(id)?'special':'nature';
 window.AquariumData=Object.freeze({...D,
