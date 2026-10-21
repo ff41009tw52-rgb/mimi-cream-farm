@@ -3,6 +3,19 @@
 
   const homepageFeatures = Object.freeze([
     Object.freeze({
+      id: 'youyou-aquarium',
+      grades: Object.freeze(['4']),
+      gradeLabel: '四年級',
+      subject: 'life',
+      icon: 'fas fa-fish',
+      title: '🐠 悠悠水族箱',
+      description: '替魚兒取個名字，選擇合適的飼料，陪牠們慢慢長大！收集金幣、認識十五種魚，搭配二十四種布置打造自己的水族箱，還能觀察魚的身體構造與呼吸。',
+      url: 'aquarium-v0.6.html',
+      actionLabel: '開始養魚',
+      actionIcon: 'fas fa-fish',
+      publishedAt: '2026-10-21T00:00:00+08:00'
+    }),
+    Object.freeze({
       id: 'fish-breathing-review',
       grades: Object.freeze(['4']),
       gradeLabel: '四年級',
