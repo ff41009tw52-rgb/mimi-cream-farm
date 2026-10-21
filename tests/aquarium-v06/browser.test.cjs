@@ -31,7 +31,7 @@ const {harness}=require('./harness.cjs'),{context,plain,v5,large}=require('./sch
  const ev=await h.create({state:empty,cadence:100}),ep=ev.p;await ep.locator('#home-continue').click();
  await ep.locator('#shop').click();await ep.locator('#tab-feed').click();
  assert.equal(await ep.locator('#emergency-feed').count(),0,'no emergency food button');
- assert.match(await ep.locator('#dialog-content').innerText(),/遊戲的簡化分類/);
+ assert.match(await ep.locator('#dialog-content').innerText(),/遊戲把飼料簡化成三種/);
  await h.closeDialog(ep);
  await advance(ep,20000);
  assert((await read(ep)).state.drops.length>0,'hungry fish must still produce fallback coins when no food can be afforded');
