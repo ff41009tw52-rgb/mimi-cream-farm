@@ -32,9 +32,17 @@ const decor={
  branchwood:{name:'分枝沉木',kind:'ground',height:.21,ratio:1.05,price:220,unlockLevel:4,color:'#9a7a58',tags:['wood','shelter','curiosity'],footprint:.14,anchor:.45,desc:'向左右舒展的曲枝，像水中的小樹。'},
  lighthouse:{name:'小燈塔',kind:'ground',height:.22,ratio:1.35,price:330,unlockLevel:5,color:'#d9cbb1',tags:['curiosity'],footprint:.1,anchor:.45,desc:'奶油白的燈塔配上紅色屋頂，讓水族箱更有特色。'}
 };
+const bonusAchievements=[
+ {id:'fourSpecies',name:'認識新朋友',desc:'在圖鑑發現 4 種不同的魚。',goal:4,metric:'species',reward:{coins:12}},
+ {id:'threePurchases',name:'採購小達人',desc:'累計購買 3 隻魚兒。',goal:3,metric:'purchases',reward:{coins:18}},
+ {id:'twoAdults',name:'養魚真有耐心',desc:'累計將 2 隻魚養成成魚。',goal:2,metric:'adults',reward:{coins:25}},
+ {id:'sevenDecor',name:'水族箱設計家',desc:'在同一個魚缸布置 7 件裝飾。',goal:7,metric:'decor',reward:{coins:35}},
+ {id:'twelveSpecies',name:'魚類探索家',desc:'在圖鑑發現 12 種不同的魚。',goal:12,metric:'species',reward:{coins:55}},
+ {id:'fifteenSpecies',name:'魚類研究家',desc:'在圖鑑發現全部 15 種魚。',goal:15,metric:'species',reward:{coins:90}}
+];
 const category=(id,d)=>d.kind==='substrate'?'sand':d.kind==='plant'?'plants':['cave','ship','chest','urn','arch','lighthouse'].includes(id)?'special':'nature';
 window.AquariumData=Object.freeze({...D,
- ACHIEVEMENTS:Object.freeze(D.ACHIEVEMENTS.map(a=>a.id==='allSpecies'?Object.freeze({...a,desc:'在圖鑑發現 10 種魚。'}):a)),
+ ACHIEVEMENTS:Object.freeze([...D.ACHIEVEMENTS.map(a=>a.id==='allSpecies'?Object.freeze({...a,desc:'在圖鑑發現 10 種魚。'}):a),...bonusAchievements.map(a=>Object.freeze(a))]),
  VARIANTS:Object.freeze({...D.VARIANTS,betta_dawn:Object.freeze({...D.VARIANTS.betta_dawn,condition:'發現 10 種魚，領取「魚類觀察家」'})}),
  SPECIES:Object.freeze({...D.SPECIES,...Object.fromEntries(Object.entries(rows).map(([id,r])=>[id,Object.freeze({...base,...r,knowledge:knowledge[id]})]))}),
  DECORATIONS:Object.freeze(Object.fromEntries(Object.entries({...D.DECORATIONS,...decor}).map(([id,d])=>[id,Object.freeze({unlockLevel:1,...d,category:category(id,d)})])))
