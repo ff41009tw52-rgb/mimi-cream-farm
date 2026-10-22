@@ -567,7 +567,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden){if(dirty)s
 window.addEventListener('pagehide',()=>{if(dirty)save();});window.addEventListener('beforeunload',()=>{if(dirty)save();});
 window.addEventListener('storage',e=>{if(e.key===CONFIG.SAVE_KEY||started&&e.key===giftKey()){if(!started){refreshHome();return;}conflict=true;clearTimeout(saveTimer);saveTimer=0;saveLabel();toast('另一個分頁已更新進度。請到設定重新讀取自動存檔，再繼續遊戲。',9000);}});
 document.addEventListener('pointerdown',()=>enableAudio(),{passive:true});document.addEventListener('keydown',()=>enableAudio());
-if(CONFIG.TEST_MODE)document.querySelector('.version').textContent='V0.6 測試';
+if(CONFIG.TEST_MODE)document.querySelector('.version').textContent='測試中';
 if(session){window.addEventListener('error',()=>session.jsErrors++);window.addEventListener('unhandledrejection',()=>session.jsErrors++);}
 const tutorial=window.AquariumTutorial.create({getState:()=>state,commit:protectedTransaction,notify:toast,grant:applyTutorialGift,prepareCoin:prepareLessonCoin,prepareFish:prepareLessonFish,prepareFood:prepareLessonFood,prepareDecor:prepareLessonDecor,prepareEditing:prepareLessonEditing,reviewPurchase,ensureFeeding:kind=>{setFeeding(true);if(kind){selectedFeed=kind;renderFeedChoices();if(innerWidth<=1050)requestAnimationFrame(()=>canvas.scrollIntoView({block:'start'}));}}});
 const sourceKeys=()=>[[CONFIG.SAVE_KEY,CONFIG.MANUAL_KEY],[CONFIG.V5_KEY,CONFIG.V5_MANUAL_KEY],[CONFIG.V4_KEY,CONFIG.V4_MANUAL_KEY],...(!CONFIG.TEST_MODE?[[CONFIG.V3_KEY,CONFIG.V3_MANUAL_KEY],[CONFIG.V2_KEY,CONFIG.V2_MANUAL_KEY],[CONFIG.LEGACY_KEY,CONFIG.LEGACY_MANUAL_KEY]]:[])];
