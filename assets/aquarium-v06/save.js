@@ -1,7 +1,7 @@
 /* Canonical schema 5: shared progression plus an extensible array of independent tanks. */
 (() => {
 'use strict';
-const legacy=window.AquariumV05Save,{CONFIG,FEEDS,TANK_TIERS,SPECIES}=window.AquariumData;
+const legacy=window.AquariumV05Save,{CONFIG,FEEDS,TANK_TIERS,SPECIES,ACHIEVEMENTS}=window.AquariumData;
 const GIFT_IDS=['starter','smallLesson','fishCard','level2','level4','migration','lessonGeneralRecovery','lessonSmallRecovery','demoCoin','demoCollected','feedSupport','fishSupport','tutorialComplete','decorSupport'];
 const clone=x=>JSON.parse(JSON.stringify(x));
 const finite=(x,a,b)=>typeof x==='number'&&Number.isFinite(x)&&x>=a&&x<=b;
@@ -60,6 +60,8 @@ function validate(raw){
  if(!Array.isArray(r.gifts)||new Set(r.gifts).size!==r.gifts.length||r.gifts.some(id=>!GIFT_IDS.includes(id))||!finite(r.emergencyAt,0,Number.MAX_SAFE_INTEGER))throw Error('贈禮紀錄不完整。');
  let migration=null;if(r.migration!=null){const m=r.migration;if(!integer(m.from,1,4)||!integer(m.oldTier,1,4)||!integer(m.compensation,0,CONFIG.MAX_COINS)||!integer(m.freeTanks,1,CONFIG.MAX_TANKS)||!integer(m.originalCoins,0,CONFIG.MAX_COINS))throw Error('移轉紀錄不完整。');migration={...m};}
  const s={...shared};for(const k of [...Object.keys(tankKeys),'tankCapacity'])delete s[k];
+ // Restore V0.6-only achievement flags after the V0.5 validator handles legacy IDs.
+ s.achievements=Object.fromEntries(ACHIEVEMENTS.map(a=>{const old=shared.achievements[a.id],v=r.achievements?.[a.id];return [a.id,old||((v&&typeof v.completed==='boolean'&&typeof v.rewardClaimed==='boolean'&&(!v.rewardClaimed||v.completed))?{completed:v.completed,rewardClaimed:v.rewardClaimed}:{completed:false,rewardClaimed:false})];}));
  return attach({...s,schemaVersion:5,gameVersion:'0.6',tanks,activeTankId:r.activeTankId,feedInventory:inventory,feedPurchases:purchases,gifts:[...r.gifts],emergencyAt:r.emergencyAt,migration,onboarding:{...o}});
 }
 function freshFromLegacy(raw,name){const s=migrate(raw);s.coins=CONFIG.START_COINS;s.tanks=[{...s.tanks[0],id:'tank-1',name:legacy.tankName(name),tier:1}];s.activeTankId='tank-1';s.feedInventory={general:0,small:0,protein:0};s.gifts=[];s.migration=null;s.onboarding=newOnboarding();return validate(s);}
