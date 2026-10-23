@@ -168,3 +168,13 @@
 .purchase-form .confirm-actions{position:sticky;bottom:0;background:#fffdf3;padding:12px 0 max(12px,env(safe-area-inset-bottom));gap:10px}
 .purchase-form .confirm-actions button{min-height:48px;min-width:100px}
 @supports(height:100dvh){#dialog{max-height:calc(100dvh - 24px)}}
+
+/* Put the tank-upgrade entry directly beside the capacity counter without a new row. */
+#game .residents>div{min-width:0}
+#game #tank-upgrade-shortcut{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;margin:4px 0 0;padding:5px 10px;min-height:30px;border:1px solid #83b7a4;border-radius:999px;background:#e0f2e7;color:#186658;font-size:13px;font-weight:800;letter-spacing:.2px;box-shadow:0 2px 5px #2a645820;cursor:pointer}
+#game #tank-upgrade-shortcut[data-ready="true"]{background:#247f70;color:#fff;border-color:#247f70}
+#game #tank-upgrade-shortcut[data-full="true"]{box-shadow:0 0 0 3px #eadca0a8,0 2px 5px #2a645820}
+#game #tank-upgrade-shortcut:disabled{background:#ecf0e9;border-color:#d2ded1;color:#6b8074;cursor:default;box-shadow:none}
+#game #tank-upgrade-shortcut:focus-visible{outline:3px solid #ddaf43;outline-offset:2px}
+@media(min-width:1060px) and (min-height:680px){#game #tank-upgrade-shortcut{min-height:24px;padding:2px 9px;margin:2px 0 0;font-size:12px}}
+@media(max-width:680px){#game #tank-upgrade-shortcut{font-size:12px;padding:5px 8px;min-height:32px}}
