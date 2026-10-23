@@ -5,11 +5,11 @@ import re, base64
 root = Path(__file__).resolve().parent.parent
 html = (root / 'aquarium-v0.6.html').read_text()
 for path in re.findall(r'<link rel="stylesheet" href="([^"]+)">', html):
-    html = html.replace(f'<link rel="stylesheet" href="{path}">', '<style>\n' + (root/path).read_text() + '\n</style>')
+    html = html.replace(f'<link rel="stylesheet" href="{path}">', '<style>\n' + (root/path.split('?', 1)[0]).read_text() + '\n</style>')
 scripts = []
 for path in re.findall(r'<script defer src="([^"]+)"></script>', html):
     html = html.replace(f'<script defer src="{path}"></script>', '')
-    script = (root/path).read_text()
+    script = (root/path.split('?', 1)[0]).read_text()
     if path.endswith('/anatomy.js'):
         data = base64.b64encode((root/'assets/aquarium-v042/carp-review.webp').read_bytes()).decode()
         script = "window.AQUARIUM_BREATHING_IMAGE='data:image/webp;base64," + data + "';\n" + script
