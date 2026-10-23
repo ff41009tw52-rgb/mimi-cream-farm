@@ -168,3 +168,16 @@
 .purchase-form .confirm-actions{position:sticky;bottom:0;background:#fffdf3;padding:12px 0 max(12px,env(safe-area-inset-bottom));gap:10px}
 .purchase-form .confirm-actions button{min-height:48px;min-width:100px}
 @supports(height:100dvh){#dialog{max-height:calc(100dvh - 24px)}}
+
+/* Fish-tank upgrade remains discoverable without adding another large main action. */
+#game #tank-selector #tank-upgrade-quick{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;flex:0 0 auto;background:#fff7dd;border:2px solid #d6b75b;color:#74561c;min-width:185px;font-size:15px}
+#game #tank-selector #tank-upgrade-quick strong{font-size:16px}
+#game #tank-selector #tank-upgrade-quick small{font-size:12px;line-height:1.2;white-space:nowrap}
+#game #tank-selector #tank-upgrade-quick.ready{background:#ffedb5;border-color:#bb9539;box-shadow:0 0 0 2px #f6d98555}
+#game #tank-selector #tank-upgrade-quick.maxed{background:#e9f3e8;border-color:#a9c8b0;color:#376e60}
+#game #tank-selector #tank-upgrade-quick:focus-visible{outline:3px solid #a27a18;outline-offset:2px}
+.onboarding-upgrade-help{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px;padding:8px 11px;background:#f4f7e8;border:1px solid #c7d8ae;border-radius:11px;color:#365f53;font-size:14px;line-height:1.4}
+.onboarding-upgrade-help[hidden]{display:none!important}
+.onboarding-upgrade-help button{flex:0 0 auto;min-height:38px;border-radius:10px;background:#fff4c9;border:1px solid #d4ba72;padding:7px 13px;color:#6a521a;font-size:14px;font-weight:700}
+@media(max-width:680px){#game #tank-selector #tank-upgrade-quick{min-width:150px;padding:7px 11px;min-height:60px;gap:2px}#game #tank-selector #tank-upgrade-quick strong{font-size:14px}#game #tank-selector #tank-upgrade-quick small{font-size:11px}.onboarding-upgrade-help{flex-direction:column;align-items:stretch;font-size:13px;padding:7px 9px}.onboarding-upgrade-help button{width:100%;min-height:40px}}
+@media(min-width:1060px) and (min-height:680px){#game #tank-selector #tank-upgrade-quick{min-height:39px;min-width:175px;padding:4px 10px;gap:0}#game #tank-selector #tank-upgrade-quick strong{font-size:13px}#game #tank-selector #tank-upgrade-quick small{font-size:11px}.onboarding-upgrade-help{margin-top:3px;padding:4px 8px;min-height:32px;font-size:12px}.onboarding-upgrade-help button{min-height:28px;font-size:12px;padding:4px 8px}}
