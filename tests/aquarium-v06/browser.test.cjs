@@ -50,9 +50,9 @@ const {harness}=require('./harness.cjs'),{context,plain,v5,large}=require('./sch
  });
  assert(await ep.locator('#fish-card').isVisible(),'fish card opens during feeding');
  assert.equal((await read(ep)).state.feedInventory.general,noFoodBefore);
- assert.equal(await ep.locator('#collect-all').count(),0,'no bulk collection shortcut');
+ await ep.locator('#close-card').click();const bulkBefore=(await read(ep)).state;assert(bulkBefore.drops.length>0);await ep.locator('#collect-all').click();const bulkAfter=(await read(ep)).state;assert.equal(bulkAfter.coins,bulkBefore.coins+bulkBefore.drops.reduce((n,c)=>n+c.value,0));assert.equal(bulkAfter.drops.length,0);assert.equal(bulkAfter.feedInventory.general,noFoodBefore);assert(await ep.locator('#collect-all').isDisabled());
  await ev.context.close();
- pass('Remove emergency food and bulk collect, keep fish/coins clickable during feeding and preserve a minimal no-food income');
+ pass('Remove emergency food, collect every coin once with the visible shortcut, keep fish/coins clickable during feeding and preserve minimal no-food income');
 
  const legacy=await h.create({state:large,key:'aquarium_game_save_v5'}),lp=legacy.p;await lp.locator('#home-continue').click();const migrated=(await read(lp)).state;assert.deepEqual(migrated.tanks.map(t=>t.fishes.length),[10,8]);assert.equal(await lp.evaluate(()=>JSON.parse(localStorage.getItem('aquarium_game_save_v5')).fishes.length),18);assert.equal(migrated.migration.compensation,5970);await shot(lp,'legacy-two-tanks');await legacy.context.close();
  const multi=await h.create({state:seeded({tier:1})}),mp=multi.p;await mp.locator('#home-continue').click();assert(await mp.locator('#tank-upgrade-shortcut').isVisible(),'tank upgrade shortcut is visible beside fish count');assert.match(await mp.locator('#tank-upgrade-shortcut').getAttribute('title'),/7 隻/);await mp.locator('#tank-upgrade-shortcut').click();assert(await mp.locator('#upgrade-tank').isVisible());await h.closeDialog(mp);async function tankMenu(){await mp.locator('#more-menu').click();await mp.locator('#tank-menu').click();}

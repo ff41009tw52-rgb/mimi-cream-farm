@@ -18,7 +18,7 @@ const steps=[
  {task:5,target:'buy-feed-general',shopTab:'feed',event:'feedBought',copy:'選一種魚兒會吃的飼料，按「購買」，看看數量有沒有增加。',success:'現在你會自己補充飼料了！飼料快用完時，記得再來商店補充。'},
  {task:6,target:'shop',event:'shopOpened',copy:'除了原本的魚兒，也可以到商店買新魚。我們一起試試吧！'},
  {task:6,target:'tab-fish',shopTab:'fish',event:'fishShopOpened',copy:'選擇「魚兒」分頁，看看目前等級已解鎖的魚和價格。'},
- {task:6,target:'tutorial-fish-buy',shopTab:'fish',event:'fishBought',copy:'挑一條已解鎖的魚，幫牠取名字再確認購買。新魚加入後，也可以看看魚兒數量旁的「升級魚缸」，了解如何養更多魚。',success:'新魚加入了！記得照顧牠，讓水族箱越來越熱鬧。'},
+ {task:6,target:'tutorial-fish-buy',shopTab:'fish',event:'fishBought',copy:'挑一條已解鎖的魚，幫牠取名字再確認購買。新魚加入後，也可以看看小居民數量旁的「升級魚缸」，了解如何養更多魚。',success:'新魚加入了！記得照顧牠，讓水族箱越來越熱鬧。'},
  {task:7,target:'shop',event:'shopOpened',copy:'除了養魚，也可以買水草、石頭和其他裝飾。先按「商店」看看吧！'},
  {task:7,target:'tab-decor',shopTab:'decor',event:'decorShopOpened',copy:'按一下「布置」，看看可以放進水族箱的裝飾。'},
  {task:7,target:'tutorial-decor-buy',shopTab:'decor',event:'decorBought',copy:'選一件喜歡的裝飾，按「購買並放置」，就能放進魚缸。先從小水草試試看吧！',success:'裝飾放好了！現在試著調整它的位置。'},
