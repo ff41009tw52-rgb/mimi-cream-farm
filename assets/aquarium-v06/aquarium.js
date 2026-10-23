@@ -717,7 +717,30 @@ function buyFeed(id){
  updateUI();sound('buy');if(advanced){dialog.close();tutorial.finish(beforeStep,true);}else renderShop();
  const message='已購買'+d.name+' ×'+d.pack+' 份！目前 '+state.feedInventory[id]+' 份。';if(subsidy)supportNotice(advanced);else if(!advanced)shopMessage(message);
 }
-function renderTankSelector(){const root=$('tank-selector');if(!root)return;const signature=state.tanks.map(t=>[t.id,t.name,t.tier,t.fishes.length,t.drops.length,t.id===state.activeTankId].join('|')).join(';');if(root.dataset.signature===signature)return;root.dataset.signature=signature;root.replaceChildren();for(const t of state.tanks){const b=button('',()=>switchTank(t.id),'tank-switch');b.dataset.tankId=t.id;b.setAttribute('aria-pressed',String(t.id===state.activeTankId));const name=document.createElement('strong');name.textContent=t.name;b.append(name,paragraph(`${t.fishes.length} / ${TANK_TIERS[t.tier-1].capacity} 隻 · 魚缸 ${t.tier} 級${t.drops.length?' · 有金幣':''}`));root.append(b);}const add=button('＋ 新魚缸',tankMenu,'tank-add');root.append(add);}
+function updateTankUpgradeShortcut(){
+ const quick=$('tank-upgrade-quick');if(!quick)return;
+ const next=TANK_TIERS[state.tankTier],current=state.tankCapacity;
+ const title=quick.querySelector('strong'),hint=quick.querySelector('small');
+ const available=next&&state.level>=next.level&&state.coins>=next.price;
+ const label=next?(state.level<next.level?`Lv.${next.level} 解鎖`:available?'可以升級':`需要 ${next.price} 金幣`):'已達最高容量';
+ title.textContent=next?'升級魚缸':'魚缸已升滿';
+ const copy=next?`${current} → ${next.capacity} 隻 · ${label}`:`最多可養 ${current} 隻`;
+ if(hint.textContent!==copy)hint.textContent=copy;
+ quick.classList.toggle('ready',!!available);
+ quick.classList.toggle('maxed',!next);
+ quick.setAttribute('aria-label',next?`查看升級魚缸：從 ${current} 隻增加到 ${next.capacity} 隻，${state.level<next.level?`養魚等級 ${next.level} 解鎖`:`花費 ${next.price} 金幣`}`:`魚缸已達最高容量 ${current} 隻，查看魚缸管理`);
+}
+function openTankUpgradeGuide(){
+ tankMenu();
+ const item=$('upgrade-tank');
+ if(item){item.scrollIntoView({block:'nearest'});item.focus({preventScroll:true});}
+}
+function renderTankSelector(){const root=$('tank-selector');if(!root)return;const signature=state.tanks.map(t=>[t.id,t.name,t.tier,t.fishes.length,t.drops.length,t.id===state.activeTankId].join('|')).join(';');if(root.dataset.signature===signature){updateTankUpgradeShortcut();return;}root.dataset.signature=signature;root.replaceChildren();for(const t of state.tanks){const b=button('',()=>switchTank(t.id),'tank-switch');b.dataset.tankId=t.id;b.setAttribute('aria-pressed',String(t.id===state.activeTankId));const name=document.createElement('strong');name.textContent=t.name;b.append(name,paragraph(`${t.fishes.length} / ${TANK_TIERS[t.tier-1].capacity} 隻 · 魚缸 ${t.tier} 級${t.drops.length?' · 有金幣':''}`));root.append(b);}
+ const upgrade=button('',openTankUpgradeGuide,'tank-upgrade-quick');upgrade.id='tank-upgrade-quick';
+ upgrade.append(document.createElement('strong'),document.createElement('small'));root.append(upgrade);
+ const add=button('＋ 新魚缸',tankMenu,'tank-add');root.append(add);
+ updateTankUpgradeShortcut();
+}
 function switchTank(id){if(conflict||saveBlocked||id===state.activeTankId||!state.tanks.some(t=>t.id===id))return;if(editing)finishEditing();if($('observation')?.open)$('obs-return').click();setFeeding(false);closeCard();state.activeTankId=id;bindTank(state.tanks.find(t=>t.id===id));specimenPose=null;feedAt=-99;buildBackground();save();updateUI();draw();tutorial.render();}
 function renderTankOffers(){const offer=TANK_OFFERS.find(o=>o.number===state.tanks.length+1);if(!offer)return;const box=document.createElement('section');box.className='new-tank-offer';const b=button(state.level<offer.level?`養魚等級 ${offer.level} 可解鎖`:`購買第 ${offer.number} 個魚缸 · ${offer.price} 金幣`,()=>{if(conflict||saveBlocked||state.level<offer.level||state.tanks.length>=CONFIG.MAX_TANKS)return;if(state.coins<offer.price){toast('再存一些金幣，就能迎接新的小水世界。');return;}confirmAction('購買新的空魚缸？',`${offer.price} 金幣，起始可養 5 隻魚，之後可升級至 10 隻。`,()=>{if(conflict||saveBlocked||state.tanks.length!==offer.number-1||state.coins<offer.price||state.level<offer.level)return;state.coins-=offer.price;const t=window.AquariumSave.emptyTank(uid(),`第 ${offer.number} 個魚缸`);state.tanks.push(t);tankContexts.set(t.id,{runtime:new Map(),food:[],effects:[],poiCache:buildPOI([],DECORATIONS,decorLayout,W,H)});if(save()){dialog.close();switchTank(t.id);toast('新魚缸準備好了！可在設定命名，或從其他魚缸移入魚兒。');}});$('dialog-content').querySelector('.confirm').textContent='確認購買';},'buy');b.id='buy-tank';b.disabled=state.level<offer.level;box.append(paragraph(`下一個魚缸：第 ${offer.number} 缸 · 養魚等級 ${offer.level} · ${offer.price} 金幣`),b);$('dialog-content').append(box);}
 function moveFish(id){const introduce=state.tanks.length>1&&!state.onboarding.hints.includes('move');if(introduce&&!protectedTransaction(()=>state.onboarding.hints.push('move')))return;const f=state.fishes.find(f=>f.id===id);if(!f)return;const source=state.activeTankId;openDialog('移動魚兒','move');if(introduce)$('dialog-content').append(paragraph('想讓魚兒住進另一個魚缸嗎？你可以把牠移過去，不需要重新購買。','tutorial-shop-copy'));$('dialog-content').append(paragraph(`替${f.name}選一個新的家。名字、成長、飽足度、個性及配色都會保留。`));for(const t of state.tanks.filter(t=>t.id!==source)){const cap=TANK_TIERS[t.tier-1].capacity;const b=button(`${t.name} · ${t.fishes.length} / ${cap} 隻`,()=>confirmAction('確認移動魚兒？',`${f.name}將搬到${t.name}，不收取費用。`,()=>{if(conflict||saveBlocked)return;const from=state.tanks.find(q=>q.id===source),to=state.tanks.find(q=>q.id===t.id),fish=from.fishes.find(q=>q.id===id);if(!fish||to.fishes.length>=TANK_TIERS[to.tier-1].capacity){toast('目標魚缸已滿，魚兒仍在原缸。');return;}from.fishes=from.fishes.filter(q=>q.id!==id);to.fishes.push(fish);if(save()){tankContexts.get(source).runtime.delete(id);tankContexts.get(t.id).runtime.set(id,makeRuntime(fish,to.fishes.length));closeCard();dialog.close();updateUI();toast('魚兒已安全搬家！');}}),'place-button');b.dataset.moveTo=t.id;b.disabled=t.fishes.length>=cap;$('dialog-content').append(b);}if(state.tanks.length<2)$('dialog-content').append(paragraph('擁有第二個魚缸後，就能替魚兒搬家。'));}
