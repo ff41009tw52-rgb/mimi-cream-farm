@@ -45,6 +45,7 @@ jobs:
           AQUARIUM_ARTIFACTS: artifacts/aquarium-v06/webkit
         run: |
           node tests/aquarium-v06/mobile.test.cjs
+          node tests/aquarium-v06/crustaceans.test.cjs
           node tests/aquarium-v06/decor-mobile.test.cjs
       - uses: actions/upload-artifact@v4
         if: always()
