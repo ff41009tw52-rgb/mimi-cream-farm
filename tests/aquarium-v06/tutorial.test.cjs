@@ -6,6 +6,34 @@ const {harness}=require('./harness.cjs'),{context,plain,starter,migrationRows}=r
  const stage=async p=>(await h.read(p)).state.onboarding.step;
  async function untilShop(p){await feed(p,'general');await p.locator('#onboarding-gift').click();await h.advance(p,800);await feed(p,'small');await p.locator('#more-menu').click();await p.locator('#roster').click();await p.locator('.roster-item').first().click();await p.locator('#close-card').click();await p.locator('#tutorial-coin-target').click();assert.equal(await stage(p),9);}
  const sizes=[{width:1366,height:768},{width:1440,height:900},{width:390,height:844},{width:820,height:1180},{width:1024,height:768}];
+
+ // Tank upgrades must be discoverable from the main tank switcher before the player can afford one.
+ const upgradeFresh=await h.create(),upgradeFreshPage=upgradeFresh.p;
+ await upgradeFreshPage.locator('#home-new').click();
+ assert(await upgradeFreshPage.locator('#tank-upgrade-quick').isVisible());
+ assert.match(await upgradeFreshPage.locator('#tank-upgrade-quick').innerText(),/5 → 7 隻/);
+ assert.match(await upgradeFreshPage.locator('#tank-upgrade-quick').innerText(),/Lv\.2 解鎖/);
+ await upgradeFreshPage.locator('#tank-upgrade-quick').click();
+ assert(await upgradeFreshPage.locator('#upgrade-tank').isVisible());
+ assert(await upgradeFreshPage.locator('#upgrade-tank').isDisabled());
+ await upgradeFresh.context.close();
+ // The upgrade lesson is optional after buying a fish; opening it must not spend coins or advance saved tutorial steps.
+ const guided=await h.create({state:stateAt(15,{coins:55})}),gp=guided.p;
+ await gp.locator('#home-continue').click();
+ assert(await gp.locator('#tutorial-upgrade-help').isVisible());
+ const beforeGuide=(await h.read(gp)).state;
+ await gp.locator('#tutorial-upgrade-help').click();
+ assert(await gp.locator('#upgrade-tank').isVisible());
+ const afterGuide=(await h.read(gp)).state;
+ assert.equal(afterGuide.coins,beforeGuide.coins);
+ assert.equal(afterGuide.onboarding.step,beforeGuide.onboarding.step);
+ await gp.locator('#dialog-close').click();
+ assert(await gp.locator('#shop').isVisible());
+ await gp.locator('#shop').click();
+ assert.equal((await h.read(gp)).state.onboarding.step,16);
+ await guided.context.close();
+ console.log('PASS visible fish-tank upgrade and optional beginner lesson without spending or schema changes');
+
  for(const size of sizes){const v=await h.create({size,touch:size.width<1060}),p=v.p;await p.locator('#home-new').click();await p.locator('#tutorial-begin').click();assert.equal(await p.locator('#onboarding-step').textContent(),'1 / 8');assert.equal(await p.locator('#onboarding-action,#onboarding-pause,#onboarding-skip,#tutorial-skip').count(),0);
   const screen=async name=>{if(size.width>=1060){const bounds=await p.evaluate(()=>({page:document.documentElement.scrollHeight,h:innerHeight,actions:document.querySelector('#game .controls').getBoundingClientRect().bottom,tank:document.getElementById('tank').getBoundingClientRect().height}));assert(bounds.page<=bounds.h+3,JSON.stringify(bounds));assert(bounds.actions<=bounds.h+3,JSON.stringify(bounds));assert(bounds.tank>=175);}assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await h.shot(p,'task-'+size.width+'-'+name);};
   await screen('1-feed-button');await p.locator('#feed').click();assert.equal(await p.locator('#onboarding-step').textContent(),'1 / 8');await p.locator('#feed-general').click();assert.equal(await stage(p),2);await screen('1-water');await p.reload();await p.locator('#home-continue').click();assert.equal(await stage(p),2);const r=await p.locator('#tank').boundingBox();await p.locator('#tank').click({position:{x:r.width*.3,y:r.height*.14}});assert.equal((await h.read(p)).state.feedInventory.general,7);assert.equal(await p.locator('#onboarding-step').textContent(),'2 / 8');await p.locator('#onboarding-gift').click();await h.advance(p,800);await feed(p,'small');assert.equal(await p.locator('#onboarding-step').textContent(),'3 / 8');
