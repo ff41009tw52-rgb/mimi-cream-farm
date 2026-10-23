@@ -188,7 +188,7 @@
 #achievement-badge{position:absolute;top:2px;right:5px;font-size:10px;max-width:90%}#feed-choices span{font-size:12px;line-height:1.35}
 #game .tank-caption{z-index:5;pointer-events:none}
 /* Shared V0.6 crustacean portraits: crisp, pale-water framing at every entry. */
-.crustacean-preview{background:radial-gradient(ellipse at 50% 55%,#fafff8 0%,#edf7ef 65%,#e5f2ec 100%);border-radius:14px;object-fit:contain}
+.crustacean-preview{min-height:0;flex:none;background:radial-gradient(ellipse at 50% 55%,#fafff8 0%,#edf7ef 65%,#e5f2ec 100%);border-radius:14px;object-fit:contain}
 .crustacean-preview[data-species-art="blueshrimp"]{background:radial-gradient(ellipse at 50% 55%,#f8fdff,#e8f3f5)}
 #fish-portrait{margin:8px 0 12px}
 #fish-portrait .fish-preview{display:block;width:100%;height:90px;margin:0}
@@ -199,3 +199,8 @@
 .roster-item.has-portrait .fish-preview{grid-row:1 / 3;width:64px;height:48px;margin:0}
 .roster-item.has-portrait span,.roster-item.has-portrait small{grid-column:2;min-width:0;overflow-wrap:anywhere}
 .encyclopedia-grid .crustacean-preview{height:190px}
+@media(max-width:680px){
+ .shop-grid > .shop-item:has(> .crustacean-preview){grid-column:1 / -1}
+ .shop-grid > .shop-item > .crustacean-preview{height:156px;grid-area:auto}
+ .encyclopedia-grid > .shop-item > .crustacean-preview{height:190px}
+}
