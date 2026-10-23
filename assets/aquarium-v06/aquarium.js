@@ -79,7 +79,7 @@ function updateUI(){if(!state)return;checkFeatureHints();renderTankSelector();re
  upgradeLink.title=nextTier?`下一級：${nextTier.capacity} 隻 · 養魚等級 ${nextTier.level} · ${nextTier.price} 金幣`:'目前已達到每缸最多 10 隻生物的上限';
  $('level').textContent=`養魚等級 ${state.level}`;const floor=CONFIG.LEVEL_XP[state.level-1],ceiling=CONFIG.LEVEL_XP[state.level];$('xp-bar').style.width=`${ceiling?(state.xp-floor)/(ceiling-floor)*100:100}%`;
  const next=Object.values(SPECIES).filter(s=>s.unlockLevel===state.level+1).map(s=>s.name);$('next-unlock').textContent=next.length?`下一級解鎖：${next.join('、')}`:`已解鎖全部魚種`;
- $('feed').disabled=editing;$('collect-all').disabled=!state.drops.length;$('collect-all').textContent=state.drops.length?`全部收取 · ${state.drops.length} 枚`:'全部收取';
+ $('feed').disabled=editing;
  const claimable=ACHIEVEMENTS.filter(a=>state.achievements[a.id]?.completed&&!state.achievements[a.id].rewardClaimed).length;const more=$('more-menu');more.dataset.rewards=String(claimable);more.setAttribute('aria-label',claimable?`更多，有 ${claimable} 項成就可領獎`:'更多');let badge=$('achievement-badge');if(!badge){badge=document.createElement('small');badge.id='achievement-badge';more.append(badge);}badge.hidden=!claimable;badge.textContent=claimable?`${claimable} 項可領獎`:'';
  if(selected){const f=state.fishes.find(f=>f.id===selected);if(f){$('fish-name').textContent=f.name;$('fish-species').textContent=SPECIES[f.species].name;$('fish-stage').textContent=residentStage(f);$('fish-growth-tip').textContent=SPECIES[f.species].category?'吃飽後會慢慢長大，從幼體長成成體。':'魚兒吃飽後會慢慢長大，從幼魚變成成魚。';$('observe-fish').textContent=SPECIES[f.species].category?'觀察這隻生物':'觀察這隻魚';$('fish-hunger').textContent=`${Math.round(f.hunger)}%`;$('fish-growth').textContent=`${Math.floor(f.growth)}%`;$('hunger-meter').value=f.hunger;$('growth-meter').value=f.growth;$('fish-mood').textContent=`目前狀態：${f.hunger<25?'肚子餓':runtime.get(f.id)?.behavior||mood(f)}`;$('fish-personality').textContent=`個性：${PERSONALITIES[f.personality].name}`;$('fish-food').textContent='食物：'+FEEDS[FOOD_FOR[f.species]].name;}}
 }
@@ -585,7 +585,6 @@ canvas.addEventListener('click',e=>{
  closeCard();
 });
 canvas.addEventListener('keydown',e=>{if(feeding&&(e.key==='Enter'||e.key===' ')){e.preventDefault();feed(.5);}if(e.key==='Escape'){setFeeding(false);closeCard();}});
-$('collect-all').onclick=()=>{for(const coin of [...state.drops])collect(coin);};
 $('feed').onclick=()=>setFeeding(!feeding);$('stop-feed').onclick=()=>setFeeding(false);$('close-card').onclick=closeCard;$('shop').onclick=shop;$('more-menu').onclick=moreMenu;$('fish-more').onclick=fishMore;$('rename').onclick=renameFish;
 $('dialog-close').onclick=()=>dialog.close();$('edit-done').onclick=finishEditing;$('edit-left').onclick=()=>nudgeDecoration(-1);$('edit-right').onclick=()=>nudgeDecoration(1);$('edit-store').onclick=storeSelectedDecoration;dialog.addEventListener('close',()=>queueMicrotask(()=>tutorial.render()));dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
 // Visibility catches mobile backgrounding; pagehide is an extra best-effort flush.

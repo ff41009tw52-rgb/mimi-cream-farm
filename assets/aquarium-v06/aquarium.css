@@ -169,18 +169,21 @@
 .purchase-form .confirm-actions button{min-height:48px;min-width:100px}
 @supports(height:100dvh){#dialog{max-height:calc(100dvh - 24px)}}
 
-/* Put the tank-upgrade entry directly beside the capacity counter without a new row. */
+/* Keep capacity readable and give the upgrade control its own breathing room. */
 #game .residents>div{min-width:0}
-#game #tank-upgrade-shortcut{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;margin:4px 0 0;padding:5px 10px;min-height:30px;border:1px solid #83b7a4;border-radius:999px;background:#e0f2e7;color:#186658;font-size:13px;font-weight:800;letter-spacing:.2px;box-shadow:0 2px 5px #2a645820;cursor:pointer}
-#game #tank-upgrade-shortcut[data-ready="true"]{background:#247f70;color:#fff;border-color:#247f70}
-#game #tank-upgrade-shortcut[data-full="true"]{box-shadow:0 0 0 3px #eadca0a8,0 2px 5px #2a645820}
-#game #tank-upgrade-shortcut:disabled{background:#ecf0e9;border-color:#d2ded1;color:#6b8074;cursor:default;box-shadow:none}
-#game #tank-upgrade-shortcut:focus-visible{outline:3px solid #ddaf43;outline-offset:2px}
-@media(min-width:1060px) and (min-height:680px){#game #tank-upgrade-shortcut{min-height:24px;padding:2px 9px;margin:2px 0 0;font-size:12px}}
-@media(max-width:680px){#game #tank-upgrade-shortcut{font-size:12px;padding:5px 8px;min-height:32px}}
+#game .residents-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px}
+#game #capacity{flex:0 0 auto;line-height:1.3;font-variant-numeric:tabular-nums}
+#game .residents-icon{display:grid;place-items:center;flex:0 0 40px;width:40px;height:40px;border:1px solid #d4e5d8;border-radius:13px;background:linear-gradient(145deg,#f6fbef,#dceee2);box-shadow:inset 0 1px 0 #fff}
+#game .residents-icon svg{width:34px;height:34px;stroke:#4c917e;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#game #tank-upgrade-shortcut{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;white-space:nowrap;margin:0;padding:6px 13px;min-height:34px;border:1px solid #a2c6b5;border-radius:12px;background:linear-gradient(135deg,#f4fae9,#dfefe2);color:#246c59;font-size:13px;font-weight:700;letter-spacing:.4px;box-shadow:inset 0 1px 0 #fff,0 2px 4px #2a645810;cursor:pointer;transition:background .15s,box-shadow .15s}
+#game #tank-upgrade-shortcut:hover:not(:disabled){background:#d9eddd;border-color:#679f87;box-shadow:inset 0 1px 0 #fff,0 3px 8px #2a64581c}
+#game #tank-upgrade-shortcut[data-ready="true"]{background:linear-gradient(135deg,#358b74,#247361);color:#fffdf0;border-color:#287b66;box-shadow:inset 0 1px 0 #73ae91,0 2px 5px #2a645825}
+#game #tank-upgrade-shortcut[data-full="true"]{outline:2px solid #deca89;outline-offset:2px}
+#game #tank-upgrade-shortcut:disabled{background:#ecf0e9;border-color:#d2ded1;color:#6b8074;cursor:default;box-shadow:none;opacity:1}
+#game #tank-upgrade-shortcut:focus-visible{outline:3px solid #ddaf43;outline-offset:3px}
+@media(max-width:680px){#game .residents{gap:9px}#game .residents-icon{flex-basis:34px;width:34px;height:36px;border-radius:11px}#game .residents-icon svg{width:29px;height:29px}#game .residents-actions{gap:8px 12px}#game #tank-upgrade-shortcut{font-size:12px;padding:6px 10px;min-height:36px}}
 
 #more-menu{position:relative}#achievement-badge{display:block;font-size:11px;line-height:1.2;color:#785616;background:#fff1b8;border-radius:8px;padding:2px 5px;white-space:nowrap}#achievement-badge[hidden]{display:none}.achievement-card[data-status="ready"]{border:2px solid #d5ae54;background:#fffae6}.achievement-card[data-status="claimed"]{opacity:.72}.encyclopedia-grid .fish-preview{height:170px}.shop-item .shop-detail{overflow-wrap:anywhere}.decor-filters{flex-wrap:wrap}
 
-#collect-all{border:1px solid #bdcebb;background:#fff5cc;color:#63551e;border-radius:14px;padding:5px 10px;font-size:12px;white-space:nowrap;cursor:pointer}#collect-all:disabled{opacity:.55;cursor:default}.tank-caption{display:flex;align-items:center;justify-content:space-between;gap:8px}#achievement-badge{position:absolute;top:2px;right:5px;font-size:10px;max-width:90%}#feed-choices span{font-size:12px;line-height:1.35}
-
-#game .tank-caption{z-index:5;pointer-events:none}#game #collect-all{pointer-events:auto;position:relative;z-index:6;flex-shrink:0}#game .tank-caption>span:first-child{max-width:calc(100% - 115px)}
+#achievement-badge{position:absolute;top:2px;right:5px;font-size:10px;max-width:90%}#feed-choices span{font-size:12px;line-height:1.35}
+#game .tank-caption{z-index:5;pointer-events:none}
