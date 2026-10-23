@@ -1,0 +1,19 @@
+{
+  "normalMode": true,
+  "debugOrSaveMutations": false,
+  "clock": "virtual time, normal gameplay speed, 1.5 seconds per UI action",
+  "milestones": {
+    "firstFeedPurchase": 0.45,
+    "firstFishPurchase": 0.55,
+    "firstDecoration": 0.65,
+    "firstCrustacean": 1.2,
+    "firstUpgrade": 4.48
+  },
+  "coins": 256,
+  "level": 3,
+  "feedInventory": {
+    "general": 14,
+    "small": 4,
+    "protein": 0
+  }
+}

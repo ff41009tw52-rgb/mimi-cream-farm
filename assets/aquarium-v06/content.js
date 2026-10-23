@@ -48,3 +48,30 @@ window.AquariumData=Object.freeze({...D,
  DECORATIONS:Object.freeze(Object.fromEntries(Object.entries({...D.DECORATIONS,...decor}).map(([id,d])=>[id,Object.freeze({unlockLevel:1,...d,category:category(id,d)})])))
 });
 })();
+
+/* Crustaceans are distinct catalog entries; historic fish IDs stay unchanged. */
+(() => {
+'use strict';
+const D=window.AquariumData;
+const base={acceleration:3,turnSpeed:4,schoolingStrength:0,pauseChance:.55,pauseDuration:[1.8,4],burstChance:.04,burstFactor:2,foodPreference:'bottom',bottomDweller:true,foodBoost:1.8,art:null,poiInterval:[12,24],poiChance:.85,personalities:['active','leisurely','foodie','curious','shy'],depth:[.86,.91],depthName:'底砂與水草表面',growthLabel:'中等',environment:{bottom:1.5,plant:1.5,wood:1.2,shelter:1},values:[1,2,4]};
+const shrimpSource='https://ask.ifas.ufl.edu/publication/IN1301';
+const rows={
+ blackshrimp:{name:'黑殼蝦',nickname:'小黑',category:'shrimp',size:48,speed:.022,price:35,unlockLevel:1,growthTime:840,coinInterval:68,color:'#6e7261',tail:'#555d50',shape:'shrimp',desc:'半透明的褐色小身體，邊走邊用小附肢找食物。',knowledge:{scientific:'Neocaridina spp.（黑殼蝦是俗名，本圖以新米蝦屬的褐色型概括）',habitat:'淡水溪流、池塘與水草間；市售黑殼蝦可能包含不同種類。',body:'頭胸部覆著甲殼，腹部分節，有觸角、步足、游泳足和尾扇。',diet:'刮食生物膜、藻類與可食碎屑，也需要合適的完整食物。',habit:'在底砂與植物表面覓食，遇到靠近的魚會躲避或短距離游開。',care:'俗名不能用來確定物種。小蝦可能被魚吞食，遊戲共缸不是混養建議。',sourceURL:shrimpSource}},
+ blueshrimp:{name:'藍蝦',nickname:'小藍',category:'shrimp',size:50,speed:.024,price:95,unlockLevel:2,growthTime:960,coinInterval:72,color:'#398ab1',tail:'#286d92',shape:'shrimp',desc:'藍色米蝦在水草和沉木間探索，停下來用小螯取食。',knowledge:{scientific:'Neocaridina davidi（藍色觀賞品系）',habitat:'淡水環境；遊戲選用藍色米蝦品系，不是藍色螯蝦。',body:'藍色分節身體與長觸角，腹面有小小的游泳足。',diet:'刮食生物膜、藻類和可食碎屑，飼養時也需合適的蝦類食物。',habit:'沿植物與沉木攀爬，偶爾短距離游動。',care:'藍色是人工選育的體色，不代表另一種身體構造。',sourceURL:shrimpSource}},
+ microcrab:{name:'迷你蜘蛛蟹',nickname:'小蛛',category:'crab',size:40,speed:.013,price:180,unlockLevel:3,growthTime:1200,coinInterval:80,color:'#adac91',tail:'#969c83',shape:'crab',desc:'小小的頭胸甲配上細長步足，慢慢攀在水草附近。',knowledge:{scientific:'Limnopilos naiyanetri',habitat:'泰國的淡水水域。',body:'身體很小，頭胸甲近圓形，有細長步足和帶剛毛的螯足；不是蜘蛛。',diet:'以附肢收集細小食物，遊戲用沉到底層的小型魚飼料表示。',habit:'緩慢移動、停留與攀附；攀爬動畫是方便觀察的簡化。',care:'真實體型很小，容易被魚捕食。遊戲放大外形，方便看清構造。',sourceURL:'https://lkcnhm.nus.edu.sg/wp-content/uploads/sites/11/app/uploads/2017/06/39rbz363-368.pdf'}},
+ pompomcrab:{name:'拳擊蟹',nickname:'小拳',category:'crab',size:58,speed:.018,price:280,unlockLevel:4,growthTime:1440,coinInterval:88,color:'#bca38a',tail:'#947c6c',shape:'crab',desc:'螯上有毛束，像小拳套；在石頭旁停停走走、收集食物。',knowledge:{scientific:'Ptychognathus spp.（水族市場毛螯型；常以 P. barbatus 販售，不能只憑俗名定種）',habitat:'相關種類多在河口或受淡水影響的海岸；不是一概適合純淡水。',body:'螯上的毛束是剛毛，不是拿著海葵；與海水 Lybia 屬拳擊蟹不同。',diet:'用螯收集、處理可食顆粒；遊戲統一用小型魚飼料簡化。',habit:'在底砂或石面行走，停下揮動螯足，靠近遮蔽物休息。',care:'2025 年研究已區分部分原稱 P. barbatus 的東亞紀錄為 P. dajie。實際飼養須查明種類、產地與鹽度，遊戲不模擬鹽度需求。',sourceURL:'https://pmc.ncbi.nlm.nih.gov/articles/PMC12238988/'}}
+};
+const additions=[
+ ['firstFeed','開飯囉','第一次投下適合的飼料。','firstFeed',5],
+ ['firstCard','認識小居民','第一次打開生物資料卡。','firstCard',5],
+ ['firstCoin','收好第一枚','第一次收取金幣。','firstCoin',5],
+ ['firstFeedBuy','飼料準備好','第一次購買飼料。','feedPurchases',10],
+ ['firstDecor','動手布置','第一次自己購買並放置布置。','firstDecor',10],
+ ['firstObserve','仔細看一看','第一次進入自由觀察。','firstObserve',10],
+ ['firstShrimp','蝦蝦新朋友','第一次飼養蝦類。','shrimp',15],
+ ['firstCrab','蟹蟹新朋友','第一次飼養蟹類。','crab',20],
+ ['observeCrustacean','發現不同構造','第一次觀察蝦或蟹。','observeCrustacean',15],
+ ['fourCrustaceans','蝦蟹收藏家','收藏本次四種蝦蟹。','crustaceans',50]
+].map(([id,name,desc,metric,coins])=>Object.freeze({id,name,desc,metric,goal:id==='fourCrustaceans'?4:1,reward:{coins}}));
+window.AquariumData=Object.freeze({...D,NEW_ACHIEVEMENT_IDS:Object.freeze(additions.map(a=>a.id)),SPECIES:Object.freeze({...D.SPECIES,...Object.fromEntries(Object.entries(rows).map(([id,r])=>[id,Object.freeze({...base,...r})]))}),ACHIEVEMENTS:Object.freeze([...D.ACHIEVEMENTS,...additions])});
+})();
