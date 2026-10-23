@@ -178,3 +178,7 @@
 #game #tank-upgrade-shortcut:focus-visible{outline:3px solid #ddaf43;outline-offset:2px}
 @media(min-width:1060px) and (min-height:680px){#game #tank-upgrade-shortcut{min-height:24px;padding:2px 9px;margin:2px 0 0;font-size:12px}}
 @media(max-width:680px){#game #tank-upgrade-shortcut{font-size:12px;padding:5px 8px;min-height:32px}}
+
+#more-menu{position:relative}#achievement-badge{display:block;font-size:11px;line-height:1.2;color:#785616;background:#fff1b8;border-radius:8px;padding:2px 5px;white-space:nowrap}#achievement-badge[hidden]{display:none}.achievement-card[data-status="ready"]{border:2px solid #d5ae54;background:#fffae6}.achievement-card[data-status="claimed"]{opacity:.72}.encyclopedia-grid .fish-preview{height:170px}.shop-item .shop-detail{overflow-wrap:anywhere}.decor-filters{flex-wrap:wrap}
+
+#collect-all{border:1px solid #bdcebb;background:#fff5cc;color:#63551e;border-radius:14px;padding:5px 10px;font-size:12px;white-space:nowrap;cursor:pointer}#collect-all:disabled{opacity:.55;cursor:default}.tank-caption{display:flex;align-items:center;justify-content:space-between;gap:8px}#achievement-badge{position:absolute;top:2px;right:5px;font-size:10px;max-width:90%}#feed-choices span{font-size:12px;line-height:1.35}

@@ -12,7 +12,7 @@ const V2_KEYS=['general.open','general.select','general.drop','small.gift','smal
 const TUTORIAL_KEYS=[...V2_KEYS.slice(0,15),'decor.shop','decor.tab','decor.buy','decor.edit','decor.move','observe'];
 const OLD_KEYS=[...V2_KEYS.slice(0,8),'feed.shop','feed.tab','feed.buy','observe'];
 const HINT_IDS=['upgrade','tank2','move','backup'];
-const ADDED_ACHIEVEMENTS=['fourSpecies','threePurchases','twoAdults','sevenDecor','twelveSpecies','fifteenSpecies'];
+const ADDED_ACHIEVEMENTS=['fourSpecies','threePurchases','twoAdults','sevenDecor','twelveSpecies','fifteenSpecies',...window.AquariumData.NEW_ACHIEVEMENT_IDS];
 function withNewAchievementDefaults(raw){
  if(!raw?.achievements||typeof raw.achievements!=='object'||Array.isArray(raw.achievements))return raw;
  const extra={...raw.achievements};
@@ -67,7 +67,8 @@ function validate(raw){
  const inventory={},purchases={};for(const id of Object.keys(FEEDS)){if(!integer(r.feedInventory?.[id],0,999999)||!integer(r.feedPurchases?.[id],0,999999))throw Error('飼料庫存或購買紀錄不完整。');inventory[id]=r.feedInventory[id];purchases[id]=r.feedPurchases[id];}
  if(!Array.isArray(r.gifts)||new Set(r.gifts).size!==r.gifts.length||r.gifts.some(id=>!GIFT_IDS.includes(id))||!finite(r.emergencyAt,0,Number.MAX_SAFE_INTEGER))throw Error('贈禮紀錄不完整。');
  let migration=null;if(r.migration!=null){const m=r.migration;if(!integer(m.from,1,4)||!integer(m.oldTier,1,4)||!integer(m.compensation,0,CONFIG.MAX_COINS)||!integer(m.freeTanks,1,CONFIG.MAX_TANKS)||!integer(m.originalCoins,0,CONFIG.MAX_COINS))throw Error('移轉紀錄不完整。');migration={...m};}
- const s={...shared};for(const k of [...Object.keys(tankKeys),'tankCapacity'])delete s[k];
+ const activity=r.activity===undefined?{}:r.activity;if(!activity||typeof activity!=='object'||Array.isArray(activity)||Object.entries(activity).some(([k,v])=>!['firstFeed','firstCard','firstCoin','firstDecor','firstObserve','observeCrustacean'].includes(k)||typeof v!=='boolean'))throw Error('觀察活動紀錄不完整。');
+ const s={...shared,...(r.activity===undefined?{}:{activity:{...activity}})};for(const k of [...Object.keys(tankKeys),'tankCapacity'])delete s[k];
  // Restore V0.6-only achievement flags after the V0.5 validator handles legacy IDs.
  s.achievements=Object.fromEntries(ACHIEVEMENTS.map(a=>{const old=shared.achievements[a.id],v=r.achievements?.[a.id];return [a.id,old||((v&&typeof v.completed==='boolean'&&typeof v.rewardClaimed==='boolean'&&(!v.rewardClaimed||v.completed))?{completed:v.completed,rewardClaimed:v.rewardClaimed}:{completed:false,rewardClaimed:false})];}));
  return attach({...s,schemaVersion:5,gameVersion:'0.6',tanks,activeTankId:r.activeTankId,feedInventory:inventory,feedPurchases:purchases,gifts:[...r.gifts],emergencyAt:r.emergencyAt,migration,onboarding:{...o}});

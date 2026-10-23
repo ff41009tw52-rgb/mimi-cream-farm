@@ -9,6 +9,7 @@ const coinInterval=s=>s.coinInterval*CONFIG.COIN_SCALE;
 const growthTime=s=>s.growthTime*CONFIG.GROWTH_SCALE;
 const $=id=>document.getElementById(id), clamp=(v,a=0,b=100)=>Math.min(b,Math.max(a,v));
 const rand=(a,b)=>a+Math.random()*(b-a), uid=()=>globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+const residentStage=f=>SPECIES[f.species].category?['幼體','成長中','成體'][stage(f.growth)]:stageName(f.growth);
 const stage=g=>g>=100?2:g>=35?1:0, stageName=g=>['幼魚','亞成魚','成魚'][stage(g)];
 const timeLabel=t=>new Date(t).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',hour12:false});
 const canvas=$('tank'), ctx=canvas.getContext('2d'), dialog=$('dialog');
@@ -18,6 +19,7 @@ let state, W=1000,H=500,dpr=1, bg, runtime=new Map(), food=[],effects=[],selecte
 let dirty=false,saveTimer=0,lastSaved=0,saveBlocked=false,conflict=false,simTime=0,feedAt=-99;
 let uiAccumulator=0,saveAccumulator=0,lastFrame=0,hiddenAt=0,toastTimer,dialogMode='',resetStep=0;
 const diagnostics={backgroundBuilds:0,backgroundMs:0,writes:0,eaten:0,spawned:0,frames:0,frameMax:0,costTotal:0,costMax:0,bursts:0,pauses:0,discoveries:0,sounds:0,environmentVisits:0,environmentSeconds:0,variantUnlocks:0,achievementCompletions:0,achievementRewards:0};
+let creatureCategory='all';
 let audioCtx=null,audioLast=-99,audioEatLast=-99,shopTab='fish',decorCategory='plants',newFishFocus=null;
 let foreground,poiCache={byId:new Map(),bySpecies:{}},editing=false,editSelection=null,drag=null,editPreview=null,editCacheDirty=false;
 const shopVariants=new Map(),editorHandles=new Map();
@@ -32,7 +34,7 @@ function starterExtras(fishes){
 }
 function fresh(name){const fishes=['guppy','goldfish','cory'].map(k=>newFish(k));const next=window.AquariumSave.freshFromLegacy({schemaVersion:2,gameVersion:'0.2',savedAt:0,coins:CONFIG.START_COINS,waterQuality:100,tankCapacity:CONFIG.CAPACITY,fishes,drops:[],...starterExtras(fishes)},name);next.tankName=window.AquariumSave.tankName(name);next.onboarding=window.AquariumSave.newOnboarding();return next;}
 function mood(f){return f.hunger<25?'肚子餓':f.hunger>=90?'吃得好滿足':'開心';}
-function syncFish(f){f.growthStage=stageName(f.growth);f.size=SPECIES[f.species].size*(.7+.3*f.growth/100);f.mood=mood(f);}
+function syncFish(f){f.growthStage=residentStage(f);f.size=SPECIES[f.species].size*(.7+.3*f.growth/100);f.mood=mood(f);}
 function oldSnapshot(){return {...state,schemaVersion:CONFIG.SCHEMA_VERSION,gameVersion:CONFIG.GAME_VERSION,savedAt:Date.now(),fishes:state.fishes.map(f=>({...f})),drops:state.drops.map(c=>({...c}))};}
 function snapshot(){return {...JSON.parse(JSON.stringify(state)),schemaVersion:5,gameVersion:'0.6',savedAt:Date.now()};}
 function save(manual=false){
@@ -74,13 +76,14 @@ function updateUI(){if(!state)return;checkFeatureHints();renderTankSelector();re
  upgradeLink.disabled=!nextTier;
  upgradeLink.dataset.ready=String(!!nextTier&&state.level>=nextTier.level&&state.coins>=nextTier.price);
  upgradeLink.dataset.full=String(!!nextTier&&state.fishes.length>=state.tankCapacity);
- upgradeLink.title=nextTier?`下一級：${nextTier.capacity} 隻 · 養魚等級 ${nextTier.level} · ${nextTier.price} 金幣`:'目前已達到每缸最多 10 隻魚的上限';
+ upgradeLink.title=nextTier?`下一級：${nextTier.capacity} 隻 · 養魚等級 ${nextTier.level} · ${nextTier.price} 金幣`:'目前已達到每缸最多 10 隻生物的上限';
  $('level').textContent=`養魚等級 ${state.level}`;const floor=CONFIG.LEVEL_XP[state.level-1],ceiling=CONFIG.LEVEL_XP[state.level];$('xp-bar').style.width=`${ceiling?(state.xp-floor)/(ceiling-floor)*100:100}%`;
  const next=Object.values(SPECIES).filter(s=>s.unlockLevel===state.level+1).map(s=>s.name);$('next-unlock').textContent=next.length?`下一級解鎖：${next.join('、')}`:`已解鎖全部魚種`;
- $('feed').disabled=editing;
- if(selected){const f=state.fishes.find(f=>f.id===selected);if(f){$('fish-name').textContent=f.name;$('fish-species').textContent=SPECIES[f.species].name;$('fish-stage').textContent=stageName(f.growth);$('fish-hunger').textContent=`${Math.round(f.hunger)}%`;$('fish-growth').textContent=`${Math.floor(f.growth)}%`;$('hunger-meter').value=f.hunger;$('growth-meter').value=f.growth;$('fish-mood').textContent=`目前狀態：${f.hunger<25?'肚子餓':runtime.get(f.id)?.behavior||mood(f)}`;$('fish-personality').textContent=`個性：${PERSONALITIES[f.personality].name}`;$('fish-food').textContent='食物：'+FEEDS[FOOD_FOR[f.species]].name;}}
+ $('feed').disabled=editing;$('collect-all').disabled=!state.drops.length;$('collect-all').textContent=state.drops.length?`全部收取 · ${state.drops.length} 枚`:'全部收取';
+ const claimable=ACHIEVEMENTS.filter(a=>state.achievements[a.id]?.completed&&!state.achievements[a.id].rewardClaimed).length;const more=$('more-menu');more.dataset.rewards=String(claimable);more.setAttribute('aria-label',claimable?`更多，有 ${claimable} 項成就可領獎`:'更多');let badge=$('achievement-badge');if(!badge){badge=document.createElement('small');badge.id='achievement-badge';more.append(badge);}badge.hidden=!claimable;badge.textContent=claimable?`${claimable} 項可領獎`:'';
+ if(selected){const f=state.fishes.find(f=>f.id===selected);if(f){$('fish-name').textContent=f.name;$('fish-species').textContent=SPECIES[f.species].name;$('fish-stage').textContent=residentStage(f);$('observe-fish').textContent=SPECIES[f.species].category?'觀察這隻生物':'觀察這隻魚';$('fish-hunger').textContent=`${Math.round(f.hunger)}%`;$('fish-growth').textContent=`${Math.floor(f.growth)}%`;$('hunger-meter').value=f.hunger;$('growth-meter').value=f.growth;$('fish-mood').textContent=`目前狀態：${f.hunger<25?'肚子餓':runtime.get(f.id)?.behavior||mood(f)}`;$('fish-personality').textContent=`個性：${PERSONALITIES[f.personality].name}`;$('fish-food').textContent='食物：'+FEEDS[FOOD_FOR[f.species]].name;}}
 }
-function selectFish(id){if(editing)return;metric('fish');selected=id;$('fish-card').hidden=false;updateUI();tutorial.report('fishOpened');}
+function selectFish(id){if(editing)return;recordActivity('firstCard');metric('fish');selected=id;$('fish-card').hidden=false;updateUI();tutorial.report('fishOpened');}
 function closeCard(){selected=null;$('fish-card').hidden=true;queueMicrotask(()=>tutorial.render());}
 let selectedFeed=null;
 function renderFeedChoices(){const root=$('feed-choices');if(!root)return;for(const id of Object.keys(FEEDS)){const b=$('feed-'+id);if(b){b.setAttribute('aria-pressed',String(selectedFeed===id));b.querySelector('small').textContent=`剩餘 ${state.feedInventory[id]} 份`;b.querySelector('span').textContent=FEEDS[id].species.map(k=>SPECIES[k].name).join('、');}}$('feed-current').textContent=selectedFeed?`已選 ${FEEDS[selectedFeed].name} · 剩餘 ${state.feedInventory[selectedFeed]} 份`:'先選擇一種飼料';}
@@ -97,7 +100,7 @@ function feed(x,confirmed=false){
   const tankId=state.activeTankId;
   confirmAction('這個魚缸沒有適合的魚兒','這個魚缸裡沒有魚兒會吃這種飼料，還要投放嗎？',()=>{if(state.activeTankId!==tankId||selectedFeed!==kind)return;dialog.close();feed(x,true);});$('dialog-content').querySelector('.confirm').textContent='仍要投放';return;
  }
- const previousStep=state.onboarding.step;let advanced=false;if(!protectedTransaction(()=>{state.feedInventory[kind]--;advanced=tutorial.record('fed:'+kind);}))return;
+ const previousStep=state.onboarding.step;let advanced=false;if(!protectedTransaction(()=>{state.feedInventory[kind]--;if(state.fishes.some(f=>FOOD_FOR[f.species]===kind)){state.activity??={};state.activity.firstFeed=true;}advanced=tutorial.record('fed:'+kind);}))return;
  feedAt=simTime;for(let i=0;i<3;i++)food.push({id:uid(),x:clamp(x+(i-1)*.017,.06,.94),y:.08+i*.006,bottom:0,phase:rand(0,7),kind});effects.push({x,y:.08,text:'',life:1,kind:'ripple'});sound('feed');metric('feed');tutorial.finish(previousStep,advanced);if(advanced)setFeeding(false);else renderFeedChoices();dirty=true;
 }
 function collect(c){
@@ -107,7 +110,7 @@ function collect(c){
   const index=state.drops.findIndex(d=>d.id===c.id);if(index<0)return false;
   state.drops.splice(index,1);
   reward=demonstration&&(state.gifts.includes('demoCollected')||state.onboarding.review)?0:c.value;
-  state.coins=clamp(state.coins+reward,0,CONFIG.MAX_COINS);
+  state.coins=clamp(state.coins+reward,0,CONFIG.MAX_COINS);if(reward){state.activity??={};state.activity.firstCoin=true;}
   if(demonstration&&!state.gifts.includes('demoCollected'))state.gifts.push('demoCollected');
   if(reward)gainXP(1,false);advanced=tutorial.record('coinCollected');
  }))return;
@@ -129,7 +132,7 @@ function validFishName(raw){const name=raw.trim().normalize('NFC');if(!name)thro
 function buy(species){
  const s=SPECIES[species];if(!s||conflict||saveBlocked||protectedBusy)return;
  if(state.level<s.unlockLevel){shopMessage('這種魚還沒解鎖，先提升養魚等級吧！');return;}
- if(state.fishes.length>=state.tankCapacity){shopMessage('魚缸滿了！先移動魚兒或升級魚缸，才能再養新魚。');return;}
+ if(state.fishes.length>=state.tankCapacity){shopMessage('魚缸住滿了！可以先升級，或到其他魚缸看看。');return;}
  if(state.onboarding.review&&tutorial.expects('fishBought')){tutorial.render();return;}
  const tankId=state.activeTankId,variant=shopVariants.get(species)||'normal';let completed=false;
  openDialog('迎接'+s.name,'purchase-name');
@@ -144,7 +147,7 @@ function completeFishPurchase(species,name,tankId,variant){
  if(conflict||saveBlocked||protectedBusy)return;const speciesData=SPECIES[species];if(!speciesData)return;
  if(state.activeTankId!==tankId){toast('魚缸已切換，請重新選擇新魚。');return false;}
  if(state.level<speciesData.unlockLevel){shopMessage('養魚等級還不夠，暫時不能買這種魚。');return;}
- if(state.fishes.length>=state.tankCapacity){shopMessage('魚缸住滿了！升級或移魚後，就能再迎接新魚。');return;}
+ if(state.fishes.length>=state.tankCapacity){shopMessage('魚缸住滿了！可以先升級，或到其他魚缸看看。');return;}
  if(variant!=='normal'&&(VARIANTS[variant]?.species!==species||!state.unlockedVariants.includes(variant))){shopMessage('這個配色還沒解鎖。');return;}
  if(!supportAvailable('fishSupport',speciesData.price)){shopMessage('金幣還不夠，先回魚缸收集金幣吧。');return;}
  const beforeStep=state.onboarding.step;let f,advanced=false,subsidy=0;
@@ -159,7 +162,7 @@ function completeFishPurchase(species,name,tankId,variant){
  if(advanced){setFeeding(false);tutorial.finish(beforeStep,true);}
  openDialog('歡迎'+f.name+'加入你的水族箱！','purchase-success');
  const actions=document.createElement('div');actions.className='confirm-actions';const see=button('去看看牠',()=>{dialog.close();if(state.activeTankId!==tankId)switchTank(tankId);setFeeding(false);newFishFocus={id:f.id,until:simTime+8};selectFish(f.id);requestAnimationFrame(()=>canvas.scrollIntoView({block:'nearest'}));},'confirm');see.id='purchase-see-fish';
- const keep=button('繼續逛商店',()=>{shopTab='fish';shop();});keep.id='purchase-keep-shopping';actions.append(see,keep);$('dialog-content').append(previewFish(species,false,variant),paragraph('牠已經住進魚缸了，快去看看牠吧！'),actions);
+ const keep=button('繼續逛商店',()=>{shopTab='fish';shop();});keep.id='purchase-keep-shopping';actions.append(see,keep);$('dialog-content').append(previewFish(species,false,variant),paragraph('牠已經住進魚缸了，圖鑑也留下紀錄，快去看看牠吧！'),actions);
  if(advanced){
   const guide=paragraph(`你的魚缸目前可以養 ${state.tankCapacity} 隻魚。點魚兒數量旁的「升級魚缸」可以先看需要的等級和金幣，不會立刻扣錢。`,'tutorial-shop-copy');
   const preview=button('看看魚缸怎麼升級',()=>{tankMenu();tutorial.render();},'place-button');
@@ -172,7 +175,7 @@ function completeFishPurchase(species,name,tankId,variant){
 function shopMessage(text){const e=$('shop-message');if(e){e.textContent=text;e.scrollIntoView({block:'nearest'});}else toast(text);}
 function openDialog(title,mode){if(editing)finishEditing();closeCard();dialogMode=mode;$('dialog-title').textContent=title;$('dialog-content').replaceChildren();if(!dialog.open)dialog.showModal();}
 function button(text,handler,cls=''){const b=document.createElement('button');b.type='button';b.textContent=text;b.className=cls;b.addEventListener('click',handler);return b;}
-function shop(){if(editing)finishEditing();metric('shop');openDialog('商店','shop');renderShop();tutorial.report('shopOpened');}
+function shop(){if(!state.onboarding.completed)creatureCategory='all';if(editing)finishEditing();metric('shop');openDialog('商店','shop');renderShop();tutorial.report('shopOpened');}
 function settings(){const expanded=document.querySelector('.save-tools')?.open||false;openDialog('設定','settings');const list=document.createElement('div');list.className='settings-list';
   function row(title,desc,label,fn,danger=false){const r=document.createElement('div');r.className='setting-row';const p=document.createElement('p');p.textContent=title;const small=document.createElement('small');small.textContent=desc;p.append(small);r.append(p,button(label,fn,danger?'danger':''));list.append(r);}
   row('手動存檔','另外存下目前的進度，遊戲也會繼續自動存檔。','存檔',()=>{if(save(true)){dialog.close();}});
@@ -211,9 +214,9 @@ function loadSaved(manual){
 }
 function reset(){if(resetStep!==2)return;resetStep=0;activate(fresh(),{backup:'before_new'});dialog.close();}
 const fishBrief={guppy:'小巧活潑，展開繽紛的大尾巴。',goldfish:'圓潤的身體，慢慢擺動尾鰭。',cory:'在底砂巡游，尋找沉底飼料。',zebra:'帶著水平條紋，輕快地游。',molly:'深色魚身，穩穩地游動。',swordtail:'尾鰭下方有細長的劍狀延伸。',whitecloud:'細細的色帶，喜歡靠近同伴。',cardinal:'藍紅相映的小型群游魚。',angel:'高高的魚鰭，姿態優雅。',betta:'飄逸的長鰭，喜歡獨自巡游。'};
-function moreMenu(){openDialog('更多功能','more');const list=document.createElement('div');list.className='more-grid';for(const [id,title,desc,fn]of [['more-observe','觀察魚兒','放大看魚兒，也能複習魚的構造與呼吸',()=>{dialog.close();openObservation(selected);}],['roster','我的魚兒','查看飽足度、改名字或管理魚兒',roster],['encyclopedia','魚類圖鑑','收藏魚種與特別配色',encyclopedia],['tank-menu','我的魚缸','升級魚缸，安排喜歡的裝飾',tankMenu],['tutorial-edit','調整布置','移動魚缸內的裝飾',()=>{dialog.close();startEditing();}],['achievements','成就','查看進度與領取獎勵',achievements],['settings','設定','調整音效、重看教學或管理存檔',settings]]){const b=button('',fn,'more-item');b.id=id;const label=document.createElement('strong');label.textContent=title;b.append(label,paragraph(desc));list.append(b);}$('dialog-content').append(list);tutorial.render();}
-function fishMore(){const f=state.fishes.find(f=>f.id===selected);if(!f)return;openDialog('更多魚兒資料','fish-more');const minutes=Math.max(0,Math.floor((Date.now()-f.createdAt)/60000));$('dialog-content').append(paragraph(f.name+' · '+SPECIES[f.species].name,'fish-detail-name'),paragraph(`生活水域：淡水${['guppy','molly'].includes(f.species)?'（也能適應一定程度半鹹水）':''}`,'fish-habitat'),paragraph(`活動水層：${SPECIES[f.species].depthName}`),paragraph(`養育時間：${minutes>=60?Math.floor(minutes/60)+' 小時 '+minutes%60+' 分鐘':minutes+' 分鐘'}`),paragraph(`心情：${mood(f)}`),paragraph(`配色：${f.variant==='normal'?'普通配色':VARIANTS[f.variant].name}`),paragraph(PERSONALITIES[f.personality].desc));const manage=button('管理魚兒',()=>manageFish(f.id),'place-button');manage.id='manage-fish';$('dialog-content').append(manage,button('回到魚兒資料',()=>{dialog.close();selectFish(f.id);},'back-button'));}
-function manageFish(id){const f=state.fishes.find(f=>f.id===id);if(!f)return;openDialog('管理魚兒','manage');$('dialog-content').append(paragraph(f.name+' · '+SPECIES[f.species].name),paragraph(allFish().length<=3?'目前所有魚缸合計只有三隻魚。請先購買新魚，才能送養其中一隻。':'送養後魚兒會離開魚缸，不會退還金幣；圖鑑紀錄保留，所有魚缸合計至少保留三隻魚。','dialog-note'));$('dialog-content').append(button('魚兒資料',()=>{dialog.close();selectFish(id);},'place-button'),button('改名字',()=>{selected=id;renameFish();},'place-button'),button('移動到其他魚缸',()=>moveFish(id),'place-button'));const b=button('送養這隻魚（不退金幣）',()=>{selected=id;rehomeFish();},'place-button danger');b.id='rehome';b.disabled=allFish().length<=3;$('dialog-content').append(b,button('返回我的魚兒',roster,'back-button'));}
+function moreMenu(){openDialog('更多功能','more');const list=document.createElement('div');list.className='more-grid';for(const [id,title,desc,fn]of [['more-observe','觀察生物','放大看魚兒和蝦蟹，也能複習魚的構造與呼吸',()=>{dialog.close();openObservation(selected);}],['roster','我的生物','查看飽足度、改名字或管理小居民',roster],['encyclopedia','生物圖鑑','收藏魚兒、蝦類與蟹類',encyclopedia],['tank-menu','我的魚缸','升級魚缸，安排喜歡的裝飾',tankMenu],['tutorial-edit','調整布置','移動魚缸內的裝飾',()=>{dialog.close();startEditing();}],['achievements','成就','查看進度與領取獎勵',achievements],['settings','設定','調整音效、重看教學或管理存檔',settings]]){const b=button('',fn,'more-item');b.id=id;const label=document.createElement('strong');label.textContent=id==='achievements'&&Number($('more-menu').dataset.rewards)?`成就 · ${$('more-menu').dataset.rewards} 項可領獎`:title;b.append(label,paragraph(desc));list.append(b);}$('dialog-content').append(list);tutorial.render();}
+function fishMore(){const f=state.fishes.find(f=>f.id===selected);if(!f)return;openDialog('更多魚兒資料','fish-more');const minutes=Math.max(0,Math.floor((Date.now()-f.createdAt)/60000));$('dialog-content').append(paragraph(f.name+' · '+SPECIES[f.species].name,'fish-detail-name'),paragraph(SPECIES[f.species].category?'生活水域：'+SPECIES[f.species].knowledge.habitat:`生活水域：淡水${['guppy','molly'].includes(f.species)?'（也能適應一定程度半鹹水）':''}`,'fish-habitat'),paragraph(`活動水層：${SPECIES[f.species].depthName}`),paragraph(`養育時間：${minutes>=60?Math.floor(minutes/60)+' 小時 '+minutes%60+' 分鐘':minutes+' 分鐘'}`),paragraph(`心情：${mood(f)}`),paragraph(`配色：${f.variant==='normal'?'普通配色':VARIANTS[f.variant].name}`),paragraph(PERSONALITIES[f.personality].desc));appendFishKnowledge($('dialog-content'),f.species);const manage=button('管理魚兒',()=>manageFish(f.id),'place-button');manage.id='manage-fish';$('dialog-content').append(manage,button('回到魚兒資料',()=>{dialog.close();selectFish(f.id);},'back-button'));}
+function manageFish(id){const f=state.fishes.find(f=>f.id===id);if(!f)return;openDialog('管理魚兒','manage');$('dialog-content').append(paragraph(f.name+' · '+SPECIES[f.species].name),paragraph(allFish().length<=3?'目前所有魚缸合計只有三隻生物。請先購買新魚，才能送養其中一隻。':'送養後魚兒會離開魚缸，不會退還金幣；圖鑑紀錄保留，所有魚缸合計至少保留三隻生物。','dialog-note'));$('dialog-content').append(button('魚兒資料',()=>{dialog.close();selectFish(id);},'place-button'),button('改名字',()=>{selected=id;renameFish();},'place-button'),button('移動到其他魚缸',()=>moveFish(id),'place-button'));const b=button(SPECIES[f.species].category?'送養這隻生物（不退金幣）':'送養這隻魚（不退金幣）',()=>{selected=id;rehomeFish();},'place-button danger');b.id='rehome';b.disabled=allFish().length<=3;$('dialog-content').append(b,button('返回我的魚兒',roster,'back-button'));}
 function roster(){
  openDialog('我的魚兒','roster');
  if(!state.fishes.length){const other=state.tanks.find(t=>t.fishes.length);$('dialog-content').append(paragraph('這個魚缸還沒有魚兒，快來迎接新朋友吧！'));if(other)$('dialog-content').append(button('查看 '+other.name+' 的魚兒',()=>{dialog.close();switchTank(other.id);roster();},'place-button'));}
@@ -221,7 +224,7 @@ function roster(){
   const item=document.createElement('div');item.className='roster-manage-row';
   const view=button('',()=>{dialog.close();selectFish(f.id);},'roster-item');
   const name=document.createElement('span');name.textContent=`${f.name} · ${SPECIES[f.species].name}`;
-  const detail=document.createElement('small');detail.textContent=`${stageName(f.growth)} · 飽足度 ${Math.round(f.hunger)}%`;
+  const detail=document.createElement('small');detail.textContent=`${residentStage(f)} · 飽足度 ${Math.round(f.hunger)}%`;
   view.append(name,detail);
   const manage=button('管理',()=>manageFish(f.id),'roster-manage');
   manage.setAttribute('aria-label','管理'+f.name);
@@ -241,14 +244,15 @@ function sound(kind){
  try{const osc=audioCtx.createOscillator(),gain=audioCtx.createGain(),now=audioCtx.currentTime;osc.type='sine';osc.frequency.setValueAtTime(start,now);osc.frequency.exponentialRampToValueAtTime(end,now+.13);gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(kind==='eat'?.018:.033,now+.014);gain.gain.exponentialRampToValueAtTime(.0001,now+.19);osc.connect(gain);gain.connect(audioCtx.destination);osc.onended=()=>{osc.disconnect();gain.disconnect();};osc.start(now);osc.stop(now+.21);diagnostics.sounds++;}catch(e){/* Audio support is optional; never stop simulation. */}
 }
 function paragraph(text,cls=''){const p=document.createElement('p');p.className=cls;p.textContent=text;return p;}
-function appendFishKnowledge(root,id){const k=SPECIES[id].knowledge;if(!k)return;const box=document.createElement('details');box.className='fish-knowledge';const title=document.createElement('summary');title.textContent='認識真正的'+SPECIES[id].name;box.append(title);for(const [label,value]of [['學名',k.scientific],['生活水域',k.habitat],['身體外形',k.body],['活動水層',SPECIES[id].depthName],['真實食性',k.diet],['代表習性',k.habit],['飼養提醒',k.care]])box.append(paragraph(label+'：'+value));box.append(paragraph('遊戲飼料分類經過簡化，不代表真實魚類只能吃這一種食物。'));const link=document.createElement('a');link.href='https://www.seriouslyfish.com/species/'+k.source+'/';link.target='_blank';link.rel='noopener noreferrer';link.textContent='魚種資料來源';box.append(link);root.append(box);}
+function appendFishKnowledge(root,id){const k=SPECIES[id].knowledge;if(!k)return;const box=document.createElement('details');box.className='fish-knowledge';const title=document.createElement('summary');title.textContent='認識真正的'+SPECIES[id].name;box.append(title);for(const [label,value]of [['學名',k.scientific],['生活水域',k.habitat],['身體外形',k.body],['活動水層',SPECIES[id].depthName],['真實食性',k.diet],['代表習性',k.habit],['飼養提醒',k.care]])box.append(paragraph(label+'：'+value));box.append(paragraph('遊戲飼料分類經過簡化，不代表真實生物只能吃這一種食物。'));const link=document.createElement('a');link.href=k.sourceURL||'https://www.seriouslyfish.com/species/'+k.source+'/';link.target='_blank';link.rel='noopener noreferrer';link.textContent='生物資料來源';box.append(link);root.append(box);}
 function previewFish(id,unknown=false,variant='normal'){const c=document.createElement('canvas');c.className='fish-preview';c.width=240;c.height=140;c.setAttribute('aria-label',unknown?'尚未發現的魚':SPECIES[id].name);const context=c.getContext('2d');if(unknown)context.globalAlpha=.12;drawFish(context,id,120,76,SPECIES[id].shape==='angel'?88:100,1,0,.7,variant);return c;}
 function renderShop(){
  if(!dialog.open||dialogMode!=='shop')return;const root=$('dialog-content');root.replaceChildren();const tabs=document.createElement('div');tabs.className='tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','商店分類');
  for(const [id,label]of [['fish','魚兒'],['feed','飼料'],['decor','布置']]){const b=button(label,()=>{shopTab=id;renderShop();if(id==='feed')tutorial.report('feedShopOpened');if(id==='fish')tutorial.report('fishShopOpened');if(id==='decor')tutorial.report('decorShopOpened');tutorial.render();},'tab'+(shopTab===id?' active':''));b.id='tab-'+id;b.setAttribute('role','tab');b.setAttribute('aria-selected',String(shopTab===id));tabs.append(b);}
- const intro=paragraph(`養魚等級 ${state.level} · ${state.coins} 金幣 · ${shopTab==='fish'?'這裡展示的是淡水觀賞魚。現實中，不是每種淡水魚都適合住在一起。':shopTab==='feed'?'選擇適合魚兒的食物。':'購買後會自動放入魚缸。'}`,'shop-intro');intro.id='shop-message';intro.setAttribute('role','status');const grid=document.createElement('div');grid.className='shop-grid';grid.setAttribute('role','tabpanel');grid.setAttribute('aria-labelledby','tab-'+shopTab);root.append(tabs);const shortcuts=document.createElement('div');shortcuts.className='shop-shortcuts';shortcuts.append(button('我的魚缸',tankMenu,'place-button'));if(shopTab==='decor')shortcuts.append(Object.assign(button('調整布置',()=>{if(tutorial.expects('decorEditing')){dialog.close();tutorial.render();}else startEditing();},'place-button'),{id:'shop-edit-decor'}));root.append(shortcuts,intro,grid);
+ const intro=paragraph(`養魚等級 ${state.level} · ${state.coins} 金幣 · ${shopTab==='fish'?'魚兒、蝦類與蟹類都在這裡。遊戲共缸展示不代表真實混養建議。':shopTab==='feed'?'選擇適合魚兒的食物。':'購買後會自動放入魚缸。'}`,'shop-intro');intro.id='shop-message';intro.setAttribute('role','status');const grid=document.createElement('div');grid.className='shop-grid';grid.setAttribute('role','tabpanel');grid.setAttribute('aria-labelledby','tab-'+shopTab);root.append(tabs);const shortcuts=document.createElement('div');shortcuts.className='shop-shortcuts';shortcuts.append(button('我的魚缸',tankMenu,'place-button'));const available=ACHIEVEMENTS.filter(a=>state.achievements[a.id].completed&&!state.achievements[a.id].rewardClaimed).length;if(available)shortcuts.append(button(`成就有 ${available} 項可領獎`,achievements,'place-button'));if(shopTab==='decor')shortcuts.append(Object.assign(button('調整布置',()=>{if(tutorial.expects('decorEditing')){dialog.close();tutorial.render();}else startEditing();},'place-button'),{id:'shop-edit-decor'}));root.append(shortcuts,intro,grid);
  if(shopTab==='fish'){
-  for(const [id,s]of Object.entries(SPECIES).sort(([,a],[,b])=>Number(state.level<a.unlockLevel)-Number(state.level<b.unlockLevel)||a.unlockLevel-b.unlockLevel)){const locked=state.level<s.unlockLevel,card=document.createElement('article');card.className='shop-item'+(locked?' locked':'');const h=document.createElement('h3');h.textContent=s.name;const b=button(locked?`養魚等級 ${s.unlockLevel} 解鎖`:`購買 · ${s.price} 金幣`,()=>buy(id),'buy');b.disabled=locked;b.dataset.species=id;const preview=previewFish(id,locked,shopVariants.get(id)||'normal');card.append(preview,h,paragraph(fishBrief[id]||s.desc,'fish-brief'),b);const detail=document.createElement('details');detail.className='fish-detail';const summary=document.createElement('summary');summary.textContent='詳細介紹與配色';detail.append(summary,paragraph(s.desc),paragraph(`${s.depthName} · ${s.growthLabel}成長`,'shop-detail'));appendFishKnowledge(detail,id);appendVariantChoices(detail,id,preview);card.append(detail);grid.append(card);}
+  const filters=document.createElement('div');filters.className='decor-filters';for(const [id,label]of [['all','全部'],['fish','魚類'],['shrimp','蝦類'],['crab','蟹類']]){const b=button(label,()=>{creatureCategory=id;renderShop();},'decor-filter');b.dataset.creatureFilter=id;b.setAttribute('aria-pressed',String(creatureCategory===id));filters.append(b);}root.insertBefore(filters,grid);
+  for(const [id,s]of Object.entries(SPECIES).filter(([,v])=>creatureCategory==='all'||(v.category||'fish')===creatureCategory).sort(([,a],[,b])=>Number(state.level<a.unlockLevel)-Number(state.level<b.unlockLevel)||a.unlockLevel-b.unlockLevel)){const locked=state.level<s.unlockLevel,card=document.createElement('article');card.className='shop-item'+(locked?' locked':'');const h=document.createElement('h3');h.textContent=s.name;const b=button(locked?`養魚等級 ${s.unlockLevel} 解鎖`:`購買 · ${s.price} 金幣`,()=>buy(id),'buy');b.disabled=locked;b.dataset.species=id;const preview=previewFish(id,locked,shopVariants.get(id)||'normal');card.append(preview,h,paragraph((s.category==='shrimp'?'蝦類':s.category==='crab'?'蟹類':'魚類')+' · '+FEEDS[FOOD_FOR[id]].name,'shop-detail'),paragraph(fishBrief[id]||s.desc,'fish-brief'),paragraph(locked?`養魚等級 ${s.unlockLevel} 解鎖 · ${s.price} 金幣`:state.fishes.length>=state.tankCapacity?'魚缸住滿了，可以升級或換缸':state.coins<s.price?`還差 ${s.price-state.coins} 金幣`:'可以購買','shop-detail'),b);const detail=document.createElement('details');detail.className='fish-detail';const summary=document.createElement('summary');summary.textContent='詳細介紹與配色';detail.append(summary,paragraph(s.desc),paragraph(`${s.depthName} · ${s.growthLabel}成長`,'shop-detail'));appendFishKnowledge(detail,id);appendVariantChoices(detail,id,preview);card.append(detail);grid.append(card);}
  }else if(shopTab==='feed'){renderFeedShop(grid);
  }else{
   const categories=document.createElement('div');categories.className='decor-filters';categories.setAttribute('aria-label','布置分類');for(const [key,label]of [['sand','底砂'],['plants','水草'],['nature','自然造景'],['special','特殊裝飾']]){const b=button(label,()=>{decorCategory=key;renderShop();},'decor-filter');b.id='decor-category-'+key;b.setAttribute('aria-pressed',String(decorCategory===key));categories.append(b);}root.insertBefore(categories,grid);
@@ -276,7 +280,7 @@ function buyDecoration(id){
   state.coins-=d.price;state.purchasedDecorations[id]=owned+1;
   if(d.kind==='substrate'){state.substrate=id;placed=true;}else placed=placeDecoration(id);
   if(lesson&&!placed)return false;
-  evaluateGoals(false);if(lesson&&placed)advanced=tutorial.record('decorBought');
+  if(placed){state.activity??={};state.activity.firstDecor=true;}evaluateGoals(false);if(lesson&&placed)advanced=tutorial.record('decorBought');
  }))return;
  buildBackground();sound('buy');updateUI();
  if(advanced){dialog.close();tutorial.finish(previous,true);}else renderShop();
@@ -296,12 +300,12 @@ function placementDialog(id){
  if(!placeDecoration(id)){shopMessage('魚缸目前放不下這件裝飾。它還在收藏裡，可以先收回其他裝飾，或升級魚缸。');return;}
  evaluateGoals();buildBackground();markDirty(true);updateUI();renderShop();shopMessage(`已放入${DECORATIONS[id].name}！想換位置，可以按「調整布置」。`);
 }
-function encyclopedia(){openDialog('魚類圖鑑','encyclopedia');const known=Object.keys(state.collection).length;$('dialog-content').append(paragraph(`已遇見 ${known} / ${Object.keys(SPECIES).length} 種魚。下一個驚喜，就在水族箱裡。`,'shop-intro'),paragraph('這十五種魚都是以淡水觀賞魚的方式介紹，遊戲裡沒有海水魚。孔雀魚和黑摩利也能適應一定鹽度，但不表示牠們適合與海水魚混養。同樣生活在淡水中，不代表不同魚種一定適合混養。現實中能否混養，還須考慮水溫、體型、活動習性及魚缸大小；本遊戲的共同展示不代表真實飼養建議。','freshwater-guide'));const grid=document.createElement('div');grid.className='shop-grid encyclopedia-grid';for(const [id,s]of Object.entries(SPECIES)){const history=state.collection[id],unlocked=state.level>=s.unlockLevel,card=document.createElement('article');card.className='shop-item'+(!history?' undiscovered':'');card.dataset.entry=id;const h=document.createElement('h3');h.textContent=history||unlocked?s.name:'？？？';card.append(previewFish(id,!history),h);
- if(history){appendFishKnowledge(card,id);card.append(paragraph('遊戲食物：'+FEEDS[FOOD_FOR[id]].name),paragraph(s.desc),paragraph(`${s.depthName} · ${s.growthLabel}成長`,'shop-detail'),paragraph(`曾養 ${history.total} 隻 · 現有 ${allFish().filter(f=>f.species===id).length} 隻`,'collection-count'),paragraph(`最高養成：${['幼魚','亞成魚','成魚'][history.highestStage]}`,'collection-stage'),button(`配色收藏 ${history.variants.length} / ${1+Object.values(VARIANTS).filter(v=>v.species===id).length}`,()=>variantCollection(id),'place-button'));}else card.append(paragraph(unlocked?'已解鎖！買回魚缸後，就能認識牠。':`養魚等級 ${s.unlockLevel} 解鎖`));grid.append(card);}$('dialog-content').append(grid);}
+function encyclopedia(){openDialog('生物圖鑑','encyclopedia');const known=Object.keys(state.collection).length;const fishKnown=Object.keys(state.collection).filter(id=>!SPECIES[id].category).length;$('dialog-content').append(paragraph(`魚類 ${fishKnown} / 15 · 蝦蟹 ${known-fishKnown} / 4。原有魚類收藏紀錄全部保留。`,'shop-intro'),paragraph('這十五種魚以淡水觀賞魚介紹。新增蝦蟹另有各自的生活水域；拳擊蟹採河口毛螯型，不表示適合純淡水。孔雀魚和黑摩利也能適應一定鹽度，但不表示牠們適合與海水魚混養。同樣生活在淡水中，不代表不同魚種一定適合混養。現實中能否混養，還須考慮水溫、體型、活動習性及魚缸大小；本遊戲的共同展示不代表真實飼養建議。','freshwater-guide'));const grid=document.createElement('div');grid.className='shop-grid encyclopedia-grid';for(const [id,s]of Object.entries(SPECIES)){const history=state.collection[id],unlocked=state.level>=s.unlockLevel,card=document.createElement('article');card.className='shop-item'+(!history?' undiscovered':'');card.dataset.entry=id;const h=document.createElement('h3');h.textContent=history||unlocked?s.name:'？？？';card.append(previewFish(id,!history),h,paragraph(s.category==='shrimp'?'蝦類':s.category==='crab'?'蟹類':'魚類','shop-detail'));
+ if(history){appendFishKnowledge(card,id);const own=allFish().find(f=>f.species===id);if(own)card.append(button('科學觀察',()=>{const tank=state.tanks.find(t=>t.fishes.some(f=>f.id===own.id));dialog.close();if(tank.id!==state.activeTankId)switchTank(tank.id);openObservation(own.id);},'place-button'));else card.append(paragraph('曾經收藏過；再次飼養後可觀察動作。','dialog-note'));card.append(paragraph('遊戲食物：'+FEEDS[FOOD_FOR[id]].name),paragraph(s.desc),paragraph(`${s.depthName} · ${s.growthLabel}成長`,'shop-detail'),paragraph(`曾養 ${history.total} 隻 · 現有 ${allFish().filter(f=>f.species===id).length} 隻`,'collection-count'),paragraph(`最高養成：${(s.category?['幼體','成長中','成體']:['幼魚','亞成魚','成魚'])[history.highestStage]}`,'collection-stage'),button(`配色收藏 ${history.variants.length} / ${1+Object.values(VARIANTS).filter(v=>v.species===id).length}`,()=>variantCollection(id),'place-button'));}else card.append(paragraph(unlocked?'已解鎖！買回魚缸後，就能認識牠。':`養魚等級 ${s.unlockLevel} 解鎖`));grid.append(card);}$('dialog-content').append(grid);}
 function renameFish(){const f=state.fishes.find(f=>f.id===selected);if(!f)return;openDialog('替魚兒取個名字','rename');const input=document.createElement('input');input.id='fish-new-name';input.type='text';input.value=f.name;input.maxLength=24;input.autocomplete='off';input.setAttribute('aria-label','新的魚兒名字');input.className='name-input';const note=paragraph('最多 12 個字，可用中文、英文、數字及常用名字符號。','dialog-note'),error=paragraph('','name-error');error.id='name-error';error.setAttribute('role','status');
  function apply(){if(conflict)return;let value;try{value=validFishName(input.value);}catch(e){error.textContent=e.message;return;}if(!protectedTransaction(()=>{const fish=allFish().find(q=>q.id===f.id);if(!fish)return false;fish.name=value;}))return;dialog.close();selectFish(f.id);toast('新名字已保存。');}
  const actions=document.createElement('div');actions.className='confirm-actions';actions.append(button('取消',()=>{dialog.close();selectFish(f.id);}),button('保存名字',apply,'confirm'));input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();apply();}});$('dialog-content').append(input,note,error,actions);input.focus();input.select();}
-function rehomeFish(){const f=state.fishes.find(f=>f.id===selected);if(!f||allFish().length<=3||conflict)return;confirmAction('送養這隻魚兒？',`送養${f.name}後，牠會離開魚缸，圖鑑與最高養成紀錄仍會保留。送養不退金幣。`,()=>{state.fishes=state.fishes.filter(q=>q.id!==f.id);runtime.delete(f.id);markDirty(true);updateUI();dialog.close();toast('已送養，圖鑑紀錄仍保留。');},false);$('dialog-content').querySelector('.confirm').textContent='確認送養';}
+function rehomeFish(){const f=state.fishes.find(f=>f.id===selected);if(!f||allFish().length<=3||conflict)return;confirmAction('送養這隻魚兒？',`送養${f.name}後，牠會離開魚缸，圖鑑與最高養成紀錄仍會保留。送養不退金幣。`,()=>{if(!protectedTransaction(()=>{if(!state.fishes.some(q=>q.id===f.id)||allFish().length<=3)return false;state.fishes=state.fishes.filter(q=>q.id!==f.id);}))return;runtime.delete(f.id);updateUI();dialog.close();toast('已送養，圖鑑紀錄仍保留。');},false);$('dialog-content').querySelector('.confirm').textContent='確認送養';}
 function exportSave(){try{const blob=new Blob([JSON.stringify(snapshot(),null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`aquarium-v06-${Date.now()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){toast('目前無法匯出，請稍後再試。');}}
 function chooseImport(){chooseFile();}
 
@@ -309,8 +313,9 @@ function chooseImport(){chooseFile();}
 function recordAdult(f){
  if(f.growth>=100&&!f.adultRecorded){f.adultRecorded=true;state.collection[f.species].adults=Math.min(state.collection[f.species].total,(state.collection[f.species].adults||0)+1);dirty=true;}
 }
+function recordActivity(id){if(!started||state.activity?.[id]||conflict||saveBlocked)return;if(protectedTransaction(()=>{state.activity??={};state.activity[id]=true;evaluateGoals(false);}))updateUI();}
 function goalValue(a){
- const values={purchases:state.stats.purchases,adults:Object.values(state.collection).reduce((n,c)=>n+c.adults,0),species:Object.keys(state.collection).length,fish:state.stats.maxFish,decor:state.stats.maxDecor,plants:['smallplant','tallplant','moss'].filter(id=>state.tanks.some(t=>t.purchasedDecorations[id])).length,care:state.stats.careSeconds,companionship:Math.max(0,...allFish().map(f=>f.playSeconds)),tier:Math.max(...state.tanks.map(t=>t.tier))};return values[a.metric]||0;
+ const values={purchases:Math.max(0,state.stats.purchases-Object.entries(state.collection).filter(([id])=>SPECIES[id].category).reduce((n,[,c])=>n+c.total,0)),adults:Object.entries(state.collection).filter(([id])=>!SPECIES[id].category).reduce((n,[,c])=>n+c.adults,0),species:Object.keys(state.collection).filter(id=>!SPECIES[id].category).length,fish:state.stats.maxFish,decor:state.stats.maxDecor,plants:['smallplant','tallplant','moss'].filter(id=>state.tanks.some(t=>t.purchasedDecorations[id])).length,care:state.stats.careSeconds,companionship:Math.max(0,...allFish().map(f=>f.playSeconds)),tier:Math.max(...state.tanks.map(t=>t.tier))};const known=Object.keys(state.collection);Object.assign(values,{shrimp:known.filter(id=>SPECIES[id].category==='shrimp').length,crab:known.filter(id=>SPECIES[id].category==='crab').length,crustaceans:known.filter(id=>SPECIES[id].category).length,feedPurchases:Object.values(state.feedPurchases).reduce((a,b)=>a+b,0)});return values[a.metric]||Number(!!state.activity?.[a.metric])||0;
 }
 function unlockVariant(id,notify=true){if(state.unlockedVariants.includes(id))return;state.unlockedVariants.push(id);diagnostics.variantUnlocks++;dirty=true;if(notify)toast(`配色解鎖：${SPECIES[VARIANTS[id].species].name}・${VARIANTS[id].name}`,4500);}
 function evaluateGoals(notify=true){
@@ -327,7 +332,8 @@ function mergeRewardLedger(next=state,fromV3=false){
 function rewardLabel(a){return a.reward.coins?`${a.reward.coins} 金幣`:`${VARIANTS[a.reward.variant].name}配色`;}
 function achievements(){
  evaluateGoals(false);openDialog('我的成就','achievements');$('dialog-content').append(paragraph('從簡單到挑戰，完成成就就能領金幣或特殊配色！每項獎勵只能領一次。','shop-intro'));const list=document.createElement('div');list.className='achievement-list';
- for(const a of ACHIEVEMENTS){const status=state.achievements[a.id],card=document.createElement('article');card.className='achievement-card'+(status.completed?' completed':'');card.dataset.achievement=a.id;const body=document.createElement('div');const h=document.createElement('h3');h.textContent=(status.completed?'✧ ':'')+a.name;let progress=Math.min(a.goal,goalValue(a));const label=['care','companionship'].includes(a.metric)?`${Math.floor(progress/60)} / ${a.goal/60} 分鐘`:`${Math.floor(progress)} / ${a.goal}`;const difficulty=a.goal>=12&&a.metric==='species'||a.goal>=7&&a.metric==='decor'?'進階':a.goal>=3&&['species','purchases'].includes(a.metric)||a.metric==='adults'&&a.goal>=2?'中等':'入門';body.append(h,paragraph(a.desc),paragraph(`${difficulty}挑戰 · ${status.completed?'已完成':label} · ${rewardLabel(a)}`,'achievement-detail'));const b=button(status.rewardClaimed?'已領取':status.completed?'領取獎勵':'慢慢來',()=>claimAchievement(a.id),'place-button');b.disabled=!status.completed||status.rewardClaimed;b.dataset.claim=a.id;card.append(body,b);list.append(card);}$('dialog-content').append(list);
+ const priority=a=>state.achievements[a.id].rewardClaimed?2:state.achievements[a.id].completed?0:1;
+ for(const a of [...ACHIEVEMENTS].sort((a,b)=>priority(a)-priority(b))){const status=state.achievements[a.id],card=document.createElement('article');card.className='achievement-card'+(status.completed?' completed':'');card.dataset.achievement=a.id;card.dataset.status=status.rewardClaimed?'claimed':status.completed?'ready':'pending';const body=document.createElement('div');const h=document.createElement('h3');h.textContent=(status.completed?'✧ ':'')+a.name;let progress=Math.min(a.goal,goalValue(a));const label=['care','companionship'].includes(a.metric)?`${Math.floor(progress/60)} / ${a.goal/60} 分鐘`:`${Math.floor(progress)} / ${a.goal}`;const difficulty=a.goal>=12&&a.metric==='species'||a.goal>=7&&a.metric==='decor'?'進階':a.goal>=3&&['species','purchases'].includes(a.metric)||a.metric==='adults'&&a.goal>=2?'中等':'入門';body.append(h,paragraph(a.desc),paragraph(`${difficulty}挑戰 · ${status.completed?'已完成':label} · ${rewardLabel(a)}`,'achievement-detail'));const b=button(status.rewardClaimed?'已領取':status.completed?'領取獎勵':'慢慢來',()=>claimAchievement(a.id),'place-button');b.disabled=!status.completed||status.rewardClaimed;b.dataset.claim=a.id;card.append(body,b);list.append(card);}$('dialog-content').append(list);
 }
 function claimAchievement(id){
  if(conflict||saveBlocked)return;const a=ACHIEVEMENTS.find(a=>a.id===id),status=state.achievements[id];if(!a||!status.completed||status.rewardClaimed)return;
@@ -336,18 +342,18 @@ function claimAchievement(id){
   key=rewardKey();previousLedger=localStorage.getItem(key);previousState=structuredClone(state);
   localStorage.setItem(key,JSON.stringify([...ids,id]));status.rewardClaimed=true;
   if(a.reward.coins)state.coins=clamp(state.coins+a.reward.coins,0,CONFIG.MAX_COINS);if(a.reward.variant)unlockVariant(a.reward.variant);
-  if(!save())throw Error('無法保存成就');diagnostics.achievementRewards++;updateUI();achievements();toast(`已領取：${rewardLabel(a)}。`);
+  if(!save())throw Error('無法保存成就');diagnostics.achievementRewards++;updateUI();achievements();toast(`完成「${a.name}」！已領取 ${rewardLabel(a)}。`);
  }catch(e){if(previousState){state=window.AquariumSave.attach(previousState);try{if(previousLedger===null)localStorage.removeItem(key);else localStorage.setItem(key,previousLedger);}catch(rollback){saveBlocked=true;}}saveLabel();toast('目前無法保存獎勵，請稍後再領取。');}
 }
 function tankMenu(){
- openDialog('我的魚缸','tank');const tier=TANK_TIERS[state.tankTier-1],next=TANK_TIERS[state.tankTier];const hero=document.createElement('div');hero.className='tier-hero';const h=document.createElement('h3');h.textContent=`魚缸等級 ${tier.tier} · ${tier.name}`;hero.append(h,paragraph(`可養 ${state.tankCapacity} 隻魚 · 可放 ${tier.decorCapacity} 件布置`));$('dialog-content').append(hero);
+ openDialog('我的魚缸','tank');const tier=TANK_TIERS[state.tankTier-1],next=TANK_TIERS[state.tankTier];const hero=document.createElement('div');hero.className='tier-hero';const h=document.createElement('h3');h.textContent=`魚缸等級 ${tier.tier} · ${tier.name}`;hero.append(h,paragraph(`可養 ${state.tankCapacity} 隻生物 · 可放 ${tier.decorCapacity} 件布置`));$('dialog-content').append(hero);
  const actions=document.createElement('div');actions.className='tank-actions';actions.append(button('調整布置',startEditing,'confirm'),button('成就',achievements,'place-button'));$('dialog-content').append(actions);
- if(next){const card=document.createElement('div');card.className='tier-next';const title=document.createElement('h3');title.textContent=`下一級魚缸：${next.name}`;const b=button(state.level<next.level?`養魚等級 ${next.level} 可升級`:`${next.price} 金幣 · 升級`,upgradeTank,'buy');b.id='upgrade-tank';b.disabled=state.level<next.level;card.append(title,paragraph(`升級後可養 ${next.capacity} 隻魚（目前 ${state.tankCapacity} 隻），最多可放 ${next.decorCapacity} 件布置。`),paragraph(`需要養魚等級 ${next.level} · ${next.price} 金幣。未達條件也可以先查看。`,'shop-detail'),b);$('dialog-content').append(card);}else $('dialog-content').append(paragraph('魚缸已升到最高等級，每缸最多可以養 10 隻魚。','dialog-note'));
+ if(next){const card=document.createElement('div');card.className='tier-next';const title=document.createElement('h3');title.textContent=`下一級魚缸：${next.name}`;const b=button(state.level<next.level?`養魚等級 ${next.level} 可升級`:`${next.price} 金幣 · 升級`,upgradeTank,'buy');b.id='upgrade-tank';b.disabled=state.level<next.level;card.append(title,paragraph(`升級後可養 ${next.capacity} 隻生物（目前 ${state.tankCapacity} 隻），最多可放 ${next.decorCapacity} 件布置。`),paragraph(`需要養魚等級 ${next.level} · ${next.price} 金幣。目前 ${state.coins} 金幣${state.coins<next.price?`，還差 ${next.price-state.coins} 金幣`:'，金幣足夠'}。${state.level<next.level?'等級還沒到，先照顧生物、收取金幣吧！':'等級條件已達成。'}`,'shop-detail'),b);$('dialog-content').append(card);}else $('dialog-content').append(paragraph('魚缸已升到最高等級，每缸最多可以養 10 隻魚。','dialog-note'));
  renderTankOffers();
 }
 function upgradeTank(){
  if(conflict||saveBlocked)return;const next=TANK_TIERS[state.tankTier];if(!next||state.level<next.level)return;if(state.coins<next.price){toast('金幣還不夠！多收集一些，就能升級魚缸。');return;}
- state.coins-=next.price;state.tankTier=next.tier;evaluateGoals();buildBackground();markDirty(true);updateUI();tankMenu();sound('level');toast(`魚缸升級了！現在能照顧 ${state.tankCapacity} 隻魚。`,4500);
+ if(!protectedTransaction(()=>{state.coins-=next.price;state.tankTier=next.tier;evaluateGoals(false);if(!state.onboarding.hints.includes('upgrade'))state.onboarding.hints.push('upgrade');}))return;buildBackground();updateUI();tankMenu();sound('level');toast(`升級成功！現在最多可以養 ${state.tankCapacity} 隻魚兒和蝦蟹了！`,4500);
 }
 function appendVariantChoices(card,id,preview){
  const colors=Object.entries(VARIANTS).filter(([,v])=>v.species===id);if(!colors.length)return;const select=document.createElement('select');select.className='variant-select';select.setAttribute('aria-label',SPECIES[id].name+'配色');select.dataset.variantSpecies=id;select.append(Object.assign(document.createElement('option'),{value:'normal',textContent:'普通配色'}));for(const [key,v]of colors){const unlocked=state.unlockedVariants.includes(key);select.append(Object.assign(document.createElement('option'),{value:key,textContent:unlocked?v.name:`🔒 ${v.name} · ${v.condition}`,disabled:!unlocked}));}
@@ -408,6 +414,10 @@ function stepTank(dt){
   if(f.hunger<91){for(const p of food){if(FOOD_FOR[f.species]!==p.kind||claimed.has(p.id)||p.y<s.depth[0]-(s.bottomDweller?.13:.12)||p.y>s.depth[1]+.1)continue;
     const distance=Math.hypot((p.x-r.x)*W,(p.y-r.y)*H),score=distance*(s.foodPreference==='bottom'&&p.y>.86?.38:1);if(score<best&&distance<Math.hypot(W,H)){target=p;best=score;}}
   }
+  if(s.category){
+   if(target)claimed.add(target.id);
+   if(window.AquariumCrustaceans.tick(r,f,s,dt,{target,fishes:state.fishes,runtime,decorations:state.placedDecorations,layout:decorLayout,W,H})){food.splice(food.indexOf(target),1);const hungry=f.hunger<86;f.hunger=clamp(f.hunger+13);effects.push({x:r.x,y:r.y-.035,text:'+ 飽足度',life:1.5});diagnostics.eaten++;if(new URLSearchParams(location.search).get('debug')==='1'){diagnostics.meals??=[];diagnostics.meals.push({fishId:f.id,species:f.species,kind:target.kind});if(diagnostics.meals.length>100)diagnostics.meals.shift();}if(hungry)gainXP(2);sound('eat');markDirty();target=null;r.wander=0;}
+  }else{
   const atEnvironment=tickEnvironment(r,f,s,dt,poiCache,!!target);if(atEnvironment){r.environmentSeconds+=dt;diagnostics.environmentSeconds+=dt;}if(r.environmentVisitedNow){r.environmentVisits++;diagnostics.environmentVisits++;}
   r.wander-=dt;r.pause=Math.max(0,r.pause-dt);const wasBurst=r.burst>0;r.burst=Math.max(0,r.burst-dt);if(wasBurst&&r.burst===0&&s.bottomDweller&&!target)r.pause=rand(...s.pauseDuration);
   if(target){claimed.add(target.id);r.target={x:target.x,y:target.y};r.pause=0;r.behavior=s.bottomDweller?'搜尋底餌':'追食';const distance=Math.hypot((target.x-r.x)*W,(target.y-r.y)*H);
@@ -434,6 +444,7 @@ function stepTank(dt){
   const desiredSpeed=Math.min(Math.hypot(vx,vy),Math.max(speed*1.25,s.speed*.22));r.magnitude??=Math.hypot(r.vx,r.vy);r.magnitude+=(desiredSpeed-r.magnitude)*(1-Math.exp(-dt*s.acceleration));r.vx=Math.cos(r.motionAngle)*r.magnitude;r.vy=Math.sin(r.motionAngle)*r.magnitude;
   r.x=clamp(r.x+r.vx*dt,marginX,1-marginX);r.y=clamp(r.y+r.vy*dt,minY,maxY);if(Math.abs(r.vx)>.006)r.direction=r.vx>0?1:-1;
   r.turn+=(r.direction-r.turn)*(1-Math.exp(-dt*s.turnSpeed));r.heading+=(clamp(r.vy/(Math.abs(r.vx)+.02),-.4,.4)-r.heading)*(1-Math.exp(-dt*2));r.phase+=dt*(r.pause>0?3:s.bottomDweller?7:5+r.magnitude*35);r.position={x:r.x,y:r.y};r.coinValue=s.values[stage(f.growth)];r.hiddenAmount+=(Number(r.behaviorState==='hide')-r.hiddenAmount)*(1-Math.exp(-dt*2.5));
+  }
   // When there is no usable feed and insufficient coins to buy any suitable pack,
    // allow a tiny, slower income. Removing the emergency-feed claim must not deadlock a save.
    const necessary=[...new Set(allFish().map(f=>FOOD_FOR[f.species]))];
@@ -531,7 +542,7 @@ function draw(){if(!state||!bg||!bg.width||!bg.height)return;ctx.clearRect(0,0,W
   for(const f of state.fishes){const r=runtime.get(f.id);if(!r)continue;const x=r.x*W,y=r.y*H;
     ellipse(ctx,x,H*.943,f.size*.34,f.size*.045,`rgba(51,116,111,${SPECIES[f.species].bottomDweller?.14:.045})`);
     if(selected===f.id){ctx.strokeStyle='#fffce6bb';ctx.lineWidth=2;ctx.setLineDash([4,5]);ctx.beginPath();ctx.ellipse(x,y,f.size*.64,f.size*.44,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);}
-    ctx.save();ctx.globalAlpha=1-r.hiddenAmount*.65;drawFish(ctx,f.species,x,y+Math.sin(r.phase*.4)*1.7,f.size,r.turn,r.heading,r.phase,f.variant);ctx.restore();
+    ctx.save();ctx.globalAlpha=1-r.hiddenAmount*.65;drawFish(ctx,f.species,x,y+(SPECIES[f.species].category?0:Math.sin(r.phase*.4)*1.7),f.size,r.turn,r.heading,r.phase,f.variant);ctx.restore();
     if(newFishFocus?.id===f.id&&simTime<newFishFocus.until){ctx.save();ctx.strokeStyle='#e8b64f';ctx.lineWidth=3;ctx.setLineDash([5,4]);ctx.beginPath();ctx.ellipse(x,y,f.size*.66,Math.max(27,f.size*.38),0,0,Math.PI*2);ctx.stroke();ctx.restore();}
   }
   if(foreground)ctx.drawImage(foreground,0,0,W,H);
@@ -541,6 +552,7 @@ function draw(){if(!state||!bg||!bg.width||!bg.height)return;ctx.clearRect(0,0,W
 }
 let specimenPose=null;
 const observation=window.AquariumObservation.create({
+ onObserve:species=>{recordActivity('firstObserve');if(SPECIES[species]?.category)recordActivity('observeCrustacean');},
  getFish:()=>state.fishes.map(f=>({...f,speciesName:SPECIES[f.species].name,personalityName:PERSONALITIES[f.personality].name,variantName:f.variant==='normal'?'普通配色':VARIANTS[f.variant].name})),
  drawSpecimen:(target,id,{tracking,zoom,playing,time,breathing,highlightPart})=>{
   const c=target.getContext('2d'),f=state.fishes.find(f=>f.id===id);c.clearRect(0,0,target.width,target.height);if(!f)return;
@@ -573,6 +585,7 @@ canvas.addEventListener('click',e=>{
  closeCard();
 });
 canvas.addEventListener('keydown',e=>{if(feeding&&(e.key==='Enter'||e.key===' ')){e.preventDefault();feed(.5);}if(e.key==='Escape'){setFeeding(false);closeCard();}});
+$('collect-all').onclick=()=>{for(const coin of [...state.drops])collect(coin);};
 $('feed').onclick=()=>setFeeding(!feeding);$('stop-feed').onclick=()=>setFeeding(false);$('close-card').onclick=closeCard;$('shop').onclick=shop;$('more-menu').onclick=moreMenu;$('fish-more').onclick=fishMore;$('rename').onclick=renameFish;
 $('dialog-close').onclick=()=>dialog.close();$('edit-done').onclick=finishEditing;$('edit-left').onclick=()=>nudgeDecoration(-1);$('edit-right').onclick=()=>nudgeDecoration(1);$('edit-store').onclick=storeSelectedDecoration;dialog.addEventListener('close',()=>queueMicrotask(()=>tutorial.render()));dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
 // Visibility catches mobile backgrounding; pagehide is an extra best-effort flush.
@@ -690,7 +703,7 @@ function checkFeatureHints(){
  const o=state.onboarding,next=TANK_TIERS[state.tankTier];
  if(!o.hints.includes('backup'))showFeatureHint('backup','遊戲會自動存檔。下次使用同一台裝置、同一個瀏覽器，按「繼續上次的遊戲」就能接著玩。');
  else if(state.level>=4&&state.tanks.length===1&&!o.hints.includes('tank2'))showFeatureHint('tank2','現在可以開啟新的魚缸了！每缸最多十隻、可獨立命名，金幣與飼料共用。',true);
- else if(next&&!o.hints.includes('upgrade')&&(state.fishes.length>=state.tankCapacity||(state.level>=next.level&&state.coins>=next.price)))showFeatureHint('upgrade',`想養更多魚嗎？點魚兒數量旁的「升級魚缸」，看看從 ${state.tankCapacity} 隻增加到 ${next.capacity} 隻需要什麼條件。`,true);
+ else if(state.tanks.every(t=>t.tier===1)&&next&&!o.hints.includes('upgrade')&&(state.fishes.length>=state.tankCapacity||(state.level>=next.level&&state.coins>=next.price)))showFeatureHint('upgrade',`想養更多魚嗎？點魚兒數量旁的「升級魚缸」，看看從 ${state.tankCapacity} 隻增加到 ${next.capacity} 隻需要什麼條件。`,true);
 }
 function reviewPurchase(kind,done){const b=button(kind==='fish'?'看看購魚流程（不消費）':kind==='decor'?'使用現有布置練習（不消費）':'看看購買與庫存（不消費）',()=>{done();dialog.close();tutorial.render();},'place-button');b.id='tutorial-review-purchase';$('dialog-content').append(b);return b;}
 function checkLevelGifts(){if(state.level>=2&&!state.gifts.includes('level2')){if(grantGift('level2'))toast('養魚等級 2：送你小型魚飼料 ×3 份，鼠魚、斑馬魚、白雲山魚、紅蓮燈和三角燈都適用。');}if(state.level>=4&&!state.gifts.includes('level4')){if(grantGift('level4'))toast('你解鎖了高蛋白飼料！神仙魚、鬥魚、蜜糖麗麗魚、酷利泥鰍和玻利維亞鳳凰都適用，記得在商店補充喔！');}}

@@ -2,7 +2,7 @@
 (() => {
 'use strict';
 const old=window.AquariumData;
-const FEEDS=Object.freeze({general:Object.freeze({name:'綜合飼料',price:8,pack:10,level:1,color:'#b88143',species:['guppy','goldfish','molly','swordtail','platy']}),small:Object.freeze({name:'小型魚飼料',price:10,pack:10,level:1,color:'#60a99c',species:['cory','zebra','whitecloud','cardinal','harlequin']}),protein:Object.freeze({name:'高蛋白飼料',price:14,pack:10,level:4,color:'#ba7898',species:['angel','betta','honey','kuhli','bolivian']})});
+const FEEDS=Object.freeze({general:Object.freeze({name:'綜合飼料',price:8,pack:10,level:1,color:'#b88143',species:['guppy','goldfish','molly','swordtail','platy']}),small:Object.freeze({name:'小型魚飼料',price:10,pack:10,level:1,color:'#60a99c',species:['cory','zebra','whitecloud','cardinal','harlequin','blackshrimp','blueshrimp','microcrab','pompomcrab']}),protein:Object.freeze({name:'高蛋白飼料',price:14,pack:10,level:4,color:'#ba7898',species:['angel','betta','honey','kuhli','bolivian']})});
 const FOOD_FOR=Object.freeze(Object.fromEntries(Object.entries(FEEDS).flatMap(([id,d])=>d.species.map(s=>[s,id]))));
 const TANK_TIERS=Object.freeze([{tier:1,name:'小小水族箱',capacity:5,decorCapacity:12,price:0,level:1},{tier:2,name:'成長水族箱',capacity:7,decorCapacity:15,price:80,level:2},{tier:3,name:'悠悠水族箱',capacity:9,decorCapacity:18,price:220,level:3},{tier:4,name:'豐富水族箱',capacity:10,decorCapacity:20,price:480,level:4}]);
 const TANK_OFFERS=Object.freeze([{number:2,level:4,price:600},{number:3,level:5,price:1400}]);

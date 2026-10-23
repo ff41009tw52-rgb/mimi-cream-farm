@@ -35,7 +35,7 @@ jobs:
       - name: Verify economy, teaching, food rules, migration, three tanks and five sizes
         run: |
           failed=0
-          for suite in expansion decor decor-mobile browser extra tutorial; do
+          for suite in expansion decor decor-mobile browser extra tutorial crustaceans journey; do
             node tests/aquarium-v06/$suite.test.cjs || failed=1
           done
           exit "$failed"

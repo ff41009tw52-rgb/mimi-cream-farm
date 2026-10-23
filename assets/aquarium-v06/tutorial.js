@@ -11,7 +11,7 @@ const steps=[
  {task:2,target:'feed',event:'feedOpened',copy:'再按「餵食」，準備替鼠魚選擇食物。'},
  {task:2,target:'feed-small',event:'selected:small',copy:'選擇「小型魚飼料」。看看還剩幾份，以及哪些魚會吃。'},
  {task:2,target:'tank',event:'fed:small',copy:'點一下魚缸上方的水面，放入小型魚飼料。不用點中鼠魚。',success:'很好！現在你知道怎麼替不同的魚兒選擇飼料了。'},
- {task:3,target:'more-menu',event:'fishOpened',copy:'按「更多」→「我的魚兒」，選一條魚，看看牠的飽足度、成長進度和適合的飼料。'},
+ {task:3,target:'more-menu',event:'fishOpened',copy:'按「更多」→「我的生物」，選一條魚，看看牠的飽足度、成長進度和適合的飼料。'},
  {task:4,target:'tutorial-coin-target',event:'coinCollected',copy:'魚兒吃飽後，會慢慢帶來金幣。點一下魚缸裡的金幣，就能收起來。',success:'做得好！收集金幣後，就能購買飼料、新魚和裝飾。'},
  {task:5,target:'shop',event:'shopOpened',copy:'飼料快用完了，就到商店補充吧！先按「商店」。'},
  {task:5,target:'tab-feed',shopTab:'feed',event:'feedShopOpened',copy:'選擇「飼料」分頁，看看每包價格和現有庫存。'},
@@ -24,7 +24,7 @@ const steps=[
  {task:7,target:'tutorial-decor-buy',shopTab:'decor',event:'decorBought',copy:'選一件喜歡的裝飾，按「購買並放置」，就能放進魚缸。先從小水草試試看吧！',success:'裝飾放好了！現在試著調整它的位置。'},
  {task:7,target:'tutorial-edit',event:'decorEditing',copy:'按「調整布置」，再選取一件裝飾。'},
  {task:7,target:'decor-handles',event:'decorMoved',copy:'選一件裝飾，把它拖到別的位置。也可以按左右箭頭移動。',success:'完成了！以後你可以自由布置自己的水族箱。'},
- {task:8,target:'more-menu' ,event:'observationOpened',copy:'按「更多」→「觀察魚兒」，認識魚的身體構造與呼吸。',success:'恭喜你完成新手教學！記得餵食、觀察魚兒、收集金幣，讓你的水族箱慢慢成長。'}
+ {task:8,target:'more-menu' ,event:'observationOpened',copy:'按「更多」→「觀察生物」，認識魚的身體構造與呼吸。',success:'恭喜你完成新手教學！記得餵食、觀察魚兒、收集金幣，讓你的水族箱慢慢成長。'}
 ];
 function create({getState,commit,notify,grant,ensureFeeding,prepareCoin,prepareFish,prepareFood,prepareDecor,prepareEditing,reviewPurchase}){
  const $=id=>document.getElementById(id);let active=false,lastLocated='';
@@ -57,10 +57,10 @@ function create({getState,commit,notify,grant,ensureFeeding,prepareCoin,prepareF
    if(shopOpen){const p=document.createElement('p');p.id='tutorial-dialog-copy';p.className='tutorial-shop-copy';p.textContent=s.task+' / 8 '+tasks[s.task-1]+' '+copy;$('dialog-content').prepend(p);}
   }
   if(o.step===18||o.step===19){const status=prepareEditing();target=status.target;if(status.copy)copy=status.copy;}
-  if(s.task===3&&$('dialog').open){if($('roster')){target=$('roster');copy='按「我的魚兒」，就能找到正在照顧的魚。';}else if(document.querySelector('.roster-item')){target=document.querySelector('.roster-item');copy='點一條魚的名字，看看飽足度、成長進度與適合的飼料。';}}
+  if(s.task===3&&$('dialog').open){if($('roster')){target=$('roster');copy='按「我的生物」，就能找到正在照顧的魚。';}else if(document.querySelector('.roster-item')){target=document.querySelector('.roster-item');copy='點一條魚的名字，看看飽足度、成長進度與適合的飼料。';}}
   if(o.step===14&&$('purchase-fish-name')){target=$('purchase-fish-name');copy='幫新魚取個名字，再按「確認購買」。取消不會扣金幣。';}
   if($('purchase-see-fish')){target=$('purchase-see-fish');copy='新魚已加入！按「去看看牠」認識新朋友，再接續教學。';}
-   if(s.task===8&&$('dialog').open&&$('more-observe')){target=$('more-observe');copy='按「觀察魚兒」，看看魚的外形與呼吸方式。';}
+   if(s.task===8&&$('dialog').open&&$('more-observe')){target=$('more-observe');copy='按「觀察生物」，看看魚的外形與呼吸方式。';}
   if(o.review&&s.task<=2)copy+='（重新練習不會扣飼料，也不會重複送禮物。）';
   if($('dialog').open&&target&&!$('dialog').contains(target)){target=$('dialog-close');copy='先按視窗右上角 ×，回到魚缸，再繼續教學標示的操作。';}
   $('onboarding-copy').textContent=copy;target?.classList.add('onboarding-highlight');$('surface-cue').hidden=![2,6].includes(o.step);
