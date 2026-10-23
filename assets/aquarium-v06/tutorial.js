@@ -31,13 +31,19 @@ function create({getState,commit,notify,grant,ensureFeeding,prepareCoin,prepareF
  const welcome=document.createElement('dialog');welcome.id='tutorial-welcome';document.body.append(welcome);
  const coinTarget=document.createElement('button');coinTarget.id='tutorial-coin-target';coinTarget.hidden=true;coinTarget.type='button';coinTarget.textContent='點這枚金幣';document.querySelector('.tank-viewport').append(coinTarget);
  const success=document.createElement('p');success.id='onboarding-success';success.hidden=true;$('onboarding-copy').after(success);
+ // Optional, actionable tank-upgrade lesson; leaves the eight persisted tutorial tasks unchanged.
+ const upgradeTip=document.createElement('div');upgradeTip.id='onboarding-upgrade-help';upgradeTip.className='onboarding-upgrade-help';upgradeTip.hidden=true;
+ const upgradeCopy=document.createElement('span');upgradeCopy.textContent='想養更多魚？魚缸升級後可以增加空位。';
+ const upgradeButton=document.createElement('button');upgradeButton.id='tutorial-upgrade-help';upgradeButton.type='button';upgradeButton.textContent='看看怎麼升級魚缸';
+ upgradeButton.onclick=()=>$('tank-upgrade-quick')?.click();
+ upgradeTip.append(upgradeCopy,upgradeButton);$('onboarding').append(upgradeTip);
  function expects(event){const o=getState().onboarding;return active&&!o.completed&&o.welcomed&&steps[o.step]?.event===event;}
  function record(event){const o=getState().onboarding;if(!expects(event))return false;const key=keys[o.step];if(!o.events.includes(key))o.events.push(key);const n=keys.findIndex(k=>!o.events.includes(k));o.step=n<0?keys.length:n;o.completed=o.step===keys.length;if(o.completed){o.everCompleted=true;if(!o.review&&!getState().gifts.includes('tutorialComplete'))getState().gifts.push('tutorialComplete');}return true;}
  function finish(previous,advanced,options={}){if(!advanced)return false;render();const text=options.viewOnly?'已看過購買流程，現在繼續下一項任務。':steps[previous]?.success||'';success.textContent=text;success.hidden=!text||getState().onboarding.completed;if(text&&getState().onboarding.completed)notify(text);return true;}
  function render(){
   $('tutorial-dialog-copy')?.remove();$('tutorial-review-purchase')?.remove();$('tutorial-room-help')?.remove();coinTarget.hidden=true;
   const o=getState().onboarding,running=active&&!o.completed&&o.welcomed;$('onboarding').hidden=!running;
-  document.querySelectorAll('.onboarding-highlight').forEach(e=>e.classList.remove('onboarding-highlight'));$('surface-cue').hidden=true;if(!running)return;
+  document.querySelectorAll('.onboarding-highlight').forEach(e=>e.classList.remove('onboarding-highlight'));$('surface-cue').hidden=true;upgradeTip.hidden=!running||o.step!==15||o.review;if(!running)return;
   const s=steps[o.step];$('onboarding-step').textContent=s.task+' / 8';$('onboarding-step').setAttribute('aria-label','第 '+s.task+' / 8 項任務');$('onboarding-title').textContent=tasks[s.task-1];
   let target=$(s.target),copy=s.copy;
   $('onboarding-gift').hidden=o.step!==3;$('onboarding-gift').parentElement.hidden=o.step!==3;$('onboarding-gift').textContent=o.review?'練習替鼠魚選飼料':'收下小型魚飼料 ×5 份';
