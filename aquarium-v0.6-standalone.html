@@ -280,21 +280,24 @@ body{background:radial-gradient(ellipse at 8% 20%,#dfece2aa,transparent 46%),rad
 .purchase-form .confirm-actions button{min-height:48px;min-width:100px}
 @supports(height:100dvh){#dialog{max-height:calc(100dvh - 24px)}}
 
-/* Put the tank-upgrade entry directly beside the capacity counter without a new row. */
+/* Keep capacity readable and give the upgrade control its own breathing room. */
 #game .residents>div{min-width:0}
-#game #tank-upgrade-shortcut{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;margin:4px 0 0;padding:5px 10px;min-height:30px;border:1px solid #83b7a4;border-radius:999px;background:#e0f2e7;color:#186658;font-size:13px;font-weight:800;letter-spacing:.2px;box-shadow:0 2px 5px #2a645820;cursor:pointer}
-#game #tank-upgrade-shortcut[data-ready="true"]{background:#247f70;color:#fff;border-color:#247f70}
-#game #tank-upgrade-shortcut[data-full="true"]{box-shadow:0 0 0 3px #eadca0a8,0 2px 5px #2a645820}
-#game #tank-upgrade-shortcut:disabled{background:#ecf0e9;border-color:#d2ded1;color:#6b8074;cursor:default;box-shadow:none}
-#game #tank-upgrade-shortcut:focus-visible{outline:3px solid #ddaf43;outline-offset:2px}
-@media(min-width:1060px) and (min-height:680px){#game #tank-upgrade-shortcut{min-height:24px;padding:2px 9px;margin:2px 0 0;font-size:12px}}
-@media(max-width:680px){#game #tank-upgrade-shortcut{font-size:12px;padding:5px 8px;min-height:32px}}
+#game .residents-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px}
+#game #capacity{flex:0 0 auto;line-height:1.3;font-variant-numeric:tabular-nums}
+#game .residents-icon{display:grid;place-items:center;flex:0 0 40px;width:40px;height:40px;border:1px solid #d4e5d8;border-radius:13px;background:linear-gradient(145deg,#f6fbef,#dceee2);box-shadow:inset 0 1px 0 #fff}
+#game .residents-icon svg{width:34px;height:34px;stroke:#4c917e;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#game #tank-upgrade-shortcut{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;white-space:nowrap;margin:0;padding:6px 13px;min-height:34px;border:1px solid #a2c6b5;border-radius:12px;background:linear-gradient(135deg,#f4fae9,#dfefe2);color:#246c59;font-size:13px;font-weight:700;letter-spacing:.4px;box-shadow:inset 0 1px 0 #fff,0 2px 4px #2a645810;cursor:pointer;transition:background .15s,box-shadow .15s}
+#game #tank-upgrade-shortcut:hover:not(:disabled){background:#d9eddd;border-color:#679f87;box-shadow:inset 0 1px 0 #fff,0 3px 8px #2a64581c}
+#game #tank-upgrade-shortcut[data-ready="true"]{background:linear-gradient(135deg,#358b74,#247361);color:#fffdf0;border-color:#287b66;box-shadow:inset 0 1px 0 #73ae91,0 2px 5px #2a645825}
+#game #tank-upgrade-shortcut[data-full="true"]{outline:2px solid #deca89;outline-offset:2px}
+#game #tank-upgrade-shortcut:disabled{background:#ecf0e9;border-color:#d2ded1;color:#6b8074;cursor:default;box-shadow:none;opacity:1}
+#game #tank-upgrade-shortcut:focus-visible{outline:3px solid #ddaf43;outline-offset:3px}
+@media(max-width:680px){#game .residents{gap:9px}#game .residents-icon{flex-basis:34px;width:34px;height:36px;border-radius:11px}#game .residents-icon svg{width:29px;height:29px}#game .residents-actions{gap:8px 12px}#game #tank-upgrade-shortcut{font-size:12px;padding:6px 10px;min-height:36px}}
 
 #more-menu{position:relative}#achievement-badge{display:block;font-size:11px;line-height:1.2;color:#785616;background:#fff1b8;border-radius:8px;padding:2px 5px;white-space:nowrap}#achievement-badge[hidden]{display:none}.achievement-card[data-status="ready"]{border:2px solid #d5ae54;background:#fffae6}.achievement-card[data-status="claimed"]{opacity:.72}.encyclopedia-grid .fish-preview{height:170px}.shop-item .shop-detail{overflow-wrap:anywhere}.decor-filters{flex-wrap:wrap}
 
-#collect-all{border:1px solid #bdcebb;background:#fff5cc;color:#63551e;border-radius:14px;padding:5px 10px;font-size:12px;white-space:nowrap;cursor:pointer}#collect-all:disabled{opacity:.55;cursor:default}.tank-caption{display:flex;align-items:center;justify-content:space-between;gap:8px}#achievement-badge{position:absolute;top:2px;right:5px;font-size:10px;max-width:90%}#feed-choices span{font-size:12px;line-height:1.35}
-
-#game .tank-caption{z-index:5;pointer-events:none}#game #collect-all{pointer-events:auto;position:relative;z-index:6;flex-shrink:0}#game .tank-caption>span:first-child{max-width:calc(100% - 115px)}
+#achievement-badge{position:absolute;top:2px;right:5px;font-size:10px;max-width:90%}#feed-choices span{font-size:12px;line-height:1.35}
+#game .tank-caption{z-index:5;pointer-events:none}
 
 </style>
 
@@ -328,14 +331,14 @@ body{background:radial-gradient(ellipse at 8% 20%,#dfece2aa,transparent 46%),rad
 <header class="header"><div class="brand"><span class="brand-icon" aria-hidden="true">≈</span><div><h1>悠悠水族箱</h1><p>我的小小水世界</p></div><span class="version">一起養魚</span></div><span class="header-note">每天來看看魚兒吧</span></header>
 <section class="hud" aria-label="水族箱狀態">
 <div class="stat coins-stat"><span class="coin-icon" aria-hidden="true">＄</span><div><span class="stat-label">我的金幣</span><strong id="coins">20</strong></div></div>
-<div class="stat residents"><span class="residents-icon" aria-hidden="true">◌</span><div><span class="stat-label">小居民數量</span><strong id="capacity">3 <small>/ 5</small></strong><button id="tank-upgrade-shortcut" class="tank-upgrade-shortcut" type="button" aria-label="查看魚缸升級條件">升級魚缸 ↗</button></div></div>
+<div class="stat residents"><span class="residents-icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none"><rect x="5" y="7" width="30" height="28" rx="9"/><path d="M6 17c5-4 9 4 14 0s9 4 14 0"/><path d="M16 24c3-4 7-4 10 0-3 4-7 4-10 0Zm0 0-4-3v6l4-3Z"/><circle cx="24" cy="12" r="1"/></svg></span><div><span class="stat-label">小居民數量</span><div class="residents-actions"><strong id="capacity">3 <small>/ 5</small></strong><button id="tank-upgrade-shortcut" class="tank-upgrade-shortcut" type="button" aria-label="查看魚缸升級條件">升級魚缸 ↗</button></div></div></div>
 <div class="level-stat"><span id="level">養魚等級 1</span><div class="xp-track"><i id="xp-bar"></i></div><small id="next-unlock">下一級解鎖：斑馬魚</small></div>
 <div class="save-status" id="save-status" role="status">正在準備水族箱…</div>
 </section>
 <nav id="tank-selector" aria-label="選擇魚缸"></nav>
 <aside id="onboarding" class="onboarding" hidden aria-label="新手教學"><span id="onboarding-step" class="guide-step"></span><div><h2 id="onboarding-title"></h2><p id="onboarding-copy"></p></div><div class="guide-actions" hidden><button id="onboarding-gift" hidden>收下小型魚飼料 ×5 份</button></div></aside>
 <section class="aquarium" aria-label="我的水族箱">
-<div class="tank-caption"><span><i></i> <b id="tank-name">小小水族箱</b></span><button id="collect-all" type="button">全部收取</button></div>
+<div class="tank-caption"><span><i></i> <b id="tank-name">小小水族箱</b></span></div>
 <div class="tank-viewport"><canvas id="tank" tabindex="0" aria-label="水族箱。點魚查看狀態，點金幣收集；先按餵食，再點水面投放飼料。鍵盤可從更多功能的我的魚兒查看，餵食模式按 Enter 投食。"></canvas>
 <div id="surface-cue" hidden aria-hidden="true">↓ 點這裡的水面，投放飼料</div></div>
 <div class="feeding-hint" id="feeding-hint" hidden><strong>選好飼料，再點一下魚缸上方的水面</strong><div id="feed-choices"><button id="feed-general" data-feed="general" aria-pressed="false"><b>綜合飼料</b><small>剩餘 0 份</small><span>孔雀魚、金魚、黑摩利、紅劍魚、月光魚</span></button><button id="feed-small" data-feed="small" aria-pressed="false"><b>小型魚飼料</b><small>剩餘 0 份</small><span>鼠魚、斑馬魚、白雲山魚、紅蓮燈、三角燈</span></button><button id="feed-protein" data-feed="protein" aria-pressed="false"><b>高蛋白飼料</b><small>剩餘 0 份</small><span>神仙魚、鬥魚、蜜糖麗麗魚、酷利泥鰍、玻利維亞鳳凰</span></button></div><p class="food-rule">遊戲把飼料分成三種，真實生物可以吃的食物更多樣。</p><p id="feed-current" aria-live="polite">先選一種飼料</p><div class="feeding-actions"><button id="feed-shop">前往飼料商店</button><button id="stop-feed">結束餵食</button></div></div>
@@ -1814,7 +1817,7 @@ function updateUI(){if(!state)return;checkFeatureHints();renderTankSelector();re
  upgradeLink.title=nextTier?`下一級：${nextTier.capacity} 隻 · 養魚等級 ${nextTier.level} · ${nextTier.price} 金幣`:'目前已達到每缸最多 10 隻生物的上限';
  $('level').textContent=`養魚等級 ${state.level}`;const floor=CONFIG.LEVEL_XP[state.level-1],ceiling=CONFIG.LEVEL_XP[state.level];$('xp-bar').style.width=`${ceiling?(state.xp-floor)/(ceiling-floor)*100:100}%`;
  const next=Object.values(SPECIES).filter(s=>s.unlockLevel===state.level+1).map(s=>s.name);$('next-unlock').textContent=next.length?`下一級解鎖：${next.join('、')}`:`已解鎖全部魚種`;
- $('feed').disabled=editing;$('collect-all').disabled=!state.drops.length;$('collect-all').textContent=state.drops.length?`全部收取 · ${state.drops.length} 枚`:'全部收取';
+ $('feed').disabled=editing;
  const claimable=ACHIEVEMENTS.filter(a=>state.achievements[a.id]?.completed&&!state.achievements[a.id].rewardClaimed).length;const more=$('more-menu');more.dataset.rewards=String(claimable);more.setAttribute('aria-label',claimable?`更多，有 ${claimable} 項成就可領獎`:'更多');let badge=$('achievement-badge');if(!badge){badge=document.createElement('small');badge.id='achievement-badge';more.append(badge);}badge.hidden=!claimable;badge.textContent=claimable?`${claimable} 項可領獎`:'';
  if(selected){const f=state.fishes.find(f=>f.id===selected);if(f){$('fish-name').textContent=f.name;$('fish-species').textContent=SPECIES[f.species].name;$('fish-stage').textContent=residentStage(f);$('fish-growth-tip').textContent=SPECIES[f.species].category?'吃飽後會慢慢長大，從幼體長成成體。':'魚兒吃飽後會慢慢長大，從幼魚變成成魚。';$('observe-fish').textContent=SPECIES[f.species].category?'觀察這隻生物':'觀察這隻魚';$('fish-hunger').textContent=`${Math.round(f.hunger)}%`;$('fish-growth').textContent=`${Math.floor(f.growth)}%`;$('hunger-meter').value=f.hunger;$('growth-meter').value=f.growth;$('fish-mood').textContent=`目前狀態：${f.hunger<25?'肚子餓':runtime.get(f.id)?.behavior||mood(f)}`;$('fish-personality').textContent=`個性：${PERSONALITIES[f.personality].name}`;$('fish-food').textContent='食物：'+FEEDS[FOOD_FOR[f.species]].name;}}
 }
@@ -2320,7 +2323,6 @@ canvas.addEventListener('click',e=>{
  closeCard();
 });
 canvas.addEventListener('keydown',e=>{if(feeding&&(e.key==='Enter'||e.key===' ')){e.preventDefault();feed(.5);}if(e.key==='Escape'){setFeeding(false);closeCard();}});
-$('collect-all').onclick=()=>{for(const coin of [...state.drops])collect(coin);};
 $('feed').onclick=()=>setFeeding(!feeding);$('stop-feed').onclick=()=>setFeeding(false);$('close-card').onclick=closeCard;$('shop').onclick=shop;$('more-menu').onclick=moreMenu;$('fish-more').onclick=fishMore;$('rename').onclick=renameFish;
 $('dialog-close').onclick=()=>dialog.close();$('edit-done').onclick=finishEditing;$('edit-left').onclick=()=>nudgeDecoration(-1);$('edit-right').onclick=()=>nudgeDecoration(1);$('edit-store').onclick=storeSelectedDecoration;dialog.addEventListener('close',()=>queueMicrotask(()=>tutorial.render()));dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
 // Visibility catches mobile backgrounding; pagehide is an extra best-effort flush.

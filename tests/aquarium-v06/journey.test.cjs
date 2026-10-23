@@ -43,7 +43,14 @@ const assert=require('node:assert/strict'),{harness}=require('./harness.cjs');
  await click('#purchase-confirm');await mark('firstCrustacean');await close();await claim();
  for(let minute=1;minute<=25;minute++){
   await h.advance(p,60000);
-  if(await p.locator('#collect-all').isEnabled())await click('#collect-all');
+  // Collect visible coins one by one, as a player does; there is no bulk control.
+  for(let n=0;n<100;n++){
+   const current=await read(),tank=current.tanks.find(t=>t.id===current.activeTankId),coin=tank.drops.at(-1);
+   if(!coin)break;
+   const r=await p.locator('#tank').boundingBox();
+   await p.locator('#tank').click({position:{x:coin.x*r.width,y:coin.y*r.height}});
+   await h.advance(p,1500);
+  }
   const s=await read();assert(s.coins>=0);
   if(!milestones.firstUpgrade&&s.level>=2&&s.coins>=80){
    await click('#tank-upgrade-shortcut');await click('#upgrade-tank');await close();await mark('firstUpgrade');
