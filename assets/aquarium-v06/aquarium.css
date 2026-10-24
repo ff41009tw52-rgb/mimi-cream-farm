@@ -205,3 +205,13 @@
  .shop-grid > .shop-item > .crustacean-preview{height:156px;grid-area:auto}
  .encyclopedia-grid > .shop-item > .crustacean-preview{height:190px}
 }
+/* Compact creation tools stay inside edit mode. */
+.edit-toolbar{max-height:52vh;overflow:auto;touch-action:pan-y;display:flex;flex-wrap:wrap;gap:6px;padding:10px;max-width:calc(100% - 20px)}
+.edit-toolbar>div{display:flex;flex-wrap:wrap;gap:4px}.edit-toolbar select{max-width:100%;min-height:38px;border:1px solid #c3d5c5;border-radius:9px;background:#fffdf4;color:#315e57;padding:5px;font:inherit}
+#edit-object{width:100%}.design-options{width:100%;font-size:13px}.design-options summary{cursor:pointer;padding:6px;font-weight:700}.design-options label{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:6px 0}.design-options input[type=range]{min-width:90px;width:45%;accent-color:#327e70}.design-options button{margin:3px;min-height:40px;font-size:13px;padding:5px 9px;border-radius:8px}.design-options output{min-width:42px}
+.decor-handle{touch-action:none!important;user-select:none;-webkit-user-select:none}.decor-handles{touch-action:none}.header .brand{gap:10px}.header .brand h1{margin:0}.home-intro>h1{margin-top:0}
+@media(max-width:680px){.edit-toolbar{left:10px;right:10px;top:40px;max-height:45vh;width:auto}.edit-toolbar #edit-label{font-size:12px}.design-options label{font-size:12px}}
+.illustrated-preview{min-height:0;flex:none;object-fit:contain;background:radial-gradient(ellipse,#f7fbef,#e2f1ec)}
+#obs-specimen[data-species-art]{min-height:0}
+.edit-toolbar{width:340px;left:auto;right:12px;max-height:48vh;transform:none}
+@media(max-width:680px){.shop-grid > .shop-item:has(> .illustrated-preview){grid-column:1/-1}.shop-grid > .shop-item > .illustrated-preview{height:156px;grid-area:auto}.edit-toolbar{width:auto;left:10px;right:10px;max-height:43vh}}
