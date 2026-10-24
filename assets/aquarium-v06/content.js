@@ -73,5 +73,6 @@ const additions=[
  ['observeCrustacean','發現不同構造','第一次觀察蝦或蟹。','observeCrustacean',15],
  ['fourCrustaceans','蝦蟹收藏家','收藏本次四種蝦蟹。','crustaceans',50]
 ].map(([id,name,desc,metric,coins])=>Object.freeze({id,name,desc,metric,goal:id==='fourCrustaceans'?4:1,reward:{coins}}));
-window.AquariumData=Object.freeze({...D,NEW_ACHIEVEMENT_IDS:Object.freeze(additions.map(a=>a.id)),SPECIES:Object.freeze({...D.SPECIES,...Object.fromEntries(Object.entries(rows).map(([id,r])=>[id,Object.freeze({...base,...r})]))}),ACHIEVEMENTS:Object.freeze([...D.ACHIEVEMENTS,...additions])});
+const ENHANCED_ACHIEVEMENT_COINS=Object.freeze({"firstPurchase":40,"firstAdult":40,"fiveSpecies":50,"allSpecies":40,"eightFish":50,"fiveDecor":45,"plantGarden":55,"clearWater":35,"companionship":55,"expandedTank":60,"fourSpecies":40,"threePurchases":50,"twoAdults":60,"sevenDecor":70,"twelveSpecies":110,"fifteenSpecies":160,"firstFeed":25,"firstCard":25,"firstCoin":25,"firstFeedBuy":35,"firstDecor":35,"firstObserve":30,"firstShrimp":45,"firstCrab":55,"observeCrustacean":40,"fourCrustaceans":140});
+window.AquariumData=Object.freeze({...D,NEW_ACHIEVEMENT_IDS:Object.freeze(additions.map(a=>a.id)),SPECIES:Object.freeze({...D.SPECIES,...Object.fromEntries(Object.entries(rows).map(([id,r])=>[id,Object.freeze({...base,...r})]))}),ACHIEVEMENTS:Object.freeze([...D.ACHIEVEMENTS,...additions].map(a=>Object.freeze({...a,reward:Object.freeze({...a.reward,coins:ENHANCED_ACHIEVEMENT_COINS[a.id]??a.reward.coins})})))});
 })();
