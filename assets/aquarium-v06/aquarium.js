@@ -338,7 +338,7 @@ function mergeRewardLedger(next=state,fromV3=false){
  const remembered=[...new Set([...readRewardLedger(next.saveId),...readRewardLedger(next.saveId,CONFIG.V5_KEY+'_rewards_'+next.saveId),...readRewardLedger(next.saveId,CONFIG.V4_KEY+'_rewards_'+next.saveId),...(!CONFIG.TEST_MODE?readRewardLedger(next.saveId,CONFIG.V3_KEY+'_rewards_'+next.saveId):[])])];for(const id of remembered){next.achievements[id]={completed:true,rewardClaimed:true};const reward=ACHIEVEMENTS.find(a=>a.id===id).reward;if(reward.variant&&!next.unlockedVariants.includes(reward.variant))next.unlockedVariants.push(reward.variant);}
  const ids=[...new Set([...remembered,...ACHIEVEMENTS.filter(a=>next.achievements[a.id].rewardClaimed).map(a=>a.id)])];if(fromV3||ids.length>remembered.length)localStorage.setItem(rewardKey(next.saveId),JSON.stringify(ids));
 }
-function rewardLabel(a){return a.reward.coins?`${a.reward.coins} 金幣`:`${VARIANTS[a.reward.variant].name}配色`;}
+function rewardLabel(a){return [a.reward.coins?`${a.reward.coins} 金幣`:null,a.reward.variant?`${VARIANTS[a.reward.variant].name}配色`:null].filter(Boolean).join(' ＋ ');}
 function achievements(){
  evaluateGoals(false);openDialog('我的成就','achievements');$('dialog-content').append(paragraph('從簡單到挑戰，完成成就就能領金幣或特殊配色！每項獎勵只能領一次。','shop-intro'));const list=document.createElement('div');list.className='achievement-list';
  const priority=a=>state.achievements[a.id].rewardClaimed?2:state.achievements[a.id].completed?0:1;
