@@ -34,10 +34,12 @@ jobs:
           apt-get update && apt-get install -y --no-install-recommends fonts-noto-cjk
           npm install --prefix /tmp/aquarium-v06-runtime playwright@1.58.2
           echo 'NODE_PATH=/tmp/aquarium-v06-runtime/node_modules' >> "$GITHUB_ENV"
+      - name: Verify free design, reward compensation and marine integration
+        run: node tests/aquarium-v06/design.test.cjs
       - name: Verify economy, teaching, food rules, migration, three tanks and five sizes
         run: |
           failed=0
-          for suite in design crustaceans expansion decor decor-mobile browser extra tutorial journey; do
+          for suite in crustaceans expansion decor decor-mobile browser extra tutorial journey; do
             node tests/aquarium-v06/$suite.test.cjs || failed=1
           done
           exit "$failed"
