@@ -3,7 +3,7 @@
 'use strict';
 const D=window.AquariumData,base=D.SPECIES.platy;
 const fishRows=[
- ['paradise','蓋斑鬥魚','Macropodus opercularis',240,3,'freshwater','protein','paradise','#58a9ba','#d27566'],
+ ['paradise','蓋斑鬥魚','Macropodus opercularis',240,4,'freshwater','protein','paradise','#58a9ba','#d27566'],
  ['ocellaris','公子小丑魚','Amphiprion ocellaris',150,5,'marine','general','clown','#ee9d47','#fff4d9'],
  ['maroon','透紅小丑魚','Amphiprion biaculeatus',220,5,'marine','general','maroon','#ac5157','#eddbc0'],
  ['blueDevil','藍魔鬼','Chrysiptera cyanea',120,5,'marine','small','damsel','#427ad2','#7ccce2'],

@@ -566,7 +566,7 @@ function buildBackground(){
   path(c,`M0 ${H*.84} Q${W*.25} ${H*.72} ${W*.49} ${H*.86} Q${W*.8} ${H*.7} ${W} ${H*.79} L${W} ${H} L0 ${H}Z`,'#67b8b5');
   const sandShape=new Path2D(`M0 ${H*.9} Q${W*.19} ${H*.84} ${W*.4} ${H*.9} Q${W*.77} ${H*.84} ${W} ${H*.9} L${W} ${H} L0 ${H}Z`);
   c.save();c.clip(sandShape);c.translate(0,H*.84);window.AquariumDecorArt.sand(c,state.substrate,W,H*.16,activeTank().substrateColor||0);c.restore();
-  for(const item of [...state.placedDecorations,...(practiceDecor?[practiceDecor]:[])].sort((a,b)=>Number(DECORATIONS[a.decoration].kind!=='plant')-Number(DECORATIONS[b.decoration].kind!=='plant'))){const pos=decorLayout(item);drawDecoration(c,item.decoration,pos.x,pos.y,pos.width,pos.height);}
+  for(const item of [...state.placedDecorations,...(practiceDecor?[practiceDecor]:[])].sort((a,b)=>(a.z??state.placedDecorations.indexOf(a))-(b.z??state.placedDecorations.indexOf(b))))paintPlaced(c,item);
   foreground=document.createElement('canvas');foreground.width=bg.width;foreground.height=bg.height;const front=foreground.getContext('2d');front.scale(dpr,dpr);
   // Residents are always drawn above placed objects; layer order applies between decorations.
   if(state.tankTier>=2){for(let i=0;i<state.tankTier+1;i++)ellipse(c,W*(.22+i*.15),H*.96,3.5,2,'#f6ecc2');}
