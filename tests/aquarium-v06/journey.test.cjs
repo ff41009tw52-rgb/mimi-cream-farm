@@ -36,7 +36,7 @@ const assert=require('node:assert/strict'),{harness}=require('./harness.cjs');
  await click('#purchase-confirm');await mark('firstFishPurchase');await close();
  await shop('decor');await click('[data-buy-decor=smallplant]');
  await mark('firstDecoration');await click('#more-menu');await click('#tutorial-edit');
- await p.locator('.decor-handle').first().click();await h.advance(p,1500);
+ await p.locator('#edit-object').selectOption(await p.locator('.decor-handle').first().getAttribute('data-decor-id'));await h.advance(p,1500);
  await click('#edit-right');await click('#edit-done');
  await click('#more-menu');await click('#more-observe');await click('#obs-return');await claim();
  await shop('fish');await click('[data-species=blackshrimp].buy');
