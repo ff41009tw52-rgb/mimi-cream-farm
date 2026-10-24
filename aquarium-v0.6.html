@@ -8,28 +8,28 @@
 <link rel="stylesheet" href="assets/aquarium-v041-r2/aquarium-observation.css">
 <link rel="stylesheet" href="assets/aquarium-v042/refinements.css">
 <link rel="stylesheet" href="assets/aquarium-v05/aquarium.css">
-<link rel="stylesheet" href="assets/aquarium-v06/aquarium.css?v=20261023-spacing-2">
+<link rel="stylesheet" href="assets/aquarium-v06/aquarium.css?v=20261024-crustacean-art">
 <script defer src="assets/aquarium-v05/aquarium-data.js"></script>
-<script defer src="assets/aquarium-v06/content.js?v=20261023-spacing-2"></script>
+<script defer src="assets/aquarium-v06/content.js?v=20261024-crustacean-art"></script>
 
 <script defer src="assets/aquarium-v041-r2/aquarium-save.js"></script>
 <script defer src="assets/aquarium-v05/aquarium-save.js"></script>
-<script defer src="assets/aquarium-v06/data.js?v=20261023-spacing-2"></script>
-<script defer src="assets/aquarium-v06/save.js?v=20261023-spacing-2"></script>
+<script defer src="assets/aquarium-v06/data.js?v=20261024-crustacean-art"></script>
+<script defer src="assets/aquarium-v06/save.js?v=20261024-crustacean-art"></script>
 <script defer src="assets/aquarium-v041-r2/aquarium-world.js"></script>
 <script defer src="assets/aquarium-v041-r2/aquarium-observation-content.js"></script>
 <script defer src="assets/aquarium-v05/anatomy.js"></script>
 <script defer src="assets/aquarium-v042/breathing-renderer.js"></script>
 <script defer src="assets/aquarium-v042/breathing-template.js"></script>
 <script defer src="assets/aquarium-v042/breathing-review.js"></script>
-<script defer src="assets/aquarium-v06/observation.js?v=20261023-spacing-2"></script>
+<script defer src="assets/aquarium-v06/observation.js?v=20261024-crustacean-art"></script>
 <script defer src="assets/aquarium-v041-r2/aquarium-fish-art.js"></script>
-<script defer src="assets/aquarium-v06/fish-art-extra.js?v=20261023-spacing-2"></script>
-<script defer src="assets/aquarium-v06/crustaceans.js?v=20261023-spacing-2"></script>
-<script defer src="assets/aquarium-v06/tutorial.js?v=20261023-spacing-2"></script>
-<script defer src="assets/aquarium-v06/decor-art.js?v=20261023-spacing-2"></script>
-<script defer src="assets/aquarium-v06/decor-extra.js?v=20261023-spacing-2"></script>
-<script defer src="assets/aquarium-v06/aquarium.js?v=20261023-spacing-2"></script>
+<script defer src="assets/aquarium-v06/fish-art-extra.js?v=20261024-crustacean-art"></script>
+<script defer src="assets/aquarium-v06/crustaceans.js?v=20261024-crustacean-art"></script>
+<script defer src="assets/aquarium-v06/tutorial.js?v=20261024-crustacean-art"></script>
+<script defer src="assets/aquarium-v06/decor-art.js?v=20261024-crustacean-art"></script>
+<script defer src="assets/aquarium-v06/decor-extra.js?v=20261024-crustacean-art"></script>
+<script defer src="assets/aquarium-v06/aquarium.js?v=20261024-crustacean-art"></script>
 
 </head>
 <body>
@@ -51,7 +51,7 @@
 <div class="tank-viewport"><canvas id="tank" tabindex="0" aria-label="水族箱。點魚查看狀態，點金幣收集；先按餵食，再點水面投放飼料。鍵盤可從更多功能的我的魚兒查看，餵食模式按 Enter 投食。"></canvas>
 <div id="surface-cue" hidden aria-hidden="true">↓ 點這裡的水面，投放飼料</div></div>
 <div class="feeding-hint" id="feeding-hint" hidden><strong>選好飼料，再點一下魚缸上方的水面</strong><div id="feed-choices"><button id="feed-general" data-feed="general" aria-pressed="false"><b>綜合飼料</b><small>剩餘 0 份</small><span>孔雀魚、金魚、黑摩利、紅劍魚、月光魚</span></button><button id="feed-small" data-feed="small" aria-pressed="false"><b>小型魚飼料</b><small>剩餘 0 份</small><span>鼠魚、斑馬魚、白雲山魚、紅蓮燈、三角燈</span></button><button id="feed-protein" data-feed="protein" aria-pressed="false"><b>高蛋白飼料</b><small>剩餘 0 份</small><span>神仙魚、鬥魚、蜜糖麗麗魚、酷利泥鰍、玻利維亞鳳凰</span></button></div><p class="food-rule">遊戲把飼料分成三種，真實生物可以吃的食物更多樣。</p><p id="feed-current" aria-live="polite">先選一種飼料</p><div class="feeding-actions"><button id="feed-shop">前往飼料商店</button><button id="stop-feed">結束餵食</button></div></div>
-<aside class="fish-card" id="fish-card" hidden aria-label="魚兒資料"><button class="icon-button card-close" id="close-card" aria-label="關閉魚兒資料">×</button><span class="eyebrow" id="fish-stage"></span><h2 id="fish-name"></h2><p id="fish-species"></p><div class="meter-label">飽足度 <b id="fish-hunger"></b></div><meter id="hunger-meter" min="0" max="100"></meter><p class="fish-care-tip">飽足度越低，代表牠越餓。記得餵牠吃東西。</p><div class="meter-label">成長進度 <b id="fish-growth"></b></div><meter id="growth-meter" min="0" max="100"></meter><p class="fish-care-tip" id="fish-growth-tip">魚兒吃飽後會慢慢長大，從幼魚變成成魚。</p><p class="mood" id="fish-mood"></p><p class="personality" id="fish-personality"></p><p id="fish-food"></p><p class="fish-care-tip">不知道該餵哪種飼料？看看這裡就知道了。</p><button id="observe-fish" class="card-observe">觀察這隻魚</button><div class="card-actions"><button id="rename">改名字</button><button id="fish-more">更多資料</button></div></aside>
+<aside class="fish-card" id="fish-card" hidden aria-label="魚兒資料"><button class="icon-button card-close" id="close-card" aria-label="關閉魚兒資料">×</button><span class="eyebrow" id="fish-stage"></span><h2 id="fish-name"></h2><p id="fish-species"></p><div id="fish-portrait" hidden></div><div class="meter-label">飽足度 <b id="fish-hunger"></b></div><meter id="hunger-meter" min="0" max="100"></meter><p class="fish-care-tip">飽足度越低，代表牠越餓。記得餵牠吃東西。</p><div class="meter-label">成長進度 <b id="fish-growth"></b></div><meter id="growth-meter" min="0" max="100"></meter><p class="fish-care-tip" id="fish-growth-tip">魚兒吃飽後會慢慢長大，從幼魚變成成魚。</p><p class="mood" id="fish-mood"></p><p class="personality" id="fish-personality"></p><p id="fish-food"></p><p class="fish-care-tip">不知道該餵哪種飼料？看看這裡就知道了。</p><button id="observe-fish" class="card-observe">觀察這隻魚</button><div class="card-actions"><button id="rename">改名字</button><button id="fish-more">更多資料</button></div></aside>
 <div id="decor-handles" class="decor-handles" hidden></div>
 <div class="edit-toolbar" id="edit-toolbar" hidden><span id="edit-label">先選裝飾，再拖曳或按箭頭移動</span><div><button id="edit-left" aria-label="向左移動裝飾">←</button><button id="edit-right" aria-label="向右移動裝飾">→</button><button id="edit-store">收回裝飾</button><button id="edit-done">完成布置</button></div></div>
 
