@@ -28,7 +28,7 @@ jobs:
           node tests/aquarium/schema-v05.test.cjs
           node tests/aquarium-v06/schema.test.cjs
           python3 scripts/build-aquarium-v06.py
-          git diff --exit-code -- aquarium-v0.6-standalone.html
+          git -c safe.directory="$GITHUB_WORKSPACE" diff --exit-code -- aquarium-v0.6-standalone.html
       - name: Prepare browsers
         run: |
           apt-get update && apt-get install -y --no-install-recommends fonts-noto-cjk
