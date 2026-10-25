@@ -343,6 +343,8 @@ body{background:radial-gradient(ellipse at 8% 20%,#dfece2aa,transparent 46%),rad
 @media(max-width:480px){.design-body label{display:flex;width:100%}.edit-toolbar .design-swatch{width:34px;min-width:34px;height:34px;min-height:34px}.design-workspace .edit-toolbar{border-radius:14px}.design-heading #edit-done{min-height:40px}.design-thumbnails{padding-bottom:3px}.edit-toolbar #edit-bottom{margin-left:8px}.design-body{min-height:53px}}
 .design-workspace [hidden]{display:none!important}
 @media(min-width:1060px) and (min-height:680px){#game .design-workspace{flex:1 1 0;min-height:190px;display:flex;flex-direction:column}#game .design-workspace.is-editing{display:grid;align-items:stretch;min-height:0}#game .design-workspace .aquarium{height:100%;min-height:0}#game .design-workspace .edit-toolbar{min-height:0;max-height:100%;align-self:stretch}}
+/* Thumbnail canvases must never inherit the tank's 340px mobile minimum. */
+.design-workspace .design-thumbnail canvas{min-height:0;max-height:42px;flex:0 0 42px}.design-thumbnail span{flex:none}
 
 </style>
 
