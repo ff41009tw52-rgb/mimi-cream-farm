@@ -48,7 +48,7 @@ function create({getState,commit,notify,grant,ensureFeeding,prepareCoin,prepareF
    const tab=$('tab-'+s.shopTab),shopOpen=!!tab&&$('dialog').open;
    if(!shopOpen){target=$('shop');copy='再按「商店」，繼續剛才的'+(s.task===5?'飼料':s.task===6?'購魚':'布置')+'操作。';}
    else if(tab.getAttribute('aria-selected')!=='true'){target=tab;}
-   else if(o.step===11){const suitable=[...document.querySelectorAll('[id^="buy-feed-"]')].find(b=>!b.disabled&&getState().fishes.some(f=>window.AquariumData.FOOD_FOR[f.species]===b.id.slice(9)));if(suitable)target=suitable;
+   else if(o.step===11){const suitable=[...document.querySelectorAll('[id^="buy-feed-"]')].find(b=>!b.disabled&&(getState().fishes.length?getState().fishes:getState().tanks.flatMap(t=>t.fishes)).some(f=>window.AquariumData.FOOD_FOR[f.species]===b.id.slice(9)));if(suitable)target=suitable;
     if(o.review){target=reviewPurchase('feed',()=>api.report('feedBought'));copy='複習時只查看價格、購買按鈕和庫存，不需要再次消費。';}}
    else if(o.step===14){const status=prepareFish();if(status?.review){target=reviewPurchase('fish',()=>api.report('fishBought',{viewOnly:true}));copy=o.review?'複習購魚流程：看解鎖狀態、價格和購買按鈕，不需要再次消費。':'魚缸都住滿了！這次先查看購魚流程。日後升級或移魚空出位置，再迎接新魚。';}
     else if(status?.move){target=status.move;copy='這個魚缸滿了！先換到還有空位的魚缸，再買新魚。';}
