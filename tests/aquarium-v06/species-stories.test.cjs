@@ -1,7 +1,7 @@
 const assert=require('node:assert/strict'),{harness}=require('./harness.cjs'),{context,plain,starter}=require('./schema.test.cjs');
 (async()=>{
  const h=await harness(8868),w=context(),D=w.AquariumData,S=w.AquariumSave;
- function seed(marine=false){const s=plain(starter);s.savedAt=Date.now();s.coins=12000;s.level=9;s.xp=5700;s.legacyLevelFloor=1;s.tanks[0].tier=4;s.onboarding={...S.newOnboarding(),completed:true,everCompleted:true,welcomed:true,step:21,events:[...S.TUTORIAL_KEYS],hints:['backup','upgrade','tank2']};if(marine){const t=S.emptyTank('stories-marine','海洋',4);t.habitat='marine';s.tanks.push(t);s.activeTankId=t.id;}return S.validate(s);}
+ function seed(marine=false){const s=plain(starter);s.savedAt=Date.now();s.coins=12000;s.level=9;s.xp=5700;s.legacyLevelFloor=1;s.tanks[0].tier=4;s.onboarding={...S.newOnboarding(),completed:true,everCompleted:true,welcomed:true,step:21,events:[...S.TUTORIAL_KEYS],hints:['backup','upgrade','tank2']};if(marine){const t=S.emptyTank('stories-marine','海洋',4);t.habitat='marine';s.tanks.push(t);s.activeTankId=t.id;}return plain(S.validate(s));}
  for(const [size,id,marine]of [[{width:1440,height:960},'dottyback',true],[{width:390,height:844},'guppy',false],[{width:820,height:1180},'blueshrimp',false]]){
   const initial=seed(marine),v=await h.create({state:initial,size,touch:size.width<1000,cadence:100}),p=v.p;await p.locator('#home-continue').click();await h.shop(p);
   assert.equal(await p.locator('[role=tablist][aria-label="商店分類"] [role=tab]').count(),3);
