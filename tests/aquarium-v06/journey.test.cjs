@@ -2,6 +2,7 @@
  * Virtual time includes 1.5 seconds for each automated UI action. */
 const assert=require('node:assert/strict'),{harness}=require('./harness.cjs');
 (async()=>{
+ const long=process.env.AQUARIUM_LONG_JOURNEY==='1';
  const h=await harness(8852),v=await h.create({query:'',cadence:100}),p=v.p;
  const read=()=>p.evaluate(k=>JSON.parse(localStorage.getItem(k)),h.KEY);
  const start=await p.evaluate(()=>Date.now()),milestones={};
@@ -22,7 +23,7 @@ const assert=require('node:assert/strict'),{harness}=require('./harness.cjs');
   await click('#more-menu');await click('#achievements');
   for(let n=0;n<30;n++){
    const b=p.locator('.achievement-card[data-status=ready] [data-claim]').first();
-   if(!await b.count())break;await b.click();await h.advance(p,1500);
+   if(!await b.count())break;await b.click();await h.advance(p,1500);if(!milestones.firstAchievement)await mark('firstAchievement');
   }
   await close();
  }
@@ -38,10 +39,10 @@ const assert=require('node:assert/strict'),{harness}=require('./harness.cjs');
  await mark('firstDecoration');await click('#more-menu');await click('#tutorial-edit');
  await p.locator('[data-select-decor]').first().click();await h.advance(p,1500);
  await click('#edit-right');await click('#edit-done');
- await click('#more-menu');await click('#more-observe');await click('#obs-return');await claim();
+ await click('#more-menu');await click('#more-observe');await click('#obs-return');await mark('tutorialComplete');await claim();
  await shop('fish');await click('[data-species=blackshrimp].buy');
  await click('#purchase-confirm');await mark('firstCrustacean');await close();await claim();
- for(let minute=1;minute<=25;minute++){
+ for(let minute=1;minute<=(long?180:25);minute++){
   await h.advance(p,60000);
   // Collect visible coins one by one, as a player does; there is no bulk control.
   for(let n=0;n<100;n++){
@@ -57,18 +58,28 @@ const assert=require('node:assert/strict'),{harness}=require('./harness.cjs');
   }
   if(minute%3===0){
    await claim();const now=await read();
-   for(const kind of ['general','small']){
+   for(const kind of ['general','small',...(now.level>=4?['protein']:[])]){
     if(now.feedInventory[kind]<2){await shop('feed');await click('#buy-feed-'+kind);await close();}
     await feed(kind);
    }
   }
-  if(milestones.firstUpgrade&&minute>=10)break;
+  if(long){
+   let current=await read();
+   if(!milestones.paradisePurchase&&current.level>=4&&current.coins>=254){
+    await shop('fish');await click('[data-species=paradise].buy');await click('#purchase-confirm');await close();await mark('paradisePurchase');
+   }
+   current=await read();
+   if(!milestones.marineTank&&current.level>=5&&current.coins>=950){
+    await click('#tank-upgrade-shortcut');await click('#buy-marine-tank');await click('#dialog-content .confirm');await mark('marineTank');
+    await shop('fish');await click('[data-species=ocellaris].buy');await click('#purchase-confirm');await close();await mark('marineFish');break;
+   }
+  }else if(milestones.firstUpgrade&&minute>=10)break;
  }
  const end=await read();assert(milestones.firstUpgrade,'normal new players must reach the first upgrade');
  assert(milestones.firstUpgrade<=20);assert(end.tanks[0].tier>=2);
- assert.equal(end.tanks[0].fishes.length,5);assert(end.tanks[0].fishes.every(f=>f.hunger>25));
+ if(long){assert(milestones.paradisePurchase);assert(milestones.marineTank);assert(milestones.marineFish);assert.equal(end.tanks.length,2);}else assert.equal(end.tanks[0].fishes.length,5);assert(end.tanks[0].fishes.every(f=>f.hunger>25));
  assert.equal(await p.evaluate(()=>typeof window.aquariumDebug),'undefined');assert.deepEqual(h.errors,[]);
- h.saveResults('journey-results',{normalMode:true,debugOrSaveMutations:false,clock:'virtual time, normal gameplay speed, 1.5 seconds per UI action',milestones,coins:end.coins,level:end.level,feedInventory:end.feedInventory});
+ h.saveResults(long?'long-journey-results':'journey-results',{normalMode:true,debugOrSaveMutations:false,clock:'virtual time, normal gameplay speed, 1.5 seconds per UI action',milestones,coins:end.coins,level:end.level,feedInventory:end.feedInventory});
  await h.shot(p,'new-player-journey');
  h.pass('normal new-player feed/fish/decor/crustacean purchases and first upgrade through visible UI',milestones);
  await v.context.close();await h.close();

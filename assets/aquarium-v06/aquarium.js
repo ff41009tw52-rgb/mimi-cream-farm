@@ -4,7 +4,7 @@
 const {CONFIG,SPECIES,DECORATIONS,PERSONALITIES,TANK_TIERS,VARIANTS,ACHIEVEMENTS,FEEDS,FOOD_FOR,TANK_OFFERS}=window.AquariumData;
 const {validate,personalityFor,snapX,nearestSnap}=window.AquariumSave;
 const {buildPOI,tickEnvironment}=window.AquariumWorld;
-let protectedBusy=false,practiceDecor=null;
+let protectedBusy=false,practiceDecor=null,writerReady=false,writerPending=false;
 const coinInterval=s=>s.coinInterval*CONFIG.COIN_SCALE;
 const growthTime=s=>s.growthTime*CONFIG.GROWTH_SCALE;
 const $=id=>document.getElementById(id), clamp=(v,a=0,b=100)=>Math.min(b,Math.max(a,v));
@@ -42,6 +42,7 @@ function save(manual=false){
   if(!started||saveBlocked||conflict){saveLabel();if(manual)toast('目前無法儲存進度。原存檔已保留。');return false;}
   let autoSaved=false;
   try{
+    if(lastPersistedState!==null&&localStorage.getItem(CONFIG.SAVE_KEY)!==lastPersistedState){conflict=true;saveLabel();return false;}
     const payload=snapshot(),json=JSON.stringify(payload);
     localStorage.setItem(CONFIG.SAVE_KEY,json);diagnostics.writes++;
     state.savedAt=lastSaved=payload.savedAt;lastPersistedState=json;dirty=false;autoSaved=true;
@@ -92,7 +93,7 @@ function selectFeed(id){if(!feeding||!FEEDS[id])return;selectedFeed=id;renderFee
 function feed(x,confirmed=false){
  if(conflict||saveBlocked)return;if(!selectedFeed){toast('先選好飼料，再點魚缸上方的水面。');return;}
  const kind=selectedFeed;
- if(state.onboarding.review&&tutorial.expects('fed:'+kind)){effects.push({x,y:.08,text:'練習投放',life:1,kind:'ripple'});tutorial.report('fed:'+kind);setFeeding(false);return;}
+ if((state.onboarding.review||!state.feedInventory[kind]&&state.gifts.includes(kind==='general'?'lessonGeneralRecovery':'lessonSmallRecovery'))&&tutorial.expects('fed:'+kind)){effects.push({x,y:.08,text:'練習投放',life:1,kind:'ripple'});tutorial.report('fed:'+kind);setFeeding(false);return;}
  if(tutorial.task()===1&&kind!=='general'||tutorial.task()===2&&kind!=='small'){toast('先選擇教學提示的飼料，再點水面。');return;}
  if(!state.feedInventory[kind]){toast('這種飼料用完了！可以到商店購買新的飼料。');$('feed-shop').hidden=false;return;}
  if(simTime-feedAt<CONFIG.FEED_COOLDOWN)return;if(food.length+3>CONFIG.MAX_FOOD){toast('魚缸裡還有飼料，等魚兒吃完再餵吧！');return;}
@@ -207,7 +208,7 @@ function loadSaved(manual){
     if(!text){toast(manual?'還沒有手動存檔，先按一次存檔吧。':'還沒有自動存檔。');dialog.close();return;}
     const next=validate(JSON.parse(text));mergeRewardLedger(next);mergeGiftLedger(next);
     const wasBlocked=saveBlocked;
-    clearTimeout(saveTimer);saveTimer=0;state=next;
+    clearTimeout(saveTimer);saveTimer=0;state=next;lastPersistedState=localStorage.getItem(CONFIG.SAVE_KEY);
     evaluateGoals(false);renderOnboarding();conflict=saveBlocked=false;
     lastSaved=state.savedAt;state.fishes.forEach(syncFish);rebuildRuntime();buildBackground();
     if(!manual)offline(Math.max(0,(Date.now()-state.savedAt)/1000));
@@ -684,8 +685,20 @@ function refreshHome(){
 function paintHomeFish(){const c=$('home-fish').getContext('2d');c.clearRect(0,0,760,300);window.AquariumFishArt.draw(c,'guppy',178,145,155,1,-.03,.8,'normal');window.AquariumFishArt.draw(c,'goldfish',520,158,172,-1,.02,1.4,'normal');window.AquariumFishArt.draw(c,'cory',365,245,105,1,0,2,'normal');}
 function backupCurrent(tag){const stored=findStored();if(stored)localStorage.setItem(CONFIG.SAVE_KEY+'_'+tag,stored.raw);}
 function activate(candidate,{backup=null,elapsed=0,manualSource=null}={}){
+ // Hold a browser-managed single-writer lock for this page's lifetime. A closed
+ // or crashed tab releases it automatically, without expiring localStorage leases.
+ if(navigator.locks&&!writerReady){
+  if(writerPending)return false;writerPending=true;
+  navigator.locks.request(CONFIG.SAVE_KEY+'_writer',{ifAvailable:true},async lock=>{
+   writerPending=false;
+   if(!lock){const message='遊戲已在另一個分頁開啟。請先關閉那個分頁，再按繼續遊戲。';$('home-error').textContent=message;toast(message,9000);return;}
+   writerReady=true;activate(candidate,{backup,elapsed,manualSource});
+   await new Promise(resolve=>window.addEventListener('pagehide',resolve,{once:true}));writerReady=false;
+  }).catch(()=>{writerPending=false;toast('暫時無法取得存檔使用權，請重新整理後再試。');});
+  return false;
+ }
  let next;
- try{next=validate(candidate);if(backup)backupCurrent(backup);const recovered=next.saveId?recoverTutorialTransaction(next.saveId):null;if(recovered&&!backup)next=validate(recovered);mergeRewardLedger(next);mergeGiftLedger(next);next.savedAt=Date.now();localStorage.setItem(CONFIG.SAVE_KEY,JSON.stringify(next));}
+ try{next=validate(candidate);if(backup)backupCurrent(backup);const recovered=next.saveId?recoverTutorialTransaction(next.saveId):null;if(recovered&&!backup)next=validate(recovered);mergeRewardLedger(next);mergeGiftLedger(next);next.savedAt=Date.now();lastPersistedState=JSON.stringify(next);localStorage.setItem(CONFIG.SAVE_KEY,lastPersistedState);}
  catch(e){toast('目前無法保存新進度，原本存檔仍保留。請確認瀏覽器有可用空間，再試一次。',8000);return false;}
  clearTimeout(saveTimer);saveTimer=0;state=next;started=true;dirty=false;saveBlocked=conflict=false;lastSaved=next.savedAt;lastFrame=0;simTime=0;saveAccumulator=0;feedAt=-99;
  $('home').hidden=true;$('game').hidden=false;window.scrollTo(0,0);setFeeding(false);allFish().forEach(syncFish);rebuildRuntime();resize();buildBackground();
@@ -724,7 +737,7 @@ function recoverTutorialTransaction(id){
  const clean={...ledger};delete clean.pending;localStorage.setItem(giftKey(id),JSON.stringify(clean));return needsCommit?pending:null;
 }
 function mergeGiftLedger(next){
- const ledger=readGifts(next.saveId);next.rewardPaid??={};for(const [id,v]of Object.entries(ledger.rewardPaid||{})){if(!ACHIEVEMENTS.some(a=>a.id===id)||!Number.isInteger(v)||v<0||v>CONFIG.MAX_COINS)throw Error('獎勵補發紀錄不完整');next.rewardPaid[id]=Math.max(next.rewardPaid[id]||0,v);}next.gifts=[...new Set([...next.gifts,...ledger.ids])];next.emergencyAt=Math.max(next.emergencyAt,ledger.emergencyAt);
+ const ledger=readGifts(next.saveId);next.rewardPaid??={};for(const [id,v]of Object.entries(ledger.rewardPaid||{})){if(!ACHIEVEMENTS.some(a=>a.id===id)||!Number.isInteger(v)||v<0||v>CONFIG.MAX_COINS)throw Error('獎勵補發紀錄不完整');next.rewardPaid[id]=Math.max(next.rewardPaid[id]||0,v);next.achievements[id]={completed:true,rewardClaimed:true};const variant=ACHIEVEMENTS.find(a=>a.id===id).reward.variant;if(variant&&!next.unlockedVariants.includes(variant))next.unlockedVariants.push(variant);}next.gifts=[...new Set([...next.gifts,...ledger.ids])];next.emergencyAt=Math.max(next.emergencyAt,ledger.emergencyAt);
  const o=next.onboarding;o.hints=[...new Set([...o.hints,...(ledger.hints||[])])];if(!o.review){o.events=[...new Set([...o.events,...(ledger.tutorialEvents||[])])];if(o.everCompleted||next.gifts.includes('tutorialComplete'))o.events=[...window.AquariumSave.TUTORIAL_KEYS];const n=window.AquariumSave.TUTORIAL_KEYS.findIndex(k=>!o.events.includes(k));o.step=n<0?window.AquariumSave.TUTORIAL_KEYS.length:n;o.completed=n<0;o.everCompleted||=o.completed;if(o.completed&&!next.gifts.includes('tutorialComplete'))next.gifts.push('tutorialComplete');}
  o.supportAmounts={feed:Math.max(o.supportAmounts.feed,ledger.supportAmounts?.feed||0),fish:Math.max(o.supportAmounts.fish,ledger.supportAmounts?.fish||0),decor:Math.max(o.supportAmounts.decor,ledger.supportAmounts?.decor||0)};
  if(next.gifts.includes('demoCollected'))for(const t of next.tanks)t.drops=t.drops.filter(c=>c.id!=='tutorial-demo-'+next.saveId);
@@ -734,6 +747,7 @@ function mergeGiftLedger(next){
 // A crash after the journal write is completed on the next load; failed writes roll back.
 function protectedTransaction(mutate){
  if(!started||conflict||saveBlocked||protectedBusy)return false;
+ if(lastPersistedState!==null&&localStorage.getItem(CONFIG.SAVE_KEY)!==lastPersistedState){conflict=true;saveLabel();toast('另一個分頁已更新進度，請重新讀取自動存檔。');return false;}
  protectedBusy=true;const before=JSON.stringify(state),key=giftKey();let raw,ledger,written=false;const wasBatching=batching;
  try{
   raw=localStorage.getItem(key);ledger=readGifts();state.rewardPaid??={};for(const[id,v]of Object.entries(ledger.rewardPaid||{})){if(!ACHIEVEMENTS.some(a=>a.id===id)||!Number.isInteger(v)||v<0||v>CONFIG.MAX_COINS)throw Error('獎勵帳本無法讀取');state.rewardPaid[id]=Math.max(state.rewardPaid[id]||0,v);}state.gifts=[...new Set([...state.gifts,...ledger.ids])];batching=true;
@@ -761,7 +775,7 @@ function prepareLessonFish(){
 function prepareLessonDecor(){
  const starter={river:1,smallplant:2,smallrock:1};
  const already=Object.entries(state.purchasedDecorations).some(([id,n])=>n>(starter[id]||0));
- return {review:state.onboarding.review||state.onboarding.decorReuse||state.gifts.includes('decorSupport')||already||!availableDecorPosition('smallplant')};
+ return {review:activeTank().habitat==='marine'||state.onboarding.review||state.onboarding.decorReuse||state.gifts.includes('decorSupport')||already||!availableDecorPosition('smallplant')};
 }
 function prepareLessonEditing(){
  if(dialog.open){if(dialogMode==='more'&&$('tutorial-edit'))return {target:$('tutorial-edit'),copy:'在「更多」選單選「調整布置」，再移動魚缸裡的裝飾。'};return {target:$('dialog-close'),copy:'先按視窗右上角 ×，回到魚缸。'};}

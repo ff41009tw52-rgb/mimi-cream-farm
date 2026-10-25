@@ -49,7 +49,7 @@ jobs:
       - name: Verify economy, teaching, food rules, migration, three tanks and five sizes
         run: |
           failed=0
-          for suite in crustaceans expansion decor decor-mobile browser extra tutorial journey; do
+          for suite in stability crustaceans expansion decor decor-mobile browser extra tutorial journey; do
             node tests/aquarium-v06/$suite.test.cjs || failed=1
           done
           exit "$failed"
@@ -68,4 +68,27 @@ jobs:
         if: always()
         with:
           name: aquarium-v06-evidence
+          path: artifacts/aquarium-v06/
+
+  normal-progression:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.58.2-noble
+      options: --ipc=host
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/aquarium-v06-runtime playwright@1.58.2
+      - name: Play from a fresh save through the first marine fish
+        env:
+          NODE_PATH: /tmp/aquarium-v06-runtime/node_modules
+          AQUARIUM_LONG_JOURNEY: '1'
+        run: node tests/aquarium-v06/journey.test.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: normal-progression-evidence
           path: artifacts/aquarium-v06/
