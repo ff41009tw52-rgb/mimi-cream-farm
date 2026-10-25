@@ -2214,6 +2214,7 @@ const {CONFIG,SPECIES,DECORATIONS,PERSONALITIES,TANK_TIERS,VARIANTS,ACHIEVEMENTS
 const {validate,personalityFor,snapX,nearestSnap}=window.AquariumSave;
 const {buildPOI,tickEnvironment}=window.AquariumWorld;
 let protectedBusy=false,practiceDecor=null,writerReady=false,writerPending=false;
+window.addEventListener('pageshow',e=>{if(e.persisted)location.reload();});
 const coinInterval=s=>s.coinInterval*CONFIG.COIN_SCALE;
 const growthTime=s=>s.growthTime*CONFIG.GROWTH_SCALE;
 const $=id=>document.getElementById(id), clamp=(v,a=0,b=100)=>Math.min(b,Math.max(a,v));
@@ -2902,7 +2903,7 @@ function activate(candidate,{backup=null,elapsed=0,manualSource=null}={}){
    writerPending=false;
    if(!lock){const message='遊戲已在另一個分頁開啟。請先關閉那個分頁，再按繼續遊戲。';$('home-error').textContent=message;toast(message,9000);return;}
    writerReady=true;activate(candidate,{backup,elapsed,manualSource});
-   await new Promise(resolve=>window.addEventListener('pagehide',resolve,{once:true}));writerReady=false;
+   await new Promise(resolve=>window.addEventListener('pagehide',()=>{writerReady=false;conflict=true;resolve();},{once:true}));
   }).catch(()=>{writerPending=false;toast('暫時無法取得存檔使用權，請重新整理後再試。');});
   return false;
  }

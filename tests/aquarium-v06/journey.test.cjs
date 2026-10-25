@@ -58,7 +58,7 @@ const assert=require('node:assert/strict'),{harness}=require('./harness.cjs');
   }
   if(minute%3===0){
    await claim();const now=await read();
-   for(const kind of ['general','small',...(now.level>=4?['protein']:[])]){
+   for(const kind of ['general','small',...(now.tanks.some(t=>t.fishes.some(f=>f.species==='paradise'))?['protein']:[])]){
     if(now.feedInventory[kind]<2){await shop('feed');await click('#buy-feed-'+kind);await close();}
     await feed(kind);
    }
