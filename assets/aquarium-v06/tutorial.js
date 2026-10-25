@@ -23,7 +23,7 @@ const steps=[
  {task:7,target:'tab-decor',shopTab:'decor',event:'decorShopOpened',copy:'按一下「布置」，看看可以放進水族箱的裝飾。'},
  {task:7,target:'tutorial-decor-buy',shopTab:'decor',event:'decorBought',copy:'選一件喜歡的裝飾，按「購買並放置」，就能放進魚缸。先從小水草試試看吧！',success:'裝飾放好了！現在試著調整它的位置。'},
  {task:7,target:'tutorial-edit',event:'decorEditing',copy:'按「調整布置」，再選取一件裝飾。'},
- {task:7,target:'decor-handles',event:'decorMoved',copy:'選一件裝飾，把它拖到別的位置。也可以按左右箭頭移動。',success:'完成了！以後你可以自由布置自己的水族箱。'},
+ {task:7,target:'decor-handles',event:'decorMoved',copy:'選一件裝飾，把它拖到別的位置。也可以按四方向箭頭微調。',success:'完成了！以後你可以自由布置自己的水族箱。'},
  {task:8,target:'more-menu' ,event:'observationOpened',copy:'按「更多」→「觀察生物」，認識魚的身體構造與呼吸。',success:'恭喜你完成新手教學！記得餵食、觀察魚兒、收集金幣，讓你的水族箱慢慢成長。'}
 ];
 function create({getState,commit,notify,grant,ensureFeeding,prepareCoin,prepareFish,prepareFood,prepareDecor,prepareEditing,reviewPurchase}){

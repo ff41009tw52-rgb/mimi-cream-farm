@@ -35,7 +35,9 @@ jobs:
           npm install --prefix /tmp/aquarium-v06-runtime playwright@1.58.2
           echo 'NODE_PATH=/tmp/aquarium-v06-runtime/node_modules' >> "$GITHUB_ENV"
       - name: Verify free design, reward compensation and marine integration
-        run: node tests/aquarium-v06/design.test.cjs
+        run: |
+          node tests/aquarium-v06/quality.test.cjs
+          node tests/aquarium-v06/design.test.cjs
       - name: Verify economy, teaching, food rules, migration, three tanks and five sizes
         run: |
           failed=0
@@ -48,6 +50,7 @@ jobs:
           AQUARIUM_BROWSER: webkit
           AQUARIUM_ARTIFACTS: artifacts/aquarium-v06/webkit
         run: |
+          node tests/aquarium-v06/quality.test.cjs
           node tests/aquarium-v06/mobile.test.cjs
           node tests/aquarium-v06/design.test.cjs
           node tests/aquarium-v06/crustaceans.test.cjs

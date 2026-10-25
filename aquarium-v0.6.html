@@ -8,36 +8,38 @@
 <link rel="stylesheet" href="assets/aquarium-v041-r2/aquarium-observation.css">
 <link rel="stylesheet" href="assets/aquarium-v042/refinements.css">
 <link rel="stylesheet" href="assets/aquarium-v05/aquarium.css">
-<link rel="stylesheet" href="assets/aquarium-v06/aquarium.css?v=20261025-design">
+<link rel="stylesheet" href="assets/aquarium-v06/aquarium.css?v=20261025-quality">
 <script defer src="assets/aquarium-v05/aquarium-data.js"></script>
-<script defer src="assets/aquarium-v06/content.js?v=20261025-design"></script>
+<script defer src="assets/aquarium-v06/content.js?v=20261025-quality"></script>
 
-<script defer src="assets/aquarium-v06/design-content.js?v=20261025-design"></script>
+<script defer src="assets/aquarium-v06/design-content.js?v=20261025-quality"></script>
+<script defer src="assets/aquarium-v06/quality-content.js?v=20261025-quality"></script>
 <script defer src="assets/aquarium-v041-r2/aquarium-save.js"></script>
 <script defer src="assets/aquarium-v05/aquarium-save.js"></script>
-<script defer src="assets/aquarium-v06/data.js?v=20261025-design"></script>
-<script defer src="assets/aquarium-v06/save.js?v=20261025-design"></script>
+<script defer src="assets/aquarium-v06/data.js?v=20261025-quality"></script>
+<script defer src="assets/aquarium-v06/save.js?v=20261025-quality"></script>
 <script defer src="assets/aquarium-v041-r2/aquarium-world.js"></script>
 <script defer src="assets/aquarium-v041-r2/aquarium-observation-content.js"></script>
 <script defer src="assets/aquarium-v05/anatomy.js"></script>
 <script defer src="assets/aquarium-v042/breathing-renderer.js"></script>
 <script defer src="assets/aquarium-v042/breathing-template.js"></script>
 <script defer src="assets/aquarium-v042/breathing-review.js"></script>
-<script defer src="assets/aquarium-v06/observation.js?v=20261025-design"></script>
+<script defer src="assets/aquarium-v06/observation.js?v=20261025-quality"></script>
 <script defer src="assets/aquarium-v041-r2/aquarium-fish-art.js"></script>
-<script defer src="assets/aquarium-v06/fish-art-extra.js?v=20261025-design"></script>
-<script defer src="assets/aquarium-v06/crustaceans.js?v=20261025-design"></script>
-<script defer src="assets/aquarium-v06/tutorial.js?v=20261025-design"></script>
-<script defer src="assets/aquarium-v06/decor-art.js?v=20261025-design"></script>
-<script defer src="assets/aquarium-v06/decor-extra.js?v=20261025-design"></script>
-<script defer src="assets/aquarium-v06/design-art.js?v=20261025-design"></script>
-<script defer src="assets/aquarium-v06/aquarium.js?v=20261025-design"></script>
+<script defer src="assets/aquarium-v06/fish-art-extra.js?v=20261025-quality"></script>
+<script defer src="assets/aquarium-v06/crustaceans.js?v=20261025-quality"></script>
+<script defer src="assets/aquarium-v06/tutorial.js?v=20261025-quality"></script>
+<script defer src="assets/aquarium-v06/decor-art.js?v=20261025-quality"></script>
+<script defer src="assets/aquarium-v06/decor-extra.js?v=20261025-quality"></script>
+<script defer src="assets/aquarium-v06/design-art.js?v=20261025-quality"></script>
+<script defer src="assets/aquarium-v06/quality-art.js?v=20261025-quality"></script>
+<script defer src="assets/aquarium-v06/aquarium.js?v=20261025-quality"></script>
 
 </head>
 <body>
 <section id="home" class="home" aria-labelledby="home-title">
 <div class="home-intro"><h1 id="home-title">悠悠水族箱</h1><p class="home-copy">餵魚、看牠們慢慢長大，收集金幣買新魚、布置水族箱，還能認識魚的身體構造與呼吸方式。</p><div class="home-art" aria-hidden="true"><canvas id="home-fish" width="760" height="300"></canvas></div><div class="home-features"><article><h2>養育魚兒</h2><p>餵餵魚兒，看牠們慢慢長大。</p></article><article><h2>布置魚缸</h2><p>收集金幣，買新魚和裝飾。</p></article><article><h2>科學觀察</h2><p>認識魚的身體構造與呼吸方式。</p></article></div></div>
-<div class="home-start"><span class="eyebrow">從這裡開始</span><h2>幫你的水族箱取個名字吧！</h2><label for="tank-new-name">水族箱名稱 <small>最多 10 個字</small></label><input id="tank-new-name" class="name-input" maxlength="20" placeholder="我的小水族箱" autocomplete="off"><p id="home-error" role="status"></p><button id="home-new" class="home-primary">開始養魚</button><button id="home-continue" hidden>繼續上次的遊戲</button><p id="home-summary"></p><p class="home-local">遊戲會自動記住你的進度！下次用同一台電腦或平板、同一個瀏覽器開啟，就能繼續養魚。記得不要清除瀏覽器的網站資料，才不會弄丟你的水族箱喔！</p></div></section>
+<div class="home-start"><h2>幫你的水族箱取個名字吧！</h2><label for="tank-new-name">水族箱名稱 <small>最多 10 個字</small></label><input id="tank-new-name" class="name-input" maxlength="20" placeholder="我的小水族箱" autocomplete="off"><p id="home-error" role="status"></p><button id="home-new" class="home-primary">開始養魚</button><button id="home-continue" hidden>繼續上次的遊戲</button><p id="home-summary"></p><p class="home-local">遊戲會自動記住你的進度！下次用同一台電腦或平板、同一個瀏覽器開啟，就能繼續養魚。記得不要清除瀏覽器的網站資料，才不會弄丟你的水族箱喔！</p></div></section>
 <main class="app" id="game" hidden>
 <header class="header"><div class="brand"><span class="brand-icon" aria-hidden="true">≈</span><div><h1>悠悠水族箱</h1></div><span class="version" hidden></span></div></header>
 <section class="hud" aria-label="水族箱狀態">
@@ -63,6 +65,6 @@
 
 
 </main>
-<dialog id="dialog"><div class="dialog-head"><div><span class="eyebrow" id="dialog-eyebrow">一起照顧水中的生命</span><h2 id="dialog-title"></h2></div><button class="icon-button" id="dialog-close" aria-label="關閉視窗">×</button></div><div id="dialog-content"></div></dialog>
+<dialog id="dialog"><div class="dialog-head"><div><span id="dialog-eyebrow" hidden></span><h2 id="dialog-title"></h2></div><button class="icon-button" id="dialog-close" aria-label="關閉視窗">×</button></div><div id="dialog-content"></div></dialog>
 <div id="toast" role="status" popover="manual" class="toast" hidden></div>
 </body></html>

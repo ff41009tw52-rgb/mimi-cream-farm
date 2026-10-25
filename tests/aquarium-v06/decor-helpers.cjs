@@ -5,7 +5,7 @@ async function completeDecor(p,{review=false}={}){
  else await p.locator('[data-buy-decor=smallplant]').click();
  assert.equal((await p.evaluate(()=>aquariumDebug())).state.onboarding.step,18);
  await p.locator('#more-menu').click();await p.locator('#tutorial-edit').click();assert.equal((await p.evaluate(()=>aquariumDebug())).state.onboarding.step,19);
- await p.locator('#edit-object').selectOption(await p.locator('.decor-handle').first().getAttribute('data-decor-id'));await p.locator('#edit-right').click();
+ await p.locator('[data-select-decor]').first().click();await p.locator('#edit-right').click();
  assert.equal((await p.evaluate(()=>aquariumDebug())).state.onboarding.step,20);
  await p.locator('#edit-done').click();
 }
