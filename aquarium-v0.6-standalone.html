@@ -324,6 +324,9 @@ body{background:radial-gradient(ellipse at 8% 20%,#dfece2aa,transparent 46%),rad
 }
 .purchase-form label{font-size:18px;color:#315e54}
 .purchase-form .name-input{width:100%;box-sizing:border-box;font-size:20px;scroll-margin:20px}
+.purchase-form .dialog-note,.purchase-form .name-error{margin:0}
+.purchase-form .name-error:empty{display:none}
+.purchase-form .confirm-actions{margin-top:4px}
 .purchase-form .confirm-actions{position:sticky;bottom:0;background:#fffdf3;padding:12px 0 max(12px,env(safe-area-inset-bottom));gap:10px}
 .purchase-form .confirm-actions button{min-height:48px;min-width:100px}
 @supports(height:100dvh){#dialog{max-height:calc(100dvh - 24px)}}
@@ -755,7 +758,7 @@ const rows={
  butterfly:['Chaetodon auriga','身側斜線交會成「人」字，眼睛上有一道深色帶。','印度洋至太平洋的珊瑚礁、礁坡與鄰近砂地。','身體側扁，前半白色斜線交錯，後半偏黃；成魚背鰭後段可拉成細絲。','啄食珊瑚蟲、海底小蟲、小型甲殼類等，也攝取部分藻類。','會在礁面附近慢慢搜尋，以小嘴啄取食物。','蝶魚的深色眼帶跨過真正的眼睛；身上的條紋不是藏在皮膚下的骨頭。','真實食性複雜，可能啄珊瑚；遊戲使用高蛋白飼料，不表示一種飼料就能滿足牠。',[['臺灣魚類資料庫','https://fishdb.sinica.edu.tw/chi/species.php?gen=Chaetodon&spe=auriga']]],
  blackshrimp:['Neocaridina spp.（黑殼蝦俗名類群）','半透明到褐色的身體，常能融入葉片與底砂。','臺灣等東亞地區可見的米蝦類群，多在淡水溪流、池沼與植物附近生活。','身體分節，有長觸角、步足與腹部游泳足；深淺顏色不能直接確認物種。','用小附肢取食附著在表面的生物膜、藻類與細小有機物。','常在葉片和石面走動覓食，也會擺動腹部快速退開。','生物膜是一層微小生物與物質的薄膜；牠啄食的表面看起來乾淨，也可能有食物。','「黑殼蝦」不是精確的單一物種名；牠也不是不需餵食、會清掉所有髒污的清潔工具。',[['佛羅里達大學 IFAS：Neocaridina','https://ask.ifas.ufl.edu/publication/IN1301']]],
  blueshrimp:['Neocaridina davidi（藍色觀賞品系）','藍色來自人工選育，身體構造仍是小型米蝦。','原種與臺灣淡水溪流有關，藍色觀賞品系主要由人工繁殖選育。','分節身體呈藍色，長觸角探索周圍，腹下的小游泳足協助游動。','啄食生物膜、藻類和細小有機物，也會接受合適的蝦飼料。','用步足在底部和植物上爬行，遇驚擾時可快速彈退。','蝦的硬外殼不會跟著身體一直伸長；成長時需要蛻殼，換上較大的外殼。','遊戲藍蝦指 N. davidi 的藍色品系，不是藍螯蝦；不同水族俗名不能互相代換。',[['佛羅里達大學 IFAS：觀賞米蝦','https://ask.ifas.ufl.edu/publication/IN1301']]],
- microcrab:['Limnopilos naiyanetri','小小的圓甲和細長步足，讓牠看起來像迷你蜘蛛。','已知來自泰國的淡水環境；原始研究確認牠是非常小型的淡水蟹。','背甲小而近圓，步足細長，螯足有細毛；不是蜘蛛，也不是蝦。','野外食性資料有限；不可只因螯上有毛，就斷定牠只靠濾水吃浮游生物。','用步足攀爬或行走，螯足可協助接觸與處理食物。','蟹有五對胸部附肢，第一對是螯足，另外四對多用來走路；和蜘蛛的八隻腳不同。','遊戲用小型飼料簡化餵食，不代表已確認完整野外食譜；真實小蟹容易被魚捕食。',[['新加坡自然歷史博物館：原始分類研究','https://lkcnhm.nus.edu.sg/wp-content/uploads/sites/11/app/uploads/2017/06/39rbz363-368.pdf']]],
+ microcrab:['Limnopilos naiyanetri','小小的圓甲和細長步足，讓牠看起來像迷你蜘蛛。','已知來自泰國的淡水環境；原始研究確認牠是非常小型的淡水蟹。','背甲小而近圓，步足細長，螯足有細毛；不是蜘蛛，也不是蝦。','野外食性資料有限；不可只因螯上有毛，就斷定牠只靠濾水吃浮游生物。','用步足攀爬或行走，螯足可協助接觸與處理食物。','蟹的十隻腳分成五對：前面一對是螯足，後面四對多用來走路；和蜘蛛的八隻腳不同。','遊戲用小型飼料簡化餵食，不代表已確認完整野外食譜；真實小蟹容易被魚捕食。',[['新加坡自然歷史博物館：原始分類研究','https://lkcnhm.nus.edu.sg/wp-content/uploads/sites/11/app/uploads/2017/06/39rbz363-368.pdf']]],
  pompomcrab:['Ptychognathus spp.（市售河口毛螯型，未確定單一物種）','兩隻螯上的毛束像小絨球，是這個市售類型的特色。','此屬多生活在河口或受淡水影響的海岸；不能一律說成終生生活在純淡水。','遊戲採用毛螯型造型，有硬背甲、螯足及四對步足；毛束不是海葵。','市售俗名可能混用物種，不能給出已確認的單一食譜；遊戲以小型飼料簡化。','用步足在底部行走，以螯足接觸和處理小物體。','「拳擊蟹」也可能指夾著海葵的 Lybia 類海蟹，和本遊戲的河口毛螯型不同。','Ptychognathus 近年有物種重新區分，不能僅憑俗名定種；列在遊戲淡水商店不表示適合純淡水飼養。',[['2025 年折顎蟹分類研究','https://pmc.ncbi.nlm.nih.gov/articles/PMC12238988/']]]
 };
 const species={...D.SPECIES};

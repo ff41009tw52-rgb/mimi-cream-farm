@@ -213,6 +213,9 @@
 }
 .purchase-form label{font-size:18px;color:#315e54}
 .purchase-form .name-input{width:100%;box-sizing:border-box;font-size:20px;scroll-margin:20px}
+.purchase-form .dialog-note,.purchase-form .name-error{margin:0}
+.purchase-form .name-error:empty{display:none}
+.purchase-form .confirm-actions{margin-top:4px}
 .purchase-form .confirm-actions{position:sticky;bottom:0;background:#fffdf3;padding:12px 0 max(12px,env(safe-area-inset-bottom));gap:10px}
 .purchase-form .confirm-actions button{min-height:48px;min-width:100px}
 @supports(height:100dvh){#dialog{max-height:calc(100dvh - 24px)}}
