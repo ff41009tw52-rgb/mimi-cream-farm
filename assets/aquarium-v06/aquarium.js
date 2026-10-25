@@ -221,7 +221,7 @@ function loadSaved(manual){
   }
   catch(e){if(!manual)saveBlocked=true;saveLabel();dialog.close();toast('這份存檔目前無法讀取，原資料已保留。',5000);}
 }
-function reset(){if(resetStep!==2)return;resetStep=0;activate(fresh(),{backup:'before_new'});dialog.close();}
+async function reset(){if(resetStep!==2)return;resetStep=0;if(await activate(fresh(),{backup:'before_new'}))dialog.close();}
 
 function moreMenu(){openDialog('更多功能','more');const list=document.createElement('div');list.className='more-grid';for(const [id,title,desc,fn]of [['more-observe','觀察生物','放大看魚兒和蝦蟹，也能複習魚的構造與呼吸',()=>{dialog.close();openObservation(selected);}],['roster','我的生物','查看飽足度、改名字或管理小居民',roster],['encyclopedia','生物圖鑑','收藏魚兒、蝦類與蟹類',encyclopedia],['tank-menu','我的魚缸','升級魚缸，安排喜歡的裝飾',tankMenu],['tutorial-edit','調整布置','移動魚缸內的裝飾',()=>{dialog.close();startEditing();}],['achievements','成就','查看進度與領取獎勵',achievements],['settings','設定','調整音效、重看教學或管理存檔',settings]]){const b=button('',fn,'more-item');b.id=id;const label=document.createElement('strong');label.textContent=id==='achievements'&&Number($('more-menu').dataset.rewards)?`成就 · ${$('more-menu').dataset.rewards} 項可領獎`:title;b.append(label,paragraph(desc));list.append(b);}$('dialog-content').append(list);tutorial.render();}
 function fishMore(){const f=state.fishes.find(f=>f.id===selected);if(!f)return;openDialog(SPECIES[f.species].category?'更多生物資料':'更多魚兒資料','fish-more');const minutes=Math.max(0,Math.floor((Date.now()-f.createdAt)/60000)),root=$('dialog-content');root.append(residentPortrait(f),paragraph(`活動水層：${SPECIES[f.species].depthName}`),paragraph(`養育時間：${minutes>=60?Math.floor(minutes/60)+' 小時 '+minutes%60+' 分鐘':minutes+' 分鐘'}`),paragraph(`心情：${mood(f)}`),paragraph(`配色：${f.variant==='normal'?'普通配色':VARIANTS[f.variant].name}`),paragraph(PERSONALITIES[f.personality].desc));const manage=button(SPECIES[f.species].category?'管理生物':'管理魚兒',()=>manageFish(f.id),'place-button');manage.id='manage-fish';root.append(manage,button('回到個體資料',()=>{dialog.close();selectFish(f.id);},'back-button'));appendFishKnowledge(root,f.species);}
@@ -690,13 +690,12 @@ function activate(candidate,{backup=null,elapsed=0,manualSource=null}={}){
  // or crashed tab releases it automatically, without expiring localStorage leases.
  if(navigator.locks&&!writerReady){
   if(writerPending)return false;writerPending=true;
-  navigator.locks.request(CONFIG.SAVE_KEY+'_writer',{ifAvailable:true},async lock=>{
+  return new Promise(resolveActivation=>navigator.locks.request(CONFIG.SAVE_KEY+'_writer',{ifAvailable:true},async lock=>{
    writerPending=false;
-   if(!lock){const message='遊戲已在另一個分頁開啟。請先關閉那個分頁，再按繼續遊戲。';$('home-error').textContent=message;toast(message,9000);return;}
-   writerReady=true;activate(candidate,{backup,elapsed,manualSource});
+   if(!lock){const message='遊戲已在另一個分頁開啟。請先關閉那個分頁，再按繼續遊戲。';$('home-error').textContent=message;toast(message,9000);resolveActivation(false);return;}
+   writerReady=true;resolveActivation(activate(candidate,{backup,elapsed,manualSource}));
    await new Promise(resolve=>window.addEventListener('pagehide',()=>{writerReady=false;conflict=true;resolve();},{once:true}));
-  }).catch(()=>{writerPending=false;toast('暫時無法取得存檔使用權，請重新整理後再試。');});
-  return false;
+  }).catch(()=>{writerPending=false;resolveActivation(false);toast('暫時無法取得存檔使用權，請重新整理後再試。');}));
  }
  let next;
  try{next=validate(candidate);if(backup)backupCurrent(backup);const recovered=next.saveId?recoverTutorialTransaction(next.saveId):null;if(recovered&&!backup)next=validate(recovered);mergeRewardLedger(next);mergeGiftLedger(next);next.savedAt=Date.now();lastPersistedState=JSON.stringify(next);localStorage.setItem(CONFIG.SAVE_KEY,lastPersistedState);}
@@ -707,15 +706,15 @@ function activate(candidate,{backup=null,elapsed=0,manualSource=null}={}){
  if(manualSource){try{const raw=localStorage.getItem(manualSource);if(raw&&!localStorage.getItem(CONFIG.MANUAL_KEY)){const m=validate(JSON.parse(raw));m.saveId=next.saveId;localStorage.setItem(CONFIG.MANUAL_KEY,JSON.stringify(m));}}catch(e){toast('進度已承接，舊手動存檔仍保留；可下載舊版備份後再匯入。');}}
  return true;
 }
-function continueSaved(){try{const source=findStored();if(!source)throw Error('沒有存檔');const next=validate(JSON.parse(source.raw));activate(next,{elapsed:Math.max(0,(Date.now()-next.savedAt)/1000),manualSource:source.key!==CONFIG.SAVE_KEY?source.manual:null});}catch(e){$('home-error').textContent='無法讀取這份進度，原本資料仍保留。請勿重置遊戲或清除網站資料。';}}
+async function continueSaved(){try{const source=findStored();if(!source)throw Error('沒有存檔');const next=validate(JSON.parse(source.raw));await activate(next,{elapsed:Math.max(0,(Date.now()-next.savedAt)/1000),manualSource:source.key!==CONFIG.SAVE_KEY?source.manual:null});}catch(e){$('home-error').textContent='無法讀取這份進度，原本資料仍保留。請勿重置遊戲或清除網站資料。';}}
 function newTank(){let name;try{name=window.AquariumSave.tankName($('tank-new-name').value);}catch(e){$('home-error').textContent=e.message;return;}
- const begin=()=>{if(activate(fresh(name),{backup:'before_new'}))dialog.close();};try{if(findStored()){confirmAction('建立新的水族箱？','目前進度會被新的三隻幼魚與 20 金幣取代。確認後會另保留一份替換前的本機備份。',begin);$('dialog-content').querySelector('.confirm').textContent='確認建立';}else begin();}catch(e){toast('目前無法讀取儲存空間，請確認瀏覽器的儲存設定。');}}
+ const begin=async()=>{if(await activate(fresh(name),{backup:'before_new'}))dialog.close();};try{if(findStored()){confirmAction('建立新的水族箱？','目前進度會被新的三隻幼魚與 20 金幣取代。確認後會另保留一份替換前的本機備份。',begin);$('dialog-content').querySelector('.confirm').textContent='確認建立';}else begin();}catch(e){toast('目前無法讀取儲存空間，請確認瀏覽器的儲存設定。');}}
 function goHome(){if(!save()){toast('尚未成功保存。請先下載存檔，再返回首頁。');return;}dialog.close();tutorial.setActive(false);started=false;dirty=false;clearTimeout(saveTimer);saveTimer=0;dismissToast();$('game').hidden=true;$('home').hidden=false;refreshHome();window.scrollTo(0,0);}
 function renameTank(){openDialog('替水族箱改名字','tank-name');const input=document.createElement('input');input.id='tank-rename';input.className='name-input';input.value=state.tankName;input.maxLength=20;input.setAttribute('aria-label','水族箱名稱，最多 10 個字');const error=paragraph('','name-error');error.setAttribute('role','status');const actions=document.createElement('div');actions.className='confirm-actions';actions.append(button('取消',()=>dialog.close()),button('保存名稱',()=>{if(conflict)return;try{state.tankName=window.AquariumSave.tankName(input.value);markDirty(true);updateUI();dialog.close();toast('水族箱名稱已保存。');}catch(e){error.textContent=e.message;}},'confirm'));$('dialog-content').append(input,error,actions);input.focus();}
 function chooseFile(){
  let input=$('save-import-file');if(!input){input=document.createElement('input');input.type='file';input.accept='.json,application/json';input.id='save-import-file';input.hidden=true;document.body.append(input);input.addEventListener('change',async()=>{
  const file=input.files?.[0];if(!file)return;
- try{if(file.size>1024*1024)throw Error('檔案太大，請選擇水族箱下載的 JSON 存檔。');const next=validate(JSON.parse(await file.text()));const date=new Date(next.savedAt).toLocaleString('zh-TW',{hour12:false});confirmAction('載入這份水族箱進度？',`水族箱：${next.tankName}。魚缸：${next.tanks.length} 個。魚兒：${next.tanks.reduce((n,t)=>n+t.fishes.length,0)} 隻。金幣：${next.coins}。儲存日期：${date}。格式已確認，可安全升級。確認後取代目前進度，原進度另留備份。`,()=>{if(started&&(conflict||saveBlocked)){toast('另一分頁已更新進度。請先重新讀取，再載入檔案。');return;}if(activate(next,{backup:'before_import'})){dialog.close();toast('存檔已載入！原本進度另有備份。');}});$('dialog-content').querySelector('.confirm').textContent='確認載入';}
+ try{if(file.size>1024*1024)throw Error('檔案太大，請選擇水族箱下載的 JSON 存檔。');const next=validate(JSON.parse(await file.text()));const date=new Date(next.savedAt).toLocaleString('zh-TW',{hour12:false});confirmAction('載入這份水族箱進度？',`水族箱：${next.tankName}。魚缸：${next.tanks.length} 個。魚兒：${next.tanks.reduce((n,t)=>n+t.fishes.length,0)} 隻。金幣：${next.coins}。儲存日期：${date}。格式已確認，可安全升級。確認後取代目前進度，原進度另留備份。`,async()=>{if(started&&(conflict||saveBlocked)){toast('另一分頁已更新進度。請先重新讀取，再載入檔案。');return;}if(await activate(next,{backup:'before_import'})){dialog.close();toast('存檔已載入！原本進度另有備份。');}});$('dialog-content').querySelector('.confirm').textContent='確認載入';}
  catch(e){toast('這份檔案無法讀取，原本進度仍保留。請選擇從水族箱下載的 JSON 存檔。',8000);}
  });}input.value='';input.click();
 }

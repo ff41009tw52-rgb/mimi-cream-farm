@@ -2,6 +2,8 @@ const assert=require('node:assert/strict'),{harness}=require('./harness.cjs'),{c
 (async()=>{
  const h=await harness(8872),w=context(),S=w.AquariumSave,D=w.AquariumData;
  const seed=step=>{const s=plain(starter);s.savedAt=Date.now();s.onboarding={...S.newOnboarding(),welcomed:true,step,events:S.TUTORIAL_KEYS.slice(0,step),completed:step===21,everCompleted:step===21};return plain(S.validate(s));};
+ // Replacing a save acquires ownership asynchronously, then closes only the confirmation.
+ const fresh=await h.create({state:seed(21)}),fp=fresh.p;await fp.locator('#home-new').click();await fp.getByRole('button',{name:'確認建立',exact:true}).click();await fp.waitForFunction(()=>aquariumDebug().started);assert.equal(await fp.locator('#dialog').evaluate(e=>e.open),false);await fp.locator('#tutorial-begin').click();assert.equal((await h.read(fp)).state.coins,20);assert.equal((await h.read(fp)).state.fishes.length,3);await fresh.context.close();
  // Lost auxiliary reward receipt: the durable payment journal must still prevent replay.
  const old=seed(21),a=D.ACHIEVEMENTS.find(a=>a.reward.coins>0&&a.reward.variant);
  old.achievements[a.id]={completed:true,rewardClaimed:false};old.rewardPaid={};
