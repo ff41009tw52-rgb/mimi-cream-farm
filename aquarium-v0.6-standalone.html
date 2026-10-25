@@ -600,7 +600,7 @@ const fishRows=[
  ['blueDevil','藍魔鬼','Chrysiptera cyanea',120,5,'marine','small','damsel','#427ad2','#7ccce2'],
  ['chromis','青魔魚','Chromis viridis',130,5,'marine','small','chromis','#73cbbd','#b8ebd8'],
  ['firefish','雷達魚','Nemateleotris magnifica',190,5,'marine','small','dart','#f3e4c6','#cf6b66'],
- ['dottyback','紫草莓','Pictichromis porphyrea',210,5,'marine','protein','dotty','#a574bd','#d394d1'],
+ ['dottyback','紫繡雀鯛','Pictichromis porphyrea',210,5,'marine','protein','dotty','#a574bd','#d394d1'],
  ['banggai','班加伊天竺鯛','Pterapogon kauderni',260,6,'marine','small','banggai','#d1d8cf','#526b73'],
  ['pajama','睡衣天竺鯛','Sphaeramia nematoptera',250,6,'marine','small','pajama','#c9d597','#dfb59a'],
  ['watchman','黃守衛蝦虎','Cryptocentrus cinctus',230,6,'marine','small','goby','#e9cb65','#88bfc6'],
@@ -640,7 +640,7 @@ const rows={
  blueDevil:['藍魔鬼是小型雀鯛，鮮藍身體和藍色背鰭很醒目；尾巴顏色可能隨性別與地區而不同。','整個身體偏鮮藍，吻部附近可有深色線帶。','背鰭也呈藍色，前方的硬棘與後方軟條連在一起。','小胸鰭拍動，協助在礁石附近調整位置。','https://fishesofaustralia.net.au/home/species/334'],
  chromis:['青綠色魚身在光線下可能偏藍，尾鰭深深分叉，和藍魔鬼的輪廓不同。','身體是青綠至藍綠色；看到的顏色會受光線影響。','背鰭沿背部延伸，協助穩定方向。','尾鰭分成明顯兩叉，適合觀察魚尾輪廓。','https://fishesofaustralia.net.au/Home/species/329'],
  firefish:['雷達魚的第一背鰭細長高聳，像小旗子；這不是觸角，也不是真正的雷達。','身體前半偏白，後半逐漸變成紅色。','第一背鰭前方的鰭棘特別細長；後方還有第二背鰭。','尾鰭較圓，會配合其他魚鰭在水中保持位置。','https://fishesofaustralia.net.au/home/species/2943'],
- dottyback:['這裡的紫草莓以弗氏擬雀鯛呈現：紫色細長身體，眼旁有深色線。俗名可能因店家而不同，辨認時要看學名。','紫色魚身較細長，吻端到眼睛附近有深色線。','背鰭長而連續，從背部前方延伸到後方。','胸鰭細小，幫助牠在礁縫附近轉向、停留。','https://shop.thebiotagroup.com/products/fridmani-dottyback'],
+ dottyback:['紫繡雀鯛又俗稱「草莓」，全身鮮紫紅色，眼睛周圍略帶藍色；牠和弗氏擬雀鯛是不同魚種。','身體細長而側扁，頭部鈍圓；體側及多數魚鰭呈鮮紫紅色，眼圈附近偏藍。','背鰭沿著背部延伸，能看到細長的鰭緣；牠常出現在珊瑚礁與礁坡附近。','尾鰭後緣較透明，胸鰭小巧；可觀察牠在礁石附近游動時如何調整方向。','https://fishdb.sinica.edu.tw/taxon/382428-fishdb'],
  banggai:['銀白魚身上的三道深色直帶、白點和長長的鰭，是班加伊天竺鯛的特色。','三道深色直帶跨過眼睛、身體及尾柄附近。','第二背鰭的鰭條拉長，和第一背鰭形成高低不同的輪廓。','尾鰭分叉，鰭面可見小白點；遊戲簡化了細點。','https://www.georgiaaquarium.org/animal/banggai-cardinalfish/'],
  pajama:['睡衣天竺鯛的前後身體像穿著不同花色：前半偏黃綠，中間深色帶，後半有圓點。','後半身的紅褐小圓點和中段深帶，是很好的辨識線索。','背上有分開的兩個背鰭，前方較高。','大眼睛有助於在昏暗環境觀察；眼睛不是呼吸器官。','https://fishesofaustralia.net.au/home/species/4237'],
  watchman:['黃守衛蝦虎常靠近砂地與洞口活動，黃色型身上有細小藍點；也有偏灰的個體。','頭大、眼睛位置較高，身上可見藍色細點。','背上有前後分開的兩個背鰭。','兩片腹鰭相連成盤狀，能協助牠在底部保持位置；遊戲只簡化畫出。','https://australian.museum/learn/animals/fishes/yellow-shrimpgoby-cryptocentrus-cinctus/'],
@@ -655,7 +655,7 @@ const observations={};const species={...D.SPECIES};
 for(const [id,[note,body,dorsal,special,sourceURL]]of Object.entries(rows)){
  const specialPart=['paradise','ocellaris','chromis','firefish','banggai','butterfly'].includes(id)?'tail':['maroon'].includes(id)?'cheek':['blueTang','yellowTang'].includes(id)?'caudalSpine':id==='sixline'?'tailMark':id==='watchman'?'pelvic':['pajama'].includes(id)?'eyes':'pectoral';
  observations[id]=Object.freeze({note,sourceURL,parts:[{id:'body',name:'體色與外形',description:body},{id:'dorsal',name:id==='firefish'?'第一背鰭':'背鰭',description:dorsal},{id:specialPart,name:{maroon:'鰓蓋旁的棘',blueTang:'尾柄與棘',yellowTang:'尾柄與棘',sixline:'尾柄眼斑',pajama:'眼睛',watchman:'相連的腹鰭',paradise:'尾鰭',ocellaris:'尾鰭',chromis:'尾鰭',firefish:'尾鰭',banggai:'尾鰭',butterfly:'尾側與尾鰭'}[id]||'胸鰭',description:special},{id:'anal',name:'臀鰭',description:'位在腹部後方，協助穩定身體；和背鰭在身體的不同側。'},{id:'gills',name:id==='paradise'?'鰓與迷鰓':'鰓與鰓蓋',description:id==='paradise'?'鰓在水中交換氣體，鰓上方的迷鰓器官則能輔助利用空氣中的氧，兩者都藏在體內。':'鰓藏在鰓蓋裡，水流經鰓時進行氣體交換；圖上的亮色是位置示意。'}]});
- species[id]=Object.freeze({...species[id],knowledge:{...species[id].knowledge,body:note,sourceURL}});
+ species[id]=Object.freeze({...species[id],knowledge:{...species[id].knowledge,body:note,...(id==='dottyback'?{habitat:'西太平洋的珊瑚礁及鄰近礁坡，臺灣海域也有紀錄。',diet:'真實食性偏肉食，會捕食小魚與小型甲殼類；遊戲簡化為高蛋白飼料。',habit:'常在珊瑚碎塊、礁石和礁坡附近活動，有時會游離礁穴。',care:'真實飼養時可能具有領域性，遊戲中的自由共缸是為了方便觀察，不代表真實混養建議。'}:{}),sourceURL}});
 }
 window.AquariumData=Object.freeze({...D,DECORATIONS:Object.freeze(decor),SPECIES:Object.freeze(species),OBSERVATIONS:Object.freeze(observations)});
 })();
