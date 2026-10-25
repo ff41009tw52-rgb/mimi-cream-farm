@@ -1923,7 +1923,7 @@ function create({getState,commit,notify,grant,ensureFeeding,prepareCoin,prepareF
    const tab=$('tab-'+s.shopTab),shopOpen=!!tab&&$('dialog').open;
    if(!shopOpen){target=$('shop');copy='再按「商店」，繼續剛才的'+(s.task===5?'飼料':s.task===6?'購魚':'布置')+'操作。';}
    else if(tab.getAttribute('aria-selected')!=='true'){target=tab;}
-   else if(o.step===11){const suitable=[...document.querySelectorAll('[id^="buy-feed-"]')].find(b=>!b.disabled&&getState().fishes.some(f=>window.AquariumData.FOOD_FOR[f.species]===b.id.slice(9)));if(suitable)target=suitable;
+   else if(o.step===11){const suitable=[...document.querySelectorAll('[id^="buy-feed-"]')].find(b=>!b.disabled&&(getState().fishes.length?getState().fishes:getState().tanks.flatMap(t=>t.fishes)).some(f=>window.AquariumData.FOOD_FOR[f.species]===b.id.slice(9)));if(suitable)target=suitable;
     if(o.review){target=reviewPurchase('feed',()=>api.report('feedBought'));copy='複習時只查看價格、購買按鈕和庫存，不需要再次消費。';}}
    else if(o.step===14){const status=prepareFish();if(status?.review){target=reviewPurchase('fish',()=>api.report('fishBought',{viewOnly:true}));copy=o.review?'複習購魚流程：看解鎖狀態、價格和購買按鈕，不需要再次消費。':'魚缸都住滿了！這次先查看購魚流程。日後升級或移魚空出位置，再迎接新魚。';}
     else if(status?.move){target=status.move;copy='這個魚缸滿了！先換到還有空位的魚缸，再買新魚。';}
@@ -2609,7 +2609,7 @@ function constrainDesign(item){
 }
 function startEditing(id){
  if(conflict)return;
- if(!practiceDecor&&(state.onboarding.review&&tutorial.task()===7||!state.placedDecorations.length&&(tutorial.expects('decorEditing')||tutorial.expects('decorMoved'))))practiceDecor={id:'practice-decor',decoration:'smallplant',normX:snapX(7),snapIndex:7,lane:0};
+ if(!practiceDecor&&(state.onboarding.review&&tutorial.task()===7||!state.placedDecorations.length&&(tutorial.expects('decorEditing')||tutorial.expects('decorMoved'))))practiceDecor={id:'practice-decor',decoration:activeTank().habitat==='marine'?'smallrock':'smallplant',normX:snapX(7),snapIndex:7,lane:0};
  dialog.close();closeCard();setFeeding(false);editing=true;designHistory.length=0;editSelection=typeof id==='string'?id:null;editPreview=null;drag=null;
  for(const r of runtime.values()){r.poi=null;r.poiWait=Math.max(r.poiWait,15);r.pause=0;}
  $('edit-toolbar').hidden=false;$('design-workspace').classList.add('is-editing');resize();$('decor-handles').hidden=false;canvas.classList.add('editing');buildBackground();updateEditorLabel();updateUI();draw();tutorial.report('decorEditing');tutorial.render();
@@ -3035,8 +3035,8 @@ function renderFeedShop(grid){
 }
 function buyFeed(id){
  if(conflict||saveBlocked||protectedBusy)return;const d=FEEDS[id];if(!d||state.level<d.level)return;
- const suitable=state.fishes.some(f=>FOOD_FOR[f.species]===id);
- if(tutorial.expects('feedBought')&&!suitable){shopMessage('先選目前魚缸裡的魚兒能吃的飼料。');return;}
+ const suitable=(state.fishes.length?state.fishes:allFish()).some(f=>FOOD_FOR[f.species]===id);
+ if(tutorial.expects('feedBought')&&!suitable){shopMessage('先選已飼養的魚兒能吃的飼料。');return;}
  if(state.feedInventory[id]>999999-d.pack||state.feedPurchases[id]>=999999){shopMessage('飼料庫存已達上限，暫時不能再買了。');return;}
  if(!supportAvailable('feedSupport',d.price)){shopMessage('金幣還不夠，先回魚缸收金幣，存夠再買飼料吧！');return;}
  const beforeStep=state.onboarding.step;let advanced=false,subsidy=0;

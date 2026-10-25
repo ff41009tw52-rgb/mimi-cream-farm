@@ -400,7 +400,7 @@ function constrainDesign(item){
 }
 function startEditing(id){
  if(conflict)return;
- if(!practiceDecor&&(state.onboarding.review&&tutorial.task()===7||!state.placedDecorations.length&&(tutorial.expects('decorEditing')||tutorial.expects('decorMoved'))))practiceDecor={id:'practice-decor',decoration:'smallplant',normX:snapX(7),snapIndex:7,lane:0};
+ if(!practiceDecor&&(state.onboarding.review&&tutorial.task()===7||!state.placedDecorations.length&&(tutorial.expects('decorEditing')||tutorial.expects('decorMoved'))))practiceDecor={id:'practice-decor',decoration:activeTank().habitat==='marine'?'smallrock':'smallplant',normX:snapX(7),snapIndex:7,lane:0};
  dialog.close();closeCard();setFeeding(false);editing=true;designHistory.length=0;editSelection=typeof id==='string'?id:null;editPreview=null;drag=null;
  for(const r of runtime.values()){r.poi=null;r.poiWait=Math.max(r.poiWait,15);r.pause=0;}
  $('edit-toolbar').hidden=false;$('design-workspace').classList.add('is-editing');resize();$('decor-handles').hidden=false;canvas.classList.add('editing');buildBackground();updateEditorLabel();updateUI();draw();tutorial.report('decorEditing');tutorial.render();
@@ -826,8 +826,8 @@ function renderFeedShop(grid){
 }
 function buyFeed(id){
  if(conflict||saveBlocked||protectedBusy)return;const d=FEEDS[id];if(!d||state.level<d.level)return;
- const suitable=state.fishes.some(f=>FOOD_FOR[f.species]===id);
- if(tutorial.expects('feedBought')&&!suitable){shopMessage('先選目前魚缸裡的魚兒能吃的飼料。');return;}
+ const suitable=(state.fishes.length?state.fishes:allFish()).some(f=>FOOD_FOR[f.species]===id);
+ if(tutorial.expects('feedBought')&&!suitable){shopMessage('先選已飼養的魚兒能吃的飼料。');return;}
  if(state.feedInventory[id]>999999-d.pack||state.feedPurchases[id]>=999999){shopMessage('飼料庫存已達上限，暫時不能再買了。');return;}
  if(!supportAvailable('feedSupport',d.price)){shopMessage('金幣還不夠，先回魚缸收金幣，存夠再買飼料吧！');return;}
  const beforeStep=state.onboarding.step;let advanced=false,subsidy=0;
