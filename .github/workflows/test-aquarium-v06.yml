@@ -27,6 +27,7 @@ jobs:
           for f in assets/aquarium-v06/*.js; do node --check "$f"; done
           node tests/aquarium/schema-v05.test.cjs
           node tests/aquarium-v06/schema.test.cjs
+          node tests/aquarium-v06/species-content.test.cjs
           python3 scripts/build-aquarium-v06.py
           git -c safe.directory="$GITHUB_WORKSPACE" diff --exit-code -- aquarium-v0.6-standalone.html
       - name: Prepare browsers
@@ -34,6 +35,13 @@ jobs:
           apt-get update && apt-get install -y --no-install-recommends fonts-noto-cjk
           npm install --prefix /tmp/aquarium-v06-runtime playwright@1.58.2
           echo 'NODE_PATH=/tmp/aquarium-v06-runtime/node_modules' >> "$GITHUB_ENV"
+      - name: Verify 35 shared species profiles and purchase journeys
+        run: node tests/aquarium-v06/species-stories.test.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: species-stories-evidence
+          path: artifacts/aquarium-v06/species-*
       - name: Verify free design, reward compensation and marine integration
         run: |
           node tests/aquarium-v06/quality.test.cjs
@@ -50,6 +58,7 @@ jobs:
           AQUARIUM_BROWSER: webkit
           AQUARIUM_ARTIFACTS: artifacts/aquarium-v06/webkit
         run: |
+          node tests/aquarium-v06/species-stories.test.cjs
           node tests/aquarium-v06/quality.test.cjs
           node tests/aquarium-v06/mobile.test.cjs
           node tests/aquarium-v06/design.test.cjs

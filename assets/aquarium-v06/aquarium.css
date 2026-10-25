@@ -163,6 +163,54 @@
 .purchase-form{max-width:520px;margin:auto;display:grid;gap:10px}
 .purchase-form .fish-preview{min-height:0;width:240px;height:140px;max-width:100%;margin:auto;grid-area:auto}
 .purchase-price{font-weight:600;text-align:center;margin:0}
+.species-identity{text-align:center;margin:8px 0 14px;min-width:0}
+.species-identity .species-name{font-size:21px;font-weight:750;color:#285d55;margin:0 0 4px;line-height:1.5}
+.species-identity .species-scientific{font-size:14px;color:#5e756b;overflow-wrap:anywhere;line-height:1.6;margin:0;font-style:italic}
+.species-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.species-facts>section,.species-highlights>section{min-width:0;padding:13px 15px;border:1px solid #dbe7d8;border-radius:14px;background:#f1f7ed}
+.species-guide h4,.species-highlights h3{font-size:16px;font-weight:750;line-height:1.5;color:#315e54;margin:0 0 6px}
+.species-guide p,.species-highlights p{font-size:16px;line-height:1.8;color:#3e6156;margin:0;min-height:0;flex:none;overflow-wrap:anywhere}
+.species-facts>.species-fun{grid-column:1/-1;background:#fff8df;border-color:#e9dfba}
+.species-care{padding:14px;margin:12px 0;border-radius:14px;background:#eef2ed;border:1px solid #dce3d8}
+.species-care .species-game-note{font-size:14px;color:#61746a;margin-top:9px}
+.species-sources{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:13px;line-height:1.8;overflow-wrap:anywhere}
+.species-sources a{color:#286e67;text-underline-offset:3px}
+.species-guide>summary{min-height:46px;font-size:16px;font-weight:700;line-height:1.5;padding:12px 0;cursor:pointer}
+.species-highlights{display:grid;gap:10px}
+.species-highlights>section:last-child{background:#fff8df;border-color:#e9dfba}
+.purchase-form .species-identity{margin:0 0 4px}
+#dialog-content>.fish-preview{min-height:0;width:min(100%,360px);height:170px;flex:none;margin:0 auto 12px;grid-area:auto}
+.species-welcome{text-align:center;max-width:600px;margin:auto}
+.species-welcome .welcome-nickname{font-size:16px;color:#57786b;margin:6px 0 16px}
+.species-welcome .welcome-fact{background:#fff7dc;border:1px solid #e6dcb4;border-radius:16px;padding:18px;text-align:left;font-size:18px;line-height:1.8;margin:12px 0}
+.species-welcome>.place-button{width:100%;margin:4px 0 10px;min-height:48px;font-size:17px}
+.purchase-welcome-actions{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+.purchase-welcome-actions button{flex:1 1 150px;min-height:48px;padding:12px 15px;border-radius:12px;background:#e9f1e4;font-size:16px}
+.purchase-welcome-actions .confirm{background:#28796d;color:#fff}
+#dialog .species-shop-grid{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+#dialog .species-shop-grid>.shop-item{display:flex;grid-column:auto;gap:9px;padding:16px}
+#dialog .species-shop-grid>.shop-item>.fish-preview{min-height:0;height:155px;width:100%;flex:none;grid-area:auto;filter:none}
+#dialog .species-shop-grid .fish-brief{font-size:16px;line-height:1.7;margin:0;min-height:0;color:#3e6156}
+#dialog .species-shop-grid .shop-detail{font-size:14px;line-height:1.6;margin:0;color:#587366;flex:none}
+#dialog .species-shop-grid .buy{font-size:16px;margin:4px 0 0}
+#dialog .species-shop-grid .fish-detail{margin:0;border-top:1px solid #dce6d5}
+#dialog .species-shop-grid .fish-detail>summary{font-size:16px;font-weight:700;min-height:46px}
+#dialog .species-shop-grid .species-facts{grid-template-columns:1fr}
+#dialog .species-shop-grid .species-guide p{font-size:15px;line-height:1.8;margin:0;color:#3e6156}
+#dialog .species-shop-grid .species-guide .species-name{font-size:20px;font-weight:750;margin-bottom:4px}
+#dialog .species-shop-grid .species-guide .species-scientific{font-size:13px;color:#5e756b}
+#obs-species-guide{margin:14px 0}
+@media(max-width:680px){
+ #dialog .species-shop-grid{grid-template-columns:1fr}
+ .species-facts{grid-template-columns:1fr}
+ .species-identity .species-name{font-size:20px}
+ .purchase-form .fish-preview{height:120px}
+ .purchase-form{gap:8px}
+ .species-highlights>section{padding:10px 12px}
+ .species-highlights p{font-size:15px;line-height:1.7}
+ .species-welcome .welcome-fact{font-size:17px;padding:14px}
+ .purchase-welcome-actions button{flex-basis:120px;font-size:15px;padding:10px}
+}
 .purchase-form label{font-size:18px;color:#315e54}
 .purchase-form .name-input{width:100%;box-sizing:border-box;font-size:20px;scroll-margin:20px}
 .purchase-form .confirm-actions{position:sticky;bottom:0;background:#fffdf3;padding:12px 0 max(12px,env(safe-area-inset-bottom));gap:10px}
@@ -234,3 +282,6 @@
 @media(min-width:1060px) and (min-height:680px){#game .design-workspace{flex:1 1 0;min-height:190px;display:flex;flex-direction:column}#game .design-workspace.is-editing{display:grid;align-items:stretch;min-height:0}#game .design-workspace .aquarium{height:100%;min-height:0}#game .design-workspace .edit-toolbar{min-height:0;max-height:100%;align-self:stretch}}
 /* Thumbnail canvases must never inherit the tank's 340px mobile minimum. */
 .design-workspace .design-thumbnail canvas{min-height:0;max-height:42px;flex:0 0 42px}.design-thumbnail span{flex:none}
+
+/* All catalog and individual portraits use their own size, including the original ten fish. */
+#dialog .fish-preview{min-height:0;flex:none}
