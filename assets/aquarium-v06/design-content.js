@@ -9,7 +9,7 @@ const fishRows=[
  ['blueDevil','藍魔鬼','Chrysiptera cyanea',120,5,'marine','small','damsel','#427ad2','#7ccce2'],
  ['chromis','青魔魚','Chromis viridis',130,5,'marine','small','chromis','#73cbbd','#b8ebd8'],
  ['firefish','雷達魚','Nemateleotris magnifica',190,5,'marine','small','dart','#f3e4c6','#cf6b66'],
- ['dottyback','紫草莓','Pictichromis porphyrea',210,5,'marine','protein','dotty','#a574bd','#d394d1'],
+ ['dottyback','紫繡雀鯛','Pictichromis porphyrea',210,5,'marine','protein','dotty','#a574bd','#d394d1'],
  ['banggai','班加伊天竺鯛','Pterapogon kauderni',260,6,'marine','small','banggai','#d1d8cf','#526b73'],
  ['pajama','睡衣天竺鯛','Sphaeramia nematoptera',250,6,'marine','small','pajama','#c9d597','#dfb59a'],
  ['watchman','黃守衛蝦虎','Cryptocentrus cinctus',230,6,'marine','small','goby','#e9cb65','#88bfc6'],
