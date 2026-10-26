@@ -24,8 +24,12 @@ const {harness}=require('./harness.cjs'),{context,plain,v5,large}=require('./sch
  assert.equal(new Set(meals.map(m=>m.species)).size,35);pass('All thirty-five residents eat their assigned food, each successful surface drop consumes one stock and creates three pellets');
  const wrongState=seeded({count:1}),wrong=await h.create({state:wrongState,cadence:100}),wp=wrong.p;await wp.locator('#home-continue').click();await wp.locator('#game').waitFor({state:'visible'});await feed(wp,'small');assert(await wp.locator('#dialog').isVisible());assert.equal((await read(wp)).state.feedInventory.small,100);await wp.getByRole('button',{name:'取消',exact:true}).click();assert.equal((await read(wp)).food.length,0);await wp.locator('#tank').click({position:{x:150,y:55}});await wp.locator('#dialog-content .confirm').click();await advance(wp,90000);assert.equal((await read(wp)).diagnostics.eaten,0);assert.equal((await read(wp)).state.feedInventory.small,99);assert.equal((await read(wp)).food.length,0);await wrong.context.close();
 
- // Removing the emergency-food button must not strand players at zero food / zero coins.
- const empty=seeded({coins:0,hunger:0});
+ // At zero hunger the fish must stop generating coins; positive hunger retains normal income even without available feed.
+ const zero=seeded({coins:0,hunger:0});zero.feedInventory={general:0,small:0,protein:0};
+ for(const f of zero.tanks[0].fishes)f.coinProgress=D.SPECIES[f.species].coinInterval*D.CONFIG.COIN_SCALE-1;
+ const zv=await h.create({state:zero,cadence:100}),zp=zv.p;await zp.locator('#home-continue').click();await zp.locator('#game').waitFor({state:'visible'});await advance(zp,20000);
+ assert.equal((await read(zp)).state.drops.length,0,'0% hunger stops new coin generation even with no food or money');await zv.context.close();
+ const empty=seeded({coins:0,hunger:10});
  empty.feedInventory={general:0,small:0,protein:0};
  for(const f of empty.tanks[0].fishes)f.coinProgress=D.SPECIES[f.species].coinInterval*D.CONFIG.COIN_SCALE-1;
  const ev=await h.create({state:empty,cadence:100}),ep=ev.p;await ep.locator('#home-continue').click();await ep.locator('#game').waitFor({state:'visible'});
@@ -34,14 +38,14 @@ const {harness}=require('./harness.cjs'),{context,plain,v5,large}=require('./sch
  assert.match(await ep.locator('#dialog-content').innerText(),/遊戲把飼料簡化成三種/);
  await h.closeDialog(ep);
  await advance(ep,20000);
- assert((await read(ep)).state.drops.length>0,'hungry fish must still produce fallback coins when no food can be afforded');
- assert((await read(ep)).state.drops.every(c=>c.value===1),'fallback coin is worth exactly 1');
+ assert((await read(ep)).state.drops.length>0,'positive-hunger fish must earn coins at the normal rate');
+ assert((await read(ep)).state.drops.every(c=>c.value>=2),'positive hunger retains the species stage payout');
  await ep.locator('#feed').click();await ep.locator('#feed-general').click();
  const noFoodBefore=(await read(ep)).state.feedInventory.general;
  const cashBefore=(await read(ep)).state.coins;
  const coin=(await read(ep)).state.drops[0],rect2=await ep.locator('#tank').boundingBox();
  await ep.locator('#tank').click({position:{x:coin.x*rect2.width,y:coin.y*rect2.height}});
- assert.equal((await read(ep)).state.coins,cashBefore+1,'coin remains collectable while feeding');
+ assert.equal((await read(ep)).state.coins,cashBefore+coin.value,'coin remains collectable while feeding');
  assert.equal((await read(ep)).state.feedInventory.general,noFoodBefore,'collecting cannot consume fish food');
  assert.equal(await ep.locator('#feed').getAttribute('aria-pressed'),'true','feeding mode remains available');
  await ep.evaluate(()=>{
@@ -53,7 +57,7 @@ const {harness}=require('./harness.cjs'),{context,plain,v5,large}=require('./sch
  await ep.locator('#close-card').click();assert.equal(await ep.locator('#collect-all').count(),0,'bulk collection control is removed');
  assert(!await ep.getByRole('button',{name:/全部收取/}).count());
  await ev.context.close();
- pass('Remove emergency food, remove bulk collection, keep fish/coins clickable during feeding and preserve minimal no-food income');
+ pass('Stop producing coins at 0% hunger, keep normal payouts while hunger is positive, preserve fish/coin interactions');
 
  const legacy=await h.create({state:large,key:'aquarium_game_save_v5'}),lp=legacy.p;await lp.locator('#home-continue').click();await lp.locator('#game').waitFor({state:'visible'});const migrated=(await read(lp)).state;assert.deepEqual(migrated.tanks.map(t=>t.fishes.length),[10,8]);assert.equal(await lp.evaluate(()=>JSON.parse(localStorage.getItem('aquarium_game_save_v5')).fishes.length),18);assert.equal(migrated.migration.compensation,5970);await shot(lp,'legacy-two-tanks');await legacy.context.close();
  const multi=await h.create({state:seeded({tier:1})}),mp=multi.p;await mp.locator('#home-continue').click();await mp.locator('#game').waitFor({state:'visible'});assert(await mp.locator('#tank-upgrade-shortcut').isVisible(),'tank upgrade shortcut is visible beside fish count');assert.match(await mp.locator('#tank-upgrade-shortcut').getAttribute('title'),/7 隻/);await mp.locator('#tank-upgrade-shortcut').click();assert(await mp.locator('#upgrade-tank').isVisible());await h.closeDialog(mp);async function tankMenu(){await mp.locator('#more-menu').click();await mp.locator('#tank-menu').click();}

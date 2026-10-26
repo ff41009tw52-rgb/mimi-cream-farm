@@ -57,7 +57,11 @@ function markDirty(important=false){if(!started)return;if(batching){dirty=true;r
 function saveLabel(){const e=$('save-status');e.classList.toggle('error',saveBlocked||conflict);e.textContent=conflict?'⚠ 另一分頁已更新，請重新讀取':saveBlocked?'⚠ 原存檔已保留，暫停儲存':lastSaved?`✓ 已自動存檔 ${timeLabel(lastSaved)}`:'尚未儲存';}
 function offline(seconds){
  const t=clamp(seconds,0,CONFIG.MAX_OFFLINE_TIME),hours=t/3600;let reward=0,changed=false;
- for(const f of allFish()){const before=stage(f.growth);if(f.hunger>25){f.growth=clamp(f.growth+hours*CONFIG.OFFLINE_GROWTH_PER_HOUR*(900/SPECIES[f.species].growthTime));if(f.hunger>=45)reward+=Math.floor(hours*2*SPECIES[f.species].values[stage(f.growth)]);}
+ for(const f of allFish()){const before=stage(f.growth);
+  // Only the time before hunger reaches 0% can earn offline coins; do not credit a full interval after starvation.
+  const productiveHours=f.hunger>0?(CONFIG.OFFLINE_HUNGER_PER_HOUR>0?Math.min(hours,f.hunger/CONFIG.OFFLINE_HUNGER_PER_HOUR):hours):0;
+  if(f.hunger>25)f.growth=clamp(f.growth+hours*CONFIG.OFFLINE_GROWTH_PER_HOUR*(900/SPECIES[f.species].growthTime));
+  if(productiveHours>0)reward+=Math.floor(productiveHours*2*SPECIES[f.species].values[stage(f.growth)]);
   f.hunger=clamp(f.hunger-hours*CONFIG.OFFLINE_HUNGER_PER_HOUR);syncFish(f);recordAdult(f);state.collection[f.species].highestStage=Math.max(state.collection[f.species].highestStage,stage(f.growth));if(stage(f.growth)!==before){gainXP(8,false);changed=true;}}
  reward=Math.min(reward,CONFIG.OFFLINE_MAX_REWARD,CONFIG.MAX_COINS-state.coins);state.coins+=reward;dirty=true;
  if(seconds>=60){const m=Math.floor(seconds/60),label=m>=60?`${Math.floor(m/60)} 小時 ${m%60} 分`:`${m} 分`;toast(`歡迎回來！離開了 ${label}${seconds>CONFIG.MAX_OFFLINE_TIME?'（最多計算 4 小時）':''}${reward?`，獲得 ${reward} 金幣`:''}${changed?'，魚兒長大了':''}。`,6500);}
@@ -83,7 +87,7 @@ function updateUI(){if(!state)return;checkFeatureHints();renderTankSelector();re
  const next=Object.values(SPECIES).filter(s=>s.unlockLevel===state.level+1).map(s=>s.name);$('next-unlock').textContent=next.length?`下一級解鎖：${next.join('、')}`:`已解鎖全部魚種`;
  $('feed').disabled=editing;
  const claimable=ACHIEVEMENTS.filter(a=>state.achievements[a.id]?.completed&&!state.achievements[a.id].rewardClaimed).length;const more=$('more-menu');more.dataset.rewards=String(claimable);more.setAttribute('aria-label',claimable?`更多，有 ${claimable} 項成就可領獎`:'更多');let badge=$('achievement-badge');if(!badge){badge=document.createElement('small');badge.id='achievement-badge';more.append(badge);}badge.hidden=!claimable;badge.textContent=claimable?`${claimable} 項可領獎`:'';
- if(selected){const f=state.fishes.find(f=>f.id===selected);if(f){$('fish-name').textContent=f.name;$('fish-species').textContent=SPECIES[f.species].name;$('fish-stage').textContent=residentStage(f);$('fish-growth-tip').textContent=SPECIES[f.species].category?'吃飽後會慢慢長大，從幼體長成成體。':'魚兒吃飽後會慢慢長大，從幼魚變成成魚。';$('observe-fish').textContent=SPECIES[f.species].category?'觀察這隻生物':'觀察這隻魚';$('fish-hunger').textContent=`${Math.round(f.hunger)}%`;$('fish-growth').textContent=`${Math.floor(f.growth)}%`;$('hunger-meter').value=f.hunger;$('growth-meter').value=f.growth;$('fish-mood').textContent=`目前狀態：${f.hunger<25?'肚子餓':runtime.get(f.id)?.behavior||mood(f)}`;$('fish-personality').textContent=`個性：${PERSONALITIES[f.personality].name}`;$('fish-food').textContent='食物：'+FEEDS[FOOD_FOR[f.species]].name;}}
+ if(selected){const f=state.fishes.find(f=>f.id===selected);if(f){$('fish-name').textContent=f.name;$('fish-species').textContent=SPECIES[f.species].name;$('fish-stage').textContent=residentStage(f);const spec=SPECIES[f.species],payouts=spec.values,stages=spec.category?'幼體／成長中／成體':'幼魚／亞成魚／成魚';$('fish-growth-tip').textContent=`${stages}每次產幣 ${payouts[0]}／${payouts[1]}／${payouts[2]} 金幣，約每 ${Math.round(coinInterval(spec))} 秒一次。飽足度 0% 才停產；保持照顧才能長大。`;$('observe-fish').textContent=SPECIES[f.species].category?'觀察這隻生物':'觀察這隻魚';$('fish-hunger').textContent=`${Math.round(f.hunger)}%`;$('fish-growth').textContent=`${Math.floor(f.growth)}%`;$('hunger-meter').value=f.hunger;$('growth-meter').value=f.growth;$('fish-mood').textContent=`目前狀態：${f.hunger<25?'肚子餓':runtime.get(f.id)?.behavior||mood(f)}`;$('fish-personality').textContent=`個性：${PERSONALITIES[f.personality].name}`;$('fish-food').textContent='食物：'+FEEDS[FOOD_FOR[f.species]].name;}}
 }
 function selectFish(id){if(editing)return;recordActivity('firstCard');metric('fish');selected=id;const f=state.fishes.find(f=>f.id===id),portrait=$('fish-portrait');portrait.replaceChildren();portrait.hidden=!f||!(SPECIES[f.species].category||SPECIES[f.species].form);if(!portrait.hidden)portrait.append(previewFish(f.species,false,f.variant));$('fish-card').hidden=false;updateUI();tutorial.report('fishOpened');}
 function closeCard(){selected=null;$('fish-card').hidden=true;queueMicrotask(()=>tutorial.render());}
@@ -510,16 +514,11 @@ function stepTank(dt){
   r.x=clamp(r.x+r.vx*dt,marginX,1-marginX);r.y=clamp(r.y+r.vy*dt,minY,maxY);if(Math.abs(r.vx)>.006)r.direction=r.vx>0?1:-1;
   r.turn+=(r.direction-r.turn)*(1-Math.exp(-dt*s.turnSpeed));r.heading+=(clamp(r.vy/(Math.abs(r.vx)+.02),-.4,.4)-r.heading)*(1-Math.exp(-dt*2));r.phase+=dt*(r.pause>0?3:s.bottomDweller?7:5+r.magnitude*35);r.position={x:r.x,y:r.y};r.coinValue=s.values[stage(f.growth)];r.hiddenAmount+=(Number(r.behaviorState==='hide')-r.hiddenAmount)*(1-Math.exp(-dt*2.5));
   }
-  // When there is no usable feed and insufficient coins to buy any suitable pack,
-   // allow a tiny, slower income. Removing the emergency-feed claim must not deadlock a save.
-   const necessary=[...new Set(allFish().map(f=>FOOD_FOR[f.species]))];
-   const noFoodToFeed=necessary.length>0&&necessary.every(id=>state.feedInventory[id]===0);
-   const minFoodCost=Math.min(...necessary.filter(id=>state.level>=FEEDS[id].level).map(id=>FEEDS[id].price));
-   const recovery=noFoodToFeed&&state.coins<minFoodCost&&f.hunger<45;
-   if(f.hunger>=45||recovery){
-    f.coinProgress=Math.min(coinInterval(s),f.coinProgress+dt*(recovery?.35:1));
+  // 1–100% hunger keeps the normal coin rate; 0% pauses coin production until fed.
+   if(f.hunger>0){
+    f.coinProgress=Math.min(coinInterval(s),f.coinProgress+dt);
     if(f.coinProgress>=coinInterval(s)&&state.drops.length<CONFIG.MAX_DROPS){
-     state.drops.push({id:uid(),x:clamp(r.x,.06,.94),y:clamp(r.y-.07,.13,.82),value:recovery?1:r.coinValue});
+     state.drops.push({id:uid(),x:clamp(r.x,.06,.94),y:clamp(r.y-.07,.13,.82),value:r.coinValue});
      f.coinProgress=0;diagnostics.spawned++;if(!simulatingBackground)tutorial.coin();markDirty();
     }
    }
