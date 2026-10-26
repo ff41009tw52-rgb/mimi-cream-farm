@@ -837,7 +837,7 @@ const variants={...D.VARIANTS};
 for(const [species,rows]of Object.entries(palettes))rows.forEach(([name,color,tail,accent],i)=>{
  const id=species+'_basic_'+(i+1);
  if(Object.hasOwn(variants,id))throw Error('Duplicate basic palette ID: '+id);
- variants[id]=Object.freeze({species,name,color,tail,accent,basic:true,condition:'基本配色，可直接選購。'});
+ variants[id]=Object.freeze({species,name,color,tail,accent,basic:true,rule:Object.freeze({type:'basic'}),condition:'基本配色，可直接選購。'});
 });
 window.AquariumData=Object.freeze({...D,VARIANTS:Object.freeze(variants)});
 // Target size is computed once. Runtime interpolation is visual only, never saved as growth.
