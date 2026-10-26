@@ -23,7 +23,7 @@ const steps=[
  {task:7,target:'tab-decor',shopTab:'decor',event:'decorShopOpened',copy:'按一下「布置」，看看可以放進水族箱的裝飾。'},
  {task:7,target:'tutorial-decor-buy',shopTab:'decor',event:'decorBought',copy:'選一件喜歡的裝飾，按「購買並放置」，就能放進魚缸。先從小水草試試看吧！',success:'裝飾放好了！現在試著調整它的位置。'},
  {task:7,target:'tutorial-edit',event:'decorEditing',copy:'按「調整布置」，再選取一件裝飾。'},
- {task:7,target:'decor-handles',event:'decorMoved',copy:'選一件裝飾，把它拖到別的位置。也可以按四方向箭頭微調。',success:'完成了！以後你可以自由布置自己的水族箱。'},
+ {task:7,target:'decor-handles',event:'decorMoved',copy:'選一件裝飾，把它拖到別的位置。也可以按四方向箭頭微調。',success:'完成了！布置可以上下左右自由移動，免費換色，還能旋轉、縮放及調整前後圖層。以後再慢慢試試吧！'},
  {task:8,target:'more-menu' ,event:'observationOpened',copy:'按「更多」→「觀察生物」，認識魚的身體構造與呼吸。',success:'恭喜你完成新手教學！前往「更多 → 成就」可領取金幣；遊戲會自動存檔，下次可接著玩。'}
 ];
 function create({getState,commit,notify,grant,ensureFeeding,prepareCoin,prepareFish,prepareFood,prepareDecor,prepareEditing,reviewPurchase}){
@@ -32,7 +32,7 @@ function create({getState,commit,notify,grant,ensureFeeding,prepareCoin,prepareF
  const coinTarget=document.createElement('button');coinTarget.id='tutorial-coin-target';coinTarget.hidden=true;coinTarget.type='button';coinTarget.textContent='點這枚金幣';document.querySelector('.tank-viewport').append(coinTarget);
  const success=document.createElement('p');success.id='onboarding-success';success.hidden=true;$('onboarding-copy').after(success);
  function expects(event){const o=getState().onboarding;return active&&!o.completed&&o.welcomed&&steps[o.step]?.event===event;}
- function record(event){const o=getState().onboarding;if(!expects(event))return false;const key=keys[o.step];if(!o.events.includes(key))o.events.push(key);const n=keys.findIndex(k=>!o.events.includes(k));o.step=n<0?keys.length:n;o.completed=o.step===keys.length;if(o.completed){o.everCompleted=true;if(!o.review&&!getState().gifts.includes('tutorialComplete'))getState().gifts.push('tutorialComplete');}return true;}
+ function record(event){const o=getState().onboarding;if(!expects(event))return false;const key=keys[o.step];if(!o.events.includes(key))o.events.push(key);const n=keys.findIndex(k=>!o.events.includes(k));o.step=n<0?keys.length:n;o.completed=o.step===keys.length;if(o.completed){o.everCompleted=true;if(!o.hints.includes('backup'))o.hints.push('backup');if(!o.review&&!getState().gifts.includes('tutorialComplete'))getState().gifts.push('tutorialComplete');}return true;}
  function finish(previous,advanced,options={}){if(!advanced)return false;render();const text=options.viewOnly?'已看過購買流程，現在繼續下一項任務。':steps[previous]?.success||'';success.textContent=text;success.hidden=!text||getState().onboarding.completed;if(text&&getState().onboarding.completed)notify(text);return true;}
  function render(){
   $('tutorial-dialog-copy')?.remove();$('tutorial-review-purchase')?.remove();$('tutorial-room-help')?.remove();coinTarget.hidden=true;
@@ -58,7 +58,7 @@ function create({getState,commit,notify,grant,ensureFeeding,prepareCoin,prepareF
   }
   if(o.step===18||o.step===19){const status=prepareEditing();target=status.target;if(status.copy)copy=status.copy;}
   if(s.task===3&&$('dialog').open){if($('roster')){target=$('roster');copy='按「我的生物」，就能找到正在照顧的魚。';}else if(document.querySelector('.roster-item')){target=document.querySelector('.roster-item');copy='點一條魚的名字，看看飽足度、成長進度與適合的飼料。';}}
-  if(o.step===14&&$('purchase-fish-name')){target=$('purchase-fish-name');copy='幫新魚取個名字，再按「確認購買」。取消不會扣金幣。';}
+  if(o.step===14&&$('purchase-fish-name')){target=$('purchase-colors')||$('purchase-fish-name');copy='先選喜歡的顏色，幫新魚取名字，再按「確認購買」。取消不會扣金幣。';}
   if($('purchase-see-fish')){target=$('purchase-see-fish');copy='新魚已加入！按「去看看牠」認識新朋友，再接續教學。';}
    if(s.task===8&&$('dialog').open&&$('more-observe')){target=$('more-observe');copy='按「觀察生物」，看看魚的外形與呼吸方式。';}
   if(o.review&&s.task<=2)copy+='（重新練習不會扣飼料，也不會重複送禮物。）';
@@ -70,7 +70,7 @@ function create({getState,commit,notify,grant,ensureFeeding,prepareCoin,prepareF
   $('tutorial-begin').onclick=()=>{if(!commit(()=>{if(!review)grant('starter');Object.assign(getState().onboarding,{welcomed:true,paused:false});}))return;welcome.close();render();};if(!welcome.open)welcome.showModal();}
  $('onboarding-gift').onclick=()=>{const n=getState().onboarding.step;if(!commit(()=>{if(!getState().onboarding.review)grant('smallLesson');record('smallGift');}))return;finish(n,true);};
  welcome.addEventListener('cancel',e=>e.preventDefault());
- const api={render,expects,record,finish,task(){return steps[getState().onboarding.step]?.task||0;},setActive(on){active=on;if(!on)welcome.close();const o=getState().onboarding;if(on&&!o.completed&&!o.welcomed)openWelcome();if(on&&o.welcomed&&[1,2,5,6].includes(o.step))ensureFeeding(o.step===2?'general':o.step===6?'small':null);render();},report(event,options={}){if(!expects(event))return false;const n=getState().onboarding.step;if(!commit(()=>record(event)))return false;return finish(n,true,options);},replay(){const o=getState().onboarding;if(!o.everCompleted){notify('先完成這次教學，就能從設定重新複習。');return;}if(!commit(()=>{getState().onboarding={...window.AquariumSave.newOnboarding(),everCompleted:true,review:true,hints:[...o.hints],supportAmounts:{...o.supportAmounts}};}))return;lastLocated='';this.setActive(true);},resume(){this.setActive(true);},coin(){const o=getState().onboarding;if(!active||o.coinHintShown)return;o.coinHintShown=true;notify('魚兒吃得飽，就會慢慢帶來金幣！看到金幣，點一下就能收取。');}};return api;
+ const api={render,expects,record,finish,task(){return steps[getState().onboarding.step]?.task||0;},setActive(on){active=on;if(!on)welcome.close();const o=getState().onboarding;if(on&&!o.completed&&!o.welcomed)openWelcome();if(on&&o.welcomed&&[1,2,5,6].includes(o.step))ensureFeeding(o.step===2?'general':o.step===6?'small':null);render();},report(event,options={}){if(!expects(event))return false;const n=getState().onboarding.step;if(!commit(()=>record(event)))return false;return finish(n,true,options);},replay(){const o=getState().onboarding;if(!o.everCompleted){notify('先完成這次教學，就能從設定重新複習。');return;}if(!commit(()=>{getState().onboarding={...window.AquariumSave.newOnboarding(),everCompleted:true,review:true,hints:[...o.hints],supportAmounts:{...o.supportAmounts}};}))return;lastLocated='';this.setActive(true);},resume(){this.setActive(true);},coin(){const o=getState().onboarding;if(!active||o.coinHintShown)return;o.coinHintShown=true;notify('魚兒飽足度還大於 0%，就會慢慢帶來金幣！看到金幣，點一下就能收取。');}};return api;
 }
 window.AquariumTutorial=Object.freeze({create,steps,tasks});
 })();

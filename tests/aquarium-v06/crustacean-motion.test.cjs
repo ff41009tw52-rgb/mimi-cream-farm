@@ -13,7 +13,7 @@ for(const key of ['blackshrimp','blueshrimp','microcrab','pompomcrab']){
  if(s.category==='shrimp'){r.crustMode='短游';A.tick(r,f,s,.1,world);assert.equal(r.crustMotion,'swim');}
  r.target={x:r.x,y:r.y};A.tick(r,f,s,.1,world);assert.equal(r.crustMotion,'rest');assert.equal(r.vx,0);
  assert.equal(JSON.stringify(f),before,'motion must never change saved fish fields');
- assert(A.displaySize(key,1)>=36);assert(A.displaySize(key,60)<70);
+ assert.equal(A.displaySize(key,1),1,'no second multiplier or minimum should flatten growth');assert.equal(A.displaySize(key,60),60);
  const parts=w.AquariumFishArt.getFinInfo(key).parts.map(p=>p.id);assert(parts.includes('gills'));assert(parts.includes('legs'));assert(!parts.includes('dorsal'));
 }
 const args=[{},'guppy',10,20,50,1,0,.2,'normal',{highlightPart:'tail'}];w.AquariumFishArt.draw(...args);assert.deepEqual(calls[0],args);assert.equal(w.AquariumFishArt.getFinInfo('guppy').fish,true);

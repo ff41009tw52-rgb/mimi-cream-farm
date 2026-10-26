@@ -298,3 +298,15 @@
 #toast.decor-success{position:fixed;inset:50% auto auto 50%;transform:translate(-50%,-50%);margin:0;width:min(420px,calc(100vw - 40px));box-sizing:border-box;padding:24px 48px 24px 24px;border:2px solid #78aa96;border-radius:22px;background:#fffdf1;color:#285f53;box-shadow:0 14px 60px #214b4b55;font-size:20px;line-height:1.8;pointer-events:none}
 #toast.decor-success .toast-close{pointer-events:auto}
 #dialog .species-shop-grid>.creature-product>.fish-preview{height:155px;min-height:155px;flex:none}
+
+/* One purchase dialog: large live art, three named basics, optional collected specials. */
+.purchase-colors{border:0;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-width:0}
+.purchase-colors legend{font-size:18px;font-weight:700;color:#315e54;margin-bottom:8px}
+.fish-color-swatch{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:8px 4px;min-height:76px;font-size:14px;border:2px solid #d8e5d8;border-radius:14px;background:#fffdf5;color:#385d54}
+.fish-color-dot{width:30px;height:30px;border-radius:50%;border:1px solid #50776855;box-shadow:inset 0 2px 3px #ffffff88}
+.fish-color-swatch[aria-pressed=true]{border-color:#428e77;background:#edf7ec;box-shadow:0 0 0 1px #428e77}
+.fish-color-swatch[aria-pressed=true]::after{content:'✓';position:absolute;right:4px;top:2px;font-size:17px;font-weight:700;color:#27735d}
+.fish-color-swatch:focus-visible{outline:3px solid #d1a44e;outline-offset:2px}
+.purchase-form .fish-preview{width:300px;height:175px;object-fit:contain}
+.purchase-form .variant-note{font-size:12px;line-height:1.4;margin:0;color:#67776a}
+@media(max-width:600px){.purchase-form .fish-preview{width:260px;height:145px}.purchase-colors{gap:6px}.purchase-colors legend{font-size:17px}.fish-color-swatch{min-height:69px}}

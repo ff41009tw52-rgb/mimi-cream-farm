@@ -28,7 +28,7 @@ const forms={
 const normalTail='M-29 -2 L-53 -19 Q-49 0 -53 21 L-29 5Z',normalDorsal='M-24 -11 Q-22 -30 -8 -29 L24 -13Z',normalAnal='M-23 9 Q-19 29 4 27 L27 13Z';
 function fin(c,d,col,phase,tail,highlight){c.save();if(tail)c.scale(.9+Math.sin(phase)*.1,1);else c.rotate(Math.sin(phase)*.025);shape(c,d,highlight?'#f1c861':col);c.save();c.clip(P(d));for(let i=0;i<9;i++)line(c,`M-12 0 L${-56+i*10} ${i%2?-40:40}`,'#f8f0ce60',.6);c.restore();c.restore();}
 function drawFish(c,key,x,y,size,turn=1,angle=0,phase=0,variant='normal',o={}){
- const s=D.SPECIES[key],f=forms[s?.form];if(!f)return fishOld.draw(c,key,x,y,size,turn,angle,phase,variant,o);
+ const base=D.SPECIES[key],v=D.VARIANTS[variant],s=v?.species===key?{...base,color:v.color,tail:v.tail}:base,f=forms[s?.form];if(!f)return fishOld.draw(c,key,x,y,size,turn,angle,phase,variant,o);
  const [body,tail=normalTail,dorsal=normalDorsal,anal=normalAnal]=f;
  c.save();c.translate(x,y);c.rotate(angle*.35);c.scale(size/100*(turn<0?-1:1)*(.2+.8*Math.abs(turn)),size/100);c.lineCap='round';c.lineJoin='round';
  fin(c,tail||normalTail,s.tail,phase,true,o.highlightPart==='tail');fin(c,dorsal||normalDorsal,s.tail+'bd',phase,false,o.highlightPart==='dorsal');fin(c,anal||normalAnal,s.tail+'bd',phase+.8,false,o.highlightPart==='anal');
@@ -38,7 +38,7 @@ function drawFish(c,key,x,y,size,turn=1,angle=0,phase=0,variant='normal',o={}){
  if(['clown','maroon'].includes(form)){for(const x0 of [-21,2,25]){line(c,`M${x0} -32 Q${x0-10} 0 ${x0+1} 32`,'#52646a',form==='clown'?13:7);line(c,`M${x0} -32 Q${x0-10} 0 ${x0+1} 32`,'#fff3d8',form==='clown'?9:4);}}
  if(['paradise','flame','banggai'].includes(form)){for(let i=0;i<(form==='banggai'?3:7);i++){const xx=-22+i*(form==='banggai'?23:8);line(c,`M${xx} -35 Q${xx-7} 0 ${xx+2} 34`,form==='paradise'?'#db8567':form==='flame'?'#574d68':'#465a65',form==='banggai'?9:4);}}
  if(form==='wrasse'){for(let i=0;i<6;i++)line(c,`M-44 ${-12+i*5} Q0 ${-19+i*6} 45 ${-7+i*4}`,'#e9b375',2);}
- if(form==='dart'){shape(c,'M1 -18 L55 -18 L55 20 L-8 20 Q12 5 1 -18Z','#cf706e',null);}
+ if(form==='dart'){shape(c,'M1 -18 L55 -18 L55 20 L-8 20 Q12 5 1 -18Z',s.tail,null);}
  if(form==='pajama'){shape(c,'M-5 -30 L5 -30 L5 30 L-5 30Z','#4d6260',null);for(let i=0;i<18;i++)oval(c,8+i%5*6,-15+Math.floor(i/5)*9,2,2.4,'#b98278');}
  if(form==='blueTang'){shape(c,'M-23 -5 Q-4 -29 25 -16 Q19 -5 4 -4 Q-4 18 -23 12 L-30 0Z','#364d77',null);oval(c,8,-12,13,6,s.color);}
  if(form==='butterfly'){for(let i=0;i<10;i++){line(c,`M${-45+i*8} -34 l45 43`,'#b49c6e80',1.1);line(c,`M${-45+i*8} 32 l45 -43`,'#fff1c57a',1.1);}shape(c,'M17 -36 L28 -29 L34 33 L24 37Z','#465567',null);shape(c,'M-38 -31 L-17 -31 L-18 33 L-38 33Z','#e7c65c',null);}
