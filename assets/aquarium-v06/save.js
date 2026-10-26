@@ -11,7 +11,7 @@ const tankKeys={fishes:'fishes',drops:'drops',tankTier:'tier',tankName:'name',pu
 const V2_KEYS=['general.open','general.select','general.drop','small.gift','small.open','small.select','small.drop','fish.card','coin.collect','feed.shop','feed.tab','feed.buy','fish.shop','fish.tab','fish.buy','observe'];
 const TUTORIAL_KEYS=[...V2_KEYS.slice(0,15),'decor.shop','decor.tab','decor.buy','decor.edit','decor.move','observe'];
 const OLD_KEYS=[...V2_KEYS.slice(0,8),'feed.shop','feed.tab','feed.buy','observe'];
-const HINT_IDS=['upgrade','tank2','move','backup'];
+const HINT_IDS=['upgrade','tank2','move','backup','marineSoon','marineReady','foodBudget'];
 const ADDED_ACHIEVEMENTS=['fourSpecies','threePurchases','twoAdults','sevenDecor','twelveSpecies','fifteenSpecies',...window.AquariumData.NEW_ACHIEVEMENT_IDS];
 function withNewAchievementDefaults(raw){
  if(!raw?.achievements||typeof raw.achievements!=='object'||Array.isArray(raw.achievements))return raw;

@@ -71,22 +71,30 @@ function shrimp(c,key,gait,idle,motion,part){
  oval(c,29,-10,2,2.1,p.ink);line(c,[[30,-5],[34,-9]],p.edge,1.3);oval(c,34,-9,3.3,3.5,'#243c40',p.leg,.7);oval(c,35,-10.2,1,1.1,'#fffdf2');oval(c,33.3,-7.8,.4,.4,'#9bbcb9');
  if(part==='gills'){form(c,shell,'#fff8df66');oval(c,14,2,11,7,'#f5bc82dd','#b27c55');for(let i=0;i<7;i++)form(c,`M${6+i*2.5} -2 Q${3+i*2.5} 3 ${7+i*2.5} 7`,null,'#fff6d4',.9);}
 }
+// Curved, tapered segments retain distinct joint centres. Small left/right offsets
+// break the mirror pose; each of the four walking pairs has its own stride phase.
 function crabLegs(c,p,micro,gait,motion,part){
- const knees=micro?[[27,-25],[34,-8],[33,15],[25,32]]:[[31,-17],[36,0],[34,17],[26,31]];
- const toes=micro?[[43,-41],[53,-17],[51,29],[35,47]]:[[48,-28],[53,5],[48,32],[35,44]];
- for(const side of [-1,1])for(let i=3;i>=0;i--){const active=motion==='walk',cycle=gait+i*Math.PI*.8+(side<0?Math.PI:0),sweep=active?Math.sin(cycle)*3.2:0,lift=active?Math.max(0,Math.cos(cycle))*2:0;
- const root=[side*(micro?10:18),-7+i*5],knee=[side*(knees[i][0]+sweep*.4),knees[i][1]+lift],toe=[side*(toes[i][0]+sweep),toes[i][1]-lift];
- const mid=[knee[0]+(toe[0]-knee[0])*.72,knee[1]+(toe[1]-knee[1])*.68];
- limb(c,[root,knee,mid,toe],p,micro?1.15:2.25,part==='legs');oval(c,knee[0],knee[1],micro?1.5:2.05,micro?1.5:2.05,part==='legs'?gold:p.belly,p.edge,.5);
- if(!micro)line(c,[[knee[0]*.94,knee[1]-1],[knee[0]*1.02,knee[1]+1]],p.ink,.8);
+ const knees=micro?[[29,-20],[35,-3],[31,19],[19,33]]:[[33,-13],[39,3],[34,21],[23,32]];
+ const toes=micro?[[40,-40],[53,-10],[48,33],[28,49]]:[[49,-25],[55,11],[47,36],[32,46]];
+ for(const side of [-1,1])for(let i=3;i>=0;i--){
+  const active=motion==='walk',cycle=gait+i*1.9+side*.8,sweep=active?Math.sin(cycle)*3.4:0,lift=active?Math.max(0,Math.cos(cycle))*2.3:0;
+  const root=[side*(micro?10:20),-6+i*5],knee=[side*(knees[i][0]+sweep*.4),knees[i][1]+lift+(side<0?1.5:-1)],toe=[side*(toes[i][0]+sweep-(side<0?2:0)),toes[i][1]-lift];
+  const joint=[knee[0]+(toe[0]-knee[0])*.54-side*2,knee[1]+(toe[1]-knee[1])*.65];
+  const d=`M${root} Q${side*(micro?21:28)} ${root[1]+(i-1)*3} ${knee} Q${knee[0]+side*2} ${joint[1]} ${joint} Q${joint[0]+side*3} ${toe[1]-2} ${toe}`;
+  const w=micro?1.45:2.8;
+  form(c,d,null,part==='legs'?'#996a25':p.edge,w+1,true);
+  form(c,d,null,part==='legs'?gold:p.leg,w,true);
+  form(c,d,null,part==='legs'?'#fff3a8':p.glint,w*.3,true);
+  for(const j of [knee,joint]){oval(c,j[0],j[1],micro?1.4:2.1,micro?1.2:1.8,p.belly,p.edge,.45);oval(c,j[0]-.3,j[1]-.4,.5,.5,p.glint);}
+  for(let n=0;n<5;n++){const t=(n+1)/6,xx=knee[0]+(joint[0]-knee[0])*t,yy=knee[1]+(joint[1]-knee[1])*t;line(c,[[xx,yy],[xx+side*(micro?1.9:2.5),yy-1.6]],p.glint+'bb',.45);}
  }
 }
-const microShell='M-12 -6 Q-10 -13 -4 -14 Q0 -16 4 -14 Q11 -13 13 -5 Q16 3 10 10 Q5 15 -3 14 Q-13 13 -14 4 Q-15 -1 -12 -6Z';
-const pomShell='M-19 -13 Q-12 -19 -5 -18 Q0 -15 5 -18 Q15 -19 21 -10 L23 -3 Q24 12 14 17 Q0 23 -15 16 Q-24 12 -23 0Z';
+const microShell='M-11 -7 C-7 -13 -2 -15 4 -13 Q12 -11 14 -3 Q16 5 9 11 C3 16 -6 13 -11 10 Q-16 4 -14 -2Z';
+const pomShell='M-23 -12 L-16 -19 Q-8 -21 -4 -18 L4 -18 Q13 -21 21 -16 L26 -9 L25 5 Q22 17 11 19 L-10 19 Q-24 17 -26 6 L-27 -4Z';
 function crab(c,key,gait,idle,motion,part){
  const micro=key==='microcrab',p=palettes[key],shape=micro?microShell:pomShell;
  crabLegs(c,p,micro,gait,motion,part);
- const body=gradient(c,-12,-20,12,21,[[0,p.top],[.4,p.body],[1,p.deep]]);
+ const body=gradient(c,-12,-20,12,21,[[0,p.top],[.4,micro?'#d2c7a9cc':p.body],[.75,micro?'#a8ad9299':p.deep],[1,p.belly]]);
  form(c,shape,part==='carapace'?'#f5c65c':body,p.edge,micro?.9:1.1);
  c.save();c.clip(path(shape));
  oval(c,-4,-8,micro?10:16,micro?6:9,'#fff3d74d');
@@ -95,21 +103,24 @@ function crab(c,key,gait,idle,motion,part){
  for(let i=0;i<(micro?28:42);i++){const x=(i*13%37)-18,y=(i*7%31)-15;oval(c,x,y,i%3===0?1:.5,i%3===0?.65:.4,i%3===0?p.ink+'66':p.spot+'bb');}
  if(!micro){form(c,'M-18 -10 Q-12 -14 -8 -12 M7 -12 Q14 -15 19 -8',null,'#fff1c7',1.4);oval(c,-12,1,3,4,'#b88a6780');oval(c,12,1,3,4,'#b88a6780');}
  c.restore();
+ // Fine shell hairs and an inner translucent rim, distinct from the leg joints.
+ if(micro){form(c,'M-10 -7 Q-16 6 -5 11 Q5 15 12 4',null,'#fff5dbb0',.7);for(let i=0;i<25;i++){const a=i/25*TAU,x=Math.cos(a)*12,y=Math.sin(a)*12;line(c,[[x,y],[x+Math.cos(a)*2.2,y+Math.sin(a)*2.2]],'#d6cdb4bb',.45);}}
+ else{form(c,'M-22 -8 Q-25 6 -18 12 M-15 14 Q0 21 16 14',null,'#87664e99',1.4);form(c,'M-19 -13 Q0 -21 19 -12',null,'#fff2c9b0',1.2);}
  // Eyestalks are visible above the anterior shell; no angry brows or large teeth.
  for(const side of [-1,1]){const ex=side*(micro?5.6:9.2),ey=micro?-18:-21;
  limb(c,[[side*(micro?4:7),micro?-11:-15],[ex,ey]],p,micro?1.4:2.5,part==='eyes');
  oval(c,ex,ey,micro?2.1:3.1,micro?2.4:3.4,part==='eyes'?gold:'#344746',p.glint,.55);oval(c,ex+.6,ey-.9,micro?.65:.85,micro?.7:.95,'#fff9e6');
  }
  // Two chelipeds: small hairy pincers for the micro crab, broad fuzzy mitts for the pom-pom.
- for(const side of [-1,1]){const lift=Math.sin(idle*1.15+side)*1.8,reach=micro?19:32;
+ for(const side of [-1,1]){const lift=Math.sin(idle*1.15+side)*1.8,reach=micro?19:34;
  limb(c,[[side*(micro?9:17),-9],[side*(micro?22:29),-20+lift],[side*reach,-29+lift]],p,micro?1.5:3.4,part==='claws');
- c.save();c.translate(side*reach,-31+lift);c.rotate(side*(.24+Math.sin(idle*.8+side)*.08));
+ c.save();c.translate(side*reach,-31+lift);c.rotate(side*(.38+Math.sin(idle*.8+side)*.09));if(!micro)c.scale(1.12,1.08);
  if(micro){
   form(c,'M-3 4 Q-6 -1 -3 -5 L-1 -8 L0 -3 L3 -7 Q6 -3 4 1 L2 5Z',part==='claws'?'#f4c15b':p.belly,p.edge,.8);
   for(let i=0;i<6;i++){const y=-4+i*1.6;line(c,[[-3,y],[-6,y-1]],part==='claws'?gold:p.leg,.55);line(c,[[3,y],[5,y-1]],part==='claws'?gold:p.leg,.55);}
  }else{
   const fuzz=gradient(c,-7,-11,7,8,[[0,'#fff2ce'],[.5,'#ddc49b'],[1,'#ba976d']]);
-  oval(c,0,-2,9,9,part==='claws'?'#f3c65d':fuzz,p.edge,.6);
+  oval(c,0,-2,10.5,8.5,part==='claws'?'#f3c65d':fuzz,p.edge,.6);
   // Fine setae grow directly on the claws, not sea anemones carried in the hands.
   for(let i=0;i<26;i++){const a=i/26*TAU,r=9+(i%4)*.7;line(c,[[Math.cos(a)*4,Math.sin(a)*4-2],[Math.cos(a)*r,Math.sin(a)*r-2]],part==='claws'?(i%2?'#fff3b5':gold):i%3?'#ebd6ae':'#b39470',.8);}
   form(c,'M-5 4 Q-7 0 -5 -4 L-3 -8 L-1 -4 L0 -1 L2 -5 L4 -8 Q7 -4 6 1 Q5 5 1 6Z',part==='claws'?'#f4c15b':'#d4a675',p.edge,.8);
@@ -132,7 +143,7 @@ function draw(c,key,x,y,size,turn=1,angle=0,phase=0,variant='normal',options={})
  c.restore();
 }
 // Display scale is transient: historic saved sizes and growth remain untouched.
-function displaySize(key,size){return key==='microcrab'?Math.max(36,size*1.16):key==='pompomcrab'?Math.max(47,size*1.08):Math.max(43,size*1.1);}
+function displaySize(key,size){return size;} // Compatibility: AquariumAppearance already applies species size once.
 // A small independent walking/climbing model; it shares growth, economy and food rules.
 function tick(r,f,s,dt,{target,fishes,runtime,decorations,layout,W,H}){
  r.crustTimer=(r.crustTimer||0)-dt;r.crustRest=Math.max(0,(r.crustRest||0)-dt);r.escape=Math.max(0,(r.escape||0)-dt);
@@ -148,7 +159,7 @@ function tick(r,f,s,dt,{target,fishes,runtime,decorations,layout,W,H}){
  const swimming=shrimpType&&(r.crustMode==='短游'||r.escape>0),stride=swimming?1:.65+.35*Math.abs(Math.sin(r.phase));
  const speed=(target?Math.max(.04,s.speed*1.9):s.speed*(r.escape?3:1))*(rest?0:stride);let vx=dx/(dist||1)*speed,vy=dy/(dist||1)*speed*.72;
  for(const q of fishes){if(rest||q.id===f.id)continue;const rr=runtime.get(q.id),ox=r.x-rr.x,oy=r.y-rr.y,d=Math.hypot(ox,oy);if(d>.001&&d<.04){vx+=ox/d*.008;vy+=oy/d*.005;}}
- r.vx=vx;r.vy=vy;r.x=cap(r.x+vx*dt,Math.max(.06,f.size*.55/W),1-Math.max(.06,f.size*.55/W));r.y=cap(r.y+vy*dt,.45,.915);if(Math.abs(vx)>.001)r.direction=vx>0?1:-1;r.turn+=(r.direction-r.turn)*Math.min(1,dt*4);r.heading=0;r.phase+=dt*(rest?0:swimming?9:6);r.idlePhase=(r.idlePhase||0)+dt;r.crustMotion=rest?'rest':swimming?'swim':'walk';r.position={x:r.x,y:r.y};r.behavior=target?'撿食底餌':rest?'停下覓食':r.crustMode||'步行';r.behaviorState=target?'feed':rest?'rest':r.crustMode==='躲藏'?'hide':r.crustMode==='攀爬'?'climb':'walk';r.hiddenAmount+=(Number(r.behaviorState==='hide')*.5-r.hiddenAmount)*Math.min(1,dt*2);r.coinValue=s.values[f.growth>=100?2:f.growth>=35?1:0];
+ r.vx=vx;r.vy=vy;r.x=cap(r.x+vx*dt,Math.max(.06,(f.size*Math.max(-bounds[f.species].left,bounds[f.species].right)/100+8)/W),1-Math.max(.06,(f.size*Math.max(-bounds[f.species].left,bounds[f.species].right)/100+8)/W));r.y=cap(r.y+vy*dt,Math.max(.45,(-bounds[f.species].top*f.size/100+8)/H),Math.min(.915,1-(bounds[f.species].bottom*f.size/100+8)/H));if(Math.abs(vx)>.001)r.direction=vx>0?1:-1;r.turn+=(r.direction-r.turn)*Math.min(1,dt*4);r.heading=0;r.phase+=dt*(rest?0:swimming?9:6);r.idlePhase=(r.idlePhase||0)+dt;r.crustMotion=rest?'rest':swimming?'swim':'walk';r.position={x:r.x,y:r.y};r.behavior=target?'撿食底餌':rest?'停下覓食':r.crustMode||'步行';r.behaviorState=target?'feed':rest?'rest':r.crustMode==='躲藏'?'hide':r.crustMode==='攀爬'?'climb':'walk';r.hiddenAmount+=(Number(r.behaviorState==='hide')*.5-r.hiddenAmount)*Math.min(1,dt*2);r.coinValue=s.values[f.growth>=100?2:f.growth>=35?1:0];
  return target&&Math.hypot((target.x-r.x)*W,(target.y-r.y)*H)<Math.max(15,f.size*.3);
 }
 window.AquariumCrustaceans=Object.freeze({tick,displaySize});

@@ -92,3 +92,35 @@ jobs:
         with:
           name: normal-progression-evidence
           path: artifacts/aquarium-v06/
+
+  appearance:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.58.2-noble
+      options: --ipc=host
+    timeout-minutes: 25
+    strategy:
+      matrix:
+        browser: [chromium, webkit]
+    env:
+      AQUARIUM_BROWSER: ${{ matrix.browser }}
+      AQUARIUM_ARTIFACTS: artifacts/appearance/${{ matrix.browser }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          apt-get update && apt-get install -y --no-install-recommends fonts-noto-cjk
+          npm install --prefix /tmp/aquarium-v06-runtime playwright@1.58.2
+      - name: Verify 93 purchases, growth transitions, retained adults and all 35 real tank sizes
+        env:
+          NODE_PATH: /tmp/aquarium-v06-runtime/node_modules
+        run: |
+          node tests/aquarium-v06/crustacean-motion.test.cjs
+          node tests/aquarium-v06/appearance.test.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: appearance-${{ matrix.browser }}
+          path: artifacts/appearance/
