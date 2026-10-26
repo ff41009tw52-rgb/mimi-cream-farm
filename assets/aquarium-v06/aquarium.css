@@ -290,7 +290,7 @@
 #dialog .fish-preview{min-height:0;flex:none}
 
 /* Keep every closed shop card aligned; reading opens its own dialog. */
-#dialog .species-shop-grid>.creature-product{height:430px;box-sizing:border-box;flex-direction:column;gap:10px;min-width:0}
+#dialog .species-shop-grid>.creature-product{height:460px;box-sizing:border-box;flex-direction:column;gap:10px;min-width:0}
 #dialog .creature-product>h3{height:52px;min-height:52px;margin:0;display:flex;align-items:center;font-size:20px;line-height:26px}
 #dialog .creature-product>.fish-brief{height:82px;min-height:82px;line-height:27px;overflow:auto;flex:none}
 #dialog .creature-product>.fish-detail{min-height:40px;height:40px;flex:none;background:transparent;border:0;color:#357568;font-size:15px;padding:6px}
