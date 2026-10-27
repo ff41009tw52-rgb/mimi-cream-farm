@@ -56,7 +56,7 @@ function save(manual=false){
 function markDirty(important=false){if(!started)return;if(batching){dirty=true;return;}dirty=true;if(important){save();return;}if(!saveTimer&&!saveBlocked&&!conflict)saveTimer=setTimeout(()=>save(),CONFIG.SAVE_DEBOUNCE_MS);}
 function saveLabel(){const e=$('save-status');e.classList.toggle('error',saveBlocked||conflict);e.textContent=conflict?'⚠ 另一分頁已更新，請重新讀取':saveBlocked?'⚠ 原存檔已保留，暫停儲存':lastSaved?`✓ 已自動存檔 ${timeLabel(lastSaved)}`:'尚未儲存';}
 function offline(seconds){
- const t=clamp(seconds,0,CONFIG.MAX_OFFLINE_TIME);if(t<=0)return;
+ const t=clamp(seconds,0,CONFIG.MAX_OFFLINE_TIME);if(t<=0)return true;
  let reward=0,productive=0;
  if(!protectedTransaction(()=>{
   for(const f of allFish()){
@@ -64,8 +64,8 @@ function offline(seconds){
    reward+=result.earned;productive=Math.max(productive,result.productive);syncFish(f);recordAdult(f);state.collection[f.species].highestStage=Math.max(state.collection[f.species].highestStage,stage(f.growth));if(stage(f.growth)!==before)gainXP(8*(stage(f.growth)-before),false);
   }
   const old=state.offlinePending;if(seconds>=60||reward||old)state.offlinePending={coins:Math.min(CONFIG.MAX_COINS,(old?.coins||0)+reward),seconds:(old?.seconds||0)+seconds,productive:(old?.productive||0)+productive,at:Date.now()};
- }))return;
- if(seconds>=60||state.offlinePending?.coins)showOffline();
+ })){saveBlocked=true;saveLabel();return false;}
+ if(seconds>=60||state.offlinePending?.coins)showOffline();return true;
 }
 function showOffline(){
  const q=state.offlinePending;if(!q||dialog.open||!state.onboarding.completed)return;
@@ -245,7 +245,7 @@ function loadSaved(manual){
     clearTimeout(saveTimer);saveTimer=0;state=next;lastPersistedState=localStorage.getItem(CONFIG.SAVE_KEY);
     evaluateGoals(false);renderOnboarding();conflict=saveBlocked=false;
     lastSaved=state.savedAt;state.fishes.forEach(syncFish);rebuildRuntime();buildBackground();
-    if(!manual)offline(Math.max(0,(Date.now()-state.savedAt)/1000));
+    if(!manual&&offline(Math.max(0,(Date.now()-state.savedAt)/1000))===false){saveLabel();return;}
     dirty=true;const saved=save();
     if(!saved)saveBlocked=wasBlocked;
     updateUI();dialog.close();
@@ -692,7 +692,7 @@ canvas.addEventListener('keydown',e=>{if(feeding&&(e.key==='Enter'||e.key===' ')
 $('feed').onclick=()=>setFeeding(!feeding);$('stop-feed').onclick=()=>setFeeding(false);$('close-card').onclick=closeCard;$('shop').onclick=shop;$('more-menu').onclick=moreMenu;$('fish-more').onclick=fishMore;$('rename').onclick=renameFish;
 $('dialog-close').onclick=()=>dialog.close();$('edit-done').onclick=finishEditing;$('edit-left').onclick=()=>nudgeDecoration(-1);$('edit-right').onclick=()=>nudgeDecoration(1);$('edit-store').onclick=storeSelectedDecoration;dialog.addEventListener('close',()=>queueMicrotask(()=>tutorial.render()));dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
 // Visibility catches mobile backgrounding; pagehide is an extra best-effort flush.
-document.addEventListener('visibilitychange',()=>{if(document.hidden){if(dirty)save();hiddenAt=Date.now();}else{lastFrame=0;if(started&&hiddenAt&&!conflict){offline((Date.now()-hiddenAt)/1000);save();updateUI();}hiddenAt=0;}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){if(dirty)save();hiddenAt=Date.now();}else{lastFrame=0;if(started&&hiddenAt&&!conflict){if(offline((Date.now()-hiddenAt)/1000)!==false)save();updateUI();}hiddenAt=0;}});
 window.addEventListener('pagehide',()=>{if(dirty)save();});window.addEventListener('beforeunload',()=>{if(dirty)save();});
 window.addEventListener('storage',e=>{if(e.key===CONFIG.SAVE_KEY||started&&e.key===giftKey()){if(!started){refreshHome();return;}conflict=true;clearTimeout(saveTimer);saveTimer=0;saveLabel();toast('另一個分頁已更新進度。請到設定重新讀取自動存檔，再繼續遊戲。',9000);}});
 document.addEventListener('pointerdown',()=>enableAudio(),{passive:true});document.addEventListener('keydown',()=>enableAudio());
@@ -725,7 +725,7 @@ function activate(candidate,{backup=null,elapsed=0,manualSource=null}={}){
  catch(e){toast('目前無法保存新進度，原本存檔仍保留。請確認瀏覽器有可用空間，再試一次。',8000);return false;}
  clearTimeout(saveTimer);saveTimer=0;state=next;shopVariants.clear();for(const [id,c]of Object.entries(state.collection))shopVariants.set(id,c.variants.at(-1)||'normal');for(const f of allFish())shopVariants.set(f.species,f.variant);started=true;dirty=false;saveBlocked=conflict=false;lastSaved=next.savedAt;lastFrame=0;simTime=0;saveAccumulator=0;feedAt=-99;
  $('home').hidden=true;$('game').hidden=false;window.scrollTo(0,0);setFeeding(false);allFish().forEach(syncFish);rebuildRuntime();resize();buildBackground();
- grantRewardDifference();if(elapsed)offline(elapsed);evaluateGoals(false);save();checkLevelGifts();updateUI();tutorial.setActive(true);if(state.offlinePending&&state.onboarding.completed)showOffline();
+ if(elapsed&&offline(elapsed)===false)return false;grantRewardDifference();evaluateGoals(false);save();checkLevelGifts();updateUI();tutorial.setActive(true);if(state.offlinePending&&state.onboarding.completed)showOffline();
  if(manualSource){try{const raw=localStorage.getItem(manualSource);if(raw&&!localStorage.getItem(CONFIG.MANUAL_KEY)){const m=validate(JSON.parse(raw));m.saveId=next.saveId;localStorage.setItem(CONFIG.MANUAL_KEY,JSON.stringify(m));}}catch(e){toast('進度已承接，舊手動存檔仍保留；可下載舊版備份後再匯入。');}}
  return true;
 }
