@@ -42,7 +42,7 @@ const assert=require('node:assert/strict'),{harness}=require('./harness.cjs');
  await click('#more-menu');await click('#more-observe');await click('#obs-return');await mark('tutorialComplete');await claim();
  await shop('fish');await click('[data-species=blackshrimp].buy');
  await click('#purchase-confirm');await mark('firstCrustacean');await close();await claim();
- for(let minute=1;minute<=(long?240:60);minute++){
+ for(let minute=1;minute<=(long?480:60);minute++){
   await h.advance(p,60000);
   // Collect visible coins one by one, as a player does; there is no bulk control.
   for(let n=0;n<100;n++){
