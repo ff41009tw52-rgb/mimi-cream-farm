@@ -5,7 +5,7 @@ on:
   pull_request:
     paths: ['aquarium-v0.6*.html', 'assets/aquarium-v06/**', 'tests/aquarium-v06/**', 'scripts/build-aquarium-v06.py', '.github/workflows/test-aquarium-v06.yml']
 concurrency:
-  group: aquarium-v06-${{ github.event.pull_request.head.ref || github.ref_name }}
+  group: aquarium-v06-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: true
 jobs:
   integration:
@@ -27,6 +27,7 @@ jobs:
           for f in assets/aquarium-v06/*.js; do node --check "$f"; done
           node tests/aquarium/schema-v05.test.cjs
           node tests/aquarium-v06/schema.test.cjs
+          node tests/aquarium-v06/economy.test.cjs
           node tests/aquarium-v06/species-content.test.cjs
           python3 scripts/build-aquarium-v06.py
           git -c safe.directory="$GITHUB_WORKSPACE" diff --exit-code -- aquarium-v0.6-standalone.html
@@ -75,7 +76,7 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.58.2-noble
       options: --ipc=host
-    timeout-minutes: 35
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -98,7 +99,7 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.58.2-noble
       options: --ipc=host
-    timeout-minutes: 25
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
@@ -118,6 +119,7 @@ jobs:
         env:
           NODE_PATH: /tmp/aquarium-v06-runtime/node_modules
         run: |
+          node tests/aquarium-v06/economy-browser.test.cjs
           node tests/aquarium-v06/crustacean-motion.test.cjs
           node tests/aquarium-v06/appearance.test.cjs
       - uses: actions/upload-artifact@v4

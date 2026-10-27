@@ -42,7 +42,7 @@ const assert=require('node:assert/strict'),{harness}=require('./harness.cjs');
  await click('#more-menu');await click('#more-observe');await click('#obs-return');await mark('tutorialComplete');await claim();
  await shop('fish');await click('[data-species=blackshrimp].buy');
  await click('#purchase-confirm');await mark('firstCrustacean');await close();await claim();
- for(let minute=1;minute<=(long?180:25);minute++){
+ for(let minute=1;minute<=(long?480:60);minute++){
   await h.advance(p,60000);
   // Collect visible coins one by one, as a player does; there is no bulk control.
   for(let n=0;n<100;n++){
@@ -53,7 +53,7 @@ const assert=require('node:assert/strict'),{harness}=require('./harness.cjs');
    await h.advance(p,1500);
   }
   const s=await read();assert(s.coins>=0);
-  if(!milestones.firstUpgrade&&s.level>=2&&s.coins>=80){
+  if(!milestones.firstUpgrade&&s.level>=2&&s.coins>=650){
    await click('#tank-upgrade-shortcut');await click('#upgrade-tank');await close();await mark('firstUpgrade');
   }
   if(minute%3===0){
@@ -65,18 +65,18 @@ const assert=require('node:assert/strict'),{harness}=require('./harness.cjs');
   }
   if(long){
    let current=await read();
-   if(!milestones.paradisePurchase&&current.level>=4&&current.coins>=254){
+   if(!milestones.paradisePurchase&&current.level>=4&&current.coins>=1066){
     await shop('fish');await click('[data-species=paradise].buy');await click('#purchase-confirm');await close();await mark('paradisePurchase');
    }
    current=await read();
-   if(!milestones.marineTank&&current.level>=5&&current.coins>=950){
+   if(!milestones.marineTank&&current.level>=5&&current.coins>=3716){
     await click('#tank-upgrade-shortcut');await click('#buy-marine-tank');await click('#dialog-content .confirm');await mark('marineTank');
     await shop('fish');await click('[data-species=ocellaris].buy');await click('#purchase-confirm');await close();await mark('marineFish');break;
    }
   }else if(milestones.firstUpgrade&&minute>=10)break;
  }
  const end=await read();assert(milestones.firstUpgrade,'normal new players must reach the first upgrade');
- assert(milestones.firstUpgrade<=20);assert(end.tanks[0].tier>=2);
+ assert(milestones.firstUpgrade<=60);assert(end.tanks[0].tier>=2);
  if(long){assert(milestones.paradisePurchase);assert(milestones.marineTank);assert(milestones.marineFish);assert.equal(end.tanks.length,2);}else assert.equal(end.tanks[0].fishes.length,5);assert(end.tanks[0].fishes.every(f=>f.hunger>25));
  assert.equal(await p.evaluate(()=>typeof window.aquariumDebug),'undefined');assert.deepEqual(h.errors,[]);
  h.saveResults(long?'long-journey-results':'journey-results',{normalMode:true,debugOrSaveMutations:false,clock:'virtual time, normal gameplay speed, 1.5 seconds per UI action',milestones,coins:end.coins,level:end.level,feedInventory:end.feedInventory});

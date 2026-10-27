@@ -1,6 +1,6 @@
 const vm=require('node:vm'),fs=require('node:fs'),assert=require('node:assert/strict'),crypto=require('node:crypto');
 const plain=x=>JSON.parse(JSON.stringify(x));
-function context(){const c=vm.createContext({window:{},location:{search:''},URLSearchParams,Date,Math,structuredClone,crypto:{randomUUID:()=>crypto.randomUUID()}});for(const p of ['assets/aquarium-v05/aquarium-data.js','assets/aquarium-v06/content.js','assets/aquarium-v06/design-content.js','assets/aquarium-v06/quality-content.js','assets/aquarium-v06/species-content.js','assets/aquarium-v06/growth-colors.js','assets/aquarium-v041-r2/aquarium-save.js','assets/aquarium-v05/aquarium-save.js','assets/aquarium-v06/data.js','assets/aquarium-v06/save.js'])vm.runInContext(fs.readFileSync(p,'utf8'),c,{filename:p});return c.window;}
+function context(){const c=vm.createContext({window:{},location:{search:''},URLSearchParams,Date,Math,structuredClone,crypto:{randomUUID:()=>crypto.randomUUID()}});for(const p of ['assets/aquarium-v05/aquarium-data.js','assets/aquarium-v06/content.js','assets/aquarium-v06/design-content.js','assets/aquarium-v06/quality-content.js','assets/aquarium-v06/species-content.js','assets/aquarium-v06/growth-colors.js','assets/aquarium-v06/economy.js','assets/aquarium-v041-r2/aquarium-save.js','assets/aquarium-v05/aquarium-save.js','assets/aquarium-v06/data.js','assets/aquarium-v06/save.js'])vm.runInContext(fs.readFileSync(p,'utf8'),c,{filename:p});return c.window;}
 const w=context(),D=w.AquariumData,S=w.AquariumSave;
 const raw=JSON.parse(fs.readFileSync('tests/aquarium/fixtures/v02-real-save.json'));raw.savedAt=Date.now();
 const v5=plain(w.AquariumV05Save.validate(raw));
@@ -16,7 +16,7 @@ const large=plain(v5);large.tankTier=4;large.tankCapacity=18;large.fishes=Array.
 const upgraded=S.validate(large);assert.deepEqual(plain(upgraded.tanks.map(t=>t.fishes.length)),[10,8]);assert.equal(upgraded.coins,Math.min(D.CONFIG.MAX_COINS,large.coins+5970));assert.deepEqual(plain(upgraded.tanks.flatMap(t=>t.fishes)),large.fishes);assert.deepEqual(plain(S.validate(plain(upgraded))),plain(upgraded));
 const starterRaw={...v5,fishes:v5.fishes.slice(0,3)};const starter=S.freshFromLegacy(starterRaw,'小星的家');assert.equal(starter.tankCapacity,5);assert.equal(starter.coins,20);assert.deepEqual(plain(starter.feedInventory),{general:0,small:0,protein:0});assert.equal(starter.onboarding.step,0);assert.equal(starter.tanks.length,1);
 for(const mutate of [s=>s.feedInventory.general=-1,s=>s.feedInventory.small=NaN,s=>s.tanks[0].fishes.push(...s.tanks[0].fishes),s=>s.activeTankId='missing',s=>s.gifts.push('fake'),s=>s.tanks.push({...s.tanks[0]}),s=>s.onboarding.step=12,s=>s.tanks[0].name='<b>bad</b>']){const bad=plain(starter);mutate(bad);assert.throws(()=>S.validate(bad));}
-assert.equal(Object.keys(D.FOOD_FOR).length,35);assert.deepEqual(plain(Object.values(D.FEEDS).map(x=>x.species.length)),[10,15,10]);assert.deepEqual(plain(D.TANK_TIERS.map(t=>t.capacity)),[5,7,9,10]);assert.deepEqual(plain(D.TANK_TIERS.slice(1).map(t=>t.price)),[80,220,480]);
+assert.equal(Object.keys(D.FOOD_FOR).length,35);assert.deepEqual(plain(Object.values(D.FEEDS).map(x=>x.species.length)),[10,15,10]);assert.deepEqual(plain(D.TANK_TIERS.map(t=>t.capacity)),[5,7,9,10]);assert.deepEqual(plain(D.TANK_TIERS.slice(1).map(t=>t.price)),[650,2000,4000]);
 // Every old 12-operation checkpoint migrates by event evidence, not by casting its number.
 const migrationRows=[];
 for(let n=0;n<=12;n++){
@@ -26,7 +26,7 @@ for(let n=0;n<=12;n++){
  if(n>10)assert(next.onboarding.events.includes('feed.buy'));
  assert.deepEqual(plain(S.validate(plain(next))),plain(next));migrationRows.push({old:n,newStep:next.onboarding.step,events:plain(next.onboarding.events),completed:next.onboarding.completed});
 }
-for(const mutate of [o=>o.version=9,o=>o.events.push('invented'),o=>o.events=['general.open'],o=>o.review=true,o=>o.supportAmounts.feed=15]){const bad=plain(starter);mutate(bad.onboarding);assert.throws(()=>S.validate(bad));}
+for(const mutate of [o=>o.version=9,o=>o.events.push('invented'),o=>o.events=['general.open'],o=>o.review=true,o=>o.supportAmounts.feed=17]){const bad=plain(starter);mutate(bad.onboarding);assert.throws(()=>S.validate(bad));}
 // All version-2 checkpoints retain event evidence; completed seven-task saves stay completed.
 const v2keys=S.TUTORIAL_KEYS.filter(k=>!k.startsWith('decor.'));
 for(let n=0;n<=16;n++){
