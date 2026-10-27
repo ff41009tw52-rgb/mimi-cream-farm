@@ -747,7 +747,7 @@ function giftKey(id=state.saveId){return CONFIG.SAVE_KEY+'_gifts_'+id;}
 function readGifts(id=state.saveId){
  const raw=localStorage.getItem(giftKey(id));if(!raw)return {ids:[],emergencyAt:0,tutorialEvents:[]};const v=JSON.parse(raw);
  if(!v||!Array.isArray(v.ids)||v.ids.some(x=>!window.AquariumSave.GIFT_IDS.includes(x))||typeof v.emergencyAt!=='number'||!Number.isFinite(v.emergencyAt)||v.emergencyAt<0||v.emergencyAt>Number.MAX_SAFE_INTEGER||v.tutorialEvents&&(!Array.isArray(v.tutorialEvents)||v.tutorialEvents.some(x=>!window.AquariumSave.TUTORIAL_KEYS.includes(x))))throw Error('贈禮帳本無法讀取');
- if(v.supportAmounts&&(!Number.isInteger(v.supportAmounts.feed)||v.supportAmounts.feed<0||v.supportAmounts.feed>14||!Number.isInteger(v.supportAmounts.fish)||v.supportAmounts.fish<0||v.supportAmounts.fish>CONFIG.MAX_COINS))throw Error('購物補助紀錄不完整');
+ if(v.supportAmounts&&(!Number.isInteger(v.supportAmounts.feed)||v.supportAmounts.feed<0||v.supportAmounts.feed>16||!Number.isInteger(v.supportAmounts.fish)||v.supportAmounts.fish<0||v.supportAmounts.fish>CONFIG.MAX_COINS))throw Error('購物補助紀錄不完整');
  if(v.hints&&(!Array.isArray(v.hints)||v.hints.some(k=>!window.AquariumSave.HINT_IDS.includes(k))))throw Error('功能提示紀錄不完整');
  if(v.supportAmounts?.decor!==undefined&&(!Number.isInteger(v.supportAmounts.decor)||v.supportAmounts.decor<0||v.supportAmounts.decor>CONFIG.MAX_COINS))throw Error('布置補助紀錄不完整');
  if(v.pending&&validate(v.pending).saveId!==id)throw Error('交易進度與贈禮帳本不符');return v;

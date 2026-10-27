@@ -26,7 +26,7 @@ for(let n=0;n<=12;n++){
  if(n>10)assert(next.onboarding.events.includes('feed.buy'));
  assert.deepEqual(plain(S.validate(plain(next))),plain(next));migrationRows.push({old:n,newStep:next.onboarding.step,events:plain(next.onboarding.events),completed:next.onboarding.completed});
 }
-for(const mutate of [o=>o.version=9,o=>o.events.push('invented'),o=>o.events=['general.open'],o=>o.review=true,o=>o.supportAmounts.feed=15]){const bad=plain(starter);mutate(bad.onboarding);assert.throws(()=>S.validate(bad));}
+for(const mutate of [o=>o.version=9,o=>o.events.push('invented'),o=>o.events=['general.open'],o=>o.review=true,o=>o.supportAmounts.feed=17]){const bad=plain(starter);mutate(bad.onboarding);assert.throws(()=>S.validate(bad));}
 // All version-2 checkpoints retain event evidence; completed seven-task saves stay completed.
 const v2keys=S.TUTORIAL_KEYS.filter(k=>!k.startsWith('decor.'));
 for(let n=0;n<=16;n++){

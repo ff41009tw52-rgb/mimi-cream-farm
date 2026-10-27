@@ -31,7 +31,7 @@ function normalizeOnboarding(o){
  const prior=o.version===2,keys=prior?V2_KEYS:TUTORIAL_KEYS;
  if(![2,3].includes(o.version)||!Array.isArray(o.events)||new Set(o.events).size!==o.events.length||o.events.some(k=>!keys.includes(k))||['completed','everCompleted','review','skipped','welcomed','paused','coinHintShown'].some(k=>typeof o[k]!=='boolean'))throw Error('新教學資料不完整。');
  const first=keys.findIndex(k=>!o.events.includes(k)),step=first<0?keys.length:first;
- if(o.step!==step||o.completed!==(step===keys.length)||(o.review&&!o.everCompleted)||o.skipped||!integer(o.supportAmounts?.feed,0,14)||!integer(o.supportAmounts?.fish,0,CONFIG.MAX_COINS)||typeof o.transactionId!=='string'||o.transactionId.length>120)throw Error('教學事件與進度不一致。');
+ if(o.step!==step||o.completed!==(step===keys.length)||(o.review&&!o.everCompleted)||o.skipped||!integer(o.supportAmounts?.feed,0,16)||!integer(o.supportAmounts?.fish,0,CONFIG.MAX_COINS)||typeof o.transactionId!=='string'||o.transactionId.length>120)throw Error('教學事件與進度不一致。');
  if(o.decorReuse!==undefined&&typeof o.decorReuse!=='boolean')throw Error('舊布置複用紀錄不完整。');
  if(!prior&&(!integer(o.supportAmounts.decor,0,CONFIG.MAX_COINS)||!Array.isArray(o.hints)||new Set(o.hints).size!==o.hints.length||o.hints.some(k=>!HINT_IDS.includes(k))))throw Error('布置教學或功能提示紀錄不完整。');
  const events=prior&&(o.completed||o.everCompleted&&!o.review)?[...TUTORIAL_KEYS]:[...o.events];
