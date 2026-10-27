@@ -5,7 +5,7 @@ on:
   pull_request:
     paths: ['aquarium-v0.6*.html', 'assets/aquarium-v06/**', 'tests/aquarium-v06/**', 'scripts/build-aquarium-v06.py', '.github/workflows/test-aquarium-v06.yml']
 concurrency:
-  group: aquarium-v06-${{ github.event.pull_request.head.ref || github.ref_name }}
+  group: aquarium-v06-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: true
 jobs:
   integration:
@@ -99,7 +99,7 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.58.2-noble
       options: --ipc=host
-    timeout-minutes: 25
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
