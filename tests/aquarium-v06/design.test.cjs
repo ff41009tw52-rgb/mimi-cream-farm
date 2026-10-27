@@ -1,7 +1,7 @@
 const assert=require('node:assert/strict'),{harness}=require('./harness.cjs'),{context,plain,starter}=require('./schema.test.cjs');
 (async()=>{
  const w=context(),D=w.AquariumData,S=w.AquariumSave,h=await harness(8858);
- const at=()=>{const s=plain(starter);s.savedAt=Date.now();s.coins=20000;s.xp=5700;s.level=9;s.legacyLevelFloor=1;s.tanks[0].tier=4;s.feedInventory={general:80,small:80,protein:80};s.onboarding={...S.newOnboarding(),welcomed:true,completed:true,everCompleted:true,step:21,events:[...S.TUTORIAL_KEYS],hints:['backup','upgrade','tank2']};return s;};
+ const at=()=>{const s=plain(starter);s.savedAt=Date.now();s.coins=50000;s.xp=5700;s.level=9;s.legacyLevelFloor=1;s.tanks[0].tier=4;s.feedInventory={general:80,small:80,protein:80};s.onboarding={...S.newOnboarding(),welcomed:true,completed:true,everCompleted:true,step:21,events:[...S.TUTORIAL_KEYS],hints:['backup','upgrade','tank2']};return s;};
  assert.equal(Object.keys(D.DECORATIONS).length,40);assert.equal(Object.keys(D.SPECIES).length,35);assert.equal(D.ACHIEVEMENTS.filter(a=>!D.DESIGN_ACHIEVEMENT_IDS.includes(a.id)).reduce((n,a)=>n+(a.reward.coins||0),0),4245);
  // Every legacy position survives byte-for-byte; new transforms round-trip and reject invalid data.
  const legacy=at(),loaded=S.validate(plain(legacy));assert.deepEqual(plain(loaded.placedDecorations),legacy.tanks[0].placedDecorations);
