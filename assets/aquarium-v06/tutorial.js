@@ -11,7 +11,7 @@ const steps=[
  {task:2,target:'feed',event:'feedOpened',copy:'再按「餵食」，準備替鼠魚選擇食物。'},
  {task:2,target:'feed-small',event:'selected:small',copy:'選擇「小型魚飼料」。看看還剩幾份，以及哪些魚會吃。'},
  {task:2,target:'tank',event:'fed:small',copy:'點一下魚缸上方的水面，放入小型魚飼料。不用點中鼠魚。',success:'很好！現在你知道怎麼替不同的魚兒選擇飼料了。'},
- {task:3,target:'more-menu',event:'fishOpened',copy:'按「更多」→「我的生物」查看成長與產幣：孔雀魚從幼魚長成成魚，每次可產 2→4→6 金幣。不同魚種的數字不一樣。'},
+ {task:3,target:'more-menu',event:'fishOpened',copy:'按「更多」→「我的生物」查看成長與產幣：孔雀魚從幼魚長成成魚，每次可產 1→2→3 金幣。不同魚種的數字不一樣。'},
  {task:4,target:'tutorial-coin-target',event:'coinCollected',copy:'飽足度還有 1% 就會正常產幣；降到 0% 才停止。點魚缸裡的金幣收起來，記得餵食才能繼續長大。',success:'做得好！魚兒長大，每次產幣通常更多；收集金幣就能購買飼料、新魚和裝飾。'},
  {task:5,target:'shop',event:'shopOpened',copy:'飼料快用完了，就到商店補充吧！先按「商店」。'},
  {task:5,target:'tab-feed',shopTab:'feed',event:'feedShopOpened',copy:'選擇「飼料」分頁，看看每包價格和現有庫存。'},
@@ -27,7 +27,10 @@ const steps=[
  {task:8,target:'more-menu' ,event:'observationOpened',copy:'按「更多」→「觀察生物」，認識魚的身體構造與呼吸。',success:'恭喜你完成新手教學！前往「更多 → 成就」可領取金幣；遊戲會自動存檔，下次可接著玩。'}
 ];
 function create({getState,commit,notify,grant,ensureFeeding,prepareCoin,prepareFish,prepareFood,prepareDecor,prepareEditing,reviewPurchase}){
- const $=id=>document.getElementById(id);let active=false,lastLocated='';
+ const $=id=>document.getElementById(id);let active=false,lastLocated='',pointerDown=false;
+ document.addEventListener('pointerdown',()=>{pointerDown=true;},{capture:true,passive:true});
+ for(const name of ['pointerup','pointercancel'])document.addEventListener(name,()=>{pointerDown=false;},{capture:true,passive:true});
+ window.addEventListener('blur',()=>{pointerDown=false;});
  const welcome=document.createElement('dialog');welcome.id='tutorial-welcome';document.body.append(welcome);
  const coinTarget=document.createElement('button');coinTarget.id='tutorial-coin-target';coinTarget.hidden=true;coinTarget.type='button';coinTarget.textContent='點這枚金幣';document.querySelector('.tank-viewport').append(coinTarget);
  const success=document.createElement('p');success.id='onboarding-success';success.hidden=true;$('onboarding-copy').after(success);
@@ -35,15 +38,15 @@ function create({getState,commit,notify,grant,ensureFeeding,prepareCoin,prepareF
  function record(event){const o=getState().onboarding;if(!expects(event))return false;const key=keys[o.step];if(!o.events.includes(key))o.events.push(key);const n=keys.findIndex(k=>!o.events.includes(k));o.step=n<0?keys.length:n;o.completed=o.step===keys.length;if(o.completed){o.everCompleted=true;if(!o.hints.includes('backup'))o.hints.push('backup');if(!o.review&&!getState().gifts.includes('tutorialComplete'))getState().gifts.push('tutorialComplete');}return true;}
  function finish(previous,advanced,options={}){if(!advanced)return false;render();const text=options.viewOnly?'已看過購買流程，現在繼續下一項任務。':steps[previous]?.success||'';success.textContent=text;success.hidden=!text||getState().onboarding.completed;if(text&&getState().onboarding.completed)notify(text);return true;}
  function render(){
-  $('tutorial-dialog-copy')?.remove();$('tutorial-review-purchase')?.remove();$('tutorial-room-help')?.remove();coinTarget.hidden=true;
+  coinTarget.hidden=true;
   const o=getState().onboarding,running=active&&!o.completed&&o.welcomed;$('onboarding').hidden=!running;
-  document.querySelectorAll('.onboarding-highlight').forEach(e=>e.classList.remove('onboarding-highlight'));$('surface-cue').hidden=true;if(!running)return;
+  document.querySelectorAll('.onboarding-highlight').forEach(e=>e.classList.remove('onboarding-highlight'));$('surface-cue').hidden=true;if(!running){$('tutorial-dialog-copy')?.remove();$('tutorial-review-purchase')?.remove();$('tutorial-room-help')?.remove();return;}
   const s=steps[o.step];$('onboarding-step').textContent=s.task+' / 8';$('onboarding-step').setAttribute('aria-label','第 '+s.task+' / 8 項任務');$('onboarding-title').textContent=tasks[s.task-1];
   let target=$(s.target),copy=s.copy;
   $('onboarding-gift').hidden=o.step!==3;$('onboarding-gift').parentElement.hidden=o.step!==3;$('onboarding-gift').textContent=o.review?'練習替鼠魚選飼料':'收下小型魚飼料 ×5 份';
   if([1,2,5,6].includes(o.step)&&$('feeding-hint').hidden&&!$('dialog').open)ensureFeeding([2,6].includes(o.step)?(o.step===2?'general':'small'):null);
   if([0,1,2,4,5,6].includes(o.step)&&!o.review)prepareFood(o.step<3?'general':'small');
-  if(o.step===8){const coin=prepareCoin();if(coin){coinTarget.hidden=false;coinTarget.style.left=coin.x*100+'%';coinTarget.style.top=coin.y*100+'%';coinTarget.onclick=coin.collect;target=coinTarget;if(!$('fish-card').hidden){coinTarget.hidden=true;target=$('close-card');copy='先看看資料卡上的飽足度、成長和飼料，再按右上角 ×，回魚缸收金幣。';}}else copy='這一步暫時無法進行，請重新整理網頁。如果還是不行，請老師協助。';}
+  if(o.step===8){const coin=prepareCoin();if(coin){coinTarget.hidden=false;const rect=$('tank').getBoundingClientRect(),insetX=Math.min(.5,28/Math.max(1,rect.width)),insetY=Math.min(.5,28/Math.max(1,rect.height));coinTarget.style.left=Math.max(insetX,Math.min(1-insetX,coin.x))*100+'%';coinTarget.style.top=Math.max(insetY,Math.min(1-insetY,coin.y))*100+'%';coinTarget.onclick=coin.collect;target=coinTarget;if(!$('fish-card').hidden){coinTarget.hidden=true;target=$('close-card');copy='先看看資料卡上的飽足度、成長和飼料，再按右上角 ×，回魚缸收金幣。';}}else copy='這一步暫時無法進行，請重新整理網頁。如果還是不行，請老師協助。';}
   if(s.shopTab){
    const tab=$('tab-'+s.shopTab),shopOpen=!!tab&&$('dialog').open;
    if(!shopOpen){target=$('shop');copy='再按「商店」，繼續剛才的'+(s.task===5?'飼料':s.task===6?'購魚':'布置')+'操作。';}
@@ -54,8 +57,11 @@ function create({getState,commit,notify,grant,ensureFeeding,prepareCoin,prepareF
     else if(status?.move){target=status.move;copy='這個魚缸滿了！先換到還有空位的魚缸，再買新魚。';}
     else target=document.querySelector('.buy[data-species]:not(:disabled)');}
    else if(o.step===17){const status=prepareDecor();if(status?.review){target=reviewPurchase('decor',()=>api.report('decorBought',{viewOnly:true}));copy=o.review?'複習先看看商品與放置方式，不需要再次購買。接著練習移動裝飾。':'已經有布置或目前空間不足，這次直接使用現有裝飾練習，不必再購買。';}else {target=document.querySelector('[data-buy-decor="smallplant"]')||$('decor-category-plants');if(target?.id==='decor-category-plants')copy='先選「水草」分類，找找便宜的小水草。';}}
-   if(shopOpen){const p=document.createElement('p');p.id='tutorial-dialog-copy';p.className='tutorial-shop-copy';p.textContent=s.task+' / 8 '+tasks[s.task-1]+' '+copy;$('dialog-content').prepend(p);}
+   if(shopOpen){let p=$('tutorial-dialog-copy');if(!p){p=document.createElement('p');p.id='tutorial-dialog-copy';p.className='tutorial-shop-copy';$('dialog-content').prepend(p);}const text=s.task+' / 8 '+tasks[s.task-1]+' '+copy;if(p.textContent!==text)p.textContent=text;}
   }
+  if(!s.shopTab||!$('tab-'+s.shopTab)||!$('dialog').open)$('tutorial-dialog-copy')?.remove();
+  if(target?.id!=='tutorial-review-purchase')$('tutorial-review-purchase')?.remove();
+  if(target?.id!=='tutorial-room-help')$('tutorial-room-help')?.remove();
   if(o.step===18||o.step===19){const status=prepareEditing();target=status.target;if(status.copy)copy=status.copy;}
   if(s.task===3&&$('dialog').open){if($('roster')){target=$('roster');copy='按「我的生物」，就能找到正在照顧的魚。';}else if(document.querySelector('.roster-item')){target=document.querySelector('.roster-item');copy='點一條魚的名字，看看飽足度、成長進度與適合的飼料。';}}
   if(o.step===14&&$('purchase-fish-name')){target=$('purchase-colors')||$('purchase-fish-name');copy='先選喜歡的顏色，幫新魚取名字，再按「確認購買」。取消不會扣金幣。';}
@@ -64,7 +70,7 @@ function create({getState,commit,notify,grant,ensureFeeding,prepareCoin,prepareF
   if(o.review&&s.task<=2)copy+='（重新練習不會扣飼料，也不會重複送禮物。）';
   if($('dialog').open&&target&&!$('dialog').contains(target)){target=$('dialog-close');copy='先按視窗右上角 ×，回到魚缸，再繼續教學標示的操作。';}
   $('onboarding-copy').textContent=copy;target?.classList.add('onboarding-highlight');$('surface-cue').hidden=![2,6].includes(o.step);
-  const signature=o.step+':'+target?.id+':'+$('dialog').open;if(signature!==lastLocated){lastLocated=signature;requestAnimationFrame(()=>{if(!target||target.closest('[hidden]'))return;const b=target.getBoundingClientRect();if(b.top<0||b.bottom>innerHeight)target.scrollIntoView({block:'nearest',behavior:'smooth'});});}
+  const stepAtRender=o.step,signature=stepAtRender+':'+target?.id+':'+$('dialog').open;if(signature!==lastLocated){lastLocated=signature;requestAnimationFrame(()=>{if(pointerDown||!target?.isConnected||target.closest('[hidden]')||getState().onboarding.step!==stepAtRender)return;const b=target.getBoundingClientRect(),d=target.closest('dialog[open]'),bounds=d?.getBoundingClientRect();if(b.top<0||b.bottom>innerHeight||bounds&&(b.top<bounds.top||b.bottom>bounds.bottom))target.scrollIntoView({block:'nearest',behavior:'auto'});});}
  }
  function openWelcome(){const review=getState().onboarding.review;welcome.innerHTML='<h2>'+ (review?'再練習八個養魚任務':'歡迎來到悠悠水族箱！')+'</h2><p>'+(review?'再練習餵魚、看魚兒、收金幣和逛商店。禮物不會重複領取。':'孔雀魚、金魚和鼠魚正在等你照顧！我們先學會餵食，再慢慢經營水族箱。')+'</p>'+(review?'':'<div class="gift-card">送你的第一份飼料<strong>綜合飼料 ×8 份</strong></div>')+'<div class="welcome-actions"><button id="tutorial-begin">'+(review?'開始複習':'收下飼料，開始餵魚！')+'</button></div>';
   $('tutorial-begin').onclick=()=>{if(!commit(()=>{if(!review)grant('starter');Object.assign(getState().onboarding,{welcomed:true,paused:false});}))return;welcome.close();render();};if(!welcome.open)welcome.showModal();}

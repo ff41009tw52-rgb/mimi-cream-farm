@@ -50,7 +50,7 @@ jobs:
       - name: Verify economy, teaching, food rules, migration, three tanks and five sizes
         run: |
           failed=0
-          for suite in stability crustaceans expansion decor decor-mobile browser extra tutorial journey; do
+          for suite in touch-stability stability crustaceans expansion decor decor-mobile browser extra tutorial journey; do
             node tests/aquarium-v06/$suite.test.cjs || failed=1
           done
           exit "$failed"
@@ -62,6 +62,7 @@ jobs:
           node tests/aquarium-v06/species-stories.test.cjs
           node tests/aquarium-v06/quality.test.cjs
           node tests/aquarium-v06/mobile.test.cjs
+          node tests/aquarium-v06/touch-stability.test.cjs
           node tests/aquarium-v06/design.test.cjs
           node tests/aquarium-v06/crustaceans.test.cjs
           node tests/aquarium-v06/decor-mobile.test.cjs
