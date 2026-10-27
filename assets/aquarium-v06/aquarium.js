@@ -113,8 +113,8 @@ function selectFish(id){if(editing)return;recordActivity('firstCard');metric('fi
 function closeCard(){selected=null;$('fish-card').hidden=true;queueMicrotask(()=>tutorial.render());}
 let selectedFeed=null;
 function renderFeedChoices(){const root=$('feed-choices');if(!root)return;for(const id of Object.keys(FEEDS)){const b=$('feed-'+id);if(b){b.setAttribute('aria-pressed',String(selectedFeed===id));b.querySelector('small').textContent=`剩餘 ${state.feedInventory[id]} 份`;const names=[...new Set(state.fishes.filter(f=>FOOD_FOR[f.species]===id).map(f=>SPECIES[f.species].name))];b.querySelector('span').textContent=names.length?names.join('、'):'本缸目前沒有需要這種飼料的居民';}}$('feed-current').textContent=selectedFeed?`已選 ${FEEDS[selectedFeed].name} · 剩餘 ${state.feedInventory[selectedFeed]} 份`:'先選擇一種飼料';}
-function setFeeding(on){feeding=on;selectedFeed=null;$('feed').setAttribute('aria-pressed',String(on));$('feeding-hint').hidden=!on;canvas.style.cursor=on?'crosshair':'pointer';if(on){closeCard();tutorial.report('feedOpened');}else $('surface-cue').hidden=true;renderFeedChoices();queueMicrotask(()=>tutorial.render());if(on&&innerWidth<=1050)requestAnimationFrame(()=>{if(feeding)$('feed-choices').scrollIntoView({block:'center'});});}
-function selectFeed(id){if(!feeding||!FEEDS[id])return;selectedFeed=id;renderFeedChoices();tutorial.report('selected:'+id);$('surface-cue').hidden=false;canvas.focus({preventScroll:true});if(innerWidth<=1050)requestAnimationFrame(()=>{if(feeding)canvas.scrollIntoView({block:'start'});});}
+function setFeeding(on){feeding=on;selectedFeed=null;$('feed').setAttribute('aria-pressed',String(on));$('feeding-hint').hidden=!on;canvas.style.cursor=on?'crosshair':'pointer';if(on){closeCard();tutorial.report('feedOpened');}else $('surface-cue').hidden=true;renderFeedChoices();queueMicrotask(()=>tutorial.render());if(on&&innerWidth<=1050)requestAnimationFrame(()=>{if(feeding&&!selectedFeed&&(state.onboarding.completed||[1,5].includes(state.onboarding.step)))$('feed-choices').scrollIntoView({block:'center',behavior:'auto'});});}
+function selectFeed(id){if(!feeding||!FEEDS[id])return;selectedFeed=id;renderFeedChoices();tutorial.report('selected:'+id);$('surface-cue').hidden=false;canvas.focus({preventScroll:true});if(innerWidth<=1050)requestAnimationFrame(()=>{if(feeding&&selectedFeed===id)canvas.scrollIntoView({block:'start',behavior:'auto'});});}
 function feed(x,confirmed=false){
  if(conflict||saveBlocked)return;if(!selectedFeed){toast('先選好飼料，再點魚缸上方的水面。');return;}
  const kind=selectedFeed;
@@ -793,7 +793,7 @@ function prepareLessonCoin(){
 function prepareLessonFish(){
  if(state.onboarding.review)return {review:true};if(state.fishes.length<state.tankCapacity)return {};
  const available=state.tanks.find(t=>t.fishes.length<TANK_TIERS[t.tier-1].capacity);if(!available)return {review:true};
- const move=button('切換到 '+available.name,()=>{dialog.close();switchTank(available.id);shopTab='fish';shop();tutorial.render();},'place-button');move.id='tutorial-room-help';$('dialog-content').append(move);return {move};
+ let move=$('tutorial-room-help');if(move&&move.dataset.tankId!==available.id){move.remove();move=null;}if(!move){move=button('切換到 '+available.name,()=>{dialog.close();switchTank(available.id);shopTab='fish';shop();tutorial.render();},'place-button');move.id='tutorial-room-help';move.dataset.tankId=available.id;$('dialog-content').append(move);}return {move};
 }
 function prepareLessonDecor(){
  const starter={river:1,smallplant:2,smallrock:1};
@@ -823,7 +823,7 @@ function checkFeatureHints(){
  else if(state.level>=4&&state.tanks.length===1&&!o.hints.includes('tank2'))showFeatureHint('tank2','現在可以開啟新的魚缸了！每缸最多十隻、可獨立命名，金幣與飼料共用。',true);
  else if(state.tanks.every(t=>t.tier===1)&&next&&!o.hints.includes('upgrade')&&(state.fishes.length>=state.tankCapacity||(state.level>=next.level&&state.coins>=next.price)))showFeatureHint('upgrade',`想養更多魚嗎？點小居民數量旁的「升級魚缸」，看看從 ${state.tankCapacity} 隻增加到 ${next.capacity} 隻需要什麼條件。`,true);
 }
-function reviewPurchase(kind,done){const b=button(kind==='fish'?'看看購魚流程（不消費）':kind==='decor'?'使用現有布置練習（不消費）':'看看購買與庫存（不消費）',()=>{done();dialog.close();tutorial.render();},'place-button');b.id='tutorial-review-purchase';$('dialog-content').append(b);return b;}
+function reviewPurchase(kind,done){let existing=$('tutorial-review-purchase');if(existing?.dataset.kind===kind){existing.completeReview=done;return existing;}existing?.remove();const b=button(kind==='fish'?'看看購魚流程（不消費）':kind==='decor'?'使用現有布置練習（不消費）':'看看購買與庫存（不消費）',()=>{b.completeReview();dialog.close();tutorial.render();},'place-button');b.id='tutorial-review-purchase';b.dataset.kind=kind;b.completeReview=done;$('dialog-content').append(b);return b;}
 function checkLevelGifts(){if(state.level>=2&&!state.gifts.includes('level2')){if(grantGift('level2'))toast('養魚等級 2：送你小型魚飼料 ×3 份，鼠魚、斑馬魚、白雲山魚、紅蓮燈和三角燈都適用。');}if(state.level>=4&&!state.gifts.includes('level4')){if(grantGift('level4'))toast('你解鎖了高蛋白飼料！神仙魚、鬥魚、蜜糖麗麗魚、酷利泥鰍和玻利維亞鳳凰都適用，記得在商店補充喔！');}}
 function feedShop(){shopTab='feed';shop();tutorial.report('feedShopOpened');tutorial.render();}
 function renderFeedShop(grid){
