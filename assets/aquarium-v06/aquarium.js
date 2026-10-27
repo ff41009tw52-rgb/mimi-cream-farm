@@ -61,7 +61,7 @@ function offline(seconds){
  if(!protectedTransaction(()=>{
   for(const f of allFish()){
    const before=stage(f.growth),result=window.AquariumEconomy.advance(f,t,{hungerRate:CONFIG.OFFLINE_HUNGER_PER_HOUR/3600,coinScale:CONFIG.COIN_SCALE,growthScale:CONFIG.GROWTH_SCALE});
-   reward+=result.earned;productive=Math.max(productive,result.productive);syncFish(f);recordAdult(f);state.collection[f.species].highestStage=Math.max(state.collection[f.species].highestStage,stage(f.growth));if(stage(f.growth)!==before)gainXP(8,false);
+   reward+=result.earned;productive=Math.max(productive,result.productive);syncFish(f);recordAdult(f);state.collection[f.species].highestStage=Math.max(state.collection[f.species].highestStage,stage(f.growth));if(stage(f.growth)!==before)gainXP(8*(stage(f.growth)-before),false);
   }
   const old=state.offlinePending;if(seconds>=60||reward||old)state.offlinePending={coins:Math.min(CONFIG.MAX_COINS,(old?.coins||0)+reward),seconds:(old?.seconds||0)+seconds,productive:(old?.productive||0)+productive,at:Date.now()};
  }))return;
@@ -82,7 +82,7 @@ function depositCoin(f,r,value){
  const tank=state.tanks.find(t=>t.id===state.activeTankId),total=state.drops.reduce((n,c)=>n+c.value,0);
  if(total+value>window.AquariumEconomy.capacity(tank))return false;
  if(state.drops.length<CONFIG.MAX_DROPS)state.drops.push({id:uid(),x:clamp(r.x,.06,.94),y:clamp(r.y-.07,.13,.82),value});
- else state.drops.reduce((a,b)=>a.value<=b.value?a:b).value+=value;
+ else {const targets=state.drops.filter(c=>c.id!==demoCoinId());if(!targets.length)return false;targets.reduce((a,b)=>a.value<=b.value?a:b).value+=value;}
  diagnostics.spawned++;if(!simulatingBackground)tutorial.coin();markDirty();return true;
 }
 function initialize(){state=fresh();refreshHome();paintHomeFish();}
@@ -219,7 +219,7 @@ function shop(){if(!state.onboarding.completed)creatureCategory='all';if(editing
 function settings(){const expanded=document.querySelector('.save-tools')?.open||false;openDialog('設定','settings');const list=document.createElement('div');list.className='settings-list';
   function row(title,desc,label,fn,danger=false){const r=document.createElement('div');r.className='setting-row';const p=document.createElement('p');p.textContent=title;const small=document.createElement('small');small.textContent=desc;p.append(small);r.append(p,button(label,fn,danger?'danger':''));list.append(r);}
   row('手動存檔','另外存下目前的進度，遊戲也會繼續自動存檔。','存檔',()=>{if(save(true)){dialog.close();}});
-  row('讀取手動存檔','回到上次按「存檔」時的遊戲進度。','讀檔',()=>confirmAction('讀取手動存檔？','讀取後，遊戲會回到上次手動存檔時的進度。確定要讀取嗎？',()=>loadSaved(true)));
+  row('讀取手動存檔','讀取保存的進度；同一水族箱優先使用最新自動存檔，避免收益重複結算。','讀檔',()=>confirmAction('讀取手動存檔？','讀取後，遊戲會回到上次手動存檔時的進度。確定要讀取嗎？',()=>loadSaved(true)));
   row('重新讀取自動存檔','回到最近一次自動存檔的進度。','讀取',()=>confirmAction('讀取自動存檔？','讀取後，尚未存檔的進度會消失。確定要讀取嗎？',()=>loadSaved(false)));
   row('重置遊戲','重新開始，魚兒與金幣都會回到最初。','重置',()=>{resetStep=1;confirmAction('確定要重新開始嗎？','重置後，將重新獲得三隻幼魚與 20 金幣；圖鑑與布置也會重新開始。',()=>{resetStep=2;confirmAction('最後確認：刪除目前進度','目前的魚、水族箱與金幣進度將被刪除，且無法復原。',reset,true);},true);},true);
   row('音效',state.soundEnabled?'柔和的操作音效已開啟。':'音效已關閉。',state.soundEnabled?'關閉':'開啟',()=>{state.soundEnabled=!state.soundEnabled;markDirty(true);settings();});
