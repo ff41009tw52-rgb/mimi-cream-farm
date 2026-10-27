@@ -46,7 +46,7 @@ function migrate(raw){
  for(let i=0;i<count;i++){const t=emptyTank('migrated-'+(i+1),i===0?v.tankName:'搬遷魚缸 '+(i+1),4);t.fishes=v.fishes.slice(i*10,(i+1)*10);if(i===0)Object.assign(t,{drops:v.drops,purchasedDecorations:v.purchasedDecorations,placedDecorations:v.placedDecorations,substrate:v.substrate});tanks.push(t);}
  for(const k of [...Object.keys(tankKeys),'tankCapacity'])delete s[k];
  const oldSpent=[0,400,1950,6750][v.tankTier-1]||0,compensation=Math.max(0,oldSpent-780);
- return attach({...s,rewardPaid:{},schemaVersion:5,gameVersion:'0.6',coins:Math.min(CONFIG.MAX_COINS,v.coins+compensation),tanks,activeTankId:tanks[0].id,feedInventory:{general:20,small:15,protein:v.fishes.some(f=>['angel','betta'].includes(f.species))?10:0},feedPurchases:{general:0,small:0,protein:0},gifts:['starter','smallLesson','fishCard','migration'],emergencyAt:0,migration:{from:raw.schemaVersion,oldTier:v.tankTier,compensation,freeTanks:count,originalCoins:v.coins},onboarding:normalizeOnboarding({step:12,completed:true,skipped:false,welcomed:true,paused:false,coinHintShown:v.onboarding.coinHintShown})});
+ return attach({...s,rewardPaid:{},offlinePending:null,schemaVersion:5,gameVersion:'0.6',coins:Math.min(CONFIG.MAX_COINS,v.coins+compensation),tanks,activeTankId:tanks[0].id,feedInventory:{general:20,small:15,protein:v.fishes.some(f=>['angel','betta'].includes(f.species))?10:0},feedPurchases:{general:0,small:0,protein:0},gifts:['starter','smallLesson','fishCard','migration'],emergencyAt:0,migration:{from:raw.schemaVersion,oldTier:v.tankTier,compensation,freeTanks:count,originalCoins:v.coins},onboarding:normalizeOnboarding({step:12,completed:true,skipped:false,welcomed:true,paused:false,coinHintShown:v.onboarding.coinHintShown})});
 }
 function validate(raw){
  if(raw?.schemaVersion!==5)return migrate(raw);
@@ -59,7 +59,12 @@ function validate(raw){
   tankIds.add(t.id);const name=legacy.tankName(t.name);if(name!==t.name)throw Error('魚缸名稱不完整。');
   if(t.substrateColor!==undefined&&!integer(t.substrateColor,0,4))throw Error('底砂配色不完整。');const habitat=t.habitat||'freshwater';if(!['freshwater','marine'].includes(habitat)||t.fishes.some(f=>(SPECIES[f.species]?.habitat||'freshwater')!==habitat))throw Error('生物與魚缸類型不符。');
   const design=new Map();for(const d of t.placedDecorations){const extra={};for(const [k,a,b]of [['posX',0,1],['posY',0,1],['scale',.6,1.4],['rotation',-180,180],['color',0,4],['z',0,24]])if(d[k]!==undefined){if(!finite(d[k],a,b)||(['color','z'].includes(k)&&!Number.isInteger(d[k])))throw Error('布置編輯資料不完整。');extra[k]=d[k];}if(d.flip!==undefined){if(typeof d.flip!=='boolean')throw Error('翻轉資料不完整。');extra.flip=d.flip;}if(d.plane!==undefined){if(!['back','middle','front'].includes(d.plane))throw Error('前後景資料不完整。');extra.plane=d.plane;}design.set(d.id,extra);}
-  const validated=legacy.validate(withNewAchievementDefaults({...r,level:legacyLevel,schemaVersion:4,gameVersion:'0.5',tankName:name,tankTier:4,tankCapacity:18,fishes:t.fishes,drops:t.drops,purchasedDecorations:t.purchasedDecorations,placedDecorations:t.placedDecorations,substrate:t.substrate,onboarding:{step:4,completed:true,skipped:false,welcomed:true,paused:false,coinHintShown:o.coinHintShown}}));
+  const dropValues=new Map(),credits=new Map();
+  for(const c of t.drops){if(!integer(c.value,1,CONFIG.MAX_COINS))throw Error('金幣暫存金額不完整。');dropValues.set(c.id,c.value);}
+  for(const f of t.fishes){if(f.coinCredit!==undefined&&!finite(f.coinCredit,0,100))throw Error('產幣進度不完整。');credits.set(f.id,f.coinCredit);}
+  const validated=legacy.validate(withNewAchievementDefaults({...r,level:legacyLevel,schemaVersion:4,gameVersion:'0.5',tankName:name,tankTier:4,tankCapacity:18,fishes:t.fishes.map(f=>({...f,coinProgress:Math.min(f.coinProgress,SPECIES[f.species].coinInterval*CONFIG.COIN_SCALE)})),drops:t.drops.map(c=>({...c,value:Math.min(18,c.value)})),purchasedDecorations:t.purchasedDecorations,placedDecorations:t.placedDecorations,substrate:t.substrate,onboarding:{step:4,completed:true,skipped:false,welcomed:true,paused:false,coinHintShown:o.coinHintShown}}));
+  for(const f of validated.fishes)if(credits.get(f.id)!==undefined)f.coinCredit=credits.get(f.id);
+  for(const c of validated.drops)c.value=dropValues.get(c.id);
   shared=validated;
   for(const [rows,ids]of [[validated.fishes,fishIds],[validated.placedDecorations,decorIds],[validated.drops,dropIds]])for(const row of rows){if(ids.has(row.id))throw Error('不同魚缸有重複的資料。');ids.add(row.id);}
   return {id:t.id,name,tier:t.tier,habitat,substrateColor:integer(t.substrateColor,0,4)?t.substrateColor:0,fishes:validated.fishes,drops:validated.drops,purchasedDecorations:validated.purchasedDecorations,placedDecorations:validated.placedDecorations.map(d=>({...d,...design.get(d.id)})),substrate:validated.substrate};
@@ -75,7 +80,9 @@ function validate(raw){
  const s={...shared,rewardPaid,...(r.activity===undefined?{}:{activity:{...activity}})};for(const k of [...Object.keys(tankKeys),'tankCapacity'])delete s[k];
  // Restore V0.6-only achievement flags after the V0.5 validator handles legacy IDs.
  s.achievements=Object.fromEntries(ACHIEVEMENTS.map(a=>{const old=shared.achievements[a.id],v=r.achievements?.[a.id];return [a.id,old||((v&&typeof v.completed==='boolean'&&typeof v.rewardClaimed==='boolean'&&(!v.rewardClaimed||v.completed))?{completed:v.completed,rewardClaimed:v.rewardClaimed}:{completed:false,rewardClaimed:false})];}));
- return attach({...s,level:r.level,schemaVersion:5,gameVersion:'0.6',tanks,activeTankId:r.activeTankId,feedInventory:inventory,feedPurchases:purchases,gifts:[...r.gifts],emergencyAt:r.emergencyAt,migration,onboarding:{...o}});
+ let offlinePending=null;
+ if(r.offlinePending!=null){const q=r.offlinePending;if(!q||!integer(q.coins,0,CONFIG.MAX_COINS)||!finite(q.seconds,0,1e12)||!finite(q.productive,0,1e12)||!finite(q.at,0,Number.MAX_SAFE_INTEGER))throw Error('離線收益不完整。');offlinePending={...q};}
+ return attach({...s,offlinePending,level:r.level,schemaVersion:5,gameVersion:'0.6',tanks,activeTankId:r.activeTankId,feedInventory:inventory,feedPurchases:purchases,gifts:[...r.gifts],emergencyAt:r.emergencyAt,migration,onboarding:{...o}});
 }
 function freshFromLegacy(raw,name){const s=migrate(raw);s.coins=CONFIG.START_COINS;s.tanks=[{...s.tanks[0],id:'tank-1',name:legacy.tankName(name),tier:1}];s.activeTankId='tank-1';s.feedInventory={general:0,small:0,protein:0};s.gifts=[];s.migration=null;s.onboarding=newOnboarding();return validate(s);}
 window.AquariumSave=Object.freeze({...legacy,validate,attach,emptyTank,freshFromLegacy,GIFT_IDS,TUTORIAL_KEYS,HINT_IDS,newOnboarding,normalizeOnboarding});
