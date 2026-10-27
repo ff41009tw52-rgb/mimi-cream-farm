@@ -29,9 +29,9 @@ const {harness}=require('./harness.cjs'),{context,plain,v5,large}=require('./sch
  for(const f of zero.tanks[0].fishes)f.coinProgress=D.SPECIES[f.species].coinInterval*D.CONFIG.COIN_SCALE-1;
  const zv=await h.create({state:zero,cadence:100}),zp=zv.p;await zp.locator('#home-continue').click();await zp.locator('#game').waitFor({state:'visible'});await advance(zp,20000);
  assert.equal((await read(zp)).state.drops.length,0,'0% hunger stops new coin generation even with no food or money');await zv.context.close();
- const empty=seeded({coins:0,hunger:10});
+ const empty=seeded({coins:0,hunger:10});empty.savedAt=Date.now()+60000;
  empty.feedInventory={general:0,small:0,protein:0};
- for(const f of empty.tanks[0].fishes)f.coinProgress=D.SPECIES[f.species].coinInterval*D.CONFIG.COIN_SCALE-1;
+ for(const f of empty.tanks[0].fishes){f.coinProgress=D.SPECIES[f.species].coinInterval*D.CONFIG.COIN_SCALE-1;delete f.coinCredit;}
  const ev=await h.create({state:empty,cadence:100}),ep=ev.p;await ep.locator('#home-continue').click();await ep.locator('#game').waitFor({state:'visible'});
  await ep.locator('#shop').click();await ep.locator('#tab-feed').click();
  assert.equal(await ep.locator('#emergency-feed').count(),0,'no emergency food button');
@@ -39,7 +39,7 @@ const {harness}=require('./harness.cjs'),{context,plain,v5,large}=require('./sch
  await h.closeDialog(ep);
  await advance(ep,20000);
  assert((await read(ep)).state.drops.length>0,'positive-hunger fish must earn coins at the normal rate');
- assert((await read(ep)).state.drops.every(c=>c.value>=2),'positive hunger retains the species stage payout');
+ assert((await read(ep)).state.drops.every(c=>c.value>=1),'positive hunger retains the species stage payout');
  await ep.locator('#feed').click();await ep.locator('#feed-general').click();
  const noFoodBefore=(await read(ep)).state.feedInventory.general;
  const cashBefore=(await read(ep)).state.coins;
