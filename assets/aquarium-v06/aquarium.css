@@ -310,3 +310,8 @@
 .purchase-form .fish-preview{width:300px;height:175px;object-fit:contain}
 .purchase-form .variant-note{font-size:12px;line-height:1.4;margin:0;color:#67776a}
 @media(max-width:600px){.purchase-form .fish-preview{width:260px;height:145px}.purchase-colors{gap:6px}.purchase-colors legend{font-size:17px}.fish-color-swatch{min-height:69px}}
+
+#offline-claim{display:block;width:100%;min-height:48px;padding:12px 20px;border:0;border-radius:14px;background:#278273;color:#fffdf2;font:700 18px inherit;cursor:pointer}
+#offline-claim:focus-visible{outline:3px solid #d7ae51;outline-offset:3px}
+#coin-storage-note{font-size:13px;color:#795624;background:#fff5d8;border-radius:8px;padding:4px 8px;max-width:52%;line-height:1.4}
+#coin-storage-note[hidden]{display:none}
