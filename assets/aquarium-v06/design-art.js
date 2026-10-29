@@ -56,7 +56,7 @@ const bounds=Object.fromEntries(Object.entries(D.SPECIES).filter(([,s])=>forms[s
 window.AquariumFishArt=Object.freeze({...fishOld,draw:drawFish,hitBounds:Object.freeze({...fishOld.hitBounds,...bounds}),getFinInfo:key=>bounds[key]?{note:'以簡化造型觀察尾鰭、背鰭與胸鰭；幼魚依體型縮放呈現。',parts:[['dorsal','背鰭','協助保持平衡。'],['tail','尾鰭','擺動尾部與尾鰭推動身體。'],['pectoral','胸鰭','協助轉向、減速與保持位置。'],['pelvic','腹鰭','協助身體平衡。'],['anal','臀鰭','協助穩定游動方向。'],['gills','鰓','位於鰓蓋裡，和水進行氣體交換；亮色是位置示意。']].map(([id,name,description])=>({id,name,description}))}:fishOld.getFinInfo(key)});
 const added=new Set(['foxtail','roundleaf','lilypad','mossrock','shrimphouse','rootarch','slatetunnel','mushroom','shellpile','starfish','seafan','staghorn','braincoral','anemone','reefcave','coraltower']);
 function leaf(c,x,y,tx,ty,w,col){shape(c,`M${x} ${y} Q${tx-w} ${ty+12} ${tx} ${ty} Q${tx+w} ${ty+12} ${x} ${y}Z`,col);line(c,`M${x} ${y} L${tx} ${ty}`,'#eef0c875',.65);}
-function stone(c,x,y,w,h){c.save();c.translate(x,y);c.scale(w,h);shape(c,'M-23 0 L-33 -21 L-20 -40 Q0 -52 23 -34 L31 -11 L22 0Z',gradient(c,'#d1d0bd','#758b86'));line(c,'M-27 -21 L-5 -31 L17 -19 M-5 -31 L1 -44','#eef0d894',1);c.restore();}
+function stone(c,x,y,w,h){c.save();c.translate(x,y);c.scale(w,h);shape(c,'M-23 0 Q-36 -8 -31 -23 Q-25 -43 -8 -44 Q12 -49 23 -34 Q35 -19 29 -8 Q26 2 22 0Z',gradient(c,'#d1d0bd','#758b86'));line(c,'M-27 -21 L-5 -31 L17 -19 M-5 -31 L1 -44','#eef0d894',1);c.restore();}
 function newDecor(c,id,x,y,w,h){if(!added.has(id))return decorOld.draw(c,id,x,y,w,h);c.save();c.translate(x,y);c.scale(w/100,h/100);c.lineCap='round';c.lineJoin='round';const d=D.DECORATIONS[id],col=gradient(c,d.color,'#5b7c76');
  if(id==='foxtail'||id==='roundleaf'){for(let i=0;i<5;i++){const x0=-30+i*15,top=-60-(i*17%40);line(c,`M${x0} 0 Q${x0+5} -45 ${x0} ${top}`,'#5e8d6c',2);for(let j=0;j<7;j++){const yy=top*j/7;for(const side of [-1,1])if(id==='foxtail'){for(let k=0;k<3;k++)line(c,`M${x0} ${yy} l${side*(8+k*3)} ${-7+k*4}`,'#8fba85',1.4);}else leaf(c,x0,yy,x0+side*15,yy-13,9,col);}}}
  else if(id==='lilypad'){for(const [xx,yy,ss]of [[-23,-48,.85],[20,-74,1],[15,-23,.72]]){line(c,`M0 0 Q${xx-10} -30 ${xx} ${yy}`,'#789a65',2);c.save();c.translate(xx,yy);c.scale(ss,.48*ss);shape(c,'M0 0 L-26 -15 C-50 -5 -29 31 0 32 C43 31 46 -20 18 -26 L0 0Z',gradient(c,'#bed08e','#689d77'));for(let j=0;j<6;j++)line(c,`M0 0 L${Math.cos(j)*28} ${Math.sin(j)*24}`,'#dde6b478',.8);c.restore();}}
@@ -77,7 +77,17 @@ function hsl(r,g,b){r/=255;g/=255;b/=255;const hi=Math.max(r,g,b),lo=Math.min(r,
 function rgb(h,s,l){const a=s*Math.min(l,1-l),f=n=>{const k=(n+h*12)%12;return Math.round(255*(l-a*Math.max(-1,Math.min(k-3,9-k,1))));};return [f(0),f(8),f(4)];}
 function tint(canvas,hex){if(!hex)return;const c=canvas.getContext('2d'),im=c.getImageData(0,0,canvas.width,canvas.height),v=hex.slice(1).match(/../g).map(x=>parseInt(x,16)),target=hsl(...v);for(let i=0;i<im.data.length;i+=4){if(!im.data[i+3])continue;const old=hsl(im.data[i],im.data[i+1],im.data[i+2]),p=rgb(target[0],Math.min(.65,target[1])*(.55+old[1]*.45),Math.max(.08,Math.min(.96,target[2]+(old[2]-.5)*.6)));im.data[i]=p[0];im.data[i+1]=p[1];im.data[i+2]=p[2];}c.putImageData(im,0,0);}
 const cache=new Map();function cached(key,make){if(cache.has(key))return cache.get(key);const out=make();cache.set(key,out);if(cache.size>96)cache.delete(cache.keys().next().value);return out;}
-function drawDecor(c,id,x,y,w,h,color=0){if(!color)return newDecor(c,id,x,y,w,h);const ww=Math.ceil(w*1.35*2),hh=Math.ceil(h*1.25*2),key=[id,ww,hh,color].join(':');const image=cached(key,()=>{const a=document.createElement('canvas');a.width=ww;a.height=hh;const ctx=a.getContext('2d');newDecor(ctx,id,ww/2,hh*.94,w*2,h*2);tint(a,colors(id)[color][1]);return a;});c.drawImage(image,x-ww/4,y-hh*.47,ww/2,hh/2);}
+function drawDecor(c,id,x,y,w,h,color=0){
+ const ww=Math.ceil(w*1.35*2),hh=Math.ceil(h*1.25*2),key=[id,ww,hh,color].join(':');
+ const image=cached(key,()=>{
+  const a=document.createElement('canvas');a.width=ww;a.height=hh;const ctx=a.getContext('2d');newDecor(ctx,id,ww/2,hh*.94,w*2,h*2);
+  // A translucent wash and fixed fine grain retain the original veins, markings and silhouette.
+  ctx.save();ctx.globalCompositeOperation='source-atop';const wash=ctx.createLinearGradient(ww*.15,0,ww*.8,hh);
+  wash.addColorStop(0,'#fff4cc1c');wash.addColorStop(.45,'#fff4cc00');wash.addColorStop(1,'#183d3521');ctx.fillStyle=wash;ctx.fillRect(0,0,ww,hh);
+  for(let i=0;i<200;i++){ctx.fillStyle=i%3?'#fff9e514':'#23463c12';ctx.beginPath();ctx.ellipse((i*73.13)%ww,(i*47.91)%hh,.55+(i%3)*.25,.45,0,0,TAU);ctx.fill();}ctx.restore();
+  if(color)tint(a,colors(id)[color][1]);return a;
+ });c.drawImage(image,x-ww/4,y-hh*.47,ww/2,hh/2);
+}
 function sand(c,id,w,h,color=0){if(!color)return decorOld.sand(c,id,w,h);const image=cached(['sand',id,w,h,color].join(':'),()=>{const a=document.createElement('canvas');a.width=Math.ceil(w);a.height=Math.ceil(h);decorOld.sand(a.getContext('2d'),id,w,h);tint(a,colors(id)[color][1]);return a;});c.drawImage(image,0,0,w,h);}
 window.AquariumDecorArt=Object.freeze({...decorOld,draw:drawDecor,sand,colors});
 })();
