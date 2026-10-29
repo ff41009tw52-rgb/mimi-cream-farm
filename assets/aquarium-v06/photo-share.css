@@ -1,0 +1,15 @@
+#dialog-content.photo-share{display:block}
+.photo-share #photo-preview{display:block;width:100%;height:auto;min-height:100px;border-radius:14px;background:#e1ebe3;border:1px solid #c5d9cc;margin:12px 0 18px}
+.photo-share form{display:grid;gap:14px}
+.photo-share label{display:grid;gap:6px;font-weight:700;color:#28594e}
+.photo-share input,.photo-share textarea{font:inherit;font-size:16px;width:100%;box-sizing:border-box;padding:12px;border:1px solid #90b4a0;border-radius:10px;background:#fffef7;color:#234a41}
+.photo-share textarea{min-height:86px;resize:vertical}
+.photo-share .photo-note{font-size:14px;line-height:1.65;color:#536b60}
+.photo-share .photo-status{font-weight:700;line-height:1.7;overflow-wrap:anywhere;min-height:1.7em;margin:0}
+.photo-share .photo-actions{display:flex;gap:10px;flex-wrap:wrap}
+.photo-share .photo-actions button,.photo-share .photo-download{min-height:48px;padding:12px 18px;font:inherit;font-weight:700;border-radius:12px}
+.photo-share .photo-download{display:inline-flex;align-items:center;justify-content:center;background:#edf3e9;border:1px solid #bbcebb;color:#285d4d;text-decoration:none;box-sizing:border-box}
+.photo-share .photo-download[aria-disabled=true]{opacity:.55;pointer-events:none}
+.photo-share button:disabled{opacity:.55;cursor:default}
+.photo-share :focus-visible{outline:3px solid #bb7930;outline-offset:3px}
+@media(max-width:480px){.photo-share .photo-actions>*{flex:1 1 42%}.photo-share .photo-actions #photo-send{flex-basis:100%}}
