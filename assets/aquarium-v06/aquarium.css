@@ -362,7 +362,7 @@ body{background:radial-gradient(ellipse at 8% 5%,#e0ece1 0,transparent 45%),radi
 #dialog .species-shop-grid{gap:16px;align-items:stretch}
 #dialog .species-shop-grid>.creature-product{height:420px;padding:14px;gap:8px;border:1px solid var(--art-line);border-radius:20px;background:linear-gradient(145deg,#fffef9,#f5f8ef);box-shadow:0 6px 18px #315e4c0c}
 #dialog .species-shop-grid>.creature-product>.fish-preview{height:166px;min-height:166px;width:100%;border-radius:14px;border:1px solid #d7e6d7;object-fit:contain;background:radial-gradient(ellipse at 45% 35%,#fffef2,#e4f1e8 75%);opacity:1}
-#dialog .fish-preview[data-habitat="marine"]{background:radial-gradient(ellipse at 40% 25%,#f8fdff,#dfedf6 78%);border-color:#cbdee8}
+#dialog .species-shop-grid>.creature-product>.fish-preview[data-habitat="marine"],#dialog .fish-preview[data-habitat="marine"]{background:radial-gradient(ellipse at 40% 25%,#f8fdff,#dfedf6 78%);border-color:#cbdee8}
 #dialog .creature-product>h3{height:30px;min-height:30px;font-size:19px;line-height:30px;white-space:nowrap;letter-spacing:0}
 #dialog .creature-product>.fish-brief{height:76px;min-height:76px;font-size:15px;line-height:25px;color:#48675b}
 #dialog .creature-product>.fish-detail{height:36px;min-height:36px;padding:4px;color:#286f60;text-decoration:underline;text-decoration-color:#a7c9b7;text-underline-offset:4px}
