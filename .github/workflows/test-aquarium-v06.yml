@@ -123,6 +123,7 @@ jobs:
           node tests/aquarium-v06/economy-browser.test.cjs
           node tests/aquarium-v06/crustacean-motion.test.cjs
           node tests/aquarium-v06/appearance.test.cjs
+          node tests/aquarium-v06/art-polish.test.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

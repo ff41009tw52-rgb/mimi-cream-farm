@@ -18,10 +18,16 @@ function sand(c,id,width,height){
  for(let i=0;i<3;i++){const y=height*(.25+i*.27);path(c,`M0 ${y} Q${width*.25} ${y-height*.12} ${width*.55} ${y} T${width} ${y-height*.02}`,null,id==='black'?'#9ca69b':id==='white'?'#ffffff':'#f6eedf',id==='white'?2.4:1.2);}
  c.globalAlpha=1;
 }
-function leaf(c,x,y,dx,dy,w,fill){const tipX=x+dx,tipY=y+dy;path(c,`M${x} ${y} Q${x+dx*.15-w} ${y+dy*.55} ${tipX} ${tipY} Q${x+dx*.85+w} ${y+dy*.5} ${x} ${y}Z`,fill,'#3e796751',.65);path(c,`M${x} ${y} Q${x+dx*.55} ${y+dy*.6} ${tipX} ${tipY}`,null,'#d1e1ad80',.85);}
+function leaf(c,x,y,dx,dy,w,fill){
+ const tx=x+dx,ty=y+dy,curve=dx*.22;
+ const outline=path(c,`M${x} ${y} C${x+curve-w} ${y+dy*.34} ${tx-w*.6} ${ty+Math.abs(dy)*.12} ${tx} ${ty} C${tx+w*.45} ${ty+Math.abs(dy)*.33} ${x+dx*.62+w} ${y+dy*.65} ${x} ${y}Z`,fill,'#3e79673b',.6);
+ c.save();c.clip(outline);const light=c.createLinearGradient(x-w,y,tx+w,ty);light.addColorStop(0,'#284e4829');light.addColorStop(.5,'#f1edb82b');light.addColorStop(1,'#ffffdd09');c.fillStyle=light;c.fillRect(-80,-130,160,140);
+ path(c,`M${x} ${y} Q${x+dx*.48-2} ${y+dy*.55} ${tx} ${ty}`,null,'#e5ebba80',.65);
+ for(let j=1;j<5;j++){const t=j/6,xx=x+dx*t,yy=y+dy*t;path(c,`M${xx} ${yy} q${-w*.45} ${dy*.07} ${-w*.6} ${dy*.12} M${xx} ${yy} q${w*.48} ${dy*.03} ${w*.62} ${dy*.09}`,null,'#dce9b53b',.45);}c.restore();
+}
 function draw(c,id,x,y,width,height){
  c.save();c.translate(x,y);c.scale(width/100,height/100);
- const green=gradient(c,-100,0,'#a4c898','#43866c'),rock=gradient(c,-100,0,'#d5d7c9','#7c9188'),wood=gradient(c,-95,0,'#c4ab83','#806647');
+ const green=gradient(c,-100,0,'#a4c898','#43866c'),rock=gradient(c,-100,0,'#d9dcdf','#7c8a95'),wood=gradient(c,-95,0,'#c4ab83','#806647');
  if(P[id]){const shape=path(c,'M-57 -31 L-24 -48 L59 -33 L25 -8Z',P[id].top);c.save();c.clip(shape);c.translate(-60,-50);sand(c,id,120,50);c.restore();}
  else if(id==='smallplant'){
   oval(c,0,-2,31,5,'#4f7a5b30');
@@ -40,7 +46,7 @@ function draw(c,id,x,y,width,height){
  }else if(id==='smallrock'||id==='bigrock'){
   const shape=id==='smallrock'?'M-48 -3 Q-56 -30 -29 -61 Q-9 -83 15 -66 Q42 -64 49 -19 Q53 -4 35 0 L-30 0Z':'M-50 -4 Q-55 -40 -35 -68 Q-22 -103 9 -96 Q33 -91 38 -59 Q57 -37 49 -2Z';
   const clip=path(c,shape,rock,'#748b8066',1);
-  c.save();c.clip(clip);path(c,'M-48 -60 Q-15 -91 9 -96 L0 -42 L-23 -19 L-53 -12Z','#e4e4d16b');path(c,'M0 -42 L34 -64 L54 -14 L30 3 L-11 0Z','#637d7766');
+  c.save();c.clip(clip);const light=c.createRadialGradient(-22,-63,3,-5,-40,70);light.addColorStop(0,'#f4f3ec88');light.addColorStop(1,'#344b5c38');c.fillStyle=light;c.fillRect(-60,-110,120,115);path(c,'M-40 -32 Q-27 -50 -7 -44 T27 -57',null,'#f0ebd64d',1.4);
   for(let i=0;i<30;i++)oval(c,-46+(i*31)%93,-5-(i*19)%89,.6+i%3*.5,.55,i%2?'#f1eedd45':'#415e5c25');
   path(c,'M-19 -67 l7 20 -8 12 M12 -44 l8 15 -4 10',null,'#60796d6b',.9);c.restore();
   if(id==='bigrock'){path(c,'M-42 -21 Q-37 -35 -25 -32 Q-14 -25 -18 -17Z','#7f9d7d');path(c,'M-40 -24 l9 -4 7 4',null,'#c0cba277',1);}

@@ -1,0 +1,16 @@
+const assert=require('node:assert/strict'),{harness}=require('./harness.cjs'),{context,plain,starter}=require('./schema.test.cjs');
+(async()=>{
+ const h=await harness(8878),w=context(),D=w.AquariumData,S=w.AquariumSave;
+ function seed(habitat){const s=plain(starter);s.savedAt=Date.now();s.coins=10000;s.xp=5700;s.level=9;s.onboarding={...S.newOnboarding(),step:21,events:[...S.TUTORIAL_KEYS],completed:true,everCompleted:true,welcomed:true,hints:[...S.HINT_IDS]};s.collection={};const t=s.tanks[0];t.habitat=habitat;t.tier=4;t.fishes=Object.keys(D.SPECIES).filter(id=>(D.SPECIES[id].habitat||'freshwater')===habitat).slice(0,5).map((id,i)=>{s.collection[id]={total:1,adults:1,highestStage:2,variants:['normal']};return {...starter.tanks[0].fishes[0],id:'art-'+i,species:id,name:D.SPECIES[id].name,variant:'normal',personality:D.SPECIES[id].personalities[0],growth:100,adultRecorded:true,hunger:90,coinProgress:0};});return plain(S.validate(s));}
+ for(const width of [390,820,1440])for(const habitat of ['freshwater','marine']){
+  const v=await h.create({state:seed(habitat),size:{width,height:width===820?1180:960},touch:width<1000,cadence:100}),p=v.p;
+  await p.locator('#home-continue').click();await h.advance(p,300);await h.shot(p,'art-tank-'+habitat+'-'+width);
+  await h.shop(p);const cards=await p.locator('.creature-product').evaluateAll(nodes=>nodes.map(e=>{const r=e.getBoundingClientRect(),b=e.querySelector('.buy').getBoundingClientRect(),c=e.querySelector('canvas'),ctx=c.getContext('2d'),d=ctx.getImageData(0,0,c.width,c.height).data;let pixels=0,edge=0;for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++){if(d[(y*c.width+x)*4+3]>100){pixels++;if(x===0||y===0||x===c.width-1||y===c.height-1)edge++;}}return {height:r.height,bottom:r.bottom-b.bottom,preview:c.getBoundingClientRect().height,pixels,edge};}));
+  assert.equal(cards.length,habitat==='marine'?15:20);assert.equal(new Set(cards.map(c=>c.height)).size,1);assert.equal(new Set(cards.map(c=>c.bottom)).size,1);assert.equal(new Set(cards.map(c=>c.preview)).size,1);assert(cards.every(c=>c.pixels>100&&c.edge===0),'All shared artwork is visible without touching canvas edges');
+  assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await h.shot(p,'art-shop-'+habitat+'-'+width);
+  await h.closeDialog(p);await p.locator('#more-menu').click();await p.locator('#more-observe').click();await h.advance(p,200);await p.locator('#obs-enlarge').click();await h.shot(p,'art-observe-'+habitat+'-'+width);await p.locator('#obs-return').click();
+  // Atmosphere honours reduced motion; fish progression and timed layer switching remain active.
+  await p.emulateMedia({reducedMotion:'reduce'});await h.advance(p,500);const before=await h.read(p);assert(before.started);assert.equal(await p.evaluate(()=>matchMedia('(prefers-reduced-motion: reduce)').matches),true);await h.advance(p,1000);const after=await h.read(p);assert(after.state.fishes[0].coinProgress>before.state.fishes[0].coinProgress);await v.context.close();
+ }
+ assert.deepEqual(h.errors,[]);h.pass('35 portraits stay in bounds; equal cards, observation and reduced-motion progression work on phone, tablet and desktop');h.saveResults('art-polish',{errors:h.errors,results:h.results});await h.close();
+})().catch(e=>{console.error(e);process.exit(1);});

@@ -5,7 +5,11 @@ const old=window.AquariumDecorArt,ids=new Set(['crypt','pebbles','anubias','lava
 function path(c,d,color,stroke='#526d5f70',w=.8){const p=new Path2D(d);if(color){c.fillStyle=color;c.fill(p);}if(stroke){c.strokeStyle=stroke;c.lineWidth=w;c.stroke(p);}return p;}
 function oval(c,x,y,rx,ry,col){c.beginPath();c.ellipse(x,y,rx,ry,0,0,Math.PI*2);c.fillStyle=col;c.fill();}
 function grad(c,a,b){const g=c.createLinearGradient(-25,-100,35,0);g.addColorStop(0,a);g.addColorStop(1,b);return g;}
-function leaf(c,bx,by,tx,ty,w,col,vein=true){path(c,`M${bx} ${by} Q${tx-w} ${ty+20} ${tx} ${ty} Q${tx+w} ${ty+20} ${bx} ${by}Z`,col);if(vein)path(c,`M${bx} ${by} Q${tx-2} ${ty+14} ${tx} ${ty}`,null,'#d6dea58c',.7);}
+function leaf(c,bx,by,tx,ty,w,col,vein=true){const mx=(bx+tx)/2,my=(by+ty)/2;
+ const clip=path(c,`M${bx} ${by} C${mx-w} ${my+5} ${tx-w*.65} ${ty+5} ${tx} ${ty} C${tx+w*.25} ${ty+16} ${mx+w} ${my-5} ${bx} ${by}Z`,col,'#456c5344',.6);
+ c.save();c.clip(clip);path(c,`M${bx-2} ${by} Q${mx-w*.4} ${my} ${tx} ${ty}`,null,'#e9e4a838',w*.5);c.restore();
+ if(vein)path(c,`M${bx} ${by} Q${mx-2} ${my} ${tx} ${ty}`,null,'#d6dea58c',.65);
+}
 function stone(c,x,y,sx,sy,color){c.save();c.translate(x,y);c.scale(sx,sy);path(c,'M-22 -2 Q-33 -14 -20 -29 Q-6 -43 15 -31 Q31 -22 26 -5 Q6 4 -22 -2Z',color);path(c,'M-22 -23 Q-5 -40 13 -29 L-2 -13 L-25 -9Z','#f1edda44',null);c.restore();}
 function draw(c,id,x,y,w,h){if(!ids.has(id))return old.draw(c,id,x,y,w,h);
  c.save();c.translate(x,y);c.scale(w/100,h/100);c.lineJoin='round';c.lineCap='round';

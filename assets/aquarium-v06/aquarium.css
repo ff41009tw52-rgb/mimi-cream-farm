@@ -331,3 +331,76 @@
 #toast .toast-close{pointer-events:auto}
 
 @media(max-width:480px){.design-swatches{gap:3px}}
+
+/* Storybook art pass: calm water, paper-like cards and one consistent set of controls. */
+:root{--art-ink:#285a53;--art-muted:#526f64;--art-line:#c6d8cc;--art-paper:#fffdf5;--art-teal:#287b6a;--art-gold:#c89a3f}
+body{background:radial-gradient(ellipse at 8% 5%,#e0ece1 0,transparent 45%),radial-gradient(ellipse at 95% 85%,#e3ece1 0,transparent 50%),#f5f3e8;color:var(--art-ink)}
+.home-start,.hud{border-color:var(--art-line);background:linear-gradient(145deg,#fffef8,#f4f7ed);box-shadow:0 12px 32px #315e4c0b,inset 0 1px 0 #fff}
+.home-art{border:1px solid #bbd4c8;background:radial-gradient(ellipse at 35% 15%,#fff9da88,transparent 55%),linear-gradient(160deg,#e1f1e5,#b1d8cf);box-shadow:inset 0 0 35px #ffffff55,0 16px 30px #32635812}
+.home-copy,.home-local,.home-features p{color:var(--art-muted)}
+.home-features article{border-top:1px solid #c4d8c9;padding-top:13px}
+.home-start h2,.home-features h2{color:var(--art-ink)}
+#game .aquarium{border-color:#e8eee2;box-shadow:0 14px 28px #244d441a,0 0 0 1px #9ebdb066,inset 0 1px 0 #fff;border-radius:24px}
+/* Glass edge is visual only: no layer may intercept feeding, fish or coins. */
+.tank-viewport::after{content:"";position:absolute;inset:0;border-radius:2px;background:linear-gradient(90deg,#ffffff1a,transparent 2%,transparent 98%,#366d6420);box-shadow:inset 0 1px 0 #fff8,inset 0 -2px 12px #335c4210;pointer-events:none;z-index:3}
+#game .tank-base{background:linear-gradient(#e3ddc9,#cec5ac);border-top:1px solid #f9f2df;box-shadow:inset 0 -3px 0 #b2ae9829}
+#game .tank-caption{color:#2d635a;text-shadow:0 1px 2px #f9fff7}
+#game .controls>.action{border:1px solid #b9cec1;background:linear-gradient(#fffdf6,#edf4e9);box-shadow:inset 0 1px 0 #fff,0 3px 0 #c3d4c6;color:var(--art-ink)}
+#game .controls>.primary{background:linear-gradient(#398c76,#287463);border-color:#287463;color:#fffdf2;box-shadow:inset 0 1px 0 #7db49a,0 3px 0 #205f51}
+#game .controls>.action .action-icon{display:grid;place-items:center;flex:none;width:28px;height:28px}
+.action-icon svg{width:28px;height:28px;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#game .controls>.action:active{box-shadow:inset 0 1px 4px #264c4426}
+#onboarding{background:linear-gradient(110deg,#fff6d8,#fbf4df);border-color:#daca98;box-shadow:0 3px 10px #9e7f2b09}
+#onboarding .guide-step{background:#f4e0a2;color:#71591e;box-shadow:inset 0 1px 0 #fff6}
+#dialog,#observation{border:1px solid var(--art-line);background:var(--art-paper);box-shadow:0 24px 80px #163d3a38}
+#dialog::backdrop,#observation::backdrop{background:#214d4852}
+#dialog .dialog-head{border-bottom:1px solid #dce7d9;padding-bottom:12px}
+#dialog .tabs{background:#eaf1e6;border-radius:15px;padding:5px;gap:5px}
+#dialog .tab{border-radius:11px}
+#dialog .tab.active{background:var(--art-teal);color:#fffdf1;box-shadow:0 2px 5px #285a5320}
+#dialog .shop-intro{font-size:14px;line-height:1.7;color:var(--art-muted);background:#eff5e9;border:1px solid #dee7d7;border-radius:12px;padding:10px 12px}
+#dialog .species-shop-grid{gap:16px;align-items:stretch}
+#dialog .species-shop-grid>.creature-product{height:420px;padding:14px;gap:8px;border:1px solid var(--art-line);border-radius:20px;background:linear-gradient(145deg,#fffef9,#f5f8ef);box-shadow:0 6px 18px #315e4c0c}
+#dialog .species-shop-grid>.creature-product>.fish-preview{height:166px;min-height:166px;width:100%;border-radius:14px;border:1px solid #d7e6d7;object-fit:contain;background:radial-gradient(ellipse at 45% 35%,#fffef2,#e4f1e8 75%);opacity:1}
+#dialog .species-shop-grid>.creature-product>.fish-preview[data-habitat="marine"],#dialog .fish-preview[data-habitat="marine"]{background:radial-gradient(ellipse at 40% 25%,#f8fdff,#dfedf6 78%);border-color:#cbdee8}
+#dialog .creature-product>h3{height:30px;min-height:30px;font-size:19px;line-height:30px;white-space:nowrap;letter-spacing:0}
+#dialog .creature-product>.fish-brief{height:76px;min-height:76px;font-size:15px;line-height:25px;color:#48675b}
+#dialog .creature-product>.fish-detail{height:36px;min-height:36px;padding:4px;color:#286f60;text-decoration:underline;text-decoration-color:#a7c9b7;text-underline-offset:4px}
+#dialog .creature-product>.buy{min-height:46px;margin-top:auto;border-radius:12px;font-weight:700}
+#dialog .creature-product.locked{opacity:1}
+#dialog .creature-product.locked>.buy:disabled{background:#e6ebe2;color:#526557;border:1px solid #c9d2c3;opacity:1}
+#dialog .shop-grid .decor-item .decor-description,#dialog .shop-grid .feed-item .feed-species{color:#4c695a}
+#dialog .shop-grid .decor-item .decor-showcase{background:radial-gradient(ellipse at 45% 25%,#fffdf0,#e3eee1 80%)}
+#dialog .shop-grid .decor-item .decor-category{color:#365f50;font-size:12px;background:#fffdf0ed}
+#dialog .fish-detail:focus-visible,button:focus-visible{outline:3px solid var(--art-gold);outline-offset:3px}
+#observation .obs-header{background:#f7f8ee;border-bottom:1px solid #d4e2d6}
+#observation .obs-layers{background:#eef3e8;gap:10px}
+#observation .own-fish-heading h3{font-size:25px;color:var(--art-ink)}
+#observation .own-fish-heading p,#observation .own-footnote{color:var(--art-muted)}
+#obs-mine .specimen-window{height:clamp(270px,40vh,420px)!important;max-width:850px;margin-inline:auto;background:radial-gradient(ellipse at 45% 40%,#fafbf0,#d6e9dd 90%);box-shadow:inset 0 0 45px #fff9;border:1px solid #bdd6c8;border-radius:22px}
+#obs-mine .specimen-window:has([data-habitat="marine"]){background:radial-gradient(ellipse at 45% 35%,#f7fcff,#cce1eb 90%);border-color:#b8d4df}
+#observation .own-direct-zoom{justify-content:center}
+#observation #obs-own-fins,#observation .species-guide{border-color:#c9dccd}
+#observation #obs-own-fin-list button{border:1px solid #bed3c4;border-radius:11px;background:#f1f6ea;color:#315e52;min-height:44px}
+#observation #obs-own-fin-list [aria-pressed="true"]{background:#fff0c5;border-color:#bd9139;color:#6c501e;box-shadow:inset 0 -2px 0 #d2ae55}
+#observation #obs-own-active-part{border-left:3px solid #c99b41;background:#fff7df;border-radius:10px;padding:12px 14px;color:#5b573a;line-height:1.7}
+@media(max-width:1059px){
+ #game .controls>.action{min-height:56px}
+ #dialog .creature-product>.fish-detail{min-height:44px;height:44px}
+ #dialog .species-shop-grid>.creature-product{height:428px}
+ #game .feeding-hint{border:1px solid #bacfbb;box-shadow:0 5px 15px #315f4810}
+}
+@media(max-width:680px){
+ #game .aquarium{border-radius:18px}
+ #game .controls>.action .action-icon,.action-icon svg{width:23px;height:23px}
+ #dialog .species-shop-grid{gap:12px}
+ #dialog .species-shop-grid>.creature-product{height:410px;padding:13px;gap:7px}
+ #dialog .species-shop-grid>.creature-product>.fish-preview{height:156px;min-height:156px}
+ #dialog .creature-product>h3{font-size:19px}
+ #dialog .creature-product>.fish-brief{height:70px;min-height:70px;line-height:23px}
+ #obs-mine .specimen-window{height:240px!important;border-radius:16px}
+ #observation .own-fish-heading h3{font-size:22px}
+}
+@media(prefers-reduced-motion:reduce){
+ .action,.home-primary,.tab,.shop-item,.guide-step{animation:none!important;transition:none!important}
+}
