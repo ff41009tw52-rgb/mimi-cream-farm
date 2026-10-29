@@ -6,7 +6,7 @@ const {harness}=require('./harness.cjs'),{context,plain,v5}=require('./schema.te
  async function open(p){await p.locator('#more-menu').click();await p.locator('#photo-share').click();await p.locator('#photo-download').filter({hasText:'下載照片'}).waitFor();}
  try{
   for(const size of [{width:390,height:844},{width:820,height:1180},{width:1440,height:960}]){
-   const {p,context:ctx}=await h.create({size,state:seed(),touch:size.width!==1440});
+   const {p,context:ctx}=await h.create({clock:false,size,state:seed(),touch:size.width!==1440});
    await p.route('**/photo-config.js*',route=>route.fulfill({contentType:'text/javascript',body:`window.AQUARIUM_PHOTO_CONFIG={endpoint:${JSON.stringify(endpoint)}};`}));
    await p.reload();await p.locator('#home-continue').click();await p.locator('#game').waitFor({state:'visible'});
    const before=await h.read(p),calls=[];let failures=1;
@@ -32,7 +32,7 @@ const {harness}=require('./harness.cjs'),{context,plain,v5}=require('./schema.te
    await p.locator('#photo-retake').click();await p.locator('#photo-send').waitFor();assert(await p.locator('#photo-className').isEnabled());assert.equal(await p.locator('#photo-seat').inputValue(),'12');
    h.pass('photo capture, download, retained retry, receipt, reload, retake and layout '+size.width);await ctx.close();
   }
-  const {p,context:ctx}=await h.create({state:seed()});await p.locator('#home-continue').click();await open(p);assert(await p.locator('#photo-send').isDisabled());assert.match(await p.locator('#photo-status').innerText(),/還沒開放收件/);await h.shot(p,'photo-not-configured');await ctx.close();
+  const {p,context:ctx}=await h.create({clock:false,state:seed()});await p.locator('#home-continue').click();await open(p);assert(await p.locator('#photo-send').isDisabled());assert.match(await p.locator('#photo-status').innerText(),/還沒開放收件/);await h.shot(p,'photo-not-configured');await ctx.close();
   assert.deepEqual(h.errors,[]);h.saveResults('photo-results',{results:h.results,errors:h.errors});
  }finally{await h.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});
