@@ -285,7 +285,12 @@ async function askGemini(env, { message, grade, character, history }) {
 
       return {
         reply,
-        model
+        model,
+        fallbackFailures: failures.map(({ model, status, detail }) => ({
+          model,
+          status,
+          timeout: /abort|timeout/i.test(detail)
+        }))
       };
     } catch (error) {
       const detail = error?.message || String(error);
@@ -327,6 +332,7 @@ export default {
           service: "mimi-cream-ai",
           status: "ready",
           deploymentSource: "github",
+          revision: "20261030-model-diagnostics",
           geminiConfigured: Boolean(env.GEMINI_API_KEY),
           model: GEMINI_MODEL,
           models: GEMINI_MODELS,
@@ -418,6 +424,7 @@ export default {
           ok: true,
           reply: result.reply,
           model: result.model,
+          fallbackFailures: result.fallbackFailures,
           grade,
           character
         },
