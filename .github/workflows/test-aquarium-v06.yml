@@ -1,9 +1,9 @@
 name: Test aquarium V0.6 feeding, decor tutorial and multi-tank
 on:
   push:
-    paths: ['aquarium-v0.6*.html', 'assets/aquarium-v06/**', 'tests/aquarium-v06/**', 'scripts/build-aquarium-v06.py', '.github/workflows/test-aquarium-v06.yml']
+    paths: ['aquarium-v0.6*.html', 'assets/aquarium-v06/**', 'tests/aquarium-v06/**', 'google-apps-script/aquarium-photo/**', 'scripts/build-aquarium-v06.py', '.github/workflows/test-aquarium-v06.yml']
   pull_request:
-    paths: ['aquarium-v0.6*.html', 'assets/aquarium-v06/**', 'tests/aquarium-v06/**', 'scripts/build-aquarium-v06.py', '.github/workflows/test-aquarium-v06.yml']
+    paths: ['aquarium-v0.6*.html', 'assets/aquarium-v06/**', 'tests/aquarium-v06/**', 'google-apps-script/aquarium-photo/**', 'scripts/build-aquarium-v06.py', '.github/workflows/test-aquarium-v06.yml']
 concurrency:
   group: aquarium-v06-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: true
@@ -27,6 +27,7 @@ jobs:
           for f in assets/aquarium-v06/*.js; do node --check "$f"; done
           node tests/aquarium/schema-v05.test.cjs
           node tests/aquarium-v06/schema.test.cjs
+          node tests/aquarium-v06/photo-share.test.cjs
           node tests/aquarium-v06/economy.test.cjs
           node tests/aquarium-v06/species-content.test.cjs
           python3 scripts/build-aquarium-v06.py
@@ -129,3 +130,35 @@ jobs:
         with:
           name: appearance-${{ matrix.browser }}
           path: artifacts/appearance/
+
+
+  photo-sharing:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.58.2-noble
+      options: --ipc=host
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    env:
+      AQUARIUM_BROWSER: ${{ matrix.browser }}
+      AQUARIUM_ARTIFACTS: artifacts/photo/${{ matrix.browser }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/aquarium-v06-runtime playwright@1.58.2
+      - name: Validate actual receiving handler and browser submission paths
+        env:
+          NODE_PATH: /tmp/aquarium-v06-runtime/node_modules
+        run: |
+          node tests/aquarium-v06/photo-share.test.cjs
+          node tests/aquarium-v06/photo-browser.test.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: photo-${{ matrix.browser }}
+          path: artifacts/photo/

@@ -547,6 +547,26 @@ body{background:radial-gradient(ellipse at 8% 5%,#e0ece1 0,transparent 45%),radi
 
 
 
+
+
+<style>
+#dialog-content.photo-share{display:block}
+.photo-share #photo-preview{display:block;width:100%;height:auto;min-height:100px;border-radius:14px;background:#e1ebe3;border:1px solid #c5d9cc;margin:12px 0 18px}
+.photo-share form{display:grid;gap:14px}
+.photo-share label{display:grid;gap:6px;font-weight:700;color:#28594e}
+.photo-share input,.photo-share textarea{font:inherit;font-size:16px;width:100%;box-sizing:border-box;padding:12px;border:1px solid #90b4a0;border-radius:10px;background:#fffef7;color:#234a41}
+.photo-share textarea{min-height:86px;resize:vertical}
+.photo-share .photo-note{font-size:14px;line-height:1.65;color:#536b60}
+.photo-share .photo-status{font-weight:700;line-height:1.7;overflow-wrap:anywhere;min-height:1.7em;margin:0}
+.photo-share .photo-actions{display:flex;gap:10px;flex-wrap:wrap}
+.photo-share .photo-actions button,.photo-share .photo-download{min-height:48px;padding:12px 18px;font:inherit;font-weight:700;border-radius:12px}
+.photo-share .photo-download{display:inline-flex;align-items:center;justify-content:center;background:#edf3e9;border:1px solid #bbcebb;color:#285d4d;text-decoration:none;box-sizing:border-box}
+.photo-share .photo-download[aria-disabled=true]{opacity:.55;pointer-events:none}
+.photo-share button:disabled{opacity:.55;cursor:default}
+.photo-share :focus-visible{outline:3px solid #bb7930;outline-offset:3px}
+@media(max-width:480px){.photo-share .photo-actions>*{flex:1 1 42%}.photo-share .photo-actions #photo-send{flex-basis:100%}}
+
+</style>
 </head>
 <body>
 <section id="home" class="home" aria-labelledby="home-title">
@@ -2519,6 +2539,121 @@ window.AquariumFishArt=Object.freeze({...fish,getFinInfo:id=>D.OBSERVATIONS[id]?
 
 </script>
 <script>
+/* Set endpoint to the deployed Google Apps Script /exec URL after teacher setup.
+   Never put email addresses, Drive IDs, passwords or OAuth tokens in this file. */
+window.AQUARIUM_PHOTO_CONFIG = Object.freeze({ endpoint: '' });
+
+</script>
+<script>
+/* Canvas-only classroom submissions. No camera, student account or mail app. */
+(() => {
+'use strict';
+const DB='youyou-aquarium-photos', KEY='current', MAX_BYTES=1500000;
+const uuid=()=>crypto.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`;
+const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text)n.textContent=text;if(cls)n.className=cls;return n;};
+function endpoint(){const value=window.AQUARIUM_PHOTO_CONFIG?.endpoint||'';return /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(value)?value:'';}
+async function storage(mode,value){
+ return new Promise((resolve,reject)=>{
+  const request=indexedDB.open(DB,1);
+  request.onupgradeneeded=()=>request.result.createObjectStore('draft');
+  request.onerror=()=>reject(request.error);
+  request.onsuccess=()=>{const db=request.result;const tx=db.transaction('draft',mode);const store=tx.objectStore('draft');const op=mode==='readonly'?store.get(KEY):store.put(value,KEY);let result;
+   op.onsuccess=()=>{result=op.result;};tx.oncomplete=()=>{db.close();resolve(result);};tx.onerror=()=>{db.close();reject(tx.error);};tx.onabort=()=>{db.close();reject(tx.error);};};
+ });
+}
+function validFields(fields){
+ const className=fields.className.trim(),seat=fields.seat.trim(),idea=fields.idea.trim();
+ if(!/^[\u3400-\u9fffA-Za-z0-9０-９]{1,12}$/.test(className))throw Error('請填寫班級，例如「四年三班」或「403」，最多 12 個字。');
+ if(!/^\d{1,2}$/.test(seat)||Number(seat)<1||Number(seat)>99)throw Error('請填寫 1～99 的座號。');
+ if([...idea].length>120)throw Error('布置想法最多 120 個字。');
+ return {className,seat:String(Number(seat)),idea};
+}
+function loadImage(src){return new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(Error('照片讀取失敗，請再拍一張。'));image.src=src;});}
+function wrap(c,text,width){const rows=[];let line='';for(const ch of text){if(ch==='\n'||c.measureText(line+ch).width>width){rows.push(line);line=ch==='\n'?'':ch;}else line+=ch;}if(line)rows.push(line);return rows;}
+async function compose(draft,fields){
+ const image=await loadImage(draft.base), width=1200, padding=42;
+ const output=document.createElement('canvas'),c=output.getContext('2d');
+ const pictureHeight=Math.round(width*image.height/image.width);
+ c.font='26px "Noto Sans TC", "Microsoft JhengHei", sans-serif';
+ const ideas=wrap(c,(fields.idea||'').replace(/\s+/g,' '),width-padding*2);
+ output.width=width;output.height=pictureHeight+176+(ideas.length?24+ideas.length*36:0);
+ c.fillStyle='#f5f5e9';c.fillRect(0,0,width,output.height);c.fillStyle='#285d54';
+ c.font='bold 38px "Noto Sans TC", "Microsoft JhengHei", sans-serif';c.fillText('悠悠水族箱 · '+draft.tankName,padding,60,width-padding*2);
+ c.drawImage(image,0,88,width,pictureHeight);
+ c.font='26px "Noto Sans TC", "Microsoft JhengHei", sans-serif';
+ const date=new Date(draft.capturedAt).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false});
+ c.fillText(`${fields.className||'班級未填'}　${fields.seat?fields.seat+' 號':'座號未填'}　拍攝：${date}`,padding,pictureHeight+137,width-padding*2);
+ ideas.forEach((line,i)=>c.fillText(line,padding,pictureHeight+185+i*36,width-padding*2));
+ return output;
+}
+async function send(payload,url){
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),35000);
+ try{
+  const response=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify(payload),signal:controller.signal,redirect:'follow',credentials:'omit'});
+  if(!response.ok)throw Error('暫時無法確認收件，請稍後再試。');
+  const result=await response.json();
+  if(result.ok!==true||result.submissionId!==payload.submissionId||typeof result.receipt!=='string'||!result.receipt)throw Error(result.error||'尚未收到收件確認，請稍後再試。');
+  return {receipt:result.receipt,notification:result.notification==='sent'?'sent':'pending'};
+ }catch(error){if(error.name==='AbortError'||error instanceof TypeError)throw Error('還沒確認是否送達。照片已保留，請按「重試傳送」。');throw error;}
+ finally{clearTimeout(timer);}
+}
+function create({capture,openDialog,root}){
+ let draft=null,busy=false,previewURL='',saveQueue=Promise.resolve(),updateVersion=0,lastStatus='',storageOK=true;
+ const ready=storage('readonly').then(value=>{if(value&&value.version===1&&typeof value.base==='string'&&value.base.startsWith('data:image/png;base64,'))draft=value;}).catch(()=>{});
+ function persist(){const copy=structuredClone(draft);saveQueue=saveQueue.catch(()=>{}).then(()=>storage('readwrite',copy));saveQueue.catch(()=>{storageOK=false;});return saveQueue;}
+ async function take(){const shot=capture();draft={version:1,base:shot.canvas.toDataURL('image/png'),tankName:shot.tankName,capturedAt:shot.capturedAt,fields:draft?.fields||{className:'',seat:'',idea:''},payload:null,result:null};await persist().catch(()=>{});}
+ async function open(){await ready;openDialog('拍照分享','photo-share');if(!draft){try{await take();}catch{root().append(el('p','拍照失敗，請關閉視窗後再試一次。'));return;}}render();}
+ function render(){
+  const host=root();host.replaceChildren();host.classList.add('photo-share');
+  const photo=el('img');photo.id='photo-preview';photo.alt='目前準備傳給老師的水族箱照片';
+  const note=el('p','這次分享拍下的這一缸。切換魚缸後，可再拍一張。','photo-note');
+  const form=el('form');form.id='photo-form';const fields={};
+  for(const [key,label,placeholder]of [['className','班級','例如：四年三班或 403'],['seat','座號','例如：12'],['idea','我的布置想法（選填）','想讓老師看看哪些布置？']]){
+   const row=el('label',label),input=el(key==='idea'?'textarea':'input');input.id='photo-'+key;input.name=key;input.value=draft.fields[key]||'';input.placeholder=placeholder;input.maxLength=key==='idea'?240:key==='className'?12:2;
+   if(key==='seat'){input.inputMode='numeric';input.pattern='[0-9]{1,2}';}if(key!=='idea')input.required=true;row.htmlFor=input.id;row.append(input);form.append(row);fields[key]=input;
+  }
+  const status=el('p',lastStatus,'photo-status');status.id='photo-status';status.setAttribute('role','status');status.setAttribute('aria-live','polite');
+  const actions=el('div',null,'photo-actions'),submit=el('button','傳給老師','confirm'),download=el('a','下載照片','photo-download'),retake=el('button','重新拍照'),edit=el('button','修改資料');
+  submit.id='photo-send';submit.type='submit';download.id='photo-download';download.textContent='正在準備照片…';download.setAttribute('aria-disabled','true');retake.id='photo-retake';retake.type=edit.type='button';edit.id='photo-edit';
+  const privacy=el('p','只需填班級、座號，不用填姓名。送出後，照片與布置想法會交給老師保存。','photo-note');
+  if(!storageOK)privacy.append(document.createTextNode(' 這台裝置暫時無法保留照片到下次開啟，請先下載保存。'));
+  actions.append(submit,download,retake,edit);form.append(status,actions);host.append(note,photo,form,privacy);
+  function refresh(){
+   const locked=busy||!!draft.payload||!!draft.result;
+   Object.values(fields).forEach(input=>{input.disabled=locked;});submit.disabled=busy||!!draft.result||!endpoint();retake.disabled=edit.disabled=busy;
+   edit.hidden=!draft.payload||!!draft.result;submit.textContent=busy?'正在傳送，請稍候…':draft.result?'已提交':draft.payload?'重試傳送':'傳給老師';
+   if(busy)status.textContent='正在傳送，請先留在這個畫面…';
+   else if(draft.result)status.textContent='老師已收到你的作品！收件編號：'+draft.result.receipt;
+   else if(!endpoint())status.textContent='老師還沒開放收件，你可以先下載照片。';
+  }
+  async function updatePreview(){
+   const revision=++updateVersion;download.setAttribute('aria-disabled','true');try{const output=await compose(draft,draft.fields);const blob=await new Promise(resolve=>output.toBlob(resolve,'image/png'));if(!blob)throw Error('照片準備失敗，請再拍一張。');if(revision!==updateVersion||!photo.isConnected)return;
+    if(previewURL)URL.revokeObjectURL(previewURL);previewURL=URL.createObjectURL(blob);photo.src=previewURL;download.href=previewURL;download.download=`悠悠水族箱_${draft.fields.className||'班級'}_${draft.fields.seat||'座號'}_${new Date(draft.capturedAt).toISOString().slice(0,10)}.png`;download.removeAttribute('aria-disabled');download.textContent='下載照片';
+   }catch(error){status.textContent=error.message;}
+  }
+  download.addEventListener('click',e=>{if(download.getAttribute('aria-disabled')==='true')e.preventDefault();});
+  form.addEventListener('input',()=>{draft.fields=Object.fromEntries(Object.entries(fields).map(([key,input])=>[key,input.value]));persist();updatePreview();});
+  retake.onclick=async()=>{if(busy)return;retake.disabled=true;try{await take();lastStatus='';render();}catch{status.textContent='拍照失敗，原本照片仍保留。';retake.disabled=false;}};
+  edit.onclick=()=>{if(busy)return;draft.payload=null;persist();lastStatus='';status.textContent='可以修改資料。再次傳送會建立一份新的作品。';refresh();};
+  form.addEventListener('submit',async event=>{
+   event.preventDefault();if(busy||draft.result||!endpoint())return;
+   try{
+    const normalized=validFields(draft.fields);busy=true;refresh();status.textContent='正在傳送，請先留在這個畫面…';
+    if(!draft.payload){const output=await compose(draft,normalized),image=output.toDataURL('image/png');if((image.length-image.indexOf(',')-1)*.75>MAX_BYTES)throw Error('照片太大，請重新拍照後再傳。');draft.fields=normalized;draft.payload={version:1,submissionId:uuid(),...normalized,tankName:draft.tankName,capturedAt:draft.capturedAt,image};}
+    await persist().catch(()=>{});
+    draft.result=await send(draft.payload,endpoint());await persist().catch(()=>{});status.textContent='老師已收到你的作品！收件編號：'+draft.result.receipt;
+   }catch(error){lastStatus=error.message||'傳送失敗，照片已保留，請稍後重試。';status.textContent=lastStatus;}
+   finally{busy=false;if(root().classList.contains('photo-share')&&root().closest('dialog')?.open)render();else refresh();}
+  });
+  refresh();updatePreview();
+ }
+ return {open};
+}
+window.AquariumPhotoShare=Object.freeze({create,validFields,send,compose});
+})();
+
+</script>
+<script>
 /* 悠悠水族箱 V0.6 — gift tutorial, schema 5 and shared multi-tank progression. */
 (() => {
 'use strict';
@@ -2735,7 +2870,7 @@ function completeFishPurchase(species,name,tankId,variant){
  tutorial.render();return true;
 }
 function shopMessage(text){const e=$('shop-message');if(e){e.textContent=text;e.scrollIntoView({block:'nearest'});}else toast(text);}
-function openDialog(title,mode){if(editing)finishEditing();closeCard();dialogMode=mode;$('dialog-title').textContent=title;$('dialog-content').replaceChildren();$('dialog-content').classList.remove('species-welcome');if(!dialog.open)dialog.showModal();}
+function openDialog(title,mode){if(editing)finishEditing();closeCard();dialogMode=mode;$('dialog-title').textContent=title;$('dialog-content').replaceChildren();$('dialog-content').classList.remove('species-welcome','photo-share');if(!dialog.open)dialog.showModal();}
 function button(text,handler,cls=''){const b=document.createElement('button');b.type='button';b.textContent=text;b.className=cls;b.addEventListener('click',handler);return b;}
 function shop(){if(!state.onboarding.completed)creatureCategory='all';if(editing)finishEditing();metric('shop');openDialog('商店','shop');renderShop();tutorial.report('shopOpened');}
 function settings(){const expanded=document.querySelector('.save-tools')?.open||false;openDialog('設定','settings');const list=document.createElement('div');list.className='settings-list';
@@ -2778,7 +2913,11 @@ function loadSaved(manual){
 }
 async function reset(){if(resetStep!==2)return;resetStep=0;if(await activate(fresh(),{backup:'before_new'}))dialog.close();}
 
-function moreMenu(){openDialog('更多功能','more');const list=document.createElement('div');list.className='more-grid';for(const [id,title,desc,fn]of [['more-observe','觀察生物','放大看魚兒和蝦蟹，也能複習魚的構造與呼吸',()=>{dialog.close();openObservation(selected);}],['roster','我的生物','查看飽足度、改名字或管理小居民',roster],['encyclopedia','生物圖鑑','收藏魚兒、蝦類與蟹類',encyclopedia],['tank-menu','我的魚缸','升級魚缸，安排喜歡的裝飾',tankMenu],['tutorial-edit','調整布置','移動魚缸內的裝飾',()=>{dialog.close();startEditing();}],['achievements','成就','查看進度與領取獎勵',achievements],['offline-income','離線收益','查看與領取保留的離線金幣',()=>{dialog.close();if(state.offlinePending)showOffline();else toast('目前沒有待領的離線收益。');}],['settings','設定','調整音效、重看教學或管理存檔',settings]]){const b=button('',fn,'more-item');b.id=id;const label=document.createElement('strong');label.textContent=id==='achievements'&&Number($('more-menu').dataset.rewards)?`成就 · ${$('more-menu').dataset.rewards} 項可領獎`:title;b.append(label,paragraph(desc));list.append(b);}$('dialog-content').append(list);tutorial.render();}
+const photoSharing=window.AquariumPhotoShare.create({capture:()=>{
+ draw(true);const shot=document.createElement('canvas');shot.width=canvas.width;shot.height=canvas.height;try{shot.getContext('2d').drawImage(canvas,0,0);}finally{draw();}
+ return {canvas:shot,tankName:activeTank().name,capturedAt:Date.now()};
+},openDialog,root:()=>$('dialog-content')});
+function moreMenu(){openDialog('更多功能','more');const list=document.createElement('div');list.className='more-grid';for(const [id,title,desc,fn]of [['more-observe','觀察生物','放大看魚兒和蝦蟹，也能複習魚的構造與呼吸',()=>{dialog.close();openObservation(selected);}],['roster','我的生物','查看飽足度、改名字或管理小居民',roster],['encyclopedia','生物圖鑑','收藏魚兒、蝦類與蟹類',encyclopedia],['tank-menu','我的魚缸','升級魚缸，安排喜歡的裝飾',tankMenu],['tutorial-edit','調整布置','移動魚缸內的裝飾',()=>{dialog.close();startEditing();}],['achievements','成就','查看進度與領取獎勵',achievements],['offline-income','離線收益','查看與領取保留的離線金幣',()=>{dialog.close();if(state.offlinePending)showOffline();else toast('目前沒有待領的離線收益。');}],['photo-share','拍照分享','拍下這一缸，填班級與座號交給老師',()=>photoSharing.open()],['settings','設定','調整音效、重看教學或管理存檔',settings]]){const b=button('',fn,'more-item');b.id=id;const label=document.createElement('strong');label.textContent=id==='achievements'&&Number($('more-menu').dataset.rewards)?`成就 · ${$('more-menu').dataset.rewards} 項可領獎`:title;b.append(label,paragraph(desc));list.append(b);}$('dialog-content').append(list);tutorial.render();}
 function fishMore(){const f=state.fishes.find(f=>f.id===selected);if(!f)return;openDialog(SPECIES[f.species].category?'更多生物資料':'更多魚兒資料','fish-more');const minutes=Math.max(0,Math.floor((Date.now()-f.createdAt)/60000)),root=$('dialog-content');root.append(residentPortrait(f),paragraph(`活動水層：${SPECIES[f.species].depthName}`),paragraph(`養育時間：${minutes>=60?Math.floor(minutes/60)+' 小時 '+minutes%60+' 分鐘':minutes+' 分鐘'}`),paragraph(`心情：${mood(f)}`),paragraph(`配色：${f.variant==='normal'?'普通配色':VARIANTS[f.variant].name}`),paragraph(PERSONALITIES[f.personality].desc));const manage=button(SPECIES[f.species].category?'管理生物':'管理魚兒',()=>manageFish(f.id),'place-button');manage.id='manage-fish';root.append(manage,button('回到個體資料',()=>{dialog.close();selectFish(f.id);},'back-button'));appendFishKnowledge(root,f.species);}
 
 function manageFish(id){const f=state.fishes.find(f=>f.id===id);if(!f)return;openDialog(SPECIES[f.species].category?'管理生物':'管理魚兒','manage');$('dialog-content').append((SPECIES[f.species].category||SPECIES[f.species].form)?residentPortrait(f):paragraph(f.name+' · '+SPECIES[f.species].name),paragraph(allFish().length<=3?'目前所有魚缸合計只有三隻生物。請先購買新魚，才能送養其中一隻。':'送養後魚兒會離開魚缸，不會退還金幣；圖鑑紀錄保留，所有魚缸合計至少保留三隻生物。','dialog-note'));$('dialog-content').append(button('魚兒資料',()=>{dialog.close();selectFish(id);},'place-button'),button('改名字',()=>{selected=id;renameFish();},'place-button'),button('移動到其他魚缸',()=>moveFish(id),'place-button'));const b=button(SPECIES[f.species].category?'送養這隻生物（不退金幣）':'送養這隻魚（不退金幣）',()=>{selected=id;rehomeFish();},'place-button danger');b.id='rehome';b.disabled=allFish().length<=3;$('dialog-content').append(b,button('返回我的魚兒',roster,'back-button'));}
@@ -3143,23 +3282,23 @@ function buildBackground(){
 }
 function resize(){const r=canvas.getBoundingClientRect();if(r.width<1||r.height<1)return;W=r.width;H=r.height;dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);buildBackground();draw();}
 function residentDepth(f,r){if(selected===f.id||editing)return 2;const seed=[...f.id].reduce((n,c)=>n+c.charCodeAt(0),0),wave=Math.sin(simTime*.14+seed*.17);return wave<-.35?0:wave>.55?2:1;}
-function draw(){if(!state||!bg||!bg.width||!bg.height)return;ctx.clearRect(0,0,W,H);ctx.drawImage(bg,0,0,W,H);
+function draw(photo=false){if(!state||!bg||!bg.width||!bg.height)return;ctx.clearRect(0,0,W,H);ctx.drawImage(bg,0,0,W,H);
   if(!reducedMotion.matches)window.AquariumSceneArt.atmosphere(ctx,W,H,simTime);
   for(let i=0;i<(reducedMotion.matches?0:7);i++){const x=(.05+(i*.073)%1)*W+Math.sin(simTime*.6+i)*8,y=H-((simTime*(9+i%4*3)+i*67)%(H+20));ctx.strokeStyle='#e9fff570';ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,2+i%4,0,Math.PI*2);ctx.stroke();}
-  for(const p of food){ellipse(ctx,p.x*W+1,p.y*H+2,3.7,3.5,'#458c9144');ellipse(ctx,p.x*W,p.y*H,3.8,3.2,FEEDS[p.kind].color);ellipse(ctx,p.x*W-1,p.y*H-1,1.4,1.1,'#ffe7a0');}
+  for(const p of photo?[]:food){ellipse(ctx,p.x*W+1,p.y*H+2,3.7,3.5,'#458c9144');ellipse(ctx,p.x*W,p.y*H,3.8,3.2,FEEDS[p.kind].color);ellipse(ctx,p.x*W-1,p.y*H-1,1.4,1.1,'#ffe7a0');}
   for(let depth=0;depth<3;depth++){
   for(const f of state.fishes){const r=runtime.get(f.id);if(!r||residentDepth(f,r)!==depth)continue;const x=r.x*W,y=r.y*H;
     ellipse(ctx,x,H*.943,f.size*.34,f.size*.045,`rgba(51,116,111,${SPECIES[f.species].bottomDweller?.14:.045})`);
-    if(selected===f.id){ctx.strokeStyle='#fffce6bb';ctx.lineWidth=2;ctx.setLineDash([4,5]);ctx.beginPath();ctx.ellipse(x,y,f.size*.64,f.size*.44,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);}
+    if(!photo&&selected===f.id){ctx.strokeStyle='#fffce6bb';ctx.lineWidth=2;ctx.setLineDash([4,5]);ctx.beginPath();ctx.ellipse(x,y,f.size*.64,f.size*.44,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);}
     ctx.save();ctx.globalAlpha=1-r.hiddenAmount*.65;drawFish(ctx,f.species,x,y+(SPECIES[f.species].category?0:Math.sin(r.phase*.4)*1.7),visualSize(f),r.turn,r.heading,r.phase,f.variant,{motion:r.crustMotion||'rest',gait:r.phase,idle:r.idlePhase||0});ctx.restore();
-    if(newFishFocus?.id===f.id&&simTime<newFishFocus.until){ctx.save();ctx.strokeStyle='#e8b64f';ctx.lineWidth=3;ctx.setLineDash([5,4]);ctx.beginPath();ctx.ellipse(x,y,f.size*.66,Math.max(27,f.size*.38),0,0,Math.PI*2);ctx.stroke();ctx.restore();}
+    if(!photo&&newFishFocus?.id===f.id&&simTime<newFishFocus.until){ctx.save();ctx.strokeStyle='#e8b64f';ctx.lineWidth=3;ctx.setLineDash([5,4]);ctx.beginPath();ctx.ellipse(x,y,f.size*.66,Math.max(27,f.size*.38),0,0,Math.PI*2);ctx.stroke();ctx.restore();}
   }
     if(depth===0&&middleground)ctx.drawImage(middleground,0,0,W,H);
     if(depth===1&&foreground){ctx.save();ctx.globalAlpha=.86;ctx.drawImage(foreground,0,0,W,H);ctx.restore();}
   }
-  if(editing&&editSelection){const item=editableDecorations().find(d=>d.id===editSelection);if(item){const p=decorLayout(item);ctx.save();ctx.strokeStyle='#fffde6';ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.translate(p.x,p.y);ctx.rotate((item.rotation||0)*Math.PI/180);ctx.strokeRect(-p.width*.65-5,-p.height*1.15-5,p.width*1.3+10,p.height*1.15+10);ctx.restore();}}
-  for(const coin of state.drops){const x=coin.x*W,y=coin.y*H+Math.sin(simTime*2+coin.x*5)*3;ctx.shadowColor='#fff3a7';ctx.shadowBlur=12;ellipse(ctx,x,y,14,14,'#edbd49');ctx.shadowBlur=0;ctx.lineWidth=2;ctx.strokeStyle='#fff0b3';ctx.beginPath();ctx.arc(x,y,10.5,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#fff6c6';ctx.font='bold 17px sans-serif';ctx.textAlign='center';ctx.font=coin.value>=100?'bold 10px sans-serif':coin.value>=10?'bold 12px sans-serif':'bold 15px sans-serif';ctx.fillText(String(coin.value),x,y+5);}
-  for(const e of effects){ctx.save();if(e.kind==='ripple'){ctx.strokeStyle=`rgba(255,255,240,${e.life})`;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(e.x*W,e.y*H,(1-e.life)*50+5,(1-e.life)*10+3,0,0,Math.PI*2);ctx.stroke();}else{ctx.globalAlpha=Math.min(1,e.life);ctx.textAlign='center';ctx.font='bold 14px "Microsoft JhengHei", sans-serif';ctx.lineWidth=4;ctx.strokeStyle='#effcf5';const yy=e.y*H-20-(1.5-e.life)*16;ctx.strokeText(e.text,e.x*W,yy);ctx.fillStyle='#45836e';ctx.fillText(e.text,e.x*W,yy);}ctx.restore();}
+  if(!photo&&editing&&editSelection){const item=editableDecorations().find(d=>d.id===editSelection);if(item){const p=decorLayout(item);ctx.save();ctx.strokeStyle='#fffde6';ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.translate(p.x,p.y);ctx.rotate((item.rotation||0)*Math.PI/180);ctx.strokeRect(-p.width*.65-5,-p.height*1.15-5,p.width*1.3+10,p.height*1.15+10);ctx.restore();}}
+  for(const coin of photo?[]:state.drops){const x=coin.x*W,y=coin.y*H+Math.sin(simTime*2+coin.x*5)*3;ctx.shadowColor='#fff3a7';ctx.shadowBlur=12;ellipse(ctx,x,y,14,14,'#edbd49');ctx.shadowBlur=0;ctx.lineWidth=2;ctx.strokeStyle='#fff0b3';ctx.beginPath();ctx.arc(x,y,10.5,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#fff6c6';ctx.font='bold 17px sans-serif';ctx.textAlign='center';ctx.font=coin.value>=100?'bold 10px sans-serif':coin.value>=10?'bold 12px sans-serif':'bold 15px sans-serif';ctx.fillText(String(coin.value),x,y+5);}
+  for(const e of photo?[]:effects){ctx.save();if(e.kind==='ripple'){ctx.strokeStyle=`rgba(255,255,240,${e.life})`;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(e.x*W,e.y*H,(1-e.life)*50+5,(1-e.life)*10+3,0,0,Math.PI*2);ctx.stroke();}else{ctx.globalAlpha=Math.min(1,e.life);ctx.textAlign='center';ctx.font='bold 14px "Microsoft JhengHei", sans-serif';ctx.lineWidth=4;ctx.strokeStyle='#effcf5';const yy=e.y*H-20-(1.5-e.life)*16;ctx.strokeText(e.text,e.x*W,yy);ctx.fillStyle='#45836e';ctx.fillText(e.text,e.x*W,yy);}ctx.restore();}
 }
 let specimenPose=null;
 const observation=window.AquariumObservation.create({
@@ -3395,5 +3534,7 @@ setupDesignToolbar();initialize();new ResizeObserver(resize).observe(canvas);res
 if(CONFIG.TEST_MODE||new URLSearchParams(location.search).get('debug')==='1')Object.defineProperty(window,'aquariumDebug',{value:()=>({state:{...structuredClone(state),fishes:structuredClone(state.fishes),drops:structuredClone(state.drops),tankName:state.tankName,tankTier:state.tankTier,tankCapacity:state.tankCapacity},runtime:[...runtime].map(([id,r])=>({id,...r})),food:structuredClone(food),diagnostics:{...diagnostics,sceneDepths:state.fishes.map(f=>({id:f.id,depth:residentDepth(f,runtime.get(f.id))}))},config:CONFIG,species:SPECIES,decorations:DECORATIONS,saveBlocked,conflict,started,audioState:audioCtx?.state||null,editing,editSelection,poi:[...poiCache.byId.values()],session:session?{...session}:null,tiers:TANK_TIERS,variants:VARIANTS,personalities:PERSONALITIES,achievementDefinitions:ACHIEVEMENTS,observation:observation.debug()})});
 })();
 
+
 </script>
 </body></html>
+
