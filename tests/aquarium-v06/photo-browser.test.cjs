@@ -38,7 +38,7 @@ const {harness}=require('./harness.cjs'),{context,plain,v5}=require('./schema.te
    await p.locator('#photo-retake').click();await p.locator('#photo-send').waitFor();assert(await p.locator('#photo-className').isEnabled());assert.equal(await p.locator('#photo-seat').inputValue(),'12');
    h.pass('photo capture, download, retained retry, receipt, reload, retake and layout '+size.width);await ctx.close();
   }
-  const {p,context:ctx}=await h.create({clock:false,state:seed()});await p.locator('#home-continue').click();await open(p);assert(await p.locator('#photo-send').isDisabled());assert.match(await p.locator('#photo-status').innerText(),/還沒開放收件/);await h.shot(p,'photo-not-configured');await ctx.close();
+  const {p,context:ctx}=await h.create({clock:false,state:seed()});await p.route('**/photo-config.js*',route=>route.fulfill({contentType:'text/javascript',body:"window.AQUARIUM_PHOTO_CONFIG={endpoint:''};"}));await p.reload();await p.locator('#home-continue').click();await open(p);assert(await p.locator('#photo-send').isDisabled());assert.match(await p.locator('#photo-status').innerText(),/還沒開放收件/);await h.shot(p,'photo-not-configured');await ctx.close();
   assert.deepEqual(h.errors,[]);h.saveResults('photo-results',{results:h.results,errors:h.errors});
  }finally{await h.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});
