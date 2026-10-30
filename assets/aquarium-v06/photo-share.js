@@ -51,7 +51,7 @@ async function send(payload,url){
  finally{clearTimeout(timer);}
 }
 function create({capture,openDialog,root,getTanks=()=>[],switchTank}){
- let draft=null,busy=false,previewURL='',saveQueue=Promise.resolve(),updateVersion=0,lastStatus='',storageOK=true;
+ let draft=null,busy=false,taking=false,previewURL='',saveQueue=Promise.resolve(),updateVersion=0,lastStatus='',storageOK=true;
  const ready=storage('readonly').then(value=>{if(value&&value.version===1&&typeof value.base==='string'&&value.base.startsWith('data:image/png;base64,'))draft=value;}).catch(()=>{});
  function persist(){const copy=structuredClone(draft);saveQueue=saveQueue.catch(()=>{}).then(()=>storage('readwrite',copy));saveQueue.catch(()=>{storageOK=false;});return saveQueue;}
  async function take(){const shot=capture();draft={version:1,base:shot.canvas.toDataURL('image/png'),tankName:shot.tankName,tankId:shot.tankId,capturedAt:shot.capturedAt,fields:draft?.fields||{className:'',seat:'',idea:''},payload:null,result:null};await persist().catch(()=>{});}
@@ -79,8 +79,8 @@ function create({capture,openDialog,root,getTanks=()=>[],switchTank}){
    const locked=busy||!!draft.payload||!!draft.result;
    Object.values(fields).forEach(input=>{input.disabled=locked;});submit.disabled=busy||!!draft.result||!endpoint();retake.disabled=edit.disabled=busy;
    tankSelect.disabled=busy;
-   edit.hidden=!draft.payload||!!draft.result;submit.textContent=busy?'正在傳送，請稍候…':draft.result?'已提交':draft.payload?'重試傳送':'傳給老師';
-   if(busy)status.textContent='正在傳送，請先留在這個畫面…';
+   edit.hidden=!draft.payload||!!draft.result;submit.textContent=busy?(taking?'正在更新照片…':'正在傳送，請稍候…'):draft.result?'已提交':draft.payload?'重試傳送':'傳給老師';
+   if(busy)status.textContent=taking?'正在更新照片…':'正在傳送，請先留在這個畫面…';
    else if(draft.result)status.textContent='老師已收到你的作品！收件編號：'+draft.result.receipt;
    else if(!endpoint())status.textContent='老師還沒開放收件，你可以先下載照片。';
   }
@@ -91,7 +91,7 @@ function create({capture,openDialog,root,getTanks=()=>[],switchTank}){
   }
   download.addEventListener('click',e=>{if(download.getAttribute('aria-disabled')==='true')e.preventDefault();});
   form.addEventListener('input',()=>{draft.fields=Object.fromEntries(Object.entries(fields).map(([key,input])=>[key,input.value]));persist();updatePreview();});
-  async function refreshShot(tankId){if(busy)return;busy=true;refresh();try{if(tankId&&switchTank(tankId)===false)throw Error('目前無法切換魚缸，請關閉視窗後再試一次。');await take();lastStatus='';}catch(error){lastStatus=error.message||'拍照失敗，原本照片仍保留。';}finally{busy=false;render();}}
+  async function refreshShot(tankId){if(busy)return;taking=true;busy=true;refresh();try{if(tankId&&switchTank(tankId)===false)throw Error('目前無法切換魚缸，請關閉視窗後再試一次。');await take();lastStatus='';}catch(error){lastStatus=error.message||'拍照失敗，原本照片仍保留。';}finally{taking=false;busy=false;render();}}
   tankSelect.onchange=()=>refreshShot(tankSelect.value);
   retake.onclick=()=>refreshShot();
   edit.onclick=()=>{if(busy)return;draft.payload=null;persist();lastStatus='';status.textContent='可以修改資料。再次傳送會建立一份新的作品。';refresh();};
