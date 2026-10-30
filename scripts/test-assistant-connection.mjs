@@ -86,6 +86,9 @@ const failures = [
   ['AI_TIMEOUT', () => { const error = new Error('aborted'); error.name = 'AbortError'; throw error; }],
   ['AI_HTTP_429', () => new Response('{}', { status: 429 })],
   ['AI_HTTP_502', () => new Response(JSON.stringify({ detail: 'private upstream detail' }), { status: 502 })],
+  ['AI_RATE_LIMIT', () => new Response(JSON.stringify({ code: 'AI_RATE_LIMIT' }), { status: 502 })],
+  ['AI_AUTH', () => new Response(JSON.stringify({ code: 'AI_AUTH' }), { status: 502 })],
+  ['AI_UPSTREAM_TIMEOUT', () => new Response(JSON.stringify({ code: 'AI_UPSTREAM_TIMEOUT' }), { status: 502 })],
   ['AI_RESPONSE', () => new Response('<html>unexpected response</html>', { status: 200 })]
 ];
 for (const [code, fail] of failures) {

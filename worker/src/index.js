@@ -5,14 +5,13 @@ const ALLOWED_ORIGINS = new Set([
 ]);
 
 const GEMINI_MODELS = [
-  "gemini-2.5-flash-lite",
   "gemini-3.5-flash-lite",
   "gemini-3.1-flash-lite"
 ];
 const GEMINI_MODEL = GEMINI_MODELS[0];
 const MAX_HISTORY = 8;
 const MAX_MESSAGE_LENGTH = 2000;
-const MODEL_TIMEOUT_MS = 9000;
+const MODEL_TIMEOUT_MS = 14000;
 
 function corsHeaders(origin) {
   const allowOrigin = ALLOWED_ORIGINS.has(origin)
@@ -220,97 +219,89 @@ async function askGemini(env, { message, grade, character, history }) {
     }
   };
 
-  const retryableStatuses = new Set([400, 404, 408, 409, 429, 500, 502, 503, 504]);
+  const retryableStatuses = new Set([404, 408, 409, 429, 500, 502, 503, 504]);
   const failures = [];
 
   for (const model of GEMINI_MODELS) {
     const endpoint =
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), MODEL_TIMEOUT_MS);
+    let response;
+    let data;
 
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), MODEL_TIMEOUT_MS);
-
-      let response;
-      try {
-        response = await fetch(endpoint, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-goog-api-key": env.GEMINI_API_KEY
-          },
-          body: JSON.stringify(body),
-          signal: controller.signal
-        });
-      } finally {
-        clearTimeout(timeoutId);
-      }
-
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        const detail =
-          data?.error?.message ||
-          `Gemini API returned HTTP ${response.status}`;
-
-        failures.push({
-          model,
-          status: response.status,
-          detail
-        });
-
-        if (retryableStatuses.has(response.status)) {
-          continue;
-        }
-
-        throw new Error(detail);
-      }
-
-      const reply = normalizeAssistantText(extractText(data));
-      if (!reply) {
-        failures.push({
-          model,
-          status: 200,
-          detail: "Gemini returned an empty response"
-        });
-        continue;
-      }
-
-      if (failures.length) {
-        console.warn("Gemini fallback succeeded", {
-          selectedModel: model,
-          previousFailures: failures
-        });
-      }
-
-      return {
-        reply,
-        model,
-        fallbackFailures: failures.map(({ model, status, detail }) => ({
-          model,
-          status,
-          timeout: /abort|timeout/i.test(detail)
-        }))
-      };
+      response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": env.GEMINI_API_KEY
+        },
+        body: JSON.stringify(body),
+        signal: controller.signal
+      });
+      // Keep the deadline active until the response body has also arrived.
+      data = await response.json();
     } catch (error) {
-      const detail = error?.message || String(error);
       failures.push({
         model,
-        status: null,
-        detail
+        status: response?.status ?? null,
+        code: controller.signal.aborted ? "AI_UPSTREAM_TIMEOUT" :
+          error instanceof SyntaxError ? "AI_RESPONSE" : "AI_UPSTREAM_NETWORK",
+        detail: error?.message || String(error)
       });
-
-      if (model !== GEMINI_MODELS[GEMINI_MODELS.length - 1]) {
-        continue;
-      }
+      continue;
+    } finally {
+      clearTimeout(timeoutId);
     }
+
+    if (!response.ok) {
+      const status = response.status;
+      failures.push({
+        model,
+        status,
+        code: [401, 403].includes(status) ? "AI_AUTH" :
+          status === 429 ? "AI_RATE_LIMIT" :
+          status === 404 ? "AI_MODEL_UNAVAILABLE" :
+          status === 400 ? "AI_REQUEST" : "AI_PROVIDER_UNAVAILABLE",
+        detail: data?.error?.message || `Gemini API returned HTTP ${status}`
+      });
+      // A bad key or malformed request will not be repaired by changing models.
+      if (!retryableStatuses.has(status)) break;
+      continue;
+    }
+
+    const reply = normalizeAssistantText(extractText(data));
+    if (!reply) {
+      failures.push({
+        model,
+        status: 200,
+        code: "AI_RESPONSE",
+        detail: "Gemini returned an empty response"
+      });
+      continue;
+    }
+
+    if (failures.length) {
+      console.warn("Gemini fallback succeeded", {
+        selectedModel: model,
+        previousFailures: failures
+      });
+    }
+    return {
+      reply,
+      model,
+      fallbackFailures: failures.map(({ model, status, code }) => ({ model, status, code }))
+    };
   }
 
   const summary = failures
     .map((item) => `${item.model}: ${item.status ?? "network"} ${item.detail}`)
     .join(" | ");
-
-  throw new Error(summary || "All Gemini models failed");
+  const error = new Error(summary || "All Gemini models failed");
+  error.code = failures.at(-1)?.code || "AI_PROVIDER_UNAVAILABLE";
+  error.failures = failures.map(({ model, status, code }) => ({ model, status, code }));
+  throw error;
 }
 
 export default {
@@ -332,7 +323,7 @@ export default {
           service: "mimi-cream-ai",
           status: "ready",
           deploymentSource: "github",
-          revision: "20261030-model-diagnostics",
+          revision: "20261030-reliable-models",
           geminiConfigured: Boolean(env.GEMINI_API_KEY),
           model: GEMINI_MODEL,
           models: GEMINI_MODELS,
@@ -355,7 +346,8 @@ export default {
       return json(
         {
           ok: false,
-          error: "GEMINI_API_KEY is not configured"
+          error: "GEMINI_API_KEY is not configured",
+          code: "AI_CONFIG"
         },
         503,
         origin
@@ -440,7 +432,8 @@ export default {
         {
           ok: false,
           error: "AI service temporarily unavailable",
-          detail: error?.message || "Unknown Gemini error"
+          code: error?.code || "AI_PROVIDER_UNAVAILABLE",
+          fallbackFailures: error?.failures || []
         },
         502,
         origin

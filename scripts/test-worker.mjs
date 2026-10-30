@@ -192,11 +192,72 @@ try {
   assert.equal(body.ok, true);
   assert.equal(body.reply, '備援模型回答成功。');
   assert.equal(callCount, 2);
-  assert.equal(calledModels[0], 'gemini-2.5-flash-lite');
-  assert.equal(calledModels[1], 'gemini-3.5-flash-lite');
-  assert.equal(body.model, 'gemini-3.5-flash-lite');
+  assert.equal(calledModels[0], 'gemini-3.5-flash-lite');
+  assert.equal(calledModels[1], 'gemini-3.1-flash-lite');
+  assert.equal(body.model, 'gemini-3.1-flash-lite');
 } finally {
   globalThis.fetch = originalFetch;
 }
 
-console.log('Worker tests passed.');
+const scienceRequest = () => new Request('https://example.test/', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ message: '彩虹怎麼形成的', grade: '3-4', history: [] })
+});
+
+// Permanent configuration errors stop after one attempt; rate limits try both models.
+for (const [status, code, expectedCalls] of [
+  [400, 'AI_REQUEST', 1],
+  [403, 'AI_AUTH', 1],
+  [429, 'AI_RATE_LIMIT', 2],
+  [404, 'AI_MODEL_UNAVAILABLE', 2],
+  [503, 'AI_PROVIDER_UNAVAILABLE', 2]
+]) {
+  let calls = 0;
+  try {
+    globalThis.fetch = async () => {
+      calls++;
+      return new Response(JSON.stringify({ error: { message: 'upstream-private-detail' } }), { status });
+    };
+    const response = await worker.fetch(scienceRequest(), { GEMINI_API_KEY: 'test-key' });
+    const body = await readJson(response);
+    assert.equal(response.status, 502);
+    assert.equal(body.code, code);
+    assert.equal(calls, expectedCalls);
+    assert.equal(body.fallbackFailures.length, expectedCalls);
+    assert.ok(!JSON.stringify(body).includes('upstream-private-detail'), 'only server logs contain upstream details');
+    assert.ok(body.fallbackFailures.every((failure) => failure.model !== 'gemini-2.5-flash-lite'));
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+// A stalled response body must also trigger fallback, even after headers arrived.
+const originalSetTimeout = globalThis.setTimeout;
+const originalClearTimeout = globalThis.clearTimeout;
+try {
+  const timeouts = [];
+  globalThis.setTimeout = (fn, delay) => { timeouts.push(delay); queueMicrotask(fn); return timeouts.length; };
+  globalThis.clearTimeout = () => {};
+  globalThis.fetch = async (_url, { signal }) => ({
+    ok: true,
+    status: 200,
+    json: () => new Promise((_resolve, reject) => {
+      const abort = () => { const error = new Error('aborted while reading body'); error.name = 'AbortError'; reject(error); };
+      if (signal.aborted) abort();
+      else signal.addEventListener('abort', abort, { once: true });
+    })
+  });
+  const response = await worker.fetch(scienceRequest(), { GEMINI_API_KEY: 'test-key' });
+  const body = await readJson(response);
+  assert.equal(response.status, 502);
+  assert.equal(body.code, 'AI_UPSTREAM_TIMEOUT');
+  assert.deepEqual(timeouts, [14000, 14000]);
+  assert.ok(timeouts.reduce((sum, delay) => sum + delay, 0) < 35000, 'backend attempts finish before frontend deadline');
+} finally {
+  globalThis.fetch = originalFetch;
+  globalThis.setTimeout = originalSetTimeout;
+  globalThis.clearTimeout = originalClearTimeout;
+}
+
+console.log('Worker tests passed: primary model, fallback, permanent failures, safe diagnostics, response-body deadline.');

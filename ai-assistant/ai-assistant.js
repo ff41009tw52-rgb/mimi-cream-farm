@@ -426,7 +426,9 @@
       if (!response.ok || !payload?.ok || !payload?.reply) {
         const error = new Error('AI HTTP ' + response.status);
         error.status = response.status;
-        error.code = response.ok ? 'AI_RESPONSE' : 'AI_HTTP_' + response.status;
+        error.code = /^AI_[A-Z_]+$/.test(payload?.code || '')
+          ? payload.code
+          : response.ok ? 'AI_RESPONSE' : 'AI_HTTP_' + response.status;
         throw error;
       }
 
@@ -457,9 +459,21 @@
         code: 'AI_NETWORK'
       };
     }
-    if (error?.status === 429) {
+    if (['AI_AUTH', 'AI_CONFIG', 'AI_REQUEST'].includes(error?.code)) {
       return {
-        text: '現在提問的人比較多，請稍等一下，再按「再試一次」。',
+        text: 'AI 的連線設定需要老師協助處理，請把下方連線代碼告訴老師。',
+        code: error.code
+      };
+    }
+    if (error?.code === 'AI_UPSTREAM_TIMEOUT') {
+      return {
+        text: 'AI 這次回答得比較慢，等候時間已超過限制。請稍後按「再試一次」。',
+        code: error.code
+      };
+    }
+    if (error?.status === 429 || error?.code === 'AI_RATE_LIMIT') {
+      return {
+        text: 'AI 目前達到使用額度限制，請稍後再試。如果持續發生，請把下方連線代碼告訴老師。',
         code: error.code
       };
     }
