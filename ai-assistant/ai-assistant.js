@@ -200,6 +200,17 @@
   const makeAction = (action) => {
     if (!action) return null;
 
+    if (action.kind === 'retry') {
+      const button = makeElement('button', 'assistant-message__action', '再試一次');
+      button.type = 'button';
+      button.addEventListener('click', () => {
+        if (state.isReplying || !state.grade) return;
+        button.disabled = true;
+        ask(action.question);
+      });
+      return button;
+    }
+
     if (action.kind === 'game' && action.href) {
       const link = makeElement('a', 'assistant-message__action', `🎮 開啟 ${action.label}`);
       link.href = action.href;
@@ -413,7 +424,10 @@
       }
 
       if (!response.ok || !payload?.ok || !payload?.reply) {
-        throw new Error(payload?.detail || payload?.error || ('AI HTTP ' + response.status));
+        const error = new Error('AI HTTP ' + response.status);
+        error.status = response.status;
+        error.code = response.ok ? 'AI_RESPONSE' : 'AI_HTTP_' + response.status;
+        throw error;
       }
 
       return {
@@ -428,6 +442,31 @@
         state.activeController = null;
       }
     }
+  };
+
+  const describeAiError = (error) => {
+    if (error?.name === 'AbortError') {
+      return {
+        text: '這次等候 AI 回答超時了，請按「再試一次」。',
+        code: 'AI_TIMEOUT'
+      };
+    }
+    if (error instanceof TypeError) {
+      return {
+        text: '目前這台裝置無法連上 AI。可以換個網路後重試，或把下方連線代碼告訴老師。',
+        code: 'AI_NETWORK'
+      };
+    }
+    if (error?.status === 429) {
+      return {
+        text: '現在提問的人比較多，請稍等一下，再按「再試一次」。',
+        code: error.code
+      };
+    }
+    return {
+      text: 'AI 服務暫時無法回答，請稍後按「再試一次」。如果持續發生，請把下方連線代碼告訴老師。',
+      code: error?.code || 'AI_UNKNOWN'
+    };
   };
 
   const replyFor = (question, preset) => {
@@ -477,11 +516,15 @@
           try {
             reply = await askAi(question);
           } catch (error) {
+            if (token !== state.responseToken) return;
+            const failure = describeAiError(error);
             console.warn('[Science Assistant] AI request failed.', error);
             reply = {
               intent: 'ai_error',
               source: 'fallback',
-              text: config.aiErrorMessage || reply.text
+              text: failure.text,
+              note: '連線代碼：' + failure.code,
+              action: { kind: 'retry', question }
             };
           }
         }
@@ -490,10 +533,13 @@
         typing.remove();
         addMessage('assistant', reply.text, reply.action, reply.links, reply.note);
 
-        state.conversation.push(
-          { role: 'user', text: question },
-          { role: 'assistant', text: reply.text }
-        );
+        // Connection failures are UI notices, not answers for the next AI request.
+        if (reply.intent !== 'ai_error') {
+          state.conversation.push(
+            { role: 'user', text: question },
+            { role: 'assistant', text: reply.text }
+          );
+        }
         const keep = Math.max(2, (Number(config.aiHistoryLimit) || 8) * 2);
         if (state.conversation.length > keep) {
           state.conversation.splice(0, state.conversation.length - keep);

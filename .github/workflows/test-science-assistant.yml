@@ -11,6 +11,8 @@ on:
       - 'scripts/test-assistant-engine.mjs'
       - 'scripts/test-worker.mjs'
       - 'scripts/test-assistant-static.mjs'
+      - 'scripts/test-assistant-connection.mjs'
+      - 'index.html'
       - '.github/workflows/test-science-assistant.yml'
   pull_request:
     paths:
@@ -21,6 +23,8 @@ on:
       - 'scripts/test-assistant-engine.mjs'
       - 'scripts/test-worker.mjs'
       - 'scripts/test-assistant-static.mjs'
+      - 'scripts/test-assistant-connection.mjs'
+      - 'index.html'
 
 jobs:
   test:
@@ -44,3 +48,5 @@ jobs:
         run: node scripts/test-worker.mjs
       - name: Test assistant frontend structure
         run: node scripts/test-assistant-static.mjs
+      - name: Test assistant connection errors and retry
+        run: node scripts/test-assistant-connection.mjs
