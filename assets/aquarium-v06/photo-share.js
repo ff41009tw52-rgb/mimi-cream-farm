@@ -50,16 +50,20 @@ async function send(payload,url){
  }catch(error){if(error.name==='AbortError'||error instanceof TypeError)throw Error('還沒確認是否送達。照片已保留，請按「重試傳送」。');throw error;}
  finally{clearTimeout(timer);}
 }
-function create({capture,openDialog,root}){
- let draft=null,busy=false,previewURL='',saveQueue=Promise.resolve(),updateVersion=0,lastStatus='',storageOK=true;
+function create({capture,openDialog,root,getTanks=()=>[],switchTank}){
+ let draft=null,busy=false,taking=false,previewURL='',saveQueue=Promise.resolve(),updateVersion=0,lastStatus='',storageOK=true;
  const ready=storage('readonly').then(value=>{if(value&&value.version===1&&typeof value.base==='string'&&value.base.startsWith('data:image/png;base64,'))draft=value;}).catch(()=>{});
  function persist(){const copy=structuredClone(draft);saveQueue=saveQueue.catch(()=>{}).then(()=>storage('readwrite',copy));saveQueue.catch(()=>{storageOK=false;});return saveQueue;}
- async function take(){const shot=capture();draft={version:1,base:shot.canvas.toDataURL('image/png'),tankName:shot.tankName,capturedAt:shot.capturedAt,fields:draft?.fields||{className:'',seat:'',idea:''},payload:null,result:null};await persist().catch(()=>{});}
+ async function take(){const shot=capture();draft={version:1,base:shot.canvas.toDataURL('image/png'),tankName:shot.tankName,tankId:shot.tankId,capturedAt:shot.capturedAt,fields:draft?.fields||{className:'',seat:'',idea:''},payload:null,result:null};await persist().catch(()=>{});}
  async function open(){await ready;openDialog('拍照分享','photo-share');if(!draft){try{await take();}catch{root().append(el('p','拍照失敗，請關閉視窗後再試一次。'));return;}}render();}
  function render(){
   const host=root();host.replaceChildren();host.classList.add('photo-share');
   const photo=el('img');photo.id='photo-preview';photo.alt='目前準備傳給老師的水族箱照片';
-  const note=el('p','這次分享拍下的這一缸。切換魚缸後，可再拍一張。','photo-note');
+  const note=el('p','選擇想分享的魚缸，照片會自動更新，已填的資料會保留。','photo-note');
+  const tanks=getTanks(),tankRow=el('label','拍哪一個魚缸？','photo-tank-picker'),tankSelect=el('select');tankSelect.id='photo-tank';tankRow.htmlFor=tankSelect.id;
+  const chosen=draft.tankId||tanks.find(t=>t.name===draft.tankName)?.id||tanks.find(t=>t.active)?.id;
+  for(const tank of tanks){const option=el('option',tank.name+'（'+(tank.habitat==='marine'?'海水':'淡水')+'）');option.value=tank.id;option.selected=tank.id===chosen;tankSelect.append(option);}
+  tankRow.append(tankSelect);tankRow.hidden=tanks.length<2;
   const form=el('form');form.id='photo-form';const fields={};
   for(const [key,label,placeholder]of [['className','班級','例如：四年三班或 403'],['seat','座號','例如：12'],['idea','我的布置想法（選填）','想讓老師看看哪些布置？']]){
    const row=el('label',label),input=el(key==='idea'?'textarea':'input');input.id='photo-'+key;input.name=key;input.value=draft.fields[key]||'';input.placeholder=placeholder;input.maxLength=key==='idea'?240:key==='className'?12:2;
@@ -70,12 +74,13 @@ function create({capture,openDialog,root}){
   submit.id='photo-send';submit.type='submit';download.id='photo-download';download.textContent='正在準備照片…';download.setAttribute('aria-disabled','true');retake.id='photo-retake';retake.type=edit.type='button';edit.id='photo-edit';
   const privacy=el('p','只需填班級、座號，不用填姓名。送出後，照片與布置想法會交給老師保存。','photo-note');
   if(!storageOK)privacy.append(document.createTextNode(' 這台裝置暫時無法保留照片到下次開啟，請先下載保存。'));
-  actions.append(submit,download,retake,edit);form.append(status,actions);host.append(note,photo,form,privacy);
+  actions.append(submit,download,retake,edit);form.append(status,actions);host.append(tankRow,note,photo,form,privacy);
   function refresh(){
    const locked=busy||!!draft.payload||!!draft.result;
    Object.values(fields).forEach(input=>{input.disabled=locked;});submit.disabled=busy||!!draft.result||!endpoint();retake.disabled=edit.disabled=busy;
-   edit.hidden=!draft.payload||!!draft.result;submit.textContent=busy?'正在傳送，請稍候…':draft.result?'已提交':draft.payload?'重試傳送':'傳給老師';
-   if(busy)status.textContent='正在傳送，請先留在這個畫面…';
+   tankSelect.disabled=busy;
+   edit.hidden=!draft.payload||!!draft.result;submit.textContent=busy?(taking?'正在更新照片…':'正在傳送，請稍候…'):draft.result?'已提交':draft.payload?'重試傳送':'傳給老師';
+   if(busy)status.textContent=taking?'正在更新照片…':'正在傳送，請先留在這個畫面…';
    else if(draft.result)status.textContent='老師已收到你的作品！收件編號：'+draft.result.receipt;
    else if(!endpoint())status.textContent='老師還沒開放收件，你可以先下載照片。';
   }
@@ -86,7 +91,9 @@ function create({capture,openDialog,root}){
   }
   download.addEventListener('click',e=>{if(download.getAttribute('aria-disabled')==='true')e.preventDefault();});
   form.addEventListener('input',()=>{draft.fields=Object.fromEntries(Object.entries(fields).map(([key,input])=>[key,input.value]));persist();updatePreview();});
-  retake.onclick=async()=>{if(busy)return;retake.disabled=true;try{await take();lastStatus='';render();}catch{status.textContent='拍照失敗，原本照片仍保留。';retake.disabled=false;}};
+  async function refreshShot(tankId){if(busy)return;taking=true;busy=true;refresh();try{if(tankId&&switchTank(tankId)===false)throw Error('目前無法切換魚缸，請關閉視窗後再試一次。');await take();lastStatus='';}catch(error){lastStatus=error.message||'拍照失敗，原本照片仍保留。';}finally{taking=false;busy=false;render();}}
+  tankSelect.onchange=()=>refreshShot(tankSelect.value);
+  retake.onclick=()=>refreshShot();
   edit.onclick=()=>{if(busy)return;draft.payload=null;persist();lastStatus='';status.textContent='可以修改資料。再次傳送會建立一份新的作品。';refresh();};
   form.addEventListener('submit',async event=>{
    event.preventDefault();if(busy||draft.result||!endpoint())return;
