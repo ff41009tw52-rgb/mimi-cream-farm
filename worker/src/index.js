@@ -201,6 +201,26 @@ function normalizeAssistantText(value) {
   return text;
 }
 
+// HTTP 400 also covers location, billing and API-key preconditions.
+// Return only a fixed code to the browser; keep provider details in server logs.
+function classifyGeminiFailure(status, data) {
+  const message = String(data?.error?.message || "");
+  const reasons = Array.isArray(data?.error?.details)
+    ? data.error.details.map((item) => String(item?.reason || "")) : [];
+  if (status === 400 && /(?:location|region|country).*(?:not supported|unsupported|not available)|(?:unsupported|not supported|not available).*(?:location|region|country)/i.test(message)) {
+    return "AI_REGION";
+  }
+  if ([401, 403].includes(status) || reasons.includes("API_KEY_INVALID") ||
+      /api.?key.*(?:not valid|invalid|expired|blocked|leaked)|invalid.*api.?key/i.test(message)) {
+    return "AI_AUTH";
+  }
+  if (status === 400 && /billing|prepay|credits|paid tier/i.test(message)) return "AI_BILLING";
+  if (status === 429) return "AI_RATE_LIMIT";
+  if (status === 404) return "AI_MODEL_UNAVAILABLE";
+  if (status === 400) return "AI_REQUEST";
+  return "AI_PROVIDER_UNAVAILABLE";
+}
+
 async function askGemini(env, { message, grade, character, history }) {
   const body = {
     systemInstruction: {
@@ -260,10 +280,7 @@ async function askGemini(env, { message, grade, character, history }) {
       failures.push({
         model,
         status,
-        code: [401, 403].includes(status) ? "AI_AUTH" :
-          status === 429 ? "AI_RATE_LIMIT" :
-          status === 404 ? "AI_MODEL_UNAVAILABLE" :
-          status === 400 ? "AI_REQUEST" : "AI_PROVIDER_UNAVAILABLE",
+        code: classifyGeminiFailure(status, data),
         detail: data?.error?.message || `Gemini API returned HTTP ${status}`
       });
       // A bad key or malformed request will not be repaired by changing models.
@@ -323,7 +340,8 @@ export default {
           service: "mimi-cream-ai",
           status: "ready",
           deploymentSource: "github",
-          revision: "20261030-reliable-models",
+          revision: "20261031-region-placement",
+          executionPlacement: request.headers.get("cf-placement") || null,
           geminiConfigured: Boolean(env.GEMINI_API_KEY),
           model: GEMINI_MODEL,
           models: GEMINI_MODELS,

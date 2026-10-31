@@ -3,6 +3,9 @@
   "name": "mimi-cream-ai",
   "main": "src/index.js",
   "compatibility_date": "2026-09-19",
+  "placement": {
+    "region": "gcp:us-east4"
+  },
   "observability": {
     "enabled": true
   }

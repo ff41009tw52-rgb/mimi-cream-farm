@@ -459,6 +459,18 @@
         code: 'AI_NETWORK'
       };
     }
+    if (error?.code === 'AI_REGION') {
+      return {
+        text: 'AI 服務暫時不接受目前伺服器的連線地區，請把下方連線代碼告訴老師。',
+        code: error.code
+      };
+    }
+    if (error?.code === 'AI_BILLING') {
+      return {
+        text: 'AI 服務的使用方案需要老師確認，請把下方連線代碼告訴老師。',
+        code: error.code
+      };
+    }
     if (['AI_AUTH', 'AI_CONFIG', 'AI_REQUEST'].includes(error?.code)) {
       return {
         text: 'AI 的連線設定需要老師協助處理，請把下方連線代碼告訴老師。',

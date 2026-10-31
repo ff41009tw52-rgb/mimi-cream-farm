@@ -232,6 +232,30 @@ for (const [status, code, expectedCalls] of [
   }
 }
 
+// Google's FAILED_PRECONDITION is not necessarily a malformed request.
+for (const [message, details, code] of [
+  ['User location is not supported for the API use.', [], 'AI_REGION'],
+  ['Gemini API free tier is not available in your country. Please enable billing on your project.', [], 'AI_REGION'],
+  ['API key not valid. Please pass a valid API key.', [], 'AI_AUTH'],
+  ['Bad request', [{ reason: 'API_KEY_INVALID' }], 'AI_AUTH'],
+  ['Please enable billing on your project.', [], 'AI_BILLING'],
+  ['Invalid JSON payload received.', [], 'AI_REQUEST']
+]) {
+  let calls = 0;
+  try {
+    globalThis.fetch = async () => {
+      calls++;
+      return new Response(JSON.stringify({ error: { message, details } }), { status: 400 });
+    };
+    const body = await readJson(await worker.fetch(scienceRequest(), { GEMINI_API_KEY: 'test-key' }));
+    assert.equal(body.code, code, message);
+    assert.equal(calls, 1, 'permanent errors do not exhaust the fallback models');
+    assert.ok(!JSON.stringify(body).includes(message), 'raw provider text is not returned to the browser');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
 // A stalled response body must also trigger fallback, even after headers arrived.
 const originalSetTimeout = globalThis.setTimeout;
 const originalClearTimeout = globalThis.clearTimeout;
