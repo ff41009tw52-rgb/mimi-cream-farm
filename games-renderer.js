@@ -3,6 +3,19 @@
 
   const homepageFeatures = Object.freeze([
     Object.freeze({
+      id: 'science-review-4a',
+      grades: Object.freeze(['4']),
+      gradeLabel: '四年級',
+      subject: 'science',
+      icon: 'fas fa-leaf',
+      title: '第一、二單元總複習',
+      description: '四年級自然第一、二單元，共 60 題。支援 2～8 組分別作答，由老師統一公布答案與計分。',
+      url: 'science-review-4a/index.html',
+      actionLabel: '開始複習',
+      actionIcon: 'fas fa-play',
+      publishedAt: '2026-11-01T16:30:00+08:00'
+    }),
+    Object.freeze({
       id: 'youyou-aquarium',
       grades: Object.freeze(['4']),
       gradeLabel: '四年級',
