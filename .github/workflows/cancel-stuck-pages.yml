@@ -1,4 +1,4 @@
-name: Clear incomplete Pages deployment
+name: Clear incomplete homepage deployments
 on:
   push:
     branches: [repair/cancel-stuck-pages-20261101]
@@ -6,21 +6,25 @@ on:
 permissions:
   contents: read
   pages: write
+  actions: write
 jobs:
-  inspect-deployment:
+  clear-incomplete-deployments:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - name: Inspect old and current Pages deployment
+      - name: Stop waiting workflow and cancel incomplete Pages records
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          for sha in 818dfb5b68878edfe0251f2fcff1d4b1f3af4e59; do
-            echo "Deployment: $sha"
-            curl --fail-with-body --silent --show-error --request POST \
+          curl --silent --show-error --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/ff41009tw52-rgb/mimi-cream-farm/actions/runs/41290588953/cancel"
+          for sha in f292fecebdc241afa7871dfda378761c60a58055 818dfb5b68878edfe0251f2fcff1d4b1f3af4e59; do
+            echo "Cancel incomplete deployment: $sha"
+            curl --silent --show-error --request POST \
               --header "Accept: application/vnd.github+json" \
               --header "Authorization: Bearer $GH_TOKEN" \
-              --header "X-GitHub-Api-Version: 2022-11-28" \
               "https://api.github.com/repos/ff41009tw52-rgb/mimi-cream-farm/pages/deployments/$sha/cancel"
             echo
           done
