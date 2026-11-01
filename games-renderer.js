@@ -9,7 +9,7 @@
       subject: 'science',
       icon: 'fas fa-leaf',
       title: '第一、二單元總複習',
-      description: '四年級自然第一、二單元，共 60 題。支援 2～8 組分別作答，由老師統一公布答案與計分。',
+      description: '栗喉蜂虎住哪裡？睡蓮和荷花又差在哪？橘咪咪準備了 60 道題目，白奶油卻把答案搞混了！快和組員一起討論、選好答案，等老師揭曉，看看哪一組能拿下最高探險積分！',
       url: 'science-review-4a/index.html',
       actionLabel: '開始複習',
       actionIcon: 'fas fa-play',
