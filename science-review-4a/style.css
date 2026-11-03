@@ -58,3 +58,13 @@ header{background:#f8faf0d9;border-radius:0 0 16px 16px}
 .playing .teams-header{background:#f5f8eddf;border-radius:8px;padding:5px 10px}.playing .footer-note{background:#f4f7ebe6;border-radius:8px;padding:5px 9px;width:fit-content}
 body[data-scene="earth"] .pill{background:#eee3cf;color:#785c37}body[data-scene="underwater"] .pill{background:#dceee8;color:#306d66}body[data-scene="river"] .pill{background:#deede5;color:#416d5b}
 @media(min-width:1000px) and (max-height:800px){.playing .controlbar{padding:6px 10px}.playing .footer-note{padding:3px 7px;margin-top:5px}}
+
+/* Scale the question independently of the classroom controls. */
+.font-controls{display:inline-flex;align-items:center;gap:4px}
+.font-controls output{min-width:3.2em;text-align:center;font-variant-numeric:tabular-nums}
+.playing .question h1{font-size:calc(clamp(26px,2.6vw,38px)*var(--question-scale,1.15));overflow-wrap:anywhere}
+.playing .answer{font-size:calc(clamp(18px,1.8vw,26px)*var(--question-scale,1.15));text-align:left;overflow-wrap:anywhere}
+.playing .explain{font-size:calc(16px*var(--question-scale,1.15));overflow-wrap:anywhere}
+.playing .round-head .tools{flex-wrap:wrap;justify-content:flex-end}
+.playing .answer.incorrect{border-color:#b94f3d;background:#fff2eb}
+.playing button.answer:hover{border-color:#32664e;background:#ecf5e8}
