@@ -28,6 +28,8 @@
   unknownPanel.id='shared-map-unlocated';
   unknownPanel.className='hidden bg-white border border-amber-200 rounded-2xl p-4 text-sm';
   mapSection.append(unknownPanel);
+  const mapStatusMessage=document.createElement('span');
+  mapStatus.replaceChildren(mapStatusMessage);
   const originalMap=window.renderCampusMap,originalSwitch=window.switchTab;
   const idsFromLocal=()=>{
     try {return new Set((typeof sharedSpecimens==='undefined'?[]:sharedSpecimens).map(s=>s.uploadRevision).filter(Boolean));}
@@ -57,13 +59,13 @@
   async function loadCloud(force=false){
     if(!valid){
       status.textContent='雲端連線設定無效，目前仍可查看本機紀錄。';
-      mapStatus.textContent='尚未連接全班圖鑑；目前地圖只顯示本機紀錄。';
+      mapStatusMessage.textContent='尚未連接全班圖鑑；目前地圖只顯示本機紀錄。';
       return [];
     }
     if(loadingPromise)return loadingPromise;
     if(!force&&ready&&Date.now()-lastSync<60000)return cloudRecords;
     status.textContent='正在讀取全班雲端紀錄…';
-    mapStatus.textContent='正在從雲端讀取全班植物標記…';
+    mapStatusMessage.textContent='正在從雲端讀取全班植物標記…';
     loadingPromise=(async()=>{
       const results=[];
       for(let page=0;page<100;page++){
@@ -80,7 +82,7 @@
       return cloudRecords;
     })().catch(error=>{
       status.textContent='雲端同步失敗：'+error.message+'；本機作品仍保留。';
-      mapStatus.textContent='雲端標記讀取失敗：'+error.message+'。請點「更新全班資料」重試。';
+      mapStatusMessage.textContent='雲端標記讀取失敗：'+error.message+'。請點「更新全班資料」重試。';
       throw error;
     }).finally(()=>{loadingPromise=null;});
     return loadingPromise;
@@ -211,7 +213,7 @@
         btn.textContent=(items[0].location||'未填地點')+' · '+items.length+' 筆';btn.onclick=()=>openCloudDetails(items,items[0].location||'未填地點');unknownPanel.append(btn);
       }
     }else unknownPanel.classList.add('hidden');
-    mapStatus.textContent=ready?
+    mapStatusMessage.textContent=ready?
       '已同步雲端 '+cloudRecords.length+' 筆作品；目前地圖顯示 '+groups.size+' 個雲端地點、'+remote.length+' 筆符合篩選的其他裝置紀錄。藍色標記可查看植物照片。':
       '等待雲端資料同步；已儲存在本機的作品仍會顯示在地圖上。';
   }
