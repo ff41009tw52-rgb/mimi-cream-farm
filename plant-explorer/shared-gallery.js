@@ -36,6 +36,17 @@
       img.src=result.photo;img.alt='植物實拍照片 '+index;
     }catch{img.alt='照片暫時無法顯示';img.closest('.shared-photo-box').textContent='照片暫時無法顯示';}
   }
+  function showZoom(src){
+    const dialog=document.createElement('dialog');
+    dialog.className='w-[95vw] max-w-4xl max-h-[95vh] rounded-2xl bg-white p-3 shadow-2xl';
+    dialog.setAttribute('aria-label','植物照片放大檢視');
+    dialog.innerHTML='<div class="flex justify-end mb-2"><button type="button" class="rounded-lg bg-emerald-700 text-white px-4 py-2 font-bold">關閉照片</button></div><img alt="植物照片放大圖" class="block w-full max-h-[78vh] object-contain rounded-xl">';
+    dialog.querySelector('img').src=src;
+    dialog.querySelector('button').onclick=()=>dialog.close();
+    dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
+    dialog.addEventListener('close',()=>dialog.remove());
+    document.body.append(dialog);dialog.showModal();
+  }
   function makeCard(r){
     const el=document.createElement('article');
     el.className='border border-slate-200 rounded-2xl p-3 bg-slate-50';
@@ -48,7 +59,7 @@
       const img=document.createElement('img');img.className='block w-full max-h-64 object-contain';img.loading='lazy';
       box.replaceChildren(img);wrap.append(box);
       showPhoto(img,r.revision,n);
-      img.addEventListener('click',()=>{if(img.src)window.open(img.src,'_blank','noopener');});
+      img.addEventListener('click',()=>{if(img.getAttribute('src'))showZoom(img.src);});
     }
     return el;
   }
