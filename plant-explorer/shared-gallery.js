@@ -12,7 +12,7 @@
   panel.innerHTML='<div class="flex flex-wrap items-center justify-between gap-3 mb-3"><div><h3 class="text-xl font-black text-emerald-900">🌿 全班植物觀察圖鑑</h3><p class="text-sm text-slate-600">欣賞大家拍攝的植物照片與觀察發現，不顯示學生個人資料。</p></div><button type="button" id="shared-refresh" class="px-4 py-2 bg-emerald-700 text-white rounded-xl font-bold">重新整理</button></div><p id="shared-status" role="status" class="text-sm text-slate-600 mb-3"></p><div id="shared-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div><button type="button" id="shared-more" class="hidden mt-5 w-full py-3 border-2 border-emerald-400 text-emerald-900 rounded-xl font-bold">查看更多作品</button>';
   section.prepend(panel);
   const cards=panel.querySelector('#shared-cards'),status=panel.querySelector('#shared-status'),more=panel.querySelector('#shared-more');
-  const valid=/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(endpoint);
+  const valid=/^https:\/\/script\.google\.com\/(?:macros\/s\/|a\/macros\/[A-Za-z0-9.-]+\/s\/)[A-Za-z0-9_-]+\/exec$/.test(endpoint);
   let page=0,loading=false,loaded=false;
   const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function request(params){
@@ -71,7 +71,7 @@
   panel.querySelector('#shared-refresh').onclick=()=>load(true);
   more.onclick=()=>load(false);
   const tab=document.getElementById('tab-almanac');
-  if(tab)tab.querySelector('span:nth-child(2)')?.replaceChildren(document.createTextNode('全班植物觀察圖鑑'));
+  if(tab){const label=tab.querySelector('span:nth-child(2)');if(label?.firstChild)label.firstChild.textContent='全班圖鑑 / 我的紀錄 (';}
   if(typeof originalTab==='function'){
     window.switchTab=function(id){originalTab(id);if(id==='almanac'&&!loaded)load(true);};
   }
