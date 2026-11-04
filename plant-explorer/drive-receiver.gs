@@ -9,19 +9,93 @@ var PLANT_FOLDER_NAME = '植物探索家_學生觀察作品';
 
 function doGet(e) {
   var p = e && e.parameter || {};
+  if (p.action === 'gallery' || p.action === 'photo') {
+    return publicGallery_(p);
+  }
   if (p.action !== 'status') {
     return ContentService.createTextOutput('植物探索家收件端已啟動。').setMimeType(ContentService.MimeType.TEXT);
   }
-  // Status is a read-only JSONP lookup; never return students' names, images or records.
   var receipt = String(p.receipt || '');
   var prefix = String(p.prefix || '');
   if (!/^[a-f0-9-]{36}$/i.test(receipt) || !/^__plantStatus_[a-f0-9]{32}$/.test(prefix)) {
     return ContentService.createTextOutput('/* invalid receipt request */').setMimeType(ContentService.MimeType.JAVASCRIPT);
   }
   var sent = CacheService.getScriptCache().get('plant_success_' + receipt) === '1';
-  var result = { ok: true, sent: sent, receipt: receipt, recipient: PLANT_RECIPIENT };
-  return ContentService.createTextOutput(prefix + '(' + JSON.stringify(result) + ');')
-    .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  return jsonp_(prefix, { ok: true, sent: sent, receipt: receipt, recipient: PLANT_RECIPIENT });
+}
+
+/**
+ * 公開展示僅限本收件資料夾中的作品，不回傳班級、座號、姓名或電子郵件。
+ * 如不允許校外瀏覽，請勿以「所有人」部署本 Apps Script；須另加身分驗證。
+ */
+function publicGallery_(p) {
+  var callback = String(p.callback || '');
+  if (!/^__plantGallery_[a-f0-9]{32}$/.test(callback)) {
+    return ContentService.createTextOutput('/* invalid callback */').setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  try {
+    var root = getRootFolder_();
+    if (p.action === 'photo') {
+      var revision = String(p.revision || '');
+      var index = Number(p.index || 1);
+      if (!/^[a-f0-9-]{36}$/i.test(revision) || ![1,2,3].includes(index)) throw Error('照片索引錯誤');
+      var folders = root.getFolders();
+      var found = null;
+      while (folders.hasNext()) {
+        var folder = folders.next();
+        if (folder.getName().slice(-37) === '_' + revision) { found = folder; break; }
+      }
+      if (!found || !found.getFilesByName('收件完成.txt').hasNext()) throw Error('沒有這張照片');
+      var photos = found.getFiles();
+      while (photos.hasNext()) {
+        var file = photos.next();
+        if (new RegExp('^照片' + index + '\\.(jpg|png|webp)$', 'i').test(file.getName())) {
+          var bytes = file.getBlob().getBytes();
+          if (bytes.length > 850000) throw Error('照片過大');
+          return jsonp_(callback, { ok: true, photo: 'data:' + file.getMimeType() + ';base64,' + Utilities.base64Encode(bytes) });
+        }
+      }
+      throw Error('找不到照片');
+    }
+    var page = Math.max(0, Math.min(500, Number(p.page) || 0));
+    var size = 12, records = [], folders = root.getFolders(), seen = 0;
+    while (folders.hasNext()) {
+      var folder = folders.next();
+      if (!folder.getFilesByName('收件完成.txt').hasNext()) continue;
+      var summaries = folder.getFilesByName('觀察紀錄.json');
+      if (!summaries.hasNext()) continue;
+      var revision = folder.getName().match(/_([a-f0-9-]{36})$/i);
+      if (!revision) continue;
+      if (seen++ < page * size) continue;
+      if (records.length >= size) break;
+      try {
+        var raw = JSON.parse(summaries.next().getBlob().getDataAsString('UTF-8'));
+        records.push({
+          revision: revision[1],
+          name: String(raw.name || '').slice(0,100),
+          date: String(raw.date || '').slice(0,20),
+          location: String(raw.location || '').slice(0,100),
+          leafMarginName: String(raw.leafMargin || '').slice(0,100),
+          leafVenationName: String(raw.leafVenation || '').slice(0,100),
+          leafArrangementName: String(raw.leafArrangement || '').slice(0,100),
+          rootSystemName: String(raw.rootSystem || '').slice(0,100),
+          stemTypeName: String(raw.stemType || '').slice(0,100),
+          hasFlower: !!raw.hasFlower,
+          flowerDescription: String(raw.flowerDescription || '').slice(0,200),
+          photoCount: Math.min(3, Math.max(0, Number(raw.photoCount) || 0)),
+          submittedAt: String(raw.submittedAt || '')
+        });
+      } catch (ignored) { console.warn('Skipping invalid observation'); }
+    }
+    return jsonp_(callback, { ok: true, records: records, hasMore: folders.hasNext() });
+  } catch (err) {
+    console.error(err);
+    return jsonp_(callback, { ok: false, error: '無法讀取共用圖鑑' });
+  }
+}
+function jsonp_(callback, object) {
+  var json = JSON.stringify(object).replace(/</g,'\\u003c').replace(/>/g,'\\u003e').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
+  return ContentService.createTextOutput(callback + '(' + json + ');').setMimeType(ContentService.MimeType.JAVASCRIPT);
 }
 
 function doPost(e) {
