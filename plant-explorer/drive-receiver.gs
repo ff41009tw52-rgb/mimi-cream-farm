@@ -7,9 +7,21 @@ var PLANT_RECIPIENT = 'zx5566zero@apps.ntpc.edu.tw';
 var PLANT_ALLOWED_ORIGIN = 'https://ff41009tw52-rgb.github.io';
 var PLANT_FOLDER_NAME = '植物探索家_學生觀察作品';
 
-function doGet() {
-  return HtmlService.createHtmlOutput('植物探索家收件端已啟動。請回到植物探索家網站進行拍照上傳。')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+function doGet(e) {
+  var p = e && e.parameter || {};
+  if (p.action !== 'status') {
+    return ContentService.createTextOutput('植物探索家收件端已啟動。').setMimeType(ContentService.MimeType.TEXT);
+  }
+  // Status is a read-only JSONP lookup; never return students' names, images or records.
+  var receipt = String(p.receipt || '');
+  var prefix = String(p.prefix || '');
+  if (!/^[a-f0-9-]{36}$/i.test(receipt) || !/^__plantStatus_[a-f0-9]{32}$/.test(prefix)) {
+    return ContentService.createTextOutput('/* invalid receipt request */').setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  var sent = CacheService.getScriptCache().get('plant_success_' + receipt) === '1';
+  var result = { ok: true, sent: sent, receipt: receipt, recipient: PLANT_RECIPIENT };
+  return ContentService.createTextOutput(prefix + '(' + JSON.stringify(result) + ');')
+    .setMimeType(ContentService.MimeType.JAVASCRIPT);
 }
 
 function doPost(e) {
@@ -79,6 +91,7 @@ function doPost(e) {
     } finally {
       lock.releaseLock();
     }
+    CacheService.getScriptCache().put('plant_success_' + revision, '1', 21600);
     return acknowledge_(requestId, { ok: true, receipt: revision, recipient: PLANT_RECIPIENT, photoCount: imageData.length });
   } catch (error) {
     console.error(error);
@@ -100,13 +113,8 @@ function getRootFolder_() {
 }
 
 function acknowledge_(requestId, result) {
-  var body = JSON.stringify(Object.assign({
+  return ContentService.createTextOutput(JSON.stringify(Object.assign({
     type: 'minan-plant-upload-result',
     requestId: requestId
-  }, result)).replace(/</g, '\\u003c');
-  var html = '<!doctype html><html><head><meta charset="utf-8"></head><body>'
-    + '<script>window.top.postMessage(' + body + ', ' + JSON.stringify(PLANT_ALLOWED_ORIGIN) + ');<\/script>'
-    + '<p>收件結果已回報植物探索家。</p></body></html>';
-  return HtmlService.createHtmlOutput(html)
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  }, result))).setMimeType(ContentService.MimeType.JSON);
 }
