@@ -37,7 +37,7 @@ function doPost(e) {
     if (!/^[a-f0-9-]{36}$/i.test(revision)) throw new Error('作品編號不正確。');
     var name = cleanPart_(record.name, 100), cls = cleanPart_(record.className, 20);
     var group = cleanPart_(record.groupName, 30);
-    if (!name || !cls || !group) throw new Error('請先填植物名稱、班級及座號／組別。');
+    if (!name) throw new Error('請填寫植物名稱。');
     var photos = record.photos;
     if (!Array.isArray(photos) || photos.length < 1 || photos.length > 3) throw new Error('每筆作品需要 1 至 3 張照片。');
     var imageData = photos.map(function(data) {
@@ -49,7 +49,7 @@ function doPost(e) {
       return { bytes: bytes, mime: 'image/' + match[1], ext: ext };
     });
 
-    var folderName = [cls, group, name, revision].join('_');
+    var folderName = [name, revision].join('_');
     var lock = LockService.getScriptLock();
     lock.waitLock(20000);
     try {
