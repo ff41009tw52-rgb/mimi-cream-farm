@@ -9,7 +9,6 @@ function setupPlantReceiver() {
     const folder = DriveApp.createFolder('植物探索家_學生觀察作品');
     props.setProperty('FOLDER_ID', folder.getId());
   }
-  // Set CLASS_CODE in Project settings -> Script properties before accepting work.
   console.log('收件資料夾：' + DriveApp.getFolderById(props.getProperty('FOLDER_ID')).getUrl());
 }
 function assertOwner_() {
@@ -17,17 +16,32 @@ function assertOwner_() {
     throw new Error('請使用指定的學校帳號部署與執行。');
   }
 }
-function doGet() { return json_({ok:false, error:'此網址僅供植物探索家交件，沒有公開檔案清單。'}); }
+function doGet(e) {
+  const p = e && e.parameter || {};
+  const revision = String(p.receipt || '');
+  const prefix = String(p.prefix || '');
+  let result = {ok:true, ready:false, recipient:PLANT_OWNER};
+  try {
+    assertOwner_();
+    const folderId = PropertiesService.getScriptProperties().getProperty('FOLDER_ID');
+    if (p.action === 'status' && /^[a-zA-Z0-9-]{16,100}$/.test(revision)) {
+      let sent = false;
+      if (folderId) { const found=DriveApp.getFolderById(folderId).getFoldersByName('收件_'+revision); sent=found.hasNext() && found.next().getFilesByName('收件完成.json').hasNext(); }
+      result = {ok:true, sent:sent, receipt:revision, recipient:PLANT_OWNER};
+    } else { result.ready=!!folderId; }
+  } catch(err) { result={ok:false,error:'收件服務未就緒。',recipient:PLANT_OWNER}; }
+  // Receipts disclose only a completion bit for an unguessable submission revision.
+  if (/^__plantStatus_[a-zA-Z0-9_]{1,80}$/.test(prefix)) return ContentService.createTextOutput(prefix+'('+JSON.stringify(result)+');').setMimeType(ContentService.MimeType.JAVASCRIPT);
+  return json_(result);
+}
 function doPost(e) {
   let lock;
   try {
     assertOwner_();
     const props = PropertiesService.getScriptProperties();
-    const code = props.getProperty('CLASS_CODE');
-    if (!code || !props.getProperty('FOLDER_ID')) throw new Error('老師尚未完成收件設定。');
-    if (!e || !e.postData || e.postData.contents.length > 3300000) throw new Error('交件內容過大。');
-    const body = JSON.parse(e.postData.contents);
-    if (typeof body.classCode !== 'string' || body.classCode !== code) throw new Error('交件碼不正確，請向老師確認。');
+    if (!props.getProperty('FOLDER_ID')) throw new Error('老師尚未完成收件設定。');
+    if (!e || !e.postData || e.postData.contents.length > 5000000) throw new Error('交件內容過大。');
+    const body = JSON.parse(e.parameter && e.parameter.payload || e.postData.contents);
     const r = validateRecord_(body.record);
     lock = LockService.getScriptLock();
     if (!lock.tryLock(20000)) throw new Error('收件忙碌中，請稍後重試。');
