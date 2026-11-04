@@ -89,6 +89,43 @@ function listPlantEntries_(roots) {
   records.sort(function(a,b) { return b.submittedAt.localeCompare(a.submittedAt); });
   return records;
 }
+/**
+ * Search for older submissions whose parent folder is no longer configured as
+ * the active receiver. Only this application's signed summary and receipt count.
+ * Return a read-only proxy to avoid changing the active upload destination.
+ */
+function findLegacyPlantRoot_() {
+  var folders = [], seen = {}, found;
+  try {
+    found = DriveApp.searchFiles("title = '觀察紀錄.json' and trashed = false");
+    var scanned = 0;
+    while (found.hasNext() && scanned++ < 300) {
+      var file = found.next(), parents = file.getParents();
+      while (parents.hasNext()) {
+        var folder = parents.next();
+        var match = folder.getName().match(/_([a-f0-9-]{36})$/i);
+        if (!match || seen[match[1]]) continue;
+        if (!folder.getFilesByName('收件完成.txt').hasNext()) continue;
+        try {
+          var summary = JSON.parse(file.getBlob().getDataAsString('UTF-8'));
+          if (summary.recipient !== PLANT_RECIPIENT || summary.uploadRevision !== match[1]) continue;
+          seen[match[1]] = true;
+          folders.push(folder);
+        } catch (ignored) {}
+      }
+    }
+  } catch (err) { console.warn('Legacy submissions not searchable: ' + err); }
+  return {
+    count: folders.length,
+    getFolders: function() {
+      var index = 0;
+      return {
+        hasNext: function() { return index < folders.length; },
+        next: function() { return folders[index++]; }
+      };
+    }
+  };
+}
 function publicGallery_(p) {
   var callback = String(p.callback || '');
   if (!/^__plantGallery_[a-f0-9]{32}$/.test(callback)) {
@@ -96,6 +133,12 @@ function publicGallery_(p) {
   }
   try {
     var roots = findPlantRoots_();
+    var recovered = 0;
+    if (listPlantEntries_(roots).length === 0) {
+      var archived = findLegacyPlantRoot_();
+      recovered = archived.count;
+      if (recovered) roots.push(archived);
+    }
     if (p.action === 'photo') {
       var revision = String(p.revision || '');
       var index = Number(p.index || 1);
@@ -124,7 +167,7 @@ function publicGallery_(p) {
     return jsonp_(callback, {
       ok: true, records: all.slice(offset, offset+size),
       hasMore: all.length > offset+size,
-      total: all.length, receiverFolders: roots.length
+      total: all.length, receiverFolders: roots.length, recoveredFolders: recovered
     });
   } catch (err) {
     console.error(err);
