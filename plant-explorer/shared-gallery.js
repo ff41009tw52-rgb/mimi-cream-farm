@@ -139,7 +139,8 @@
         if(!data.ok||!safePhoto(data.photo))throw new Error('照片尚無法讀取');
         photoCache.set(key,data);if(photoCache.size>90)photoCache.delete(photoCache.keys().next().value);
       }
-      if(!img.isConnected)return;
+      // Cached photos resolve before cardFor appends its new card to the page.
+      // Set the source immediately, including during a gallery/map rerender.
       img.src=data.photo;img.alt='植物實拍照片 '+index;
     }catch{
       if(!img.isConnected)return;
