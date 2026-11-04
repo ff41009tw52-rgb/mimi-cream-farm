@@ -93,7 +93,8 @@
       }
       const unique=new Map();results.forEach(r=>unique.set(r.revision,r));
       const latest=[...unique.values()].sort((a,b)=>String(b.submittedAt||'').localeCompare(String(a.submittedAt||'')));
-      if(latest.length){
+      const confirmedEmpty=metadata&&metadata.schema==='minan-plants-v4'&&metadata.receiverFolders>0&&!metadata.warnings&&metadata.total===0;
+      if(latest.length||confirmedEmpty){
         if(metadata&&metadata.warnings){const merged=new Map(cloudRecords.map(r=>[r.revision,r]));latest.forEach(r=>merged.set(r.revision,r));cloudRecords=[...merged.values()];syncWarning='部分舊作品仍待恢復，保留上次已確認的紀錄。';}else{cloudRecords=latest;syncWarning='';}
         try{localStorage.setItem(CACHE_KEY,JSON.stringify({savedAt:Date.now(),records:cloudRecords.slice(0,1000)}));}catch{}
       }else if(cloudRecords.length){
@@ -150,6 +151,7 @@
     const el=document.createElement('article');
     el.className='border border-slate-200 rounded-2xl p-3 bg-slate-50';
     el.innerHTML='<h4 class="text-lg font-black text-slate-900">'+esc(r.name||'待辨識植物')+'</h4><p class="text-xs text-slate-500 mb-3">📍 '+esc(r.location||'未填地點')+'　'+esc(r.date||'')+'</p><div class="shared-photos grid gap-2 mb-3"></div><div class="text-xs leading-6 text-slate-700">葉緣：'+esc(r.leafMarginName||'未記錄')+'<br>葉脈：'+esc(r.leafVenationName||'未記錄')+'<br>葉序：'+esc(r.leafArrangementName||'未記錄')+'<br>根系：'+esc(r.rootSystemName||'未記錄')+'<br>莖：'+esc(r.stemTypeName||'未記錄')+'</div>';
+    const flower=document.createElement('p');flower.className='text-xs text-pink-800 leading-6 mt-2';flower.textContent=r.hasFlower?'花部：'+(r.flowerDescription||'有花朵'):'花部：未開花／未記錄';el.append(flower);
     const wrap=el.querySelector('.shared-photos');
     for(let n=1;n<=Math.min(3,Math.max(0,Number(r.photoCount)||0));n++){
       const box=document.createElement('div');box.className='shared-photo-box rounded-xl bg-slate-200 min-h-36 overflow-hidden flex items-center justify-center text-xs text-slate-500';
@@ -216,7 +218,7 @@
   }
   function mapRecords(){
     const combined=new Map(cloudRecords.map(r=>[r.revision,r]));
-    ownRecords().forEach(r=>{const revision=r.uploadRevision||r.id;if(combined.has(revision))return;const pics=Array.isArray(r.photos)?r.photos.filter(safePhoto):(safePhoto(r.photoData)?[r.photoData]:[]);combined.set(revision,{...r,revision,photoCount:pics.length,_localPhotos:pics});});
+    ownRecords().forEach(r=>{const revision=r.uploadRevision||r.id;if(combined.has(revision))return;if(r.uploadState==='sent'&&ready&&!syncWarning)return;const pics=Array.isArray(r.photos)?r.photos.filter(safePhoto):(safePhoto(r.photoData)?[r.photoData]:[]);combined.set(revision,{...r,revision,photoCount:pics.length,_localPhotos:pics});});
     return [...combined.values()];
   }
   function renderCloudMap(){

@@ -49,7 +49,8 @@ function collectPlantEntries_(){
  var legacy=DriveApp.searchFiles("trashed = false and (title = '觀察紀錄.json' or title contains '_觀察紀錄.json')");
  var searched=0;while(legacy.hasNext()&&searched++<1000){var file=legacy.next(),parents=file.getParents();while(parents.hasNext()){var f=parents.next();if(!visited[f.getId()])readFolder(f,0,false);}}
  var list=Object.keys(entries).map(function(k){return entries[k];});list.sort(function(a,b){return b.public.submittedAt.localeCompare(a.public.submittedAt)||a.public.revision.localeCompare(b.public.revision);});
- warnings+=PLANT_KNOWN_RECEIPTS.filter(function(id){return !entries[id];}).length;
+ // Missing receipts may have been intentionally removed by the teacher.
+ // Only actual read errors are warnings; never resurrect deleted gallery rows.
  return {entries:list,roots:roots,warnings:warnings};
 }
 function jsonp_(callback,value){var json=JSON.stringify(value).replace(/</g,'\\u003c').replace(/>/g,'\\u003e').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');return ContentService.createTextOutput(callback+'('+json+');').setMimeType(ContentService.MimeType.JAVASCRIPT);}
