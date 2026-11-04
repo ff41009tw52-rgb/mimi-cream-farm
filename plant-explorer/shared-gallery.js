@@ -6,7 +6,16 @@
   const section=document.getElementById('section-almanac');
   const mapSection=document.getElementById('section-map');
   if(!section||!mapSection)return;
-  let cloudRecords=[],lastSync=0,loadingPromise=null,ready=false;
+  let cloudRecords=[],lastSync=0,loadingPromise=null,ready=false,syncWarning='';
+  const CACHE_KEY='minan_plant_shared_gallery_last_good_v1';
+  const CACHE_MAX_AGE_MS=30*60*1000;
+  try{
+    const cached=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');
+    if(cached&&Array.isArray(cached.records)&&Date.now()-cached.savedAt<CACHE_MAX_AGE_MS){
+      cloudRecords=cached.records.filter(r=>r&&typeof r.revision==='string').slice(0,1000);
+      if(cloudRecords.length)syncWarning='目前顯示最近同步的雲端紀錄，正在重新檢查。';
+    }
+  }catch{}
   const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const normalize=s=>String(s||'').replace(/[\s\u3000]/g,'').trim();
   const safePhoto=s=>typeof s==='string'&&/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(s);
@@ -63,26 +72,46 @@
       return [];
     }
     if(loadingPromise)return loadingPromise;
-    if(!force&&ready&&Date.now()-lastSync<60000)return cloudRecords;
+    if(!force&&ready&&Date.now()-lastSync<30000)return cloudRecords;
     status.textContent='正在讀取全班雲端紀錄…';
     mapStatusMessage.textContent='正在從雲端讀取全班植物標記…';
     loadingPromise=(async()=>{
-      const results=[];
-      for(let page=0;page<100;page++){
-        const data=await request({action:'gallery',page:page});
-        if(!data||!data.ok||!Array.isArray(data.records))throw new Error('收件端無法提供圖鑑資料');
-        results.push(...data.records.filter(r=>r&&typeof r.revision==='string'));
-        if(!data.hasMore||!data.records.length)break;
+      let results=[],metadata=null;
+      // 空清單可能是部署版本或收件資料夾切換造成，先重試再更新畫面。
+      for(let attempt=0;attempt<3;attempt++){
+        results=[];
+        for(let page=0;page<100;page++){
+          const data=await request({action:'gallery',page:page});
+          if(!data||!data.ok||!Array.isArray(data.records))throw new Error('收件端無法提供圖鑑資料');
+          if(page===0)metadata=data;
+          results.push(...data.records.filter(r=>r&&typeof r.revision==='string'));
+          if(!data.hasMore||!data.records.length)break;
+        }
+        if(results.length)break;
+        if(attempt<2)await new Promise(resolve=>setTimeout(resolve,600*(attempt+1)));
       }
-      const unique=new Map();
-      results.forEach(r=>unique.set(r.revision,r));
-      cloudRecords=[...unique.values()].sort((a,b)=>String(b.submittedAt||'').localeCompare(String(a.submittedAt||'')));
+      const unique=new Map();results.forEach(r=>unique.set(r.revision,r));
+      const latest=[...unique.values()].sort((a,b)=>String(b.submittedAt||'').localeCompare(String(a.submittedAt||'')));
+      if(latest.length){
+        cloudRecords=latest;syncWarning='';
+        try{localStorage.setItem(CACHE_KEY,JSON.stringify({savedAt:Date.now(),records:latest.slice(0,1000)}));}catch{}
+      }else if(cloudRecords.length){
+        syncWarning='雲端目前回傳 0 筆，保留最近 30 分鐘已確認的 '+cloudRecords.length+' 筆資料；這不代表照片已經刪除。';
+      }else{
+        cloudRecords=[];
+        syncWarning='雲端目前回傳 0 筆。請確認 Apps Script 是否指向原本的作品資料夾，以及收件程式是否重新部署。';
+      }
+      if(metadata&&typeof metadata.receiverFolders!=='number'){
+        syncWarning+=' 雲端目前仍是舊版讀取程式，尚未啟用跨資料夾尋找。';
+      }else if(metadata&&!metadata.receiverFolders){
+        syncWarning+=' 雲端沒有找到可讀取的作品收件資料夾。';
+      }
       lastSync=Date.now();ready=true;
       renderGallery();renderCloudMap();
       return cloudRecords;
     })().catch(error=>{
-      status.textContent='雲端同步失敗：'+error.message+'；本機作品仍保留。';
-      mapStatusMessage.textContent='雲端標記讀取失敗：'+error.message+'。請點「更新全班資料」重試。';
+      syncWarning='雲端同步失敗：'+error.message+'；已保留的作品不會清除。';
+      renderGallery();renderCloudMap();
       throw error;
     }).finally(()=>{loadingPromise=null;});
     return loadingPromise;
@@ -128,7 +157,7 @@
     cards.replaceChildren();
     const q=normalize(search.value);
     const filtered=cloudRecords.filter(r=>normalize(r.name).includes(q)||normalize(r.location).includes(q));
-    status.textContent='全班雲端已有 '+cloudRecords.length+' 筆作品'+(q?'，目前符合 '+filtered.length+' 筆':'')+'。地圖與圖鑑同步使用相同紀錄。';
+    status.textContent=(syncWarning?syncWarning+' ':'')+'目前可顯示 '+cloudRecords.length+' 筆雲端作品'+(q?'，符合搜尋 '+filtered.length+' 筆':'')+'。地圖和圖鑑使用相同資料。';
     if(!filtered.length){cards.innerHTML='<p class="col-span-full text-slate-500 p-4 rounded-2xl bg-slate-50">目前沒有符合條件的雲端紀錄。</p>';return;}
     filtered.forEach(r=>cards.append(cardFor(r)));
   }
@@ -185,9 +214,12 @@
     const f=document.getElementById('map-filter-feature')?.value||'ALL',localIDs=idsFromLocal();
     const remote=cloudRecords.filter(r=>!localIDs.has(r.revision)&&mapFilter(r,f));
     const localCount=ownRecords().filter(r=>Number.isFinite(r.mapX)&&Number.isFinite(r.mapY)&&localFilter(r,f)).length;
-    const positions=mapLocations(),groups=new Map(),unknown=new Map();
+    const positions=mapLocations(),groups=new Map(),unknown=new Map(),resolved=new Map();
     remote.forEach(r=>{
-      const place=normalize(r.location),position=positions.get(place);
+      const place=normalize(r.location);
+      const storedXY=Number.isFinite(r.mapX)&&Number.isFinite(r.mapY)?{x:r.mapX,y:r.mapY}:null;
+      const position=positions.get(place)||storedXY;
+      if(position)resolved.set(place,position);
       const target=position?groups:unknown;
       if(!target.has(place))target.set(place,[]);
       target.get(place).push(r);
@@ -195,7 +227,7 @@
     count.textContent=String(localCount+[...groups.values()].reduce((n,records)=>n+records.length,0));
     count.title='包含 '+localCount+' 筆本機定位紀錄及 '+[...groups.values()].reduce((n,records)=>n+records.length,0)+' 筆其他裝置上傳的雲端定位紀錄';
     for(const [place,items] of groups){
-      const xy=positions.get(place),pin=document.createElement('button');
+      const xy=resolved.get(place),pin=document.createElement('button');
       pin.type='button';pin.className='shared-cloud-pin absolute -translate-x-1/2 -translate-y-full z-30 p-2 cursor-pointer focus:outline-emerald-500';
       pin.style.left=Math.max(5,Math.min(95,xy.x))+'%';
       pin.style.top=Math.max(10,Math.min(97,xy.y))+'%';
@@ -213,9 +245,7 @@
         btn.textContent=(items[0].location||'未填地點')+' · '+items.length+' 筆';btn.onclick=()=>openCloudDetails(items,items[0].location||'未填地點');unknownPanel.append(btn);
       }
     }else unknownPanel.classList.add('hidden');
-    mapStatusMessage.textContent=ready?
-      '已同步雲端 '+cloudRecords.length+' 筆作品；目前地圖顯示 '+groups.size+' 個雲端地點、'+remote.length+' 筆符合篩選的其他裝置紀錄。藍色標記可查看植物照片。':
-      '等待雲端資料同步；已儲存在本機的作品仍會顯示在地圖上。';
+    mapStatusMessage.textContent=(syncWarning?syncWarning+' ':'')+(ready?('已取得 '+cloudRecords.length+' 筆雲端作品，目前有 '+groups.size+' 個全班觀察地點。藍色標記可查看其他平板的照片。'):'正在讀取全班地圖；本機標記仍保留。');
   }
   if(typeof originalMap==='function'){
     window.renderCampusMap=function(){originalMap.apply(this,arguments);renderCloudMap();};
@@ -229,6 +259,13 @@
       }
     };
   }
+  const originalLocation=window.showCampusLocation;
+  window.showCampusLocation=function(name){
+    if(typeof originalLocation==='function')originalLocation(name);
+    search.value=name||'';renderGallery();
+    loadCloud(false).catch(()=>{});
+  };
+  window.addEventListener('plant-cloud-upload-success',()=>loadCloud(true).catch(()=>{}));
   const tab=document.getElementById('tab-almanac');
   if(tab){const label=tab.querySelector('span:nth-child(2)');if(label?.firstChild)label.firstChild.textContent='全班圖鑑 / 我的紀錄 (';}
   const mapHeader=mapSection.querySelector('h2')?.nextElementSibling;
@@ -241,5 +278,6 @@
   mapReload.onclick=()=>loadCloud(true).catch(()=>{});
   mapStatus.append(mapReload);
   // 換頁、重新開啟或回到地圖時自動取最新版本，不要求學生手動匯入 JSON。
+  if(cloudRecords.length){renderGallery();renderCloudMap();}
   setTimeout(()=>loadCloud(false).catch(()=>{}),700);
 })();
