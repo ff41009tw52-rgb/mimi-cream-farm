@@ -8,12 +8,13 @@
   if(!section||!mapSection)return;
   let cloudRecords=[],lastSync=0,loadingPromise=null,ready=false,syncWarning='';
   const CACHE_KEY='minan_plant_shared_gallery_last_good_v1';
-  const CACHE_MAX_AGE_MS=30*60*1000;
+  const CACHE_MAX_AGE_MS=7*24*60*60*1000;
+  const photoCache=new Map(),photoRequests=new Map();
   try{
     const cached=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');
     if(cached&&Array.isArray(cached.records)&&Date.now()-cached.savedAt<CACHE_MAX_AGE_MS){
       cloudRecords=cached.records.filter(r=>r&&typeof r.revision==='string').slice(0,1000);
-      if(cloudRecords.length)syncWarning='目前顯示最近同步的雲端紀錄，正在重新檢查。';
+      if(cloudRecords.length)syncWarning='目前顯示最近同步的雲端紀錄，正在重新檢查，離線快照不代表最新資料。';
     }
   }catch{}
   const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -81,9 +82,9 @@
       for(let attempt=0;attempt<3;attempt++){
         results=[];
         for(let page=0;page<100;page++){
-          const data=await request({action:'gallery',page:page});
+          const data=await request({action:'gallery',page:page,fresh:force&&page===0?'1':'0'});
           if(!data||!data.ok||!Array.isArray(data.records))throw new Error('收件端無法提供圖鑑資料');
-          if(page===0)metadata=data;
+          if(page===0)metadata=data;else if(metadata.snapshot&&data.snapshot!==metadata.snapshot)throw new Error('雲端資料更新中，請再同步一次');
           results.push(...data.records.filter(r=>r&&typeof r.revision==='string'));
           if(!data.hasMore||!data.records.length)break;
         }
@@ -93,10 +94,10 @@
       const unique=new Map();results.forEach(r=>unique.set(r.revision,r));
       const latest=[...unique.values()].sort((a,b)=>String(b.submittedAt||'').localeCompare(String(a.submittedAt||'')));
       if(latest.length){
-        cloudRecords=latest;syncWarning='';
-        try{localStorage.setItem(CACHE_KEY,JSON.stringify({savedAt:Date.now(),records:latest.slice(0,1000)}));}catch{}
+        if(metadata&&metadata.warnings){const merged=new Map(cloudRecords.map(r=>[r.revision,r]));latest.forEach(r=>merged.set(r.revision,r));cloudRecords=[...merged.values()];syncWarning='部分舊作品仍待恢復，保留上次已確認的紀錄。';}else{cloudRecords=latest;syncWarning='';}
+        try{localStorage.setItem(CACHE_KEY,JSON.stringify({savedAt:Date.now(),records:cloudRecords.slice(0,1000)}));}catch{}
       }else if(cloudRecords.length){
-        syncWarning='雲端目前回傳 0 筆，保留最近 30 分鐘已確認的 '+cloudRecords.length+' 筆資料；這不代表照片已經刪除。';
+        syncWarning='雲端目前回傳 0 筆，保留上次已確認的 '+cloudRecords.length+' 筆資料；這不代表照片已經刪除。';
       }else{
         cloudRecords=[];
         syncWarning='雲端目前回傳 0 筆。請確認 Apps Script 是否指向原本的作品資料夾，以及收件程式是否重新部署。';
@@ -128,15 +129,21 @@
     document.body.append(dialog);dialog.showModal();
   }
   async function photo(img,revision,index){
+    const key=revision+'#'+index;
     try{
-      const data=await request({action:'photo',revision,index});
-      if(!data.ok||!safePhoto(data.photo))throw new Error('照片尚無法讀取');
+      let data=photoCache.get(key);
+      if(!data){
+        if(!photoRequests.has(key))photoRequests.set(key,request({action:'photo',revision,index}).finally(()=>photoRequests.delete(key)));
+        data=await photoRequests.get(key);
+        if(!data.ok||!safePhoto(data.photo))throw new Error('照片尚無法讀取');
+        photoCache.set(key,data);if(photoCache.size>90)photoCache.delete(photoCache.keys().next().value);
+      }
       if(!img.isConnected)return;
       img.src=data.photo;img.alt='植物實拍照片 '+index;
     }catch{
       if(!img.isConnected)return;
       const box=img.closest('.shared-photo-box');
-      if(box)box.textContent='照片暫時無法顯示，請稍後再試';
+      if(box){img.hidden=true;const retry=document.createElement('button');retry.type='button';retry.className='p-3 text-emerald-800 font-bold';retry.textContent='照片暫時無法讀取 · 點此重試';retry.onclick=()=>{retry.remove();img.hidden=false;photo(img,revision,index);};box.append(retry);}
     }
   }
   function cardFor(r){
@@ -149,7 +156,7 @@
       const img=document.createElement('img');img.className='block w-full max-h-64 object-contain cursor-zoom-in';img.loading='lazy';img.alt='載入植物照片中';
       box.append(img);wrap.append(box);
       img.addEventListener('click',()=>{if(img.getAttribute('src'))photoDialog(img.src);});
-      photo(img,r.revision,n);
+      if(r._localPhotos&&safePhoto(r._localPhotos[n-1])){img.src=r._localPhotos[n-1];img.alt='本機待同步植物照片 '+n;}else photo(img,r.revision,n);
     }
     return el;
   }
@@ -207,45 +214,39 @@
     dialog.addEventListener('close',()=>dialog.remove());
     document.body.append(dialog);dialog.showModal();
   }
+  function mapRecords(){
+    const combined=new Map(cloudRecords.map(r=>[r.revision,r]));
+    ownRecords().forEach(r=>{const revision=r.uploadRevision||r.id;if(combined.has(revision))return;const pics=Array.isArray(r.photos)?r.photos.filter(safePhoto):(safePhoto(r.photoData)?[r.photoData]:[]);combined.set(revision,{...r,revision,photoCount:pics.length,_localPhotos:pics});});
+    return [...combined.values()];
+  }
   function renderCloudMap(){
     const layer=document.getElementById('map-pins-layer'),count=document.getElementById('map-pins-count');
     if(!layer||!count)return;
-    layer.querySelectorAll('.shared-cloud-pin').forEach(pin=>pin.remove());
-    const f=document.getElementById('map-filter-feature')?.value||'ALL',localIDs=idsFromLocal();
-    const remote=cloudRecords.filter(r=>!localIDs.has(r.revision)&&mapFilter(r,f));
-    const localCount=ownRecords().filter(r=>Number.isFinite(r.mapX)&&Number.isFinite(r.mapY)&&localFilter(r,f)).length;
-    const positions=mapLocations(),groups=new Map(),unknown=new Map(),resolved=new Map();
-    remote.forEach(r=>{
-      const place=normalize(r.location);
+    layer.replaceChildren();
+    const f=document.getElementById('map-filter-feature')?.value||'ALL';
+    const records=mapRecords().filter(r=>mapFilter(r,f));
+    const positions=mapLocations(),groups=new Map(),unknown=new Map();
+    records.forEach(r=>{
+      const place=normalize(r.location)||'未填地點';
       const storedXY=Number.isFinite(r.mapX)&&Number.isFinite(r.mapY)?{x:r.mapX,y:r.mapY}:null;
       const position=positions.get(place)||storedXY;
-      if(position)resolved.set(place,position);
+      const key=position?position.x.toFixed(2)+','+position.y.toFixed(2):place;
       const target=position?groups:unknown;
-      if(!target.has(place))target.set(place,[]);
-      target.get(place).push(r);
+      if(!target.has(key))target.set(key,{position,items:[]});
+      target.get(key).items.push(r);
     });
-    count.textContent=String(localCount+[...groups.values()].reduce((n,records)=>n+records.length,0));
-    count.title='包含 '+localCount+' 筆本機定位紀錄及 '+[...groups.values()].reduce((n,records)=>n+records.length,0)+' 筆其他裝置上傳的雲端定位紀錄';
-    for(const [place,items] of groups){
-      const xy=resolved.get(place),pin=document.createElement('button');
+    const located=[...groups.values()].reduce((n,g)=>n+g.items.length,0);
+    count.textContent=String(located);count.title='本機與全班雲端去重後的定位紀錄';
+    for(const group of groups.values()){
+      const xy=group.position,items=group.items,place=items[0].location||'觀察地點',pin=document.createElement('button');
       pin.type='button';pin.className='shared-cloud-pin absolute -translate-x-1/2 -translate-y-full z-30 p-2 cursor-pointer focus:outline-emerald-500';
-      pin.style.left=Math.max(5,Math.min(95,xy.x))+'%';
-      pin.style.top=Math.max(10,Math.min(97,xy.y))+'%';
-      pin.innerHTML='<span class="inline-flex flex-col items-center"><span class="text-[11px] font-black px-3 py-1.5 rounded-full bg-sky-700 text-white border-2 border-white shadow-lg whitespace-nowrap">🌐 '+esc(items[0].location||place)+' · '+items.length+' 筆</span><span class="text-xl leading-none drop-shadow">📍</span></span>';
-      pin.setAttribute('aria-label','查看'+(items[0].location||place)+'的 '+items.length+' 筆全班觀察作品');
-      pin.onclick=()=>openCloudDetails(items,items[0].location||place);layer.append(pin);
+      pin.style.left=Math.max(5,Math.min(95,xy.x))+'%';pin.style.top=Math.max(10,Math.min(97,xy.y))+'%';
+      pin.innerHTML='<span class="inline-flex flex-col items-center"><span class="text-[11px] font-black px-3 py-1.5 rounded-full bg-sky-700 text-white border-2 border-white shadow-lg whitespace-nowrap">🌿 '+esc(place)+' · '+items.length+' 筆</span><span class="text-xl leading-none drop-shadow">📍</span></span>';
+      pin.setAttribute('aria-label','查看'+place+'的 '+items.length+' 筆觀察作品');pin.onclick=()=>openCloudDetails(items,place);layer.append(pin);
     }
-    unknownPanel.replaceChildren();
-    if(unknown.size){
-      unknownPanel.classList.remove('hidden');
-      const p=document.createElement('p');p.className='mb-2 font-bold text-amber-800';p.textContent='另有 '+[...unknown.values()].reduce((n,a)=>n+a.length,0)+' 筆雲端作品尚未對應校園地圖座標，仍可點選查看：';
-      unknownPanel.append(p);
-      for(const [place,items] of unknown){
-        const btn=document.createElement('button');btn.type='button';btn.className='inline-block m-1 px-3 py-2 rounded-xl bg-amber-100 border border-amber-300 font-bold';
-        btn.textContent=(items[0].location||'未填地點')+' · '+items.length+' 筆';btn.onclick=()=>openCloudDetails(items,items[0].location||'未填地點');unknownPanel.append(btn);
-      }
-    }else unknownPanel.classList.add('hidden');
-    mapStatusMessage.textContent=(syncWarning?syncWarning+' ':'')+(ready?('已取得 '+cloudRecords.length+' 筆雲端作品，目前有 '+groups.size+' 個全班觀察地點。藍色標記可查看其他平板的照片。'):'正在讀取全班地圖；本機標記仍保留。');
+    unknownPanel.replaceChildren();unknownPanel.classList.toggle('hidden',!unknown.size);
+    if(unknown.size){const p=document.createElement('p');p.className='mb-2 font-bold text-amber-800';p.textContent='以下作品尚未對應地圖座標，仍可查看：';unknownPanel.append(p);for(const group of unknown.values()){const items=group.items,place=items[0].location||'未填地點',btn=document.createElement('button');btn.type='button';btn.className='m-1 px-3 py-2 rounded-xl bg-amber-100 font-bold';btn.textContent=place+' · '+items.length+' 筆';btn.onclick=()=>openCloudDetails(items,place);unknownPanel.append(btn);}}
+    mapStatusMessage.textContent=(syncWarning?syncWarning+' ':'')+(ready?'已取得 '+cloudRecords.length+' 筆雲端作品；地圖共有 '+groups.size+' 個觀察地點，含本機尚未同步作品。':'正在讀取全班地圖；本機作品仍保留。');
   }
   if(typeof originalMap==='function'){
     window.renderCampusMap=function(){originalMap.apply(this,arguments);renderCloudMap();};
@@ -269,7 +270,7 @@
   const tab=document.getElementById('tab-almanac');
   if(tab){const label=tab.querySelector('span:nth-child(2)');if(label?.firstChild)label.firstChild.textContent='全班圖鑑 / 我的紀錄 (';}
   const mapHeader=mapSection.querySelector('h2')?.nextElementSibling;
-  if(mapHeader)mapHeader.textContent='地圖整合本機與全班雲端植物紀錄；點擊藍色雲端標記可查看其他同學的照片。';
+  if(mapHeader)mapHeader.textContent='地圖整合本機與全班雲端植物紀錄；點擊觀察標記可查看該地點的全班照片與特徵。';
   panel.querySelector('#shared-refresh').onclick=()=>loadCloud(true).catch(()=>{});
   search.oninput=renderGallery;
   const mapReload=document.createElement('button');
@@ -279,5 +280,8 @@
   mapStatus.append(mapReload);
   // 換頁、重新開啟或回到地圖時自動取最新版本，不要求學生手動匯入 JSON。
   if(cloudRecords.length){renderGallery();renderCloudMap();}
+  window.addEventListener('online',()=>loadCloud(true).catch(()=>{}));
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadCloud(true).catch(()=>{});});
+  setInterval(()=>{if(!document.hidden)loadCloud(false).catch(()=>{});},60000);
   setTimeout(()=>loadCloud(false).catch(()=>{}),700);
 })();
