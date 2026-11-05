@@ -19,3 +19,20 @@ let duplicate=e.folder('重複_'+ids[0],e.current);e.file(duplicate,'觀察紀�
 const record={id:'LOCAL-test',uploadRevision:ids[0],name:'重試不得覆寫',photos:['data:image/jpeg;base64,/9j/2Q==']};const result=JSON.parse(e.ctx.doPost({parameter:{payload:JSON.stringify({version:3,record})}}).text);assert.equal(result.ok,true);assert.equal(e.get({action:'gallery',fresh:'1'}).records.find(r=>r.revision===ids[0]).name,'舊格式植物');assert.equal(e.writes(),0);
 const before=e.get({action:'gallery',fresh:'1'}).total;const nr={...record,uploadRevision:crypto.randomUUID(),location:'生態池',leafMargin:'unknown',leafMarginName:'未觀察到／無法判斷'};assert.equal(JSON.parse(e.ctx.doPost({parameter:{payload:JSON.stringify({version:3,record:nr})}}).text).ok,true);assert.equal(e.get({action:'gallery'}).total,before+1);const writes=e.writes();e.ctx.doPost({parameter:{payload:JSON.stringify({version:3,record:nr})}});assert.equal(e.writes(),writes,'retry deduplicates across all roots');
 console.log('PASS: both disk formats, both root properties, old photos, durable receipts without cache, privacy allowlist, read-only recovery, duplicate root dedup, idempotent upload, index invalidation');
+
+// Name-only creation and edits by another anonymous client share one stable record key.
+const send=r=>JSON.parse(e.ctx.doPost({parameter:{payload:JSON.stringify({version:3,record:r})}}).text);
+const textRevision=crypto.randomUUID(),textRecord={name:'僅填名稱',uploadRevision:textRevision,recordKey:textRevision,photos:[]};
+let total=e.get({action:'gallery',fresh:'1'}).total;
+assert.equal(send(textRecord).ok,true);assert.equal(e.get({action:'gallery'}).total,total+1);
+let row=e.get({action:'gallery',fresh:'1'}).records.find(r=>r.recordKey===textRevision);
+assert.equal(row.photoCount,0);assert.equal(row.leafMarginName,'');assert.equal(row.leafMargin,'');
+assert.equal(e.get({action:'status',receipt:textRevision,prefix:'__plantStatus_'+'c'.repeat(32)}).sent,true);
+const editedRevision=crypto.randomUUID(),edit={...textRecord,name:'另一台裝置修改',uploadRevision:editedRevision,baseRevision:textRevision,photos:['data:image/jpeg;base64,/9j/2Q=='],leafMargin:'serrated',leafMarginName:'鋸齒狀'};
+assert.equal(send(edit).ok,true);let updated=e.get({action:'gallery',fresh:'1'});assert.equal(updated.total,total+1,'editing replaces the public row, not adds a duplicate');row=updated.records.find(r=>r.recordKey===textRevision);assert.equal(row.revision,editedRevision);assert.equal(row.version,2);assert.equal(row.name,edit.name);assert.equal(row.photoCount,1);assert.equal(row.leafMarginName,'鋸齒狀');
+let history=e.ctx.collectPlantEntries_().entries;assert.equal(history.find(x=>x.public.revision===textRevision).public.name,'僅填名稱','old summary remains intact');
+const beforeRetry=e.writes();assert.equal(send(edit).ok,true);assert.equal(e.writes(),beforeRetry,'same revision retry does not add a history version');
+const stale={...edit,name:'過期同時編輯',uploadRevision:crypto.randomUUID(),baseRevision:textRevision};assert.equal(send(stale).error,'EDIT_CONFLICT');assert.equal(e.writes(),beforeRetry,'stale edit does not change any Drive file');assert.equal(e.get({action:'status',receipt:stale.uploadRevision,recordKey:textRevision,baseRevision:textRevision,prefix:'__plantStatus_'+'d'.repeat(32)}).conflict,true);
+const noPhotoEdit={...edit,uploadRevision:crypto.randomUUID(),baseRevision:editedRevision,photos:[]};assert.equal(send(noPhotoEdit).ok,true);assert.equal(e.get({action:'gallery',fresh:'1'}).records.find(x=>x.recordKey===textRevision).photoCount,0);assert(e.get({action:'photo',revision:editedRevision,index:1}).photo,'prior photos remain readable after a newer edit');
+assert.equal(send({...textRecord,uploadRevision:crypto.randomUUID(),recordKey:crypto.randomUUID(),name:''}).ok,false);
+console.log('PASS: name-only creation, zero-photo durable receipt, anonymous shared edit, one public row, immutable history/photos, edit retry deduplication, stale-edit rejection, and name-required validation.');

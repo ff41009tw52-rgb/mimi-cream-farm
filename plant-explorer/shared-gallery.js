@@ -6,7 +6,7 @@
   const section=document.getElementById('section-almanac');
   const mapSection=document.getElementById('section-map');
   if(!section||!mapSection)return;
-  let cloudRecords=[],lastSync=0,loadingPromise=null,ready=false,syncWarning='';
+  let cloudRecords=[],lastSync=0,loadingPromise=null,editorBusy=false,ready=false,syncWarning='';
   const CACHE_KEY='minan_plant_shared_gallery_last_good_v1';
   const CACHE_MAX_AGE_MS=7*24*60*60*1000;
   const photoCache=new Map(),photoRequests=new Map();
@@ -93,11 +93,11 @@
         if(results.length)break;
         if(attempt<2)await new Promise(resolve=>setTimeout(resolve,600*(attempt+1)));
       }
-      const unique=new Map();results.forEach(r=>unique.set(r.revision,r));
+      const unique=new Map();results.forEach(r=>unique.set(r.recordKey||r.revision,r));
       const latest=[...unique.values()].sort((a,b)=>String(b.submittedAt||'').localeCompare(String(a.submittedAt||'')));
-      const confirmedEmpty=metadata&&metadata.schema==='minan-plants-v4'&&metadata.receiverFolders>0&&!metadata.warnings&&metadata.total===0;
+      const confirmedEmpty=metadata&&/^minan-plants-v[45]$/.test(metadata.schema)&&metadata.receiverFolders>0&&!metadata.warnings&&metadata.total===0;
       if(latest.length||confirmedEmpty){
-        if(metadata&&metadata.warnings){const merged=new Map(cloudRecords.map(r=>[r.revision,r]));latest.forEach(r=>merged.set(r.revision,r));cloudRecords=[...merged.values()];syncWarning='部分舊作品仍待恢復，保留上次已確認的紀錄。';}else{cloudRecords=latest;syncWarning='';}
+        if(metadata&&metadata.warnings){const merged=new Map(cloudRecords.map(r=>[r.recordKey||r.revision,r]));latest.forEach(r=>merged.set(r.recordKey||r.revision,r));cloudRecords=[...merged.values()];syncWarning='部分舊作品仍待恢復，保留上次已確認的紀錄。';}else{cloudRecords=latest;syncWarning='';}
         try{localStorage.setItem(CACHE_KEY,JSON.stringify({savedAt:Date.now(),records:cloudRecords.slice(0,1000)}));}catch{}
       }else if(cloudRecords.length){
         syncWarning='雲端目前回傳 0 筆，保留上次已確認的 '+cloudRecords.length+' 筆資料；這不代表照片已經刪除。';
@@ -131,28 +131,39 @@
     dialog.addEventListener('close',()=>dialog.remove());
     document.body.append(dialog);dialog.showModal();
   }
+  async function readPhoto(revision,index){
+    const key=revision+'#'+index;let data=photoCache.get(key);
+    if(!data){
+      if(!photoRequests.has(key))photoRequests.set(key,request({action:'photo',revision,index}).finally(()=>photoRequests.delete(key)));
+      data=await photoRequests.get(key);if(!data.ok||!safePhoto(data.photo))throw Error('照片尚無法讀取');
+      photoCache.set(key,data);if(photoCache.size>90)photoCache.delete(photoCache.keys().next().value);
+    }
+    return data.photo;
+  }
   async function photo(img,revision,index){
-    const key=revision+'#'+index;
-    try{
-      let data=photoCache.get(key);
-      if(!data){
-        if(!photoRequests.has(key))photoRequests.set(key,request({action:'photo',revision,index}).finally(()=>photoRequests.delete(key)));
-        data=await photoRequests.get(key);
-        if(!data.ok||!safePhoto(data.photo))throw new Error('照片尚無法讀取');
-        photoCache.set(key,data);if(photoCache.size>90)photoCache.delete(photoCache.keys().next().value);
-      }
-      // Cached photos resolve before cardFor appends its new card to the page.
-      // Set the source immediately, including during a gallery/map rerender.
-      img.src=data.photo;img.alt='植物實拍照片 '+index;
-    }catch{
+    try{img.src=await readPhoto(revision,index);img.alt='植物實拍照片 '+index;}
+    catch{
       if(!img.isConnected)return;
       const box=img.closest('.shared-photo-box');
       if(box){img.hidden=true;const retry=document.createElement('button');retry.type='button';retry.className='p-3 text-emerald-800 font-bold';retry.textContent='照片暫時無法讀取 · 點此重試';retry.onclick=()=>{retry.remove();img.hidden=false;photo(img,revision,index);};box.append(retry);}
     }
   }
+  async function editCloudRecord(key,button){
+    if(editorBusy)return;editorBusy=true;if(button)button.disabled=true;
+    try{
+      await loadCloud(true);
+      const r=cloudRecords.find(x=>(x.recordKey||x.revision)===key);if(!r)throw Error('作品目前無法讀取，請更新圖鑑後重試。');
+      const photos=await Promise.all(Array.from({length:Math.min(3,Math.max(0,Number(r.photoCount)||0))},(_,i)=>readPhoto(r.revision,i+1)));
+      if(typeof window.beginSharedPlantEdit!=='function')throw Error('編輯功能尚未準備好，請重新整理。');
+      await window.beginSharedPlantEdit({...r,photos});
+    }catch(error){window.showNotification?.(error.message||'無法開啟編輯，原作品未更動。');}
+    finally{editorBusy=false;if(button)button.disabled=false;}
+  }
+  window.editSharedPlantRecord=key=>editCloudRecord(key);
   function openCloudReport(r){
     const item={...r,id:null,photos:[],photoData:null};
     window.populatePrintModal(item);
+    const actions=document.createElement('div');actions.id='report-shared-actions';actions.className='no-print record-extra';const edit=document.createElement('button');edit.type='button';edit.className='record-action';edit.textContent='編輯';edit.onclick=()=>{window.closePrintModal();editCloudRecord(r.recordKey||r.revision,edit);};actions.append(edit);document.getElementById('printable-report').after(actions);
     const container=document.getElementById('print-photo-container');
     container.classList.remove('hidden');
     const wrap=container.querySelector('.photo-gallery');
@@ -170,7 +181,7 @@
   function cardFor(r){
     const el=document.createElement('article');el.className='observation-summary border border-slate-200 rounded-2xl p-4 bg-slate-50';
     el.innerHTML='<h4 class="text-lg font-black text-slate-900">'+esc(r.name||'待辨識植物')+'</h4><p class="observation-meta"><time>'+esc(r.date||'未記錄日期')+'</time><span>📍 '+esc(r.location||'未記錄地點')+'</span></p>';
-    const view=document.createElement('button');view.type='button';view.className='record-action primary';view.textContent='檢視報告';view.setAttribute('aria-label','檢視'+(r.name||'植物')+'的報告');view.onclick=()=>openCloudReport(r);el.append(view);
+    const view=document.createElement('button');view.type='button';view.className='record-action primary';view.textContent='檢視報告';view.setAttribute('aria-label','檢視'+(r.name||'植物')+'的報告');view.onclick=()=>openCloudReport(r);const actions=document.createElement('div');actions.className='record-extra';actions.append(view);const edit=document.createElement('button');edit.type='button';edit.className='record-action';edit.textContent='編輯';edit.setAttribute('aria-label','編輯'+(r.name||'植物')+'的紀錄');edit.onclick=()=>editCloudRecord(r.recordKey||r.revision,edit);actions.append(edit);el.append(actions);
     return el;
   }
   function renderGallery(){
@@ -228,8 +239,8 @@
     document.body.append(dialog);dialog.showModal();
   }
   function mapRecords(){
-    const combined=new Map(cloudRecords.map(r=>[r.revision,r]));
-    ownRecords().forEach(r=>{const revision=r.uploadRevision||r.id;if(combined.has(revision))return;if(r.uploadState==='sent'&&ready&&!syncWarning)return;const pics=Array.isArray(r.photos)?r.photos.filter(safePhoto):(safePhoto(r.photoData)?[r.photoData]:[]);combined.set(revision,{...r,revision,photoCount:pics.length,_localPhotos:pics});});
+    const combined=new Map(cloudRecords.map(r=>[r.recordKey||r.revision,r]));
+    ownRecords().forEach(r=>{const revision=r.recordKey||r.uploadRevision||r.id;if(combined.has(revision))return;if(r.uploadState==='sent'&&ready&&!syncWarning)return;const pics=Array.isArray(r.photos)?r.photos.filter(safePhoto):(safePhoto(r.photoData)?[r.photoData]:[]);combined.set(revision,{...r,revision,photoCount:pics.length,_localPhotos:pics});});
     return [...combined.values()];
   }
   function renderCloudMap(){

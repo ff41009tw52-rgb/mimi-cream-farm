@@ -27,14 +27,14 @@
   function scheduleDraft(){if(restoring||!ready)return;clearTimeout(draftTimer);setDraftState('草稿保存中…');draftTimer=setTimeout(()=>write('draft',capture()).then(()=>setDraftState('✓ 草稿已自動保存')).catch(()=>setDraftState('草稿未保存，請下載備份')),350);}
   byId('observer-fields').replaceChildren();
   for(const g of groups){g.options.push(['unknown','未觀察到／無法判斷','看不清楚也可以如實記錄','🔎']);const b=document.createElement('button');b.type='button';b.className='option-card min-h-[90px] p-3.5 rounded-2xl border-2 border-slate-200 bg-white flex flex-col items-center justify-center text-center';b.dataset.value='unknown';b.setAttribute('aria-pressed','false');b.innerHTML=(g.id==='stem-type'?'':'<span class="text-2xl">🔎</span>')+'<span class="font-bold text-sm">未觀察到／無法判斷</span><span class="text-xs text-slate-500">看不清楚也可以如實記錄</span>';b.onclick=()=>{selectOption(g.id,'unknown','未觀察到／無法判斷',b);scheduleDraft();};byId('group-'+g.id).append(b);}
-  document.addEventListener('input',scheduleDraft);document.addEventListener('change',scheduleDraft);document.addEventListener('click',e=>{if(e.target.closest('.option-card,.loc-tag'))scheduleDraft();});
+  document.addEventListener('input',e=>{scheduleDraft();if(e.target.id==='input-plant-name')updateCompletionMeter();});document.addEventListener('change',scheduleDraft);document.addEventListener('click',e=>{if(e.target.closest('.option-card,.loc-tag'))scheduleDraft();});
   // Names are observations, not a pre-filled identification answer.
-  function renderPhotos(){byId('photo-preview-container').classList.add('hidden');byId('btn-remove-photo').classList.add('hidden');const gallery=byId('photo-gallery');gallery.replaceChildren();photos.forEach((data,i)=>{const tile=document.createElement('div');tile.className='photo-tile';const img=document.createElement('img');img.src=data;img.alt='觀察照片 '+(i+1);const label=document.createElement('p');label.textContent=['照片 1 · 全株','照片 2 · 葉片','照片 3 · 其他細節'][i];label.className='text-xs mt-2';const remove=document.createElement('button');remove.textContent='移除這張';remove.type='button';remove.onclick=()=>{photos.splice(i,1);currentRecord.photoData=photos[0]||null;renderPhotos();scheduleDraft();};tile.append(img,label,remove);gallery.append(tile);});byId('photo-submit-panel').classList.toggle('hidden',!photos.length);byId('photo-submit-note').textContent='照片已備妥。確認植物名稱與 5 項特徵後，按下按鈕儲存並上傳。';byId('btn-photo-send').textContent='🌿 儲存並上傳照片';}
+  function renderPhotos(){byId('photo-preview-container').classList.add('hidden');byId('btn-remove-photo').classList.add('hidden');const gallery=byId('photo-gallery');gallery.replaceChildren();photos.forEach((data,i)=>{const tile=document.createElement('div');tile.className='photo-tile';const img=document.createElement('img');img.src=data;img.alt='觀察照片 '+(i+1);const label=document.createElement('p');label.textContent=['照片 1 · 全株','照片 2 · 葉片','照片 3 · 其他細節'][i];label.className='text-xs mt-2';const remove=document.createElement('button');remove.textContent='移除這張';remove.type='button';remove.onclick=()=>{photos.splice(i,1);currentRecord.photoData=photos[0]||null;renderPhotos();scheduleDraft();};tile.append(img,label,remove);gallery.append(tile);});byId('photo-submit-panel').classList.toggle('hidden',!photos.length);byId('photo-submit-note').textContent='照片已備妥。填寫植物名稱後即可儲存並上傳。';byId('btn-photo-send').textContent=editId?'儲存變更':'🌿 儲存並上傳照片';byId('record-heading').textContent=editId?'編輯觀察紀錄':'植物觀察紀錄';}
   handlePhotoUpload=async event=>{if(photoBusy||saving)return;const files=[...event.target.files];if(!files.length)return;photoBusy=true;const room=MAX_PHOTOS-photos.length;if(files.length>room)showNotification('最多保存 3 張照片，多出的照片不會加入。');try{for(const file of files.slice(0,room)){if(!/^image\//.test(file.type)||file.size>25*1024*1024)throw Error('請使用 25 MB 以下的照片。');const url=URL.createObjectURL(file);try{const img=new Image();img.src=url;await img.decode();const scale=Math.min(1,1200/Math.max(img.naturalWidth,img.naturalHeight)),canvas=document.createElement('canvas');canvas.width=Math.round(img.naturalWidth*scale);canvas.height=Math.round(img.naturalHeight*scale);const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);let data=canvas.toDataURL('image/jpeg',.78);if(data.length>1000000)data=canvas.toDataURL('image/jpeg',.5);if(data.length>1000000)throw Error('照片壓縮後仍太大，請換一張。');photos.push(data);}finally{URL.revokeObjectURL(url);}}currentRecord.photoData=photos[0]||null;showNotification('📸 照片已備妥！可按下方按鈕直接送出觀察紀錄。');}catch(e){showNotification(e.message||'無法讀取照片，請改用 JPG 或 PNG。');}finally{photoBusy=false;event.target.value='';renderPhotos();scheduleDraft();}};
   function fill(record){restoring=true;currentRecord={...record};photos=allPhotos(record);editId=record.editId||null;byId('input-plant-name').value=record.name||'';byId('input-date').value=record.date||today();byId('input-location').value=record.location||'';document.querySelectorAll('.loc-tag').forEach((b,i)=>b.setAttribute('aria-pressed',String(locations[i][1]===record.location)));for(const g of groups){document.querySelectorAll('#group-'+g.id+' button').forEach(b=>{const active=b.dataset.value===record[g.key];b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});}byId('toggle-flower').checked=!!record.hasFlower;toggleFlowerSection(!!record.hasFlower);byId('input-flower-description').value=record.flowerDescription||'';renderPhotos();updateCompletionMeter();restoring=false;}
   const baseReset=resetForm;resetForm=function(silent=false){if(photoBusy||saving&&!silent)return;if(!silent&&!confirm('要開始新紀錄嗎？尚未儲存的草稿將被清空。'))return;restoring=true;baseReset(true);photos=[];editId=null;byId('input-plant-name').value='';renderPhotos();restoring=false;if(ready){clearTimeout(draftTimer);write('draft',capture()).then(()=>setDraftState('可開始下一筆觀察')).catch(()=>setDraftState('草稿未保存'));}};
   byId('input-location').addEventListener('input',()=>{const loc=locations.find(x=>x[1]===byId('input-location').value.trim());currentRecord.mapX=loc?loc[2]:null;currentRecord.mapY=loc?loc[3]:null;document.querySelectorAll('.loc-tag').forEach(b=>b.setAttribute('aria-pressed','false'));});
-  submitObservation=async()=>{if(!ready||saving||photoBusy||uploadBusy){showNotification('資料或照片處理中，請稍候。');return;}const record=capture();if(!record.name){showNotification('請填植物名稱，或填「待辨識植物」。');byId('input-plant-name').focus();return;}const missing=groups.find(g=>!record[g.key]);if(missing){showNotification('請記錄各部位；看不到時可以選「未觀察到／無法判斷」。');byId('group-'+missing.id).scrollIntoView({block:'center',behavior:'smooth'});return;}saving=true;document.querySelectorAll('.submit-button').forEach(b=>b.disabled=true);try{const old=sharedSpecimens.find(s=>s.id===editId);const item={...record,id:editId||'LOCAL-'+uid(),editId:null,createdAt:old?.createdAt||Date.now(),updatedAt:Date.now(),creatorId:old?.creatorId||currentUserId,uploadRevision:uid(),uploadState:'pending'};const next=old?sharedSpecimens.map(s=>s.id===editId?item:s):[item,...sharedSpecimens];await write('records',next);sharedSpecimens=next;resetForm(true);renderAll();updateDriveState();switchTab('almanac');if(!allPhotos(item).length){showNotification('✓ 觀察紀錄已保存在本機。需要時可編輯並補拍照片。');}else if(!validEndpoint()){showNotification('照片已保留在這台裝置，雲端上傳暫時無法使用。');}else{showNotification('✓ 觀察紀錄已儲存，正在同步作品…');await uploadOne(item.id);}}catch{showNotification('儲存失敗，表單與照片已保留。請先下載備份。');}finally{saving=false;document.querySelectorAll('.submit-button').forEach(b=>b.disabled=false);}};
+  submitObservation=async()=>{if(!ready||saving||photoBusy||uploadBusy){showNotification('資料或照片處理中，請稍候。');return;}const record=capture();if(!record.name){showNotification('請填寫植物名稱。');byId('input-plant-name').focus();return;}saving=true;document.querySelectorAll('.submit-button').forEach(b=>b.disabled=true);try{const old=sharedSpecimens.find(s=>s.id===editId);const revision=uid();const item={...record,recordKey:old?.recordKey||old?.uploadRevision||revision,baseRevision:old?.uploadState==='sent'?old.uploadRevision:(old?.baseRevision||''),id:editId||'LOCAL-'+uid(),editId:null,createdAt:old?.createdAt||Date.now(),updatedAt:Date.now(),creatorId:old?.creatorId||currentUserId,uploadRevision:revision,uploadState:'pending'};const next=old?sharedSpecimens.map(s=>s.id===editId?item:s):[item,...sharedSpecimens];await write('records',next);sharedSpecimens=next;resetForm(true);renderAll();updateDriveState();switchTab('almanac');if(!validEndpoint()){showNotification('作品已保留在這台裝置，雲端上傳暫時無法使用。');}else{showNotification('✓ 觀察紀錄已儲存，正在同步作品…');await uploadOne(item.id);}}catch{showNotification('儲存失敗，表單與照片已保留。請先下載備份。');}finally{saving=false;document.querySelectorAll('.submit-button').forEach(b=>b.disabled=false);}};
   function download(data,name,type){const a=document.createElement('a');const url=typeof data==='string'&&data.startsWith('data:')?data:URL.createObjectURL(new Blob([data],{type}));a.href=url;a.download=name;a.click();if(url.startsWith('blob:'))setTimeout(()=>URL.revokeObjectURL(url),1000);}
   renderAlmanac=function(){
     const q=byId('record-search').value.trim().toLowerCase(),all=sharedSpecimens;
@@ -42,7 +42,7 @@
   };
   populatePrintModal=function(item){
     originalPrint(item);byId('print-observer').textContent='校園植物觀察';
-    byId('report-local-actions')?.remove();
+    byId('report-local-actions')?.remove();byId('report-shared-actions')?.remove();
     const box=byId('print-photo-container');box.querySelector('.photo-gallery')?.remove();
     byId('print-photo-img').classList.add('hidden');
     const gallery=document.createElement('div');gallery.className='photo-gallery';
@@ -51,14 +51,34 @@
     const own=sharedSpecimens.find(r=>r.id===item.id);if(!own)return;
     const controls=document.createElement('div');controls.id='report-local-actions';controls.className='no-print report-local-actions';
     const badge=document.createElement('p');badge.className='record-badge '+(own.uploadState==='sent'?'sent':'pending');badge.setAttribute('role','status');
-    badge.textContent=activeUploadId===own.id?'☁️ 上傳中，請保持網頁開啟':own.uploadState==='sent'?'✓ 已上傳到全班圖鑑':allPhotos(own).length?'尚未上傳 · 照片已安全保留':'本機紀錄 · 尚未加入照片';controls.append(badge);
+    badge.textContent=activeUploadId===own.id?'☁️ 上傳中，請保持網頁開啟':own.uploadState==='sent'?'✓ 已上傳到全班圖鑑':own.uploadState==='conflict'?'雲端已有其他修改；此版本已保留在本機。':'尚未上傳 · 作品已保留';controls.append(badge);
     const actions=document.createElement('div');actions.className='record-extra';controls.append(actions);
     const action=(text,fn)=>{const b=document.createElement('button');b.type='button';b.className='record-action';b.textContent=text;b.onclick=fn;actions.append(b);return b;};
-    if(allPhotos(own).length&&own.uploadState!=='sent'){const retry=action(activeUploadId===own.id?'正在上傳…':'重新上傳',()=>{closePrintModal();uploadOne(own.id);});retry.classList.add('primary');retry.disabled=uploadBusy||!validEndpoint();}
-    action('編輯',()=>{if(uploadBusy)return;closePrintModal();fill({...own,editId:own.id});switchTab('record');window.scrollTo({top:0,behavior:'smooth'});scheduleDraft();});
+    if(!['sent','conflict'].includes(own.uploadState)){const retry=action(activeUploadId===own.id?'正在上傳…':'重新上傳',()=>{closePrintModal();uploadOne(own.id);});retry.classList.add('primary');retry.disabled=uploadBusy||!validEndpoint();}
+    action('編輯',()=>{closePrintModal();window.editPlantRecord(own.id);});
     allPhotos(own).forEach((data,n)=>action('下載照片 '+(n+1),()=>download(data,[own.name,n+1].join('_')+'.jpg')));
     action('刪除本機紀錄',async()=>{await deleteSpecimen(own.id);if(!sharedSpecimens.some(r=>r.id===own.id))closePrintModal();});
     byId('printable-report').after(controls);
+  };
+  window.beginSharedPlantEdit=async record=>{
+    if(!ready||uploadBusy||saving||photoBusy)throw Error('資料處理中，請稍後再編輯。');
+    const key=record.recordKey||record.revision;
+    const pending=sharedSpecimens.find(r=>r.recordKey===key&&['pending','uncertain'].includes(r.uploadState));
+    if(pending)throw Error('這台裝置還有此作品的未完成上傳，請先重新上傳。');
+    if((byId('input-plant-name').value.trim()||photos.length)&&!confirm('要開啟這筆作品嗎？目前尚未儲存的表單將被取代。'))return false;
+    const prior=sharedSpecimens.find(r=>r.recordKey===key&&r.uploadState==='sent');
+    let id=prior?.id||'CLOUD-'+key;if(sharedSpecimens.some(r=>r.id===id&&r.uploadState==='conflict'))id+='-'+record.revision;
+    const item={...record,id,recordKey:key,uploadRevision:record.revision,baseRevision:record.revision,uploadState:'sent',photoData:record.photos?.[0]||null};
+    const next=[item,...sharedSpecimens.filter(r=>r.id!==id)];await write('records',next);sharedSpecimens=next;
+    fill({...item,editId:id});switchTab('record');window.scrollTo({top:0,behavior:'smooth'});scheduleDraft();updateDriveState();
+    return true;
+  };
+  window.editPlantRecord=async id=>{
+    if(uploadBusy||saving||photoBusy)return;
+    const item=sharedSpecimens.find(r=>r.id===id);if(!item)return;
+    if(['sent','conflict'].includes(item.uploadState)&&window.editSharedPlantRecord){await window.editSharedPlantRecord(item.recordKey||item.uploadRevision);return;}
+    if((byId('input-plant-name').value.trim()||photos.length)&&!confirm('要開啟這筆作品嗎？目前尚未儲存的表單將被取代。'))return;
+    fill({...item,editId:id});switchTab('record');window.scrollTo({top:0,behavior:'smooth'});scheduleDraft();
   };
   previewPrint=()=>populatePrintModal({...capture(),id:editId||'草稿預覽',name:byId('input-plant-name').value||'待辨識植物'});
   renderCampusMap=function(){const all=sharedSpecimens;sharedSpecimens=all.filter(s=>Number.isFinite(s.mapX)&&Number.isFinite(s.mapY));originalMap();sharedSpecimens=all;const missingMap=byId('main-campus-map-img').classList.contains('hidden');byId('map-pins-layer').classList.toggle('hidden',missingMap);if(missingMap){const box=byId('map-unavailable');box.replaceChildren();const wrap=document.createElement('div');wrap.className='w-full';const title=document.createElement('h3');title.textContent='📍 先從觀察地點探索';const note=document.createElement('p');note.className='text-sm my-3';note.textContent='校園底圖待補；以下依紀錄地點整理，不代表實際地圖位置。';const grid=document.createElement('div');grid.className='grid grid-cols-2 sm:grid-cols-3 gap-3';const names=[...new Set([...locations.map(l=>l[1]),...all.map(r=>r.location)])].filter(Boolean);names.forEach(name=>{const b=document.createElement('button');b.className='record-action';b.textContent=name+' · '+all.filter(r=>r.location===name).length+' 筆';b.onclick=()=>{byId('record-search').value=name;switchTab('almanac');};grid.append(b);});wrap.append(title,note,grid);box.append(wrap);}const unlocated=all.filter(s=>!Number.isFinite(s.mapX)||!Number.isFinite(s.mapY)).length;byId('map-pins-count').title=unlocated+' 筆自訂地點尚未定位';const positions=new Map();[...byId('map-pins-layer').children].forEach(pin=>{const key=pin.style.left+pin.style.top;if(!positions.has(key))positions.set(key,[]);positions.get(key).push(pin);});for(const pins of positions.values()){if(pins.length<2)continue;const first=pins[0];first.querySelector('span>span').textContent='🌿 此地 '+pins.length+' 筆觀察';first.onclick=()=>{byId('record-search').value=all.find(s=>Number(s.mapX)+'%'===first.style.left&&Number(s.mapY)+'%'===first.style.top)?.location||'';switchTab('almanac');};pins.slice(1).forEach(p=>p.remove());}};
@@ -69,13 +89,13 @@
   const validEndpoint=()=>/^https:\/\/script\.google\.com\/(?:macros\/s\/|a\/macros\/[A-Za-z0-9.-]+\/s\/)[A-Za-z0-9_-]+\/exec$/.test(config?.receiverUrl||'');
   // A health-check timeout must never prevent sending the actual photo.
   // A durable server receipt, not the opaque POST response, confirms success.
-  function getUploadReceipt(revision){return new Promise((resolve,reject)=>{
+  function getUploadReceipt(revision,recordKey='',baseRevision=''){return new Promise((resolve,reject)=>{
     const callback='__plantStatus_'+uid().replace(/-/g,''),script=document.createElement('script');let settled=false;
     const finish=(error,value)=>{if(settled)return;settled=true;clearTimeout(timer);script.remove();delete window[callback];error?reject(error):resolve(value);};
     const timer=setTimeout(()=>finish(new Error('雲端確認較慢，稍後會重新查詢')),35000);
     window[callback]=result=>{if(!result||!result.ok||result.receipt!==revision||result.recipient!==config.recipient)finish(new Error('尚未收到有效雲端確認'));else finish(null,result);};
     script.onerror=()=>finish(new Error('目前無法查詢雲端收件狀態'));
-    script.src=config.receiverUrl+'?action=status&receipt='+encodeURIComponent(revision)+'&prefix='+callback+'&t='+Date.now();document.head.append(script);
+    script.src=config.receiverUrl+'?action=status&receipt='+encodeURIComponent(revision)+'&recordKey='+encodeURIComponent(recordKey)+'&baseRevision='+encodeURIComponent(baseRevision)+'&prefix='+callback+'&t='+Date.now();document.head.append(script);
   });}
   async function postToReceiver(item){
     const body=new URLSearchParams();body.set('payload',JSON.stringify({version:3,requestId:uid(),record:{...item,className:'',groupName:'',photos:allPhotos(item),photoData:null}}));
@@ -87,26 +107,26 @@
     for(const delay of [0,1500,4000]){
       if(navigator.onLine===false)break;
       if(delay)await new Promise(resolve=>setTimeout(resolve,delay));
-      try{const result=await getUploadReceipt(item.uploadRevision);if(result.sent)return result;}catch(error){console.warn('Receipt check delayed',error);}
+      try{const result=await getUploadReceipt(item.uploadRevision,item.recordKey,item.baseRevision);if(result.sent)return result;if(result.conflict){const conflict=Error('雲端已有其他修改');conflict.code='EDIT_CONFLICT';throw conflict;}}catch(error){if(error.code==='EDIT_CONFLICT')throw error;console.warn('Receipt check delayed',error);}
     }
     throw postError||new Error('尚未確認雲端收件；作品已保留，可重新上傳');
   }
   function normalizeUploadRecord(record){
     const valid=value=>typeof value==='string'&&/^[a-zA-Z0-9-]{16,100}$/.test(value);
     const uploadRevision=valid(record.uploadRevision)?record.uploadRevision:valid(record.receipt)?record.receipt:uid();
-    const uploadState=['pending','uncertain','sent'].includes(record.uploadState)?record.uploadState:'pending';
-    return {...record,uploadRevision,uploadState:uploadState==='sent'&&!valid(record.uploadRevision)&&!valid(record.receipt)?'pending':uploadState};
+    const uploadState=['pending','uncertain','sent','conflict'].includes(record.uploadState)?record.uploadState:'pending';
+    return {...record,recordKey:valid(record.recordKey)?record.recordKey:uploadRevision,baseRevision:valid(record.baseRevision)?record.baseRevision:'',uploadRevision,uploadState:uploadState==='sent'&&!valid(record.uploadRevision)&&!valid(record.receipt)?'pending':uploadState};
   }
   function scheduleRetry(){
     clearTimeout(retryTimer);
-    if(!ready||!validEndpoint()||!sharedSpecimens.some(x=>x.uploadState!=='sent'&&allPhotos(x).length))return;
+    if(!ready||!validEndpoint()||!sharedSpecimens.some(x=>!['sent','conflict'].includes(x.uploadState)&&String(x.name||'').trim()))return;
     nextRetryAt=Date.now()+Math.min(300000,30000*Math.pow(2,Math.min(retryFailures,4)));
     retryTimer=setTimeout(()=>{if(!document.hidden)retryPending();},Math.max(0,nextRetryAt-Date.now()));
   }
   async function uploadOne(id){
     if(uploadBusy)return false;
-    let item=sharedSpecimens.find(s=>s.id===id);if(!item||!allPhotos(item).length)return false;
-    if(!validEndpoint()){updateDriveState();showNotification('照片已保留，雲端上傳暫時無法使用。');return false;}
+    let item=sharedSpecimens.find(s=>s.id===id);if(!item||!String(item.name||'').trim())return false;
+    if(!validEndpoint()){updateDriveState();showNotification('作品已保留，雲端上傳暫時無法使用。');return false;}
     uploadBusy=true;activeUploadId=id;clearTimeout(retryTimer);updateDriveState();renderAlmanac();
     try{
       const normalized=normalizeUploadRecord(item);
@@ -120,26 +140,28 @@
       window.dispatchEvent(new CustomEvent('plant-cloud-upload-success',{detail:{revision:item.uploadRevision}}));return true;
     }catch(error){
       console.warn('Plant upload unconfirmed',error);retryFailures++;
-      const next=sharedSpecimens.map(s=>s.id===id?{...s,uploadState:'uncertain'}:s);
+      const next=sharedSpecimens.map(s=>s.id===id?{...s,uploadState:error.code==='EDIT_CONFLICT'?'conflict':'uncertain'}:s);
       try{await write('records',next);sharedSpecimens=next;}catch{}
-      showNotification('尚未完成上傳，照片已保留。可按「重新上傳」，連線恢復後也會自動補傳。');return false;
+      showNotification(error.code==='EDIT_CONFLICT'?'雲端作品已有其他修改。請從全班圖鑑重新開啟最新作品；你的版本已保留在本機。':'尚未完成上傳，作品已保留。可按「重新上傳」，連線恢復後也會自動補傳。');return false;
     }finally{uploadBusy=false;activeUploadId=null;updateDriveState();renderAlmanac();scheduleRetry();}
   }
   async function retryPending(){
     if(!ready||!validEndpoint()||uploadBusy||saving)return;
-    for(const item of [...sharedSpecimens].filter(x=>x.uploadState!=='sent'&&allPhotos(x).length)){if(!(await uploadOne(item.id)))break;}
+    for(const item of [...sharedSpecimens].filter(x=>!['sent','conflict'].includes(x.uploadState)&&String(x.name||'').trim())){if(!(await uploadOne(item.id)))break;}
     updateDriveState();
   }
   byId('upload-pending').onclick=()=>retryPending();
   window.addEventListener('online',()=>{retryFailures=0;setTimeout(retryPending,1000);});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()>=nextRetryAt)retryPending();});
   function updateDriveState(){
-    const pending=sharedSpecimens.filter(x=>x.uploadState!=='sent'&&allPhotos(x).length).length;
+    const pending=sharedSpecimens.filter(x=>!['sent','conflict'].includes(x.uploadState)&&String(x.name||'').trim()).length;
     const sent=sharedSpecimens.filter(x=>x.uploadState==='sent').length;
+    const conflicts=sharedSpecimens.filter(x=>x.uploadState==='conflict').length;
     const status=byId('sync-status');status.style.display='block';
-    status.textContent=uploadBusy?'☁️ 正在上傳並等待雲端確認，請保持網頁開啟。':pending?pending+' 筆照片作品尚未上傳；已保留在這台裝置，可到「我的紀錄」重新上傳。':sent?'✓ '+sent+' 筆照片作品已確認上傳到全班圖鑑。':'拍照後按「儲存並上傳」，作品會出現在全班圖鑑。';
+    status.textContent=uploadBusy?'☁️ 正在上傳並等待雲端確認，請保持網頁開啟。':pending?pending+' 筆作品尚未上傳；已保留在這台裝置，可到「我的紀錄」重新上傳。':sent?'✓ '+sent+' 筆作品已確認上傳到全班圖鑑。':'填寫植物名稱後即可儲存並上傳，其他項目可稍後編輯。';
+    if(conflicts&&!uploadBusy)status.textContent+=' '+conflicts+' 筆作品有編輯衝突，本機內容已保留；請從全班圖鑑開啟最新作品。';
     byId('drive-state').textContent=uploadBusy?'正在上傳':pending?'等待上傳':'準備就緒';
-    byId('btn-submit-text').textContent=uploadBusy?'上傳中…':'儲存並上傳觀察紀錄';byId('mobile-submit-text').textContent=uploadBusy?'上傳中…':'儲存並上傳';
+    byId('btn-submit-text').textContent=uploadBusy?'上傳中…':editId?'儲存變更':'儲存並上傳觀察紀錄';byId('mobile-submit-text').textContent=uploadBusy?'上傳中…':editId?'儲存變更':'儲存並上傳';
     const retry=byId('upload-pending');retry.hidden=!pending;retry.removeAttribute('aria-hidden');retry.removeAttribute('tabindex');retry.disabled=uploadBusy||!validEndpoint();retry.textContent='重新上傳未完成作品（'+pending+'）';
     renderPhotos();
   }
