@@ -51,7 +51,9 @@
   };
   function request(params){
     return new Promise((resolve,reject)=>{
-      const name='__plantGallery_'+crypto.randomUUID().replace(/-/g,'');
+      const bytes=new Uint8Array(16);
+      if(window.crypto&&window.crypto.getRandomValues)window.crypto.getRandomValues(bytes);else for(let i=0;i<16;i++)bytes[i]=Math.floor(Math.random()*256);
+      const name='__plantGallery_'+Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');
       const tag=document.createElement('script');
       let settled=false;
       const finish=(error,data)=>{
