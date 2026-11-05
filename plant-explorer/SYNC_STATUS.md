@@ -5,10 +5,10 @@ Last verification: 2026-11-05 (Asia/Taipei client date).
 ## Deployment
 
 - Canonical Apps Script source: `drive-receiver.gs`. The historical `DriveReceiver.gs` must not be pasted alongside it.
-- Updated the existing school-owned Apps Script deployment to version 5. Kept the original project, URL, executing account and existing anonymous access setting.
-- Initial gallery repair: `e464432b13f15114208ea18d31922dc8f19d124d`. The subsequent upload repair below supersedes its uploader; current asset versions are `enhancements.js?v=8` and `shared-gallery.js?v=10`.
+- Updated the existing school-owned Apps Script deployment to version 6 (schema `minan-plants-v5`). Kept the original project, URL, executing account and existing anonymous access setting.
+- Initial gallery repair: `e464432b13f15114208ea18d31922dc8f19d124d`. The subsequent upload repair below supersedes its uploader; current asset versions are `enhancements.js?v=11` and `shared-gallery.js?v=12`.
 
-## Changes
+## Initial sync repair (before shared editing)
 
 - Disk-backed receipts, compatible old summary/marker formats, deduplicated common gallery/photo index and owner-only diagnostics.
 - Only plant observation fields and image bytes are exposed. No public Drive file IDs, student identity fields, edit or delete routes.
@@ -70,3 +70,16 @@ Supersedes the earlier photo-required and read-only-gallery behavior. Only a non
 The existing Apps Script deployment was updated to version 6, schema `minan-plants-v5`, with the same URL, owner and anonymous access. Each accepted change creates a new immutable revision folder. The public gallery groups revisions by a stable record key and shows only the latest accepted version. Repeated receipt uploads are idempotent. Updates must reference the latest base revision; stale edits are rejected, retained locally and excluded from automatic retries until the user opens the newest cloud work. Earlier summaries and photos remain private in Drive and are not overwritten or deleted. There is no anonymous delete route.
 
 Automated validation: interface, gallery, upload and receiver regression suites pass, including name-only/zero-photo receipts, importing a shared work for editing with its original photos, revision identity, immutable history, stable gallery counts, retry deduplication, stale-edit rejection, and offline data retention. Live verification details are reported after deployment; mock tests alone are not counted as physical-device acceptance.
+
+
+### Live shared-edit verification
+
+Two separate anonymous Python HTTP clients with independent cookie jars used the production deployment, without Google credentials. A created a work containing only its name, date and zero photos. B read it, edited the same stable key, added two traits and a real plant JPEG, and saved it. A read the updated single gallery row and an exactly matching photo. Retrying the identical edit left version 2 and one public row; a stale-base edit was rejected with EDIT_CONFLICT. Original non-test works remained listed.
+
+The production browser, whose local records were initially empty, then used the shared card's Edit button on that externally created work. It loaded the original JPEG and traits. Changing the name and adding leaf arrangement while leaving root/stem blank succeeded through Save Changes. An independent anonymous HTTP reader confirmed version 3, exactly one public row, the retained photo, the new arrangement and blank optional root/stem fields.
+
+The production browser also submitted a second work with only its name: before submission there were zero selected trait cards and zero photos. It received a durable success receipt and appeared in the cloud gallery. Another anonymous HTTP read verified photoCount=0 and all five optional trait labels empty. Two local disposable test copies were exported to a JSON backup and validated before cleanup.
+
+These are real production UI and independent anonymous HTTP tests, not two isolated browser profiles. Physical phone/tablet operation, a two-browser bidirectional acceptance test and a real browser network interruption remain unverified; offline/conflict handling is covered by mock integration tests.
+
+Cleanup: only the four explicitly named 系統測試_共同編輯_20261105 revision folders were moved to Drive Trash, with Undo available. Their two verified, backed-up local test copies were removed. The pre-existing 薄荷 work was not edited or selected for cleanup.
