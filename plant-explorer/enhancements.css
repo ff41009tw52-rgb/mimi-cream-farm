@@ -8,3 +8,16 @@
 .campus-map-label>span{font-size:17px;flex-shrink:0}
 #campus-map-labels .campus-map-label:nth-child(2),#campus-map-labels .campus-map-label:nth-child(3){max-width:155px;font-size:11px}
 @media(max-width:639px){.campus-map-label{font-size:12px;padding:5px 8px;max-width:135px}.campus-map-label>span{font-size:14px}}
+
+/* Map is paused; historical coordinates and map implementation remain available. */
+#tab-map,#section-map{display:none!important}
+.observation-summary{display:flex;flex-direction:column;gap:12px;min-width:0}
+.observation-summary h4{margin:0;overflow-wrap:anywhere}
+.observation-meta{display:flex;flex-wrap:wrap;gap:6px 16px;color:var(--muted);font-size:13px;line-height:1.7;margin:0}
+.observation-summary>.record-action{margin-top:auto;align-self:flex-start;min-width:120px}
+.report-local-actions{border-top:1px solid var(--line);margin-top:20px;padding-top:12px}
+.report-photo-box{border:1px solid var(--line);border-radius:14px;padding:8px;min-width:0;background:#f8faf6}
+.report-photo-box img{width:100%;object-fit:contain;border-radius:8px}
+#print-table-body td{overflow-wrap:anywhere;vertical-align:top}
+#print-table-body td:first-child{width:34%}
+@media(max-width:639px){#printable-report .photo-gallery{grid-template-columns:1fr}#printable-report .photo-gallery img{max-height:300px}.observation-summary>.record-action{width:100%}}

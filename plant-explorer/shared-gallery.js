@@ -24,7 +24,7 @@
   const panel=document.createElement('section');
   panel.id='shared-gallery';
   panel.className='bg-white border border-emerald-200 rounded-3xl p-4 sm:p-6 mb-5 shadow-sm';
-  panel.innerHTML='<div class="flex flex-wrap items-center justify-between gap-3 mb-3"><div><h3 class="text-xl font-black text-emerald-900">🌿 全班植物觀察圖鑑</h3><p class="text-sm text-slate-600">這裡與校園地圖共用同一份雲端觀察紀錄，不顯示學生個人資料。</p></div><button type="button" id="shared-refresh" class="px-4 py-2 bg-emerald-700 text-white rounded-xl font-bold">更新全班資料</button></div><label class="block text-sm font-bold text-slate-700 mb-3">搜尋全班作品<input id="shared-search" class="block w-full mt-1 rounded-xl border-2 border-slate-200 px-3 py-2" type="search" placeholder="輸入植物名稱或觀察地點"></label><p id="shared-status" role="status" class="text-sm text-slate-600 mb-3">準備連線雲端…</p><div id="shared-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>';
+  panel.innerHTML='<div class="flex flex-wrap items-center justify-between gap-3 mb-3"><div><h3 class="text-xl font-black text-emerald-900">🌿 全班植物觀察圖鑑</h3><p class="text-sm text-slate-600">查看全班的植物觀察作品，照片與特徵請開啟報告。</p></div><button type="button" id="shared-refresh" class="px-4 py-2 bg-emerald-700 text-white rounded-xl font-bold">更新全班資料</button></div><label class="block text-sm font-bold text-slate-700 mb-3">搜尋全班作品<input id="shared-search" class="block w-full mt-1 rounded-xl border-2 border-slate-200 px-3 py-2" type="search" placeholder="輸入植物名稱或觀察地點"></label><p id="shared-status" role="status" class="text-sm text-slate-600 mb-3">準備連線雲端…</p><div id="shared-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>';
   section.prepend(panel);
   const cards=panel.querySelector('#shared-cards'),status=panel.querySelector('#shared-status'),search=panel.querySelector('#shared-search');
   const mapStatus=document.createElement('div');
@@ -150,26 +150,34 @@
       if(box){img.hidden=true;const retry=document.createElement('button');retry.type='button';retry.className='p-3 text-emerald-800 font-bold';retry.textContent='照片暫時無法讀取 · 點此重試';retry.onclick=()=>{retry.remove();img.hidden=false;photo(img,revision,index);};box.append(retry);}
     }
   }
-  function cardFor(r){
-    const el=document.createElement('article');
-    el.className='border border-slate-200 rounded-2xl p-3 bg-slate-50';
-    el.innerHTML='<h4 class="text-lg font-black text-slate-900">'+esc(r.name||'待辨識植物')+'</h4><p class="text-xs text-slate-500 mb-3">📍 '+esc(r.location||'未填地點')+'　'+esc(r.date||'')+'</p><div class="shared-photos grid gap-2 mb-3"></div><div class="text-xs leading-6 text-slate-700">葉緣：'+esc(r.leafMarginName||'未記錄')+'<br>葉脈：'+esc(r.leafVenationName||'未記錄')+'<br>葉序：'+esc(r.leafArrangementName||'未記錄')+'<br>根系：'+esc(r.rootSystemName||'未記錄')+'<br>莖：'+esc(r.stemTypeName||'未記錄')+'</div>';
-    const flower=document.createElement('p');flower.className='text-xs text-pink-800 leading-6 mt-2';flower.textContent=r.hasFlower?'花部：'+(r.flowerDescription||'有花朵'):'花部：未開花／未記錄';el.append(flower);
-    const wrap=el.querySelector('.shared-photos');
+  function openCloudReport(r){
+    const item={...r,id:null,photos:[],photoData:null};
+    window.populatePrintModal(item);
+    const container=document.getElementById('print-photo-container');
+    container.classList.remove('hidden');
+    const wrap=container.querySelector('.photo-gallery');
     for(let n=1;n<=Math.min(3,Math.max(0,Number(r.photoCount)||0));n++){
-      const box=document.createElement('div');box.className='shared-photo-box rounded-xl bg-slate-200 min-h-36 overflow-hidden flex items-center justify-center text-xs text-slate-500';
-      const img=document.createElement('img');img.className='block w-full max-h-64 object-contain cursor-zoom-in';img.loading='lazy';img.alt='載入植物照片中';
-      box.append(img);wrap.append(box);
+      const box=document.createElement('div');box.className='shared-photo-box report-photo-box';
+      const img=document.createElement('img');img.alt='載入植物照片中';img.className='cursor-zoom-in';
+      const loading=document.createElement('p');loading.className='text-xs text-slate-500';loading.textContent='照片載入中…';
+      box.append(img,loading);wrap.append(box);
       img.addEventListener('click',()=>{if(img.getAttribute('src'))photoDialog(img.src);});
-      if(r._localPhotos&&safePhoto(r._localPhotos[n-1])){img.src=r._localPhotos[n-1];img.alt='本機待同步植物照片 '+n;}else photo(img,r.revision,n);
+      if(r._localPhotos&&safePhoto(r._localPhotos[n-1])){img.src=r._localPhotos[n-1];img.alt='植物實拍照片 '+n;loading.remove();}
+      else photo(img,r.revision,n).finally(()=>loading.remove());
     }
+    container.classList.toggle('hidden',!wrap.children.length);
+  }
+  function cardFor(r){
+    const el=document.createElement('article');el.className='observation-summary border border-slate-200 rounded-2xl p-4 bg-slate-50';
+    el.innerHTML='<h4 class="text-lg font-black text-slate-900">'+esc(r.name||'待辨識植物')+'</h4><p class="observation-meta"><time>'+esc(r.date||'未記錄日期')+'</time><span>📍 '+esc(r.location||'未記錄地點')+'</span></p>';
+    const view=document.createElement('button');view.type='button';view.className='record-action primary';view.textContent='檢視報告';view.setAttribute('aria-label','檢視'+(r.name||'植物')+'的報告');view.onclick=()=>openCloudReport(r);el.append(view);
     return el;
   }
   function renderGallery(){
     cards.replaceChildren();
     const q=normalize(search.value);
     const filtered=cloudRecords.filter(r=>normalize(r.name).includes(q)||normalize(r.location).includes(q));
-    status.textContent=(syncWarning?syncWarning+' ':'')+'目前可顯示 '+cloudRecords.length+' 筆雲端作品'+(q?'，符合搜尋 '+filtered.length+' 筆':'')+'。地圖和圖鑑使用相同資料。';
+    status.textContent=(syncWarning?syncWarning+' ':'')+'目前可顯示 '+cloudRecords.length+' 筆雲端作品'+(q?'，符合搜尋 '+filtered.length+' 筆':'')+'。';
     if(!filtered.length){cards.innerHTML='<p class="col-span-full text-slate-500 p-4 rounded-2xl bg-slate-50">目前沒有符合條件的雲端紀錄。</p>';return;}
     filtered.forEach(r=>cards.append(cardFor(r)));
   }
@@ -225,6 +233,7 @@
     return [...combined.values()];
   }
   function renderCloudMap(){
+    if(window.PLANT_MAP_ENABLED!==true)return;
     const layer=document.getElementById('map-pins-layer'),count=document.getElementById('map-pins-count');
     if(!layer||!count)return;
     layer.replaceChildren();
