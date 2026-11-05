@@ -6,7 +6,7 @@ Last verification: 2026-11-05 (Asia/Taipei client date).
 
 - Canonical Apps Script source: `drive-receiver.gs`. The historical `DriveReceiver.gs` must not be pasted alongside it.
 - Updated the existing school-owned Apps Script deployment to version 5. Kept the original project, URL, executing account and existing anonymous access setting.
-- GitHub production code: `e464432b13f15114208ea18d31922dc8f19d124d`. Pages build/deployment succeeded; live browser confirmed `shared-gallery.js?v=9`.
+- Initial gallery repair: `e464432b13f15114208ea18d31922dc8f19d124d`. The subsequent upload repair below supersedes its uploader; current asset versions are `enhancements.js?v=8` and `shared-gallery.js?v=10`.
 
 ## Changes
 
@@ -42,3 +42,15 @@ Last verification: 2026-11-05 (Asia/Taipei client date).
 The available browser tabs shared the same local database, including tabs opened with different session names and the attempted private-window shortcut. Thus two tabs are NOT counted as two isolated devices. Anonymous independent HTTP read/write succeeded, but a genuine bidirectional test between two isolated browser profiles remains unverified.
 
 Physical phone/tablet camera and touch behavior, mobile/tablet viewport execution, and a real browser network interruption/recovery were not completed. The browser environment did not expose isolated profiles, viewport/network emulation, or a usable separate private browsing context. Do not claim full cross-device/mobile/offline acceptance from the checks above.
+
+## Follow-up upload repair (2026-11-05)
+
+The user reported photos staying only on a phone again. Public production diagnostics measured a valid status response at 16.09 seconds and a valid gallery response at 14.55 seconds (0 records, no warnings). The uploader had a 7-second health-check timeout and returned before issuing its photo POST when that check failed. Startup retries used the same gate. Retry controls and upload state had also been hidden from students.
+
+Fixed by posting directly without a preliminary health gate, then checking the actual durable receipt with a 35-second timeout. A lost POST response still triggers receipt checks. Added a single-flight upload lock, persistent pending/uncertain/sent badges, visible per-work/batch retries, bounded automatic retry backoff, and resume on online/visible/reopen. Older local records receive a stable revision before sending. Existing IndexedDB data is merged with unmatched localStorage fallback works without overwriting records. Added UUID compatibility for browsers without randomUUID. Buttons explicitly say 儲存並上傳.
+
+`upload.test.cjs` passes mock integration checks for 16-second receipts, no preliminary health query, no concurrent duplicate POST, failed-upload photo retention, stable retry identity, offline resume, legacy cache migration, and automatic upload of imported pending works. These are simulated network failures, not tests on the user's physical phone.
+
+Production UI verification used 系統測試_上傳修復_20261105, revision `ae296852-85ab-4933-ba91-82f906347d88`. The form uploaded a real JPEG, received a durable receipt, displayed 已上傳到全班圖鑑, and displayed the plant photo and all five core features in the shared gallery. School Drive was inspected directly: the new folder contained 照片1.jpg, 觀察紀錄.json and 收件完成.txt. The test folder and local test copy were cleaned up after verification; the live shared gallery returned to 0. No existing student work was changed. Backend version 5 and the receiving URL were unchanged.
+
+The user's actual phone storage is not remotely accessible in this session. They must refresh the same site's page in the same phone browser to load the fix; its retained pending photos will retry automatically and can also be retried with the visible button. Do not clear that browser's site data. Physical phone/tablet and truly isolated-browser acceptance remain unverified.
