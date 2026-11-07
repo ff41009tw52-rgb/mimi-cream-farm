@@ -234,6 +234,12 @@
 #game #tank-upgrade-shortcut:focus-visible{outline:3px solid #ddaf43;outline-offset:3px}
 @media(max-width:680px){#game .residents{gap:9px}#game .residents-icon{flex-basis:34px;width:34px;height:36px;border-radius:11px}#game .residents-icon svg{width:29px;height:29px}#game .residents-actions{gap:8px 12px}#game #tank-upgrade-shortcut{font-size:12px;padding:6px 10px;min-height:36px}}
 
+#game .coins-stat{flex-wrap:wrap}
+#coin-collect-all{min-height:44px;max-width:100%;padding:4px 9px;border:1px solid #bc9d4f;border-radius:11px;background:#fff2ca;color:#624813;font-size:13px;line-height:1.25;cursor:pointer}
+#coin-collect-all small{display:block;margin-top:2px;font-size:11px}
+#coin-collect-all[data-unlocked="true"]{background:#286f5e;border-color:#246252;color:#fffdf2}
+#coin-collect-all:focus-visible{outline:3px solid #b18727;outline-offset:2px}
+
 #more-menu{position:relative}#achievement-badge{display:block;font-size:11px;line-height:1.2;color:#785616;background:#fff1b8;border-radius:8px;padding:2px 5px;white-space:nowrap}#achievement-badge[hidden]{display:none}.achievement-card[data-status="ready"]{border:2px solid #d5ae54;background:#fffae6}.achievement-card[data-status="claimed"]{opacity:.72}.encyclopedia-grid .fish-preview{height:170px}.shop-item .shop-detail{overflow-wrap:anywhere}.decor-filters{flex-wrap:wrap}
 
 #achievement-badge{position:absolute;top:2px;right:5px;font-size:10px;max-width:90%}#feed-choices span{font-size:12px;line-height:1.35}
