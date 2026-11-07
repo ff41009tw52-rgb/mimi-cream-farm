@@ -28,6 +28,8 @@ const shopVariants=new Map(),editorHandles=new Map();
 const session=CONFIG.PLAYTEST?{version:'0.6',elapsedSeconds:0,first:{feed:null,fish:null,shop:null,buy:null,place:null},counts:{feed:0,shop:0,buy:0,place:0},onboardingCompleted:false,jsErrors:0,frames:0,longFrames:0,frameMsTotal:0}:null;
 const levelFor=x=>CONFIG.LEVEL_XP.reduce((l,v,i)=>x>=v?i+1:l,1);
 const zones={left:'左側',center:'中央',right:'右側'};
+const COIN_COLLECT_PRICE=2000;
+const coinCollectPriceLabel=COIN_COLLECT_PRICE.toLocaleString('zh-TW')+' 金幣';
 
 function newFish(species,index=0,variant='normal'){const s=SPECIES[species],id=uid();return {id,species,personality:personalityFor(id,species),variant,playSeconds:0,adultRecorded:false,name:s.nickname+(index?` ${index+1}`:''),hunger:68,growth:0,growthStage:'幼魚',size:window.AquariumAppearance.size(species,0),mood:'開心',createdAt:Date.now(),coinProgress:coinInterval(s)*rand(.35,.55)};}
 function starterExtras(fishes){
@@ -96,6 +98,12 @@ function toast(text,ms=6000){if(simulatingBackground)return;clearTimeout(toastTi
 function updateUI(){if(!state)return;checkFeatureHints();renderTankSelector();renderFeedChoices();
  $('tank-name').textContent=state.tankName;
  $('coins').textContent=state.coins.toLocaleString();
+ const collectButton=$('coin-collect-all');
+ collectButton.hidden=!state.onboarding.completed;
+ collectButton.disabled=editing;
+ collectButton.dataset.unlocked=String(state.coinCollectUnlocked);
+ collectButton.querySelector('b').textContent=state.coinCollectUnlocked?'一鍵領取':'解鎖一鍵領取';
+ collectButton.querySelector('small').textContent=state.coinCollectUnlocked?'所有魚缸':coinCollectPriceLabel;
  const stored=state.drops.reduce((n,c)=>n+c.value,0),limit=window.AquariumEconomy.capacity(state.tanks.find(t=>t.id===state.activeTankId));let notice=$('coin-storage-note');if(!notice){notice=document.createElement('small');notice.id='coin-storage-note';notice.setAttribute('role','status');$('tank-name').closest('.tank-caption').append(notice);}notice.hidden=stored<limit-7;notice.textContent='金幣暫存已滿，點金幣收取後繼續累積';$('tank-name').title=stored>=limit-7?'金幣暫存已滿，點金幣收取後就會繼續累積。':'魚缸內待收金幣：'+stored+'（暫存上限 '+limit+'）';
  $('capacity').replaceChildren(document.createTextNode(`${state.fishes.length} `),Object.assign(document.createElement('small'),{textContent:`/ ${state.tankCapacity}`}));
  const nextTier=TANK_TIERS[state.tankTier],upgradeLink=$('tank-upgrade-shortcut');
@@ -130,18 +138,60 @@ function feed(x,confirmed=false){
  const previousStep=state.onboarding.step;let advanced=false;if(!protectedTransaction(()=>{state.feedInventory[kind]--;if(state.fishes.some(f=>FOOD_FOR[f.species]===kind)){state.activity??={};state.activity.firstFeed=true;}advanced=tutorial.record('fed:'+kind);}))return;
  feedAt=simTime;for(let i=0;i<3;i++)food.push({id:uid(),x:clamp(x+(i-1)*.017,.06,.94),y:.08+i*.006,bottom:0,phase:rand(0,7),kind});effects.push({x,y:.08,text:'',life:1,kind:'ripple'});sound('feed');metric('feed');tutorial.finish(previousStep,advanced);if(advanced)setFeeding(false);else renderFeedChoices();dirty=true;
 }
+function creditTankCoins(value){
+ const amount=Math.min(value,CONFIG.MAX_COINS-state.coins);
+ if(amount){state.coins+=amount;state.activity??={};state.activity.firstCoin=true;gainXP(1,false);}
+ return amount;
+}
 function collect(c){
  if(conflict||saveBlocked||!state.drops.some(d=>d.id===c.id))return;
  const demonstration=c.id===demoCoinId(),beforeStep=state.onboarding.step;let advanced=false,reward=0;
  if(!protectedTransaction(()=>{
   const index=state.drops.findIndex(d=>d.id===c.id);if(index<0)return false;
-  reward=demonstration&&(state.gifts.includes('demoCollected')||state.onboarding.review)?0:Math.min(state.drops[index].value,CONFIG.MAX_COINS-state.coins);
+  reward=demonstration&&(state.gifts.includes('demoCollected')||state.onboarding.review)?0:creditTankCoins(state.drops[index].value);
   if(demonstration||reward===state.drops[index].value)state.drops.splice(index,1);else state.drops[index].value-=reward;
-  state.coins=clamp(state.coins+reward,0,CONFIG.MAX_COINS);if(reward){state.activity??={};state.activity.firstCoin=true;}
   if(demonstration&&!state.gifts.includes('demoCollected'))state.gifts.push('demoCollected');
-  if(reward)gainXP(1,false);advanced=tutorial.record('coinCollected');
+  advanced=tutorial.record('coinCollected');
  }))return;
  effects.push({x:c.x,y:c.y,text:reward?'+'+reward:'練習完成',life:1.5});sound('coin');updateUI();tutorial.finish(beforeStep,advanced);tutorial.render();
+}
+function offerCoinCollection(){
+ const copy='花 '+coinCollectPriceLabel+' 永久解鎖。解鎖後，按一下就能收取所有已開魚缸裡的待收金幣。';
+ if(state.coins<COIN_COLLECT_PRICE){
+  openDialog('解鎖一鍵領取','confirm');
+  $('dialog-content').append(paragraph(copy),paragraph('還差 '+(COIN_COLLECT_PRICE-state.coins).toLocaleString('zh-TW')+' 金幣。可以先點魚缸裡的金幣收集。'));
+  return;
+ }
+ confirmAction('解鎖一鍵領取？',copy,()=>{
+  if(!protectedTransaction(()=>{
+   if(state.coinCollectUnlocked||state.coins<COIN_COLLECT_PRICE)return false;
+   state.coins-=COIN_COLLECT_PRICE;
+   state.coinCollectUnlocked=true;
+  }))return;
+  dialog.close();updateUI();sound('buy');toast('已解鎖一鍵領取！');
+ },false,'花 '+coinCollectPriceLabel+' 解鎖');
+}
+function collectAllOrUnlock(){
+ if(!started||!state.onboarding.completed||editing||dialog.open)return;
+ if(!state.coinCollectUnlocked){offerCoinCollection();return;}
+ const demoId=demoCoinId();
+ const total=state.tanks.flatMap(tank=>tank.drops).reduce((sum,coin)=>coin.id===demoId?sum:sum+coin.value,0);
+ if(!total){toast('目前沒有待收金幣。');return;}
+ if(state.coins>=CONFIG.MAX_COINS){toast('金幣已達上限，待收金幣會留在魚缸裡。');return;}
+ let collected=0;
+ if(!protectedTransaction(()=>{
+  for(const tank of state.tanks){
+   tank.drops=tank.drops.filter(coin=>{
+    if(coin.id===demoId)return true;
+    const amount=creditTankCoins(coin.value);
+    collected+=amount;
+    coin.value-=amount;
+    return coin.value>0;
+   });
+  }
+ }))return;
+ updateUI();sound('coin');
+ toast('已收取 '+collected.toLocaleString('zh-TW')+' 金幣。'+(collected<total?'金幣已達上限，剩餘金幣仍在魚缸裡。':''));
 }
 function supportNotice(advanced){
  const message='金幣還差一點，已幫你補足這次需要的金額！',inline=$('onboarding-success');
@@ -234,7 +284,7 @@ function settings(){const expanded=document.querySelector('.save-tools')?.open||
 
   const note=document.createElement('p');note.className='dialog-note';note.textContent='遊戲會自動存檔。請使用同一台裝置、同一個瀏覽器繼續遊戲；更換裝置或清除瀏覽器網站資料，可能找不到進度。';const saveTools=document.createElement('details');saveTools.className='save-tools';saveTools.open=expanded;const heading=document.createElement('summary');heading.textContent='存檔與進度';saveTools.append(heading);const advanced=document.createElement('div');advanced.className='settings-list';for(const r of [...list.children]){if(!['音效','水族箱名稱','接續新手教學','重新觀看新手引導','返回首頁','本次試玩摘要'].some(t=>r.querySelector('p').firstChild.textContent===t))advanced.append(r);}saveTools.append(advanced);$('dialog-content').append(list,note,saveTools);
 }
-function confirmAction(title,copy,fn,danger=false){openDialog(title,'confirm');const p=document.createElement('p');p.className='confirm-copy';p.textContent=copy;const actions=document.createElement('div');actions.className='confirm-actions';actions.append(button('取消',()=>{resetStep=0;dialog.close();}),button(danger?'確認重置':title==='確認移動魚兒？'?'確認移動':'確定讀取',fn,'confirm'+(danger?' danger':'')));$('dialog-content').append(p,actions);}
+function confirmAction(title,copy,fn,danger=false,confirmLabel){openDialog(title,'confirm');const p=document.createElement('p');p.className='confirm-copy';p.textContent=copy;const actions=document.createElement('div');actions.className='confirm-actions';actions.append(button('取消',()=>{resetStep=0;dialog.close();}),button(confirmLabel||(danger?'確認重置':title==='確認移動魚兒？'?'確認移動':'確定讀取'),fn,'confirm'+(danger?' danger':'')));$('dialog-content').append(p,actions);}
 function loadSaved(manual){
   try{
     let text=localStorage.getItem(manual?CONFIG.MANUAL_KEY:CONFIG.SAVE_KEY);
@@ -682,6 +732,7 @@ canvas.addEventListener('click',e=>{
 });
 canvas.addEventListener('keydown',e=>{if(feeding&&(e.key==='Enter'||e.key===' ')){e.preventDefault();feed(.5);}if(e.key==='Escape'){setFeeding(false);closeCard();}});
 $('feed').onclick=()=>setFeeding(!feeding);$('stop-feed').onclick=()=>setFeeding(false);$('close-card').onclick=closeCard;$('shop').onclick=shop;$('more-menu').onclick=moreMenu;$('fish-more').onclick=fishMore;$('rename').onclick=renameFish;
+$('coin-collect-all').onclick=collectAllOrUnlock;
 $('dialog-close').onclick=()=>dialog.close();$('edit-done').onclick=finishEditing;$('edit-left').onclick=()=>nudgeDecoration(-1);$('edit-right').onclick=()=>nudgeDecoration(1);$('edit-store').onclick=storeSelectedDecoration;dialog.addEventListener('close',()=>queueMicrotask(()=>tutorial.render()));dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
 // Visibility catches mobile backgrounding; pagehide is an extra best-effort flush.
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(dirty)save();hiddenAt=Date.now();}else{lastFrame=0;if(started&&hiddenAt&&!conflict){if(offline((Date.now()-hiddenAt)/1000)!==false)save();updateUI();}hiddenAt=0;}});

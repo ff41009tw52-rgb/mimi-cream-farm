@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="assets/aquarium-v041-r2/aquarium-observation.css">
 <link rel="stylesheet" href="assets/aquarium-v042/refinements.css">
 <link rel="stylesheet" href="assets/aquarium-v05/aquarium.css">
-<link rel="stylesheet" href="assets/aquarium-v06/aquarium.css?v=20261029-storybook">
+<link rel="stylesheet" href="assets/aquarium-v06/aquarium.css?v=20261107-coin-collection">
 <script defer src="assets/aquarium-v05/aquarium-data.js"></script>
 <script defer src="assets/aquarium-v06/content.js?v=20261029-storybook"></script>
 
@@ -21,7 +21,7 @@
 <script defer src="assets/aquarium-v041-r2/aquarium-save.js"></script>
 <script defer src="assets/aquarium-v05/aquarium-save.js"></script>
 <script defer src="assets/aquarium-v06/data.js?v=20261029-storybook"></script>
-<script defer src="assets/aquarium-v06/save.js?v=20261029-storybook"></script>
+<script defer src="assets/aquarium-v06/save.js?v=20261107-coin-collection"></script>
 <script defer src="assets/aquarium-v041-r2/aquarium-world.js"></script>
 <script defer src="assets/aquarium-v041-r2/aquarium-observation-content.js"></script>
 <script defer src="assets/aquarium-v05/anatomy.js"></script>
@@ -39,7 +39,7 @@
 <script defer src="assets/aquarium-v06/quality-art.js?v=20261029-storybook"></script>
 <script defer src="assets/aquarium-v06/photo-config.js?v=20261030-photo-live"></script>
 <script defer src="assets/aquarium-v06/photo-share.js?v=20261030-photo-tanks"></script>
-<script defer src="assets/aquarium-v06/aquarium.js?v=20261030-photo-tanks"></script>
+<script defer src="assets/aquarium-v06/aquarium.js?v=20261107-coin-collection"></script>
 
 <link rel="stylesheet" href="assets/aquarium-v06/photo-share.css?v=20261030-photo-tanks">
 </head>
@@ -50,7 +50,7 @@
 <main class="app" id="game" hidden>
 <header class="header"><div class="brand"><span class="brand-icon" aria-hidden="true">≈</span><div><h1>悠悠水族箱</h1></div><span class="version" hidden></span></div></header>
 <section class="hud" aria-label="水族箱狀態">
-<div class="stat coins-stat"><span class="coin-icon" aria-hidden="true">＄</span><div><span class="stat-label">我的金幣</span><strong id="coins">20</strong></div></div>
+<div class="stat coins-stat"><span class="coin-icon" aria-hidden="true">＄</span><div><span class="stat-label">我的金幣</span><strong id="coins">20</strong></div><button id="coin-collect-all" type="button" hidden><b>解鎖一鍵領取</b><small></small></button></div>
 <div class="stat residents"><span class="residents-icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none"><rect x="5" y="7" width="30" height="28" rx="9"/><path d="M6 17c5-4 9 4 14 0s9 4 14 0"/><path d="M16 24c3-4 7-4 10 0-3 4-7 4-10 0Zm0 0-4-3v6l4-3Z"/><circle cx="24" cy="12" r="1"/></svg></span><div><span class="stat-label">小居民數量</span><div class="residents-actions"><strong id="capacity">3 <small>/ 5</small></strong><button id="tank-upgrade-shortcut" class="tank-upgrade-shortcut" type="button" aria-label="查看魚缸升級條件">升級魚缸 ↗</button></div></div></div>
 <div class="level-stat"><span id="level">養魚等級 1</span><div class="xp-track"><i id="xp-bar"></i></div><small id="next-unlock">下一級解鎖：斑馬魚</small></div>
 <div class="save-status" id="save-status" role="status">正在準備水族箱…</div>
