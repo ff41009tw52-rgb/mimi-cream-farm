@@ -3,6 +3,20 @@
 
   const homepageFeatures = Object.freeze([
     Object.freeze({
+      id: 'minan-bird-observation',
+      grades: Object.freeze([]),
+      gradeLabel: '探索天地',
+      category: 'explore',
+      subject: 'science',
+      icon: 'fas fa-dove',
+      title: '🐦 民安羽跡｜校園鳥類觀察站',
+      description: '橘咪咪和白奶油發現校園裡有好多鳥兒！快來看看有哪些鳥類造訪校園，透過照片、外形特徵和鳥叫聲認識這些羽毛朋友！',
+      url: 'bird.html',
+      actionLabel: '開始觀察',
+      actionIcon: 'fas fa-binoculars',
+      publishedAt: '2026-11-09T23:00:00+08:00'
+    }),
+    Object.freeze({
       id: 'science-review-4a',
       grades: Object.freeze(['4']),
       gradeLabel: '四年級',
@@ -101,6 +115,7 @@
     card.setAttribute('role', 'listitem');
     card.dataset.grades = game.grades.join(',');
     if (game.subject) card.dataset.subject = game.subject;
+    if (game.category) card.dataset.category = game.category;
     card.dataset.gameId = game.id;
 
     const header = document.createElement('div');
@@ -163,7 +178,7 @@
     const status = document.getElementById('filter-status');
     if (!status) return;
 
-    const gradeLabels = { '3': '三年級', '4': '四年級', '5': '五年級', '6': '六年級' };
+    const gradeLabels = { '3': '三年級', '4': '四年級', '5': '五年級', '6': '六年級', explore: '探索天地' };
     const label = selectedGrade === 'all' ? '全部' : gradeLabels[selectedGrade] || `${selectedGrade}年級`;
     status.textContent = `目前顯示${label} ${visibleCount} 個遊戲。`;
   };
@@ -186,7 +201,8 @@
         let visibleCount = 0;
         document.querySelectorAll('#game-grid .science-card').forEach((card) => {
           const grades = (card.dataset.grades || '').split(',').filter(Boolean);
-          const shouldShow = selectedGrade === 'all' || grades.includes(selectedGrade);
+          const shouldShow = selectedGrade === 'all' ||
+            (selectedGrade === 'explore' ? card.dataset.category === 'explore' : grades.includes(selectedGrade));
           card.classList.toggle('hidden', !shouldShow);
           if (shouldShow) visibleCount += 1;
         });
