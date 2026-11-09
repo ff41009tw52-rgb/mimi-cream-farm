@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#fff8ed">
+<meta name="description" content="挑選感官描寫，完成料理介紹｜橘咪咪與白奶油的四年級國語遊戲">
+<title>白奶油的文字料理屋｜橘咪咪與白奶油</title>
+<link rel="stylesheet" href="play.css">
+<script defer src="play.js"></script>
+</head>
+<body data-game="kitchen">
+<div class="wrap">
+<header class="top">
+<a class="back" href="../chinese.html">← 返回國語首頁</a>
+<nav class="sites" aria-label="切換學習科目">
+<a href="../index.html">自然科學</a>
+<a href="../chinese.html" aria-current="page">國語</a>
+<a href="../math.html" >數學</a>
+</nav></header>
+<section class="hero" aria-label="遊戲介紹">
+<div class="kicker" id="subject-badge"></div>
+<h1 id="game-title">白奶油的文字料理屋</h1>
+<p id="game-subtitle">挑選感官描寫，完成料理介紹</p>
+</section>
+<div class="bar">
+<span id="round-number">第 1 題</span>
+<div class="meter" aria-label="遊戲進度"><div id="fill"></div></div>
+<span id="score">完成 0 題</span>
+</div>
+<main class="task" aria-label="互動遊戲">
+<div id="stage"></div>
+<div id="message" role="status" aria-live="polite"></div>
+<div class="actions"><a class="secondary" href="../chinese.html" style="text-decoration:none;display:inline-flex;align-items:center">回國語首頁</a><button id="next" class="primary" type="button" disabled>下一題 →</button></div>
+</main>
+<section class="guide" aria-label="玩法說明"><h3>怎麼玩？</h3><p id="guide-text"></p></section>
+</div>
+</body></html>
