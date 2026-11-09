@@ -8,7 +8,7 @@ const CN=[
 {clue:'請把地板「＿＿」乾淨',left:'扌',right:'帚',char:'掃',word:'掃地',leftChoices:['亻','扌','口','氵'],rightChoices:['苗','帚','青','包'],why:'「掃」的提手旁表示和手的動作有關。'},
 {clue:'老師說：「＿＿問，你要找哪一本書？」',left:'言',right:'青',char:'請',word:'請問',leftChoices:['日','言','土','木'],rightChoices:['青','白','馬','也'],why:'「請」的言字旁與說話、語言有關。'},
 {clue:'下雨後，池水變得很「＿＿澈」',left:'氵',right:'青',char:'清',word:'清澈',leftChoices:['日','扌','氵','口'],rightChoices:['包','青','白','目'],why:'「清」有三點水，常與水的性質相關。'},
-{clue:'爸爸帶我去一座「＿＿園」',left:'木',right:'公',char:'松',word:'松樹',leftChoices:['扌','木','女','亻'],rightChoices:['公','青','白','也'],why:'「松」是木字旁，和樹木有關。'},
+{clue:'山坡上長著一棵「＿＿樹」',left:'木',right:'公',char:'松',word:'松樹',leftChoices:['扌','木','女','亻'],rightChoices:['公','青','白','也'],why:'「松」是木字旁，和樹木有關。'},
 {clue:'我們一起「＿＿歌」給朋友聽',left:'口',right:'昌',char:'唱',word:'唱歌',leftChoices:['口','氵','木','日'],rightChoices:['馬','昌','月','青'],why:'「唱」的口字旁與發聲有關。'}
 ];
 const KITCHEN=[
