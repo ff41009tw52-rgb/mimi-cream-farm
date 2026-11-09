@@ -4,6 +4,21 @@
   const catalogs = {
   "chinese": [
     {
+      "id": "chinese-sensory-kitchen",
+      "title": "白奶油的文字料理屋",
+      "grades": ["4"],
+      "topic": "康軒四上｜感官描寫、句子組合",
+      "description": "白奶油要介紹好吃的料理！仔細分辨視覺、聽覺、嗅覺、味覺與觸覺，挑選正確詞句，完成每一道料理介紹。",
+      "icon": "香",
+      "artwork": "kitchen",
+      "cover": "",
+      "url": "learning-games/kitchen.html",
+      "status": "published",
+      "publishedAt": "2026-11-09T23:47:00+08:00",
+      "order": 0,
+      "featured": true
+    },
+    {
       "id": "chinese-character-factory",
       "title": "橘咪咪的國字拼裝工廠",
       "grades": [
@@ -14,9 +29,9 @@
       "icon": "字",
       "artwork": "letters",
       "cover": "",
-      "url": "",
-      "status": "coming-soon",
-      "publishedAt": null,
+      "url": "learning-games/characters.html",
+      "status": "published",
+      "publishedAt": "2026-11-09T23:45:00+08:00",
       "order": 1,
       "featured": true
     },
@@ -91,6 +106,21 @@
   ],
   "math": [
     {
+      "id": "math-angle-park",
+      "title": "角度遊樂園",
+      "grades": ["4"],
+      "topic": "南一四上｜角度與量角器",
+      "description": "橘咪咪帶白奶油到遊樂園！親手旋轉角度射線，認識銳角、直角、鈍角與平角，挑戰轉出指定的角度。",
+      "icon": "∠",
+      "artwork": "angles",
+      "cover": "",
+      "url": "learning-games/angles.html",
+      "status": "published",
+      "publishedAt": "2026-11-09T23:48:00+08:00",
+      "order": 0,
+      "featured": true
+    },
+    {
       "id": "math-cat-market",
       "title": "橘咪咪的貓咪超級市場",
       "grades": [
@@ -118,11 +148,11 @@
       "icon": "½",
       "artwork": "pizza",
       "cover": "",
-      "url": "",
-      "status": "coming-soon",
-      "publishedAt": null,
+      "url": "learning-games/pizza.html",
+      "status": "published",
+      "publishedAt": "2026-11-09T23:46:00+08:00",
       "order": 2,
-      "featured": false
+      "featured": true
     },
     {
       "id": "math-geometry-architect",
