@@ -6,6 +6,7 @@
     <title>橘咪咪與白奶油的科學農場</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="ai-assistant/ai-assistant.css?v=20260920-bottom-chat" rel="stylesheet">
+    <link href="assets/learning-worlds/science-switcher.css" rel="stylesheet">
     <style>
         /* --- 配色設定 --- */
         :root {
@@ -417,10 +418,18 @@
         <p>Created with ❤️ by 兩隻科學貓咪：橘咪咪與白奶油的主人</p>
     </footer>
 
-    <a href="feedback.html" class="feedback-float-btn" title="有問題請找我們">
-        <i class="fas fa-comment-dots" aria-hidden="true"></i> 回報問題
-    </a>
+    <div class="subject-switcher" id="subject-switcher">
+        <nav class="subject-switcher__panel" id="subject-switcher-panel" aria-label="其他學習網站與回報問題" hidden>
+            <a href="chinese.html">國語<span>橘咪咪與白奶油的語文故事屋</span></a>
+            <a href="math.html">數學<span>橘咪咪與白奶油的數學遊樂城</span></a>
+            <a href="feedback.html">回報問題<span>遇到問題可以在這裡告訴我們</span></a>
+        </nav>
+        <button type="button" class="subject-switcher__toggle" id="subject-switcher-toggle" aria-expanded="false" aria-controls="subject-switcher-panel">
+            <i class="fas fa-book-open" aria-hidden="true"></i> 切換科目 <span data-arrow aria-hidden="true">▸</span>
+        </button>
+    </div>
 
+    <script defer src="assets/learning-worlds/science-switcher.js"></script>
     <script src="games-data.js"></script>
     <script src="games-renderer.js?v=20261101-review-title"></script>
     <script src="ai-assistant/ai-assistant-config.js?v=20261031-region-placement"></script>
