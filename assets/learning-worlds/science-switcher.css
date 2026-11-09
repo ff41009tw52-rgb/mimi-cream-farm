@@ -1,0 +1,16 @@
+
+/* Floating subject switcher on the science homepage only. */
+.subject-switcher,.subject-switcher *{box-sizing:border-box}
+.subject-switcher{position:fixed;right:24px;bottom:23px;z-index:10010;display:flex;align-items:flex-end;gap:10px;font-family:"Microsoft JhengHei","Noto Sans TC",sans-serif}
+.subject-switcher__toggle{min-height:56px;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 19px;background:#3f8548;color:white;border:3px solid white;border-radius:32px;font-size:16px;font-weight:800;box-shadow:0 5px 18px #214d3080;cursor:pointer;white-space:nowrap}
+.subject-switcher__toggle:hover{background:#33713b}
+.subject-switcher__toggle[aria-expanded="true"]{background:#2f6436}
+.subject-switcher__panel{width:184px;padding:10px;background:#fffef9;border:2px solid #7eb65d;border-radius:18px;box-shadow:0 10px 30px #43382138;display:grid;gap:7px}
+.subject-switcher__panel[hidden]{display:none}
+.subject-switcher__panel a{display:block;min-height:44px;padding:8px 11px;border-radius:10px;color:#4b3b32;background:#f6f7f0;text-decoration:none;font-size:15px;font-weight:850;line-height:1.4;border:1px solid #e4e7de}
+.subject-switcher__panel a span{display:block;font-weight:600;font-size:12px;color:#5d6154}
+.subject-switcher__panel a:hover{background:#e6f3dd;border-color:#78ab64}
+.subject-switcher__toggle:focus-visible,.subject-switcher__panel a:focus-visible{outline:4px solid #1a5eaa;outline-offset:3px}
+@media(max-width:620px){.subject-switcher{right:12px;bottom:14px;gap:8px}.subject-switcher__toggle{min-height:52px;padding:9px 11px;font-size:14px}.subject-switcher__panel{width:160px;padding:8px}.subject-switcher__panel a{padding:7px 9px;font-size:14px}}
+@media(max-width:350px){.subject-switcher__toggle{padding:8px;font-size:13px}.subject-switcher__panel{width:144px}}
+@media(prefers-reduced-motion:reduce){.subject-switcher *{transition:none!important}}
