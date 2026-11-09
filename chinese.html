@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#FFF7E9">
+  <meta name="description" content="橘咪咪與白奶油的語文故事屋，依年級尋找國語學習遊戲，認識兩隻貓咪。">
+  <title>橘咪咪與白奶油的語文故事屋</title>
+  <link rel="stylesheet" href="assets/learning-worlds/home.css">
+  <script src="assets/learning-worlds/games-data.js" defer></script>
+  <script src="assets/learning-worlds/home.js" defer></script>
+</head>
+<body class="learning-world" data-subject="chinese">
+  <a class="skip-link" href="#games">跳到遊戲清單</a>
+  <header class="topbar">
+    <div class="shell nav-inner">
+      <div class="brand-mark"><svg class="paw" viewBox="0 0 40 40" aria-hidden="true"><g fill="currentColor"><ellipse cx="9" cy="14" rx="4" ry="6" transform="rotate(-25 9 14)"/><ellipse cx="18" cy="8" rx="4" ry="6"/><ellipse cx="28" cy="10" rx="4" ry="6" transform="rotate(20 28 10)"/><ellipse cx="34" cy="20" rx="4" ry="6" transform="rotate(35 34 20)"/><path d="M10 27c2-7 6-11 11-9 4 2 5 6 9 9s1 10-5 8c-5-2-8-1-12 0s-6-4-3-8Z"/></g></svg><span>橘咪咪與白奶油</span></div>
+      <nav class="subject-nav" data-world-nav aria-label="切換學習科目"></nav>
+    </div>
+  </header>
+  <main class="shell">
+    <section class="hero" aria-labelledby="site-title">
+      <div class="hero-copy">
+        <h1 id="site-title"><span class="title-family">橘咪咪與白奶油的</span><span class="title-world">語文故事屋</span></h1>
+        <p class="hero-topics">國字・詞語・成語・閱讀</p>
+        <a class="browse-link" href="#games">瀏覽遊戲 <span aria-hidden="true">↓</span></a>
+      </div>
+      <img class="hero-art" src="assets/learning-worlds/story-room.svg" alt="" width="520" height="350" fetchpriority="high">
+    </section>
+    <section class="owners-section" aria-label="認識橘咪咪與白奶油">
+      <div class="owners-caption"><h2>認識兩隻貓咪</h2><p>點選照片，看看牠們的故事。</p></div>
+      <div class="owners">
+        <a class="owner-link mimi" href="about.html" aria-label="查看橘咪咪的介紹">
+          <div class="owner-img"><img src="picture/mimi-solo.JPG" alt="橘咪咪" width="78" height="78"></div>
+          <div><strong>橘咪咪</strong><small>認識我 <span aria-hidden="true">↗</span></small></div>
+        </a>
+        <a class="owner-link cream" href="about.html" aria-label="查看白奶油的介紹">
+          <div class="owner-img"><img src="picture/cream-solo.JPG" alt="白奶油" width="78" height="78"></div>
+          <div><strong>白奶油</strong><small>認識我 <span aria-hidden="true">↗</span></small></div>
+        </a>
+      </div>
+    </section>
+    <div class="catalog" id="games" tabindex="-1">
+      <div class="filter-row">
+        <div class="filter-nav" role="group" aria-label="依年級篩選遊戲">
+          <button type="button" class="filter-btn" data-grade="all" aria-pressed="true" aria-controls="featured-games all-games">全部遊戲</button>
+          <button type="button" class="filter-btn" data-grade="3" aria-pressed="false" aria-controls="featured-games all-games">三年級</button>
+          <button type="button" class="filter-btn" data-grade="4" aria-pressed="false" aria-controls="featured-games all-games">四年級</button>
+          <button type="button" class="filter-btn" data-grade="5" aria-pressed="false" aria-controls="featured-games all-games">五年級</button>
+          <button type="button" class="filter-btn" data-grade="6" aria-pressed="false" aria-controls="featured-games all-games">六年級</button>
+        </div>
+        <p id="filter-status" role="status" aria-live="polite">正在載入遊戲清單…</p>
+      </div>
+      <noscript><p>請啟用 JavaScript 以查看遊戲清單與年級分類。</p><p><a href="index.html">自然科學</a> · <a href="chinese.html">國語</a> · <a href="math.html">數學</a></p></noscript>
+      <section class="game-section" aria-labelledby="featured-heading">
+        <div class="section-heading"><h2 id="featured-heading">精選遊戲</h2></div>
+        <div class="featured-grid" id="featured-games"></div>
+        <p class="featured-empty" id="featured-empty" hidden>這個年級的精選遊戲還在準備中。</p>
+      </section>
+      <section class="game-section" aria-labelledby="all-heading">
+        <div class="section-heading"><h2 id="all-heading">全部遊戲</h2><span class="section-note" id="game-count"></span></div>
+        <div class="game-grid" id="all-games"></div>
+        <div class="empty-state" id="empty-state" hidden><h3 id="empty-title">遊戲還在準備中</h3><p>可以先看看其他年級即將推出的遊戲。</p><button type="button" id="show-all">查看全部遊戲</button></div>
+      </section>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <div class="footer-cats"><img src="picture/welcome-cats.JPG" alt="橘咪咪與白奶油的合照" width="70" height="70" loading="lazy"><div><strong>橘咪咪與白奶油</strong><span>回到其他學習世界</span></div></div>
+      <nav class="footer-nav" data-world-nav aria-label="其他學習世界"></nav>
+    </div>
+  </footer>
+</body>
+</html>

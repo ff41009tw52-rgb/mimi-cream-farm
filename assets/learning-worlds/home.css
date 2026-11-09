@@ -1,0 +1,192 @@
+/* Loaded only by chinese.html and math.html; never imported by science pages. */
+body.learning-world {
+  --bg: #FFF7E9; --paper: #fffdf8; --accent: #B86654; --strong: #914936;
+  --ink: #45332D; --muted: #755e50; --line: #e7d9c7; --soft: #f3e7d5;
+  --secondary: #956747; --shadow: 0 12px 32px #6b47300a;
+  margin: 0; color: var(--ink); background: var(--bg);
+  font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+  font-size: 16px; line-height: 1.7; -webkit-text-size-adjust: 100%;
+}
+.learning-world[data-subject='math'] {
+  --bg: #F2F4FF; --paper: #ffffff; --accent: #5268C9; --strong: #4053ac;
+  --ink: #303650; --muted: #626981; --line: #dce0f3; --soft: #e8ebfb;
+  --secondary: #8A72CB; --shadow: 0 12px 32px #4755a00b;
+}
+.learning-world *, .learning-world *::before, .learning-world *::after { box-sizing: border-box; }
+.learning-world a { color: inherit; text-decoration: none; }
+.learning-world button { font: inherit; cursor: pointer; }
+.learning-world button, .learning-world a { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.learning-world :focus-visible { outline: 3px solid var(--strong); outline-offset: 5px; }
+.learning-world [hidden] { display: none !important; }
+.learning-world img { max-width: 100%; display: block; }
+.learning-world h1, .learning-world h2, .learning-world h3, .learning-world p { margin: 0; }
+.learning-world .shell { width: min(1120px, calc(100% - 64px)); margin-inline: auto; }
+.learning-world .skip-link { position: absolute; top: -100px; left: 16px; z-index: 10; padding: 12px 22px; background: var(--paper); }
+.learning-world .skip-link:focus { top: 10px; }
+.learning-world .topbar { background: var(--paper); border-bottom: 1px solid var(--line); }
+.learning-world .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 88px; }
+.learning-world .brand-mark { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 800; letter-spacing: 1px; flex-shrink: 0; }
+.learning-world .paw { width: 33px; height: 33px; color: var(--accent); }
+.learning-world .subject-nav { display: flex; gap: 8px; }
+.learning-world .world-link { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 9px 18px; border: 1px solid transparent; border-radius: 14px; font-size: 14px; }
+.learning-world .world-link:hover { background: var(--soft); }
+.learning-world .world-link[aria-current] { background: var(--soft); border-color: var(--accent); color: var(--strong); }
+.learning-world .world-symbol { font-size: 25px; line-height: 1; font-weight: 700; }
+.learning-world .world-wording { display: flex; flex-direction: column; line-height: 1.5; }
+.learning-world .world-name { font-size: 12px; }
+.learning-world .hero { margin-top: 32px; position: relative; display: grid; grid-template-columns: 1fr 1fr; align-items: center; border: 1px solid var(--line); background: #f5ead8; border-radius: 24px 90px 24px 24px; overflow: hidden; min-height: 340px; }
+.learning-world .hero-copy { padding: 36px 0 36px 44px; position: relative; z-index: 1; }
+.learning-world h1 { line-height: 1.35; font-size: clamp(32px, 3.8vw, 48px); letter-spacing: 2px; font-weight: 800; }
+.learning-world h1 .title-family { display: block; font-size: 19px; letter-spacing: 3px; margin-bottom: 15px; font-weight: 600; }
+.learning-world h1 .title-world { display: block; color: var(--strong); }
+.learning-world .hero-topics { color: var(--muted); font-size: 15px; margin-top: 17px; letter-spacing: 2px; }
+.learning-world .browse-link { display: inline-flex; align-items: center; justify-content: center; gap: 30px; min-height: 48px; padding: 10px 22px; margin-top: 26px; background: var(--strong); color: white; border-radius: 9px; font-weight: 700; font-size: 15px; }
+.learning-world .browse-link:hover { background: var(--ink); }
+.learning-world .hero-art { width: 100%; height: 340px; object-fit: contain; padding: 12px 20px 0 0; }
+.learning-world[data-subject='chinese'] h1 .title-world { font-family: 'Noto Serif TC', 'Songti TC', 'PMingLiU', serif; }
+.learning-world[data-subject='math'] .hero { background: #e7ebff; border-radius: 28px; }
+.learning-world[data-subject='math'] .hero-copy { padding-left: 44px; }
+.learning-world .owners-section { display: flex; align-items: center; justify-content: center; gap: 36px; padding: 29px 0; }
+.learning-world .owners-caption { padding-right: 36px; border-right: 1px solid var(--line); }
+.learning-world .owners-caption h2 { font-size: 19px; }
+.learning-world .owners-caption p { font-size: 13px; color: var(--muted); margin-top: 3px; }
+.learning-world .owners { display: flex; gap: 32px; }
+.learning-world .owner-link { display: flex; align-items: center; gap: 14px; min-height: 80px; border-radius: 45px 12px 12px 45px; }
+.learning-world .owner-img { width: 78px; height: 78px; border-radius: 50%; border: 3px solid var(--accent); padding: 3px; background: var(--paper); transition: transform .2s; }
+.learning-world .owner-img img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.learning-world .owner-link.cream .owner-img { border-color: var(--secondary); }
+.learning-world .owner-link strong { font-size: 17px; }
+.learning-world .owner-link small { display: block; font-size: 12px; color: var(--muted); }
+.learning-world .owner-link:hover .owner-img { transform: rotate(-4deg) scale(1.04); }
+.learning-world .catalog { border-top: 1px solid var(--line); padding-top: 27px; padding-bottom: 64px; }
+.learning-world .filter-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.learning-world .filter-nav { display: flex; gap: 8px; flex-wrap: wrap; }
+.learning-world .filter-btn { min-height: 46px; border: 1px solid var(--line); background: var(--paper); padding: 9px 23px; border-radius: 9px; color: var(--muted); font-size: 15px; font-weight: 700; }
+.learning-world .filter-btn[aria-pressed='true'] { background: var(--strong); border-color: var(--strong); color: #fff; }
+.learning-world .filter-btn:hover { border-color: var(--accent); }
+.learning-world #filter-status { color: var(--muted); font-size: 13px; }
+.learning-world .game-section { margin-top: 32px; }
+.learning-world .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.learning-world .section-heading h2 { font-size: 23px; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
+.learning-world .section-heading h2::before { content: ''; width: 5px; height: 22px; border-radius: 4px; background: var(--accent); }
+.learning-world .section-note { font-size: 13px; color: var(--muted); }
+.learning-world .featured-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.learning-world .game-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+.learning-world .game-card { min-width: 0; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: var(--paper); box-shadow: var(--shadow); display: flex; flex-direction: column; transition: transform .2s, box-shadow .2s; }
+.learning-world .card-body { padding: 23px; display: flex; flex: 1; flex-direction: column; align-items: flex-start; }
+.learning-world .card-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; font-size: 12px; margin-bottom: 12px; }
+.learning-world .grade-label { color: var(--muted); }
+.learning-world .availability { color: var(--strong); background: var(--soft); border-radius: 5px; padding: 2px 8px; white-space: nowrap; }
+.learning-world .game-card h3 { font-size: 19px; line-height: 1.55; overflow-wrap: anywhere; }
+.learning-world .game-topic { color: var(--strong); font-size: 13px; margin-top: 9px; }
+.learning-world .game-description { color: var(--muted); font-size: 14px; line-height: 1.85; margin-top: 11px; }
+.learning-world .card-art { height: 140px; flex-shrink: 0; display: grid; place-items: center; position: relative; overflow: hidden; background-color: #f0e2cd; background-image: radial-gradient(#95674720 1px, transparent 1px); background-size: 12px 12px; }
+.learning-world .card-art::after { content: ''; position: absolute; width: 120px; height: 10px; background: #95674738; border-radius: 50%; bottom: 18px; }
+.learning-world .art-symbol { display: grid; place-items: center; width: 74px; height: 82px; background: #fffaf0; color: #914936; border: 1px solid #bc9474; box-shadow: 5px 5px 0 #bf98744d; border-radius: 7px; z-index: 1; font-family: 'Songti TC', 'PMingLiU', serif; font-size: 45px; transform: rotate(-8deg); }
+.learning-world .art-shape { position: absolute; width: 64px; height: 78px; background: #b86654; border-radius: 6px; transform: translate(27px, 5px) rotate(12deg); }
+.learning-world .art-search, .learning-world .art-book { background-color: #e5e9dd; }
+.learning-world .art-search .art-shape, .learning-world .art-book .art-shape { background-color: #81967b; }
+.learning-world .art-treasure { background-color: #f4e3bd; }
+.learning-world .art-treasure .art-shape { background-color: #b68c43; }
+.learning-world .art-forest { background-color: #e4e6ce; }
+.learning-world .art-forest .art-shape { background-color: #7b8f62; }
+.learning-world .featured-card { flex-direction: row; }
+.learning-world .featured-card .card-art { height: auto; width: 128px; }
+.learning-world .featured-card .card-body { padding: 22px; }
+.learning-world .featured-card .game-description { font-size: 13px; }
+.learning-world .game-cover { width: 100%; height: 100%; object-fit: cover; position: absolute; z-index: 2; }
+.learning-world .play-link { display: block; align-self: stretch; min-height: 44px; text-align: center; padding: 9px 14px; background: var(--strong); color: white; margin-top: 18px; border-radius: 8px; font-weight: 700; }
+.learning-world[data-subject='math'] .card-art { background-color: #e7eaff; background-image: linear-gradient(#5268c90a 1px, transparent 1px),linear-gradient(90deg, #5268c90a 1px, transparent 1px); background-size: 18px 18px; }
+.learning-world[data-subject='math'] .card-art::after { background-color: #5268c922; }
+.learning-world[data-subject='math'] .art-symbol { color: #4053ac; background: #ffffff; font-family: inherit; font-weight: 700; border: 0; border-radius: 18px; box-shadow: 6px 6px 0 #5268c92b; transform: rotate(-8deg); }
+.learning-world[data-subject='math'] .art-shape { background: #8A72CB; border-radius: 50%; width: 80px; height: 80px; transform: translate(27px, 5px); }
+.learning-world[data-subject='math'] .art-pizza, .learning-world[data-subject='math'] .art-gears { background-color: #fff0c9; }
+.learning-world[data-subject='math'] .art-pizza .art-symbol { border-radius: 50%; background: #ffd36b; color: #715027; }
+.learning-world[data-subject='math'] .art-blocks, .learning-world[data-subject='math'] .art-race { background-color: #eee6fa; }
+.learning-world[data-subject='math'] .art-blocks .art-shape { border-radius: 4px; background-color: #ffd36b; }
+.learning-world[data-subject='math'] .art-bridge { background-color: #dfeef0; }
+.learning-world .empty-state { text-align: center; padding: 36px 20px; background: var(--paper); border: 1px dashed var(--line); border-radius: 16px; }
+.learning-world .empty-state h3 { font-size: 20px; }
+.learning-world .empty-state p { color: var(--muted); margin-top: 8px; }
+.learning-world .empty-state button { margin-top: 18px; border: 1px solid var(--accent); border-radius: 8px; padding: 10px 20px; min-height: 44px; color: var(--strong); background: var(--soft); }
+.learning-world .featured-empty { padding: 24px; border-radius: 12px; background: var(--soft); font-size: 14px; color: var(--muted); }
+.learning-world .site-footer { border-top: 1px solid var(--line); background: var(--paper); padding: 30px 0; }
+.learning-world .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.learning-world .footer-cats { display: flex; align-items: center; gap: 14px; font-size: 14px; }
+.learning-world .footer-cats img { width: 70px; height: 70px; object-fit: cover; border: 4px solid var(--soft); border-radius: 15px; }
+.learning-world .footer-cats span { display: block; font-size: 12px; color: var(--muted); }
+.learning-world .footer-nav { display: flex; flex-wrap: wrap; gap: 6px; }
+.learning-world .footer-nav .world-link { padding: 8px 12px; min-height: 44px; }
+.learning-world .footer-nav .world-symbol, .learning-world .footer-nav .world-name { display: none; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .learning-world[data-subject='math'] .game-card:hover { transform: translateY(-4px); box-shadow: 0 14px 28px #5268c914; }
+}
+@media (min-width: 1600px) { .learning-world .shell { width: min(1240px, calc(100% - 80px)); } }
+@media (max-width: 1000px) {
+  .learning-world .brand-mark span { display: none; }
+  .learning-world .hero-copy, .learning-world[data-subject='math'] .hero-copy { padding-left: 28px; }
+  .learning-world h1 { font-size: 36px; }
+  .learning-world .game-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .learning-world .featured-card .card-art { width: 96px; }
+  .learning-world .featured-card .card-body { padding: 18px; }
+  .learning-world .owners-section { gap: 25px; }
+  .learning-world .owners-caption { padding-right: 25px; }
+}
+@media (max-width: 760px) {
+  .learning-world .shell { width: calc(100% - 36px); }
+  .learning-world .nav-inner { min-height: 80px; justify-content: center; }
+  .learning-world .brand-mark { display: none; }
+  .learning-world .subject-nav { width: 100%; gap: 6px; }
+  .learning-world .subject-nav .world-link { flex: 1; padding: 8px 10px; justify-content: center; }
+  .learning-world .world-symbol { display: none; }
+  .learning-world .hero { margin-top: 20px; grid-template-columns: 1fr 1fr; min-height: 270px; border-radius: 20px 65px 20px 20px; }
+  .learning-world .hero-copy, .learning-world[data-subject='math'] .hero-copy { padding: 24px 0 24px 24px; }
+  .learning-world h1 { font-size: 31px; letter-spacing: 0; }
+  .learning-world h1 .title-family { font-size: 15px; letter-spacing: 1px; }
+  .learning-world .hero-art { height: 260px; padding: 0; }
+  .learning-world .hero-topics { font-size: 13px; letter-spacing: 0; }
+  .learning-world .browse-link { margin-top: 18px; }
+  .learning-world .owners-caption { display: none; }
+  .learning-world .owners { gap: 36px; }
+  .learning-world .owner-img { width: 70px; height: 70px; }
+  .learning-world .featured-card { flex-direction: column; }
+  .learning-world .featured-card .card-art { width: 100%; height: 125px; }
+  .learning-world .footer-inner { flex-wrap: wrap; }
+}
+@media (max-width: 540px) {
+  .learning-world .shell { width: calc(100% - 28px); }
+  .learning-world .nav-inner { min-height: 76px; }
+  .learning-world .subject-nav .world-link { padding: 7px 3px; border-radius: 9px; text-align: center; }
+  .learning-world .world-name { font-size: 11px; }
+  .learning-world .hero { grid-template-columns: 1fr; }
+  .learning-world .hero-copy, .learning-world[data-subject='math'] .hero-copy { padding: 29px 22px 0; }
+  .learning-world h1 { font-size: 36px; }
+  .learning-world .hero-art { height: 220px; width: 100%; margin-top: -9px; padding: 0 8px; }
+  .learning-world .hero-topics { margin-top: 13px; }
+  .learning-world .browse-link { position: relative; z-index: 1; }
+  .learning-world .owners-section { padding: 23px 0; }
+  .learning-world .owners { gap: 24px; }
+  .learning-world .owner-link { gap: 9px; }
+  .learning-world .owner-img { width: 63px; height: 63px; }
+  .learning-world .owner-link strong { font-size: 15px; }
+  .learning-world .owner-link small { font-size: 11px; }
+  .learning-world .catalog { padding-top: 22px; }
+  .learning-world .filter-nav { gap: 7px; width: 100%; }
+  .learning-world .filter-btn { padding: 8px 12px; flex: 1 0 auto; font-size: 14px; }
+  .learning-world .filter-btn:first-child { flex-basis: 100%; }
+  .learning-world #filter-status { margin-top: 3px; font-size: 12px; }
+  .learning-world .featured-grid, .learning-world .game-grid { grid-template-columns: 1fr; gap: 16px; }
+  .learning-world .featured-card { flex-direction: row; }
+  .learning-world .featured-card .card-art { width: 89px; height: auto; }
+  .learning-world .featured-card .art-symbol { width: 55px; height: 67px; font-size: 34px; }
+  .learning-world .featured-card h3 { font-size: 18px; }
+  .learning-world .featured-card .card-meta { font-size: 11px; }
+  .learning-world .section-heading h2 { font-size: 21px; }
+  .learning-world .card-art { height: 145px; }
+  .learning-world .card-body { padding: 22px; }
+  .learning-world .footer-inner { justify-content: center; }
+  .learning-world .footer-nav { justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .learning-world *, .learning-world *::before, .learning-world *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}
