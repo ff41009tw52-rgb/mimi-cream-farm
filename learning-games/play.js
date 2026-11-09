@@ -79,7 +79,7 @@ const ray=svg('line',{x1:ox,y1:oy,x2:ox+r,y2:oy,stroke:'#475bd1','stroke-width':
 s.append(ray,dot);box.append(s);
 const read=el('div','readout');box.append(read);
 const controls=el('div','angle-controls');let current=0;
-function adjust(v){current=Math.max(0,Math.min(180,Math.round(v)));let [x,y]=pos(current,r);ray.setAttribute('x2',x);ray.setAttribute('y2',y);read.textContent='目前 '+current+'°｜'+(current<90?'銳角':current===90?'直角':current<180?'鈍角':'平角');}
+function adjust(v){current=Math.max(0,Math.min(180,Math.round(v)));let [x,y]=pos(current,r);ray.setAttribute('x2',x);ray.setAttribute('y2',y);read.textContent='目前 '+current+'°｜'+(current===0?'零度角':current<90?'銳角':current===90?'直角':current<180?'鈍角':'平角');}
 [-10,-1,1,10].forEach(d=>controls.append(btn((d>0?'+':'')+d+'°','',()=>{if(!solved)adjust(current+d)})));
 box.append(controls);stage.append(box);
 let dragging=false;
