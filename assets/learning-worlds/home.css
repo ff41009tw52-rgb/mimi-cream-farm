@@ -40,6 +40,7 @@ body.learning-world {
 .learning-world h1 .title-family { display: block; font-size: 19px; letter-spacing: 3px; margin-bottom: 15px; font-weight: 600; }
 .learning-world h1 .title-world { display: block; color: var(--strong); }
 .learning-world .hero-topics { color: var(--muted); font-size: 15px; margin-top: 17px; letter-spacing: 2px; }
+.learning-world .curriculum-note { display: inline-block; margin-top: 10px; padding: 4px 12px; border: 1px solid var(--line); border-radius: 999px; color: var(--strong); background: var(--paper); font-size: 13px; font-weight: 700; letter-spacing: 0.2px; }
 .learning-world .browse-link { display: inline-flex; align-items: center; justify-content: center; gap: 30px; min-height: 48px; padding: 10px 22px; margin-top: 26px; background: var(--strong); color: white; border-radius: 9px; font-weight: 700; font-size: 15px; }
 .learning-world .browse-link:hover { background: var(--ink); }
 .learning-world .hero-art { width: 100%; height: 340px; object-fit: contain; padding: 12px 20px 0 0; }
