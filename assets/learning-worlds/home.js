@@ -59,14 +59,14 @@
     const body = el('div', 'card-body');
     const meta = el('div', 'card-meta');
     meta.append(el('span', 'grade-label', game.grades.map(grade => labels[grade] || `${grade}年級`).join('・')));
-    meta.append(el('span', 'availability', isReady(game) ? '已上架' : '即將推出'));
+    meta.append(el('span', 'availability', isReady(game) ? '可以玩' : '準備中'));
     const title = el('h3', '', game.title);
     title.id = `${featured ? 'featured' : 'all'}-${game.id}`;
     card.setAttribute('aria-labelledby', title.id);
     body.append(meta, title, el('p', 'game-topic', game.topic), el('p', 'game-description', game.description));
     if (isReady(game)) {
-      const link = el('a', 'play-link', '開始遊玩 →');
-      link.href = safeUrl(game.url); link.setAttribute('aria-label', `開始遊玩：${game.title}`);
+      const link = el('a', 'play-link', '開始玩 →');
+      link.href = safeUrl(game.url); link.setAttribute('aria-label', `開始玩「${game.title}」`);
       body.append(link);
     }
     card.append(art, body);
@@ -82,13 +82,17 @@
     featuredGrid.replaceChildren(...featured.map(g => makeCard(g, true)));
     document.getElementById('featured-empty').hidden = featured.length > 0;
     empty.hidden = selected.length > 0;
+    const gradeName = grade === 'all' ? '全部年級' : labels[grade];
     if (!selected.length) {
-      document.getElementById('empty-title').textContent = `${grade === 'all' ? '' : labels[grade]}遊戲還在準備中`;
+      document.getElementById('empty-title').textContent = grade === 'all' ? '遊戲還在準備中' : `${gradeName}的遊戲還在準備中`;
     }
     const ready = selected.filter(isReady).length;
-    const status = `${grade === 'all' ? '全部年級' : labels[grade]}・${ready} 款可遊玩・${selected.length - ready} 款即將推出`;
-    document.getElementById('filter-status').textContent = status;
-    document.getElementById('game-count').textContent = `${selected.length} 款遊戲`;
+    const preparing = selected.length - ready;
+    const counts = [];
+    if (ready) counts.push(`${ready} 款可以玩`);
+    if (preparing) counts.push(`${preparing} 款準備中`);
+    document.getElementById('filter-status').textContent = `${gradeName}｜${counts.join('、') || '還沒有遊戲'}`;
+    document.getElementById('game-count').textContent = selected.length ? `${selected.length} 款遊戲` : '';
   };
   const buttons = [...document.querySelectorAll('[data-grade]')];
   const selectGrade = grade => {
@@ -101,7 +105,6 @@
     buttons[0].focus();
   });
   if (!Array.isArray(source)) {
-    document.getElementById('filter-status').textContent = '遊戲清單暫時無法載入，請重新整理頁面。';
-    document.getElementById('featured-empty').hidden = false;
+    document.getElementById('filter-status').textContent = '遊戲清單沒載入。請重新整理頁面再試一次。';
   } else selectGrade('all');
 })();

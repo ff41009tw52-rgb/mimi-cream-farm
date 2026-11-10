@@ -25,17 +25,23 @@ function run(subject, data) {
   return { ids, buttons, navs, games: ctx.window.LEARNING_GAMES[subject] };
 }
 const descendants = node => node.children.flatMap(n => [n, ...descendants(n)]);
-for (const [subject, count] of [['chinese', 5], ['math', 6]]) {
+for (const [subject, count, playable] of [
+  ['chinese', 6, ['kitchen', 'characters']],
+  ['math', 7, ['angles', 'pizza']]
+]) {
   const {ids, buttons, navs, games} = run(subject);
   assert.equal(games.length, count);
   assert.equal(new Set(games.map(g => g.id)).size, count);
   for (const g of games) {
     for (const field of ['id','title','grades','topic','description','icon','cover','url','status','order','publishedAt','featured']) assert.ok(field in g, field);
-    assert.equal(g.status, 'coming-soon'); assert.equal(g.url, '');
+    if (g.status === 'coming-soon') assert.equal(g.url, '');
   }
   assert.equal(ids['all-games'].children.length, count);
   assert.equal(ids['featured-games'].children.length, 2);
-  assert.equal(descendants(ids['all-games']).filter(n => n.tagName === 'a').length, 0);
+  const links = descendants(ids['all-games']).filter(n => n.tagName === 'a');
+  assert.deepEqual(links.map(n => n.href), playable.map(game => `https://example.org/farm/learning-games/${game}.html`));
+  for (const game of playable) assert.ok(fs.existsSync(path.join(root, 'learning-games', `${game}.html`)));
+  assert.equal(ids['filter-status'].textContent, `全部年級｜${playable.length} 款可以玩、${count - playable.length} 款準備中`);
   for (const grade of ['3','5','6']) {
     buttons.find(b => b.dataset.grade === grade).events.click();
     assert.equal(ids['all-games'].children.length, 0);
@@ -58,7 +64,7 @@ for (const [subject, count] of [['chinese', 5], ['math', 6]]) {
 }
 // Future publication: newest live games first, coming-soon never linked,
 // hidden entries omitted, and invalid URLs never become play buttons.
-const seed = run('chinese').games[0];
+const seed = run('chinese').games.find(game => game.status === 'coming-soon');
 const mock = (id, overrides) => ({...seed, id, ...overrides});
 const future = run('chinese', [
   mock('soon', {order: 0}),
@@ -72,5 +78,6 @@ assert.deepEqual(future.ids['all-games'].children.slice(0, 2).map(n=>n.dataset.g
 assert.equal(future.ids['all-games'].children.length, 5);
 assert.equal(descendants(future.ids['all-games']).filter(n => n.tagName === 'a').length, 2);
 assert.equal(descendants(future.ids['all-games']).find(n => n.tagName === 'a').href, 'https://example.org/farm/new.html');
-assert.ok(!fs.readFileSync(path.join(root,'index.html'),'utf8').includes('learning-worlds'));
-console.log('PASS: 11 placeholders, every grade, empty/reset states, navigation, assets, future publication ordering and safe links; no science imports or storage writes.');
+const science = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+assert.doesNotMatch(science, /learning-worlds\/(?:home\.(?:js|css)|games-data\.js)/);
+console.log('PASS: 13 cards, 4 playable games, every grade, empty/reset states, navigation, assets and safe links.');
