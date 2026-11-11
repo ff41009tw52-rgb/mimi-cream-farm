@@ -143,15 +143,30 @@
       "grades": [
         "4"
       ],
-      "topic": "平分披薩、認識分數",
-      "description": "客人點了 3/4 個披薩。先把披薩平分成四片，再點三片幫白奶油出餐。遇到超過一個披薩的訂單，也要算算該拿幾片。",
+      "topic": "分數、假分數與帶分數互換",
+      "description": "幫白奶油切披薩、拿小片，再合成完整披薩。遇到超過一個的訂單，試著用假分數和帶分數說出份量。",
       "icon": "½",
       "artwork": "pizza",
       "cover": "",
       "url": "learning-games/pizza.html",
       "status": "published",
-      "publishedAt": "2026-11-09T23:46:00+08:00",
+      "publishedAt": "2026-11-11T16:00:00+08:00",
       "order": 2,
+      "featured": true
+    },
+    {
+      "id": "math-fraction-rail",
+      "title": "橘咪咪的分數軌道",
+      "grades": ["4"],
+      "topic": "分數數線、刻度與位置",
+      "description": "替橘咪咪鋪好等距軌道，照車票移動小火車。超過 1 的分數要停在哪裡？換一種寫法，看看是不是同一站。",
+      "icon": "↔",
+      "artwork": "race",
+      "cover": "",
+      "url": "learning-games/fraction-rail.html",
+      "status": "published",
+      "publishedAt": "2026-11-11T16:01:00+08:00",
+      "order": 0,
       "featured": true
     },
     {
