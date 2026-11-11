@@ -30,7 +30,7 @@ function round(){
 function finish(q,explanation){
  if(state.solved)return;state.solved=true;records.push({q:{...q},errors:[...state.errors]});
  speech(`<span class="success-stamp">${isPizza?'出餐完成':'停靠完成'}</span>${explanation}`,'good');
- $('#next').hidden=false;app.querySelector('progress').value=index+1;
+ $('#next').hidden=false;app.querySelector('progress').value=index+1;app.querySelector('.progressbar span:last-child').textContent='完成 '+(index+1);
  $('#workspace').querySelectorAll('button,select').forEach(b=>b.disabled=true);
  $('#workspace').querySelectorAll('[role=button]').forEach(b=>{b.setAttribute('aria-disabled','true');b.setAttribute('tabindex','-1');});
 }
