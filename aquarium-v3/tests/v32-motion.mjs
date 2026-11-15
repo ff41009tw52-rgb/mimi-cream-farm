@@ -47,19 +47,30 @@ assert.ok(entrance.every(f=>f.x<0||f.x>world.width));
 for (let tick=0;tick<120;tick++) stepSchool(entrance,world,1/fps);
 assert.ok(entrance.every(f=>f.x>f.width/2*-1 && f.x<world.width+f.width/2));
 assert.equal(new Set(Object.values(SPECIES).map(p=>p.tailHz)).size,4);
+const lateralTravel={};
 for (const [type,profile] of Object.entries(SPECIES)) {
-  for (const model of ['hinge','wave']) {
-    const strip=createStrip(18);
-    let flex=0;
-    for (let i=0;i<24;i++) {
-      poseStrip(strip,model,profile,i/24*TAU,1.2,.25);
-      assert.equal(strip.x.at(-1),.5);
-      assert.equal(Math.abs(strip.y.at(-1)),0);
+  const hinge=createStrip(18);
+  poseStrip(hinge,'hinge',profile,Math.PI/2,1,0);
+  assert.ok(Math.abs(hinge.y[0])>.015,`${type}: comparison hinge is not animated`);
+  for (const columns of [7,10,12,18]) {
+    const strip=createStrip(columns), xs=[], ys=[];
+    for (let i=0;i<48;i++) {
+      poseStrip(strip,'wave',profile,i/48*TAU,1,0);
+      for (let j=Math.ceil(columns*.75);j<=columns;j++) {
+        assert.ok(Math.abs(strip.x[j]-(j/columns-.5))<.000001,`${type}: stable head was warped`);
+        assert.ok(Math.abs(strip.y[j])<.000001,`${type}: stable head moved vertically`);
+      }
       assert.ok(strip.x.every((x,j)=>j===0||x>strip.x[j-1]),`${type}: crossed mesh columns`);
-      flex=Math.max(flex,Math.abs(strip.y[0]));
+      xs.push(strip.x[0]);
+      ys.push(strip.y[0]);
     }
-    assert.ok(flex>.015,`${type}: tail scarcely moves`);
+    const xTravel=Math.max(...xs)-Math.min(...xs), yTravel=Math.max(...ys)-Math.min(...ys);
+    assert.ok(xTravel>.035 && xTravel>5*yTravel,`${type}: tail motion is not predominantly horizontal`);
+    poseStrip(strip,'wave',profile,TAU/4,2,1,1.8,1.5);
+    assert.ok(strip.x.every((x,j)=>j===0||x>strip.x[j-1]),`${type}: extreme lab controls folded the mesh`);
+    if (columns===18) lateralTravel[type]=[xTravel,yTravel].map(value=>Number((value*100).toFixed(2)));
   }
 }
 console.log(JSON.stringify({fishes:40,simulatedSeconds:90,changedTarget:goalChanges.size,
-  turned:turns.size,maxTurnDegrees:maxAngleChange*180/Math.PI,longestOverlapSeconds:longestOverlap},null,2));
+  turned:turns.size,maxTurnDegrees:maxAngleChange*180/Math.PI,longestOverlapSeconds:longestOverlap,
+  lateralTravelPercent:lateralTravel},null,2));

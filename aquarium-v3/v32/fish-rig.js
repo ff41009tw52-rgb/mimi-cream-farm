@@ -19,28 +19,51 @@ export function createStrip(columns) {
   return { x:new Float32Array(columns+1), y:new Float32Array(columns+1) };
 }
 
+// An oblique view makes the two sides of a horizontal tail beat project differently.
+const viewYaw=.44;
+const viewWidth=Math.cos(viewYaw);
+const viewDepth=Math.sin(viewYaw);
+const depthLift=.075;
+
+function poseLateralWave(strip, fish, phase, strength, bend, bodyGain) {
+  const columns=strip.x.length-1;
+  const step=1/columns;
+  const swing=Math.min(.92,strength*12);
+  const steering=clamp(bend,-1,1)*fish.amplitude*2.4*bodyGain;
+  let x=.5, depth=0;
+  strip.x[columns]=x;
+  strip.y[columns]=0;
+
+  // Integrate the spine from the fixed nose to the tail, one strip at a time.
+  for (let i=columns-1; i>=0; i--) {
+    const s=1-(i+.5)*step;
+    const body=smoothstep(fish.bendFrom,1,s);
+    const tail=smoothstep(fish.hinge-.13,1,s);
+    const weight=clamp(body*bodyGain+(1-bodyGain)*tail,0,1.24);
+    const yaw=viewYaw+swing*weight*Math.sin(phase-fish.wave*s)+steering*body;
+    const projectedWidth=clamp(Math.cos(yaw)/viewWidth,.46,1.12);
+    x-=step*projectedWidth;
+    depth+=step*(Math.sin(yaw)-viewDepth);
+    strip.x[i]=x;
+    // A slightly elevated viewpoint leaves only a small vertical cue for depth.
+    strip.y[i]=depth*depthLift;
+  }
+  return strip;
+}
+
 export function poseStrip(strip, model, fish, phase, pace, bend, tailGain=1, bodyGain=1) {
   const columns=strip.x.length-1;
   const strength=fish.amplitude*tailGain*clamp(.78+pace*.22,.72,1.23);
+  if (model==='wave') return poseLateralWave(strip,fish,phase,strength,bend,bodyGain);
+
   const hingeAngle=Math.atan2(strength*Math.sin(phase),1-fish.hinge);
-  const turnBend=clamp(bend,-1,1)*fish.amplitude*.45;
+  const lengthShift=1-Math.cos(hingeAngle);
+  const lift=Math.sin(hingeAngle);
   for (let i=0; i<=columns; i++) {
     const u=i/columns;
-    const s=1-u;
-    let x=u-.5;
-    let y=0;
-    if (model==='hinge') {
-      const joint=Math.max(0,s-fish.hinge);
-      x+=joint*(1-Math.cos(hingeAngle));
-      y=joint*Math.sin(hingeAngle);
-    } else if (model==='wave') {
-      const wave=smoothstep(fish.bendFrom,1,s);
-      const tail=smoothstep(fish.hinge-.13,1,s);
-      const weight=wave*bodyGain+(1-bodyGain)*tail;
-      y=strength*clamp(weight,0,1.28)*Math.sin(phase-fish.wave*s) + turnBend*wave*bodyGain;
-    }
-    strip.x[i]=x;
-    strip.y[i]=y;
+    const joint=model==='hinge' ? Math.max(0,1-u-fish.hinge) : 0;
+    strip.x[i]=u-.5+joint*lengthShift;
+    strip.y[i]=joint*lift;
   }
   return strip;
 }
