@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>班級彩繪水族館｜魚類游動比較</title>
+  <link rel="stylesheet" href="v32/lab.css">
+</head>
+<body>
+  <header>
+    <div>
+      <h1>魚類游動比較</h1>
+      <a href="../class-aquarium-v3-display.html">開啟水族館 ↗</a>
+    </div>
+  </header>
+  <main>
+    <section class="controls" aria-label="動畫控制">
+      <div class="selectors">
+        <label>魚種
+          <select id="species">
+            <option value="clown">小丑魚</option>
+            <option value="butterfly">蝴蝶魚</option>
+            <option value="puffer">河豚</option>
+            <option value="shark">鯊魚</option>
+          </select>
+        </label>
+        <label>測試作品
+          <select id="artwork">
+            <option value="paint">著色示範</option>
+            <option value="line">原始線稿</option>
+          </select>
+        </label>
+        <label class="upload">載入透明 PNG<input id="upload" type="file" accept="image/png"></label>
+        <div class="playback">
+          <button id="pause" type="button">暫停</button>
+          <label><input id="slow" type="checkbox"> 慢動作</label>
+        </div>
+      </div>
+      <div class="sliders">
+        <label for="speed">游動速度 <output for="speed">1.00×</output><input id="speed" type="range" min="0.35" max="2" step="0.05" value="1"></label>
+        <label for="frequency">擺尾頻率 <output for="frequency">1.00×</output><input id="frequency" type="range" min="0.3" max="2" step="0.05" value="1"></label>
+        <label for="amplitude">擺尾幅度 <output for="amplitude">1.00×</output><input id="amplitude" type="range" min="0" max="1.8" step="0.05" value="1"></label>
+        <label for="bend">身體彎曲 <output for="bend">1.00×</output><input id="bend" type="range" min="0" max="1.5" step="0.05" value="1"></label>
+        <label for="turn">轉彎速度 <output for="turn">1.00×</output><input id="turn" type="range" min="0.5" max="2" step="0.05" value="1"></label>
+        <label for="size">魚的大小 <output for="size">1.00×</output><input id="size" type="range" min="0.65" max="1.4" step="0.05" value="1"></label>
+      </div>
+      <p id="lab-error" role="status" hidden></p>
+    </section>
+    <section class="comparison" aria-label="三種動畫">
+      <article>
+        <h2>A. V3.1.2</h2>
+        <div class="pool"><canvas id="legacy" role="img" aria-label="原版動畫"></canvas></div>
+        <p>整張 PNG 移動，在折返時縮窄並翻向。</p>
+      </article>
+      <article>
+        <h2>B. 2D 骨架擺尾</h2>
+        <div class="pool"><canvas id="hinge" role="img" aria-label="單關節擺尾動畫"></canvas></div>
+        <p>接合處共用座標，尾部繞單一關節擺動。</p>
+      </article>
+      <article>
+        <h2>C. 2D 網格變形</h2>
+        <div class="pool"><canvas id="wave" role="img" aria-label="頭穩尾動的網格動畫"></canvas></div>
+        <p>頭部相對穩定，波浪沿魚身傳往尾部。<span id="lab-renderer"></span></p>
+      </article>
+    </section>
+  </main>
+  <script type="module" src="v32/lab.js"></script>
+</body>
+</html>
