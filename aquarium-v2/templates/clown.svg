@@ -5,7 +5,7 @@
 <g font-family="'Noto Sans TC','Microsoft JhengHei',sans-serif" fill="#18394a">
 <text x="400" y="78" font-size="28" font-weight="700" text-anchor="middle">班級彩繪水族館｜小丑魚型</text>
 <text x="400" y="109" font-size="17" text-anchor="middle">請在魚的輪廓內自由上色，讓你的魚游進全班的海洋！</text>
-<text x="84" y="141" font-size="16">魚的名字（選填）：_______________________</text>
+<text x="84" y="141" font-size="16">魚名（選填）：____________</text>
 <text x="701" y="141" font-size="15" font-weight="700" text-anchor="end">模板 A</text>
 </g>
 <path d="M222 286 C203 267 166 230 134 208 L144 285 L134 363 C169 339 202 314 222 304 C268 255 329 224 393 220 L419 176 L449 220 C527 218 615 250 659 281 Q681 291 659 304 C607 342 530 365 450 360 L419 401 L394 360 C326 352 264 330 222 304 Q215 295 222 286 Z" fill="white" stroke="#253e4d" stroke-width="3" stroke-linejoin="round"/>
