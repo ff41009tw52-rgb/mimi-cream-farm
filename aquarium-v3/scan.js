@@ -20,20 +20,21 @@ const species = byId('fish-type');
 const templateVersion = byId('template-version');
 const collection = createCollection();
 const gate = new PaperGate();
-const interval = 370;
+const scanInterval = 240;
+const removalInterval = 370;
 const frameCanvas = document.createElement('canvas');
 const analysisCanvas = document.createElement('canvas');
 const analysisContext = analysisCanvas.getContext('2d',{willReadFrequently:true});
 let worker, workerRequest, camera, auto = false, opening = false, busy = false;
 let cameraRevision = 0, saved = 0, latestURL, manualURL, manual, timer;
-let emptyFrames = 0, lastDevice = '', activeFacing = '', noticeTimer;
+let emptyFrames = 0, lastDevice = '', activeFacing = '', noticeTimer, pendingSnapshot;
 let preferredFacing = mobile ? 'environment' : '';
 
 if (mobile) {
   byId('camera-heading').textContent = '相機';
   flipCamera.hidden = false;
   byId('mobile-photo-label').hidden = false;
-  byId('camera-hint').textContent = '點「開始自動掃描」開啟後鏡頭。';
+  byId('camera-hint').textContent = '點一次「開始自動掃描」開啟後鏡頭。';
   devices.options[0].textContent = '自動選擇鏡頭';
 }
 
@@ -41,13 +42,13 @@ function hideNotice() {
   clearTimeout(noticeTimer);
   notice.hidden = true;
 }
-function showNotice(fromCamera) {
+function showNotice(showRemoval, waitForRemoval) {
   clearTimeout(noticeTimer);
   const instruction = byId('upload-instruction');
-  instruction.textContent = fromCamera ? '現在可以移開圖畫紙。' : '';
-  instruction.hidden = !fromCamera;
+  instruction.textContent = showRemoval ? '現在可以移開圖畫紙。' : '';
+  instruction.hidden = !showRemoval;
   notice.hidden = false;
-  if (!fromCamera) noticeTimer = setTimeout(hideNotice,4200);
+  if (!waitForRemoval) noticeTimer = setTimeout(hideNotice,4200);
 }
 
 function show(text,tone='') {
@@ -103,9 +104,15 @@ function stopCamera(message='攝影機已停止。',tone='') {
     show(message,tone);
   }
 }
-function schedule() {
+function schedule(delay=gate.locked ? removalInterval : scanInterval) {
   clearTimeout(timer);
-  if (camera && (auto || gate.locked)) timer = setTimeout(tick,interval);
+  if (!busy && pendingSnapshot) {
+    const request=pendingSnapshot;
+    pendingSnapshot=undefined;
+    void scanSnapshot(request);
+    return;
+  }
+  if (camera && (auto || gate.locked)) timer = setTimeout(tick,delay);
 }
 async function openCamera(resumeAuto=true) {
   if (!isSecureContext || !navigator.mediaDevices?.getUserMedia) {
@@ -165,7 +172,7 @@ async function openCamera(resumeAuto=true) {
     else if (facing && actualFacing && facing!==actualFacing) {
       show('指定方向的鏡頭無法開啟，已切到可用鏡頭。你也可以從攝影機清單改選。','warning');
     } else show(auto ? '請放上著色紙，讓四個定位方格入鏡。' : '自動掃描已暫停。');
-    schedule();
+    schedule(0);
     refreshDevices();
   } catch (error) {
     if (revision===cameraRevision) stopCamera(cameraError(error),'warning');
@@ -214,9 +221,10 @@ function classify(source,previous) {
     worker.postMessage({frame,previous:compatiblePrevious},[frame.data.buffer]);
   });
 }
-async function save(blob,type,fromCamera,map) {
+async function save(blob,type,{paper,showRemoval=Boolean(paper)}={}) {
   await collection.add(blob,type);
-  if (fromCamera) gate.latch(map);
+  const waitForRemoval=Boolean(paper && paper.session===cameraRevision);
+  if (waitForRemoval) gate.latch(paper);
   saved++;
   const latest=byId('latest');
   if (latestURL) URL.revokeObjectURL(latestURL);
@@ -226,9 +234,20 @@ async function save(blob,type,fromCamera,map) {
   latest.hidden=false;
   byId('latest-empty').hidden=true;
   byId('count').textContent=`這次已掃描 ${saved} 張`;
-  show(`已加入${FISH[type].name}。${fromCamera ? '請拿走圖畫紙。' : ''}`,'success');
-  showNotice(fromCamera);
+  show(`已加入${FISH[type].name}。${showRemoval ? '請拿走圖畫紙。' : ''}`,'success');
+  showNotice(showRemoval,waitForRemoval);
 }
+
+async function saveDetection(frame,{result,scaleX,scaleY,w,h},source,session) {
+  const {type,map,revision,signature}=result;
+  show(`正在儲存${FISH[type].name}…`);
+  updateControls();
+  const blob=await extractFish(frame,type,map,{scaleX,scaleY,revision});
+  if (source==='camera' && session!==cameraRevision) return;
+  const paper=source==='camera' ? {map,type,revision,signature,w,h,session} : undefined;
+  await save(blob,type,{paper,showRemoval:source!=='file'});
+}
+
 async function tick() {
   const revision = cameraRevision;
   if (!camera || (!auto && !gate.locked)) return;
@@ -241,21 +260,16 @@ async function tick() {
     drawFrame(frameCanvas,video,video.videoWidth,video.videoHeight);
     const data = await classify(frameCanvas,gate.previous);
     if (revision!==cameraRevision || dialog.open || (!auto && !gate.locked)) return;
-    const {result,scaleX,scaleY,w,h} = data;
+    const {result} = data;
     const state = gate.observe(result);
     if (state==='ready') {
-      show(`正在儲存${FISH[result.type].name}…`);
-      updateControls();
-      const version = result.revision;
-      const blob = await extractFish(frameCanvas,result.type,result.map,{scaleX,scaleY,revision:version});
-      if (revision!==cameraRevision) return;
-      await save(blob,result.type,true,{map:result.map,type:result.type,revision:version,signature:result.signature,w,h});
+      await saveDetection(frameCanvas,data,'camera',revision);
     } else if (state==='stabilizing') {
       emptyFrames=0;
       show(`找到${FISH[result.type].name}，請把紙放穩。`);
     } else if (state==='uncertain') {
       emptyFrames=0;
-      show('辨識不完整。請把四角放進畫面、移開遮擋，或使用手動拍照。','warning');
+      show('辨識不完整。請把四角放進畫面、移開遮擋，或使用「拍照掃描」。','warning');
     } else if (state==='removed') {
       hideNotice();
       emptyFrames=0;
@@ -263,7 +277,7 @@ async function tick() {
     } else if (state==='empty') {
       emptyFrames++;
       if (emptyFrames>=3) show(result.partial
-        ? '尚未辨識到紙張。請確認方格清晰，必要時可手動拍照。'
+        ? '尚未辨識到紙張。請確認方格清晰，必要時可用「拍照掃描」。'
         : '等待著色紙，請讓四個方格完整入鏡。');
     }
   } catch (error) {
@@ -275,7 +289,7 @@ async function tick() {
   } finally {
     busy = false;
     updateControls();
-    if (revision===cameraRevision) schedule();
+    schedule();
   }
 }
 
@@ -309,7 +323,6 @@ function drawHandles() {
 function movePoint(index,x,y) {
   if (!manual || manual.saving) return;
   manual.points[index]=[Math.max(0,Math.min(photo.width-1,x)),Math.max(0,Math.min(photo.height-1,y))];
-  manual.autoMap=null;
   invalidatePreview();
   drawHandles();
 }
@@ -339,39 +352,57 @@ for (const [index,key] of Object.keys(FISH).entries()) {
   });
   byId('handles').append(button);
 }
-async function prepareManual(blob) {
-  if (busy || dialog.open || (!blob && (!camera || video.readyState<2 || gate.locked))) return;
+function showManual(frame,source,session) {
+  photo.width=frame.width;
+  photo.height=frame.height;
+  const ratio=(SHEET.centers[1][0]-SHEET.centers[0][0])/(SHEET.centers[3][1]-SHEET.centers[0][1]);
+  const w=Math.min(photo.width*.7,photo.height*.73*ratio);
+  const h=w/ratio;
+  const x=(photo.width-w)/2,y=(photo.height-h)/2;
+  manual={frame,source,session,version:0,points:[[x,y],[x+w,y],[x+w,y+h],[x,y+h]]};
+  species.value='';
+  templateVersion.value=String(ARTWORK_REVISION);
+  byId('manual-info').textContent='請選擇魚形，並將定位點對到紙上的方格。';
+  drawHandles();
+  gate.resetStability();
+  dialog.showModal();
+}
+
+async function scanSnapshot({file,source,session}) {
+  if (dialog.open || (source==='camera' && (session!==cameraRevision || !camera || video.readyState<2 || gate.locked))) return;
+  if (busy) {
+    pendingSnapshot={file,source,session};
+    return;
+  }
   busy=true;
   clearTimeout(timer);
+  hideNotice();
+  show('正在辨識著色紙…');
   updateControls();
   let bitmap;
   try {
-    bitmap=blob ? await createImageBitmap(blob) : null;
-    const source=bitmap || video;
+    if (file) {
+      try {
+        bitmap=await createImageBitmap(file);
+      } catch {
+        show('無法開啟這張照片，請改用 JPEG 或 PNG 後重試。','warning');
+        return;
+      }
+    }
     const frame=document.createElement('canvas');
-    drawFrame(frame,source,bitmap?.width || video.videoWidth,bitmap?.height || video.videoHeight);
-    photo.width=frame.width;
-    photo.height=frame.height;
-    manual = {frame,fromCamera:!blob,version:0};
-    let hit;
-    try { hit = await classify(frame); } catch {}
-    const found=hit?.result?.kind==='found';
-    const ratio=(SHEET.centers[1][0]-SHEET.centers[0][0])/(SHEET.centers[3][1]-SHEET.centers[0][1]);
-    const w=Math.min(photo.width*.7,photo.height*.73*ratio);
-    const h=w/ratio;
-    const x=(photo.width-w)/2,y=(photo.height-h)/2;
-    manual.points=found ? hit.result.corners.map(([u,v])=>[u*hit.scaleX,v*hit.scaleY])
-      : [[x,y],[x+w,y],[x+w,y+h],[x,y+h]];
-    manual.autoMap=found ? hit : null;
-    species.value=found ? hit.result.type : '';
-    templateVersion.value=String(found ? hit.result.revision : ARTWORK_REVISION);
-    byId('manual-info').textContent=found ? '已找到四個定位點，請確認預覽。' : '請選擇魚形，並將定位點對到紙上的方格。';
-    drawHandles();
-    gate.resetStability();
-    dialog.showModal();
-    if (found) await preview();
-  } catch {
-    show('無法開啟這張照片，請改用 JPEG 或 PNG 後重試。','warning');
+    drawFrame(frame,bitmap || video,bitmap?.width || video.videoWidth,bitmap?.height || video.videoHeight);
+    const detection=await classify(frame);
+    if (source==='camera' && session!==cameraRevision) return;
+    if (detection.result.kind==='found') {
+      await saveDetection(frame,detection,source,session);
+    } else {
+      show('辨識不完整，可重新拍攝或修正四角定位。','warning');
+      showManual(frame,source,session);
+    }
+  } catch (error) {
+    if (source==='camera' && session!==cameraRevision) return;
+    if (source==='camera') auto=false;
+    show(`${error.message || '掃描失敗'}。請檢查後重試。`,'warning');
   } finally {
     bitmap?.close();
     busy=false;
@@ -390,14 +421,13 @@ async function preview() {
   }
   invalidatePreview();
   const version=item.version;
-  const hit=item.autoMap;
-  const map=hit?.result.map || manualMap(item.points,item.frame);
+  const map=manualMap(item.points,item.frame);
   if (!map) {
     byId('manual-info').textContent='定位順序或範圍有誤，請從紙的左上角順時針對準四個方格。';
     return;
   }
   try {
-    const blob=await extractFish(item.frame,type,map,{scaleX:hit?.scaleX,scaleY:hit?.scaleY,revision});
+    const blob=await extractFish(item.frame,type,map,{revision});
     if (manual!==item || version!==item.version) return;
     item.preview={type,blob,revision};
     manualURL=URL.createObjectURL(blob);
@@ -415,11 +445,17 @@ byId('send').onclick=async () => {
   item.saving=true;
   byId('send').disabled=byId('close-manual').disabled=true;
   try {
-    const [w,h]=dimensions(item.frame.width,item.frame.height,896);
-    const map=homographyForManual(item,w,h);
     const {type,blob,revision}=item.preview;
-    const signature=item.fromCamera ? paperFingerprint(analysisContext.getImageData(0,0,w,h),{type,map,revision}) : null;
-    await save(blob,type,item.fromCamera,{map,type,revision,signature,w,h});
+    let paper;
+    if (item.source==='camera' && item.session===cameraRevision) {
+      const [w,h]=dimensions(item.frame.width,item.frame.height,896);
+      const points=item.points.map(([x,y])=>[x*w/item.frame.width,y*h/item.frame.height]);
+      const map=manualMap(points,{width:w,height:h});
+      if (!map) throw new Error('定位點無效，請重新對準四個方格。');
+      const signature=paperFingerprint(analysisContext.getImageData(0,0,w,h),{type,map,revision});
+      paper={map,type,revision,signature,w,h,session:item.session};
+    }
+    await save(blob,type,{paper,showRemoval:item.source!=='file'});
     dialog.close();
   } catch (error) {
     byId('manual-info').textContent=error.message || '無法儲存作品，請再試一次。';
@@ -429,9 +465,6 @@ byId('send').onclick=async () => {
     byId('close-manual').disabled=false;
   }
 };
-function homographyForManual(item,w,h) {
-  return manualMap(item.points.map(([x,y])=>[x*w/item.frame.width,y*h/item.frame.height]),{width:w,height:h});
-}
 dialog.addEventListener('cancel',event=>{ if (manual?.saving) event.preventDefault(); });
 dialog.addEventListener('close',()=>{
   invalidatePreview();
@@ -442,11 +475,11 @@ dialog.addEventListener('close',()=>{
 byId('close-manual').onclick=()=>dialog.close();
 byId('preview').onclick=preview;
 species.onchange=templateVersion.onchange=invalidatePreview;
-capture.onclick=()=>prepareManual();
-byId('photo').onchange=mobilePhoto.onchange=event=>{
-  const file=event.target.files[0];
-  event.target.value='';
-  if (file) void prepareManual(file);
+capture.onclick=()=>void scanSnapshot({source:'camera',session:cameraRevision});
+byId('photo').onchange=mobilePhoto.onchange=({target})=>{
+  const file=target.files[0];
+  target.value='';
+  if (file) void scanSnapshot({file,source:target===mobilePhoto ? 'mobile' : 'file'});
 };
 startButton.onclick=()=>{
   if (!camera) {
@@ -458,7 +491,7 @@ startButton.onclick=()=>{
   emptyFrames=0;
   updateControls();
   show(auto ? gate.locked ? '請拿走已掃描的紙張。' : '請放上著色紙。' : '自動掃描已暫停。');
-  schedule();
+  schedule(0);
 };
 byId('stop').onclick=()=>stopCamera();
 byId('dismiss-upload').onclick=hideNotice;

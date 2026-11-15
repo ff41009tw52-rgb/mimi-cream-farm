@@ -21,7 +21,7 @@
       <h2 id="camera-heading">實物投影機</h2>
       <div class="camera-frame">
         <video id="camera" autoplay muted playsinline aria-label="即時相機畫面"></video>
-        <p id="camera-hint">選擇攝影機後，點「開始自動掃描」。</p>
+        <p id="camera-hint">選擇攝影機後，點一次「開始自動掃描」。</p>
       </div>
       <p id="status" role="status" aria-live="polite">等待開啟攝影機。</p>
     </section>
@@ -33,10 +33,10 @@
         <button id="start" class="primary">開始自動掃描</button>
         <div class="secondary-actions">
           <button id="stop" disabled>停止攝影機</button>
-          <button id="capture" disabled>手動拍照</button>
+          <button id="capture" disabled>拍照掃描</button>
         </div>
         <button id="flip-camera" class="flip-camera" type="button" hidden disabled>切到前鏡頭</button>
-        <p>把著色紙平放，讓四個方格完整入鏡。出現「已上傳」後，再移開圖畫紙。</p>
+        <p>把著色紙平放，讓四個方格完整入鏡。辨識成功就會自動加入，看到「已上傳」再移開。</p>
         <label class="file-label">匯入照片<input type="file" id="photo" accept="image/*"></label>
         <label class="file-label" id="mobile-photo-label" hidden>用後鏡頭拍照<input type="file" id="mobile-photo" accept="image/*" capture="environment"></label>
       </section>
@@ -75,6 +75,6 @@
       <button id="send" class="primary" disabled>加入水族館</button>
     </div>
   </dialog>
-  <script type="module" src="aquarium-v3/scan.js?v=3.1.0"></script>
+  <script type="module" src="aquarium-v3/scan.js?v=3.1.1"></script>
 </body>
 </html>

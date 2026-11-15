@@ -40,7 +40,7 @@ try {
       image.src='data:image/jpeg;base64,'+data;
       return image;
     });
-    let mode=0,stream,timeout;
+    let mode=1,stream,timeout;
     window.changeFrame=next=>{mode=next;};
     window.rejectCamera=false;
     window.unplugCamera=()=>{
@@ -78,11 +78,19 @@ try {
   const notice=scan.locator('#upload-notice');
   assert.equal(await notice.isVisible(),false);
   await scan.getByRole('button',{name:'開始自動掃描'}).click();
+  await scan.getByRole('button',{name:'暫停自動掃描'}).waitFor();
+  const insertTime=await scan.evaluate(()=>{
+    window.changeFrame(0);
+    return Date.now();
+  });
   await display.waitForFunction(()=>document.querySelector('#aquarium').dataset.fishCount==='1');
   await display.waitForFunction(()=>window.fishArrivals.length===1);
   await scan.getByText('已加入小丑魚型。請拿走圖畫紙。').waitFor();
   await scan.getByText('已上傳到水族館',{exact:true}).waitFor();
   await scan.getByText('現在可以移開圖畫紙。',{exact:true}).waitFor();
+  const insertToNotice=Date.now()-insertTime;
+  assert.ok(insertToNotice<2000,`Automatic scan took ${insertToNotice} ms`);
+  results.insertToNotice=insertToNotice;
   if (process.env.AQUARIUM_SCREENSHOTS) {
     await mkdir(process.env.AQUARIUM_SCREENSHOTS,{recursive:true});
     await scan.screenshot({path:process.env.AQUARIUM_SCREENSHOTS+'/upload-notice.png'});
@@ -104,7 +112,7 @@ try {
   await scan.getByText('已上傳到水族館',{exact:true}).waitFor();
   await scan.getByRole('button',{name:'關閉上傳提示'}).click();
   await notice.waitFor({state:'hidden'});
-  assert.equal(await scan.getByRole('button',{name:'手動拍照'}).isEnabled(),false);
+  assert.equal(await scan.getByRole('button',{name:'拍照掃描'}).isEnabled(),false);
   results.uploadNotice='shown after write, stays until paper removed, dismissal leaves latch closed';
   await display.waitForFunction(()=>window.fishArrivals.length===2);
   const arrivals=await display.evaluate(async()=>{
@@ -117,6 +125,17 @@ try {
   results.duplicate='passed';
   await display.reload();
   await display.waitForFunction(()=>document.querySelector('#aquarium').dataset.fishCount==='2');
+  await scan.getByRole('button',{name:'暫停自動掃描'}).click();
+  await scan.evaluate(()=>window.changeFrame(1));
+  const snapshot=scan.getByRole('button',{name:'拍照掃描'});
+  await scan.waitForFunction(()=>!document.querySelector('#capture').disabled);
+  await scan.evaluate(()=>window.changeFrame(0));
+  await delay(120);
+  await snapshot.click();
+  await notice.waitFor();
+  assert.equal(await scan.locator('#manual').isVisible(),false);
+  await scan.getByText('現在可以移開圖畫紙。',{exact:true}).waitFor();
+  await display.waitForFunction(()=>document.querySelector('#aquarium').dataset.fishCount==='3');
   await scan.evaluate(()=>window.unplugCamera());
   await scan.getByText(/攝影機已中斷/).waitFor();
   await scan.evaluate(()=>{window.rejectCamera=true;});
@@ -125,22 +144,23 @@ try {
   results.camera='simulated interruption and denial passed';
   const input=scan.locator('#photo');
   await input.setInputFiles({name:'clown.jpg',mimeType:'image/jpeg',buffer:Buffer.from(pictures[0],'base64')});
-  await scan.getByText('請確認魚身完整，再加入水族館。').waitFor();
-  await scan.getByRole('button',{name:'加入水族館',exact:true}).click();
-  await display.waitForFunction(()=>document.querySelector('#aquarium').dataset.fishCount==='3');
+  await display.waitForFunction(()=>document.querySelector('#aquarium').dataset.fishCount==='4');
   await scan.getByText('已上傳到水族館',{exact:true}).waitFor();
+  assert.equal(await scan.locator('#manual').isVisible(),false);
   await scan.locator('#upload-instruction').waitFor({state:'hidden'});
   const fixture=Buffer.from(pictures[3],'base64');
   await input.setInputFiles({name:'covered.jpg',mimeType:'image/jpeg',buffer:fixture});
   await scan.getByText('請選擇魚形，並將定位點對到紙上的方格。').waitFor();
+  assert.equal(await notice.isVisible(),false);
+  assert.equal(await stage.getAttribute('data-fish-count'),'4');
   await scan.getByLabel('魚形',{exact:true}).selectOption('clown');
   await scan.getByRole('button',{name:'預覽魚形'}).click();
   await scan.getByText('請確認魚身完整，再加入水族館。').waitFor();
   await scan.getByRole('button',{name:'取消',exact:true}).click();
-  results.manual='auto-point preview, manual preview and upload passed';
+  results.snapshot='camera snapshot and file import publish directly; only ambiguous marks open manual correction';
   await display.getByRole('button',{name:'作品與設定'}).click();
   await display.getByRole('button',{name:'刪除小丑魚型作品'}).first().click();
-  await display.waitForFunction(()=>document.querySelector('#aquarium').dataset.fishCount==='2');
+  await display.waitForFunction(()=>document.querySelector('#aquarium').dataset.fishCount==='3');
   await display.getByRole('button',{name:'關閉',exact:true}).click();
   await display.evaluate(async()=>{
     const {createCollection}=await import('./aquarium-v3/collection.js');
@@ -225,7 +245,16 @@ try {
     {facing:'environment',exact:false,previousStopped:true},
   ]);
   await mobile.getByRole('button',{name:'停止攝影機'}).click();
-  results.mobileCamera='rear first, front/back switch releases track, ideal fallback and native capture hint passed';
+  const mobileDisplay=await mobileContext.newPage();
+  await mobileDisplay.goto(base+'/class-aquarium-v3-display.html');
+  await mobile.locator('#mobile-photo').setInputFiles({
+    name:'mobile-clown.jpg',mimeType:'image/jpeg',buffer:Buffer.from(pictures[0],'base64'),
+  });
+  await mobile.getByText('已上傳到水族館',{exact:true}).waitFor();
+  assert.equal(await mobile.locator('#manual').isVisible(),false);
+  await mobile.getByText('現在可以移開圖畫紙。',{exact:true}).waitFor();
+  await mobileDisplay.waitForFunction(()=>document.querySelector('#aquarium').dataset.fishCount==='1');
+  results.mobileCamera='rear-default and switching passed; a returned native photo publishes without preview or confirmation';
   await mobileContext.close();
   assert.deepEqual(errors,[]);
 } finally {
