@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="210mm" viewBox="0 0 800 566">
+<rect width="800" height="566" fill="white"/>
+<style>text{font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif;fill:#192e3b}.small{font-size:17px}.sub{font-size:16px;fill:#405b65}</style>
+<!-- Four registration markers: their CENTER coordinates are (40,40), (760,40), (760,526), (40,526). -->
+<g fill="#111827"><rect x="30" y="30" width="20" height="20"/><rect x="750" y="30" width="20" height="20"/><rect x="750" y="516" width="20" height="20"/><rect x="30" y="516" width="20" height="20"/></g>
+<text x="400" y="78" text-anchor="middle" font-size="29" font-weight="700">我的彩繪小魚</text>
+<text x="400" y="107" text-anchor="middle" class="sub">請在魚的輪廓內自由著色，魚身的空白也可以上色</text>
+<text x="94" y="132" class="small">魚的名字（選填）：___________________</text>
+<!-- The following fish silhouette path is identical to the JS mask in the web prototype. -->
+<path d="M225 286 C204 264 167 225 136 207 L144 366 C174 347 205 322 225 309 C268 257 332 225 400 211 L444 164 L471 214 C550 218 622 251 659 282 Q681 292 658 309 C614 348 537 365 472 362 L442 408 L400 363 C333 359 269 339 225 309 Q214 297 225 286 Z" fill="white" stroke="#192e3b" stroke-width="3.5" stroke-linejoin="round"/>
+<path d="M224 285 Q232 297 225 309" fill="none" stroke="#192e3b" stroke-width="2"/>
+<path d="M549 249 Q527 284 549 321" fill="none" stroke="#192e3b" stroke-width="2.4"/>
+<circle cx="598" cy="275" r="7" fill="#192e3b"/>
+<circle cx="600" cy="273" r="2" fill="white"/>
+<text x="400" y="459" text-anchor="middle" class="sub">畫好後，將整張紙攤平拍照；四個角落的黑色方塊都要入鏡。</text>
+<text x="400" y="483" text-anchor="middle" class="sub">拍照前請確認紙張沒有被遮住，也不要沿著魚形剪下來。</text>
+<text x="400" y="552" text-anchor="middle" font-size="12" fill="#70828b">班級彩繪水族館 ｜ A4 橫式，建議 100% 原尺寸列印</text>
+</svg>
