@@ -19,4 +19,20 @@ assert.equal(gate.observe({kind:'empty',removed:true}),'removed');
 assert.equal(gate.observe(stable),'stabilizing');
 assert.equal(gate.observe(stable),'stabilizing');
 assert.equal(gate.observe(stable),'ready');
+const jitterGate=new PaperGate();
+const baseline={...stable,revision:2,signature:Array.from({length:28},(_,i)=>80+i)};
+const shift=(x,y,signature=baseline.signature)=>({
+  ...baseline,corners:baseline.corners.map(([u,v])=>[u+x,v+y]),signature,
+});
+const inkEdges=baseline.signature.map((value,i)=>i<5 ? value+60 : value+8);
+assert.equal(jitterGate.observe(baseline),'stabilizing');
+assert.equal(jitterGate.observe(shift(6,2,inkEdges)),'stabilizing');
+assert.equal(jitterGate.observe(shift(-2,3)),'ready');
+jitterGate.resetStability();
+assert.equal(jitterGate.observe(baseline),'stabilizing');
+assert.equal(jitterGate.observe(shift(6,0,baseline.signature.map(value=>value+40))),'stabilizing');
+assert.equal(jitterGate.observe(baseline),'stabilizing');
+assert.equal(jitterGate.observe(shift(14,0)),'stabilizing');
+assert.equal(jitterGate.observe(shift(26,0)),'stabilizing');
+assert.equal(jitterGate.observe(shift(38,0)),'stabilizing');
 console.log('Paper gate passed: motion, stillness, duplicate, occlusion, removal, next scan');

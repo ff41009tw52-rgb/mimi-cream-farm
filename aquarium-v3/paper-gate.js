@@ -1,5 +1,15 @@
 import { distance } from './geometry.js';
 
+const cornerJitterPixels = 8;
+const brightnessChange = 32;
+const changedSampleFraction = .2;
+
+function similarBrightness(current,previous) {
+  // A few samples can cross dark ink edges even when the whole page moves very little.
+  const changed=current.filter((value,i)=>Math.abs(value-previous[i])>brightnessChange).length;
+  return changed <= Math.floor(current.length*changedSampleFraction);
+}
+
 export class PaperGate {
   locked = false;
   previous = null;
@@ -34,8 +44,8 @@ export class PaperGate {
     }
     const anchor = this.anchor;
     const still = anchor && anchor.type===hit.type && anchor.revision===hit.revision
-      && hit.corners.every((p,i) => distance(p,anchor.corners[i]) < 4.5)
-      && hit.signature.every((v,i) => Math.abs(v-anchor.signature[i]) < 28);
+      && hit.corners.every((p,i) => distance(p,anchor.corners[i]) <= cornerJitterPixels)
+      && similarBrightness(hit.signature,anchor.signature);
     if (!still) {
       this.anchor = hit;
       this.stable = 0;

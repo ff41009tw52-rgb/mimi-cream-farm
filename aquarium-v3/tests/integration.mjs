@@ -40,7 +40,7 @@ try {
       image.src='data:image/jpeg;base64,'+data;
       return image;
     });
-    let mode=1,stream,timeout;
+    let mode=1,stream,timeout,jitterFrame=0;
     window.changeFrame=next=>{mode=next;};
     window.rejectCamera=false;
     window.unplugCamera=()=>{
@@ -56,7 +56,10 @@ try {
       const canvas=document.createElement('canvas');
       canvas.width=896; canvas.height=704;
       const ctx=canvas.getContext('2d');
-      const draw=()=>ctx.drawImage(images[mode],0,0);
+      const draw=()=>{
+        const offset=mode===0 ? (Math.floor(jitterFrame++/4)%2 ? 3 : -3) : 0;
+        ctx.drawImage(images[mode],offset,0);
+      };
       draw();
       stream=canvas.captureStream(18);
       timeout=setInterval(draw,50);

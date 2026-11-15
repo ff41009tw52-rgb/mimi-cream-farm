@@ -1,6 +1,6 @@
 import { createCollection } from './collection.js';
 import { extractFish, manualMap } from './extract.js?v=3.1.0';
-import { PaperGate } from './paper-gate.js?v=3.1.0';
+import { PaperGate } from './paper-gate.js?v=3.1.2';
 import { ARTWORK_REVISION, FISH, SHEET } from './templates.js?v=3.1.0';
 import { paperFingerprint } from './detect.js?v=3.1.0';
 
@@ -266,7 +266,7 @@ async function tick() {
       await saveDetection(frameCanvas,data,'camera',revision);
     } else if (state==='stabilizing') {
       emptyFrames=0;
-      show(`找到${FISH[result.type].name}，請把紙放穩。`);
+      show(`已辨識${FISH[result.type].name}，正在確認畫面…`);
     } else if (state==='uncertain') {
       emptyFrames=0;
       show('辨識不完整。請把四角放進畫面、移開遮擋，或使用「拍照掃描」。','warning');
