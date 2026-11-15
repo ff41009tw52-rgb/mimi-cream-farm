@@ -1,0 +1,62 @@
+:root {
+  color-scheme: light;
+  font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+  color: #16383d;
+  background: #f0f6f5;
+  --dark: #173d44;
+  --accent: #167369;
+  --border: #c9dcd8;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+button, select, input { font: inherit; }
+button, .heading a { cursor: pointer; }
+button:disabled { opacity: .52; cursor: default; }
+:focus-visible { outline: 3px solid #dd9851; outline-offset: 3px; }
+.heading { background: #153d43; color: #fff; }
+.heading-inner, main { max-width: 1280px; margin: auto; padding-inline: clamp(16px,4vw,48px); }
+.heading-inner { min-height: 92px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding-block: 18px; }
+h1 { font-size: clamp(24px,3vw,34px); margin: 0; letter-spacing: -.035em; }
+h1 small { display: inline-block; color: #b9ded7; font-size: .48em; font-weight: 500; letter-spacing: 0; margin-left: .6em; }
+nav { display: flex; align-items: center; gap: 16px; }
+nav a { color: #fff; text-decoration-thickness: 1px; text-underline-offset: 4px; font-weight: 650; }
+nav .display-link { background: #d7f2e7; color: #153d43; padding: 10px 14px; border-radius: 10px; text-decoration: none; }
+main { display: grid; grid-template-columns: minmax(0,1fr) minmax(270px,330px); gap: 24px; padding-block: 30px; }
+h2 { margin: 0 0 14px; font-size: 20px; }
+p { line-height: 1.55; }
+.camera-frame { position: relative; border-radius: 15px; background: #19353c; overflow: hidden; min-height: min(45vh,340px); display: grid; align-items: center; justify-items: center; }
+video { width: 100%; display: block; max-height: 64vh; object-fit: contain; }
+#camera-hint { position: absolute; margin: 0; color: #d4e9e4; padding: 16px; text-align: center; }
+#status { margin: 14px 0 0; min-height: 54px; border-radius: 10px; padding: 12px 16px; background: #e0efec; font-weight: 650; }
+#status[data-tone="success"] { background: #d5f2df; color: #0d5234; }
+#status[data-tone="warning"] { background: #fff0d7; color: #72460d; }
+aside { display: grid; align-content: start; gap: 16px; }
+.panel { background: white; border: 1px solid var(--border); border-radius: 15px; padding: 17px; }
+.controls label, dialog label { display: block; font-weight: 650; margin-bottom: 6px; }
+select { width: 100%; max-width: 100%; background: white; }
+button, select { border-radius: 8px; border: 1px solid #bcd4ce; padding: 10px 12px; color: var(--dark); }
+button { background: #edf5f2; font-weight: 650; }
+button.primary { background: var(--accent); color: white; border-color: transparent; }
+#start { margin-top: 10px; width: 100%; }
+.secondary-actions, .manual-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 9px; }
+.secondary-actions button { flex: 1; }
+.controls p, #count, .instructions, .keyboard-help { font-size: .89rem; color: #426461; }
+.controls .file-label { display: inline-block; position: relative; padding: 7px 12px; border-radius: 8px; border: 1px solid #bcd4ce; background: #edf5f2; cursor: pointer; }
+.file-label input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.file-label:focus-within { outline: 3px solid #dd9851; outline-offset: 3px; }
+.latest, #manual-result { background: #edf5f2; border-radius: 10px; min-height: 105px; display: grid; place-items: center; text-align: center; padding: 10px; }
+.latest img, #manual-result img { max-width: 100%; width: 220px; max-height: 115px; object-fit: contain; vertical-align: middle; }
+[hidden], #manual-result[hidden] { display: none !important; }
+#count { margin-bottom: 0; }
+dialog { padding: clamp(16px,3vw,25px); width: min(720px,96vw); max-height: 92vh; overflow: auto; border: 1px solid var(--border); border-radius: 16px; color: var(--dark); }
+dialog::backdrop { background: #0d262bd0; }
+dialog select { max-width: 240px; }
+.manual-photo { position: relative; width: 100%; }
+#snapshot { display: block; width: 100%; height: auto; border-radius: 8px; }
+#handles { position: absolute; inset: 0; pointer-events: none; }
+.handle { position: absolute; transform: translate(-50%,-50%); border-radius: 50%; width: 32px; height: 32px; padding: 0; background: #ffe09ddd; border: 2px solid #3b2e1d; touch-action: none; pointer-events: auto; line-height: 25px; }
+.manual-actions { justify-content: flex-end; }
+@media(max-width: 780px) {
+  main { grid-template-columns: 1fr; gap: 17px; padding-top: 17px; }
+  aside { grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); }
+}

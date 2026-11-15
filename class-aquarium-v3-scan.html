@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>班級彩繪水族館 V3｜教師掃描</title>
+  <link rel="stylesheet" href="aquarium-v3/scan.css">
+</head>
+<body>
+  <header class="heading">
+    <div class="heading-inner">
+      <h1>班級彩繪水族館 <small>教師掃描</small></h1>
+      <nav aria-label="相關頁面">
+        <a href="aquarium-v3/templates/aquarium-v3-a4.pdf" target="_blank" rel="noopener">A4 著色模板</a>
+        <a class="display-link" href="class-aquarium-v3-display.html" target="_blank" rel="noopener">開啟水族館 ↗</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <section class="viewer" aria-labelledby="camera-heading">
+      <h2 id="camera-heading">實物投影機</h2>
+      <div class="camera-frame">
+        <video id="camera" autoplay muted playsinline aria-label="即時相機畫面"></video>
+        <p id="camera-hint">選擇攝影機後，點「開始自動掃描」。</p>
+      </div>
+      <p id="status" role="status" aria-live="polite">等待開啟攝影機。</p>
+    </section>
+    <aside aria-label="掃描操作">
+      <section class="panel controls">
+        <h2>掃描設定</h2>
+        <label for="devices">攝影機</label>
+        <select id="devices"><option value="">預設攝影機</option></select>
+        <button id="start" class="primary">開始自動掃描</button>
+        <div class="secondary-actions">
+          <button id="stop" disabled>停止攝影機</button>
+          <button id="capture" disabled>手動拍照</button>
+        </div>
+        <p>把著色紙平放，讓四個方格完整入鏡。出現「已加入」後，再拿走圖畫紙。</p>
+        <label class="file-label">匯入照片<input type="file" id="photo" accept="image/*"></label>
+      </section>
+      <section class="panel">
+        <h2>最近加入的作品</h2>
+        <div class="latest"><p id="latest-empty">等待第一張作品</p><img id="latest" alt="" hidden></div>
+        <p id="count">這次已掃描 0 張</p>
+      </section>
+    </aside>
+  </main>
+  <dialog id="manual" aria-labelledby="manual-heading">
+    <h2 id="manual-heading">手動確認作品</h2>
+    <p id="manual-info" role="status"></p>
+    <label for="fish-type">魚形</label>
+    <select id="fish-type"><option value="">選擇魚形</option></select>
+    <p class="instructions">如需修正，將 1～4 對準紙上四個方格的中心。依紙張標題的方向，從左上角順時針排列。</p>
+    <div class="manual-photo" id="manual-photo">
+      <canvas id="snapshot" aria-label="拍攝照片"></canvas>
+      <div id="handles" aria-label="四個定位點"></div>
+    </div>
+    <p class="keyboard-help">也可以用 Tab 選取定位點，再用方向鍵移動。</p>
+    <div id="manual-result" hidden><img id="manual-preview" alt="擷取的魚形預覽"></div>
+    <div class="manual-actions">
+      <button id="close-manual">取消</button>
+      <button id="preview">預覽魚形</button>
+      <button id="send" class="primary" disabled>加入水族館</button>
+    </div>
+  </dialog>
+  <script type="module" src="aquarium-v3/scan.js"></script>
+</body>
+</html>

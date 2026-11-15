@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-Hant"><meta charset="utf-8"><title>V3 影像測試</title>
+<main>
+  <h1>V3 合成影像測試</h1>
+  <button id="run">測試四種魚形</button>
+  <pre id="results" role="status"></pre>
+</main>
+<script type="module">
+import { detectSheet } from '../detect.js';
+import { extractFish } from '../extract.js';
+import { distance, project } from '../geometry.js';
+import { FISH } from '../templates.js';
+import { canvas, paints, scenarios, scene, sourceSheet } from './fixtures.js';
+
+window.suite = async () => {
+  const tests=[];
+  for (const [index,type] of Object.keys(FISH).entries()) {
+    const sheet=await sourceSheet(type,index);
+    for (const [name,options] of Object.entries(scenarios)) {
+      const {c,expected}=scene(sheet,options);
+      const ctx=c.getContext('2d',{willReadFrequently:true});
+      const frame=ctx.getImageData(0,0,c.width,c.height);
+      const start=performance.now();
+      const hit=detectSheet(frame);
+      const ms=performance.now()-start;
+      const test={type,name,expected:!['coveredOne','coveredFour','blank'].includes(name),actual:hit.type||hit.kind,marks:hit.marks,ms};
+      if (hit.type===type) {
+        const [x,y,w,h]=FISH[type].bounds;
+        const points=[[x,y],[x+w,y],[x+w,y+h],[x,y+h],[x+w/2,y+h/2],...paints];
+        test.error=Math.max(...points.map(p=>distance(project(expected,p),project(hit.map,p))));
+        const blob=await extractFish(c,type,hit.map);
+        const bitmap=await createImageBitmap(blob);
+        const out=canvas(w,h), octx=out.getContext('2d',{willReadFrequently:true});
+        octx.drawImage(bitmap,0,0);
+        bitmap.close();
+        test.clear=[[0,0],[w-1,0],[w-1,h-1],[0,h-1]].every(([u,v])=>octx.getImageData(u,v,1,1).data[3]===0);
+        test.color= Math.max(...paints.map(([u,v])=>{
+          const [sx,sy]=project(expected,[u+.5,v+.5]).map(Math.floor);
+          const seen=ctx.getImageData(sx,sy,1,1).data;
+          const cropped=octx.getImageData(u-x,v-y,1,1).data;
+          return cropped[3]!==255 ? 255 : Math.max(...[0,1,2].map(i=>Math.abs(seen[i]-cropped[i])));
+        }));
+      }
+      tests.push(test);
+    }
+  }
+  return tests;
+};
+window.fixture = async (type,name) => {
+  const sheet=await sourceSheet(type,Object.keys(FISH).indexOf(type));
+  return scene(sheet,scenarios[name]).c.toDataURL('image/jpeg',.86).split(',')[1];
+};
+document.getElementById('run').onclick=async ()=>{
+  const button=document.getElementById('run'), result=document.getElementById('results');
+  button.disabled=true;
+  result.textContent='執行中…';
+  try {
+    const tests=await window.suite();
+    const valid=tests.filter(t=>t.expected);
+    const hits=valid.filter(t=>t.actual===t.type);
+    const invalid=tests.filter(t=>!t.expected);
+    const rejected=invalid.filter(t=>!FISH[t.actual]);
+    result.textContent=[
+      `魚形正確 ${hits.length} / ${valid.length}`,
+      `無效影像拒收 ${rejected.length} / ${invalid.length}`,
+      `最大定位誤差 ${Math.max(...hits.map(t=>t.error)).toFixed(2)} px`,
+      `最大色差 ${Math.max(...hits.map(t=>t.color))} / 255`,
+      `透明角落 ${hits.filter(t=>t.clear).length} / ${hits.length}`,
+    ].join('\n');
+  } catch (error) {
+    result.textContent=error.message;
+  } finally {
+    button.disabled=false;
+  }
+};
+</script>
+</html>
