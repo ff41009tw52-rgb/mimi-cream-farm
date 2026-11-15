@@ -1,0 +1,65 @@
+import assert from 'node:assert/strict';
+import { FISH } from '../templates.js';
+import { angleDelta, makeSwimmer, stepSchool } from '../v32/school.js';
+import { SPECIES, createStrip, poseStrip, TAU } from '../v32/fish-rig.js';
+
+const world={width:960,height:540}, types=Object.keys(FISH);
+const fishes=Array.from({length:40},(_,i)=>{
+  const type=types[i%types.length], [,,width,height]=FISH[type].bounds;
+  return makeSwimmer({id:'swimmer-'+i,type},{width,height},world,false);
+});
+const overlap=new Map(), goalChanges=new Set(), turns=new Set();
+const fps=60;
+let longestOverlap=0,maxAngleChange=0;
+for (let tick=0;tick<90*fps;tick++) {
+  const headings=fishes.map(fish=>fish.angle);
+  const goals=fishes.map(fish=>fish.goalX);
+  stepSchool(fishes,world,1/fps);
+  for (const [i,fish] of fishes.entries()) {
+    maxAngleChange=Math.max(maxAngleChange,Math.abs(angleDelta(fish.angle,headings[i])));
+    if (fish.goalX!==goals[i]) goalChanges.add(fish.id);
+    if (Math.cos(fish.angle)*Math.cos(headings[i])<0) turns.add(fish.id);
+  }
+  if (tick<600) continue;
+  for (let i=0;i<fishes.length;i++) {
+    for (let j=i+1;j<fishes.length;j++) {
+      const a=fishes[i],b=fishes[j],key=i*40+j;
+      const dx=(a.x-b.x)/((a.width+b.width)*.29);
+      const dy=(a.y-b.y)/((a.width*a.aspect+b.width*b.aspect)*.32);
+      if (dx*dx+dy*dy<1 && Math.abs(a.depth-b.depth)<.45) {
+        const duration=(overlap.get(key)||0)+1/fps;
+        overlap.set(key,duration);
+        longestOverlap=Math.max(longestOverlap,duration);
+      } else overlap.delete(key);
+    }
+  }
+}
+assert.equal(goalChanges.size,40);
+assert.equal(turns.size,40);
+assert.ok(maxAngleChange<.055, `heading step ${maxAngleChange}`);
+assert.ok(longestOverlap<3,`longest severe overlap ${longestOverlap}s`);
+
+const entrance=types.map((type,index)=>{
+  const [,,width,height]=FISH[type].bounds;
+  return makeSwimmer({id:'enter-'+index,type},{width,height},world,true);
+});
+assert.ok(entrance.every(f=>f.x<0||f.x>world.width));
+for (let tick=0;tick<120;tick++) stepSchool(entrance,world,1/fps);
+assert.ok(entrance.every(f=>f.x>f.width/2*-1 && f.x<world.width+f.width/2));
+assert.equal(new Set(Object.values(SPECIES).map(p=>p.tailHz)).size,4);
+for (const [type,profile] of Object.entries(SPECIES)) {
+  for (const model of ['hinge','wave']) {
+    const strip=createStrip(18);
+    let flex=0;
+    for (let i=0;i<24;i++) {
+      poseStrip(strip,model,profile,i/24*TAU,1.2,.25);
+      assert.equal(strip.x.at(-1),.5);
+      assert.equal(Math.abs(strip.y.at(-1)),0);
+      assert.ok(strip.x.every((x,j)=>j===0||x>strip.x[j-1]),`${type}: crossed mesh columns`);
+      flex=Math.max(flex,Math.abs(strip.y[0]));
+    }
+    assert.ok(flex>.015,`${type}: tail scarcely moves`);
+  }
+}
+console.log(JSON.stringify({fishes:40,simulatedSeconds:90,changedTarget:goalChanges.size,
+  turned:turns.size,maxTurnDegrees:maxAngleChange*180/Math.PI,longestOverlapSeconds:longestOverlap},null,2));

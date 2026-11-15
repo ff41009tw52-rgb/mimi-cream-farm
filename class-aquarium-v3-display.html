@@ -3,11 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>班級彩繪水族館 V3｜展示</title>
+  <title>班級彩繪水族館 V3.2｜展示</title>
   <link rel="stylesheet" href="aquarium-v3/display.css">
+  <link rel="stylesheet" href="aquarium-v3/v32/display-v32.css">
 </head>
 <body>
-  <main id="aquarium" data-fish-count="0">
+  <main id="aquarium" data-engine="v32" data-fish-count="0">
     <div class="ocean" aria-hidden="true"></div>
     <div class="light" aria-hidden="true"></div>
     <canvas id="water" aria-hidden="true"></canvas>
@@ -37,6 +38,6 @@
       <ul id="gallery"></ul>
     </dialog>
   </main>
-  <script type="module" src="aquarium-v3/display.js"></script>
+  <script type="module" src="aquarium-v3/display.js?v=3.2"></script>
 </body>
 </html>

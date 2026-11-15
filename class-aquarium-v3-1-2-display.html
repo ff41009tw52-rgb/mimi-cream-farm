@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>班級彩繪水族館 V3.1.2｜展示</title>
+  <link rel="stylesheet" href="aquarium-v3/display.css">
+</head>
+<body>
+  <main id="aquarium" data-fish-count="0">
+    <div class="ocean" aria-hidden="true"></div>
+    <div class="light" aria-hidden="true"></div>
+    <canvas id="water" aria-hidden="true"></canvas>
+    <header class="toolbar">
+      <p id="total">0 隻魚</p>
+      <div>
+        <button id="manage" aria-haspopup="dialog">作品與設定</button>
+        <button id="fullscreen">全螢幕</button>
+      </div>
+    </header>
+    <p id="sea-error" role="status" hidden></p>
+    <dialog id="gallery-dialog" aria-labelledby="gallery-heading">
+      <div class="gallery-title">
+        <h1 id="gallery-heading">作品與設定</h1>
+        <button id="close-gallery">關閉</button>
+      </div>
+      <div class="preferences">
+        <label><input type="checkbox" id="low">低效能模式</label>
+        <label><input type="checkbox" id="reduce">減少動態效果</label>
+      </div>
+      <div class="gallery-actions">
+        <p id="gallery-count">0 份作品</p>
+        <button id="clear" disabled>清空作品</button>
+      </div>
+      <p id="confirm-clear" hidden>清空後，這台電腦的水族館作品將永久刪除。<button id="confirm">確認清空</button> <button id="cancel-clear">取消</button></p>
+      <p id="gallery-error" role="status" hidden></p>
+      <ul id="gallery"></ul>
+    </dialog>
+  </main>
+  <script type="module" src="aquarium-v3/display.js"></script>
+</body>
+</html>

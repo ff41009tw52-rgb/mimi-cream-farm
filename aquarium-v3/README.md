@@ -1,5 +1,9 @@
 # 班級彩繪水族館 V3
 
+## V3.2 自然游動
+
+[三種動畫比較](animation-lab.html) · [動畫、開源授權與效能](ANIMATION-V32.md) · [原版 V3.1.2 展示](../class-aquarium-v3-1-2-display.html)
+
 ## 上課操作
 
 1. 下載[四種 A4 著色紙](https://ff41009tw52-rgb.github.io/mimi-cream-farm/aquarium-v3/templates/aquarium-v3-a4.pdf?v=3.1.0)。黑白、A4 橫式、原尺寸 100% 列印。保留整張紙，四角標記不要塗改。
