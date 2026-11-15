@@ -47,28 +47,36 @@ assert.ok(entrance.every(f=>f.x<0||f.x>world.width));
 for (let tick=0;tick<120;tick++) stepSchool(entrance,world,1/fps);
 assert.ok(entrance.every(f=>f.x>f.width/2*-1 && f.x<world.width+f.width/2));
 assert.equal(new Set(Object.values(SPECIES).map(p=>p.tailHz)).size,4);
+const priorTailTravel={clown:.1378,butterfly:.1009,puffer:.0415,shark:.0969};
+const range=values=>Math.max(...values)-Math.min(...values);
 const lateralTravel={};
 for (const [type,profile] of Object.entries(SPECIES)) {
   const hinge=createStrip(18);
   poseStrip(hinge,'hinge',profile,Math.PI/2,1,0);
   assert.ok(Math.abs(hinge.y[0])>.015,`${type}: comparison hinge is not animated`);
   for (const columns of [7,10,12,18]) {
-    const strip=createStrip(columns), xs=[], ys=[];
+    const strip=createStrip(columns), tailXs=[], tailYs=[], rearXs=[];
     for (let i=0;i<48;i++) {
       poseStrip(strip,'wave',profile,i/48*TAU,1,0);
-      for (let j=Math.ceil(columns*.75);j<=columns;j++) {
-        assert.ok(Math.abs(strip.x[j]-(j/columns-.5))<.000001,`${type}: stable head was warped`);
-        assert.ok(Math.abs(strip.y[j])<.000001,`${type}: stable head moved vertically`);
-      }
       assert.ok(strip.x.every((x,j)=>j===0||x>strip.x[j-1]),`${type}: crossed mesh columns`);
-      xs.push(strip.x[0]);
-      ys.push(strip.y[0]);
+      tailXs.push(strip.x[0]);
+      tailYs.push(strip.y[0]);
+      rearXs.push(strip.x[Math.floor(columns*.3)]);
+      poseStrip(strip,'wave',profile,i/48*TAU,2,1,1.8,1.5);
+      assert.ok(strip.x.every((x,j)=>j===0||x>strip.x[j-1]),`${type}: extreme lab controls folded the mesh`);
+      for (let j=Math.floor(columns/2);j<=columns;j++) {
+        assert.ok(Math.abs(strip.x[j]-(j/columns-.5))<.000001,`${type}: front half was warped`);
+        assert.ok(Math.abs(strip.y[j])<.000001,`${type}: front half moved vertically`);
+      }
     }
-    const xTravel=Math.max(...xs)-Math.min(...xs), yTravel=Math.max(...ys)-Math.min(...ys);
-    assert.ok(xTravel>.035 && xTravel>5*yTravel,`${type}: tail motion is not predominantly horizontal`);
-    poseStrip(strip,'wave',profile,TAU/4,2,1,1.8,1.5);
-    assert.ok(strip.x.every((x,j)=>j===0||x>strip.x[j-1]),`${type}: extreme lab controls folded the mesh`);
-    if (columns===18) lateralTravel[type]=[xTravel,yTravel].map(value=>Number((value*100).toFixed(2)));
+    const tail=range(tailXs), lift=range(tailYs), rear=range(rearXs);
+    assert.ok(tail>.02 && tail>5*lift,`${type}: tail motion is not predominantly horizontal`);
+    assert.ok(tail<priorTailTravel[type]*.75,`${type}: tail swing is too large`);
+    assert.ok(rear>.004 && rear<tail,`${type}: rear body does not sway gently`);
+    if (columns===18) {
+      lateralTravel[type]=Object.fromEntries(Object.entries({tail,rear,lift})
+        .map(([part,travel])=>[part,Number((travel*100).toFixed(2))]));
+    }
   }
 }
 console.log(JSON.stringify({fishes:40,simulatedSeconds:90,changedTarget:goalChanges.size,

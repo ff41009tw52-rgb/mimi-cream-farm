@@ -1,7 +1,7 @@
 import { createCollection } from '../collection.js';
 import { FISH } from '../templates.js';
 import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js';
-import { clamp, createStrip, dorsalMix, poseStrip, profileFor, TAU } from './fish-rig.js?v=3.2.1';
+import { clamp, createStrip, dorsalMix, poseStrip, profileFor, TAU } from './fish-rig.js?v=3.2.2';
 import { loadFishImage, templateFish } from './sample-fish.js';
 
 const $=id=>document.getElementById(id);

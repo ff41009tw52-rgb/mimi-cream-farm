@@ -1,7 +1,7 @@
 # 班級彩繪水族館 V3.2 動畫與驗收
 
 - [魚類游動比較](https://ff41009tw52-rgb.github.io/mimi-cream-farm/aquarium-v3/animation-lab.html)
-- [V3.2.1 展示端](https://ff41009tw52-rgb.github.io/mimi-cream-farm/class-aquarium-v3-display.html?v=3.2.1)
+- [V3.2.2 展示端](https://ff41009tw52-rgb.github.io/mimi-cream-farm/class-aquarium-v3-display.html?v=3.2.2)
 - [V3.1.2 展示端](https://ff41009tw52-rgb.github.io/mimi-cream-farm/class-aquarium-v3-1-2-display.html)
 - [現有掃描端](https://ff41009tw52-rgb.github.io/mimi-cream-farm/class-aquarium-v3-scan.html?v=3.1.2)
 
@@ -29,6 +29,8 @@
 | 鯊魚 | 較長巡游與轉彎弧線，尾部週期較慢 | 1.08 Hz |
 
 V3.2.1 將擺尾改為水平面上的脊線擺動。在略偏斜的視角下，從魚頭逐段投影到尾鰭，累積每一段的投影長度與深度，視角微微俯視帶來少量垂直位移。魚頭前四分之一保持原來的相對座標，身體色帶與尾鰭會隨朝向交替拉長與縮短。Canvas 與 WebGL 共用相同的變形計算。
+
+V3.2.2 將魚的前半身固定在原相對座標，水平波動從魚身中線漸進至尾鰭。擺動角度降低，四種魚的尾端水平行程比 V3.2.1 少約 45%～56%。
 
 每隻魚都保有當前位置、朝向、速度、目標、深度和游動狀態。目標會依可游距離、鄰魚和邊界更新。魚用有上限的角速度沿弧線轉向，頭部接近直上或直下時沿身體軸心短暫混合兩個背向，一般轉身維持圖片比例。共用紋理直接來自掃描 PNG，UV 固定。實際速度會調制擺尾頻率，轉彎角速度會加上腰尾的柔和彎曲。新魚先在左右畫面之外產生，再游進畫面。
 

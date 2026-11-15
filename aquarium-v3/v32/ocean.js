@@ -1,4 +1,4 @@
-import { clamp, dorsalMix, poseStrip } from './fish-rig.js?v=3.2.1';
+import { clamp, dorsalMix, poseStrip } from './fish-rig.js?v=3.2.2';
 import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js';
 import { makeSwimmer, resizeSchool, stepSchool } from './school.js';
 import { makeAtmosphere } from './ocean-scene.js';
