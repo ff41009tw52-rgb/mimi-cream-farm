@@ -1,4 +1,4 @@
-import { FISH, SHEET } from './templates.js';
+import { SHEET, fishShape } from './templates.js?v=3.1.0';
 import { homography, project, validQuad } from './geometry.js';
 
 export function manualMap(points, source) {
@@ -6,8 +6,9 @@ export function manualMap(points, source) {
   return homography(SHEET.centers,points);
 }
 
-export function extractFish(source, type, map, scaleX=1, scaleY=scaleX) {
-  const [left,top,width,height] = FISH[type].bounds;
+export function extractFish(source, type, map, {scaleX=1,scaleY=scaleX,revision}={}) {
+  const {bounds,outline,strokeWidth} = fishShape(type,revision);
+  const [left,top,width,height] = bounds;
   const input = source.getContext('2d',{willReadFrequently:true}).getImageData(0,0,source.width,source.height);
   const out = document.createElement('canvas');
   out.width = width;
@@ -38,12 +39,13 @@ export function extractFish(source, type, map, scaleX=1, scaleY=scaleX) {
   mask.width = width; mask.height = height;
   const maskCtx = mask.getContext('2d');
   maskCtx.translate(-left,-top);
-  const outline = new Path2D(FISH[type].outline);
-  maskCtx.fill(outline);
-  maskCtx.strokeStyle = '#000';
-  maskCtx.lineWidth = 3.4;
-  maskCtx.lineJoin = 'round';
-  maskCtx.stroke(outline);
+  const path = new Path2D(outline);
+  maskCtx.fill(path);
+  if (strokeWidth) {
+    maskCtx.lineWidth = strokeWidth;
+    maskCtx.lineJoin = 'round';
+    maskCtx.stroke(path);
+  }
   ctx.drawImage(mask,0,0);
   return new Promise((resolve,reject) => out.toBlob(blob => {
     if (blob) resolve(blob);

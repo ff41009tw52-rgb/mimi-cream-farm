@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { detectSheet } from '../detect.js';
-import { FISH, SHEET } from '../templates.js';
+import { ARTWORK_REVISION, FISH, SHEET } from '../templates.js';
 import { distance, project } from '../geometry.js';
 import { paints, scenarios, scene } from './fixtures.js';
 
@@ -49,7 +49,7 @@ for (const [index,type] of Object.keys(FISH).entries()) {
     const [x,y,w,h] = FISH[type].bounds;
     const expectedPoints = [[x,y],[x+w,y],[x+w,y+h],[x,y+h],...paints];
     const error = hit.map ? Math.max(...expectedPoints.map(p => distance(project(expected,p),project(hit.map,p)))) : null;
-    metrics.push({type,name,expected:accepted ? type : 'reject',actual:hit.type || hit.kind,marks:hit.marks,error,ms});
+    metrics.push({type,name,expected:accepted ? type : 'reject',actual:hit.type || hit.kind,marks:hit.marks,revision:hit.revision,error,ms});
     if (fixturesDir) {
       await sharp(Buffer.from(frame.data),{raw:{width:frame.width,height:frame.height,channels:4}})
         .jpeg({quality:88}).toFile(fixturesDir+'/'+type+'-'+name+'.jpg');
@@ -59,7 +59,7 @@ for (const [index,type] of Object.keys(FISH).entries()) {
 if (process.env.METRICS_PATH) writeFileSync(process.env.METRICS_PATH, JSON.stringify(metrics,null,2));
 const good = metrics.filter(m => m.actual===m.expected);
 const rejects = metrics.filter(m => m.expected==='reject');
-const failures = metrics.filter(m => m.expected==='reject' ? FISH[m.actual] : m.actual!==m.expected || m.error>3);
+const failures = metrics.filter(m => m.expected==='reject' ? FISH[m.actual] : m.actual!==m.expected || m.revision!==ARTWORK_REVISION || m.error>3);
 console.log(JSON.stringify({
   accepted:good.length, valid:metrics.length-rejects.length,
   rejected:rejects.filter(m => !FISH[m.actual]).length, invalid:rejects.length,

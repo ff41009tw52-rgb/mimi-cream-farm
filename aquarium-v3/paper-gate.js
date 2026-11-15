@@ -33,7 +33,7 @@ export class PaperGate {
       return hit.kind;
     }
     const anchor = this.anchor;
-    const still = anchor && anchor.type===hit.type
+    const still = anchor && anchor.type===hit.type && anchor.revision===hit.revision
       && hit.corners.every((p,i) => distance(p,anchor.corners[i]) < 4.5)
       && hit.signature.every((v,i) => Math.abs(v-anchor.signature[i]) < 28);
     if (!still) {

@@ -1,17 +1,23 @@
 import { createCollection } from './collection.js';
-import { extractFish, manualMap } from './extract.js';
-import { PaperGate } from './paper-gate.js';
-import { FISH, SHEET } from './templates.js';
-import { paperFingerprint } from './detect.js';
+import { extractFish, manualMap } from './extract.js?v=3.1.0';
+import { PaperGate } from './paper-gate.js?v=3.1.0';
+import { ARTWORK_REVISION, FISH, SHEET } from './templates.js?v=3.1.0';
+import { paperFingerprint } from './detect.js?v=3.1.0';
 
 const byId = id => document.getElementById(id);
 const video = byId('camera');
 const devices = byId('devices');
 const startButton = byId('start');
 const capture = byId('capture');
+const flipCamera = byId('flip-camera');
+const mobilePhoto = byId('mobile-photo');
+const notice = byId('upload-notice');
+const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+  || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
 const dialog = byId('manual');
 const photo = byId('snapshot');
 const species = byId('fish-type');
+const templateVersion = byId('template-version');
 const collection = createCollection();
 const gate = new PaperGate();
 const interval = 370;
@@ -20,7 +26,29 @@ const analysisCanvas = document.createElement('canvas');
 const analysisContext = analysisCanvas.getContext('2d',{willReadFrequently:true});
 let worker, workerRequest, camera, auto = false, opening = false, busy = false;
 let cameraRevision = 0, saved = 0, latestURL, manualURL, manual, timer;
-let emptyFrames = 0, lastDevice = '';
+let emptyFrames = 0, lastDevice = '', activeFacing = '', noticeTimer;
+let preferredFacing = mobile ? 'environment' : '';
+
+if (mobile) {
+  byId('camera-heading').textContent = '相機';
+  flipCamera.hidden = false;
+  byId('mobile-photo-label').hidden = false;
+  byId('camera-hint').textContent = '點「開始自動掃描」開啟後鏡頭。';
+  devices.options[0].textContent = '自動選擇鏡頭';
+}
+
+function hideNotice() {
+  clearTimeout(noticeTimer);
+  notice.hidden = true;
+}
+function showNotice(fromCamera) {
+  clearTimeout(noticeTimer);
+  const instruction = byId('upload-instruction');
+  instruction.textContent = fromCamera ? '現在可以移開圖畫紙。' : '';
+  instruction.hidden = !fromCamera;
+  notice.hidden = false;
+  if (!fromCamera) noticeTimer = setTimeout(hideNotice,4200);
+}
 
 function show(text,tone='') {
   const state = byId('status');
@@ -34,13 +62,15 @@ function updateControls() {
   startButton.setAttribute('aria-pressed',String(auto));
   byId('stop').disabled = !camera && !opening;
   capture.disabled = !camera || gate.locked || busy || dialog.open;
-  byId('photo').disabled = dialog.open || busy;
+  byId('photo').disabled = mobilePhoto.disabled = dialog.open || busy;
+  flipCamera.disabled = opening || !camera || dialog.open;
+  flipCamera.textContent = activeFacing==='user' ? '切到後鏡頭' : '切到前鏡頭';
   devices.disabled = opening;
 }
 function cameraError(error) {
   const messages = {
     NotAllowedError:'攝影機權限已被拒絕。請在網址列的網站設定允許使用攝影機，再試一次。',
-    NotFoundError:'找不到攝影機。請檢查實物投影機的 USB 連線。',
+    NotFoundError:mobile ? '找不到可用鏡頭。請使用「匯入照片」。' : '找不到攝影機。請檢查實物投影機的 USB 連線。',
     NotReadableError:'攝影機無法讀取。請關閉正在使用鏡頭的投影程式或視訊軟體後再試。',
     OverconstrainedError:'所選攝影機目前無法使用，請重新選擇裝置。',
   };
@@ -48,9 +78,9 @@ function cameraError(error) {
 }
 async function refreshDevices() {
   try {
-    const selected = devices.value;
     const media = (await navigator.mediaDevices?.enumerateDevices() || []).filter(d=>d.kind==='videoinput');
-    devices.replaceChildren(new Option('預設攝影機',''));
+    const selected = devices.value;
+    devices.replaceChildren(new Option(mobile ? '自動選擇鏡頭' : '預設攝影機',''));
     media.filter(d=>d.deviceId).forEach((d,i) => devices.add(new Option(d.label||`攝影機 ${i+1}`,d.deviceId)));
     if ([...devices.options].some(o=>o.value===selected)) devices.value=selected;
     else if ([...devices.options].some(o=>o.value===lastDevice)) devices.value=lastDevice;
@@ -68,15 +98,18 @@ function stopCamera(message='攝影機已停止。',tone='') {
   gate.resetStability();
   emptyFrames = 0;
   updateControls();
-  if (message) show(message,tone);
+  if (message) {
+    hideNotice();
+    show(message,tone);
+  }
 }
 function schedule() {
   clearTimeout(timer);
   if (camera && (auto || gate.locked)) timer = setTimeout(tick,interval);
 }
-async function openCamera() {
+async function openCamera(resumeAuto=true) {
   if (!isSecureContext || !navigator.mediaDevices?.getUserMedia) {
-    show('請以 HTTPS 的 Chrome 或 Edge 開啟網頁，才能使用攝影機。','warning');
+    show('請從 HTTPS 網址開啟掃描端，才能使用攝影機。','warning');
     return;
   }
   const revision = ++cameraRevision;
@@ -85,20 +118,38 @@ async function openCamera() {
   show('正在等待攝影機授權。');
   try {
     const wanted = devices.value;
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio:false, video:{width:{ideal:1600},height:{ideal:1200},...(wanted && {deviceId:{exact:wanted}})},
-    });
+    const facing = wanted ? '' : preferredFacing;
+    const size = {width:{ideal:1600},height:{ideal:1200}};
+    const request = videoConstraints => navigator.mediaDevices.getUserMedia({audio:false,video:videoConstraints});
+    let stream;
+    if (facing) {
+      try {
+        stream = await request({...size,facingMode:{exact:facing}});
+      } catch (error) {
+        if (revision!==cameraRevision) return;
+        if (!['OverconstrainedError','NotFoundError'].includes(error.name)) throw error;
+        stream = await request({...size,facingMode:{ideal:facing}});
+      }
+    } else {
+      stream = await request(wanted ? {...size,deviceId:{exact:wanted}} : size);
+    }
     if (revision!==cameraRevision) {
       stream.getTracks().forEach(track=>track.stop());
       return;
     }
     const track = stream.getVideoTracks()[0];
-    const device = track.getSettings().deviceId || wanted;
-    if (lastDevice && device!==lastDevice) {
+    const settings = track.getSettings();
+    const device = settings.deviceId || wanted;
+    const facingFromLabel = /back|rear|environment|後鏡頭|後置/i.test(track.label) ? 'environment'
+      : /front|user|前鏡頭|前置/i.test(track.label) ? 'user' : '';
+    const actualFacing = settings.facingMode || facingFromLabel || facing;
+    if ((lastDevice && device && device!==lastDevice) || (activeFacing && actualFacing && actualFacing!==activeFacing)) {
       gate.locked = false;
       gate.previous = null;
+      hideNotice();
     }
     lastDevice = device;
+    activeFacing = actualFacing;
     camera = stream;
     video.srcObject = stream;
     track.addEventListener('ended', () => {
@@ -107,10 +158,13 @@ async function openCamera() {
     await video.play();
     if (revision!==cameraRevision) return;
     byId('camera-hint').hidden = true;
-    auto = true;
+    auto = resumeAuto;
     opening = false;
     updateControls();
-    show(gate.locked ? '請先拿走已掃描的紙張，等待再次就緒。' : '請放上著色紙，讓四個定位方格入鏡。');
+    if (gate.locked) show('請先拿走已掃描的紙張，等待再次就緒。');
+    else if (facing && actualFacing && facing!==actualFacing) {
+      show('指定方向的鏡頭無法開啟，已切到可用鏡頭。你也可以從攝影機清單改選。','warning');
+    } else show(auto ? '請放上著色紙，讓四個定位方格入鏡。' : '自動掃描已暫停。');
     schedule();
     refreshDevices();
   } catch (error) {
@@ -129,7 +183,7 @@ function drawFrame(target, source, width, height, max=1600) {
 }
 function classify(source,previous) {
   if (!worker) {
-    worker = new Worker(new URL('./scan-worker.js',import.meta.url),{type:'module'});
+    worker = new Worker(new URL('./scan-worker.js?v=3.1.0',import.meta.url),{type:'module'});
     worker.onmessage = ({data}) => {
       const request = workerRequest;
       workerRequest = undefined;
@@ -173,6 +227,7 @@ async function save(blob,type,fromCamera,map) {
   byId('latest-empty').hidden=true;
   byId('count').textContent=`這次已掃描 ${saved} 張`;
   show(`已加入${FISH[type].name}。${fromCamera ? '請拿走圖畫紙。' : ''}`,'success');
+  showNotice(fromCamera);
 }
 async function tick() {
   const revision = cameraRevision;
@@ -191,9 +246,10 @@ async function tick() {
     if (state==='ready') {
       show(`正在儲存${FISH[result.type].name}…`);
       updateControls();
-      const blob = await extractFish(frameCanvas,result.type,result.map,scaleX,scaleY);
+      const version = result.revision;
+      const blob = await extractFish(frameCanvas,result.type,result.map,{scaleX,scaleY,revision:version});
       if (revision!==cameraRevision) return;
-      await save(blob,result.type,true,{map:result.map,type:result.type,signature:result.signature,w,h});
+      await save(blob,result.type,true,{map:result.map,type:result.type,revision:version,signature:result.signature,w,h});
     } else if (state==='stabilizing') {
       emptyFrames=0;
       show(`找到${FISH[result.type].name}，請把紙放穩。`);
@@ -201,6 +257,7 @@ async function tick() {
       emptyFrames=0;
       show('辨識不完整。請把四角放進畫面、移開遮擋，或使用手動拍照。','warning');
     } else if (state==='removed') {
+      hideNotice();
       emptyFrames=0;
       show(auto ? '已就緒，可以放上下一張。' : '自動掃描已暫停。');
     } else if (state==='empty') {
@@ -307,6 +364,7 @@ async function prepareManual(blob) {
       : [[x,y],[x+w,y],[x+w,y+h],[x,y+h]];
     manual.autoMap=found ? hit : null;
     species.value=found ? hit.result.type : '';
+    templateVersion.value=String(found ? hit.result.revision : ARTWORK_REVISION);
     byId('manual-info').textContent=found ? '已找到四個定位點，請確認預覽。' : '請選擇魚形，並將定位點對到紙上的方格。';
     drawHandles();
     gate.resetStability();
@@ -325,6 +383,7 @@ async function preview() {
   const item=manual;
   if (!item || item.saving) return;
   const type=species.value;
+  const revision=Number(templateVersion.value);
   if (!FISH[type]) {
     byId('manual-info').textContent='請選擇魚形。';
     return;
@@ -338,9 +397,9 @@ async function preview() {
     return;
   }
   try {
-    const blob=await extractFish(item.frame,type,map,hit?.scaleX,hit?.scaleY);
+    const blob=await extractFish(item.frame,type,map,{scaleX:hit?.scaleX,scaleY:hit?.scaleY,revision});
     if (manual!==item || version!==item.version) return;
-    item.preview={type,blob};
+    item.preview={type,blob,revision};
     manualURL=URL.createObjectURL(blob);
     byId('manual-preview').src=manualURL;
     byId('manual-result').hidden=false;
@@ -358,9 +417,9 @@ byId('send').onclick=async () => {
   try {
     const [w,h]=dimensions(item.frame.width,item.frame.height,896);
     const map=homographyForManual(item,w,h);
-    const type=item.preview.type;
-    const signature=item.fromCamera ? paperFingerprint(analysisContext.getImageData(0,0,w,h),{type,map}) : null;
-    await save(item.preview.blob,type,item.fromCamera,{map,type,signature,w,h});
+    const {type,blob,revision}=item.preview;
+    const signature=item.fromCamera ? paperFingerprint(analysisContext.getImageData(0,0,w,h),{type,map,revision}) : null;
+    await save(blob,type,item.fromCamera,{map,type,revision,signature,w,h});
     dialog.close();
   } catch (error) {
     byId('manual-info').textContent=error.message || '無法儲存作品，請再試一次。';
@@ -382,9 +441,9 @@ dialog.addEventListener('close',()=>{
 });
 byId('close-manual').onclick=()=>dialog.close();
 byId('preview').onclick=preview;
-species.onchange=invalidatePreview;
+species.onchange=templateVersion.onchange=invalidatePreview;
 capture.onclick=()=>prepareManual();
-byId('photo').onchange=event=>{
+byId('photo').onchange=mobilePhoto.onchange=event=>{
   const file=event.target.files[0];
   event.target.value='';
   if (file) void prepareManual(file);
@@ -402,11 +461,21 @@ startButton.onclick=()=>{
   schedule();
 };
 byId('stop').onclick=()=>stopCamera();
-devices.onchange=()=>{
-  if (camera) {
-    stopCamera('');
-    void openCamera();
-  }
+byId('dismiss-upload').onclick=hideNotice;
+function restartCamera() {
+  if (!camera) return;
+  const wasAuto=auto;
+  stopCamera('');
+  void openCamera(wasAuto);
+}
+devices.onchange=restartCamera;
+flipCamera.onclick=()=>{
+  preferredFacing=activeFacing==='user' ? 'environment' : 'user';
+  devices.value='';
+  restartCamera();
+};
+mobilePhoto.onclick=()=>{
+  if (camera) stopCamera();
 };
 navigator.mediaDevices?.addEventListener('devicechange',()=>{
   refreshDevices();

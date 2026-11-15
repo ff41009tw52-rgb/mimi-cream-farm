@@ -18,17 +18,20 @@ try {
   const suite=await test.evaluate(()=>window.suite());
   const valid=suite.filter(row=>row.expected);
   const invalid=suite.filter(row=>!row.expected);
-  const recognized=valid.filter(row=>row.actual===row.type);
+  const recognized=valid.filter(row=>row.actual===row.type && row.revision===2);
   const wrong=invalid.filter(row=>!['empty','uncertain'].includes(row.actual));
   const maxError=Math.max(...recognized.map(row=>row.error));
   const maxColor=Math.max(...recognized.map(row=>row.color));
-  assert.ok(recognized.length/valid.length>=.95 && !wrong.length && maxError<=3 && maxColor<=14);
-  assert.ok(recognized.every(row=>row.clear));
-  results.vision={accepted:recognized.length,valid:valid.length,rejected:invalid.length-wrong.length,invalid:invalid.length,maxError,maxColor};
   if (process.env.BROWSER_METRICS_PATH) await writeFile(process.env.BROWSER_METRICS_PATH,JSON.stringify(suite,null,2));
+  assert.ok(recognized.length/valid.length>=.95 && !wrong.length && maxError<=3 && maxColor<=14, JSON.stringify({recognized:recognized.length,valid:valid.length,wrong,maxError,maxColor}));
+  assert.ok(recognized.every(row=>row.clear));
+  const legacy=await test.evaluate(()=>window.legacySuite());
+  assert.ok(legacy.length===4 && legacy.every(row=>row.found && row.transparent));
+  results.legacyTemplates=legacy.length;
+  results.vision={accepted:recognized.length,valid:valid.length,rejected:invalid.length-wrong.length,invalid:invalid.length,maxError,maxColor};
   const pictures=await test.evaluate(async()=>Promise.all([
     window.fixture('clown','straight'),window.fixture('clown','blank'),
-    window.fixture('shark','trapezoid'),window.fixture('clown','coveredOne'),
+    window.fixture('shark','trapezoid',1),window.fixture('clown','coveredOne'),
   ]));
   await context.addInitScript(pictures=>{
     if (!location.pathname.endsWith('-scan.html')) return;
@@ -72,10 +75,18 @@ try {
     new MutationObserver(()=>window.fishArrivals.push({time:Date.now(),id:a.dataset.renderedId}))
       .observe(a,{attributes:true,attributeFilter:['data-rendered-id']});
   });
+  const notice=scan.locator('#upload-notice');
+  assert.equal(await notice.isVisible(),false);
   await scan.getByRole('button',{name:'開始自動掃描'}).click();
   await display.waitForFunction(()=>document.querySelector('#aquarium').dataset.fishCount==='1');
   await display.waitForFunction(()=>window.fishArrivals.length===1);
   await scan.getByText('已加入小丑魚型。請拿走圖畫紙。').waitFor();
+  await scan.getByText('已上傳到水族館',{exact:true}).waitFor();
+  await scan.getByText('現在可以移開圖畫紙。',{exact:true}).waitFor();
+  if (process.env.AQUARIUM_SCREENSHOTS) {
+    await mkdir(process.env.AQUARIUM_SCREENSHOTS,{recursive:true});
+    await scan.screenshot({path:process.env.AQUARIUM_SCREENSHOTS+'/upload-notice.png'});
+  }
   await delay(1500);
   assert.equal(await stage.getAttribute('data-fish-count'),'1');
   await scan.evaluate(()=>window.changeFrame(3));
@@ -85,9 +96,16 @@ try {
   await delay(1250);
   assert.equal(await stage.getAttribute('data-fish-count'),'1');
   await scan.evaluate(()=>window.changeFrame(1));
+  assert.equal(await notice.isVisible(),true);
   await scan.getByText('已就緒，可以放上下一張。').waitFor();
+  await notice.waitFor({state:'hidden'});
   await scan.evaluate(()=>window.changeFrame(2));
   await scan.getByText('已加入鯊魚型。請拿走圖畫紙。').waitFor();
+  await scan.getByText('已上傳到水族館',{exact:true}).waitFor();
+  await scan.getByRole('button',{name:'關閉上傳提示'}).click();
+  await notice.waitFor({state:'hidden'});
+  assert.equal(await scan.getByRole('button',{name:'手動拍照'}).isEnabled(),false);
+  results.uploadNotice='shown after write, stays until paper removed, dismissal leaves latch closed';
   await display.waitForFunction(()=>window.fishArrivals.length===2);
   const arrivals=await display.evaluate(async()=>{
     const {createCollection}=await import('./aquarium-v3/collection.js');
@@ -110,6 +128,8 @@ try {
   await scan.getByText('請確認魚身完整，再加入水族館。').waitFor();
   await scan.getByRole('button',{name:'加入水族館',exact:true}).click();
   await display.waitForFunction(()=>document.querySelector('#aquarium').dataset.fishCount==='3');
+  await scan.getByText('已上傳到水族館',{exact:true}).waitFor();
+  await scan.locator('#upload-instruction').waitFor({state:'hidden'});
   const fixture=Buffer.from(pictures[3],'base64');
   await input.setInputFiles({name:'covered.jpg',mimeType:'image/jpeg',buffer:fixture});
   await scan.getByText('請選擇魚形，並將定位點對到紙上的方格。').waitFor();
@@ -160,6 +180,53 @@ try {
   await display.getByRole('button',{name:'確認清空',exact:true}).click();
   await display.waitForFunction(()=>document.querySelector('#aquarium').dataset.fishCount==='0');
   results.restoreAndGallery='passed';
+  const mobileContext=await browser.newContext({
+    viewport:{width:390,height:844},isMobile:true,hasTouch:true,
+    userAgent:'Mozilla/5.0 (Linux; Android 15) AppleWebKit/537.36 Chrome/153.0 Mobile Safari/537.36',
+  });
+  await mobileContext.addInitScript(()=>{
+    window.cameraRequests=[];
+    window.forceFallback=false;
+    let oldTrack;
+    navigator.mediaDevices.enumerateDevices=async ()=>{
+      return [{kind:'videoinput',deviceId:'rear',label:'Back camera'},{kind:'videoinput',deviceId:'front',label:'Front camera'}];
+    };
+    navigator.mediaDevices.getUserMedia=async ({video})=>{
+      const facing=video.facingMode?.exact || video.facingMode?.ideal;
+      window.cameraRequests.push({facing,exact:Boolean(video.facingMode?.exact),previousStopped:oldTrack?.readyState==='ended'});
+      if (window.forceFallback && video.facingMode?.exact) throw new DOMException('Fixture constrained','OverconstrainedError');
+      const canvas=document.createElement('canvas');
+      canvas.width=640; canvas.height=480;
+      const ctx=canvas.getContext('2d');
+      ctx.fillStyle='#666';
+      ctx.fillRect(0,0,640,480);
+      const stream=canvas.captureStream(10);
+      const track=stream.getVideoTracks()[0];
+      track.getSettings=()=>({deviceId:facing==='user' ? 'front' : 'rear',facingMode:facing});
+      oldTrack=track;
+      return stream;
+    };
+  });
+  const mobile=await mobileContext.newPage();
+  mobile.on('pageerror',error=>errors.push(error.message));
+  await mobile.goto(base+'/class-aquarium-v3-scan.html');
+  assert.equal(await mobile.locator('#mobile-photo').getAttribute('capture'),'environment');
+  await mobile.getByRole('button',{name:'開始自動掃描'}).click();
+  await mobile.getByRole('button',{name:'暫停自動掃描'}).waitFor();
+  await mobile.getByRole('button',{name:'切到前鏡頭'}).click();
+  await mobile.getByRole('button',{name:'切到後鏡頭'}).waitFor();
+  await mobile.evaluate(()=>{window.forceFallback=true;});
+  await mobile.getByRole('button',{name:'切到後鏡頭'}).click();
+  await mobile.getByRole('button',{name:'切到前鏡頭'}).waitFor();
+  assert.deepEqual(await mobile.evaluate(()=>window.cameraRequests),[
+    {facing:'environment',exact:true,previousStopped:false},
+    {facing:'user',exact:true,previousStopped:true},
+    {facing:'environment',exact:true,previousStopped:true},
+    {facing:'environment',exact:false,previousStopped:true},
+  ]);
+  await mobile.getByRole('button',{name:'停止攝影機'}).click();
+  results.mobileCamera='rear first, front/back switch releases track, ideal fallback and native capture hint passed';
+  await mobileContext.close();
   assert.deepEqual(errors,[]);
 } finally {
   console.log(JSON.stringify(results,null,2));

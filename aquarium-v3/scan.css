@@ -60,3 +60,29 @@ dialog select { max-width: 240px; }
   main { grid-template-columns: 1fr; gap: 17px; padding-top: 17px; }
   aside { grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); }
 }
+
+.flip-camera { width: 100%; margin-top: 8px; }
+.manual-fields { display: flex; flex-wrap: wrap; gap: 10px 18px; }
+.upload-notice {
+  position: fixed;
+  z-index: 2;
+  top: max(18px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: max-content;
+  max-width: calc(100vw - 24px);
+  padding: 13px 14px;
+  border: 1px solid #8cccab;
+  border-radius: 14px;
+  background: #e8faef;
+  box-shadow: 0 9px 34px #12393238;
+  color: #104c36;
+}
+.upload-check { background: #176b46; color: #fff; font-size: 1.25rem; font-weight: 750; text-align: center; width: 37px; height: 37px; line-height: 37px; border-radius: 50%; }
+.upload-notice strong { font-size: clamp(17px,4.5vw,21px); }
+.upload-notice p { margin: 3px 0 0; }
+.upload-notice button { background: transparent; color: inherit; font-size: 1.25rem; padding: 5px 10px; }

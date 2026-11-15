@@ -1,5 +1,5 @@
 import { area, convexHull, cross, distance, homography, project, validQuad } from './geometry.js';
-import { CODES, FISH, SHEET } from './templates.js';
+import { CODES, FISH, SHEET, fishShape } from './templates.js?v=3.1.0';
 
 const GRID = [[0,0],[7,0],[7,7],[0,7]];
 const species = Object.keys(FISH);
@@ -195,14 +195,16 @@ export function detectSheet({data, width, height}) {
   const tolerance = Math.max(1.9, Math.min(...markerSpan)*.105);
   if (Math.max(...residuals)>tolerance || residuals.some(v => !Number.isFinite(v))) return match;
   // Never add a cropped fish if its actual print region extends beyond the capture.
-  const [x,y,w,h] = FISH[species[group]].bounds;
+  const revision = Math.floor(group/species.length)+1;
+  const type = species[group%species.length];
+  const [x,y,w,h] = fishShape(type,revision).bounds;
   const fishQuad = [[x,y],[x+w,y],[x+w,y+h],[x,y+h]].map(p => project(map,p));
   if (!validQuad(fishQuad,width,height,.03)) return match;
-  return { kind:'found', marks:4, type:species[group], corners, map, residual:Math.max(...residuals) };
+  return { kind:'found', marks:4, type, revision, corners, map, residual:Math.max(...residuals) };
 }
 
-export function paperFingerprint(frame, {type,map}) {
-  const [left,top,width,height]=FISH[type].bounds;
+export function paperFingerprint(frame, {type,map,revision}) {
+  const [left,top,width,height]=fishShape(type,revision).bounds;
   const samples=[];
   for (let y=1; y<=4; y++) {
     for (let x=1; x<=7; x++) {
@@ -217,7 +219,7 @@ export function paperFingerprint(frame, {type,map}) {
   });
 }
 
-export function removalVisible(frame, {map,type,signature}) {
+export function removalVisible(frame, {map,type,revision,signature}) {
   // A hand over a single corner must not rearm the camera. Most of the original
   // black marker borders must disappear from the last position for several frames.
   const {data,width,height} = frame;
@@ -241,6 +243,6 @@ export function removalVisible(frame, {map,type,signature}) {
   if (gone < 3) return false;
   // When all four corner codes are covered but the fish is still visible,
   // keep the latch closed. Blank templates can also unlock on mid-tone desks.
-  const after=paperFingerprint(frame,{type,map});
+  const after=paperFingerprint(frame,{type,map,revision});
   return after.filter((value,i)=>Math.abs(value-signature[i])>9).length>=5;
 }

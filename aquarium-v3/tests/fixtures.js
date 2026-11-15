@@ -1,4 +1,4 @@
-import { FISH, SHEET } from '../templates.js';
+import { ARTWORK_REVISION, CODES, FISH, SHEET, fishShape } from '../templates.js?v=3.1.0';
 import { homography, project } from '../geometry.js';
 
 const a4 = [[0,0],[SHEET.width,0],[SHEET.width,SHEET.height],[0,SHEET.height]];
@@ -26,15 +26,35 @@ export function canvas(width,height) {
   c.width=width; c.height=height;
   return c;
 }
-export async function sourceSheet(type, variant=0) {
+export async function sourceSheet(type, variant=0, revision=ARTWORK_REVISION) {
   const c = canvas(800, Math.round(SHEET.height)), ctx=c.getContext('2d');
-  const img = new Image();
-  img.src = new URL('../templates/'+type+'.svg',import.meta.url);
-  await img.decode();
-  ctx.drawImage(img,0,0,c.width,c.height);
+  const {outline,strokeWidth}=fishShape(type,revision);
+  const fish=new Path2D(outline);
+  if (revision===ARTWORK_REVISION) {
+    const img = new Image();
+    img.src = new URL('../templates/'+type+'.svg?v=3.1.0',import.meta.url);
+    await img.decode();
+    ctx.drawImage(img,0,0,c.width,c.height);
+  } else {
+    ctx.fillStyle='#fff';
+    ctx.fillRect(0,0,c.width,c.height);
+    const marker=Object.keys(FISH).indexOf(type)*4;
+    for (const [index,[x,y]] of SHEET.centers.entries()) {
+      const size=SHEET.cell;
+      const left=x-3.5*size,top=y-3.5*size;
+      ctx.fillStyle='#000';
+      ctx.fillRect(left,top,7*size,7*size);
+      ctx.fillStyle='#fff';
+      CODES[marker+index].forEach((bit,i)=>{
+        if (bit) ctx.fillRect(left+(i%5+1)*size,top+(Math.floor(i/5)+1)*size,size,size);
+      });
+    }
+    ctx.strokeStyle='#171717';
+    ctx.lineWidth=strokeWidth;
+    ctx.stroke(fish);
+  }
   ctx.save();
-  const outline = new Path2D(FISH[type].outline);
-  ctx.clip(outline);
+  ctx.clip(fish);
   ctx.globalAlpha=.87;
   for (let i=0; i<paints.length; i++) {
     const [x,y] = paints[i];
