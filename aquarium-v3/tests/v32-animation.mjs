@@ -56,6 +56,15 @@ try {
     const {dataset}=document.querySelector('#aquarium');
     return dataset.renderer==='pixi-webgl'||Boolean(dataset.fallbackReason);
   });
+  const music=display.locator('#background-music');
+  assert.equal(await music.evaluate(track=>track.paused && track.currentTime===0 && track.loop),true);
+  const playMusic=display.getByRole('button',{name:'播放背景音樂'});
+  await playMusic.click();
+  await display.waitForFunction(()=>document.querySelector('#background-music').currentTime>.1);
+  await display.getByRole('button',{name:'暫停背景音樂'}).click();
+  await playMusic.waitFor();
+  assert.equal(await music.evaluate(track=>track.paused),true);
+  report.music='starts silent, plays on click, pauses on click';
   const scanPage=context.waitForEvent('page');
   await display.getByRole('link',{name:'拍照掃描'}).click();
   const scan=await scanPage;

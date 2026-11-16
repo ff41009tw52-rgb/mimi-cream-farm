@@ -1,11 +1,13 @@
 # 班級彩繪水族館 V3.2 動畫與驗收
 
 - [魚類游動比較](https://ff41009tw52-rgb.github.io/mimi-cream-farm/aquarium-v3/animation-lab.html)
-- [V3.2.4 展示端](https://ff41009tw52-rgb.github.io/mimi-cream-farm/class-aquarium-v3-display.html?v=3.2.4)
+- [V3.2.5 展示端](https://ff41009tw52-rgb.github.io/mimi-cream-farm/class-aquarium-v3-display.html?v=3.2.5)
 - [V3.1.2 展示端](https://ff41009tw52-rgb.github.io/mimi-cream-farm/class-aquarium-v3-1-2-display.html)
 - [現有掃描端](https://ff41009tw52-rgb.github.io/mimi-cream-farm/class-aquarium-v3-scan.html?v=3.1.2)
 
 展示端上方的「拍照掃描」會另開掃描頁。同一台裝置、同一瀏覽器設定檔開掃描與展示端，即可使用同一份水族館收藏。原版展示可直接開啟，同樣讀取這份作品。
+
+展示頁初始保持靜音。點「播放背景音樂」會循環播放原創的 48 秒無人聲配樂，可用同一個按鈕暫停。音檔在網站內提供。
 
 ## 比較和選型
 

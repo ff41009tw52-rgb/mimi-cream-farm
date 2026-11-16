@@ -15,6 +15,8 @@ body { margin: 0; background: #093e57; }
 .toolbar a, button { padding: 9px 12px; cursor: pointer; }
 .toolbar a { display: inline-flex; align-items: center; text-decoration: none; }
 .toolbar a:hover, button:hover { background-color: #245369; }
+#music-toggle[data-playing] { background: #286753; border-color: #91d9bd; }
+#music-error { color: #ffebc1; flex-basis: 100%; }
 button:disabled { opacity: .55; cursor: default; }
 :focus-visible { outline: 3px solid #ffd688; outline-offset: 3px; }
 #aquarium.hide-toolbar .toolbar:not(:focus-within) { opacity: 0; pointer-events: none; }
