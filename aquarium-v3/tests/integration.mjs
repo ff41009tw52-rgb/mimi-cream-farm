@@ -80,7 +80,7 @@ try {
   });
   const notice=scan.locator('#upload-notice');
   assert.equal(await notice.isVisible(),false);
-  await scan.getByRole('button',{name:'開始自動掃描'}).click();
+  await scan.getByRole('button',{name:'開啟相機',exact:true}).click();
   await scan.getByRole('button',{name:'暫停自動掃描'}).waitFor();
   const insertTime=await scan.evaluate(()=>{
     window.changeFrame(0);
@@ -115,7 +115,7 @@ try {
   await scan.getByText('已上傳到水族館',{exact:true}).waitFor();
   await scan.getByRole('button',{name:'關閉上傳提示'}).click();
   await notice.waitFor({state:'hidden'});
-  assert.equal(await scan.getByRole('button',{name:'拍照掃描'}).isEnabled(),false);
+  assert.equal(await scan.locator('#capture').isEnabled(),false);
   results.uploadNotice='shown after write, stays until paper removed, dismissal leaves latch closed';
   await display.waitForFunction(()=>window.fishArrivals.length===2);
   const arrivals=await display.evaluate(async()=>{
@@ -130,6 +130,7 @@ try {
   await display.waitForFunction(()=>document.querySelector('#aquarium').dataset.fishCount==='2');
   await scan.getByRole('button',{name:'暫停自動掃描'}).click();
   await scan.evaluate(()=>window.changeFrame(1));
+  await scan.getByText('相機設定',{exact:true}).click();
   const snapshot=scan.getByRole('button',{name:'拍照掃描'});
   await scan.waitForFunction(()=>!document.querySelector('#capture').disabled);
   await scan.evaluate(()=>window.changeFrame(0));
@@ -142,7 +143,7 @@ try {
   await scan.evaluate(()=>window.unplugCamera());
   await scan.getByText(/攝影機已中斷/).waitFor();
   await scan.evaluate(()=>{window.rejectCamera=true;});
-  await scan.getByRole('button',{name:'開始自動掃描'}).click();
+  await scan.getByRole('button',{name:'開啟相機',exact:true}).click();
   await scan.getByText(/攝影機權限已被拒絕/).waitFor();
   results.camera='simulated interruption and denial passed';
   const input=scan.locator('#photo');
@@ -234,8 +235,9 @@ try {
   mobile.on('pageerror',error=>errors.push(error.message));
   await mobile.goto(base+'/class-aquarium-v3-scan.html');
   assert.equal(await mobile.locator('#mobile-photo').getAttribute('capture'),'environment');
-  await mobile.getByRole('button',{name:'開始自動掃描'}).click();
+  await mobile.getByRole('button',{name:'開啟相機',exact:true}).click();
   await mobile.getByRole('button',{name:'暫停自動掃描'}).waitFor();
+  await mobile.getByText('相機設定',{exact:true}).click();
   await mobile.getByRole('button',{name:'切到前鏡頭'}).click();
   await mobile.getByRole('button',{name:'切到後鏡頭'}).waitFor();
   await mobile.evaluate(()=>{window.forceFallback=true;});
@@ -247,7 +249,7 @@ try {
     {facing:'environment',exact:true,previousStopped:true},
     {facing:'environment',exact:false,previousStopped:true},
   ]);
-  await mobile.getByRole('button',{name:'停止攝影機'}).click();
+  await mobile.getByRole('button',{name:'關閉相機',exact:true}).click();
   const mobileDisplay=await mobileContext.newPage();
   await mobileDisplay.goto(base+'/class-aquarium-v3-display.html');
   await mobile.locator('#mobile-photo').setInputFiles({

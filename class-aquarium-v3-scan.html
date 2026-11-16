@@ -4,47 +4,59 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>班級彩繪水族館 V3｜教師掃描</title>
-  <link rel="stylesheet" href="aquarium-v3/scan.css?v=3.1.0">
+  <link rel="stylesheet" href="aquarium-v3/scan.css?v=3.5.0">
 </head>
 <body>
   <header class="heading">
     <div class="heading-inner">
-      <h1>班級彩繪水族館 <small>教師掃描</small></h1>
-      <nav aria-label="相關頁面">
-        <a href="aquarium-v3/templates/aquarium-v3-a4.pdf?v=3.1.0" target="_blank" rel="noopener">四種魚 A4 著色紙</a>
-        <a href="aquarium-v3/templates/aquarium-ocean-a4.pdf?v=3.4.1" target="_blank" rel="noopener">水母、魟魚、章魚、海龜 A4 著色紙</a>
-        <a class="display-link" href="class-aquarium-v3-display.html" target="_blank" rel="noopener">開啟水族館 ↗</a>
-      </nav>
+      <span class="site-name">班級彩繪水族館</span>
+      <a class="display-link" href="class-aquarium-v3-display.html" target="_blank" rel="noopener">開啟水族館 <span aria-hidden="true">↗</span></a>
     </div>
   </header>
   <main>
-    <section class="viewer" aria-labelledby="camera-heading">
-      <h2 id="camera-heading">實物投影機</h2>
-      <div class="camera-frame">
+    <div class="page-title">
+      <h1>掃描著色紙</h1>
+      <p>把整張著色紙放平，讓四個方格都入鏡。</p>
+    </div>
+    <section class="panel viewer" aria-labelledby="camera-heading">
+      <h2 id="camera-heading">相機畫面</h2>
+      <div class="camera-frame" id="camera-frame">
         <video id="camera" autoplay muted playsinline aria-label="即時相機畫面"></video>
-        <p id="camera-hint">選擇攝影機後，點一次「開始自動掃描」。</p>
+        <div id="camera-hint"><span class="viewfinder" aria-hidden="true"></span><p>相機尚未開啟</p></div>
       </div>
-      <p id="status" role="status" aria-live="polite">等待開啟攝影機。</p>
-    </section>
-    <aside aria-label="掃描操作">
-      <section class="panel controls">
-        <h2>掃描設定</h2>
-        <label for="devices">攝影機</label>
-        <select id="devices"><option value="">預設攝影機</option></select>
-        <button id="start" class="primary">開始自動掃描</button>
-        <div class="secondary-actions">
-          <button id="stop" disabled>停止攝影機</button>
-          <button id="capture" disabled>拍照掃描</button>
-        </div>
-        <button id="flip-camera" class="flip-camera" type="button" hidden disabled>切到前鏡頭</button>
-        <p>把著色紙平放，讓四個方格完整入鏡。辨識成功就會自動加入，看到「已上傳」再移開。</p>
+      <div class="scan-actions">
+        <button id="start" class="primary" type="button">開啟相機</button>
         <label class="file-label">匯入照片<input type="file" id="photo" accept="image/*"></label>
         <label class="file-label" id="mobile-photo-label" hidden>用後鏡頭拍照<input type="file" id="mobile-photo" accept="image/*" capture="environment"></label>
+        <button id="stop" class="stop-camera" type="button" hidden disabled>關閉相機</button>
+      </div>
+      <p id="status" role="status">開啟相機後會自動掃描。</p>
+      <details class="camera-settings">
+        <summary>相機設定</summary>
+        <div class="settings-content">
+          <div>
+            <label for="devices">攝影機</label>
+            <select id="devices"><option value="">預設攝影機</option></select>
+          </div>
+          <div class="settings-actions">
+            <button id="flip-camera" type="button" hidden disabled>切到前鏡頭</button>
+            <button id="capture" type="button" hidden disabled>拍照掃描</button>
+          </div>
+        </div>
+      </details>
+    </section>
+    <aside class="sidebar" aria-label="著色紙與掃描紀錄">
+      <section class="panel worksheets">
+        <h2>著色紙</h2>
+        <p>共 8 款，每款一頁。請用 A4 橫式、原尺寸 100% 列印。</p>
+        <a class="download-link" href="aquarium-v3/templates/aquarium-all-a4.pdf?v=3.5.0" download="班級彩繪水族館-A4著色紙-全8款.pdf">下載全部著色紙 <span>PDF</span></a>
       </section>
-      <section class="panel">
-        <h2>最近加入的作品</h2>
+      <section class="panel recent">
+        <div class="recent-heading">
+          <h2>最近加入的作品</h2>
+          <p id="count">這次已掃描 0 張</p>
+        </div>
         <div class="latest"><p id="latest-empty">等待第一張作品</p><img id="latest" alt="" hidden></div>
-        <p id="count">這次已掃描 0 張</p>
       </section>
     </aside>
   </main>
@@ -76,6 +88,6 @@
       <button id="send" class="primary" disabled>加入水族館</button>
     </div>
   </dialog>
-  <script type="module" src="aquarium-v3/scan.js?v=3.4.3"></script>
+  <script type="module" src="aquarium-v3/scan.js?v=3.5.0"></script>
 </body>
 </html>

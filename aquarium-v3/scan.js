@@ -6,8 +6,11 @@ import { paperFingerprint } from './detect.js?v=3.4.1';
 
 const byId = id => document.getElementById(id);
 const video = byId('camera');
+const cameraFrame = byId('camera-frame');
+const cameraHint = byId('camera-hint');
 const devices = byId('devices');
 const startButton = byId('start');
+const stopButton = byId('stop');
 const capture = byId('capture');
 const flipCamera = byId('flip-camera');
 const mobilePhoto = byId('mobile-photo');
@@ -31,12 +34,12 @@ let worker, workerRequest, camera, auto = false, opening = false, busy = false;
 let cameraRevision = 0, saved = 0, latestURL, manualURL, manual, timer;
 let emptyFrames = 0, lastDevice = '', activeFacing = '', noticeTimer, pendingSnapshot;
 let preferredFacing = mobile ? 'environment' : '';
+const devicePreference = 'class-aquarium-v3:camera-device';
+let preferredDevice = '';
+try { preferredDevice = localStorage.getItem(devicePreference) || ''; } catch {}
 
 if (mobile) {
-  byId('camera-heading').textContent = '相機';
-  flipCamera.hidden = false;
   byId('mobile-photo-label').hidden = false;
-  byId('camera-hint').textContent = '點一次「開始自動掃描」開啟後鏡頭。';
   devices.options[0].textContent = '自動選擇鏡頭';
 }
 
@@ -59,16 +62,27 @@ function show(text,tone='') {
   state.dataset.tone = tone;
 }
 function updateControls() {
+  const live = Boolean(camera && !opening);
+  cameraFrame.toggleAttribute('data-live',live);
+  cameraHint.hidden = live;
   startButton.disabled = opening;
-  startButton.textContent = opening ? '正在開啟攝影機…'
-    : auto ? '暫停自動掃描' : camera ? '繼續自動掃描' : '開始自動掃描';
-  startButton.setAttribute('aria-pressed',String(auto));
-  byId('stop').disabled = !camera && !opening;
-  capture.disabled = !camera || gate.locked || busy || dialog.open;
+  startButton.textContent = opening ? '正在開啟相機…'
+    : auto ? '暫停自動掃描' : live ? '繼續自動掃描' : '開啟相機';
+  stopButton.hidden = stopButton.disabled = !opening && !camera;
+  capture.hidden = !live;
+  capture.disabled = !live || gate.locked || busy || dialog.open;
   byId('photo').disabled = mobilePhoto.disabled = dialog.open || busy;
-  flipCamera.disabled = opening || !camera || dialog.open;
+  flipCamera.hidden = !mobile || !live;
+  flipCamera.disabled = flipCamera.hidden || dialog.open;
   flipCamera.textContent = activeFacing==='user' ? '切到後鏡頭' : '切到前鏡頭';
   devices.disabled = opening;
+}
+function selectCamera(deviceId) {
+  preferredDevice = deviceId;
+  try {
+    if (deviceId) localStorage.setItem(devicePreference,deviceId);
+    else localStorage.removeItem(devicePreference);
+  } catch {}
 }
 function cameraError(error) {
   const messages = {
@@ -82,11 +96,9 @@ function cameraError(error) {
 async function refreshDevices() {
   try {
     const media = (await navigator.mediaDevices?.enumerateDevices() || []).filter(d=>d.kind==='videoinput');
-    const selected = devices.value;
     devices.replaceChildren(new Option(mobile ? '自動選擇鏡頭' : '預設攝影機',''));
     media.filter(d=>d.deviceId).forEach((d,i) => devices.add(new Option(d.label||`攝影機 ${i+1}`,d.deviceId)));
-    if ([...devices.options].some(o=>o.value===selected)) devices.value=selected;
-    else if ([...devices.options].some(o=>o.value===lastDevice)) devices.value=lastDevice;
+    if (media.some(device=>device.deviceId===preferredDevice)) devices.value=preferredDevice;
   } catch {}
 }
 function stopCamera(message='攝影機已停止。',tone='') {
@@ -97,7 +109,6 @@ function stopCamera(message='攝影機已停止。',tone='') {
   auto = opening = false;
   stream?.getTracks().forEach(track => track.stop());
   video.srcObject = null;
-  byId('camera-hint').hidden = false;
   gate.resetStability();
   emptyFrames = 0;
   updateControls();
@@ -126,12 +137,22 @@ async function openCamera(resumeAuto=true) {
   updateControls();
   show('正在等待攝影機授權。');
   try {
-    const wanted = devices.value;
-    const facing = wanted ? '' : preferredFacing;
+    let wanted = preferredDevice;
     const size = {width:{ideal:cameraFrameLimit},height:{ideal:1440}};
     const request = videoConstraints => navigator.mediaDevices.getUserMedia({audio:false,video:videoConstraints});
     let stream;
-    if (facing) {
+    if (wanted) {
+      try {
+        stream = await request({...size,deviceId:{exact:wanted}});
+      } catch (error) {
+        if (revision!==cameraRevision) return;
+        if (!['OverconstrainedError','NotFoundError'].includes(error.name)) throw error;
+        selectCamera('');
+        wanted = '';
+      }
+    }
+    const facing = wanted ? '' : preferredFacing;
+    if (!stream && facing) {
       try {
         stream = await request({...size,facingMode:{exact:facing}});
       } catch (error) {
@@ -139,9 +160,8 @@ async function openCamera(resumeAuto=true) {
         if (!['OverconstrainedError','NotFoundError'].includes(error.name)) throw error;
         stream = await request({...size,facingMode:{ideal:facing}});
       }
-    } else {
-      stream = await request(wanted ? {...size,deviceId:{exact:wanted}} : size);
     }
+    if (!stream) stream = await request(size);
     if (revision!==cameraRevision) {
       stream.getTracks().forEach(track=>track.stop());
       return;
@@ -166,7 +186,6 @@ async function openCamera(resumeAuto=true) {
     });
     await video.play();
     if (revision!==cameraRevision) return;
-    byId('camera-hint').hidden = true;
     auto = resumeAuto;
     opening = false;
     updateControls();
@@ -503,7 +522,7 @@ startButton.onclick=()=>{
   show(auto ? gate.locked ? '請拿走已掃描的紙張。' : '請放上著色紙。' : '自動掃描已暫停。');
   schedule(0);
 };
-byId('stop').onclick=()=>stopCamera();
+stopButton.onclick=()=>stopCamera();
 byId('dismiss-upload').onclick=hideNotice;
 function restartCamera() {
   if (!camera) return;
@@ -511,10 +530,14 @@ function restartCamera() {
   stopCamera('');
   void openCamera(wasAuto);
 }
-devices.onchange=restartCamera;
+devices.onchange=()=>{
+  selectCamera(devices.value);
+  restartCamera();
+};
 flipCamera.onclick=()=>{
   preferredFacing=activeFacing==='user' ? 'environment' : 'user';
   devices.value='';
+  selectCamera('');
   restartCamera();
 };
 mobilePhoto.onclick=()=>{
@@ -527,4 +550,5 @@ navigator.mediaDevices?.addEventListener('devicechange',()=>{
   }
 });
 addEventListener('pagehide',()=>stopCamera());
+updateControls();
 refreshDevices();
