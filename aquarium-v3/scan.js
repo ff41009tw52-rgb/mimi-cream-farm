@@ -1,8 +1,8 @@
 import { createCollection } from './collection.js';
-import { extractFish, manualMap } from './extract.js?v=3.4.0';
+import { extractFish, manualMap } from './extract.js?v=3.4.1';
 import { PaperGate } from './paper-gate.js?v=3.1.2';
-import { ARTWORK_REVISION, FISH, SHEET, fishShape } from './templates.js?v=3.4.0';
-import { paperFingerprint } from './detect.js?v=3.4.0';
+import { ARTWORK_REVISION, FISH, SHEET, fishShape } from './templates.js?v=3.4.1';
+import { paperFingerprint } from './detect.js?v=3.4.1';
 
 const byId = id => document.getElementById(id);
 const video = byId('camera');
@@ -190,7 +190,7 @@ function drawFrame(target, source, width, height, max=1600) {
 }
 function classify(source,previous) {
   if (!worker) {
-    worker = new Worker(new URL('./scan-worker.js?v=3.4.0',import.meta.url),{type:'module'});
+    worker = new Worker(new URL('./scan-worker.js?v=3.4.1',import.meta.url),{type:'module'});
     worker.onmessage = ({data}) => {
       const request = workerRequest;
       workerRequest = undefined;

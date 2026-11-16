@@ -20,6 +20,7 @@ const species = [...originalSpecies,
   ['jelly','水母'],
   ['ray','魟魚'],
   ['octopus','章魚'],
+  ['turtle','海龜'],
 ];
 // These indices are printed on the worksheets. Keep published groups in order.
 const markerGroups = [

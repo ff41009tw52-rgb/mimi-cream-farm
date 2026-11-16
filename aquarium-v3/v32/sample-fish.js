@@ -1,4 +1,4 @@
-import { FISH, SHEET } from '../templates.js?v=3.4.0';
+import { FISH, SHEET } from '../templates.js?v=3.4.1';
 
 export async function loadFishImage(url) {
   const image=new Image();
@@ -28,6 +28,7 @@ export async function templateFish(type,colored) {
       jelly:['#f49cbd','#f6d3ca','#c4aeea','#9dcbe9'],
       ray:['#8fc8cf','#adb2e8','#e7c6ae','#91acd4'],
       octopus:['#f0a97d','#ed829c','#c982b0','#ad85c1'],
+      turtle:['#d9ce85','#9bcb95','#70b9b0','#92b4d3'],
     }[type];
     const gradient=context.createLinearGradient(left+width*.18,top,left+width*.7,top+height);
     palette.forEach((color,i)=>gradient.addColorStop(i/(palette.length-1),color));

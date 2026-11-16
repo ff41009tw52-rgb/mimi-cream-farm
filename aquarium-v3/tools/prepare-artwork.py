@@ -1,4 +1,4 @@
-"""Create printer artwork and silhouette masks from individual source PNGs."""
+"""Create printer artwork and silhouette masks from individual source images."""
 import argparse
 import json
 from pathlib import Path
@@ -7,13 +7,13 @@ import cv2
 import numpy as np
 from PIL import Image
 
-species = ('clown', 'butterfly', 'puffer', 'shark', 'jelly', 'ray', 'octopus')
+species = ('clown', 'butterfly', 'puffer', 'shark', 'jelly', 'ray', 'octopus', 'turtle')
 parser = argparse.ArgumentParser(description=__doc__)
 for name in species:
     parser.add_argument(f'--{name}', type=Path)
 args = parser.parse_args()
 if not any(getattr(args, name) for name in species):
-    parser.error('provide at least one source PNG')
+    parser.error('provide at least one source image')
 base = Path(__file__).resolve().parent.parent
 artwork = base / 'templates' / 'artwork'
 artwork.mkdir(exist_ok=True)

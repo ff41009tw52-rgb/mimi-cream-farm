@@ -1,5 +1,5 @@
 import { area, convexHull, cross, distance, homography, project, validQuad } from './geometry.js';
-import { CODES, MARKER_GROUPS, SHEET, fishShape } from './templates.js?v=3.4.0';
+import { CODES, MARKER_GROUPS, SHEET, fishShape } from './templates.js?v=3.4.1';
 
 const GRID = [[0,0],[7,0],[7,7],[0,7]];
 const half = SHEET.cell * 3.5;

@@ -1,4 +1,4 @@
-import { SHEET, fishShape } from './templates.js?v=3.4.0';
+import { SHEET, fishShape } from './templates.js?v=3.4.1';
 import { homography, project, validQuad } from './geometry.js';
 
 export function manualMap(points, source) {

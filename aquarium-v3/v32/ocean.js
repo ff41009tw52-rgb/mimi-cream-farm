@@ -1,9 +1,9 @@
-import { clamp, dorsalMix, poseCreature, poseStrip } from './fish-rig.js?v=3.4.0';
-import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js?v=3.4.0';
-import { makeSwimmer, resizeSchool, stepSchool } from './school.js?v=3.4.0';
+import { clamp, creatureHeading, dorsalMix, poseCreature, poseStrip } from './fish-rig.js?v=3.4.1';
+import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js?v=3.4.1';
+import { makeSwimmer, resizeSchool, stepSchool } from './school.js?v=3.4.1';
 import { makeAtmosphere } from './ocean-scene.js';
-import { loadFishImage } from './sample-fish.js?v=3.4.0';
-import { createWaterInteractions } from './water-interactions.js?v=3.4.0';
+import { loadFishImage } from './sample-fish.js?v=3.4.1';
+import { createWaterInteractions } from './water-interactions.js?v=3.4.1';
 
 export function createOcean(canvas) {
   const stage=canvas.parentElement;
@@ -76,7 +76,7 @@ export function createOcean(canvas) {
         const lift=creature==='jelly' ? 16 : fish.type==='butterfly' || creature==='octopus' ? 8 : 0;
         pose.y=(fish.y+float-greeting*lift)*usedScale;
         pose.width=fish.width*usedScale*(1+(fish.type==='puffer' ? greeting*.15 : 0));
-        pose.angle=creature ? .12*Math.sin(fish.angle) : fish.angle;
+        pose.angle=creature ? creatureHeading(creature,fish.angle) : fish.angle;
         pose.dorsal=creature ? 1 : dorsalMix(fish.angle);
       }
       poses.push(pose);

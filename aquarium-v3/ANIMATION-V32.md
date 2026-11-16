@@ -1,7 +1,7 @@
 # 班級彩繪水族館 V3.2 動畫與驗收
 
 - [魚類游動比較](https://ff41009tw52-rgb.github.io/mimi-cream-farm/aquarium-v3/animation-lab.html)
-- [V3.4 展示端](https://ff41009tw52-rgb.github.io/mimi-cream-farm/class-aquarium-v3-display.html?v=3.4.0)
+- [V3.4.1 展示端](https://ff41009tw52-rgb.github.io/mimi-cream-farm/class-aquarium-v3-display.html?v=3.4.1)
 - [V3.1.2 展示端](https://ff41009tw52-rgb.github.io/mimi-cream-farm/class-aquarium-v3-1-2-display.html)
 - [現有掃描端](https://ff41009tw52-rgb.github.io/mimi-cream-farm/class-aquarium-v3-scan.html?v=3.1.2)
 
@@ -11,7 +11,9 @@
 
 V3.3 可直接點魚打招呼、點空白水域餵食，或拖曳氣泡引導附近的魚。小魚遇到鄰近鯊魚時會先分散，之後往魚群會合。鍵盤聚焦水族館後，可用 Enter 或空白鍵在中央投餵。減少動態效果模式顯示靜態作品。互動為展示頁內的暫時狀態。
 
-V3.4 加入 [水母、魟魚、章魚的三頁 A4 著色紙](templates/aquarium-ocean-a4.pdf)。新角色採正視姿態，水母有傘面收縮與觸手飄動，魟魚以兩側胸鰭拍動，章魚在下層擺動腕部。點擊時會加強各自的動作。舊著色紙角碼維持可識別。
+V3.4 加入水母、魟魚和章魚。新角色採正視姿態，水母有傘面收縮與觸手飄動，魟魚以兩側胸鰭拍動，章魚在下層擺動腕部。點擊時會加強各自的動作。
+
+V3.4.1 加入海龜。[海洋生物 A4 著色紙](templates/aquarium-ocean-a4.pdf?v=3.4.1)的第 4 頁使用俯視海龜線稿。海龜隨行進方向轉身，中央龜殼保持平穩，兩側前鰭划動。舊著色紙角碼維持可識別。
 
 ## 比較和選型
 

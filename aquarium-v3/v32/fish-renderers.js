@@ -1,4 +1,4 @@
-import { stripTopology, updatePositions } from './fish-rig.js?v=3.4.0';
+import { stripTopology, updatePositions } from './fish-rig.js?v=3.4.1';
 
 export function canvasFishRenderer(canvas) {
   const ctx=canvas.getContext('2d',{alpha:true});

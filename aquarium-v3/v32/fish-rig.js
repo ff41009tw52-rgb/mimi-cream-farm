@@ -5,7 +5,7 @@ export const smoothstep = (start, end, value) => {
   return t * t * (3 - 2 * t);
 };
 
-// All four scanned templates face right. Distances along the body run nose to tail.
+// The original fish face right. Creature templates use their own orientation.
 export const SPECIES = {
   clown:     {speed:66, width:110, tailHz:1.82, amplitude:.064, hinge:.72, wave:5.3, turnRate:2.08, rise:15, float:2.4, dash:.38},
   butterfly: {speed:43, width:102, tailHz:1.36, amplitude:.044, hinge:.78, wave:4.9, turnRate:1.68, rise:12, float:2.5, dash:.05},
@@ -14,6 +14,7 @@ export const SPECIES = {
   jelly:     {speed:23, width:68, tailHz:.52, turnRate:.94, rise:19, float:10, dash:0, habitat:[.23,.59], creature:'jelly'},
   ray:       {speed:47, width:151, tailHz:.63, turnRate:1.25, rise:11, float:3.6, dash:.04, habitat:[.47,.77], creature:'ray'},
   octopus:   {speed:27, width:116, tailHz:.73, turnRate:1.09, rise:9, float:4.5, dash:0, habitat:[.66,.84], creature:'octopus'},
+  turtle:    {speed:39, width:128, tailHz:.66, turnRate:1.20, rise:10, float:2.2, dash:0, habitat:[.29,.69], creature:'turtle'},
 };
 
 export function profileFor(type) { return SPECIES[type] || SPECIES.clown; }
@@ -32,6 +33,12 @@ export function poseCreature(strip,creature,phase,aspect,greeting=0) {
       const stroke=Math.sin(phase-wing*1.9);
       strip.x[i]=(u-.5)*(1-.10*wing*wing*(.5+.5*stroke));
       strip.y[i]=stroke*wing**2.2*(.10+.048*greeting);
+    } else if (creature==='turtle') {
+      // The artwork's shell occupies the middle 56 percent. Flex the flipper tips only.
+      const flipper=smoothstep(.57,1,Math.abs(u*2-1));
+      const stroke=Math.sin(phase-flipper*.56);
+      strip.x[i]=(u-.5)*(1-flipper*.10*(.5+.5*stroke));
+      strip.y[i]=flipper*stroke*(.12+.06*greeting);
     } else {
       const arms=smoothstep(.36,1,u);
       const wave=Math.sin(phase-u*5);
@@ -45,6 +52,10 @@ export function poseCreature(strip,creature,phase,aspect,greeting=0) {
     }
   }
   return strip;
+}
+
+export function creatureHeading(creature,heading) {
+  return creature==='turtle' ? heading+Math.PI/2 : .12*Math.sin(heading);
 }
 
 // An oblique view makes the two sides of a horizontal tail beat project differently.

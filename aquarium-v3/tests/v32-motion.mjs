@@ -91,7 +91,7 @@ for (const type of types) {
     }
   }
 }
-for (const type of ['jelly','ray','octopus']) {
+for (const type of ['jelly','ray','octopus','turtle']) {
   const [,,width,height]=FISH[type].bounds;
   const fish=makeSwimmer({id:'creature-'+type,type},{width,height},world,false);
   const {mesh,aspect}=fish;
@@ -102,6 +102,14 @@ for (const type of ['jelly','ray','octopus']) {
     assert.ok(axis.every((value,index)=>index===0 || value>axis[index-1]),`${type}: folded mesh`);
     updatePositions(points,mesh,aspect);
     assert.ok(points.every(Number.isFinite),`${type}: invalid mesh coordinates`);
+    if (type==='turtle') {
+      for (let i=0;i<mesh.x.length;i++) {
+        const u=i/(mesh.x.length-1);
+        if (Math.abs(u-.5)<.28) {
+          assert.ok(mesh.y[i]===0 && Math.abs(mesh.x[i]-(u-.5))<1e-6,'turtle shell should remain steady');
+        }
+      }
+    }
   }
 }
 console.log(JSON.stringify({fishes:40,simulatedSeconds:90,changedTarget:goalChanges.size,

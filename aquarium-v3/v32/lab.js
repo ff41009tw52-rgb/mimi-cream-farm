@@ -1,8 +1,8 @@
 import { createCollection } from '../collection.js';
-import { FISH } from '../templates.js?v=3.4.0';
-import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js?v=3.4.0';
-import { clamp, createStrip, dorsalMix, poseCreature, poseStrip, profileFor, TAU } from './fish-rig.js?v=3.4.0';
-import { loadFishImage, templateFish } from './sample-fish.js?v=3.4.0';
+import { FISH } from '../templates.js?v=3.4.1';
+import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js?v=3.4.1';
+import { clamp, createStrip, creatureHeading, dorsalMix, poseCreature, poseStrip, profileFor, TAU } from './fish-rig.js?v=3.4.1';
+import { loadFishImage, templateFish } from './sample-fish.js?v=3.4.1';
 
 const $=id=>document.getElementById(id);
 const controls=Object.fromEntries(['speed','frequency','amplitude','bend','turn','size'].map(key=>[key,$(key)]));
@@ -68,9 +68,9 @@ function draw() {
     const base={image,aspect,width:fishWidth,id:'lab-'+drawnId};
     let pose;
     if (fish.creature) {
-      const mesh=fish.creature==='ray' ? strips.wave : strips.vertical;
+      const mesh=fish.creature==='jelly' || fish.creature==='octopus' ? strips.vertical : strips.wave;
       pose={...base,x:width*(.5+.27*Math.sin(path)),y:height*(.53+.13*Math.cos(path)),
-        angle:.12*Math.sin(heading),dorsal:1,
+        angle:creatureHeading(fish.creature,heading),dorsal:1,
         strip:i===2 ? poseCreature(mesh,fish.creature,phase,aspect) : null};
     } else if (i===0) {
       pose={...base,x:width*(.5+.30*Math.sin(path)),y:height*(.54+Math.sin(path*1.35)*.018),angle:0,dorsal:1,
