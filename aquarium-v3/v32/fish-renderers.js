@@ -1,4 +1,4 @@
-import { stripTopology, updatePositions } from './fish-rig.js';
+import { stripTopology, updatePositions } from './fish-rig.js?v=3.4.0';
 
 export function canvasFishRenderer(canvas) {
   const ctx=canvas.getContext('2d',{alpha:true});
@@ -29,6 +29,8 @@ export function canvasFishRenderer(canvas) {
     if (mirrored) ctx.scale(1,-1);
     if (!strip) {
       ctx.drawImage(image,-width/2,-height/2,width,height);
+    } else if (strip.vertical) {
+      drawVertical(pose);
     } else {
       const columns=strip.x.length-1;
       const naturalWidth=image.naturalWidth || image.width;
@@ -46,6 +48,21 @@ export function canvasFishRenderer(canvas) {
       }
     }
     ctx.restore();
+  }
+  function drawVertical({image,width,strip}) {
+    const naturalWidth=image.naturalWidth || image.width;
+    const naturalHeight=image.naturalHeight || image.height;
+    const rows=strip.y.length-1, step=naturalHeight/rows;
+    for (let i=0;i<rows;i++) {
+      const left=strip.x[i]*width, top=strip.y[i]*width;
+      const span=(strip.span[i]+strip.span[i+1])*.5;
+      const end=Math.min(naturalHeight,(i+1)*step+1.3);
+      const sourceHeight=end-i*step;
+      ctx.save();
+      ctx.transform(span,0,(strip.x[i+1]*width-left)/step,(strip.y[i+1]*width-top)/step,left,top);
+      ctx.drawImage(image,0,i*step,naturalWidth,sourceHeight,-width/2,0,width,sourceHeight);
+      ctx.restore();
+    }
   }
   return { resize, draw };
 }
@@ -93,9 +110,9 @@ export async function webglFishRenderer(canvas,onLost) {
     entry.mirror.destroy();
     entry.geometry.destroy(true);
   }
-  function resetGeometry(entry,columns,aspect) {
+  function resetGeometry(entry,columns,aspect,vertical) {
     releaseGeometry(entry);
-    const {uv,indices}=stripTopology(columns);
+    const {uv,indices}=stripTopology(columns,vertical);
     const positions=new Float32Array((columns+1)*4);
     for (let c=0;c<=columns;c++) {
       positions.set([c/columns-.5,-aspect/2,c/columns-.5,aspect/2],c*4);
@@ -104,6 +121,7 @@ export async function webglFishRenderer(canvas,onLost) {
     entry.geometry=geometry;
     entry.positions=positions;
     entry.columns=columns;
+    entry.vertical=vertical;
     entry.normal=make(geometry,entry.texture);
     entry.mirror=make(geometry,entry.texture);
     entry.mirror.scale.y=-1;
@@ -126,7 +144,8 @@ export async function webglFishRenderer(canvas,onLost) {
         fish.set(pose.id,entry);
       }
       const columns=pose.strip ? pose.strip.x.length-1 : 1;
-      if (entry.columns!==columns) resetGeometry(entry,columns,pose.aspect);
+      const vertical=pose.strip?.vertical || false;
+      if (entry.columns!==columns || entry.vertical!==vertical) resetGeometry(entry,columns,pose.aspect,vertical);
       if (pose.strip) {
         updatePositions(entry.positions,pose.strip,pose.aspect);
         entry.geometry.getBuffer('aPosition').update();

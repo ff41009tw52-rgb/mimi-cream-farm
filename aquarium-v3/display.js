@@ -1,11 +1,11 @@
 import { createCollection } from './collection.js';
-import { FISH } from './templates.js';
+import { FISH } from './templates.js?v=3.4.0';
 
 const byId=id=>document.getElementById(id);
 const stage=byId('aquarium');
 const gallery=byId('gallery-dialog');
 const collection=createCollection();
-const {createOcean}=stage.dataset.engine==='v32' ? await import('./v32/ocean.js?v=3.3.0') : await import('./swim.js');
+const {createOcean}=stage.dataset.engine==='v32' ? await import('./v32/ocean.js?v=3.4.0') : await import('./swim.js');
 const ocean=createOcean(byId('water'));
 const current=new Map();
 const systemMotion=matchMedia('(prefers-reduced-motion: reduce)');
@@ -91,7 +91,7 @@ async function refresh() {
     }
     if (changed || !initialized) {
       stage.dataset.fishCount=current.size;
-      byId('total').textContent=`${current.size} 隻魚`;
+      byId('total').textContent=`${current.size} 隻${stage.dataset.engine==='v32' ? '' : '魚'}`;
       if (gallery.open) renderGallery();
     }
     initialized=true;

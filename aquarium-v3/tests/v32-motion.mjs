@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
 import { FISH } from '../templates.js';
 import { angleDelta, makeSwimmer, stepSchool } from '../v32/school.js';
-import { SPECIES, createStrip, poseStrip, TAU } from '../v32/fish-rig.js';
+import { SPECIES, createStrip, poseCreature, poseStrip, updatePositions, TAU } from '../v32/fish-rig.js';
 
-const world={width:960,height:540}, types=Object.keys(FISH);
+const world={width:960,height:540};
 const previousWidths={clown:91,butterfly:84,puffer:82,shark:108};
+const types=Object.keys(previousWidths);
 const sameDepthWidths=Object.fromEntries(types.map(type=>{
   const [,,width,height]=FISH[type].bounds;
   const fish=makeSwimmer({id:'size-reference',type},{width,height},world,false);
@@ -56,11 +57,12 @@ const entrance=types.map((type,index)=>{
 assert.ok(entrance.every(f=>f.x<0||f.x>world.width));
 for (let tick=0;tick<120;tick++) stepSchool(entrance,world,1/fps);
 assert.ok(entrance.every(f=>f.x>f.width/2*-1 && f.x<world.width+f.width/2));
-assert.equal(new Set(Object.values(SPECIES).map(p=>p.tailHz)).size,4);
+assert.equal(new Set(types.map(type=>SPECIES[type].tailHz)).size,4);
 const priorTailTravel={clown:.1378,butterfly:.1009,puffer:.0415,shark:.0969};
 const range=values=>Math.max(...values)-Math.min(...values);
 const lateralTravel={};
-for (const [type,profile] of Object.entries(SPECIES)) {
+for (const type of types) {
+  const profile=SPECIES[type];
   const hinge=createStrip(18);
   poseStrip(hinge,'hinge',profile,Math.PI/2,1,0);
   assert.ok(Math.abs(hinge.y[0])>.015,`${type}: comparison hinge is not animated`);
@@ -87,6 +89,19 @@ for (const [type,profile] of Object.entries(SPECIES)) {
       lateralTravel[type]=Object.fromEntries(Object.entries({tail,rear,lift})
         .map(([part,travel])=>[part,Number((travel*100).toFixed(2))]));
     }
+  }
+}
+for (const type of ['jelly','ray','octopus']) {
+  const [,,width,height]=FISH[type].bounds;
+  const fish=makeSwimmer({id:'creature-'+type,type},{width,height},world,false);
+  const {mesh,aspect}=fish;
+  const points=new Float32Array(mesh.x.length*4);
+  for (let frame=0;frame<24;frame++) {
+    poseCreature(mesh,type,frame*TAU/24,aspect,1);
+    const axis=mesh.vertical ? mesh.y : mesh.x;
+    assert.ok(axis.every((value,index)=>index===0 || value>axis[index-1]),`${type}: folded mesh`);
+    updatePositions(points,mesh,aspect);
+    assert.ok(points.every(Number.isFinite),`${type}: invalid mesh coordinates`);
   }
 }
 console.log(JSON.stringify({fishes:40,simulatedSeconds:90,changedTarget:goalChanges.size,

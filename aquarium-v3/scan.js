@@ -1,8 +1,8 @@
 import { createCollection } from './collection.js';
-import { extractFish, manualMap } from './extract.js?v=3.1.0';
+import { extractFish, manualMap } from './extract.js?v=3.4.0';
 import { PaperGate } from './paper-gate.js?v=3.1.2';
-import { ARTWORK_REVISION, FISH, SHEET } from './templates.js?v=3.1.0';
-import { paperFingerprint } from './detect.js?v=3.1.0';
+import { ARTWORK_REVISION, FISH, SHEET, fishShape } from './templates.js?v=3.4.0';
+import { paperFingerprint } from './detect.js?v=3.4.0';
 
 const byId = id => document.getElementById(id);
 const video = byId('camera');
@@ -190,7 +190,7 @@ function drawFrame(target, source, width, height, max=1600) {
 }
 function classify(source,previous) {
   if (!worker) {
-    worker = new Worker(new URL('./scan-worker.js?v=3.1.0',import.meta.url),{type:'module'});
+    worker = new Worker(new URL('./scan-worker.js?v=3.4.0',import.meta.url),{type:'module'});
     worker.onmessage = ({data}) => {
       const request = workerRequest;
       workerRequest = undefined;
@@ -326,8 +326,8 @@ function movePoint(index,x,y) {
   invalidatePreview();
   drawHandles();
 }
-for (const [index,key] of Object.keys(FISH).entries()) {
-  species.add(new Option(FISH[key].name,key));
+for (const [key,shape] of Object.entries(FISH)) species.add(new Option(shape.name,key));
+for (let index=0; index<SHEET.centers.length; index++) {
   const button=document.createElement('button');
   button.type='button';
   button.id='handle-'+index;
@@ -362,6 +362,7 @@ function showManual(frame,source,session) {
   manual={frame,source,session,version:0,points:[[x,y],[x+w,y],[x+w,y+h],[x,y+h]]};
   species.value='';
   templateVersion.value=String(ARTWORK_REVISION);
+  templateVersion.querySelector('[value="1"]').disabled=false;
   byId('manual-info').textContent='請選擇魚形，並將定位點對到紙上的方格。';
   drawHandles();
   gate.resetStability();
@@ -474,7 +475,13 @@ dialog.addEventListener('close',()=>{
 });
 byId('close-manual').onclick=()=>dialog.close();
 byId('preview').onclick=preview;
-species.onchange=templateVersion.onchange=invalidatePreview;
+species.onchange=()=>{
+  const original=templateVersion.querySelector('[value="1"]');
+  original.disabled=Boolean(species.value && !fishShape(species.value,1));
+  if (original.disabled) templateVersion.value=String(ARTWORK_REVISION);
+  invalidatePreview();
+};
+templateVersion.onchange=invalidatePreview;
 capture.onclick=()=>void scanSnapshot({source:'camera',session:cameraRevision});
 byId('photo').onchange=mobilePhoto.onchange=({target})=>{
   const file=target.files[0];

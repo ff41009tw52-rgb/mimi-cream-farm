@@ -1,7 +1,7 @@
 # 班級彩繪水族館 V3.2 動畫與驗收
 
 - [魚類游動比較](https://ff41009tw52-rgb.github.io/mimi-cream-farm/aquarium-v3/animation-lab.html)
-- [V3.3 展示端](https://ff41009tw52-rgb.github.io/mimi-cream-farm/class-aquarium-v3-display.html?v=3.3.0)
+- [V3.4 展示端](https://ff41009tw52-rgb.github.io/mimi-cream-farm/class-aquarium-v3-display.html?v=3.4.0)
 - [V3.1.2 展示端](https://ff41009tw52-rgb.github.io/mimi-cream-farm/class-aquarium-v3-1-2-display.html)
 - [現有掃描端](https://ff41009tw52-rgb.github.io/mimi-cream-farm/class-aquarium-v3-scan.html?v=3.1.2)
 
@@ -10,6 +10,8 @@
 展示頁初始保持靜音。點「播放背景音樂」會循環播放原創的 48 秒無人聲配樂，可用同一個按鈕暫停。音檔在網站內提供。
 
 V3.3 可直接點魚打招呼、點空白水域餵食，或拖曳氣泡引導附近的魚。小魚遇到鄰近鯊魚時會先分散，之後往魚群會合。鍵盤聚焦水族館後，可用 Enter 或空白鍵在中央投餵。減少動態效果模式顯示靜態作品。互動為展示頁內的暫時狀態。
+
+V3.4 加入 [水母、魟魚、章魚的三頁 A4 著色紙](templates/aquarium-ocean-a4.pdf)。新角色採正視姿態，水母有傘面收縮與觸手飄動，魟魚以兩側胸鰭拍動，章魚在下層擺動腕部。點擊時會加強各自的動作。舊著色紙角碼維持可識別。
 
 ## 比較和選型
 

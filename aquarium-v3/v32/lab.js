@@ -1,8 +1,8 @@
 import { createCollection } from '../collection.js';
-import { FISH } from '../templates.js';
-import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js';
-import { clamp, createStrip, dorsalMix, poseStrip, profileFor, TAU } from './fish-rig.js?v=3.2.2';
-import { loadFishImage, templateFish } from './sample-fish.js';
+import { FISH } from '../templates.js?v=3.4.0';
+import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js?v=3.4.0';
+import { clamp, createStrip, dorsalMix, poseCreature, poseStrip, profileFor, TAU } from './fish-rig.js?v=3.4.0';
+import { loadFishImage, templateFish } from './sample-fish.js?v=3.4.0';
 
 const $=id=>document.getElementById(id);
 const controls=Object.fromEntries(['speed','frequency','amplitude','bend','turn','size'].map(key=>[key,$(key)]));
@@ -20,7 +20,7 @@ const fallback=wave.renderer;
 let gpu=null, image, fileImage, sourceRevision=0, drawnId=0, paused=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let phase=0, route=0, last=0, request=0, heading=0;
 const savedImages=new Map();
-const strips={hinge:createStrip(12),wave:createStrip(18)};
+const strips={hinge:createStrip(12),wave:createStrip(18),vertical:createStrip(18,true)};
 $('lab-renderer').textContent='Canvas 2D';
 $('pause').textContent=paused ? '播放' : '暫停';
 
@@ -67,7 +67,12 @@ function draw() {
     const fishWidth=Math.min(width*.34,height*.57)*size;
     const base={image,aspect,width:fishWidth,id:'lab-'+drawnId};
     let pose;
-    if (i===0) {
+    if (fish.creature) {
+      const mesh=fish.creature==='ray' ? strips.wave : strips.vertical;
+      pose={...base,x:width*(.5+.27*Math.sin(path)),y:height*(.53+.13*Math.cos(path)),
+        angle:.12*Math.sin(heading),dorsal:1,
+        strip:i===2 ? poseCreature(mesh,fish.creature,phase,aspect) : null};
+    } else if (i===0) {
       pose={...base,x:width*(.5+.30*Math.sin(path)),y:height*(.54+Math.sin(path*1.35)*.018),angle:0,dorsal:1,
         legacyScale:Math.sign(legacyDirection||1)*(.045+.955*Math.abs(legacyDirection))};
     } else {

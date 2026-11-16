@@ -1,4 +1,4 @@
-"""Create printer artwork and the exact silhouette masks from the four source PNGs."""
+"""Create printer artwork and silhouette masks from individual source PNGs."""
 import argparse
 import json
 from pathlib import Path
@@ -7,17 +7,22 @@ import cv2
 import numpy as np
 from PIL import Image
 
-species = ('clown', 'butterfly', 'puffer', 'shark')
+species = ('clown', 'butterfly', 'puffer', 'shark', 'jelly', 'ray', 'octopus')
 parser = argparse.ArgumentParser(description=__doc__)
 for name in species:
-    parser.add_argument(f'--{name}', type=Path, required=True)
+    parser.add_argument(f'--{name}', type=Path)
 args = parser.parse_args()
+if not any(getattr(args, name) for name in species):
+    parser.error('provide at least one source PNG')
 base = Path(__file__).resolve().parent.parent
 artwork = base / 'templates' / 'artwork'
 artwork.mkdir(exist_ok=True)
-geometry = {}
+geometry_path = base / 'tools' / 'artwork.json'
+geometry = json.loads(geometry_path.read_text(encoding='utf-8')) if geometry_path.exists() else {}
 
 for name in species:
+    if not getattr(args, name):
+        continue
     with Image.open(getattr(args, name)) as original:
         image = original.convert('L')
     pixels = np.asarray(image)
@@ -42,6 +47,6 @@ for name in species:
         'outline': (points - [x, y]).tolist(),
     }
 
-(base / 'tools' / 'artwork.json').write_text(
+geometry_path.write_text(
     json.dumps(geometry, ensure_ascii=False, separators=(',', ':')) + '\n', encoding='utf-8'
 )

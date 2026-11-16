@@ -61,8 +61,8 @@ export function createWaterInteractions(stage,canvas,getFish) {
 
   function greet(fish) {
     fish.greet=.8;
-    const x=fish.pose.x/scale+Math.cos(fish.angle)*fish.width*.4;
-    const y=fish.pose.y/scale+Math.sin(fish.angle)*fish.width*.4;
+    const x=fish.pose.x/scale+(fish.profile.creature ? 0 : Math.cos(fish.angle)*fish.width*.4);
+    const y=fish.pose.y/scale+(fish.profile.creature ? -fish.width*fish.aspect*.26 : Math.sin(fish.angle)*fish.width*.4);
     bubble(x,y,fish.type==='clown' ? 8 : 4);
   }
 

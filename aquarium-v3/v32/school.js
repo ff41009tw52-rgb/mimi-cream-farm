@@ -1,4 +1,4 @@
-import { clamp, createStrip, profileFor, TAU } from './fish-rig.js?v=3.2.3';
+import { clamp, createStrip, profileFor, TAU } from './fish-rig.js?v=3.4.0';
 
 export function randomSource(seed) {
   let state=seed || 0x2f39b7c1;
@@ -23,7 +23,9 @@ export function angleDelta(target,current) {
 function limits(fish,world) {
   const insetX=Math.min(world.width*.25,fish.width*.64+30);
   const insetY=Math.min(world.height*.25,fish.width*fish.aspect*.54+46);
-  return {left:insetX,right:world.width-insetX,top:insetY,bottom:world.height-insetY};
+  const top=Math.max(insetY,world.height*(fish.profile.habitat?.[0] ?? 0));
+  const bottom=Math.min(world.height-insetY,world.height*(fish.profile.habitat?.[1] ?? 1));
+  return {left:insetX,right:world.width-insetX,top,bottom:Math.max(top,bottom),insetY};
 }
 
 function chooseTarget(fish,world) {
@@ -52,9 +54,11 @@ export function makeSwimmer(record, image, world, fresh) {
   const aspect=(image.naturalHeight||image.height)/(image.naturalWidth||image.width);
   const baseSpeed=profile.speed*(.70+.42*depth)*(.87+.26*random());
   const side=random()<.5 ? 1 : -1;
-  const y=world.height*(.19+.65*random());
+  const band=profile.habitat;
+  const y=world.height*(band ? band[0]+(band[1]-band[0])*random() : .19+.65*random());
   const x=fresh ? side>0 ? -width*.56 : world.width+width*.56 : world.width*(.11+.78*random());
   const angle=(side>0?0:Math.PI)+(fresh ? 0 : (random()-.5)*.54);
+  const vertical=profile.creature==='jelly' || profile.creature==='octopus';
   const fish={
     id:record.id,type:record.type,image,aspect,profile,random,depth,width,baseSpeed,
     x,y,angle,yaw:0,speed:baseSpeed*(fresh ? 1.10 : .90),phase:random()*TAU,
@@ -62,12 +66,14 @@ export function makeSwimmer(record, image, world, fresh) {
     paceTarget:.83+.33*random(),decisionAge:.6+random()*3.8,
     avoidX:0,avoidY:0,driftX:0,driftY:0,crowd:0,
     greet:0,feedRest:0,alarmTime:0,threat:null,intent:{x:0,y:0,weight:0,pace:1},
-    mesh:createStrip(depth>.52?18:10), fallbackMesh:createStrip(depth>.61 ? 12 : 7),
+    mesh:createStrip(depth>.52?18:10,vertical), fallbackMesh:createStrip(depth>.61 ? 12 : 7,vertical),
     pose:{id:record.id,image,aspect},
   };
   if (fresh) {
     fish.goalX=world.width*(side>0 ? .27 : .73);
-    fish.goalY=clamp(y+(random()-.5)*world.height*.14,world.height*.16,world.height*.83);
+    const edges=limits(fish,world);
+    fish.goalY=clamp(y+(random()-.5)*world.height*.14,
+      profile.habitat ? edges.top : world.height*.16,profile.habitat ? edges.bottom : world.height*.83);
     fish.targetAge=Number.POSITIVE_INFINITY;
   } else chooseTarget(fish,world);
   return fish;
@@ -140,7 +146,7 @@ function advance(fish,world,dt) {
     range=Math.hypot(dx,dy);
   }
   const facingX=Math.cos(fish.angle), facingY=Math.sin(fish.angle);
-  const {left,right,top,bottom}=limits(fish,world);
+  const {left,right,top,bottom,insetY}=limits(fish,world);
   const approachX=fish.x+facingX*fish.speed*.67;
   const approachY=fish.y+facingY*fish.speed*.67;
   const wallX=fish.state==='enter' ? 0 : (Math.max(0,left-approachX)-Math.max(0,approachX-right))/48;
@@ -158,10 +164,10 @@ function advance(fish,world,dt) {
   const throttle=fish.state==='enter' ? 1.16 : fish.burst>0 ? 1.46 : fish.paceTarget;
   const turning=Math.min(1,Math.abs(turn)/Math.PI);
   const pace=throttle*cruiseWeight+intent.pace*intent.weight;
-  const greeting=fish.type==='shark' ? fish.greet*.38 : 0;
+  const greeting=fish.type==='shark' || profile.creature==='octopus' || profile.creature==='ray' ? fish.greet*.38 : 0;
   const targetSpeed=fish.baseSpeed*(pace+greeting)*(1-.29*turning)*(1-.25*fish.crowd);
   fish.speed+=(targetSpeed-fish.speed)*(1-Math.exp(-(fish.burst>0?3.8:2.1)*dt));
-  const verticalInset=top*.66;
+  const verticalInset=insetY*.66;
   const edgeDrift=(Math.max(0,verticalInset-fish.y)-Math.max(0,fish.y-world.height+verticalInset))*.83;
   const driftLimit=fish.baseSpeed*.62;
   fish.x+=(Math.cos(fish.angle)*fish.speed+clamp(fish.driftX,-driftLimit,driftLimit))*dt;

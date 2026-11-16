@@ -1,9 +1,9 @@
-import { clamp, dorsalMix, poseStrip } from './fish-rig.js?v=3.2.3';
-import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js';
-import { makeSwimmer, resizeSchool, stepSchool } from './school.js?v=3.3.0';
+import { clamp, dorsalMix, poseCreature, poseStrip } from './fish-rig.js?v=3.4.0';
+import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js?v=3.4.0';
+import { makeSwimmer, resizeSchool, stepSchool } from './school.js?v=3.4.0';
 import { makeAtmosphere } from './ocean-scene.js';
-import { loadFishImage } from './sample-fish.js';
-import { createWaterInteractions } from './water-interactions.js';
+import { loadFishImage } from './sample-fish.js?v=3.4.0';
+import { createWaterInteractions } from './water-interactions.js?v=3.4.0';
 
 export function createOcean(canvas) {
   const stage=canvas.parentElement;
@@ -54,11 +54,13 @@ export function createOcean(canvas) {
     let vertices=0;
     for (const [i,fish] of swimmers.entries()) {
       const pose=fish.pose;
+      const {creature}=fish.profile;
       const greeting=Math.sin(Math.PI*fish.greet/.8);
       const chosenMesh=low || reduced ? null : gpu ? fish.mesh : fish.fallbackMesh;
       if (chosenMesh) {
-        pose.strip=poseStrip(chosenMesh,'wave',fish.profile,fish.phase,
-          fish.speed/fish.baseSpeed,fish.yaw/fish.profile.turnRate,1+(fish.type==='butterfly' ? greeting*.35 : 0));
+        pose.strip=creature ? poseCreature(chosenMesh,creature,fish.phase,fish.aspect,greeting)
+          : poseStrip(chosenMesh,'wave',fish.profile,fish.phase,
+            fish.speed/fish.baseSpeed,fish.yaw/fish.profile.turnRate,1+(fish.type==='butterfly' ? greeting*.35 : 0));
         vertices+=chosenMesh.x.length*2;
       } else pose.strip=null;
       if (reduced) {
@@ -71,10 +73,11 @@ export function createOcean(canvas) {
       } else {
         const float=Math.sin(time*.95+fish.floatPhase)*fish.profile.float;
         pose.x=fish.x*usedScale;
-        pose.y=(fish.y+float-(fish.type==='butterfly' ? greeting*8 : 0))*usedScale;
+        const lift=creature==='jelly' ? 16 : fish.type==='butterfly' || creature==='octopus' ? 8 : 0;
+        pose.y=(fish.y+float-greeting*lift)*usedScale;
         pose.width=fish.width*usedScale*(1+(fish.type==='puffer' ? greeting*.15 : 0));
-        pose.angle=fish.angle;
-        pose.dorsal=dorsalMix(fish.angle);
+        pose.angle=creature ? .12*Math.sin(fish.angle) : fish.angle;
+        pose.dorsal=creature ? 1 : dorsalMix(fish.angle);
       }
       poses.push(pose);
     }

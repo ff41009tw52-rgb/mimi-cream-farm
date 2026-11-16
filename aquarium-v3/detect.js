@@ -1,8 +1,7 @@
 import { area, convexHull, cross, distance, homography, project, validQuad } from './geometry.js';
-import { CODES, FISH, SHEET, fishShape } from './templates.js?v=3.1.0';
+import { CODES, MARKER_GROUPS, SHEET, fishShape } from './templates.js?v=3.4.0';
 
 const GRID = [[0,0],[7,0],[7,7],[0,7]];
-const species = Object.keys(FISH);
 const half = SHEET.cell * 3.5;
 const sheetTags = SHEET.centers.map(([x,y]) => GRID.map(([u,v]) =>
   [x + (u-3.5)*SHEET.cell, y + (v-3.5)*SHEET.cell]
@@ -195,8 +194,7 @@ export function detectSheet({data, width, height}) {
   const tolerance = Math.max(1.9, Math.min(...markerSpan)*.105);
   if (Math.max(...residuals)>tolerance || residuals.some(v => !Number.isFinite(v))) return match;
   // Never add a cropped fish if its actual print region extends beyond the capture.
-  const revision = Math.floor(group/species.length)+1;
-  const type = species[group%species.length];
+  const {type,revision} = MARKER_GROUPS[group];
   const [x,y,w,h] = fishShape(type,revision).bounds;
   const fishQuad = [[x,y],[x+w,y],[x+w,y+h],[x,y+h]].map(p => project(map,p));
   if (!validQuad(fishQuad,width,height,.03)) return match;
