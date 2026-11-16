@@ -1,5 +1,5 @@
 import { createCollection } from './collection.js';
-import { extractFish, manualMap } from './extract.js?v=3.4.1';
+import { extractFish, manualMap } from './extract.js?v=3.4.3';
 import { PaperGate } from './paper-gate.js?v=3.1.2';
 import { ARTWORK_REVISION, FISH, SHEET, fishShape } from './templates.js?v=3.4.1';
 import { paperFingerprint } from './detect.js?v=3.4.1';
@@ -22,6 +22,8 @@ const collection = createCollection();
 const gate = new PaperGate();
 const scanInterval = 240;
 const removalInterval = 370;
+const cameraFrameLimit = 1920;
+const photoFrameLimit = 2560;
 const frameCanvas = document.createElement('canvas');
 const analysisCanvas = document.createElement('canvas');
 const analysisContext = analysisCanvas.getContext('2d',{willReadFrequently:true});
@@ -126,7 +128,7 @@ async function openCamera(resumeAuto=true) {
   try {
     const wanted = devices.value;
     const facing = wanted ? '' : preferredFacing;
-    const size = {width:{ideal:1600},height:{ideal:1200}};
+    const size = {width:{ideal:cameraFrameLimit},height:{ideal:1440}};
     const request = videoConstraints => navigator.mediaDevices.getUserMedia({audio:false,video:videoConstraints});
     let stream;
     if (facing) {
@@ -182,7 +184,7 @@ function dimensions(width,height,max) {
   const scale = Math.min(1,max/Math.max(width,height));
   return [Math.max(1,Math.round(width*scale)),Math.max(1,Math.round(height*scale))];
 }
-function drawFrame(target, source, width, height, max=1600) {
+function drawFrame(target, source, width, height, max=cameraFrameLimit) {
   const [w,h] = dimensions(width,height,max);
   if (target.width!==w) target.width=w;
   if (target.height!==h) target.height=h;
@@ -391,7 +393,8 @@ async function scanSnapshot({file,source,session}) {
       }
     }
     const frame=document.createElement('canvas');
-    drawFrame(frame,bitmap || video,bitmap?.width || video.videoWidth,bitmap?.height || video.videoHeight);
+    drawFrame(frame,bitmap || video,bitmap?.width || video.videoWidth,bitmap?.height || video.videoHeight,
+      file ? photoFrameLimit : cameraFrameLimit);
     const detection=await classify(frame);
     if (source==='camera' && session!==cameraRevision) return;
     if (detection.result.kind==='found') {

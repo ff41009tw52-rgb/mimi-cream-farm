@@ -104,7 +104,7 @@ export function createOcean(canvas) {
     const next={width:w/usedScale,height:h/usedScale};
     resizeSchool(swimmers,world,next);
     world=next;
-    const resolution=Math.min(devicePixelRatio||1,low ? .78 : gpu ? 1.25 : 1);
+    const resolution=Math.min(devicePixelRatio||1,low ? .78 : gpu ? 2 : 1.5);
     (gpu || fallback).resize(w,h,resolution);
     interactions.resize(w,h,usedScale);
     stage.dataset.pixelSize=`${Math.round(w*resolution)}×${Math.round(h*resolution)}`;
