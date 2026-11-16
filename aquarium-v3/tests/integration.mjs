@@ -162,10 +162,13 @@ try {
   await scan.getByText('請確認魚身完整，再加入水族館。').waitFor();
   await scan.getByRole('button',{name:'取消',exact:true}).click();
   results.snapshot='camera snapshot and file import publish directly; only ambiguous marks open manual correction';
-  await display.getByRole('button',{name:'作品與設定'}).click();
+  const settings=display.locator('#motion-settings summary');
+  await settings.click();
+  await display.getByRole('button',{name:'管理作品'}).click();
   await display.getByRole('button',{name:'刪除小丑魚型作品'}).first().click();
   await display.waitForFunction(()=>document.querySelector('#aquarium').dataset.fishCount==='3');
   await display.getByRole('button',{name:'關閉',exact:true}).click();
+  await settings.click();
   await display.evaluate(async()=>{
     const {createCollection}=await import('./aquarium-v3/collection.js');
     const collection=createCollection();
@@ -196,10 +199,11 @@ try {
   results.fullscreen='passed';
   results.fps40=fps;
   assert.ok(fps>=30,'40 sprites must maintain at least 30 FPS in the test environment');
-  await display.getByRole('button',{name:'作品與設定'}).click();
+  await settings.click();
   await display.getByLabel('低效能模式').check();
   await display.getByLabel('減少動態效果').check();
   assert.match(await stage.getAttribute('class'),/low.*reduce/);
+  await display.getByRole('button',{name:'管理作品'}).click();
   await display.getByRole('button',{name:'清空作品',exact:true}).click();
   await display.getByRole('button',{name:'確認清空',exact:true}).click();
   await display.waitForFunction(()=>document.querySelector('#aquarium').dataset.fishCount==='0');

@@ -31,9 +31,10 @@ async function sample(page,duration=4500) {
   }),duration);
 }
 async function setting(page,label,enabled) {
-  await page.getByRole('button',{name:'作品與設定'}).click();
+  const settings=page.locator('#motion-settings summary');
+  await settings.click();
   await page.getByRole('checkbox',{name:label}).setChecked(enabled);
-  await page.getByRole('button',{name:'關閉'}).click();
+  await settings.click();
 }
 const capture=process.env.AQUARIUM_SCREENSHOTS;
 async function screenshot(page,name) {
@@ -56,6 +57,31 @@ try {
     const {dataset}=document.querySelector('#aquarium');
     return dataset.renderer==='pixi-webgl'||Boolean(dataset.fallbackReason);
   });
+  const settings=display.locator('#motion-settings summary');
+  await settings.click();
+  const species=display.getByLabel('生物種類');
+  const addTestFish=display.getByRole('button',{name:'加入測試生物'});
+  const clearTestFish=display.getByRole('button',{name:'移除測試生物'});
+  await species.selectOption('jelly');
+  await addTestFish.click();
+  await display.getByText('已加入 1 隻測試生物。',{exact:true}).waitFor();
+  await species.selectOption('all');
+  await addTestFish.click();
+  await display.getByText('已加入 7 隻測試生物。',{exact:true}).waitFor();
+  await display.getByText('0 隻 · 測試 8 隻',{exact:true}).waitFor();
+  await display.waitForFunction(()=>Number(document.querySelector('#aquarium').dataset.meshVertices)>0);
+  await clearTestFish.click();
+  await display.getByText('已移除測試生物。',{exact:true}).waitFor();
+  await display.waitForFunction(()=>document.querySelector('#aquarium').dataset.meshVertices==='0');
+  await addTestFish.click();
+  await display.getByText('已加入 8 隻測試生物。',{exact:true}).waitFor();
+  await display.reload();
+  await display.locator('#aquarium[data-motion-speed]').waitFor();
+  await waitCount(display,0);
+  assert.equal(await display.locator('#total').textContent(),'0 隻');
+  await settings.click();
+  assert.equal(await clearTestFish.isDisabled(),true);
+  report.testFish='single model, all eight, render, removal, no saved records and reset on reload';
   const music=display.locator('#background-music');
   assert.equal(await music.evaluate(track=>track.paused && track.currentTime===0 && track.loop),true);
   const playMusic=display.getByRole('button',{name:'播放背景音樂'});
@@ -65,6 +91,7 @@ try {
   await playMusic.waitFor();
   assert.equal(await music.evaluate(track=>track.paused),true);
   report.music='starts silent, plays on click, pauses on click';
+  await settings.click();
   const scanPage=context.waitForEvent('page');
   await display.getByRole('link',{name:'拍照掃描'}).click();
   const scan=await scanPage;
@@ -198,7 +225,8 @@ try {
   await display.getByRole('button',{name:'全螢幕',exact:true}).click();
   await display.waitForFunction(()=>document.fullscreenElement?.id==='aquarium');
   await display.evaluate(()=>document.exitFullscreen());
-  await display.getByRole('button',{name:'作品與設定'}).click();
+  await settings.click();
+  await display.getByRole('button',{name:'管理作品'}).click();
   await display.getByRole('button',{name:'刪除小丑魚型作品'}).first().click();
   await waitCount(display,39);
   await display.getByRole('button',{name:'清空作品',exact:true}).click();

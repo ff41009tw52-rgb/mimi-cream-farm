@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>班級彩繪水族館 V3.6.1｜展示</title>
-  <link rel="stylesheet" href="aquarium-v3/display.css?v=3.6.1">
+  <title>班級彩繪水族館 V3.6.2｜展示</title>
+  <link rel="stylesheet" href="aquarium-v3/display.css?v=3.6.2">
   <link rel="stylesheet" href="aquarium-v3/v32/display-v32.css?v=3.3.0">
 </head>
 <body>
@@ -16,33 +16,47 @@
       <p id="total">0 隻</p>
       <div>
         <a href="class-aquarium-v3-scan.html" target="_blank" rel="noopener">拍照掃描</a>
-        <button id="music-toggle" type="button">播放背景音樂</button>
         <details id="motion-settings">
-          <summary>速度設定</summary>
+          <summary>設定</summary>
           <div class="motion-panel">
             <label for="motion-speed">生物速度 <output id="motion-speed-value" for="motion-speed">1.00×</output></label>
             <input id="motion-speed" type="range" min="0.25" max="2" step="0.05" value="1" aria-describedby="motion-speed-help">
-            <p id="motion-speed-help">一起調整游動與擺動快慢，即時生效。</p>
+            <p id="motion-speed-help">調整游動與擺動快慢。</p>
             <p id="motion-static-note" hidden>目前已開啟「減少動態效果」，關閉後即可看見速度變化。</p>
             <button id="motion-speed-reset" type="button">恢復原速</button>
+            <section class="settings-section" aria-labelledby="test-heading">
+              <h2 id="test-heading">測試生物</h2>
+              <label for="test-species">生物種類</label>
+              <select id="test-species" aria-describedby="test-fish-note">
+                <option value="all">全部八種</option>
+              </select>
+              <div class="test-actions">
+                <button id="add-test-fish" type="button">加入測試生物</button>
+                <button id="clear-test-fish" type="button" disabled>移除測試生物</button>
+              </div>
+              <p id="test-fish-note">僅顯示在本頁，重新整理後移除。</p>
+              <p id="test-fish-status" role="status"></p>
+            </section>
+            <section class="settings-section" aria-labelledby="display-settings-heading">
+              <h2 id="display-settings-heading">顯示與作品</h2>
+              <label class="setting-toggle"><input type="checkbox" id="low">低效能模式</label>
+              <label class="setting-toggle"><input type="checkbox" id="reduce">減少動態效果</label>
+              <button id="music-toggle" type="button">播放背景音樂</button>
+              <p id="music-error" role="status" hidden>背景音樂無法播放，請再試一次。</p>
+              <button id="manage" type="button" aria-haspopup="dialog">管理作品</button>
+            </section>
           </div>
         </details>
-        <button id="manage" aria-haspopup="dialog">作品與設定</button>
         <button id="fullscreen">全螢幕</button>
       </div>
-      <p id="music-error" role="status" hidden>背景音樂無法播放，請再試一次。</p>
     </header>
     <audio id="background-music" src="aquarium-v3/assets/aquarium-music.mp3" loop preload="none"></audio>
     <p id="water-hint">點魚打招呼 · 點海水餵食 · 拖曳氣泡帶隊</p>
     <p id="sea-error" role="status" hidden></p>
     <dialog id="gallery-dialog" aria-labelledby="gallery-heading">
       <div class="gallery-title">
-        <h1 id="gallery-heading">作品與設定</h1>
+        <h1 id="gallery-heading">管理作品</h1>
         <button id="close-gallery">關閉</button>
-      </div>
-      <div class="preferences">
-        <label><input type="checkbox" id="low">低效能模式</label>
-        <label><input type="checkbox" id="reduce">減少動態效果</label>
       </div>
       <div class="gallery-actions">
         <p id="gallery-count">0 份作品</p>
@@ -53,7 +67,7 @@
       <ul id="gallery"></ul>
     </dialog>
   </main>
-  <script type="module" src="aquarium-v3/display.js?v=3.6.1"></script>
+  <script type="module" src="aquarium-v3/display.js?v=3.6.2"></script>
   <script type="module" src="aquarium-v3/music.js"></script>
 </body>
 </html>

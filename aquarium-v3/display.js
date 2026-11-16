@@ -8,6 +8,7 @@ const collection=createCollection();
 const {createOcean}=stage.dataset.engine==='v32' ? await import('./v32/ocean.js?v=3.6.1') : await import('./swim.js');
 const ocean=createOcean(byId('water'));
 const current=new Map();
+const testFish=new Map();
 const motionSettings=byId('motion-settings');
 const speedInput=byId('motion-speed');
 const speedKey='class-aquarium-v3:motion-speed';
@@ -35,6 +36,7 @@ if (speedInput) {
     if (event.key==='Escape') {
       motionSettings.open=false;
       motionSettings.querySelector('summary').focus();
+      event.preventDefault();
       event.stopPropagation();
     }
   });
@@ -68,6 +70,69 @@ systemMotion.addEventListener('change',()=>{
   byId('reduce').checked=systemMotion.matches;
   mode();
 });
+
+function updateCounts() {
+  stage.dataset.fishCount=String(current.size);
+  const label=stage.dataset.engine==='v32' ? ' 隻' : ' 隻魚';
+  const testing=testFish.size ? ` · 測試 ${testFish.size} 隻` : '';
+  byId('total').textContent=current.size+label+testing;
+}
+
+const testSelect=byId('test-species');
+if (testSelect) {
+  const addTestButton=byId('add-test-fish');
+  const clearTestButton=byId('clear-test-fish');
+  const status=byId('test-fish-status');
+  for (const [type,fish] of Object.entries(FISH)) {
+    testSelect.add(new Option(fish.name,type));
+  }
+
+  addTestButton.onclick=async ()=>{
+    const types=testSelect.value==='all' ? Object.keys(FISH) : [testSelect.value];
+    const missing=types.filter(type=>!testFish.has(type));
+    if (!missing.length) {
+      status.textContent='選取的測試生物已在水族館。';
+      return;
+    }
+    addTestButton.disabled=clearTestButton.disabled=testSelect.disabled=true;
+    status.textContent='正在載入測試生物…';
+    try {
+      const {templateFish}=await import('./v32/sample-fish.js?v=3.4.1');
+      const results=await Promise.allSettled(missing.map(async type=>{
+        const canvas=await templateFish(type,true);
+        const blob=await new Promise((resolve,reject)=>{
+          canvas.toBlob(image=>image ? resolve(image) : reject(new Error('Could not encode test artwork')));
+        });
+        const id='test-fish-'+type;
+        const url=URL.createObjectURL(blob);
+        try {
+          await ocean.add({id,type},url,false);
+          testFish.set(type,id);
+        } finally {
+          URL.revokeObjectURL(url);
+        }
+      }));
+      const added=results.filter(result=>result.status==='fulfilled').length;
+      updateCounts();
+      status.textContent=added===missing.length ? `已加入 ${added} 隻測試生物。`
+        : `已加入 ${added} 隻，有 ${missing.length-added} 隻載入失敗，可以再試一次。`;
+    } catch {
+      status.textContent='無法載入測試生物，請再試一次。';
+    } finally {
+      addTestButton.disabled=testSelect.disabled=false;
+      clearTestButton.disabled=!testFish.size;
+    }
+  };
+
+  clearTestButton.onclick=()=>{
+    for (const id of testFish.values()) ocean.remove(id);
+    testFish.clear();
+    updateCounts();
+    clearTestButton.disabled=true;
+    status.textContent='已移除測試生物。';
+    addTestButton.focus();
+  };
+}
 
 function renderGallery() {
   const items=byId('gallery');
@@ -117,13 +182,13 @@ async function refresh() {
         if (current.has(record.id)) stage.dataset.renderedId=record.id;
       }).catch(()=>{
         byId('sea-error').hidden=false;
-        byId('sea-error').textContent='有作品無法載入，可在「作品與設定」刪除後重新掃描。';
+        const menu=motionSettings ? '設定 → 管理作品' : '作品與設定';
+        byId('sea-error').textContent=`有作品無法載入，可在「${menu}」刪除後重新掃描。`;
       });
       changed=true;
     }
     if (changed || !initialized) {
-      stage.dataset.fishCount=current.size;
-      byId('total').textContent=`${current.size} 隻${stage.dataset.engine==='v32' ? '' : '魚'}`;
+      updateCounts();
       if (gallery.open) renderGallery();
     }
     initialized=true;

@@ -40,17 +40,21 @@ input { accent-color: #80e7ba; }
   .toolbar p, .toolbar a, .toolbar button { padding: 8px; font-size: .84rem; }
 }
 
-/* Compact controls remain over the ocean so changes can be seen immediately. */
-#motion-settings { position: relative; }
 #motion-settings summary { list-style: none; cursor: pointer; padding: 9px 12px; border: 1px solid #b7ebe052; border-radius: 9px; background: #0b3449dc; font: 600 .92rem system-ui,sans-serif; }
 #motion-settings summary::-webkit-details-marker { display: none; }
+#motion-settings summary:hover { background: #245369; }
 #motion-settings[open] summary { background: #286753; }
-.toolbar #motion-settings .motion-panel { display: grid; gap: 12px; position: absolute; top: calc(100% + 10px); right: 0; width: min(300px,calc(100vw - 28px)); padding: 16px; border: 1px solid #73b9c1; border-radius: 12px; background: #153747f5; box-shadow: 0 10px 28px #00192366; }
-.motion-panel label { display: flex; justify-content: space-between; gap: 10px; }
+.toolbar #motion-settings .motion-panel { display: grid; gap: 9px; position: absolute; z-index: 1; top: calc(100% + 8px); right: 0; width: min(320px,100%); max-height: calc(100vh - 115px); max-height: calc(100dvh - 115px); overflow: auto; padding: 14px; border: 1px solid #73b9c1; border-radius: 12px; background: #153747f5; box-shadow: 0 10px 28px #00192366; }
+.motion-panel label[for="motion-speed"] { display: flex; justify-content: space-between; gap: 10px; }
 .motion-panel output { color: #a4f0d2; font-variant-numeric: tabular-nums; }
-.motion-panel input { width: 100%; min-width: 0; margin: 0; min-height: 32px; touch-action: pan-y; }
+.motion-panel input[type="range"] { width: 100%; min-width: 0; margin: 0; min-height: 30px; touch-action: pan-y; }
 .toolbar .motion-panel p { border: 0; background: none; padding: 0; font-size: .85rem; line-height: 1.5; font-weight: 400; }
-@media(max-width: 600px) {
-  .toolbar #motion-settings .motion-panel { position: fixed; top: 110px; right: 12px; max-height: calc(100dvh - 125px); overflow: auto; }
-}
+#test-fish-status:empty { display: none; }
+.settings-section { display: grid; gap: 8px; border-top: 1px solid #abc8cb48; padding-top: 11px; margin-top: 4px; }
+.settings-section h2 { margin: 0; font-size: .98rem; }
+.settings-section select { width: 100%; border: 1px solid #b7ebe052; border-radius: 9px; background: #0b3449; color: inherit; font: inherit; padding: 7px 9px; }
+.settings-section .setting-toggle { display: flex; align-items: center; gap: 7px; cursor: pointer; }
+.settings-section .test-actions { gap: 6px; }
+.test-actions button { flex: 1 1 auto; }
 @media(max-width: 450px) { #motion-settings summary { padding: 8px; font-size: .84rem; } }
+#aquarium[data-engine="v32"] .gallery-actions { margin-top: 14px; }
