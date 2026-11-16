@@ -1,6 +1,6 @@
-import { clamp, dorsalMix, poseStrip } from './fish-rig.js?v=3.2.2';
+import { clamp, dorsalMix, poseStrip } from './fish-rig.js?v=3.2.3';
 import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js';
-import { makeSwimmer, resizeSchool, stepSchool } from './school.js';
+import { makeSwimmer, resizeSchool, stepSchool } from './school.js?v=3.2.3';
 import { makeAtmosphere } from './ocean-scene.js';
 import { loadFishImage } from './sample-fish.js';
 
@@ -37,6 +37,14 @@ export function createOcean(canvas) {
   function drawFish(now) {
     const columns=Math.max(2,Math.round(Math.sqrt(swimmers.length*w/h)));
     const rows=Math.max(1,Math.ceil(swimmers.length/columns));
+    let gridScale=usedScale;
+    if (reduced) {
+      const cellWidth=w/columns*.83, cellHeight=h/rows*.66;
+      // A shared scale keeps the species proportions even in a packed grid.
+      for (const fish of swimmers) {
+        gridScale=Math.min(gridScale,cellWidth/fish.width,cellHeight/(fish.width*fish.aspect));
+      }
+    }
     poses.length=0;
     let vertices=0;
     for (const [i,fish] of swimmers.entries()) {
@@ -53,7 +61,7 @@ export function createOcean(canvas) {
         pose.y=(.60+row)*h/(rows+.35);
         pose.angle=0;
         pose.dorsal=1;
-        pose.width=Math.min(fish.width*usedScale,w/columns*.83,h/rows*.66/fish.aspect);
+        pose.width=fish.width*gridScale;
       } else {
         const float=Math.sin(time*.95+fish.floatPhase)*fish.profile.float;
         pose.x=fish.x*usedScale;

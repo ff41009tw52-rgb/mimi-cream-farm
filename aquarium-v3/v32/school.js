@@ -1,4 +1,4 @@
-import { clamp, createStrip, profileFor, TAU } from './fish-rig.js';
+import { clamp, createStrip, profileFor, TAU } from './fish-rig.js?v=3.2.3';
 
 export function randomSource(seed) {
   let state=seed || 0x2f39b7c1;
@@ -97,7 +97,7 @@ function separate(fishes) {
         const strength=(1-closest)*depthWeight;
         const awayX=closest>.004 ? closeX/closest : 0;
         const awayY=closest>.004 ? closeY/closest : (i%2 ? 1 : -1);
-        const driftX=awayX*strength*46, driftY=awayY*strength*76;
+        const driftX=awayX*strength*69, driftY=awayY*strength*114;
         a.driftX+=driftX; b.driftX-=driftX;
         a.driftY+=driftY; b.driftY-=driftY;
       }
@@ -158,7 +158,7 @@ function advance(fish,world,dt) {
   fish.speed+=(targetSpeed-fish.speed)*(1-Math.exp(-(fish.burst>0?3.8:2.1)*dt));
   const verticalInset=top*.66;
   const edgeDrift=(Math.max(0,verticalInset-fish.y)-Math.max(0,fish.y-world.height+verticalInset))*.83;
-  const driftLimit=fish.baseSpeed*.46;
+  const driftLimit=fish.baseSpeed*.62;
   fish.x+=(Math.cos(fish.angle)*fish.speed+clamp(fish.driftX,-driftLimit,driftLimit))*dt;
   fish.y+=(Math.sin(fish.angle)*fish.speed+clamp(fish.driftY+edgeDrift,-driftLimit,driftLimit))*dt;
   const pace=fish.speed/fish.baseSpeed;

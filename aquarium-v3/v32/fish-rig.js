@@ -7,10 +7,10 @@ export const smoothstep = (start, end, value) => {
 
 // All four scanned templates face right. Distances along the body run nose to tail.
 export const SPECIES = {
-  clown:     {speed:66, width:91, tailHz:1.82, amplitude:.064, hinge:.72, wave:5.3, turnRate:2.08, rise:15, float:2.4, dash:.38},
-  butterfly: {speed:43, width:84, tailHz:1.36, amplitude:.044, hinge:.78, wave:4.9, turnRate:1.68, rise:12, float:2.5, dash:.05},
-  puffer:    {speed:33, width:82, tailHz:1.62, amplitude:.022, hinge:.78, wave:4.6, turnRate:1.52, rise:10, float:5.1, dash:0},
-  shark:     {speed:75, width:108, tailHz:1.08, amplitude:.052, hinge:.75, wave:5.7, turnRate:1.57, rise:8, float:1.35, dash:.02},
+  clown:     {speed:66, width:110, tailHz:1.82, amplitude:.064, hinge:.72, wave:5.3, turnRate:2.08, rise:15, float:2.4, dash:.38},
+  butterfly: {speed:43, width:102, tailHz:1.36, amplitude:.044, hinge:.78, wave:4.9, turnRate:1.68, rise:12, float:2.5, dash:.05},
+  puffer:    {speed:33, width:100, tailHz:1.62, amplitude:.022, hinge:.78, wave:4.6, turnRate:1.52, rise:10, float:5.1, dash:0},
+  shark:     {speed:75, width:148, tailHz:1.08, amplitude:.052, hinge:.75, wave:5.7, turnRate:1.57, rise:8, float:1.35, dash:.02},
 };
 
 export function profileFor(type) { return SPECIES[type] || SPECIES.clown; }

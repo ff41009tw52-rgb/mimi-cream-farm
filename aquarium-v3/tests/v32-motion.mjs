@@ -4,6 +4,16 @@ import { angleDelta, makeSwimmer, stepSchool } from '../v32/school.js';
 import { SPECIES, createStrip, poseStrip, TAU } from '../v32/fish-rig.js';
 
 const world={width:960,height:540}, types=Object.keys(FISH);
+const previousWidths={clown:91,butterfly:84,puffer:82,shark:108};
+const sameDepthWidths=Object.fromEntries(types.map(type=>{
+  const [,,width,height]=FISH[type].bounds;
+  const fish=makeSwimmer({id:'size-reference',type},{width,height},world,false);
+  assert.equal(fish.aspect,height/width,`${type}: resizing changed the artwork proportions`);
+  assert.ok(SPECIES[type].width/previousWidths[type]>=1.18,`${type}: size did not increase by at least 18%`);
+  return [type,fish.width];
+}));
+const sharkToClown=sameDepthWidths.shark/sameDepthWidths.clown;
+assert.ok(sharkToClown>=1.25 && sharkToClown<=1.40,`shark to clown length ratio ${sharkToClown}`);
 const fishes=Array.from({length:40},(_,i)=>{
   const type=types[i%types.length], [,,width,height]=FISH[type].bounds;
   return makeSwimmer({id:'swimmer-'+i,type},{width,height},world,false);
@@ -81,4 +91,4 @@ for (const [type,profile] of Object.entries(SPECIES)) {
 }
 console.log(JSON.stringify({fishes:40,simulatedSeconds:90,changedTarget:goalChanges.size,
   turned:turns.size,maxTurnDegrees:maxAngleChange*180/Math.PI,longestOverlapSeconds:longestOverlap,
-  lateralTravelPercent:lateralTravel},null,2));
+  sharkToClown,lateralTravelPercent:lateralTravel},null,2));
