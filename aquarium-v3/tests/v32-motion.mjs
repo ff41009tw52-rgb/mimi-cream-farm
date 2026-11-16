@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { FISH } from '../templates.js';
 import { angleDelta, makeSwimmer, stepSchool } from '../v32/school.js';
-import { SPECIES, createStrip, poseCreature, poseStrip, updatePositions, TAU } from '../v32/fish-rig.js';
+import { SPECIES, createCreatureMesh, createStrip, poseCreature, poseStrip, updatePositions, TAU } from '../v32/fish-rig.js';
 
 const world={width:960,height:540};
 const previousWidths={clown:91,butterfly:84,puffer:82,shark:108};
@@ -107,33 +107,54 @@ for (const type of types) {
     }
   }
 }
+const creatureTravel={};
 for (const type of ['jelly','ray','octopus','turtle']) {
   const [,,width,height]=FISH[type].bounds;
   const fish=makeSwimmer({id:'creature-'+type,type},{width,height},world,false);
   const {profile,aspect}=fish;
-  for (const mesh of [fish.mesh,fish.fallbackMesh,createStrip(18,fish.mesh.vertical)]) {
-    const points=new Float32Array(mesh.x.length*4);
-    for (let frame=0;frame<48;frame++) {
-      poseCreature(mesh,profile,frame*TAU/48,aspect,1,1.8);
-      const axis=mesh.vertical ? mesh.y : mesh.x;
-      assert.ok(axis.every((value,index)=>index===0 || value>axis[index-1]),`${type}: folded mesh`);
+  for (const mesh of [fish.mesh,fish.fallbackMesh,createCreatureMesh(16,18)]) {
+    const points=new Float32Array(mesh.positions.length);
+    const originalArea=aspect/(mesh.columns*mesh.rows);
+    for (let frame=0;frame<96;frame++) {
+      poseCreature(mesh,profile,frame*TAU/96,aspect,1,1.8);
       updatePositions(points,mesh,aspect);
       assert.ok(points.every(Number.isFinite),`${type}: invalid mesh coordinates`);
-      for (let i=0;i<mesh.x.length;i++) {
-        const u=i/(mesh.x.length-1);
-        if ((type==='turtle' && Math.abs(u-.5)<.28) || (type==='ray' && Math.abs(u-.5)<=.23)) {
-          assert.ok(mesh.y[i]===0 && Math.abs(mesh.x[i]-(u-.5))<1e-6,`${type}: center should remain steady`);
-        }
-        if (type==='octopus' && u<=.43) {
-          assert.ok(mesh.x[i]===0 && mesh.span[i]===1 && Math.abs(mesh.y[i]-(u-.5)*aspect)<1e-6,'octopus head should remain steady');
-        }
+      for(let k=0;k<mesh.indices.length;k+=3) {
+        const a=mesh.indices[k]*2,b=mesh.indices[k+1]*2,c=mesh.indices[k+2]*2;
+        const area=(points[b]-points[a])*(points[c+1]-points[a+1])-(points[c]-points[a])*(points[b+1]-points[a+1]);
+        assert.ok(area>originalArea*.12,`${type}: folded or collapsed triangle at ${frame}, ${k}, ratio ${area/originalArea}`);
       }
     }
     poseCreature(mesh,profile,1,aspect,0,0);
-    assert.ok(mesh.x.every((value,i)=>Math.abs(value-(mesh.vertical ? 0 : i/(mesh.x.length-1)-.5))<1e-6));
-    assert.ok(!mesh.span || mesh.span.every(value=>value===1));
+    assert.ok(mesh.positions.every((value,i)=>Math.abs(value-(mesh.uv[i]-.5)*(i%2 ? aspect : 1))<1e-6),`${type}: zero amplitude must preserve artwork`);
   }
+  // Probe landmark pairs directly using the same vertex field as the renderers.
+  const probes=type==='turtle' ? [[.04,.55],[.96,.55],[.24,.96],[.76,.96],[.5,.55]]
+    : type==='octopus' ? [[.20,.19],[.80,.19],[.07,.61],[.93,.61],[.32,.88],[.68,.88],[.41,.34],[.59,.34]]
+    : type==='ray' ? [[.04,.40],[.96,.40],[.43,.18],[.57,.18]]
+    : [[.12,.25],[.30,.82],[.70,.82]];
+  const mesh={uv:new Float32Array(probes.flat()),positions:new Float32Array(probes.length*2)};
+  const samples=probes.map(()=>[]),eyeDistances=[];
+  for(let frame=0;frame<96;frame++) {
+    poseCreature(mesh,profile,frame*TAU/96,aspect);
+    probes.forEach((_,i)=>samples[i].push([mesh.positions[2*i],mesh.positions[2*i+1]]));
+    if(type==='octopus') eyeDistances.push(Math.hypot(mesh.positions[12]-mesh.positions[14],mesh.positions[13]-mesh.positions[15]));
+  }
+  const travels=samples.map(values=>Math.hypot(range(values.map(p=>p[0])),range(values.map(p=>p[1]))));
+  if(type==='turtle') {
+    assert.ok(travels.slice(0,4).every(t=>t>.025),'all four turtle flippers should move');
+    assert.ok(travels[4]<1e-6,'turtle shell should stay rigid');
+    assert.ok(travels[0]>travels[2]*1.3,'front turtle flippers should have larger strokes');
+  }
+  if(type==='octopus') {
+    assert.ok(travels.slice(0,6).every(t=>t>.02),'upper, side and lower octopus arms should move');
+    assert.ok(range(eyeDistances)<.002,'octopus eyes should preserve their separation');
+    assert.ok(samples[0].some((p,i)=>Math.abs(p[1]-samples[1][i][1])>.005),'opposite arms should have phase lag');
+  }
+  if(type==='ray') assert.ok(travels[2]<1e-6 && travels[3]<1e-6,'ray eyes should stay still');
+  creatureTravel[type]=travels.map(t=>Number((100*t).toFixed(2)));
 }
+
 console.log(JSON.stringify({fishes:40,simulatedSeconds:90,changedTarget:goalChanges.size,
   turned:turns.size,maxTurnDegrees:maxAngleChange*180/Math.PI,longestOverlapSeconds:longestOverlap,
-  sharkToClown,sharkToClownArea,lateralTravelPercent:lateralTravel},null,2));
+  sharkToClown,sharkToClownArea,lateralTravelPercent:lateralTravel,creatureLandmarkTravelPercent:creatureTravel},null,2));

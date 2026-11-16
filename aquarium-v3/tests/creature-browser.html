@@ -1,0 +1,72 @@
+<!doctype html><html lang="zh-Hant"><meta charset="utf-8"><title>生物動畫瀏覽器驗證</title>
+<style>body{background:#123e4b;color:#fff;font:16px system-ui}button{padding:10px;margin:5px}pre{white-space:pre-wrap}#stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:#164b5b}#stage canvas{position:absolute;inset:0;width:100%;height:100%}canvas[hidden]{display:none!important}#gallery{width:1200px;height:620px;background:#164b5b}</style>
+<h1>生物動畫瀏覽器驗證</h1><p>使用合成著色模板，不寫入作品收藏。測量固定 1920 × 1080 畫布。</p>
+<button id="baseline">瀏覽器更新頻率基準</button><button id="canvas">Canvas 八種生物</button><button id="gpu">WebGL 八種生物</button><button id="run">40 隻效能測試</button><button id="low">切換低效能模式</button>
+<pre id="result" role="status">準備測試圖片…</pre><canvas id="gallery"></canvas><div id="stage" hidden><canvas id="ocean"></canvas></div>
+<script type="module">
+import {SPECIES,createCreatureMesh,createStrip,poseCreature,poseStrip,TAU} from '../v32/fish-rig.js?v=3.6.0';
+import {canvasFishRenderer,webglFishRenderer} from '../v32/fish-renderers.js?v=3.6.0';
+import {templateFish} from '../v32/sample-fish.js?v=3.4.1';
+import {createOcean} from '../v32/ocean.js?v=3.6.0';
+const result=document.querySelector('#result'), stage=document.querySelector('#stage');
+const types=Object.keys(SPECIES), images=await Promise.all(types.map(t=>templateFish(t,true)));
+let renderer,raf=0,ocean,low=false,canvas=document.querySelector('#gallery'),serial=0;
+const errors=[];
+window.addEventListener('error',event=>{errors.push(event.message);result.textContent=JSON.stringify({errors});});
+window.addEventListener('unhandledrejection',event=>{errors.push(String(event.reason));result.textContent=JSON.stringify({errors});});
+async function gallery(gpu=false){
+ const revision=++serial;
+ cancelAnimationFrame(raf);renderer?.destroy?.();ocean?.setMode(true,true);
+ stage.hidden=true;canvas.replaceWith(canvas=canvas.cloneNode());canvas.hidden=false;
+ try {renderer=gpu ? await webglFishRenderer(canvas,()=>{result.textContent='WebGL context lost';}) : canvasFishRenderer(canvas);}
+ catch(error){result.textContent='WebGL 無法啟動：'+error.message;return;}
+ if(revision!==serial)return;
+ renderer.resize(1200,620,1);
+ const poses=types.map((type,i)=>({id:type,image:images[i],aspect:images[i].height/images[i].width,width:180,
+  x:150+(i%4)*300,y:155+Math.floor(i/4)*310,angle:0,dorsal:1,
+  strip:SPECIES[type].creature ? createCreatureMesh(16,18) : createStrip(18)}));
+ let start=0,count=0;
+ function draw(t){if(!start)start=t;count++;
+  for(let i=0;i<poses.length;i++){
+   const profile=SPECIES[types[i]],pose=poses[i],phase=t/1000*TAU*profile.tailHz;
+   if(profile.creature)poseCreature(pose.strip,profile,phase,pose.aspect);
+   else poseStrip(pose.strip,'wave',profile,phase,1,0);
+  }
+  renderer.draw(poses);
+  if(count%60===0)result.textContent=JSON.stringify({renderer:gpu?'WebGL':'Canvas',software:renderer.software||false,animals:8,frames:count,fps:Math.round(count*1000/(t-start)),errors},null,2);
+  raf=requestAnimationFrame(draw);
+ }
+ raf=requestAnimationFrame(draw);
+}
+document.querySelector('#baseline').onclick=()=>{
+ cancelAnimationFrame(raf);ocean?.setMode(true,true);canvas.hidden=true;stage.hidden=true;
+ let count=0,start=performance.now();
+ function tick(){count++;raf=requestAnimationFrame(tick);}
+ raf=requestAnimationFrame(tick);result.textContent='量測空白畫面更新頻率…';
+ setTimeout(()=>{cancelAnimationFrame(raf);result.textContent=JSON.stringify({baselineFps:count*1000/(performance.now()-start),seconds:(performance.now()-start)/1000});},6000);
+};
+document.querySelector('#canvas').onclick=()=>gallery(false);
+document.querySelector('#gpu').onclick=()=>gallery(true);
+document.querySelector('#low').onclick=()=>{low=!low;ocean?.setMode(low,false);result.textContent='低效能模式 '+low;};
+document.querySelector('#run').onclick=async()=>{
+ if(ocean)return;
+ cancelAnimationFrame(raf);renderer?.destroy?.();canvas.hidden=true;stage.hidden=false;
+ ocean=createOcean(document.querySelector('#ocean'));
+ result.textContent='載入 40 隻合成作品…';
+ await Promise.all(Array.from({length:40},async(_,i)=>{
+  const texture=images[i%8],blob=await new Promise(resolve=>texture.toBlob(resolve));
+  const url=URL.createObjectURL(blob);
+  try{await ocean.add({id:'test-'+i,type:types[i%8]},url,false);}finally{URL.revokeObjectURL(url);}
+ }));
+ // Start after textures, the first resize and renderer selection have settled.
+ setTimeout(()=>{
+  const start=performance.now(),frames=Number(stage.dataset.drawCount||0);
+  result.textContent='正在量測 40 隻，請保持此分頁可見…';
+  setTimeout(()=>{
+   result.textContent=JSON.stringify({animals:40,size:[1920,1080],seconds:(performance.now()-start)/1000,
+    fps:(Number(stage.dataset.drawCount)-frames)*1000/(performance.now()-start),...stage.dataset,errors},null,2);
+  },8000);
+ },2500);
+};
+await gallery();
+</script></html>

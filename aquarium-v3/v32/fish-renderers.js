@@ -1,4 +1,4 @@
-import { stripTopology, updatePositions } from './fish-rig.js?v=3.4.1';
+import { stripTopology, updatePositions } from './fish-rig.js?v=3.6.0';
 
 export function canvasFishRenderer(canvas) {
   const ctx=canvas.getContext('2d',{alpha:true});
@@ -29,6 +29,8 @@ export function canvasFishRenderer(canvas) {
     if (mirrored) ctx.scale(1,-1);
     if (!strip) {
       ctx.drawImage(image,-width/2,-height/2,width,height);
+    } else if (strip.grid) {
+      drawGrid(pose);
     } else if (strip.vertical) {
       drawVertical(pose);
     } else {
@@ -48,6 +50,39 @@ export function canvasFishRenderer(canvas) {
       }
     }
     ctx.restore();
+  }
+  function drawGrid({image,width,strip}) {
+    const {positions:p,uv,indices}=strip;
+    const iw=image.naturalWidth||image.width, ih=image.naturalHeight||image.height;
+    for (let k=0;k<indices.length;k+=3) {
+      const a=indices[k]*2,b=indices[k+1]*2,c=indices[k+2]*2;
+      const ax=p[a]*width,ay=p[a+1]*width,bx=p[b]*width,by=p[b+1]*width,cx=p[c]*width,cy=p[c+1]*width;
+      const sx=uv[a]*iw,sy=uv[a+1]*ih;
+      const ux=(uv[b]-uv[a])*iw,uy=(uv[b+1]-uv[a+1])*ih;
+      const vx=(uv[c]-uv[a])*iw,vy=(uv[c+1]-uv[a+1])*ih;
+      const det=ux*vy-uy*vx;
+      const m0=((bx-ax)*vy-(cx-ax)*uy)/det, m1=((by-ay)*vy-(cy-ay)*uy)/det;
+      const m2=((cx-ax)*ux-(bx-ax)*vx)/det, m3=((cy-ay)*ux-(by-ay)*vx)/det;
+      const centerX=(ax+bx+cx)/3,centerY=(ay+by+cy)/3;
+      ctx.save();
+      ctx.beginPath();
+      // Tiny overlap covers antialiased clip edges. UVs and shared vertices never change.
+      for (let n=0;n<3;n++) {
+        const j=indices[k+n]*2,x=p[j]*width,y=p[j+1]*width;
+        const padding=.36/Math.max(1,Math.hypot(x-centerX,y-centerY));
+        const px=x+(x-centerX)*padding,py=y+(y-centerY)*padding;
+        if (!n) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+      }
+      ctx.closePath();
+      ctx.clip();
+      ctx.transform(m0,m1,m2,m3,ax-m0*sx-m2*sy,ay-m1*sx-m3*sy);
+      const left=Math.max(0,Math.min(sx,sx+ux,sx+vx)-2);
+      const top=Math.max(0,Math.min(sy,sy+uy,sy+vy)-2);
+      const right=Math.min(iw,Math.max(sx,sx+ux,sx+vx)+2);
+      const bottom=Math.min(ih,Math.max(sy,sy+uy,sy+vy)+2);
+      ctx.drawImage(image,left,top,right-left,bottom-top,left,top,right-left,bottom-top);
+      ctx.restore();
+    }
   }
   function drawVertical({image,width,strip}) {
     const naturalWidth=image.naturalWidth || image.width;
@@ -110,11 +145,11 @@ export async function webglFishRenderer(canvas,onLost) {
     entry.mirror.destroy();
     entry.geometry.destroy(true);
   }
-  function resetGeometry(entry,columns,aspect,vertical) {
+  function resetGeometry(entry,columns,aspect,vertical,grid) {
     releaseGeometry(entry);
-    const {uv,indices}=stripTopology(columns,vertical);
-    const positions=new Float32Array((columns+1)*4);
-    for (let c=0;c<=columns;c++) {
+    const {uv,indices}=grid || stripTopology(columns,vertical);
+    const positions=new Float32Array(uv.length);
+    for (let c=0;!grid && c<=columns;c++) {
       positions.set([c/columns-.5,-aspect/2,c/columns-.5,aspect/2],c*4);
     }
     const geometry=new MeshGeometry({positions,uvs:uv,indices});
@@ -122,6 +157,7 @@ export async function webglFishRenderer(canvas,onLost) {
     entry.positions=positions;
     entry.columns=columns;
     entry.vertical=vertical;
+    entry.rows=grid?.rows || 0;
     entry.normal=make(geometry,entry.texture);
     entry.mirror=make(geometry,entry.texture);
     entry.mirror.scale.y=-1;
@@ -143,9 +179,10 @@ export async function webglFishRenderer(canvas,onLost) {
         entry=add(pose);
         fish.set(pose.id,entry);
       }
-      const columns=pose.strip ? pose.strip.x.length-1 : 1;
+      const grid=pose.strip?.grid ? pose.strip : null;
+      const columns=grid ? grid.columns : pose.strip ? pose.strip.x.length-1 : 1;
       const vertical=pose.strip?.vertical || false;
-      if (entry.columns!==columns || entry.vertical!==vertical) resetGeometry(entry,columns,pose.aspect,vertical);
+      if (entry.columns!==columns || entry.vertical!==vertical || entry.rows!==(grid?.rows||0)) resetGeometry(entry,columns,pose.aspect,vertical,grid);
       if (pose.strip) {
         updatePositions(entry.positions,pose.strip,pose.aspect);
         entry.geometry.getBuffer('aPosition').update();

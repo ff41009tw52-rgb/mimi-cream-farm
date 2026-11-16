@@ -52,22 +52,22 @@
     </section>
     <section class="comparison" aria-label="三種動畫">
       <article>
-        <h2>A. V3.1.2</h2>
+        <h2 id="original-title">A. V3.1.2</h2>
         <div class="pool"><canvas id="legacy" role="img" aria-label="原版動畫"></canvas></div>
-        <p>整張 PNG 移動，在折返時縮窄並翻向。</p>
+        <p id="original-note">整張 PNG 移動，在折返時縮窄並翻向。</p>
       </article>
       <article>
-        <h2>B. 2D 骨架擺尾</h2>
+        <h2 id="baseline-title">B. 2D 骨架擺尾</h2>
         <div class="pool"><canvas id="hinge" role="img" aria-label="單關節擺尾動畫"></canvas></div>
-        <p>接合處共用座標，尾部繞單一關節擺動。</p>
+        <p id="baseline-note">接合處共用座標，尾部繞單一關節擺動。</p>
       </article>
       <article>
         <h2>C. 2D 網格變形</h2>
-        <div class="pool"><canvas id="wave" role="img" aria-label="頭穩尾動的網格動畫"></canvas></div>
-        <p>觀察魚尾、傘面、腕部及前鰭的動作。<span id="lab-renderer"></span></p>
+        <div class="pool"><canvas id="wave" role="img" aria-label="各生物分區網格動畫"></canvas></div>
+        <p>觀察魚尾、傘面、各區腕足及四肢的動作。<span id="lab-renderer"></span></p>
       </article>
     </section>
   </main>
-  <script type="module" src="v32/lab.js?v=3.5.2"></script>
+  <script type="module" src="v32/lab.js?v=3.6.0"></script>
 </body>
 </html>

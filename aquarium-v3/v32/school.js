@@ -1,4 +1,4 @@
-import { clamp, createStrip, octopusStroke, profileFor, TAU } from './fish-rig.js?v=3.5.2';
+import { clamp, createCreatureMesh, createStrip, octopusStroke, profileFor, TAU } from './fish-rig.js?v=3.6.0';
 
 export function randomSource(seed) {
   let state=seed || 0x2f39b7c1;
@@ -66,7 +66,8 @@ export function makeSwimmer(record, image, world, fresh) {
     paceTarget:.83+.33*random(),decisionAge:.6+random()*3.8,
     avoidX:0,avoidY:0,driftX:0,driftY:0,crowd:0,
     greet:0,feedRest:0,alarmTime:0,threat:null,intent:{x:0,y:0,weight:0,pace:1},
-    mesh:createStrip(depth>.52?18:10,vertical), fallbackMesh:createStrip(depth>.61 ? 12 : 7,vertical),
+    mesh:profile.creature ? createCreatureMesh(depth>.52 ? 16 : 12,depth>.52 ? 18 : 14) : createStrip(depth>.52?18:10,vertical),
+    fallbackMesh:profile.creature ? createCreatureMesh(8,10) : createStrip(depth>.61 ? 12 : 7,vertical),
     pose:{id:record.id,image,aspect},
   };
   if (fresh) {
@@ -165,7 +166,9 @@ function advance(fish,world,dt) {
   const turning=Math.min(1,Math.abs(turn)/Math.PI);
   const pace=throttle*cruiseWeight+intent.pace*intent.weight;
   const greeting=fish.type==='shark' || profile.creature==='octopus' || profile.creature==='ray' ? fish.greet*.38 : 0;
-  const thrust=profile.creature==='octopus' ? .86+.34*octopusStroke(fish.phase-.62) : 1;
+  const thrust=profile.creature==='octopus' ? .86+.34*octopusStroke(fish.phase-.62)
+    : profile.creature==='jelly' ? .84+.40*octopusStroke(fish.phase-.35)
+    : profile.creature==='turtle' ? .94+.12*octopusStroke(fish.phase-.4) : 1;
   const targetSpeed=fish.baseSpeed*(pace+greeting)*thrust*(1-.29*turning)*(1-.25*fish.crowd);
   fish.speed+=(targetSpeed-fish.speed)*(1-Math.exp(-(fish.burst>0?3.8:2.1)*dt));
   const verticalInset=insetY*.66;

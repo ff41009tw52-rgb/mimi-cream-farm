@@ -1,7 +1,7 @@
 import { createCollection } from '../collection.js';
 import { FISH } from '../templates.js?v=3.4.1';
-import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js?v=3.4.1';
-import { clamp, createStrip, creatureHeading, dorsalMix, poseCreature, poseStrip, profileFor, TAU } from './fish-rig.js?v=3.5.2';
+import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js?v=3.6.0';
+import { clamp, createCreatureMesh, createStrip, creatureHeading, dorsalMix, poseCreature, poseCreatureLegacy, poseStrip, profileFor, TAU } from './fish-rig.js?v=3.6.0';
 import { loadFishImage, templateFish } from './sample-fish.js?v=3.4.1';
 
 const $=id=>document.getElementById(id);
@@ -20,7 +20,7 @@ const fallback=wave.renderer;
 let gpu=null, image, fileImage, sourceRevision=0, drawnId=0, paused=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let phase=0, route=0, last=0, request=0, heading=0;
 const savedImages=new Map();
-const strips={hinge:createStrip(12),wave:createStrip(18),vertical:createStrip(18,true)};
+const strips={hinge:createStrip(12),wave:createStrip(18),vertical:createStrip(18,true),creature:createCreatureMesh(16,18)};
 $('lab-renderer').textContent='Canvas 2D';
 $('pause').textContent=paused ? '播放' : '暫停';
 
@@ -58,6 +58,10 @@ for (const {canvas} of renderers) observer.observe(canvas.parentElement);
 function draw() {
   if (!image) return;
   const fish=profileFor(species.value);
+  $('original-title').textContent=fish.creature ? 'A. 原圖平移' : 'A. V3.1.2';
+  $('original-note').textContent=fish.creature ? '保留原圖形狀，作為動作比較基準。' : '整張 PNG 移動，在折返時縮窄並翻向。';
+  $('baseline-title').textContent=fish.creature ? 'B. 上一版整列擺動' : 'B. 2D 骨架擺尾';
+  $('baseline-note').textContent=fish.creature ? '比較整排或整列圖片變形的舊動作。' : '接合處共用座標，尾部繞單一關節擺動。';
   const aspect=(image.naturalHeight||image.height)/(image.naturalWidth||image.width);
   const size=Number(controls.size.value), amplitude=Number(controls.amplitude.value), bending=Number(controls.bend.value);
   const path=route;
@@ -71,7 +75,8 @@ function draw() {
       const mesh=fish.creature==='jelly' || fish.creature==='octopus' ? strips.vertical : strips.wave;
       pose={...base,x:width*(.5+.27*Math.sin(path)),y:height*(.53+.13*Math.cos(path)),
         angle:creatureHeading(fish.creature,heading),dorsal:1,
-        strip:i===2 ? poseCreature(mesh,fish,phase,aspect,0,amplitude) : null};
+        strip:i===2 ? poseCreature(strips.creature,fish,phase,aspect,0,amplitude)
+          : i===1 ? poseCreatureLegacy(mesh,fish,phase,aspect,0,amplitude) : null};
     } else if (i===0) {
       pose={...base,x:width*(.5+.30*Math.sin(path)),y:height*(.54+Math.sin(path*1.35)*.018),angle:0,dorsal:1,
         legacyScale:Math.sign(legacyDirection||1)*(.045+.955*Math.abs(legacyDirection))};
