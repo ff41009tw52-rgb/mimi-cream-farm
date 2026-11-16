@@ -1,7 +1,7 @@
 # 班級彩繪水族館 V3.2 動畫與驗收
 
 - [魚類游動比較](https://ff41009tw52-rgb.github.io/mimi-cream-farm/aquarium-v3/animation-lab.html)
-- [V3.2.6 展示端](https://ff41009tw52-rgb.github.io/mimi-cream-farm/class-aquarium-v3-display.html?v=3.2.6)
+- [V3.2.5 展示端](https://ff41009tw52-rgb.github.io/mimi-cream-farm/class-aquarium-v3-display.html?v=3.2.5)
 - [V3.1.2 展示端](https://ff41009tw52-rgb.github.io/mimi-cream-farm/class-aquarium-v3-1-2-display.html)
 - [現有掃描端](https://ff41009tw52-rgb.github.io/mimi-cream-farm/class-aquarium-v3-scan.html?v=3.1.2)
 
@@ -36,7 +36,7 @@ V3.2.2 將魚的前半身固定在原相對座標，水平波動從魚身中線�
 
 V3.2.3 調整四種魚在水族館的顯示比例。以相同景深、個體縮放倍率計，小丑魚、蝴蝶魚及河豚的魚身長度放大約 21%～22%，鯊魚放大約 37%。鯊魚的基準長度約為小丑魚的 1.35 倍。減少動態效果模式以同一倍率縮放整群魚，使密集排列時仍保有個別比例。
 
-每隻魚都保有當前位置、朝向、速度、目標、深度和游動狀態。目標會依可游距離、鄰魚和邊界更新。魚用有上限的角速度沿弧線轉向。V3.2.6 區分游動路徑和畫作的微傾角，換邊時以原畫的魚頭花紋組成短暫的正面姿勢，背鰭朝上，投影縮放最低為側面的 54%。後半身依 PolyFish 的轉向延遲稍後跟上，並沿用水平擺尾。側面直接使用掃描 PNG。正面貼圖依作品快取，新魚先在左右畫面之外產生，再游進畫面。
+每隻魚都保有當前位置、朝向、速度、目標、深度和游動狀態。目標會依可游距離、鄰魚和邊界更新。魚用有上限的角速度沿弧線轉向，頭部接近直上或直下時沿身體軸心短暫混合兩個背向，一般轉身維持圖片比例。共用紋理直接來自掃描 PNG，UV 固定。實際速度會調制擺尾頻率，轉彎角速度會加上腰尾的柔和彎曲。新魚先在左右畫面之外產生，再游進畫面。
 
 近景魚較大、巡游略快。鄰近避讓看預測位置和深度，過近時加入有上限的側向漂移。40 隻跑 90 秒的固定種子測試中，每隻都重新選目標並轉向。最長的一次明顯重疊為 2.08 秒，此處以魚身中心橢圓與深度差做近似量測。
 
@@ -54,8 +54,8 @@ V3.2.3 調整四種魚在水族館的顯示比例。以相同景深、個體縮�
 | 資源 | 授權與採用方式 |
 | --- | --- |
 | [PixiJS 8.23.0](https://pixijs.com/versions) · [Mesh 文件](https://pixijs.com/8.x/guides/components/scene-objects/mesh) | MIT。固定版本，從 npm 套件擷取 WebGL、Mesh 及紋理模組，以 esbuild 產生本地 ESM。完整原著權聲明及隨包的 colord（MIT）、eventemitter3（MIT）、earcut（ISC）放在 [PIXI-LICENSES.txt](v32/vendor/PIXI-LICENSES.txt)。 |
-| [Paper Aquarium 原始碼](https://github.com/MrMoT9I/paper-aquarium/tree/32b0eb96e185689716f6c6bbce2f711eedb34693) | 程式與作者自製背景列 MIT。其購買的 3D 魚模另有授權。本專案參考作品映射到魚身、擺尾相位和沿速度朝向轉頭的概念。 |
-| [PolyFish 技術文章](https://polyfish.mattscott.dev/making-of/creatures.html) · [原始碼及 MIT 授權](https://github.com/unclemattmakes/polyfish/tree/1c0d7636f2c71fd81d001a597c13554f9cbdd417) | V3.2.6 從 `src/systems/ProceduralAnim.js` 改寫轉向延遲的趨近公式，用於調整 2D 網格後半身。第三方授權收錄於 [POLYFISH-LICENSE.txt](v32/vendor/POLYFISH-LICENSE.txt)。 |
+| [Paper Aquarium 原始碼](https://github.com/MrMoT9I/paper-aquarium/tree/32b0eb96e185689716f6c6bbce2f711eedb34693) | 程式與作者自製背景列 MIT。其購買的 3D 魚模另有授權。本專案採概念參考，包括作品映射到魚身、各魚擺尾相位及展示水域的分布。 |
+| [PolyFish 技術文章](https://polyfish.mattscott.dev/making-of/creatures.html) · [原始碼及 MIT 授權](https://github.com/unclemattmakes/polyfish/tree/1c0d7636f2c71fd81d001a597c13554f9cbdd417) | 查有 MIT 原始碼。採概念參考，包括沿體長傳遞波相位、速度連動、轉向平滑及推進與滑行節奏。2D 實作為本專案自行撰寫。 |
 | [Kenney Fish Pack](https://kenney.nl/assets/fish-pack) | 官方標示 CC0。列入比較資源，測試使用本專案原始圖和掃描 PNG。 |
 | [OpenGameArt Underwater Background](https://opengameart.org/content/underwater-background-2) | donte 的資源頁標示 CC0，附件為 PNG 與 Krita ZIP。評估後採用原專案的海底插畫和新增 Canvas 光影、粒子與植物。 |
 | 現有魚圖與海洋底圖 | 魚圖使用老師提供的四種模板及掃描產生的 PNG。比較頁的著色示範只在模板線稿上疊色。海洋底圖為 V3 原有插畫，額外動態圖層為本次自行撰寫。 |

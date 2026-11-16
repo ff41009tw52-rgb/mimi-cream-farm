@@ -1,5 +1,4 @@
 import { stripTopology, updatePositions } from './fish-rig.js';
-import { frontViewFor } from './sample-fish.js?v=3.2.6';
 
 export function canvasFishRenderer(canvas) {
   const ctx=canvas.getContext('2d',{alpha:true});
@@ -16,16 +15,9 @@ export function canvasFishRenderer(canvas) {
       ctx.save();
       ctx.translate(pose.x,pose.y);
       ctx.rotate(pose.angle);
-      ctx.scale(pose.turnWidth ?? pose.legacyScale ?? 1,1);
-      const front=pose.frontMix||0;
-      const side=1-front;
-      if (side*pose.dorsal>0) drawSide(pose,false,side*pose.dorsal);
-      if (side*(1-pose.dorsal)>0) drawSide(pose,true,side*(1-pose.dorsal));
-      if (front>0) {
-        const {image,width,aspect}=pose;
-        ctx.globalAlpha=front;
-        ctx.drawImage(frontViewFor(image),-width/2,-width*aspect/2,width,width*aspect);
-      }
+      ctx.scale(pose.legacyScale ?? 1,1);
+      if (pose.dorsal>0) drawSide(pose,false,pose.dorsal);
+      if (pose.dorsal<1) drawSide(pose,true,1-pose.dorsal);
       ctx.restore();
     }
   }
@@ -34,10 +26,7 @@ export function canvasFishRenderer(canvas) {
     const height=width*aspect;
     ctx.save();
     ctx.globalAlpha=alpha;
-    if (mirrored) {
-      if (pose.turnWidth===undefined) ctx.scale(1,-1);
-      else ctx.scale(-1,1);
-    }
+    if (mirrored) ctx.scale(1,-1);
     if (!strip) {
       ctx.drawImage(image,-width/2,-height/2,width,height);
     } else {
@@ -117,28 +106,13 @@ export async function webglFishRenderer(canvas,onLost) {
     entry.columns=columns;
     entry.normal=make(geometry,entry.texture);
     entry.mirror=make(geometry,entry.texture);
+    entry.mirror.scale.y=-1;
     entry.holder.addChild(entry.normal,entry.mirror);
-    if (entry.front) entry.holder.setChildIndex(entry.front,entry.holder.children.length-1);
-  }
-  function addFront(entry,pose) {
-    const {uv,indices}=stripTopology(1);
-    const half=pose.aspect/2;
-    const positions=new Float32Array([-.5,-half,-.5,half,.5,-half,.5,half]);
-    const geometry=new MeshGeometry({positions,uvs:uv,indices});
-    const texture=textureFor(frontViewFor(pose.image));
-    entry.front=make(geometry,texture);
-    entry.holder.addChild(entry.front);
   }
   function remove(id) {
     const item=fish.get(id);
     if (!item) return;
     releaseGeometry(item);
-    if (item.front) {
-      const {geometry,texture}=item.front;
-      item.front.destroy();
-      geometry.destroy(true);
-      texture.destroy(true);
-    }
     item.holder.destroy();
     item.texture.destroy(true);
     fish.delete(id);
@@ -161,20 +135,11 @@ export async function webglFishRenderer(canvas,onLost) {
       if (stage.children[i]!==holder) stage.setChildIndex(holder,i);
       holder.position.set(pose.x,pose.y);
       holder.rotation=pose.angle;
-      holder.scale.set(pose.width*(pose.turnWidth ?? pose.legacyScale ?? 1),pose.width);
-      const uprightTurn=pose.turnWidth!==undefined;
-      mirror.scale.set(uprightTurn ? -1 : 1,uprightTurn ? 1 : -1);
-      const front=pose.frontMix||0;
-      const side=1-front;
-      normal.alpha=side*pose.dorsal;
-      normal.visible=normal.alpha>0;
-      mirror.alpha=side*(1-pose.dorsal);
-      mirror.visible=mirror.alpha>0;
-      if (front>0 && !entry.front) addFront(entry,pose);
-      if (entry.front) {
-        entry.front.visible=front>0;
-        entry.front.alpha=front;
-      }
+      holder.scale.set(pose.width*(pose.legacyScale ?? 1),pose.width);
+      normal.visible=pose.dorsal>0;
+      normal.alpha=pose.dorsal;
+      mirror.visible=pose.dorsal<1;
+      mirror.alpha=1-pose.dorsal;
     }
     renderer.render({container:stage});
   }

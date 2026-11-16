@@ -1,7 +1,7 @@
 import { createCollection } from '../collection.js';
 import { FISH } from '../templates.js';
-import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js?v=3.2.6';
-import { clamp, createStrip, dorsalMix, followTurn, poseStrip, profileFor, projectTurn, TAU } from './fish-rig.js?v=3.2.6';
+import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js';
+import { clamp, createStrip, dorsalMix, poseStrip, profileFor, TAU } from './fish-rig.js?v=3.2.2';
 import { loadFishImage, templateFish } from './sample-fish.js';
 
 const $=id=>document.getElementById(id);
@@ -18,7 +18,7 @@ $('wave').after(alternate);
 const wave=renderers[2];
 const fallback=wave.renderer;
 let gpu=null, image, fileImage, sourceRevision=0, drawnId=0, paused=matchMedia('(prefers-reduced-motion: reduce)').matches;
-let phase=0, route=0, last=0, request=0, heading=0, turnBend=0;
+let phase=0, route=0, last=0, request=0, heading=0;
 const savedImages=new Map();
 const strips={hinge:createStrip(12),wave:createStrip(18)};
 $('lab-renderer').textContent='Canvas 2D';
@@ -72,10 +72,9 @@ function draw() {
         legacyScale:Math.sign(legacyDirection||1)*(.045+.955*Math.abs(legacyDirection))};
     } else {
       const model=i===1?'hinge':'wave';
-      const strip=poseStrip(strips[model],model,fish,phase,Number(controls.speed.value),turnBend,amplitude,bending);
+      const strip=poseStrip(strips[model],model,fish,phase,Number(controls.speed.value),Math.sin(path)*.45,amplitude,bending);
       pose={...base,x:width*(.5+.29*Math.sin(path)),y:height*(.53+.19*Math.cos(path)),
         angle:heading,dorsal:dorsalMix(heading),strip};
-      if (model==='wave') projectTurn(pose,heading);
     }
     try { panel.renderer.draw([pose]); }
     catch (problem) {
@@ -96,9 +95,7 @@ function animate(time) {
   const desired=Math.atan2(-Math.sin(route)*.58,Math.cos(route));
   const delta=Math.atan2(Math.sin(desired-heading),Math.cos(desired-heading));
   const turn=Number(controls.turn.value)*fish.turnRate*1.85;
-  const headingStep=clamp(delta,-turn*dt,turn*dt);
-  heading+=headingStep;
-  if (dt>0) turnBend=followTurn(turnBend,headingStep/(turn*dt),dt);
+  heading+=clamp(delta,-turn*dt,turn*dt);
   draw();
   request=requestAnimationFrame(animate);
 }

@@ -7,26 +7,6 @@ export async function loadFishImage(url) {
   return image;
 }
 
-const frontViews=new WeakMap();
-
-export function frontViewFor(image) {
-  if (frontViews.has(image)) return frontViews.get(image);
-  const width=image.naturalWidth||image.width, height=image.naturalHeight||image.height;
-  const view=document.createElement('canvas');
-  const half=Math.max(1,Math.min(96,Math.round(width/2)));
-  view.width=2*half;
-  view.height=Math.max(1,Math.round(view.width*height/width));
-  const ctx=view.getContext('2d');
-  // The two sides share the colors of the original head without duplicating the tail.
-  const left=width*.64, headWidth=width*.35;
-  ctx.drawImage(image,left,0,headWidth,height,half,0,half,view.height);
-  ctx.translate(half,0);
-  ctx.scale(-1,1);
-  ctx.drawImage(image,left,0,headWidth,height,0,0,half,view.height);
-  frontViews.set(image,view);
-  return view;
-}
-
 export async function templateFish(type,colored) {
   const artwork=await loadFishImage(new URL('../templates/artwork/'+type+'.png',import.meta.url));
   const {outline,bounds:[left,top,width,height]}=FISH[type];
