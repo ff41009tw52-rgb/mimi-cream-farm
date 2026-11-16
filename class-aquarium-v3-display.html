@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>班級彩繪水族館 V3.2.5｜展示</title>
+  <title>班級彩繪水族館 V3.3｜展示</title>
   <link rel="stylesheet" href="aquarium-v3/display.css?v=3.2.5">
-  <link rel="stylesheet" href="aquarium-v3/v32/display-v32.css">
+  <link rel="stylesheet" href="aquarium-v3/v32/display-v32.css?v=3.3.0">
 </head>
 <body>
-  <main id="aquarium" data-engine="v32" data-fish-count="0">
+  <main id="aquarium" data-engine="v32" data-fish-count="0" tabindex="0" aria-label="班級彩繪水族館" aria-describedby="water-hint">
     <div class="ocean" aria-hidden="true"></div>
     <div class="light" aria-hidden="true"></div>
     <canvas id="water" aria-hidden="true"></canvas>
@@ -23,6 +23,7 @@
       <p id="music-error" role="status" hidden>背景音樂無法播放，請再試一次。</p>
     </header>
     <audio id="background-music" src="aquarium-v3/assets/aquarium-music.mp3" loop preload="none"></audio>
+    <p id="water-hint">點魚打招呼 · 點海水餵食 · 拖曳氣泡帶隊</p>
     <p id="sea-error" role="status" hidden></p>
     <dialog id="gallery-dialog" aria-labelledby="gallery-heading">
       <div class="gallery-title">
@@ -42,7 +43,7 @@
       <ul id="gallery"></ul>
     </dialog>
   </main>
-  <script type="module" src="aquarium-v3/display.js?v=3.2.3"></script>
+  <script type="module" src="aquarium-v3/display.js?v=3.3.0"></script>
   <script type="module" src="aquarium-v3/music.js"></script>
 </body>
 </html>

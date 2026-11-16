@@ -1,4 +1,5 @@
-#aquarium .sea-atmosphere, #aquarium .sea-fish-gl {
+#aquarium { touch-action: pinch-zoom; }
+#aquarium .sea-atmosphere, #aquarium .sea-fish-gl, #aquarium .sea-effects {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -15,3 +16,22 @@
 }
 #aquarium.low .light, #aquarium.reduce .light { animation: none; }
 #aquarium > #sea-error { z-index: 1; }
+#water-hint {
+  position: absolute;
+  left: 50%;
+  bottom: max(12px,env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 24px);
+  margin: 0;
+  padding: 7px 12px;
+  border-radius: 16px;
+  background: #0b3449dc;
+  color: #f5fffd;
+  font-size: .84rem;
+  line-height: 1.45;
+  text-align: center;
+  pointer-events: none;
+  transition: opacity .3s;
+}
+#aquarium.hide-toolbar #water-hint { opacity: 0; }

@@ -56,11 +56,12 @@ export function makeSwimmer(record, image, world, fresh) {
   const x=fresh ? side>0 ? -width*.56 : world.width+width*.56 : world.width*(.11+.78*random());
   const angle=(side>0?0:Math.PI)+(fresh ? 0 : (random()-.5)*.54);
   const fish={
-    id:record.id,image,aspect,profile,random,depth,width,baseSpeed,
+    id:record.id,type:record.type,image,aspect,profile,random,depth,width,baseSpeed,
     x,y,angle,yaw:0,speed:baseSpeed*(fresh ? 1.10 : .90),phase:random()*TAU,
     floatPhase:random()*TAU,age:0,state:fresh?'enter':'cruise',burst:0,
     paceTarget:.83+.33*random(),decisionAge:.6+random()*3.8,
     avoidX:0,avoidY:0,driftX:0,driftY:0,crowd:0,
+    greet:0,feedRest:0,alarmTime:0,threat:null,intent:{x:0,y:0,weight:0,pace:1},
     mesh:createStrip(depth>.52?18:10), fallbackMesh:createStrip(depth>.61 ? 12 : 7),
     pose:{id:record.id,image,aspect},
   };
@@ -144,25 +145,29 @@ function advance(fish,world,dt) {
   const approachY=fish.y+facingY*fish.speed*.67;
   const wallX=fish.state==='enter' ? 0 : (Math.max(0,left-approachX)-Math.max(0,approachX-right))/48;
   const wallY=(Math.max(0,top-approachY)-Math.max(0,approachY-bottom))/43;
-  const targetX=dx/Math.max(1,range)+clamp(fish.avoidX,-1.1,1.1)+wallX;
-  const targetY=dy/Math.max(1,range)+clamp(fish.avoidY,-1.6,1.6)+wallY;
+  const {intent}=fish;
+  const cruiseWeight=1-intent.weight;
+  const targetX=dx/Math.max(1,range)*cruiseWeight+intent.x*intent.weight+clamp(fish.avoidX,-1.1,1.1)+wallX;
+  const targetY=dy/Math.max(1,range)*cruiseWeight+intent.y*intent.weight+clamp(fish.avoidY,-1.6,1.6)+wallY;
   const turn=angleDelta(Math.atan2(targetY,targetX),fish.angle);
-  const maxTurn=profile.turnRate*(1+.22*fish.crowd);
+  const maxTurn=profile.turnRate*(1+.22*fish.crowd+.26*intent.weight);
   const aim=clamp(turn*2.8,-maxTurn,maxTurn);
   fish.yaw+=(aim-fish.yaw)*(1-Math.exp(-6*dt));
   fish.angle=angleDelta(fish.angle+fish.yaw*dt,0);
 
   const throttle=fish.state==='enter' ? 1.16 : fish.burst>0 ? 1.46 : fish.paceTarget;
   const turning=Math.min(1,Math.abs(turn)/Math.PI);
-  const targetSpeed=fish.baseSpeed*throttle*(1-.29*turning)*(1-.25*fish.crowd);
+  const pace=throttle*cruiseWeight+intent.pace*intent.weight;
+  const greeting=fish.type==='shark' ? fish.greet*.38 : 0;
+  const targetSpeed=fish.baseSpeed*(pace+greeting)*(1-.29*turning)*(1-.25*fish.crowd);
   fish.speed+=(targetSpeed-fish.speed)*(1-Math.exp(-(fish.burst>0?3.8:2.1)*dt));
   const verticalInset=top*.66;
   const edgeDrift=(Math.max(0,verticalInset-fish.y)-Math.max(0,fish.y-world.height+verticalInset))*.83;
   const driftLimit=fish.baseSpeed*.62;
   fish.x+=(Math.cos(fish.angle)*fish.speed+clamp(fish.driftX,-driftLimit,driftLimit))*dt;
   fish.y+=(Math.sin(fish.angle)*fish.speed+clamp(fish.driftY+edgeDrift,-driftLimit,driftLimit))*dt;
-  const pace=fish.speed/fish.baseSpeed;
-  fish.phase=(fish.phase+TAU*profile.tailHz*(.50+.50*pace)*dt)%TAU;
+  const strokePace=fish.speed/fish.baseSpeed;
+  fish.phase=(fish.phase+TAU*profile.tailHz*(.50+.50*strokePace)*dt)%TAU;
 }
 
 export function stepSchool(fishes,world,dt) {

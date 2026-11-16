@@ -1,26 +1,31 @@
 import { clamp, dorsalMix, poseStrip } from './fish-rig.js?v=3.2.3';
 import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js';
-import { makeSwimmer, resizeSchool, stepSchool } from './school.js?v=3.2.3';
+import { makeSwimmer, resizeSchool, stepSchool } from './school.js?v=3.3.0';
 import { makeAtmosphere } from './ocean-scene.js';
 import { loadFishImage } from './sample-fish.js';
+import { createWaterInteractions } from './water-interactions.js';
 
 export function createOcean(canvas) {
   const stage=canvas.parentElement;
   const ambient=document.createElement('canvas');
   const gpuCanvas=document.createElement('canvas');
+  const effects=document.createElement('canvas');
   ambient.className='sea-atmosphere';
   gpuCanvas.className='sea-fish-gl';
+  effects.className='sea-effects';
   ambient.setAttribute('aria-hidden','true');
   gpuCanvas.setAttribute('aria-hidden','true');
+  effects.setAttribute('aria-hidden','true');
   gpuCanvas.hidden=true;
   canvas.before(ambient);
-  canvas.after(gpuCanvas);
+  canvas.after(gpuCanvas,effects);
 
   const sprites=new Map();
   const poses=[];
   let swimmers=[];
   const fallback=canvasFishRenderer(canvas);
   const atmosphere=makeAtmosphere(ambient);
+  const interactions=createWaterInteractions(stage,effects,()=>swimmers);
   let gpu=null, gpuFailed=false;
   let low=false,reduced=false,usedScale=1,w=1,h=1;
   let world={width:960,height:540};
@@ -49,10 +54,11 @@ export function createOcean(canvas) {
     let vertices=0;
     for (const [i,fish] of swimmers.entries()) {
       const pose=fish.pose;
+      const greeting=Math.sin(Math.PI*fish.greet/.8);
       const chosenMesh=low || reduced ? null : gpu ? fish.mesh : fish.fallbackMesh;
       if (chosenMesh) {
         pose.strip=poseStrip(chosenMesh,'wave',fish.profile,fish.phase,
-          fish.speed/fish.baseSpeed,fish.yaw/fish.profile.turnRate);
+          fish.speed/fish.baseSpeed,fish.yaw/fish.profile.turnRate,1+(fish.type==='butterfly' ? greeting*.35 : 0));
         vertices+=chosenMesh.x.length*2;
       } else pose.strip=null;
       if (reduced) {
@@ -65,8 +71,8 @@ export function createOcean(canvas) {
       } else {
         const float=Math.sin(time*.95+fish.floatPhase)*fish.profile.float;
         pose.x=fish.x*usedScale;
-        pose.y=(fish.y+float)*usedScale;
-        pose.width=fish.width*usedScale;
+        pose.y=(fish.y+float-(fish.type==='butterfly' ? greeting*8 : 0))*usedScale;
+        pose.width=fish.width*usedScale*(1+(fish.type==='puffer' ? greeting*.15 : 0));
         pose.angle=fish.angle;
         pose.dorsal=dorsalMix(fish.angle);
       }
@@ -97,6 +103,7 @@ export function createOcean(canvas) {
     world=next;
     const resolution=Math.min(devicePixelRatio||1,low ? .78 : gpu ? 1.25 : 1);
     (gpu || fallback).resize(w,h,resolution);
+    interactions.resize(w,h,usedScale);
     stage.dataset.pixelSize=`${Math.round(w*resolution)}×${Math.round(h*resolution)}`;
     atmosphere.resize(w,h,low||reduced);
     drawStill();
@@ -122,8 +129,10 @@ export function createOcean(canvas) {
       const dt=Math.min(elapsed/1000,.09);
       lastDraw=now;
       time+=dt;
+      interactions.step(dt,world);
       stepSchool(swimmers,world,dt);
       drawFish(now);
+      interactions.draw();
       if (gpu && !low && swimmers.length) {
         if (!perfStart) perfStart=now;
         perfFrames++;
@@ -177,6 +186,7 @@ export function createOcean(canvas) {
       if (low===isLow && reduced===isReduced) return;
       low=isLow;
       reduced=isReduced;
+      interactions.setEnabled(!reduced);
       perfStart=perfFrames=slowWindows=0;
       stage.dataset.frameLimit=reduced ? '0' : low ? '30' : 'display';
       if (request && reduced) { cancelAnimationFrame(request); request=0; }
