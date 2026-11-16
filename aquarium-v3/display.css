@@ -39,3 +39,18 @@ input { accent-color: #80e7ba; }
   .toolbar { inset: 10px 9px auto; }
   .toolbar p, .toolbar a, .toolbar button { padding: 8px; font-size: .84rem; }
 }
+
+/* Compact controls remain over the ocean so changes can be seen immediately. */
+#motion-settings { position: relative; }
+#motion-settings summary { list-style: none; cursor: pointer; padding: 9px 12px; border: 1px solid #b7ebe052; border-radius: 9px; background: #0b3449dc; font: 600 .92rem system-ui,sans-serif; }
+#motion-settings summary::-webkit-details-marker { display: none; }
+#motion-settings[open] summary { background: #286753; }
+.toolbar #motion-settings .motion-panel { display: grid; gap: 12px; position: absolute; top: calc(100% + 10px); right: 0; width: min(300px,calc(100vw - 28px)); padding: 16px; border: 1px solid #73b9c1; border-radius: 12px; background: #153747f5; box-shadow: 0 10px 28px #00192366; }
+.motion-panel label { display: flex; justify-content: space-between; gap: 10px; }
+.motion-panel output { color: #a4f0d2; font-variant-numeric: tabular-nums; }
+.motion-panel input { width: 100%; min-width: 0; margin: 0; min-height: 32px; touch-action: pan-y; }
+.toolbar .motion-panel p { border: 0; background: none; padding: 0; font-size: .85rem; line-height: 1.5; font-weight: 400; }
+@media(max-width: 600px) {
+  .toolbar #motion-settings .motion-panel { position: fixed; top: 110px; right: 12px; max-height: calc(100dvh - 125px); overflow: auto; }
+}
+@media(max-width: 450px) { #motion-settings summary { padding: 8px; font-size: .84rem; } }

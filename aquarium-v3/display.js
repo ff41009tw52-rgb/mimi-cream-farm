@@ -5,9 +5,40 @@ const byId=id=>document.getElementById(id);
 const stage=byId('aquarium');
 const gallery=byId('gallery-dialog');
 const collection=createCollection();
-const {createOcean}=stage.dataset.engine==='v32' ? await import('./v32/ocean.js?v=3.6.0') : await import('./swim.js');
+const {createOcean}=stage.dataset.engine==='v32' ? await import('./v32/ocean.js?v=3.6.1') : await import('./swim.js');
 const ocean=createOcean(byId('water'));
 const current=new Map();
+const motionSettings=byId('motion-settings');
+const speedInput=byId('motion-speed');
+const speedKey='class-aquarium-v3:motion-speed';
+function applySpeed(value,persist=false) {
+  const number=Number(value);
+  const speed=Number.isFinite(number) ? Math.max(.25,Math.min(2,number)) : 1;
+  ocean.setSpeed?.(speed);
+  if (speedInput) {
+    speedInput.value=String(speed);
+    byId('motion-speed-value').textContent=speed.toFixed(2)+'×';
+    speedInput.setAttribute('aria-valuetext',speed.toFixed(2)+' 倍');
+  }
+  if (persist) {
+    try { localStorage.setItem(speedKey,String(speed)); } catch {}
+  }
+}
+if (speedInput) {
+  let saved=1;
+  try { saved=localStorage.getItem(speedKey) ?? 1; } catch {}
+  applySpeed(saved);
+  speedInput.oninput=()=>applySpeed(speedInput.value,true);
+  byId('motion-speed-reset').onclick=()=>applySpeed(1,true);
+  motionSettings.addEventListener('toggle',toolbar);
+  motionSettings.addEventListener('keydown',event=>{
+    if (event.key==='Escape') {
+      motionSettings.open=false;
+      motionSettings.querySelector('summary').focus();
+      event.stopPropagation();
+    }
+  });
+}
 const systemMotion=matchMedia('(prefers-reduced-motion: reduce)');
 let initialized=false, updating=false, refreshAgain=false, toolbarTimer, changing=false;
 const prefs='class-aquarium-v3:display-settings';
@@ -23,6 +54,7 @@ function mode() {
   stage.classList.toggle('low',low);
   stage.classList.toggle('reduce',reduce);
   ocean.setMode(low,reduce);
+  if (byId('motion-static-note')) byId('motion-static-note').hidden=!reduce;
 }
 mode();
 function saveMode() {
@@ -155,8 +187,8 @@ byId('confirm').onclick=()=>mutate(()=>collection.clear());
 function toolbar() {
   stage.classList.remove('hide-toolbar');
   clearTimeout(toolbarTimer);
-  if (document.fullscreenElement && !gallery.open) {
-    toolbarTimer=setTimeout(()=>{ if (!gallery.open) stage.classList.add('hide-toolbar'); },2600);
+  if (document.fullscreenElement && !gallery.open && !motionSettings?.open) {
+    toolbarTimer=setTimeout(()=>{ if (!gallery.open && !motionSettings?.open) stage.classList.add('hide-toolbar'); },2600);
   }
 }
 byId('fullscreen').onclick=async ()=>{

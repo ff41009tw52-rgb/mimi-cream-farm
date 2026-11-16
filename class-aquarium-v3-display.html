@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>班級彩繪水族館 V3.6.0｜展示</title>
-  <link rel="stylesheet" href="aquarium-v3/display.css?v=3.2.5">
+  <title>班級彩繪水族館 V3.6.1｜展示</title>
+  <link rel="stylesheet" href="aquarium-v3/display.css?v=3.6.1">
   <link rel="stylesheet" href="aquarium-v3/v32/display-v32.css?v=3.3.0">
 </head>
 <body>
@@ -17,6 +17,16 @@
       <div>
         <a href="class-aquarium-v3-scan.html" target="_blank" rel="noopener">拍照掃描</a>
         <button id="music-toggle" type="button">播放背景音樂</button>
+        <details id="motion-settings">
+          <summary>速度設定</summary>
+          <div class="motion-panel">
+            <label for="motion-speed">生物速度 <output id="motion-speed-value" for="motion-speed">1.00×</output></label>
+            <input id="motion-speed" type="range" min="0.25" max="2" step="0.05" value="1" aria-describedby="motion-speed-help">
+            <p id="motion-speed-help">一起調整游動與擺動快慢，即時生效。</p>
+            <p id="motion-static-note" hidden>目前已開啟「減少動態效果」，關閉後即可看見速度變化。</p>
+            <button id="motion-speed-reset" type="button">恢復原速</button>
+          </div>
+        </details>
         <button id="manage" aria-haspopup="dialog">作品與設定</button>
         <button id="fullscreen">全螢幕</button>
       </div>
@@ -43,7 +53,7 @@
       <ul id="gallery"></ul>
     </dialog>
   </main>
-  <script type="module" src="aquarium-v3/display.js?v=3.6.0"></script>
+  <script type="module" src="aquarium-v3/display.js?v=3.6.1"></script>
   <script type="module" src="aquarium-v3/music.js"></script>
 </body>
 </html>

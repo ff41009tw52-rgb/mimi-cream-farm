@@ -1,4 +1,4 @@
-import { clamp, creatureHeading, dorsalMix, poseCreature, poseStrip } from './fish-rig.js?v=3.6.0';
+import { clamp, createStrip, creatureHeading, dorsalMix, poseCreature, poseCreatureLegacy, poseStrip } from './fish-rig.js?v=3.6.0';
 import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js?v=3.6.0';
 import { makeSwimmer, resizeSchool, stepSchool } from './school.js?v=3.6.0';
 import { makeAtmosphere } from './ocean-scene.js';
@@ -27,6 +27,7 @@ export function createOcean(canvas) {
   const atmosphere=makeAtmosphere(ambient);
   const interactions=createWaterInteractions(stage,effects,()=>swimmers);
   let gpu=null, gpuFailed=false;
+  let motionSpeed=1,motionTime=0;
   let low=false,reduced=false,usedScale=1,w=1,h=1;
   let world={width:960,height:540};
   let request=0,lastDraw=0,lastAmbient=0,time=0,drawCount=0,lastReport=0;
@@ -58,7 +59,8 @@ export function createOcean(canvas) {
       const greeting=Math.sin(Math.PI*fish.greet/.8);
       const chosenMesh=low || reduced ? null : gpu ? fish.mesh : fish.fallbackMesh;
       if (chosenMesh) {
-        pose.strip=creature ? poseCreature(chosenMesh,fish.profile,fish.phase,fish.aspect,greeting)
+        pose.strip=creature==='jelly' ? poseCreatureLegacy(chosenMesh,fish.profile,fish.phase,fish.aspect,greeting)
+          : creature ? poseCreature(chosenMesh,fish.profile,fish.phase,fish.aspect,greeting)
           : poseStrip(chosenMesh,'wave',fish.profile,fish.phase,
             fish.speed/fish.baseSpeed,fish.yaw/fish.profile.turnRate,1+(fish.type==='butterfly' ? greeting*.35 : 0));
         vertices+=chosenMesh.grid ? chosenMesh.positions.length/2 : chosenMesh.x.length*2;
@@ -71,7 +73,7 @@ export function createOcean(canvas) {
         pose.dorsal=1;
         pose.width=fish.width*gridScale;
       } else {
-        const float=Math.sin(time*.95+fish.floatPhase)*fish.profile.float;
+        const float=Math.sin(motionTime*.95+fish.floatPhase)*fish.profile.float;
         pose.x=fish.x*usedScale;
         const lift=creature==='jelly' ? 16 : fish.type==='butterfly' || creature==='octopus' ? 8 : 0;
         pose.y=(fish.y+float-greeting*lift)*usedScale;
@@ -132,8 +134,14 @@ export function createOcean(canvas) {
       const dt=Math.min(elapsed/1000,.09);
       lastDraw=now;
       time+=dt;
-      interactions.step(dt,world);
-      stepSchool(swimmers,world,dt);
+      const motionDt=dt*motionSpeed;
+      motionTime+=motionDt;
+      // Bounded simulation steps preserve turning/avoidance at 2× speed.
+      const steps=Math.max(1,Math.ceil(motionDt/(1/30)));
+      for (let step=0;step<steps;step++) {
+        interactions.step(motionDt/steps,world);
+        stepSchool(swimmers,world,motionDt/steps);
+      }
       drawFish(now);
       interactions.draw();
       if (gpu && !low && swimmers.length) {
@@ -185,6 +193,11 @@ export function createOcean(canvas) {
   }).catch(()=>useFallback('webgl-unavailable'));
 
   return {
+    setSpeed(value) {
+      const number=Number(value);
+      motionSpeed=Number.isFinite(number) ? clamp(number,.25,2) : 1;
+      stage.dataset.motionSpeed=String(motionSpeed);
+    },
     setMode(isLow,isReduced) {
       if (low===isLow && reduced===isReduced) return;
       low=isLow;
@@ -204,6 +217,11 @@ export function createOcean(canvas) {
         const image=await loadFishImage(url);
         if (sprites.get(record.id)!==entry) return;
         entry.fish=makeSwimmer(record,image,world,fresh);
+        if (entry.fish.profile.creature==='jelly') {
+          // Restore exactly the vertical strip rig used by comparison pane B.
+          entry.fish.mesh=createStrip(entry.fish.depth>.52 ? 18 : 10,true);
+          entry.fish.fallbackMesh=createStrip(entry.fish.depth>.61 ? 12 : 7,true);
+        }
         swimmers.push(entry.fish);
         swimmers.sort((a,b)=>a.depth-b.depth);
         if (reduced || document.hidden) drawFish(performance.now());
