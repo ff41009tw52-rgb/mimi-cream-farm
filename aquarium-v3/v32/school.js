@@ -1,4 +1,4 @@
-import { clamp, createStrip, profileFor, TAU } from './fish-rig.js?v=3.2.3';
+import { clamp, createStrip, followTurn, profileFor, TAU } from './fish-rig.js?v=3.2.6';
 
 export function randomSource(seed) {
   let state=seed || 0x2f39b7c1;
@@ -57,7 +57,7 @@ export function makeSwimmer(record, image, world, fresh) {
   const angle=(side>0?0:Math.PI)+(fresh ? 0 : (random()-.5)*.54);
   const fish={
     id:record.id,image,aspect,profile,random,depth,width,baseSpeed,
-    x,y,angle,yaw:0,speed:baseSpeed*(fresh ? 1.10 : .90),phase:random()*TAU,
+    x,y,angle,yaw:0,turnBend:0,speed:baseSpeed*(fresh ? 1.10 : .90),phase:random()*TAU,
     floatPhase:random()*TAU,age:0,state:fresh?'enter':'cruise',burst:0,
     paceTarget:.83+.33*random(),decisionAge:.6+random()*3.8,
     avoidX:0,avoidY:0,driftX:0,driftY:0,crowd:0,
@@ -151,6 +151,7 @@ function advance(fish,world,dt) {
   const aim=clamp(turn*2.8,-maxTurn,maxTurn);
   fish.yaw+=(aim-fish.yaw)*(1-Math.exp(-6*dt));
   fish.angle=angleDelta(fish.angle+fish.yaw*dt,0);
+  fish.turnBend=followTurn(fish.turnBend,clamp(fish.yaw/profile.turnRate,-1,1),dt);
 
   const throttle=fish.state==='enter' ? 1.16 : fish.burst>0 ? 1.46 : fish.paceTarget;
   const turning=Math.min(1,Math.abs(turn)/Math.PI);

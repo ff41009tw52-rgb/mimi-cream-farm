@@ -29,7 +29,7 @@ function poseLateralWave(strip, fish, phase, strength, bend, bodyGain) {
   const columns=strip.x.length-1;
   const step=1/columns;
   const swing=Math.min(.58,strength*4.4);
-  const steering=clamp(bend,-1,1)*fish.amplitude*.9*bodyGain;
+  const steering=clamp(bend,-1,1)*fish.amplitude*2*bodyGain;
   let x=.5, depth=0;
   strip.x[columns]=x;
   strip.y[columns]=0;
@@ -96,4 +96,20 @@ export function updatePositions(positions,strip,aspect) {
 export function dorsalMix(angle) {
   // When the nose points up/down, blend the two dorsal poses around the same body axis.
   return smoothstep(-.13,.13,Math.cos(angle));
+}
+
+export function projectTurn(pose,heading) {
+  const lateral=Math.cos(heading);
+  // Keep the dorsal fin upright as the horizontal motion reverses.
+  pose.angle=.46*Math.sin(heading)*lateral;
+  pose.turnWidth=.54+.46*smoothstep(0,.84,Math.abs(lateral));
+  pose.dorsal=smoothstep(-.13,.13,lateral);
+  pose.frontMix=1-smoothstep(.07,.36,Math.abs(lateral));
+  return pose;
+}
+
+// Adapted from PolyFish's ProceduralAnim turn lag (MIT, Copyright Matt Scott).
+export function followTurn(previous,target,dt) {
+  const rate=Math.abs(target)>Math.abs(previous) ? 3 : 5;
+  return previous+(target-previous)*Math.min(1,rate*dt);
 }

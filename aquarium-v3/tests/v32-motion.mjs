@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { FISH } from '../templates.js';
 import { angleDelta, makeSwimmer, stepSchool } from '../v32/school.js';
-import { SPECIES, createStrip, poseStrip, TAU } from '../v32/fish-rig.js';
+import { SPECIES, createStrip, followTurn, poseStrip, projectTurn, TAU } from '../v32/fish-rig.js';
 
 const world={width:960,height:540}, types=Object.keys(FISH);
 const previousWidths={clown:91,butterfly:84,puffer:82,shark:108};
@@ -14,6 +14,23 @@ const sameDepthWidths=Object.fromEntries(types.map(type=>{
 }));
 const sharkToClown=sameDepthWidths.shark/sameDepthWidths.clown;
 assert.ok(sharkToClown>=1.25 && sharkToClown<=1.40,`shark to clown length ratio ${sharkToClown}`);
+for (const direction of [-1,1]) {
+  let previous=projectTurn({},0);
+  for (let degrees=1;degrees<=180;degrees++) {
+    const pose=projectTurn({},direction*degrees*Math.PI/180);
+    assert.ok(pose.turnWidth>=.54 && pose.turnWidth<=1,'turn squeezed the fish flat');
+    assert.ok(Math.abs(pose.angle)<=.231,'turn rolled the body too far');
+    assert.ok(Math.abs(pose.turnWidth-previous.turnWidth)<.015,'turn abruptly changed the width');
+    assert.ok(Math.abs(pose.frontMix-previous.frontMix)<.1,'turn abruptly changed the visible face');
+    if (degrees===90) assert.equal(pose.frontMix,1);
+    previous=pose;
+  }
+  assert.equal(previous.dorsal,0);
+  assert.equal(previous.frontMix,0);
+}
+const firstTurnFrame=followTurn(0,1,1/60);
+assert.ok(firstTurnFrame>0 && firstTurnFrame<.10);
+assert.ok(followTurn(firstTurnFrame,0,1/60)<firstTurnFrame);
 const fishes=Array.from({length:40},(_,i)=>{
   const type=types[i%types.length], [,,width,height]=FISH[type].bounds;
   return makeSwimmer({id:'swimmer-'+i,type},{width,height},world,false);

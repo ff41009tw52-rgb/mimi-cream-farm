@@ -1,6 +1,6 @@
-import { clamp, dorsalMix, poseStrip } from './fish-rig.js?v=3.2.3';
-import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js';
-import { makeSwimmer, resizeSchool, stepSchool } from './school.js?v=3.2.3';
+import { clamp, poseStrip, projectTurn } from './fish-rig.js?v=3.2.6';
+import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js?v=3.2.6';
+import { makeSwimmer, resizeSchool, stepSchool } from './school.js?v=3.2.6';
 import { makeAtmosphere } from './ocean-scene.js';
 import { loadFishImage } from './sample-fish.js';
 
@@ -52,23 +52,21 @@ export function createOcean(canvas) {
       const chosenMesh=low || reduced ? null : gpu ? fish.mesh : fish.fallbackMesh;
       if (chosenMesh) {
         pose.strip=poseStrip(chosenMesh,'wave',fish.profile,fish.phase,
-          fish.speed/fish.baseSpeed,fish.yaw/fish.profile.turnRate);
+          fish.speed/fish.baseSpeed,fish.turnBend);
         vertices+=chosenMesh.x.length*2;
       } else pose.strip=null;
       if (reduced) {
         const row=Math.floor(i/columns), placed=Math.min(columns,swimmers.length-row*columns);
         pose.x=(.5+i%columns+(columns-placed)/2)*w/columns;
         pose.y=(.60+row)*h/(rows+.35);
-        pose.angle=0;
-        pose.dorsal=1;
+        projectTurn(pose,0);
         pose.width=fish.width*gridScale;
       } else {
         const float=Math.sin(time*.95+fish.floatPhase)*fish.profile.float;
         pose.x=fish.x*usedScale;
         pose.y=(fish.y+float)*usedScale;
         pose.width=fish.width*usedScale;
-        pose.angle=fish.angle;
-        pose.dorsal=dorsalMix(fish.angle);
+        projectTurn(pose,fish.angle);
       }
       poses.push(pose);
     }
