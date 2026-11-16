@@ -8,12 +8,13 @@ body { margin: 0; background: #093e57; }
 .light { background: radial-gradient(ellipse at 18% -24%,#d5ffce5e 0%,#a6ffe525 35%,transparent 65%), radial-gradient(ellipse at 74% -15%,#b0fff342,transparent 57%); animation: water-light 15s ease-in-out infinite alternate; pointer-events: none; }
 @keyframes water-light { from { transform: scale(1.06) translateX(-1%); opacity: .52; } to { transform: scale(1.15) translateX(2%); opacity: .93; } }
 .low .light, .reduce .light { animation: none; }
-.toolbar { position: absolute; inset: 16px 18px auto; display: flex; justify-content: space-between; align-items: center; gap: 6px; z-index: 1; color: #f3fff9; transition: opacity .3s; }
-.toolbar p, button { border: 1px solid #b7ebe052; border-radius: 9px; background: #0b3449dc; color: #f5fffd; font: 600 .92rem system-ui,sans-serif; }
+.toolbar { position: absolute; inset: 16px 18px auto; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px; z-index: 1; color: #f3fff9; transition: opacity .3s; }
+.toolbar p, .toolbar a, button { border: 1px solid #b7ebe052; border-radius: 9px; background: #0b3449dc; color: #f5fffd; font: 600 .92rem system-ui,sans-serif; }
 .toolbar p { margin: 0; padding: 9px 12px; }
-.toolbar div { display: flex; gap: 7px; }
-button { padding: 9px 12px; cursor: pointer; }
-button:hover { background-color: #245369; }
+.toolbar div { display: flex; flex-wrap: wrap; gap: 7px; }
+.toolbar a, button { padding: 9px 12px; cursor: pointer; }
+.toolbar a { display: inline-flex; align-items: center; text-decoration: none; }
+.toolbar a:hover, button:hover { background-color: #245369; }
 button:disabled { opacity: .55; cursor: default; }
 :focus-visible { outline: 3px solid #ffd688; outline-offset: 3px; }
 #aquarium.hide-toolbar .toolbar:not(:focus-within) { opacity: 0; pointer-events: none; }
@@ -34,5 +35,5 @@ input { accent-color: #80e7ba; }
 #confirm-clear button { margin: 2px 0; }
 @media(max-width: 450px) {
   .toolbar { inset: 10px 9px auto; }
-  .toolbar p, .toolbar button { padding: 8px; font-size: .84rem; }
+  .toolbar p, .toolbar a, .toolbar button { padding: 8px; font-size: .84rem; }
 }

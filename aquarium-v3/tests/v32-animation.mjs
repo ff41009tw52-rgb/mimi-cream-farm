@@ -56,8 +56,10 @@ try {
     const {dataset}=document.querySelector('#aquarium');
     return dataset.renderer==='pixi-webgl'||Boolean(dataset.fallbackReason);
   });
-  const scan=await context.newPage();
-  await scan.goto(base+'/class-aquarium-v3-scan.html');
+  const scanPage=context.waitForEvent('page');
+  await display.getByRole('link',{name:'拍照掃描'}).click();
+  const scan=await scanPage;
+  await scan.waitForURL(base+'/class-aquarium-v3-scan.html');
   for (let i=0;i<pictures.length;i++) {
     await scan.locator('#photo').setInputFiles({name:types[i]+'.jpg',mimeType:'image/jpeg',buffer:Buffer.from(pictures[i],'base64')});
     await waitCount(display,i+1);
