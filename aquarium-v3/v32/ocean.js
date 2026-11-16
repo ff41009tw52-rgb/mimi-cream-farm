@@ -1,6 +1,6 @@
-import { clamp, creatureHeading, dorsalMix, poseCreature, poseStrip } from './fish-rig.js?v=3.4.1';
+import { clamp, creatureHeading, dorsalMix, poseCreature, poseStrip } from './fish-rig.js?v=3.4.2';
 import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js?v=3.4.1';
-import { makeSwimmer, resizeSchool, stepSchool } from './school.js?v=3.4.1';
+import { makeSwimmer, resizeSchool, stepSchool } from './school.js?v=3.4.2';
 import { makeAtmosphere } from './ocean-scene.js';
 import { loadFishImage } from './sample-fish.js?v=3.4.1';
 import { createWaterInteractions } from './water-interactions.js?v=3.4.1';

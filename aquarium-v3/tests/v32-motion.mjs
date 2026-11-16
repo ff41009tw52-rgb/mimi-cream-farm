@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { FISH } from '../templates.js';
 import { angleDelta, makeSwimmer, stepSchool } from '../v32/school.js';
 import { SPECIES, createStrip, poseCreature, poseStrip, updatePositions, TAU } from '../v32/fish-rig.js';
@@ -6,15 +7,28 @@ import { SPECIES, createStrip, poseCreature, poseStrip, updatePositions, TAU } f
 const world={width:960,height:540};
 const previousWidths={clown:91,butterfly:84,puffer:82,shark:108};
 const types=Object.keys(previousWidths);
-const sameDepthWidths=Object.fromEntries(types.map(type=>{
+const sameDepthWidths=Object.fromEntries(Object.keys(FISH).map(type=>{
   const [,,width,height]=FISH[type].bounds;
   const fish=makeSwimmer({id:'size-reference',type},{width,height},world,false);
   assert.equal(fish.aspect,height/width,`${type}: resizing changed the artwork proportions`);
-  assert.ok(SPECIES[type].width/previousWidths[type]>=1.18,`${type}: size did not increase by at least 18%`);
+  if (type in previousWidths) assert.ok(SPECIES[type].width/previousWidths[type]>=1.18,`${type}: size did not increase by at least 18%`);
   return [type,fish.width];
 }));
 const sharkToClown=sameDepthWidths.shark/sameDepthWidths.clown;
-assert.ok(sharkToClown>=1.25 && sharkToClown<=1.40,`shark to clown length ratio ${sharkToClown}`);
+const artwork=JSON.parse(readFileSync(new URL('../tools/artwork.json',import.meta.url),'utf8'));
+const silhouetteAreas=Object.fromEntries(Object.entries(sameDepthWidths).map(([type,width])=>{
+  const {outline,width:sourceWidth}=artwork[type];
+  const signedDoubleArea=outline.reduce((area,[x,y],index)=>{
+    const [nextX,nextY]=outline[(index+1)%outline.length];
+    return area+x*nextY-y*nextX;
+  },0);
+  return [type,Math.abs(signedDoubleArea)*.5*(width/sourceWidth)**2];
+}));
+const sharkToClownArea=silhouetteAreas.shark/silhouetteAreas.clown;
+assert.ok(sharkToClownArea>=1.05 && sharkToClownArea<=1.25,`shark to clown silhouette ratio ${sharkToClownArea}`);
+for (const type of ['shark','ray','turtle']) {
+  assert.ok(silhouetteAreas[type]>silhouetteAreas.butterfly,`${type}: large species silhouette is smaller than a butterflyfish`);
+}
 const fishes=Array.from({length:40},(_,i)=>{
   const type=types[i%types.length], [,,width,height]=FISH[type].bounds;
   return makeSwimmer({id:'swimmer-'+i,type},{width,height},world,false);
@@ -114,4 +128,4 @@ for (const type of ['jelly','ray','octopus','turtle']) {
 }
 console.log(JSON.stringify({fishes:40,simulatedSeconds:90,changedTarget:goalChanges.size,
   turned:turns.size,maxTurnDegrees:maxAngleChange*180/Math.PI,longestOverlapSeconds:longestOverlap,
-  sharkToClown,lateralTravelPercent:lateralTravel},null,2));
+  sharkToClown,sharkToClownArea,lateralTravelPercent:lateralTravel},null,2));

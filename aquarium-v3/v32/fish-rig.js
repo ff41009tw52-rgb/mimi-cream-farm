@@ -10,7 +10,7 @@ export const SPECIES = {
   clown:     {speed:66, width:110, tailHz:1.82, amplitude:.064, hinge:.72, wave:5.3, turnRate:2.08, rise:15, float:2.4, dash:.38},
   butterfly: {speed:43, width:102, tailHz:1.36, amplitude:.044, hinge:.78, wave:4.9, turnRate:1.68, rise:12, float:2.5, dash:.05},
   puffer:    {speed:33, width:100, tailHz:1.62, amplitude:.022, hinge:.78, wave:4.6, turnRate:1.52, rise:10, float:5.1, dash:0},
-  shark:     {speed:75, width:148, tailHz:1.08, amplitude:.052, hinge:.75, wave:5.7, turnRate:1.57, rise:8, float:1.35, dash:.02},
+  shark:     {speed:75, width:174, tailHz:1.08, amplitude:.052, hinge:.75, wave:5.7, turnRate:1.57, rise:8, float:1.35, dash:.02},
   jelly:     {speed:23, width:68, tailHz:.52, turnRate:.94, rise:19, float:10, dash:0, habitat:[.23,.59], creature:'jelly'},
   ray:       {speed:47, width:151, tailHz:.63, turnRate:1.25, rise:11, float:3.6, dash:.04, habitat:[.47,.77], creature:'ray'},
   octopus:   {speed:27, width:116, tailHz:.73, turnRate:1.09, rise:9, float:4.5, dash:0, habitat:[.66,.84], creature:'octopus'},

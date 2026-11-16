@@ -1,4 +1,4 @@
-import { clamp, createStrip, profileFor, TAU } from './fish-rig.js?v=3.4.1';
+import { clamp, createStrip, profileFor, TAU } from './fish-rig.js?v=3.4.2';
 
 export function randomSource(seed) {
   let state=seed || 0x2f39b7c1;
