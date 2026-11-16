@@ -72,7 +72,8 @@ assert.ok(entrance.every(f=>f.x<0||f.x>world.width));
 for (let tick=0;tick<120;tick++) stepSchool(entrance,world,1/fps);
 assert.ok(entrance.every(f=>f.x>f.width/2*-1 && f.x<world.width+f.width/2));
 assert.equal(new Set(types.map(type=>SPECIES[type].tailHz)).size,4);
-const priorTailTravel={clown:.1378,butterfly:.1009,puffer:.0415,shark:.0969};
+const priorTailTravel={clown:.0625,butterfly:.0443,puffer:.0227,shark:.0493};
+const maxTailTravel={clown:.11,butterfly:.08,puffer:.04,shark:.10};
 const range=values=>Math.max(...values)-Math.min(...values);
 const lateralTravel={};
 for (const type of types) {
@@ -97,7 +98,8 @@ for (const type of types) {
     }
     const tail=range(tailXs), lift=range(tailYs), rear=range(rearXs);
     assert.ok(tail>.02 && tail>5*lift,`${type}: tail motion is not predominantly horizontal`);
-    assert.ok(tail<priorTailTravel[type]*.75,`${type}: tail swing is too large`);
+    assert.ok(tail>priorTailTravel[type]*1.18,`${type}: tail swing did not increase`);
+    assert.ok(tail<maxTailTravel[type],`${type}: tail swing is too large`);
     assert.ok(rear>.004 && rear<tail,`${type}: rear body does not sway gently`);
     if (columns===18) {
       lateralTravel[type]=Object.fromEntries(Object.entries({tail,rear,lift})
@@ -108,22 +110,28 @@ for (const type of types) {
 for (const type of ['jelly','ray','octopus','turtle']) {
   const [,,width,height]=FISH[type].bounds;
   const fish=makeSwimmer({id:'creature-'+type,type},{width,height},world,false);
-  const {mesh,aspect}=fish;
-  const points=new Float32Array(mesh.x.length*4);
-  for (let frame=0;frame<24;frame++) {
-    poseCreature(mesh,type,frame*TAU/24,aspect,1);
-    const axis=mesh.vertical ? mesh.y : mesh.x;
-    assert.ok(axis.every((value,index)=>index===0 || value>axis[index-1]),`${type}: folded mesh`);
-    updatePositions(points,mesh,aspect);
-    assert.ok(points.every(Number.isFinite),`${type}: invalid mesh coordinates`);
-    if (type==='turtle') {
+  const {profile,aspect}=fish;
+  for (const mesh of [fish.mesh,fish.fallbackMesh,createStrip(18,fish.mesh.vertical)]) {
+    const points=new Float32Array(mesh.x.length*4);
+    for (let frame=0;frame<48;frame++) {
+      poseCreature(mesh,profile,frame*TAU/48,aspect,1,1.8);
+      const axis=mesh.vertical ? mesh.y : mesh.x;
+      assert.ok(axis.every((value,index)=>index===0 || value>axis[index-1]),`${type}: folded mesh`);
+      updatePositions(points,mesh,aspect);
+      assert.ok(points.every(Number.isFinite),`${type}: invalid mesh coordinates`);
       for (let i=0;i<mesh.x.length;i++) {
         const u=i/(mesh.x.length-1);
-        if (Math.abs(u-.5)<.28) {
-          assert.ok(mesh.y[i]===0 && Math.abs(mesh.x[i]-(u-.5))<1e-6,'turtle shell should remain steady');
+        if ((type==='turtle' && Math.abs(u-.5)<.28) || (type==='ray' && Math.abs(u-.5)<=.23)) {
+          assert.ok(mesh.y[i]===0 && Math.abs(mesh.x[i]-(u-.5))<1e-6,`${type}: center should remain steady`);
+        }
+        if (type==='octopus' && u<=.43) {
+          assert.ok(mesh.x[i]===0 && mesh.span[i]===1 && Math.abs(mesh.y[i]-(u-.5)*aspect)<1e-6,'octopus head should remain steady');
         }
       }
     }
+    poseCreature(mesh,profile,1,aspect,0,0);
+    assert.ok(mesh.x.every((value,i)=>Math.abs(value-(mesh.vertical ? 0 : i/(mesh.x.length-1)-.5))<1e-6));
+    assert.ok(!mesh.span || mesh.span.every(value=>value===1));
   }
 }
 console.log(JSON.stringify({fishes:40,simulatedSeconds:90,changedTarget:goalChanges.size,

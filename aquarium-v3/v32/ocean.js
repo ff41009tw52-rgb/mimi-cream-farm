@@ -1,6 +1,6 @@
-import { clamp, creatureHeading, dorsalMix, poseCreature, poseStrip } from './fish-rig.js?v=3.4.2';
+import { clamp, creatureHeading, dorsalMix, poseCreature, poseStrip } from './fish-rig.js?v=3.5.2';
 import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js?v=3.4.1';
-import { makeSwimmer, resizeSchool, stepSchool } from './school.js?v=3.4.2';
+import { makeSwimmer, resizeSchool, stepSchool } from './school.js?v=3.5.2';
 import { makeAtmosphere } from './ocean-scene.js';
 import { loadFishImage } from './sample-fish.js?v=3.4.1';
 import { createWaterInteractions } from './water-interactions.js?v=3.4.1';
@@ -58,7 +58,7 @@ export function createOcean(canvas) {
       const greeting=Math.sin(Math.PI*fish.greet/.8);
       const chosenMesh=low || reduced ? null : gpu ? fish.mesh : fish.fallbackMesh;
       if (chosenMesh) {
-        pose.strip=creature ? poseCreature(chosenMesh,creature,fish.phase,fish.aspect,greeting)
+        pose.strip=creature ? poseCreature(chosenMesh,fish.profile,fish.phase,fish.aspect,greeting)
           : poseStrip(chosenMesh,'wave',fish.profile,fish.phase,
             fish.speed/fish.baseSpeed,fish.yaw/fish.profile.turnRate,1+(fish.type==='butterfly' ? greeting*.35 : 0));
         vertices+=chosenMesh.x.length*2;

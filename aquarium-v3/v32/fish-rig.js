@@ -7,14 +7,14 @@ export const smoothstep = (start, end, value) => {
 
 // The original fish face right. Creature templates use their own orientation.
 export const SPECIES = {
-  clown:     {speed:66, width:110, tailHz:1.82, amplitude:.064, hinge:.72, wave:5.3, turnRate:2.08, rise:15, float:2.4, dash:.38},
-  butterfly: {speed:43, width:102, tailHz:1.36, amplitude:.044, hinge:.78, wave:4.9, turnRate:1.68, rise:12, float:2.5, dash:.05},
-  puffer:    {speed:33, width:100, tailHz:1.62, amplitude:.022, hinge:.78, wave:4.6, turnRate:1.52, rise:10, float:5.1, dash:0},
-  shark:     {speed:75, width:174, tailHz:1.08, amplitude:.052, hinge:.75, wave:5.7, turnRate:1.57, rise:8, float:1.35, dash:.02},
-  jelly:     {speed:23, width:68, tailHz:.52, turnRate:.94, rise:19, float:10, dash:0, habitat:[.23,.59], creature:'jelly'},
-  ray:       {speed:47, width:151, tailHz:.63, turnRate:1.25, rise:11, float:3.6, dash:.04, habitat:[.47,.77], creature:'ray'},
-  octopus:   {speed:27, width:116, tailHz:.73, turnRate:1.09, rise:9, float:4.5, dash:0, habitat:[.66,.84], creature:'octopus'},
-  turtle:    {speed:39, width:128, tailHz:.66, turnRate:1.20, rise:10, float:2.2, dash:0, habitat:[.29,.69], creature:'turtle'},
+  clown:     {speed:66, width:110, tailHz:1.82, amplitude:.082, hinge:.72, wave:5.3, turnRate:2.08, rise:15, float:2.4, dash:.38},
+  butterfly: {speed:43, width:102, tailHz:1.36, amplitude:.058, hinge:.78, wave:4.9, turnRate:1.68, rise:12, float:2.5, dash:.05},
+  puffer:    {speed:33, width:100, tailHz:1.62, amplitude:.028, hinge:.78, wave:4.6, turnRate:1.52, rise:10, float:5.1, dash:0},
+  shark:     {speed:75, width:174, tailHz:1.08, amplitude:.075, hinge:.75, wave:5.7, turnRate:1.57, rise:8, float:1.35, dash:.02},
+  jelly:     {speed:23, width:68, tailHz:.52, amplitude:.068, turnRate:.94, rise:19, float:10, dash:0, habitat:[.23,.59], creature:'jelly'},
+  ray:       {speed:47, width:151, tailHz:.63, amplitude:.16, turnRate:1.25, rise:11, float:3.6, dash:.04, habitat:[.47,.77], creature:'ray'},
+  octopus:   {speed:27, width:116, tailHz:.59, amplitude:.12, turnRate:1.09, rise:9, float:4.5, dash:0, habitat:[.66,.84], creature:'octopus'},
+  turtle:    {speed:39, width:128, tailHz:.66, amplitude:.17, turnRate:1.20, rise:10, float:2.2, dash:0, habitat:[.29,.69], creature:'turtle'},
 };
 
 export function profileFor(type) { return SPECIES[type] || SPECIES.clown; }
@@ -24,31 +24,43 @@ export function createStrip(columns,vertical=false) {
     span:vertical ? new Float32Array(columns+1) : null};
 }
 
-export function poseCreature(strip,creature,phase,aspect,greeting=0) {
+// A brief push followed by a longer release.
+export function octopusStroke(phase) {
+  return (.5+.5*Math.cos(phase))**2;
+}
+
+export function poseCreature(strip,{creature,amplitude},phase,aspect,greeting=0,gain=1) {
+  const strength=amplitude*clamp(gain,0,1.8)*(1+.32*greeting);
   const segments=strip.x.length-1;
   for (let i=0;i<=segments;i++) {
     const u=i/segments;
     if (creature==='ray') {
-      const wing=Math.abs(u*2-1);
-      const stroke=Math.sin(phase-wing*1.9);
-      strip.x[i]=(u-.5)*(1-.10*wing*wing*(.5+.5*stroke));
-      strip.y[i]=stroke*wing**2.2*(.10+.048*greeting);
+      // Keep the face steady while the outer fins follow a traveling wave.
+      const wing=smoothstep(.46,1,Math.abs(u*2-1));
+      const stroke=Math.sin(phase-wing*1.45);
+      strip.x[i]=(u-.5)*(1-strength*.66*wing*(.5+.5*stroke));
+      strip.y[i]=strength*wing*stroke;
     } else if (creature==='turtle') {
       // The artwork's shell occupies the middle 56 percent. Flex the flipper tips only.
       const flipper=smoothstep(.57,1,Math.abs(u*2-1));
       const stroke=Math.sin(phase-flipper*.56);
-      strip.x[i]=(u-.5)*(1-flipper*.10*(.5+.5*stroke));
-      strip.y[i]=flipper*stroke*(.12+.06*greeting);
-    } else {
+      strip.x[i]=(u-.5)*(1-strength*.59*flipper*(.5+.5*stroke));
+      strip.y[i]=strength*flipper*stroke;
+    } else if (creature==='jelly') {
       const arms=smoothstep(.36,1,u);
       const wave=Math.sin(phase-u*5);
-      strip.x[i]=wave*arms*(creature==='jelly' ? .047 : .039);
-      strip.y[i]=(u-.5)*aspect+.045*Math.sin(phase)*Math.sin(Math.PI*u)
-        +(creature==='octopus' ? .025*arms*wave : 0);
       const bell=1-smoothstep(.32,.53,u);
-      strip.span[i]=creature==='jelly'
-        ? 1-bell*(.065+.069*Math.sin(phase)+.064*greeting)
-        : 1+arms*(.10*wave+.14*greeting);
+      strip.x[i]=strength*wave*arms;
+      strip.y[i]=aspect*(u-.5+strength*.88*Math.sin(phase)*Math.sin(Math.PI*u));
+      strip.span[i]=1-bell*strength*(1+1.24*Math.sin(phase)+.52*greeting);
+    } else {
+      // The eyes end above this band. Delay the curl along the arms and between sides.
+      const arms=smoothstep(.43,.96,u);
+      const armPhase=phase-2.2*(u-.43);
+      const left=octopusStroke(armPhase+.62), right=octopusStroke(armPhase-.62);
+      strip.x[i]=strength*arms*(left-right)*.42;
+      strip.y[i]=aspect*(u-.5+strength*arms*(.18-.95*octopusStroke(armPhase)));
+      strip.span[i]=1+strength*arms*(.62-left-right);
     }
   }
   return strip;

@@ -1,7 +1,7 @@
 import { createCollection } from '../collection.js';
 import { FISH } from '../templates.js?v=3.4.1';
 import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js?v=3.4.1';
-import { clamp, createStrip, creatureHeading, dorsalMix, poseCreature, poseStrip, profileFor, TAU } from './fish-rig.js?v=3.4.1';
+import { clamp, createStrip, creatureHeading, dorsalMix, poseCreature, poseStrip, profileFor, TAU } from './fish-rig.js?v=3.5.2';
 import { loadFishImage, templateFish } from './sample-fish.js?v=3.4.1';
 
 const $=id=>document.getElementById(id);
@@ -71,7 +71,7 @@ function draw() {
       const mesh=fish.creature==='jelly' || fish.creature==='octopus' ? strips.vertical : strips.wave;
       pose={...base,x:width*(.5+.27*Math.sin(path)),y:height*(.53+.13*Math.cos(path)),
         angle:creatureHeading(fish.creature,heading),dorsal:1,
-        strip:i===2 ? poseCreature(mesh,fish.creature,phase,aspect) : null};
+        strip:i===2 ? poseCreature(mesh,fish,phase,aspect,0,amplitude) : null};
     } else if (i===0) {
       pose={...base,x:width*(.5+.30*Math.sin(path)),y:height*(.54+Math.sin(path*1.35)*.018),angle:0,dorsal:1,
         legacyScale:Math.sign(legacyDirection||1)*(.045+.955*Math.abs(legacyDirection))};

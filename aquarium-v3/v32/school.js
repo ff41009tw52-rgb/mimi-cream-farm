@@ -1,4 +1,4 @@
-import { clamp, createStrip, profileFor, TAU } from './fish-rig.js?v=3.4.2';
+import { clamp, createStrip, octopusStroke, profileFor, TAU } from './fish-rig.js?v=3.5.2';
 
 export function randomSource(seed) {
   let state=seed || 0x2f39b7c1;
@@ -165,7 +165,8 @@ function advance(fish,world,dt) {
   const turning=Math.min(1,Math.abs(turn)/Math.PI);
   const pace=throttle*cruiseWeight+intent.pace*intent.weight;
   const greeting=fish.type==='shark' || profile.creature==='octopus' || profile.creature==='ray' ? fish.greet*.38 : 0;
-  const targetSpeed=fish.baseSpeed*(pace+greeting)*(1-.29*turning)*(1-.25*fish.crowd);
+  const thrust=profile.creature==='octopus' ? .86+.34*octopusStroke(fish.phase-.62) : 1;
+  const targetSpeed=fish.baseSpeed*(pace+greeting)*thrust*(1-.29*turning)*(1-.25*fish.crowd);
   fish.speed+=(targetSpeed-fish.speed)*(1-Math.exp(-(fish.burst>0?3.8:2.1)*dt));
   const verticalInset=insetY*.66;
   const edgeDrift=(Math.max(0,verticalInset-fish.y)-Math.max(0,fish.y-world.height+verticalInset))*.83;
