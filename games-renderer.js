@@ -3,6 +3,20 @@
 
   const homepageFeatures = Object.freeze([
     Object.freeze({
+      id: 'class-aquarium',
+      grades: Object.freeze([]),
+      gradeLabel: '探索天地',
+      category: 'explore',
+      subject: 'science',
+      icon: 'fas fa-fish',
+      title: '班級彩繪水族館',
+      description: '拍攝彩繪著色紙，把畫好的海洋生物放進水族館。',
+      url: 'class-aquarium-v3-scan.html',
+      actionLabel: '開啟拍照掃描',
+      actionIcon: 'fas fa-camera',
+      publishedAt: '2026-11-17T00:00:00+08:00'
+    }),
+    Object.freeze({
       id: 'minan-bird-observation',
       grades: Object.freeze([]),
       gradeLabel: '探索天地',
