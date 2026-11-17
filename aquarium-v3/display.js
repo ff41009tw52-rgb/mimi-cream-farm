@@ -1,11 +1,11 @@
-import { createCollection } from './collection.js';
-import { FISH } from './templates.js?v=3.4.1';
+import { createCollection } from './collection.js?v=3.6.4';
+import { FISH, artworkRevisionFor } from './templates.js?v=3.6.4';
 
 const byId=id=>document.getElementById(id);
 const stage=byId('aquarium');
 const gallery=byId('gallery-dialog');
 const collection=createCollection();
-const {createOcean}=stage.dataset.engine==='v32' ? await import('./v32/ocean.js?v=3.6.3') : await import('./swim.js');
+const {createOcean}=stage.dataset.engine==='v32' ? await import('./v32/ocean.js?v=3.6.4') : await import('./swim.js');
 const ocean=createOcean(byId('water'));
 const current=new Map();
 const testFish=new Map();
@@ -97,7 +97,7 @@ if (testSelect) {
     addTestButton.disabled=clearTestButton.disabled=testSelect.disabled=true;
     status.textContent='正在載入測試生物…';
     try {
-      const {templateFish}=await import('./v32/sample-fish.js?v=3.4.1');
+      const {templateFish}=await import('./v32/sample-fish.js?v=3.6.4');
       const results=await Promise.allSettled(missing.map(async type=>{
         const canvas=await templateFish(type,true);
         const blob=await new Promise((resolve,reject)=>{
@@ -106,7 +106,7 @@ if (testSelect) {
         const id='test-fish-'+type;
         const url=URL.createObjectURL(blob);
         try {
-          await ocean.add({id,type},url,false);
+          await ocean.add({id,type,artworkRevision:artworkRevisionFor(type)},url,false);
           testFish.set(type,id);
         } finally {
           URL.revokeObjectURL(url);

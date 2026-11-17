@@ -88,12 +88,24 @@ export function createCreatureMesh(columns=16,rows=18) {
   return {...topology,grid:true,columns,rows,positions:new Float32Array(topology.uv.length)};
 }
 
+// Locations on the new line art, from the upper curled tips down to the front pair.
+const octopusArms = [
+  [.28,.24,.14,.19],
+  [.43,.40,.13,.16],
+  [.44,.58,.16,.17],
+  [.25,.81,.18,.22],
+];
+
 // All coordinates below refer to the tightly cropped original artwork, not the A4 sheet.
-export function poseCreature(mesh,{creature,amplitude},phase,aspect,greeting=0,gain=1) {
+export function poseCreature(mesh,{creature,amplitude,eightArms},phase,aspect,greeting=0,gain=1) {
   const intensity=clamp(gain,0,1.8)*(1+.32*greeting);
   // Soft saturation limits extreme controls without abruptly clipping a stroke.
   const strength=amplitude*1.25*Math.tanh(intensity/1.25);
   const {uv,positions}=mesh;
+  const armMotion=eightArms ? [-1,1].flatMap(side=>octopusArms.map(([x,y,rx,ry],i)=>{
+    const angle=phase-i*.78+side*.38;
+    return {x:side*x,y,rx,ry,dx:side*.27*Math.sin(angle),dy:.43*Math.cos(angle)};
+  })) : null;
   for (let i=0;i<uv.length;i+=2) {
     const x=uv[i]-.5, v=uv[i+1], side=x<0 ? -1 : 1, ax=Math.abs(x);
     let dx=0,dy=0;
@@ -112,6 +124,15 @@ export function poseCreature(mesh,{creature,amplitude},phase,aspect,greeting=0,g
         +rear*((Math.cos(rearAngle)-1)*rx-Math.sin(rearAngle)*ry);
       dy=front*(Math.sin(frontAngle)*fx+(Math.cos(frontAngle)-1)*fy)
         +rear*(Math.sin(rearAngle)*rx+(Math.cos(rearAngle)-1)*ry);
+    } else if (armMotion) {
+      // Shift each tip in its own phase; compact weights keep the mantle and eyes steady.
+      for (const arm of armMotion) {
+        const d=((x-arm.x)/arm.rx)**2+((v-arm.y)/arm.ry)**2;
+        if (d>=1) continue;
+        const weight=1-smoothstep(.04,1,d);
+        dx+=strength*weight*arm.dx;
+        dy+=strength*aspect*weight*arm.dy;
+      }
     } else if (creature==='octopus') {
       // Upper, sideways and lower arms respond at different phases. No horizontal
       // row is moved as a unit, so the raised arms can curl while the eyes stay together.

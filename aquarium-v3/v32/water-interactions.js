@@ -1,5 +1,6 @@
-import { clamp, TAU } from './fish-rig.js?v=3.6.3';
+import { clamp, TAU } from './fish-rig.js?v=3.6.4';
 import { canvasFishRenderer } from './fish-renderers.js?v=3.6.0';
+import { startGreeting } from './school.js?v=3.6.4';
 
 const ALARM_TIME=3.2;
 const FLEE_TIME=.65;
@@ -32,9 +33,9 @@ export function createWaterInteractions(stage,canvas,getFish) {
     return {x:clamp(event.clientX-rect.left,0,width)/scale,y:clamp(event.clientY-rect.top,0,height)/scale};
   }
 
-  function ring(x,y) {
+  function ring(x,y,fish) {
     if (rings.length>=12) rings.shift();
-    rings.push({x,y,age:0});
+    rings.push({x,y,fish,age:0});
   }
 
   function bubble(x,y,amount) {
@@ -73,8 +74,8 @@ export function createWaterInteractions(stage,canvas,getFish) {
   }
 
   function greet(fish,where) {
-    fish.greet=.8;
-    ring(where.x,where.y);
+    startGreeting(fish,{width:width/scale,height:height/scale});
+    ring(where.x,where.y,fish);
     bubble(where.x,where.y,fish.type==='clown' ? 8 : 6);
   }
 
@@ -148,7 +149,6 @@ export function createWaterInteractions(stage,canvas,getFish) {
     sharks.length=followers.length=0;
     for (const fish of fishes) {
       fish.intent.weight=0;
-      fish.greet=Math.max(0,fish.greet-dt);
       if (fish.type==='shark' && fish.x>0 && fish.x<world.width) sharks.push(fish);
       if (guide && fish.state!=='enter' && guideDistance(fish)<252**2) followers.push(fish);
     }
@@ -196,9 +196,19 @@ export function createWaterInteractions(stage,canvas,getFish) {
       circle(x+drift*age,y-lift*age,radius+age*3);
       ctx.stroke();
     }
-    for (const {x,y,age} of rings) {
-      ctx.globalAlpha=.77*(1-age/.72);
-      circle(x,y,7+age*40);
+    for (const {x,y,age,fish} of rings) {
+      ctx.globalAlpha=.87*(1-age/.72);
+      if (fish) {
+        const pose=fish.pose;
+        const radius=Math.min(90,pose.width/scale*.30)+age*38;
+        ctx.lineWidth=4;
+        circle(pose.x/scale,pose.y/scale,radius);
+        ctx.stroke();
+        ctx.lineWidth=2;
+        circle(pose.x/scale,pose.y/scale,radius+7);
+      } else {
+        circle(x,y,7+age*40);
+      }
       ctx.stroke();
     }
     if (guide) {
@@ -233,6 +243,7 @@ export function createWaterInteractions(stage,canvas,getFish) {
       for (const fish of getFish()) {
         fish.intent.weight=fish.greet=fish.alarmTime=0;
         fish.threat=null;
+        fish.greetingArc=null;
       }
       draw();
     },

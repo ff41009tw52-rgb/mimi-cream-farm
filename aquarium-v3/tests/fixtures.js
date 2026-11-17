@@ -1,4 +1,4 @@
-import { ARTWORK_REVISION, CODES, MARKER_GROUPS, SHEET, fishShape } from '../templates.js?v=3.4.1';
+import { CODES, MARKER_GROUPS, SHEET, artworkRevisionFor, fishShape } from '../templates.js?v=3.6.4';
 import { homography, project } from '../geometry.js';
 
 const a4 = [[0,0],[SHEET.width,0],[SHEET.width,SHEET.height],[0,SHEET.height]];
@@ -26,13 +26,13 @@ export function canvas(width,height) {
   c.width=width; c.height=height;
   return c;
 }
-export async function sourceSheet(type, variant=0, revision=ARTWORK_REVISION) {
+export async function sourceSheet(type, variant=0, revision=artworkRevisionFor(type)) {
   const c = canvas(800, Math.round(SHEET.height)), ctx=c.getContext('2d');
   const {outline,strokeWidth}=fishShape(type,revision);
   const fish=new Path2D(outline);
-  if (revision===ARTWORK_REVISION) {
+  if (revision===artworkRevisionFor(type)) {
     const img = new Image();
-    img.src = new URL('../templates/'+type+'.svg?v=3.4.1',import.meta.url);
+    img.src = new URL('../templates/'+type+'.svg?v=3.6.4',import.meta.url);
     await img.decode();
     ctx.drawImage(img,0,0,c.width,c.height);
   } else {

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { artworkRevisionFor } from '../templates.js';
 import { createRequire } from 'node:module';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -18,7 +19,7 @@ try {
   const suite=await test.evaluate(()=>window.suite());
   const valid=suite.filter(row=>row.expected);
   const invalid=suite.filter(row=>!row.expected);
-  const recognized=valid.filter(row=>row.actual===row.type && row.revision===2);
+  const recognized=valid.filter(row=>row.actual===row.type && row.revision===artworkRevisionFor(row.type));
   const wrong=invalid.filter(row=>!['empty','uncertain'].includes(row.actual));
   const maxError=Math.max(...recognized.map(row=>row.error));
   const maxColor=Math.max(...recognized.map(row=>row.color));

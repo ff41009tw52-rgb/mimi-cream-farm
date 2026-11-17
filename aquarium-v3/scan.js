@@ -1,8 +1,8 @@
-import { createCollection } from './collection.js';
-import { extractFish, manualMap } from './extract.js?v=3.4.3';
+import { createCollection } from './collection.js?v=3.6.4';
+import { extractFish, manualMap } from './extract.js?v=3.6.4';
 import { PaperGate } from './paper-gate.js?v=3.1.2';
-import { ARTWORK_REVISION, FISH, SHEET, fishShape } from './templates.js?v=3.4.1';
-import { paperFingerprint } from './detect.js?v=3.4.1';
+import { FISH, OCTOPUS_REVISION, SHEET, artworkRevisionFor, fishShape } from './templates.js?v=3.6.4';
+import { paperFingerprint } from './detect.js?v=3.6.4';
 
 const byId = id => document.getElementById(id);
 const video = byId('camera');
@@ -211,7 +211,7 @@ function drawFrame(target, source, width, height, max=cameraFrameLimit) {
 }
 function classify(source,previous) {
   if (!worker) {
-    worker = new Worker(new URL('./scan-worker.js?v=3.4.1',import.meta.url),{type:'module'});
+    worker = new Worker(new URL('./scan-worker.js?v=3.6.4',import.meta.url),{type:'module'});
     worker.onmessage = ({data}) => {
       const request = workerRequest;
       workerRequest = undefined;
@@ -242,8 +242,8 @@ function classify(source,previous) {
     worker.postMessage({frame,previous:compatiblePrevious},[frame.data.buffer]);
   });
 }
-async function save(blob,type,{paper,showRemoval=Boolean(paper)}={}) {
-  await collection.add(blob,type);
+async function save(blob,type,{revision,paper,showRemoval=Boolean(paper)}={}) {
+  await collection.add(blob,type,revision);
   const waitForRemoval=Boolean(paper && paper.session===cameraRevision);
   if (waitForRemoval) gate.latch(paper);
   saved++;
@@ -266,7 +266,7 @@ async function saveDetection(frame,{result,scaleX,scaleY,w,h},source,session) {
   const blob=await extractFish(frame,type,map,{scaleX,scaleY,revision});
   if (source==='camera' && session!==cameraRevision) return;
   const paper=source==='camera' ? {map,type,revision,signature,w,h,session} : undefined;
-  await save(blob,type,{paper,showRemoval:source!=='file'});
+  await save(blob,type,{revision,paper,showRemoval:source!=='file'});
 }
 
 async function tick() {
@@ -382,8 +382,7 @@ function showManual(frame,source,session) {
   const x=(photo.width-w)/2,y=(photo.height-h)/2;
   manual={frame,source,session,version:0,points:[[x,y],[x+w,y],[x+w,y+h],[x,y+h]]};
   species.value='';
-  templateVersion.value=String(ARTWORK_REVISION);
-  templateVersion.querySelector('[value="1"]').disabled=false;
+  updateTemplateVersions();
   byId('manual-info').textContent='請選擇魚形，並將定位點對到紙上的方格。';
   drawHandles();
   gate.resetStability();
@@ -478,7 +477,7 @@ byId('send').onclick=async () => {
       const signature=paperFingerprint(analysisContext.getImageData(0,0,w,h),{type,map,revision});
       paper={map,type,revision,signature,w,h,session:item.session};
     }
-    await save(blob,type,{paper,showRemoval:item.source!=='file'});
+    await save(blob,type,{revision,paper,showRemoval:item.source!=='file'});
     dialog.close();
   } catch (error) {
     byId('manual-info').textContent=error.message || '無法儲存作品，請再試一次。';
@@ -497,10 +496,18 @@ dialog.addEventListener('close',()=>{
 });
 byId('close-manual').onclick=()=>dialog.close();
 byId('preview').onclick=preview;
-species.onchange=()=>{
+function updateTemplateVersions() {
+  const type=species.value;
+  const current=templateVersion.querySelector('[value="2"]');
   const original=templateVersion.querySelector('[value="1"]');
-  original.disabled=Boolean(species.value && !fishShape(species.value,1));
-  if (original.disabled) templateVersion.value=String(ARTWORK_REVISION);
+  const eightArms=templateVersion.querySelector(`[value="${OCTOPUS_REVISION}"]`);
+  current.textContent=type==='octopus' ? '舊版章魚著色紙' : '新版插圖';
+  original.disabled=Boolean(type && !fishShape(type,1));
+  eightArms.hidden=eightArms.disabled=type!=='octopus';
+  templateVersion.value=String(artworkRevisionFor(type));
+}
+species.onchange=()=>{
+  updateTemplateVersions();
   invalidatePreview();
 };
 templateVersion.onchange=invalidatePreview;

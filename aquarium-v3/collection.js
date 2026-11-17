@@ -64,8 +64,8 @@ export function createCollection() {
         req.onsuccess = () => result(req.result.sort((a,b) => a.createdAt-b.createdAt || a.id.localeCompare(b.id)));
       });
     },
-    add(blob,type) {
-      const record = {id:crypto.randomUUID(),blob,type,createdAt:Date.now()};
+    add(blob,type,artworkRevision) {
+      const record = {id:crypto.randomUUID(),blob,type,createdAt:Date.now(),artworkRevision};
       return write((table,result,abort) => {
         const count = table.count();
         count.onsuccess = () => {

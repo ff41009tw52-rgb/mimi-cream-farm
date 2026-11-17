@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { detectSheet } from '../detect.js';
-import { ARTWORK_REVISION, FISH, SHEET } from '../templates.js';
+import { FISH, SHEET, artworkRevisionFor } from '../templates.js';
 import { distance, project } from '../geometry.js';
 import { paints, scenarios, scene } from './fixtures.js';
 
@@ -59,7 +59,7 @@ for (const [index,type] of Object.keys(FISH).entries()) {
 if (process.env.METRICS_PATH) writeFileSync(process.env.METRICS_PATH, JSON.stringify(metrics,null,2));
 const good = metrics.filter(m => m.actual===m.expected);
 const rejects = metrics.filter(m => m.expected==='reject');
-const failures = metrics.filter(m => m.expected==='reject' ? FISH[m.actual] : m.actual!==m.expected || m.revision!==ARTWORK_REVISION || m.error>3);
+const failures = metrics.filter(m => m.expected==='reject' ? FISH[m.actual] : m.actual!==m.expected || m.revision!==artworkRevisionFor(m.type) || m.error>3);
 console.log(JSON.stringify({
   accepted:good.length, valid:metrics.length-rejects.length,
   rejected:rejects.filter(m => !FISH[m.actual]).length, invalid:rejects.length,

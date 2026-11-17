@@ -1,4 +1,5 @@
-import { clamp, createCreatureMesh, createStrip, octopusStroke, profileFor, TAU } from './fish-rig.js?v=3.6.3';
+import { clamp, createCreatureMesh, createStrip, octopusStroke, profileFor, TAU } from './fish-rig.js?v=3.6.4';
+import { OCTOPUS_REVISION } from '../templates.js?v=3.6.4';
 
 export function randomSource(seed) {
   let state=seed || 0x2f39b7c1;
@@ -48,7 +49,9 @@ function chooseTarget(fish,world) {
 
 export function makeSwimmer(record, image, world, fresh) {
   const random=randomSource(seedFor(record.id));
-  const profile=profileFor(record.type);
+  const baseProfile=profileFor(record.type);
+  const profile=record.type==='octopus' && record.artworkRevision===OCTOPUS_REVISION
+    ? {...baseProfile,eightArms:true} : baseProfile;
   const depth=.08+random()*.90;
   const width=profile.width*(.72+.44*depth)*(.94+.13*random());
   const aspect=(image.naturalHeight||image.height)/(image.naturalWidth||image.width);
@@ -65,7 +68,7 @@ export function makeSwimmer(record, image, world, fresh) {
     floatPhase:random()*TAU,age:0,state:fresh?'enter':'cruise',burst:0,
     paceTarget:.83+.33*random(),decisionAge:.6+random()*3.8,
     avoidX:0,avoidY:0,driftX:0,driftY:0,crowd:0,
-    greet:0,alarmTime:0,threat:null,intent:{x:0,y:0,weight:0,pace:1},
+    greet:0,greetingArc:null,alarmTime:0,threat:null,intent:{x:0,y:0,weight:0,pace:1},
     mesh:profile.creature ? createCreatureMesh(depth>.52 ? 16 : 12,depth>.52 ? 18 : 14) : createStrip(depth>.52?18:10,vertical),
     fallbackMesh:profile.creature ? createCreatureMesh(8,10) : createStrip(depth>.61 ? 12 : 7,vertical),
     pose:{id:record.id,image,aspect},
@@ -124,7 +127,43 @@ function separate(fishes) {
   }
 }
 
+const greetingDuration=1.35;
+
+export function startGreeting(fish,world) {
+  if (fish.greetingArc || !fish.baseSpeed) return;
+  const inset=Math.min(fish.width*.55+12,world.width*.2);
+  const left=inset, right=world.width-inset;
+  let direction=Math.cos(fish.angle)<0 ? -1 : 1;
+  const distance=Math.min(world.width*.24,clamp(fish.baseSpeed*1.65,64,136));
+  if ((direction>0 ? right-fish.x : fish.x-left)<distance*.55) direction*=-1;
+  const heightInset=Math.min(fish.width*fish.aspect*.56+20,world.height*.23);
+  const roomAbove=fish.y-heightInset, roomBelow=world.height-heightInset-fish.y;
+  const rise=clamp(distance*.43,25,56);
+  const lift=roomAbove>=rise ? -rise : Math.max(0,Math.min(rise,roomBelow));
+  fish.greetingArc={elapsed:0,x:fish.x,y:fish.y,
+    travel:clamp(fish.x+direction*distance,left,right)-fish.x,lift};
+  fish.greet=.8;
+}
+
+function advanceGreeting(fish,dt) {
+  const arc=fish.greetingArc;
+  arc.elapsed+=dt;
+  const t=Math.min(1,arc.elapsed/greetingDuration);
+  fish.x=arc.x+arc.travel*t;
+  fish.y=arc.y+arc.lift*Math.sin(Math.PI*t)**2;
+  const heading=Math.atan2(arc.lift*Math.PI*Math.sin(TAU*t),arc.travel);
+  fish.yaw=clamp(angleDelta(heading,fish.angle)*3,-2.8,2.8);
+  fish.angle=angleDelta(fish.angle+fish.yaw*dt,0);
+  fish.phase=(fish.phase+TAU*fish.profile.tailHz*1.32*dt)%TAU;
+  fish.greet=.8*(1-t);
+  if (t===1) fish.greetingArc=null;
+}
+
 function advance(fish,world,dt) {
+  if (fish.greetingArc) {
+    advanceGreeting(fish,dt);
+    return;
+  }
   const {profile, random}=fish;
   fish.age+=dt;
   fish.targetAge-=dt;
@@ -165,11 +204,10 @@ function advance(fish,world,dt) {
   const throttle=fish.state==='enter' ? 1.16 : fish.burst>0 ? 1.46 : fish.paceTarget;
   const turning=Math.min(1,Math.abs(turn)/Math.PI);
   const pace=throttle*cruiseWeight+intent.pace*intent.weight;
-  const greeting=fish.type==='shark' || profile.creature==='octopus' || profile.creature==='ray' ? fish.greet*.38 : 0;
   const thrust=profile.creature==='octopus' ? .86+.34*octopusStroke(fish.phase-.62)
     : profile.creature==='jelly' ? .84+.40*octopusStroke(fish.phase-.35)
     : profile.creature==='turtle' ? .94+.12*octopusStroke(fish.phase-.4) : 1;
-  const targetSpeed=fish.baseSpeed*(pace+greeting)*thrust*(1-.29*turning)*(1-.25*fish.crowd);
+  const targetSpeed=fish.baseSpeed*pace*thrust*(1-.29*turning)*(1-.25*fish.crowd);
   fish.speed+=(targetSpeed-fish.speed)*(1-Math.exp(-(fish.burst>0?3.8:2.1)*dt));
   const verticalInset=insetY*.66;
   const edgeDrift=(Math.max(0,verticalInset-fish.y)-Math.max(0,fish.y-world.height+verticalInset))*.83;
@@ -193,5 +231,11 @@ export function resizeSchool(fishes,previous,next) {
     fish.y*=sy;
     fish.goalX*=sx;
     fish.goalY*=sy;
+    if (fish.greetingArc) {
+      fish.greetingArc.x*=sx;
+      fish.greetingArc.y*=sy;
+      fish.greetingArc.travel*=sx;
+      fish.greetingArc.lift*=sy;
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { FISH, SHEET } from '../templates.js?v=3.4.1';
+import { FISH, SHEET } from '../templates.js?v=3.6.4';
 
 export async function loadFishImage(url) {
   const image=new Image();

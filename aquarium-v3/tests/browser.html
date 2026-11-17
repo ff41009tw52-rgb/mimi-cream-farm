@@ -6,11 +6,11 @@
   <pre id="results" role="status"></pre>
 </main>
 <script type="module">
-import { detectSheet } from '../detect.js?v=3.1.0';
-import { extractFish } from '../extract.js?v=3.1.0';
+import { detectSheet } from '../detect.js?v=3.6.4';
+import { extractFish } from '../extract.js?v=3.6.4';
 import { distance, project } from '../geometry.js';
-import { ARTWORK_REVISION, FISH, fishShape } from '../templates.js?v=3.1.0';
-import { canvas, paints, scenarios, scene, sourceSheet } from './fixtures.js?v=3.1.0';
+import { FISH, artworkRevisionFor, fishShape } from '../templates.js?v=3.6.4';
+import { canvas, paints, scenarios, scene, sourceSheet } from './fixtures.js?v=3.6.4';
 
 window.suite = async () => {
   const tests=[];
@@ -55,7 +55,7 @@ window.suite = async () => {
 };
 window.legacySuite = async () => {
   const outcomes=[];
-  for (const [index,type] of Object.keys(FISH).entries()) {
+  for (const [index,type] of Object.keys(FISH).filter(type=>fishShape(type,1)).entries()) {
     const sheet=await sourceSheet(type,index,1);
     const {c}=scene(sheet,scenarios.trapezoid);
     const hit=detectSheet(c.getContext('2d').getImageData(0,0,c.width,c.height));
@@ -75,7 +75,7 @@ window.legacySuite = async () => {
   }
   return outcomes;
 };
-window.fixture = async (type,name,revision=ARTWORK_REVISION) => {
+window.fixture = async (type,name,revision=artworkRevisionFor(type)) => {
   const sheet=await sourceSheet(type,Object.keys(FISH).indexOf(type),revision);
   return scene(sheet,scenarios[name]).c.toDataURL('image/jpeg',.86).split(',')[1];
 };

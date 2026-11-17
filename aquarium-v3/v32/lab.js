@@ -1,8 +1,8 @@
-import { createCollection } from '../collection.js';
-import { FISH } from '../templates.js?v=3.4.1';
+import { createCollection } from '../collection.js?v=3.6.4';
+import { FISH, OCTOPUS_REVISION } from '../templates.js?v=3.6.4';
 import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js?v=3.6.0';
-import { clamp, createCreatureMesh, createStrip, creatureHeading, dorsalMix, poseCreature, poseCreatureLegacy, poseStrip, profileFor, TAU } from './fish-rig.js?v=3.6.0';
-import { loadFishImage, templateFish } from './sample-fish.js?v=3.4.1';
+import { clamp, createCreatureMesh, createStrip, creatureHeading, dorsalMix, poseCreature, poseCreatureLegacy, poseStrip, profileFor, TAU } from './fish-rig.js?v=3.6.4';
+import { loadFishImage, templateFish } from './sample-fish.js?v=3.6.4';
 
 const $=id=>document.getElementById(id);
 const controls=Object.fromEntries(['speed','frequency','amplitude','bend','turn','size'].map(key=>[key,$(key)]));
@@ -57,7 +57,10 @@ for (const {canvas} of renderers) observer.observe(canvas.parentElement);
 
 function draw() {
   if (!image) return;
-  const fish=profileFor(species.value);
+  const profile=profileFor(species.value);
+  const record=savedImages.get(artwork.value);
+  const eightArms=species.value==='octopus' && (record ? record.artworkRevision===OCTOPUS_REVISION : artwork.value!=='file');
+  const fish=eightArms ? {...profile,eightArms} : profile;
   $('original-title').textContent=fish.creature ? 'A. 原圖平移' : 'A. V3.1.2';
   $('original-note').textContent=fish.creature ? '保留原圖形狀，作為動作比較基準。' : '整張 PNG 移動，在折返時縮窄並翻向。';
   $('baseline-title').textContent=fish.creature ? 'B. 上一版整列擺動' : 'B. 2D 骨架擺尾';

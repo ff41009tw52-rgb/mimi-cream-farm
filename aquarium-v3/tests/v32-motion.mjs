@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { FISH } from '../templates.js';
-import { angleDelta, makeSwimmer, stepSchool } from '../v32/school.js';
+import { FISH, OCTOPUS_REVISION } from '../templates.js';
+import { angleDelta, makeSwimmer, startGreeting, stepSchool } from '../v32/school.js';
 import { SPECIES, createCreatureMesh, createStrip, poseCreature, poseStrip, updatePositions, TAU } from '../v32/fish-rig.js';
 
 const world={width:960,height:540};
@@ -158,6 +158,49 @@ for (const type of ['jelly','ray','octopus','turtle']) {
   }
   if(type==='ray') assert.ok(travels[2]<1e-6 && travels[3]<1e-6,'ray eyes should stay still');
   creatureTravel[type]=travels.map(t=>Number((100*t).toFixed(2)));
+}
+
+// Every species describes a curved greeting, then resumes autonomous swimming.
+for (const type of Object.keys(FISH)) {
+  const [,,width,height]=FISH[type].bounds;
+  const fish=makeSwimmer({id:'greeting-'+type,type},{width,height},world,false);
+  fish.x=world.width/2;
+  fish.y=world.height/2;
+  startGreeting(fish,world);
+  const startX=fish.x, startY=fish.y;
+  const arc=fish.greetingArc;
+  startGreeting(fish,world);
+  assert.equal(fish.greetingArc,arc,'repeat taps should not restart a moving arc');
+  for (let i=0;i<40;i++) stepSchool([fish],world,1/60);
+  assert.ok(Math.abs(fish.y-startY)>24,`${type}: greeting should visibly curve`);
+  for (let i=0;i<41;i++) stepSchool([fish],world,1/60);
+  assert.equal(fish.greetingArc,null);
+  assert.ok(Math.abs(fish.x-startX)>=64 && Math.abs(fish.y-startY)<1e-6);
+  const endX=fish.x;
+  stepSchool([fish],world,1/60);
+  assert.ok(Math.abs(fish.x-endX)<4,`${type}: jumped after greeting`);
+}
+
+const [,,octopusWidth,octopusHeight]=FISH.octopus.bounds;
+const octopus=makeSwimmer({id:'eight-arms',type:'octopus',artworkRevision:OCTOPUS_REVISION},
+  {width:octopusWidth,height:octopusHeight},world,false);
+assert.equal(octopus.profile.eightArms,true);
+const eightTips=[.28,.43,.44,.25].flatMap((x,i)=>[-1,1].map(side=>[.5+x*side,[.24,.40,.58,.81][i]]));
+for (const uv of [...eightTips,[.5,.22]]) {
+  const probe={uv:new Float32Array(uv),positions:new Float32Array(2)};
+  const heights=Array.from({length:48},(_,i)=>poseCreature(probe,octopus.profile,i*TAU/48,octopus.aspect).positions[1]);
+  if (uv[0]===.5) assert.equal(range(heights),0,'mantle remains stable');
+  else assert.ok(range(heights)>.035,'all eight tip regions move visibly');
+}
+const octopusMesh=createCreatureMesh();
+for (let frame=0;frame<96;frame++) {
+  const {indices,positions}=poseCreature(octopusMesh,octopus.profile,frame*TAU/96,octopus.aspect,1,1.8);
+  for (let k=0;k<indices.length;k+=3) {
+    const a=indices[k]*2,b=indices[k+1]*2,c=indices[k+2]*2;
+    const area=(positions[b]-positions[a])*(positions[c+1]-positions[a+1])
+      -(positions[c]-positions[a])*(positions[b+1]-positions[a+1]);
+    assert.ok(area>0,'new octopus mesh must not fold');
+  }
 }
 
 console.log(JSON.stringify({fishes:40,simulatedSeconds:90,changedTarget:goalChanges.size,
