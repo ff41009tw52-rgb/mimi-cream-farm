@@ -1,4 +1,5 @@
-import { clamp, TAU } from './fish-rig.js';
+import { clamp, TAU } from './fish-rig.js?v=3.6.3';
+import { canvasFishRenderer } from './fish-renderers.js?v=3.6.0';
 
 const ALARM_TIME=3.2;
 const FLEE_TIME=.65;
@@ -11,23 +12,18 @@ function steer(fish,dx,dy,weight,pace) {
   fish.intent.pace=pace;
 }
 
-function hitFish(fishes,x,y) {
-  for (let i=fishes.length-1;i>=0;i--) {
-    const fish=fishes[i], {pose}=fish;
-    if (!pose.width) continue;
-    const dx=x-pose.x, dy=y-pose.y;
-    const cos=Math.cos(pose.angle), sin=Math.sin(pose.angle);
-    const u=(dx*cos+dy*sin)/Math.max(17,pose.width*.48);
-    const v=(dy*cos-dx*sin)/Math.max(13,pose.width*pose.aspect*.45);
-    if (u*u+v*v<=1) return fish;
-  }
-  return null;
-}
 
 export function createWaterInteractions(stage,canvas,getFish) {
   const ctx=canvas.getContext('2d');
   const hint=stage.querySelector('#water-hint');
-  const pellets=[], bubbles=[], rings=[], sharks=[], followers=[], groups=new Map();
+  // Sample only around the pointer, using the same artwork and pose as the display.
+  const pickRadius=4;
+  const pickSize=2*pickRadius+1;
+  const pickCanvas=document.createElement('canvas');
+  const pickContext=pickCanvas.getContext('2d',{alpha:true,willReadFrequently:true});
+  const picker=canvasFishRenderer(pickCanvas);
+  picker.resize(pickSize,pickSize,1);
+  const bubbles=[], rings=[], sharks=[], followers=[], groups=new Map();
   let width=1,height=1,scale=1,resolution=1,visible=false,enabled=true;
   let gesture=null,guide=null;
 
@@ -49,33 +45,50 @@ export function createWaterInteractions(stage,canvas,getFish) {
     }
   }
 
-  function dropFood(where) {
-    const x=clamp(where.x,width*.08/scale,width*.92/scale);
-    const y=clamp(where.y,height*.1/scale,height*.76/scale);
-    if (pellets.length>24) pellets.splice(0,pellets.length-24);
-    for (let i=0;i<6;i++) {
-      pellets.push({x:x+(i-2.5)*12,y:y-4-i%3*11,age:0,phase:i*1.6,radius:4+i%3*.6});
+  function hitFish(x,y) {
+    const fishes=getFish();
+    let nearest=null;
+    let bestDistance=pickRadius**2+1;
+    for (let i=fishes.length-1;i>=0;i--) {
+      const fish=fishes[i], {pose}=fish;
+      if (!pose.width) continue;
+      const dx=x-pose.x, dy=y-pose.y;
+      const cos=Math.cos(pose.angle), sin=Math.sin(pose.angle);
+      const bodyX=dx*cos+dy*sin, bodyY=dy*cos-dx*sin;
+      if (Math.abs(bodyX)>pose.width*.70+pickRadius ||
+          Math.abs(bodyY)>pose.width*(pose.aspect*.60+.15)+pickRadius) continue;
+      picker.draw([{...pose,x:pickSize/2-dx,y:pickSize/2-dy}]);
+      const {data}=pickContext.getImageData(0,0,pickSize,pickSize);
+      const center=pickRadius*pickSize+pickRadius;
+      if (data[center*4+3]>=32) return fish;
+      // Prefer a direct hit, even through a transparent part of a foreground fish.
+      for (let row=0;row<pickSize;row++) for (let col=0;col<pickSize;col++) {
+        const distance=(row-pickRadius)**2+(col-pickRadius)**2;
+        if (distance>=bestDistance || data[(row*pickSize+col)*4+3]<32) continue;
+        nearest=fish;
+        bestDistance=distance;
+      }
     }
-    ring(where.x,where.y);
+    return nearest;
   }
 
-  function greet(fish) {
+  function greet(fish,where) {
     fish.greet=.8;
-    const x=fish.pose.x/scale+(fish.profile.creature ? 0 : Math.cos(fish.angle)*fish.width*.4);
-    const y=fish.pose.y/scale+(fish.profile.creature ? -fish.width*fish.aspect*.26 : Math.sin(fish.angle)*fish.width*.4);
-    bubble(x,y,fish.type==='clown' ? 8 : 4);
+    ring(where.x,where.y);
+    bubble(where.x,where.y,fish.type==='clown' ? 8 : 6);
   }
 
   stage.addEventListener('pointerdown',event=>{
     if (!enabled || gesture || event.button!==0 || !event.isPrimary || event.target.closest('header,dialog,button,a')) return;
     const start=point(event);
-    gesture={id:event.pointerId,...start,fish:hitFish(getFish(),start.x*scale,start.y*scale)};
+    gesture={id:event.pointerId,...start,fish:hitFish(start.x*scale,start.y*scale)};
     stage.setPointerCapture(event.pointerId);
   });
   stage.addEventListener('pointermove',event=>{
     if (gesture?.id!==event.pointerId) return;
     const where=point(event);
-    if (!guide && Math.hypot(where.x-gesture.x,where.y-gesture.y)*scale<12) return;
+    const dragThreshold=event.pointerType==='touch' ? 16 : 12;
+    if (!guide && Math.hypot(where.x-gesture.x,where.y-gesture.y)*scale<dragThreshold) return;
     if (!guide || Math.hypot(where.x-guide.trailX,where.y-guide.trailY)>24) {
       bubble(where.x,where.y,2);
       guide={...where,trailX:where.x,trailY:where.y};
@@ -89,20 +102,13 @@ export function createWaterInteractions(stage,canvas,getFish) {
     if (event.type==='pointerup') {
       const where=point(event);
       if (guide) ring(guide.x,guide.y);
-      else if (gesture.fish && getFish().includes(gesture.fish)) greet(gesture.fish);
-      else dropFood(where);
+      else if (gesture.fish && getFish().includes(gesture.fish)) greet(gesture.fish,where);
     }
     gesture=guide=null;
   }
   stage.addEventListener('pointerup',finish);
   stage.addEventListener('pointercancel',finish);
   stage.addEventListener('lostpointercapture',finish);
-  stage.addEventListener('keydown',event=>{
-    if (!enabled || event.target!==stage || event.repeat || (event.key!=='Enter' && event.key!==' ')) return;
-    event.preventDefault();
-    dropFood({x:width*.5/scale,y:height*.45/scale});
-  });
-
   function updateAlarm(fish,dt) {
     let threat=null, nearest=Infinity;
     if (fish.type!=='shark' && fish.state!=='enter') {
@@ -130,46 +136,18 @@ export function createWaterInteractions(stage,canvas,getFish) {
     group.count++;
   }
 
-  function forage(fish) {
-    if (fish.feedRest>0) return false;
-    let target=null, best=(fish.type==='shark' ? 184 : 234)**2;
-    const noticeDelay=.13+fish.depth*.65;
-    for (const pellet of pellets) {
-      if (pellet.eaten || pellet.age<noticeDelay) continue;
-      const distance=(pellet.x-fish.x)**2+(pellet.y-fish.y)**2;
-      if (distance<best) { target=pellet; best=distance; }
-    }
-    if (!target) return false;
-    const dx=target.x-fish.x, dy=target.y-fish.y;
-    const length=Math.sqrt(best);
-    const mouthDistance=Math.hypot(dx-Math.cos(fish.angle)*fish.width*.34,dy-Math.sin(fish.angle)*fish.width*.34);
-    if (mouthDistance<19 || length<17) {
-      target.eaten=true;
-      fish.feedRest=1.4+fish.depth*1.6;
-      bubble(target.x,target.y,2);
-      return false;
-    }
-    steer(fish,dx,dy,.94,length>70 ? 1.53 : .84);
-    return true;
-  }
-
   function step(dt,world) {
-    for (const pellet of pellets) {
-      pellet.age+=dt;
-      pellet.x+=Math.sin(pellet.age*1.9+pellet.phase)*7*dt;
-      pellet.y=Math.min(world.height*.86,pellet.y+11*dt);
-    }
-    for (const list of [pellets,bubbles,rings]) for (let i=list.length-1;i>=0;i--) {
-      const item=list[i];
-      if (list!==pellets) item.age+=dt;
-      if (item.eaten || item.age>(list===pellets ? 7.2 : list===bubbles ? 1.35 : .72)) list.splice(i,1);
+    for (const [list,lifetime] of [[bubbles,1.35],[rings,.72]]) {
+      for (let i=list.length-1;i>=0;i--) {
+        list[i].age+=dt;
+        if (list[i].age>lifetime) list.splice(i,1);
+      }
     }
     const fishes=getFish();
     groups.clear();
     sharks.length=followers.length=0;
     for (const fish of fishes) {
       fish.intent.weight=0;
-      fish.feedRest=Math.max(0,fish.feedRest-dt);
       fish.greet=Math.max(0,fish.greet-dt);
       if (fish.type==='shark' && fish.x>0 && fish.x<world.width) sharks.push(fish);
       if (guide && fish.state!=='enter' && guideDistance(fish)<252**2) followers.push(fish);
@@ -188,7 +166,7 @@ export function createWaterInteractions(stage,canvas,getFish) {
         const dx=guide.x-fish.x, dy=guide.y-fish.y;
         const distance=Math.hypot(dx,dy);
         steer(fish,dx,dy,clamp(distance/55,.2,.94),distance>80 ? 1.66 : .78);
-      } else if (!pellets.length || !forage(fish)) {
+      } else {
         const group=groups.get(fish.threat);
         if (group?.count>1) {
           const dx=group.x/group.count-fish.x, dy=group.y/group.count-fish.y;
@@ -206,21 +184,11 @@ export function createWaterInteractions(stage,canvas,getFish) {
   }
 
   function draw() {
-    const active=Boolean(guide || pellets.length || bubbles.length || rings.length);
+    const active=Boolean(guide || bubbles.length || rings.length);
     if (!active && !visible) return;
     visible=active;
     ctx.setTransform(resolution*scale,0,0,resolution*scale,0,0);
     ctx.clearRect(0,0,width/scale,height/scale);
-    for (const pellet of pellets) {
-      if (pellet.eaten) continue;
-      ctx.globalAlpha=clamp((7.2-pellet.age)*2,0,1);
-      circle(pellet.x,pellet.y,pellet.radius);
-      ctx.fillStyle='#ffd589';
-      ctx.fill();
-      ctx.strokeStyle='#5e623d';
-      ctx.lineWidth=1.2;
-      ctx.stroke();
-    }
     ctx.lineWidth=2.2;
     ctx.strokeStyle='#d4fff7';
     for (const {x,y,age,drift,lift,radius} of bubbles) {
@@ -261,7 +229,7 @@ export function createWaterInteractions(stage,canvas,getFish) {
       hint.hidden=!value;
       if (value) return;
       gesture=guide=null;
-      pellets.length=bubbles.length=rings.length=0;
+      bubbles.length=rings.length=0;
       for (const fish of getFish()) {
         fish.intent.weight=fish.greet=fish.alarmTime=0;
         fish.threat=null;

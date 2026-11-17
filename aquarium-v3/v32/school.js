@@ -1,4 +1,4 @@
-import { clamp, createCreatureMesh, createStrip, octopusStroke, profileFor, TAU } from './fish-rig.js?v=3.6.0';
+import { clamp, createCreatureMesh, createStrip, octopusStroke, profileFor, TAU } from './fish-rig.js?v=3.6.3';
 
 export function randomSource(seed) {
   let state=seed || 0x2f39b7c1;
@@ -65,7 +65,7 @@ export function makeSwimmer(record, image, world, fresh) {
     floatPhase:random()*TAU,age:0,state:fresh?'enter':'cruise',burst:0,
     paceTarget:.83+.33*random(),decisionAge:.6+random()*3.8,
     avoidX:0,avoidY:0,driftX:0,driftY:0,crowd:0,
-    greet:0,feedRest:0,alarmTime:0,threat:null,intent:{x:0,y:0,weight:0,pace:1},
+    greet:0,alarmTime:0,threat:null,intent:{x:0,y:0,weight:0,pace:1},
     mesh:profile.creature ? createCreatureMesh(depth>.52 ? 16 : 12,depth>.52 ? 18 : 14) : createStrip(depth>.52?18:10,vertical),
     fallbackMesh:profile.creature ? createCreatureMesh(8,10) : createStrip(depth>.61 ? 12 : 7,vertical),
     pose:{id:record.id,image,aspect},
@@ -105,7 +105,7 @@ function separate(fishes) {
         const strength=(1-closest)*depthWeight;
         const awayX=closest>.004 ? closeX/closest : 0;
         const awayY=closest>.004 ? closeY/closest : (i%2 ? 1 : -1);
-        const driftX=awayX*strength*69, driftY=awayY*strength*114;
+        const driftX=awayX*strength*69, driftY=awayY*strength*145;
         a.driftX+=driftX; b.driftX-=driftX;
         a.driftY+=driftY; b.driftY-=driftY;
       }

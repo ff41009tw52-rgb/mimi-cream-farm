@@ -5,13 +5,18 @@ import { angleDelta, makeSwimmer, stepSchool } from '../v32/school.js';
 import { SPECIES, createCreatureMesh, createStrip, poseCreature, poseStrip, updatePositions, TAU } from '../v32/fish-rig.js';
 
 const world={width:960,height:540};
-const previousWidths={clown:91,butterfly:84,puffer:82,shark:108};
-const types=Object.keys(previousWidths);
+const types=['clown','butterfly','puffer','shark'];
+const previousWidths={clown:110,puffer:100,jelly:68,octopus:116};
 const sameDepthWidths=Object.fromEntries(Object.keys(FISH).map(type=>{
   const [,,width,height]=FISH[type].bounds;
   const fish=makeSwimmer({id:'size-reference',type},{width,height},world,false);
   assert.equal(fish.aspect,height/width,`${type}: resizing changed the artwork proportions`);
-  if (type in previousWidths) assert.ok(SPECIES[type].width/previousWidths[type]>=1.18,`${type}: size did not increase by at least 18%`);
+  if (type==='clown' || type==='puffer') {
+    assert.ok(SPECIES[type].width<previousWidths[type],`${type}: size should decrease`);
+  }
+  if (type==='jelly' || type==='octopus') {
+    assert.ok(SPECIES[type].width>previousWidths[type],`${type}: size should increase`);
+  }
   return [type,fish.width];
 }));
 const sharkToClown=sameDepthWidths.shark/sameDepthWidths.clown;
@@ -25,7 +30,7 @@ const silhouetteAreas=Object.fromEntries(Object.entries(sameDepthWidths).map(([t
   return [type,Math.abs(signedDoubleArea)*.5*(width/sourceWidth)**2];
 }));
 const sharkToClownArea=silhouetteAreas.shark/silhouetteAreas.clown;
-assert.ok(sharkToClownArea>=1.05 && sharkToClownArea<=1.25,`shark to clown silhouette ratio ${sharkToClownArea}`);
+assert.ok(sharkToClownArea>=1.05 && sharkToClownArea<=1.65,`shark to clown silhouette ratio ${sharkToClownArea}`);
 for (const type of ['shark','ray','turtle']) {
   assert.ok(silhouetteAreas[type]>silhouetteAreas.butterfly,`${type}: large species silhouette is smaller than a butterflyfish`);
 }

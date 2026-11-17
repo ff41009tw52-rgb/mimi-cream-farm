@@ -7,13 +7,13 @@ export const smoothstep = (start, end, value) => {
 
 // The original fish face right. Creature templates use their own orientation.
 export const SPECIES = {
-  clown:     {speed:66, width:110, tailHz:1.82, amplitude:.09, hinge:.72, wave:5.3, beat:.15, turnRate:2.08, rise:15, float:2.4, dash:.38},
+  clown:     {speed:66, width:94, tailHz:1.82, amplitude:.09, hinge:.72, wave:5.3, beat:.15, turnRate:2.08, rise:15, float:2.4, dash:.38},
   butterfly: {speed:43, width:102, tailHz:1.36, amplitude:.065, hinge:.78, wave:4.9, beat:.06, turnRate:1.68, rise:12, float:2.5, dash:.05},
-  puffer:    {speed:33, width:100, tailHz:1.62, amplitude:.032, hinge:.78, wave:4.6, beat:.20, turnRate:1.52, rise:10, float:5.1, dash:0},
+  puffer:    {speed:33, width:86, tailHz:1.62, amplitude:.032, hinge:.78, wave:4.6, beat:.20, turnRate:1.52, rise:10, float:5.1, dash:0},
   shark:     {speed:75, width:174, tailHz:1.08, amplitude:.084, hinge:.75, wave:5.7, beat:.025, turnRate:1.57, rise:8, float:1.35, dash:.02},
-  jelly:     {speed:23, width:68, tailHz:.52, amplitude:.068, turnRate:.94, rise:19, float:10, dash:0, habitat:[.23,.59], creature:'jelly'},
+  jelly:     {speed:23, width:88, tailHz:.52, amplitude:.068, turnRate:.94, rise:19, float:10, dash:0, habitat:[.23,.59], creature:'jelly'},
   ray:       {speed:47, width:151, tailHz:.63, amplitude:.16, turnRate:1.25, rise:11, float:3.6, dash:.04, habitat:[.47,.77], creature:'ray'},
-  octopus:   {speed:27, width:116, tailHz:.59, amplitude:.12, turnRate:1.09, rise:9, float:4.5, dash:0, habitat:[.66,.84], creature:'octopus'},
+  octopus:   {speed:27, width:140, tailHz:.59, amplitude:.12, turnRate:1.09, rise:9, float:4.5, dash:0, habitat:[.66,.84], creature:'octopus'},
   turtle:    {speed:39, width:128, tailHz:.66, amplitude:.17, turnRate:1.20, rise:10, float:2.2, dash:0, habitat:[.29,.69], creature:'turtle'},
 };
 
