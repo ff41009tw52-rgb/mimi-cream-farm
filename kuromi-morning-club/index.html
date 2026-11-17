@@ -331,7 +331,7 @@
     const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
     const defaults = {
       nickname: '寶貝',
-      wakeTime: '08:00',
+      wakeTime: '10:00',
       reward: '專屬驚喜禮物',
       description: '這份驚喜就等妳來拆啦。集滿 20 點，記得來領走喔！',
       note: '咳，才沒有一直在等妳起床呢。只是想說，今天有沒有拿到點數，妳都很可愛 ♡',
@@ -371,6 +371,7 @@
 
     function sanitize(value) {
       const data = value && typeof value === 'object' ? value : {};
+      const hadPreviousDefault = data.wakeTime === '08:00' && data.wakeTimeConfigured !== true;
       const checkins = new Map();
       const records = Array.isArray(data.checkins) ? data.checkins.filter(record =>
         record && validDay(record.day) && ['onTime', 'late'].includes(record.type)).slice(-3000) : [];
@@ -384,7 +385,8 @@
       }
       return {
         nickname: String(data.nickname || defaults.nickname).slice(0, 12),
-        wakeTime: /^([01]\d|2[0-3]):[0-5]\d$/.test(data.wakeTime) ? data.wakeTime : defaults.wakeTime,
+        wakeTime: !hadPreviousDefault && /^([01]\d|2[0-3]):[0-5]\d$/.test(data.wakeTime) ? data.wakeTime : defaults.wakeTime,
+        wakeTimeConfigured: data.wakeTimeConfigured === true,
         reward: String(data.reward || defaults.reward).slice(0, 35),
         description: String(data.description || defaults.description).slice(0, 100),
         note: String(data.note || defaults.note).slice(0, 160),
@@ -674,6 +676,7 @@
       const settings = {
         nickname: $('inputName').value.trim() || defaults.nickname,
         wakeTime: $('inputWake').value,
+        wakeTimeConfigured: true,
         reward: $('inputReward').value.trim() || defaults.reward,
         description: $('inputDesc').value.trim() || defaults.description,
         note: $('inputNote').value.trim() || defaults.note
