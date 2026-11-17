@@ -43,7 +43,7 @@
     .hero h1 { margin: 0; font-size: clamp(34px, 6vw, 58px); font-weight: 900; letter-spacing: -.035em; line-height: 1.13; }
     .hero h1 span { display: block; color: #ffc8e7; overflow-wrap: anywhere; }
     .hero p { margin: 15px 0 0; max-width: 26em; color: #f4e0f3; font-size: 14px; line-height: 1.82; }
-    .hero strong { color: #ffd1e9; font-weight: 850; }
+    .hero strong { color: #ffd1e9; font-weight: 850; white-space: nowrap; }
     .hero-art { position: relative; z-index: 0; display: grid; width: min(100%, 345px); height: 242px; place-items: center; justify-self: center; }
     .hero-art::before { content: ""; position: absolute; inset: 3% 4%; border: 1px solid #e9befa52; border-radius: 50%; background: radial-gradient(ellipse, #dbb7f5, #a873cea3 65%, #9e60bd34 90%); transform: rotate(-10deg); }
     .hero-art iframe, .hero-art img { width: min(100%, 267px); height: min(100%, 242px); position: relative; z-index: 1; }
@@ -94,7 +94,8 @@
     .reward-card { background: linear-gradient(160deg, #fffdfd 55%, #f9effc); }
     .reward-inner { display: flex; align-items: center; gap: 13px; padding: 10px; margin-bottom: 13px; border: 1px solid #eadcf0; border-radius: 14px; background: #f7eefb; }
     .reward-art { position: relative; overflow: hidden; flex: none; width: 84px; height: 84px; border-radius: 12px; display: grid; place-items: center; background: #f0dcf5; }
-    .reward-art iframe { width: 100%; height: 100%; }
+    /* GIPHY's player needs a minimum viewport of 150 px to show the full sticker. */
+    .reward-art iframe { position: absolute; inset: 0 auto auto 0; width: 168px; height: 168px; transform: scale(.5); transform-origin: top left; }
     .reward-art .still-icon { font-size: 25px; color: #7f478f; }
     .reward-meta { min-width: 0; overflow-wrap: anywhere; }
     .reward-meta h3 { margin: 0 0 4px; font-size: 17px; }
@@ -161,6 +162,12 @@
       .card { padding: 17px 16px; }
       .time-help { min-height: 0; }
       .stamp { min-height: 43px; }
+    }
+    @media (max-width: 460px) {
+      .hero-art iframe { position: absolute; inset: 50% auto auto 50%; width: 166px; height: 166px; transform: translate(-50%, -50%) scale(.79); }
+    }
+    @media (max-width: 370px) {
+      .hero-art iframe { transform: translate(-50%, -50%) scale(.67); }
     }
     @media (max-width: 345px) {
       .app { padding-inline: 10px; }
