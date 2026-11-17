@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f2fc">
+  <meta name="description" content="酷洛米主題的早起小任務。每天準時打卡拿 1 點，集滿 20 點就能換一份專屬驚喜。">
+  <meta name="robots" content="noindex, nofollow">
+  <title>早安小惡魔俱樂部 ♡</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #251b35;
+      --muted: #695976;
+      --accent: #694496;
+      --line: #e8dcef;
+      --paper: #fffdfd;
+      --plum: #3b254e;
+      --pink: #ffe0ef;
+      --shadow: 0 8px 28px #4224550c;
+      font-family: "Nunito", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+      color: var(--ink);
+      background: #f7f2fc;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; min-width: 280px; min-height: 100svh; background: radial-gradient(ellipse at 92% 4%, #fee5f4 0, transparent 35rem), #f7f2fc; }
+    button, input, textarea { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: default; }
+    :focus-visible { outline: 3px solid #955bc7; outline-offset: 3px; }
+    a { color: inherit; }
+    .app { width: min(1050px, 100%); margin: auto; padding: 20px 26px 42px; }
+    .masthead { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 19px; }
+    .brand { display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; font-size: 15px; font-weight: 850; }
+    .brand-icon { display: grid; width: 36px; height: 36px; flex: none; place-items: center; border: 1px solid #ffe1f1; border-radius: 11px; background: #32213f; color: #ffd8ee; font-size: 19px; }
+    .control { min-height: 41px; padding: 8px 14px; border: 1px solid #ddcce9; border-radius: 11px; background: var(--paper); color: #553675; font-weight: 750; font-size: 13px; }
+    .control:hover { background: #f3e9fa; }
+    .settings-btn { border-radius: 999px; white-space: nowrap; }
+
+    .hero { position: relative; isolation: isolate; display: grid; grid-template-columns: minmax(0, 1.17fr) minmax(0, 1fr); align-items: center; column-gap: 22px; min-height: 288px; padding: 24px clamp(25px, 5vw, 57px); overflow: hidden; border-radius: 25px; color: #fff9fe; background: radial-gradient(ellipse at 79% 58%, #673e83 0, #452954 34%, transparent 62%), #291b36; box-shadow: 0 12px 34px #351d4524; }
+    .hero-copy { z-index: 1; padding-block: 8px; }
+    .hero h1 { margin: 0; font-size: clamp(34px, 6vw, 58px); font-weight: 900; letter-spacing: -.035em; line-height: 1.13; }
+    .hero h1 span { display: block; color: #ffc8e7; overflow-wrap: anywhere; }
+    .hero p { margin: 15px 0 0; max-width: 26em; color: #f4e0f3; font-size: 14px; line-height: 1.82; }
+    .hero strong { color: #ffd1e9; font-weight: 850; }
+    .hero-art { position: relative; z-index: 0; display: grid; width: min(100%, 345px); height: 242px; place-items: center; justify-self: center; }
+    .hero-art::before { content: ""; position: absolute; inset: 3% 4%; border: 1px solid #e9befa52; border-radius: 50%; background: radial-gradient(ellipse, #dbb7f5, #a873cea3 65%, #9e60bd34 90%); transform: rotate(-10deg); }
+    .hero-art iframe, .hero-art img { width: min(100%, 267px); height: min(100%, 242px); position: relative; z-index: 1; }
+    .hero-art img { object-fit: contain; }
+    iframe { display: block; border: 0; }
+    .star { position: absolute; z-index: 2; line-height: 1; color: #ffcce7; pointer-events: none; }
+    .star-left { left: 6%; bottom: 18%; font-size: 27px; }
+    .star-right { right: 5%; top: 11%; font-size: 37px; }
+    .star-little { right: 14%; bottom: 7%; font-size: 15px; }
+    .still-icon { position: relative; z-index: 1; color: #352247; font-size: clamp(39px, 8vw, 85px); }
+    .hero-art:has(img:not([hidden])) .still-icon { display: none; }
+    .hero-art:has(iframe[src]) .still-icon,
+    .reward-art:has(iframe[src]) .still-icon { display: none; }
+
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 17px; margin-top: 20px; align-items: start; }
+    .card { min-width: 0; padding: 21px 23px; border-radius: 21px; border: 1px solid var(--line); background: var(--paper); box-shadow: var(--shadow); }
+    .card-title { display: flex; justify-content: space-between; align-items: center; gap: 9px; margin-bottom: 15px; }
+    .card-title h2, .history-title { margin: 0; font-size: 19px; line-height: 1.3; }
+    .title-icon { display: inline-grid; width: 30px; height: 30px; place-items: center; margin-right: 5px; border-radius: 8px; color: #714993; background: #f1e6fa; font-size: 16px; vertical-align: middle; }
+    .card-note { color: var(--muted); font-size: 12px; font-weight: 700; text-align: right; white-space: nowrap; }
+    .today-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .clock { display: flex; align-items: baseline; gap: 9px; min-width: 0; white-space: nowrap; }
+    .clock strong { font-size: clamp(40px, 6vw, 57px); letter-spacing: -.06em; line-height: 1.04; font-variant-numeric: tabular-nums; }
+    .clock small, .time-help { color: var(--muted); font-weight: 650; }
+    .status-pill { border-radius: 999px; padding: 6px 9px; background: #f0e5fa; color: #593b78; font-size: 12px; font-weight: 850; white-space: nowrap; }
+    .status-pill.success { background: #ddf6e9; color: #27624f; }
+    .status-pill.late { background: #f8e5ef; color: #7d3c5e; }
+    .time-help { margin: 11px 0 14px; min-height: 2.95em; font-size: 13px; line-height: 1.55; }
+    .primary { display: block; width: 100%; min-height: 47px; padding: 10px 14px; border: 1px solid #4b2e60; border-radius: 12px; background: #593974; color: #fff7ff; font-size: 14px; font-weight: 850; box-shadow: 0 3px 0 #38234a; }
+    .primary:not(:disabled):hover { background: #68438a; }
+    .primary:not(:disabled):active { transform: translateY(2px); box-shadow: 0 1px 0 #38234a; }
+    .primary:disabled { background: #f0e7f5; border-color: #eadff1; color: #71617d; box-shadow: none; }
+    .soft-line { border: 0; border-top: 1px dashed #e0cfe8; margin: 18px 0 14px; }
+    .mini-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; text-align: center; }
+    .stat { padding: 6px; border-radius: 10px; background: #f8f1fc; }
+    .stat strong { display: block; font-size: 21px; line-height: 1.2; }
+    .stat span { color: var(--muted); font-size: 11px; font-weight: 700; }
+    .progress-summary { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+    .points-main { white-space: nowrap; font-size: 20px; color: #725f81; font-weight: 800; }
+    .points-main strong { color: var(--ink); font-size: 42px; line-height: .95; letter-spacing: -.06em; }
+    .progress-bar { height: 8px; overflow: hidden; margin-bottom: 13px; border-radius: 999px; background: #eee4f6; }
+    .progress-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #8755c0, #dd6daf); transition: width .32s ease; }
+    .stamp-board { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px; margin: 0; padding: 0; list-style: none; }
+    .stamp { position: relative; display: grid; min-height: 41px; place-items: center; border: 1px dashed #dfcbe9; border-radius: 9px; background: #fbf7fd; color: #836d94; font-size: 17px; line-height: 1; }
+    .stamp.filled { border: 1px solid #e7a0c8; background: #ffdeef; color: #9b3a72; }
+    .stamp b { position: absolute; right: 5px; bottom: 4px; font-size: 9px; color: inherit; }
+
+    .reward-card { background: linear-gradient(160deg, #fffdfd 55%, #f9effc); }
+    .reward-inner { display: flex; align-items: center; gap: 13px; padding: 10px; margin-bottom: 13px; border: 1px solid #eadcf0; border-radius: 14px; background: #f7eefb; }
+    .reward-art { position: relative; overflow: hidden; flex: none; width: 84px; height: 84px; border-radius: 12px; display: grid; place-items: center; background: #f0dcf5; }
+    .reward-art iframe { width: 100%; height: 100%; }
+    .reward-art .still-icon { font-size: 25px; color: #7f478f; }
+    .reward-meta { min-width: 0; overflow-wrap: anywhere; }
+    .reward-meta h3 { margin: 0 0 4px; font-size: 17px; }
+    .reward-meta p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+    .love-note { margin: 13px 0 0; padding: 10px 12px; background: #ffedf7; color: #742c5e; border: 1px dashed #ecbad7; border-radius: 11px; font-size: 13px; font-weight: 650; line-height: 1.6; overflow-wrap: anywhere; }
+    .love-note span { margin-right: 4px; }
+    .calendar-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; margin: 0; padding: 0; list-style: none; text-align: center; }
+    .weekday { display: block; margin-bottom: 5px; color: var(--muted); font-size: 11px; font-weight: 750; }
+    .bubble { display: grid; min-height: 35px; place-items: center; border: 1px solid #efe3f6; border-radius: 8px; background: #faf3fc; color: #715b82; font-size: 12px; font-weight: 800; }
+    .day.hit .bubble { background: #ffdeef; color: #9b3a72; border-color: #e7a0c8; font-size: 16px; }
+    .day.missed .bubble { background: #eee8f0; }
+    .day.today .bubble { outline: 2px solid #a574bf; outline-offset: -2px; }
+    .calendar-note { margin: 10px 0 0; color: var(--muted); font-size: 11px; }
+    .history-title { margin-bottom: 9px; font-size: 15px; }
+    .history-list { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; }
+    .history-item { min-width: 0; display: flex; align-items: center; gap: 8px; padding: 7px; border-radius: 9px; background: #f9f4fc; }
+    .history-icon { display: grid; width: 28px; height: 28px; place-items: center; flex: none; border-radius: 7px; background: #ffe4f1; color: #9a3970; }
+    .history-item b, .history-item small { display: block; overflow-wrap: anywhere; }
+    .history-item b { font-size: 12px; }
+    .history-item small { color: var(--muted); margin-top: 1px; font-size: 11px; }
+    .delta { color: #884169; margin-left: auto; white-space: nowrap; font-size: 13px; font-weight: 850; }
+    .history-empty { padding: 8px 0; color: var(--muted); font-size: 13px; }
+    .foot { margin-top: 23px; color: var(--muted); text-align: center; font-size: 11px; line-height: 1.9; }
+    .foot p { margin: 2px 0; }
+    .foot a { text-underline-offset: 2px; }
+
+    dialog { width: min(440px, calc(100% - 24px)); max-height: calc(100dvh - 24px); padding: 0; border: 0; border-radius: 19px; color: var(--ink); box-shadow: 0 23px 90px #28183c66; }
+    dialog::backdrop { background: #25172f9c; }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 15px 19px; background: var(--plum); color: white; }
+    .modal-head h2 { margin: 0; font-size: 18px; }
+    .close { width: 36px; height: 36px; border: 0; border-radius: 50%; background: #ffffff26; color: white; font-size: 22px; line-height: 1; }
+    .modal-body { padding: 17px 19px 21px; }
+    .field { margin-bottom: 13px; }
+    .field label { display: block; margin-bottom: 5px; font-size: 13px; font-weight: 850; }
+    .field input, .field textarea { display: block; width: 100%; min-height: 43px; padding: 8px 10px; border: 1px solid #dbc9e7; border-radius: 9px; background: #fcf8fd; color: var(--ink); font-size: 16px; }
+    .field textarea { resize: vertical; }
+    .field small, .setting-hint { display: block; margin: 5px 0 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .setting-hint { margin: 0 0 11px; }
+    .setting-actions, .modal-bottom { display: flex; flex-wrap: wrap; gap: 7px; }
+    .modal-bottom button { flex: 1; }
+    .danger { color: #9b305b; border-color: #edc7d9; }
+    #removeSticker { margin-top: 7px; }
+    .confirm-copy { margin: 0 0 15px; font-size: 14px; line-height: 1.7; overflow-wrap: anywhere; }
+    .toast { position: fixed; z-index: 10; left: 50%; bottom: 17px; transform: translate(-50%, 9px); width: max-content; max-width: min(90vw, 440px); padding: 10px 16px; border-radius: 12px; background: #35224a; color: white; font-size: 13px; font-weight: 750; text-align: center; pointer-events: none; opacity: 0; transition: .18s ease; }
+    .toast.show { transform: translate(-50%, 0); opacity: 1; }
+    .confetti { position: fixed; top: 0; z-index: 5; width: 8px; height: 12px; pointer-events: none; animation: fall 1.15s ease-in forwards; }
+    @keyframes fall {
+      from { opacity: 1; transform: translateY(-22px); }
+      to { opacity: 0; transform: translate(var(--drift), 97vh) rotate(var(--spin)); }
+    }
+    .noscript { color: #792c51; text-align: center; }
+
+    @media (max-width: 700px) {
+      .app { padding: 14px 14px 30px; }
+      .masthead { margin-bottom: 13px; }
+      .hero { min-height: 239px; padding: 15px 20px; column-gap: 5px; grid-template-columns: minmax(0, 1.22fr) minmax(0, .9fr); }
+      .hero h1 { font-size: clamp(30px, 6.5vw, 43px); }
+      .hero p { margin-top: 11px; font-size: 13px; line-height: 1.65; }
+      .hero-art { width: 100%; height: min(42vw, 206px); }
+      .hero-art::before { inset: 2% -9%; }
+      .star-left { left: 0; bottom: 6%; font-size: 20px; }
+      .star-right { right: 0; top: 0; font-size: 26px; }
+      .cards { grid-template-columns: 1fr; gap: 12px; margin-top: 14px; }
+      .card { padding: 17px 16px; }
+      .time-help { min-height: 0; }
+      .stamp { min-height: 43px; }
+    }
+    @media (max-width: 345px) {
+      .app { padding-inline: 10px; }
+      .hero { padding-inline: 13px; }
+      .hero h1 { font-size: 28px; }
+      .brand { font-size: 13px; }
+      .clock { gap: 5px; }
+      .card { padding-inline: 12px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="masthead">
+      <a class="brand" href="#top"><span class="brand-icon" aria-hidden="true">☾</span>早安小惡魔俱樂部</a>
+      <button id="openSettings" class="control settings-btn" type="button">設定時間與獎品</button>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="heroTitle">
+        <div class="hero-copy">
+          <h1 id="heroTitle">起床啦，<span><b id="heroName">寶貝</b>！</span></h1>
+          <p>哼，棉被再香也沒有獎品香吧？準時打卡拿 <strong>1 點</strong>，集滿 <strong>20 點</strong>，就把驚喜帶回家 ♡</p>
+        </div>
+        <div class="hero-art">
+          <span class="star star-left" aria-hidden="true">✦</span>
+          <span class="star star-right" aria-hidden="true">✧</span>
+          <span class="star star-little" aria-hidden="true">✦</span>
+          <span class="still-icon" aria-hidden="true">♥</span>
+          <iframe id="mascot" data-src="https://giphy.com/embed/fYT608LmfWloq08a5n" title="酷洛米和巴庫 · Sanrio Korea via GIPHY" referrerpolicy="no-referrer" tabindex="-1" hidden></iframe>
+          <img id="customSticker" alt="自訂封面貼圖" hidden>
+        </div>
+      </section>
+
+      <div class="cards">
+        <section class="card" aria-labelledby="todayTitle">
+          <div class="card-title">
+            <h2 id="todayTitle"><span class="title-icon" aria-hidden="true">☀</span>早安打卡</h2>
+            <span class="card-note" id="todayDate"></span>
+          </div>
+          <div class="today-top">
+            <div class="clock"><strong id="currentClock">--:--</strong><small>台灣時間</small></div>
+            <span id="statusBadge" class="status-pill">準備打卡</span>
+          </div>
+          <p id="timeHelp" class="time-help">準時起床就有一顆愛心等著妳。</p>
+          <button class="primary" id="checkinBtn" type="button" disabled>我起床啦！收下 1 點 ♡</button>
+          <hr class="soft-line">
+          <div class="mini-stats">
+            <div class="stat"><strong id="totalOnTime">0</strong><span>累計早起天數</span></div>
+            <div class="stat"><strong id="streakCount">0</strong><span>連續早起天數</span></div>
+            <div class="stat"><strong id="redeemCount">0</strong><span>已兌獎次數</span></div>
+          </div>
+        </section>
+        <section class="card" aria-labelledby="pointsTitle">
+          <div class="card-title">
+            <h2 id="pointsTitle"><span class="title-icon" aria-hidden="true">♥</span>愛心集點卡</h2>
+          </div>
+          <div class="progress-summary">
+            <div class="points-main"><strong id="progressPoints">0</strong> / 20</div>
+            <div class="card-note">可用 <b id="availablePoints">0</b> 點<br><span id="pointsNeed">再 20 點就能換禮物</span></div>
+          </div>
+          <div class="progress-bar" id="progressBar" role="progressbar" aria-label="集點進度" aria-valuemin="0" aria-valuemax="20" aria-valuenow="0">
+            <div class="progress-fill" id="progressFill" style="width:0%"></div>
+          </div>
+          <ol class="stamp-board" id="stampBoard" aria-label="20 格集點卡"></ol>
+        </section>
+        <section class="card reward-card" aria-labelledby="rewardTitle">
+          <div class="card-title">
+            <h2 id="rewardTitle"><span class="title-icon" aria-hidden="true">✦</span>我的獎品</h2>
+            <span class="card-note">20 點／次</span>
+          </div>
+          <div class="reward-inner">
+            <div class="reward-art">
+              <span class="still-icon" aria-hidden="true">♥</span>
+              <iframe id="rewardSticker" data-src="https://giphy.com/embed/vWogB2TzWRruIQzRBt" title="酷洛米的愛心表情貼圖 · Sanrio via GIPHY" loading="lazy" referrerpolicy="no-referrer" tabindex="-1" hidden></iframe>
+            </div>
+            <div class="reward-meta"><h3 id="rewardName">專屬驚喜禮物</h3><p id="rewardDescription"></p></div>
+          </div>
+          <button class="primary" id="redeemBtn" type="button" disabled>再攢一點就能換 ♡</button>
+          <p class="love-note"><span aria-hidden="true">♡</span><span id="loveNote"></span></p>
+        </section>
+        <section class="card" aria-labelledby="weekTitle">
+          <div class="card-title">
+            <h2 id="weekTitle"><span class="title-icon" aria-hidden="true">☾</span>本週早起日記</h2>
+            <span class="card-note" id="weekRange"></span>
+          </div>
+          <ol class="calendar-row" id="calendar" aria-label="本週打卡紀錄"></ol>
+          <p class="calendar-note">♥ 代表準時打卡。晚起也可以留紀錄，點數照樣留著。</p>
+          <hr class="soft-line">
+          <h3 class="history-title">最近的紀錄</h3>
+          <ol id="history" class="history-list"></ol>
+        </section>
+      </div>
+    </main>
+
+    <footer class="foot">
+      <p>點數和設定存在目前的瀏覽器。換手機前，記得到設定匯出備份 ♡</p>
+      <p>個人粉絲作品。酷洛米貼圖由
+        <a href="https://giphy.com/stickers/SanrioKorea-sanrio-korea-kuromi-fYT608LmfWloq08a5n" target="_blank" rel="noopener noreferrer">Sanrio Korea</a> 與
+        <a href="https://giphy.com/stickers/sanrioinc-sanrio-expressions-kuromi-vWogB2TzWRruIQzRBt" target="_blank" rel="noopener noreferrer">Sanrio</a>
+        發布，via GIPHY。角色權利歸 Sanrio Co., Ltd. 所有。
+      </p>
+    </footer>
+  </div>
+
+  <dialog id="settingsDialog" aria-labelledby="settingsTitle" aria-describedby="settingHint">
+    <div class="modal-head"><h2 id="settingsTitle">我的早起設定 ♡</h2><button type="button" class="close" data-close="settingsDialog" aria-label="關閉設定">×</button></div>
+    <div class="modal-body">
+      <form id="settingsForm">
+        <div class="field"><label for="inputName">要叫妳什麼？</label><input id="inputName" maxlength="12" placeholder="寶貝" required></div>
+        <div class="field"><label for="inputWake">每天打卡截止時間</label><input id="inputWake" type="time" required><small>用台灣時間算，截止時間的整分鐘都可以打卡。每天最多拿 1 點。</small></div>
+        <div class="field"><label for="inputReward">20 點要換什麼？</label><input id="inputReward" maxlength="35" placeholder="一頓浪漫約會" required></div>
+        <div class="field"><label for="inputDesc">獎品介紹</label><textarea id="inputDesc" rows="2" maxlength="100"></textarea></div>
+        <div class="field"><label for="inputNote">想偷偷跟妳說的話</label><textarea id="inputNote" rows="3" maxlength="160"></textarea></div>
+        <div class="field">
+          <label for="inputSticker">自訂封面貼圖（選填）</label>
+          <input type="file" id="inputSticker" accept="image/png,image/jpeg,image/webp,image/gif">
+          <small>也可以用自己的照片或貼圖當封面，只存在這個瀏覽器。</small>
+          <button type="button" id="removeSticker" class="control" hidden>換回酷洛米貼圖</button>
+        </div>
+        <button class="primary" type="submit">存好囉 ♡</button>
+      </form>
+      <hr class="soft-line">
+      <p class="setting-hint" id="settingHint">點數只存在這個瀏覽器。換裝置前先存一份備份喔。手動補點適合補登，早起天數照打卡紀錄算。</p>
+      <div class="setting-actions">
+        <button id="demoAdd" class="control" type="button">補 1 點</button>
+        <button id="demoRemove" class="control" type="button">扣 1 點</button>
+        <button id="exportBtn" class="control" type="button">匯出備份</button>
+        <button id="chooseImport" class="control" type="button">匯入備份</button>
+        <input type="file" id="importFile" accept="application/json,.json" hidden>
+        <button id="resetBtn" class="control danger" type="button">清空紀錄</button>
+      </div>
+    </div>
+    <p class="toast" id="settingsToast" role="status"></p>
+  </dialog>
+
+  <dialog id="confirmDialog" aria-labelledby="confirmTitle">
+    <div class="modal-head"><h2 id="confirmTitle">換獎品囉 ♡</h2><button type="button" class="close" data-close="confirmDialog" aria-label="關閉兌獎視窗">×</button></div>
+    <div class="modal-body">
+      <p class="confirm-copy">用 <b>20 點</b> 換走「<b id="confirmReward"></b>」嗎？確認後會扣掉 20 點，並記到早起日記裡。</p>
+      <div class="modal-bottom">
+        <button type="button" class="control" data-close="confirmDialog" autofocus>再等等</button>
+        <button type="button" class="primary" id="confirmRedeem">就換這個 ♡</button>
+      </div>
+    </div>
+    <p class="toast" id="confirmToast" role="status"></p>
+  </dialog>
+  <p class="toast" id="toast" role="status"></p>
+  <noscript><p class="noscript">請啟用 JavaScript，愛心集點卡才會動起來喔。</p></noscript>
+  <script>
+  (() => {
+    'use strict';
+
+    const KEY = 'little-devil-morning-club-v1';
+    const TZ = 'Asia/Taipei';
+    const REWARD_COST = 20;
+    const DAY_MS = 86400000;
+    const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
+    const defaults = {
+      nickname: '寶貝',
+      wakeTime: '08:00',
+      reward: '專屬驚喜禮物',
+      description: '這份驚喜就等妳來拆啦。集滿 20 點，記得來領走喔！',
+      note: '咳，才沒有一直在等妳起床呢。只是想說，今天有沒有拿到點數，妳都很可愛 ♡',
+      sticker: '',
+      points: 0,
+      checkins: [],
+      redemptions: [],
+      adjustments: []
+    };
+    const $ = id => document.getElementById(id);
+    const pad = value => String(value).padStart(2, '0');
+    const localDay = date => date.toISOString().slice(0, 10);
+    const dateFromDay = day => new Date(day + 'T12:00:00+08:00');
+    const dayLabel = day => Number(day.slice(5, 7)) + '/' + Number(day.slice(8));
+    const clockFormat = new Intl.DateTimeFormat('en-US', {
+      timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+    });
+    const historyFormat = new Intl.DateTimeFormat('zh-TW', {
+      timeZone: TZ, month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+    });
+    const motion = matchMedia('(prefers-reduced-motion: reduce)');
+
+    function nowInTaipei(date = new Date()) {
+      const parts = Object.fromEntries(clockFormat.formatToParts(date).map(item => [item.type, item.value]));
+      return { day: parts.year + '-' + parts.month + '-' + parts.day, hour: +parts.hour, minute: +parts.minute };
+    }
+
+    function validDay(day) {
+      return typeof day === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(day) &&
+        Number.isFinite(+dateFromDay(day)) && localDay(dateFromDay(day)) === day;
+    }
+
+    function validTime(at) {
+      return typeof at === 'string' && Number.isFinite(Date.parse(at));
+    }
+
+    function sanitize(value) {
+      const data = value && typeof value === 'object' ? value : {};
+      const checkins = new Map();
+      const records = Array.isArray(data.checkins) ? data.checkins.filter(record =>
+        record && validDay(record.day) && ['onTime', 'late'].includes(record.type)).slice(-3000) : [];
+      for (const record of records) {
+        if (checkins.has(record.day)) continue;
+        checkins.set(record.day, {
+          day: record.day,
+          type: record.type,
+          at: validTime(record.at) ? record.at : record.day + 'T00:00:00+08:00'
+        });
+      }
+      return {
+        nickname: String(data.nickname || defaults.nickname).slice(0, 12),
+        wakeTime: /^([01]\d|2[0-3]):[0-5]\d$/.test(data.wakeTime) ? data.wakeTime : defaults.wakeTime,
+        reward: String(data.reward || defaults.reward).slice(0, 35),
+        description: String(data.description || defaults.description).slice(0, 100),
+        note: String(data.note || defaults.note).slice(0, 160),
+        sticker: typeof data.sticker === 'string' && data.sticker.length < 1000000 &&
+          /^data:image\/(png|jpeg|webp);base64,[a-z0-9+/]+={0,2}$/i.test(data.sticker) ? data.sticker : '',
+        points: Number.isSafeInteger(data.points) && data.points >= 0 ? data.points : 0,
+        checkins: [...checkins.values()],
+        redemptions: Array.isArray(data.redemptions) ? data.redemptions.filter(record =>
+          record && validTime(record.at)).slice(-3000).map(record =>
+          ({ at: record.at, reward: String(record.reward || '小驚喜').slice(0, 35) })) : [],
+        adjustments: Array.isArray(data.adjustments) ? data.adjustments.filter(record =>
+          record && validTime(record.at) && Number.isSafeInteger(record.delta)).slice(-3000).map(record =>
+          ({ at: record.at, delta: record.delta })) : []
+      };
+    }
+
+    function load() {
+      try { return sanitize(JSON.parse(localStorage.getItem(KEY))); }
+      catch { return sanitize(null); }
+    }
+
+    let state = load();
+    let toastHandle;
+    let previousDay = '';
+
+    function toast(message) {
+      const target = $('settingsDialog').open ? $('settingsToast') : $('confirmDialog').open ? $('confirmToast') : $('toast');
+      document.querySelectorAll('.toast.show').forEach(element => element.classList.remove('show'));
+      target.textContent = message;
+      target.classList.add('show');
+      clearTimeout(toastHandle);
+      toastHandle = setTimeout(() => target.classList.remove('show'), 3200);
+    }
+
+    async function changeState(change) {
+      const write = () => {
+        const next = load();
+        if (change(next) === false) {
+          state = next;
+          render();
+          return false;
+        }
+        try {
+          localStorage.setItem(KEY, JSON.stringify(next));
+        } catch {
+          toast('剛剛沒存成功，請確認瀏覽器還能儲存資料，再試一次喔。');
+          return false;
+        }
+        state = next;
+        render();
+        return true;
+      };
+
+      return navigator.locks ? navigator.locks.request(KEY, write) : write();
+    }
+
+    function confetti() {
+      if (motion.matches) return;
+      const colors = ['#f687bf', '#b78ae5', '#fff7ff', '#ffd996'];
+      for (let i = 0; i < 30; i++) {
+        const piece = document.createElement('i');
+        piece.className = 'confetti';
+        piece.style.left = Math.random() * 100 + 'vw';
+        piece.style.background = colors[i % colors.length];
+        piece.style.animationDelay = Math.random() * .2 + 's';
+        piece.style.setProperty('--drift', (Math.random() * 200 - 100) + 'px');
+        piece.style.setProperty('--spin', (Math.random() * 720 - 360) + 'deg');
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 1450);
+      }
+    }
+
+    function getStatus(data, date = new Date()) {
+      const time = nowInTaipei(date);
+      const existing = data.checkins.find(record => record.day === time.day);
+      const [hour, minute] = data.wakeTime.split(':').map(Number);
+      return { ...time, existing, onTime: time.hour * 60 + time.minute <= hour * 60 + minute };
+    }
+
+    function updateClock() {
+      const time = getStatus(state);
+      $('currentClock').textContent = pad(time.hour) + ':' + pad(time.minute);
+      $('todayDate').textContent = dayLabel(time.day) + '・週' + WEEKDAYS[dateFromDay(time.day).getUTCDay()];
+
+      const badge = $('statusBadge');
+      const button = $('checkinBtn');
+      const help = $('timeHelp');
+      badge.className = 'status-pill';
+      button.disabled = Boolean(time.existing);
+
+      if (time.existing?.type === 'onTime') {
+        badge.classList.add('success');
+        badge.textContent = '準時達成';
+        button.textContent = '今天的愛心已入袋 ♡';
+        help.textContent = '哼哼，居然真的起來了！今天的 1 點歸妳啦。';
+      } else if (time.existing) {
+        badge.classList.add('late');
+        badge.textContent = '已留紀錄';
+        button.textContent = '今天也辛苦啦 ♡';
+        help.textContent = '今天就先放棉被一馬。明早再來找我拿愛心吧 ♡';
+      } else if (time.onTime) {
+        badge.textContent = '可以拿 1 點';
+        button.textContent = '我起床啦！收下 1 點 ♡';
+        help.textContent = '今天 ' + state.wakeTime + ' 截止，趁棉被還沒反悔，快來打卡 ♡';
+      } else {
+        badge.classList.add('late');
+        badge.textContent = '今天已超時';
+        button.textContent = '我起來了，留個紀錄 ♡';
+        help.textContent = '今天 ' + state.wakeTime + ' 的集點時間過啦。晚起也可以留紀錄，今天加 0 點。';
+      }
+    }
+
+    function showEmbed(frame, show) {
+      frame.hidden = !show;
+      if (show && !frame.hasAttribute('src')) frame.src = frame.dataset.src;
+      if (!show && frame.hasAttribute('src')) frame.removeAttribute('src');
+    }
+
+    function renderStickers() {
+      const sticker = $('customSticker');
+      sticker.hidden = !state.sticker;
+      if (state.sticker && sticker.getAttribute('src') !== state.sticker) sticker.src = state.sticker;
+      if (!state.sticker) sticker.removeAttribute('src');
+      $('removeSticker').hidden = !state.sticker;
+      showEmbed($('mascot'), !motion.matches && !state.sticker);
+      showEmbed($('rewardSticker'), !motion.matches);
+    }
+
+    function renderHistory() {
+      const events = [
+        ...state.checkins.map(record => ({
+          at: record.at,
+          name: record.type === 'onTime' ? '準時起床！愛心入袋 ♡' : '晚起也來留了紀錄',
+          icon: record.type === 'onTime' ? '♥' : '☁',
+          delta: record.type === 'onTime' ? 1 : 0
+        })),
+        ...state.redemptions.map(record => ({
+          at: record.at, name: '換到「' + record.reward + '」', icon: '✦', delta: -REWARD_COST
+        })),
+        ...state.adjustments.map(record => ({
+          at: record.at, name: record.delta > 0 ? '手動補點' : '手動扣點', icon: '✎', delta: record.delta
+        }))
+      ].sort((a, b) => Date.parse(b.at) - Date.parse(a.at)).slice(0, 5);
+
+      $('history').replaceChildren(...events.map(event => {
+        const item = document.createElement('li');
+        item.className = 'history-item';
+        item.innerHTML = '<span class="history-icon" aria-hidden="true"></span><div><b></b><small></small></div><span class="delta"></span>';
+        item.querySelector('.history-icon').textContent = event.icon;
+        item.querySelector('b').textContent = event.name;
+        item.querySelector('small').textContent = historyFormat.format(new Date(event.at));
+        item.querySelector('.delta').textContent = (event.delta > 0 ? '+' : '') + String(event.delta);
+        return item;
+      }));
+      if (!events.length) {
+        const empty = document.createElement('li');
+        empty.className = 'history-empty';
+        empty.textContent = '日記還是空白。第一顆早安愛心，等妳來拿 ♡';
+        $('history').append(empty);
+      }
+    }
+
+    function render() {
+      const today = nowInTaipei().day;
+      previousDay = today;
+      const noon = dateFromDay(today);
+      const hits = new Map(state.checkins.map(record => [record.day, record.type]));
+      const onTimeDays = state.checkins.filter(record => record.type === 'onTime').length;
+      let current = noon.getTime();
+      let streak = 0;
+      if (!hits.has(today)) current -= DAY_MS;
+      while (hits.get(localDay(new Date(current))) === 'onTime') {
+        streak++;
+        current -= DAY_MS;
+      }
+
+      $('heroName').textContent = state.nickname;
+      $('rewardName').textContent = state.reward;
+      $('rewardDescription').textContent = state.description;
+      $('loveNote').textContent = state.note;
+      $('totalOnTime').textContent = onTimeDays;
+      $('streakCount').textContent = streak;
+      $('redeemCount').textContent = state.redemptions.length;
+
+      const stamps = Math.min(REWARD_COST, state.points);
+      const canRedeem = state.points >= REWARD_COST;
+      $('availablePoints').textContent = state.points;
+      $('progressPoints').textContent = stamps;
+      $('progressFill').style.width = (stamps / REWARD_COST * 100) + '%';
+      $('progressBar').setAttribute('aria-valuenow', stamps);
+      $('pointsNeed').textContent = canRedeem ? '哼哼，可以換獎品啦 ♡' : '再 ' + (REWARD_COST - stamps) + ' 點就能換禮物';
+      $('stampBoard').innerHTML = Array.from({ length: REWARD_COST }, (_, i) => {
+        const filled = i < stamps;
+        return '<li class="stamp' + (filled ? ' filled' : '') + '" aria-label="第 ' + (i + 1) + ' 格，' +
+          (filled ? '已蓋章' : '還沒蓋章') + '"><span aria-hidden="true">' + (filled ? '♥' : '·') +
+          '</span><b aria-hidden="true">' + (i + 1) + '</b></li>';
+      }).join('');
+
+      $('redeemBtn').disabled = !canRedeem;
+      $('redeemBtn').textContent = canRedeem ? '我要換獎品 ♡' : '再攢一點就能換 ♡';
+
+      const monday = noon.getTime() - ((noon.getUTCDay() + 6) % 7) * DAY_MS;
+      const days = Array.from({ length: 7 }, (_, i) => localDay(new Date(monday + i * DAY_MS)));
+      $('weekRange').textContent = dayLabel(days[0]) + '–' + dayLabel(days[6]);
+      $('calendar').innerHTML = days.map((day, i) => {
+        const type = hits.get(day);
+        const weekday = WEEKDAYS[(i + 1) % 7];
+        const label = type === 'onTime' ? '準時' : type === 'late' ? '晚起' : '還沒打卡';
+        return '<li class="day' + (day === today ? ' today' : '') +
+          (type === 'onTime' ? ' hit' : type === 'late' ? ' missed' : '') +
+          '" aria-label="' + dayLabel(day) + ' 週' + weekday + '，' + label + '"' +
+          (day === today ? ' aria-current="date"' : '') + '><span class="weekday" aria-hidden="true">' +
+          weekday + '</span><span class="bubble" aria-hidden="true">' +
+          (type === 'onTime' ? '♥' : Number(day.slice(8))) + '</span></li>';
+      }).join('');
+
+      renderStickers();
+      renderHistory();
+      updateClock();
+    }
+
+    $('checkinBtn').addEventListener('click', async () => {
+      let onTime;
+      const saved = await changeState(next => {
+        const stamp = new Date();
+        const status = getStatus(next, stamp);
+        if (status.existing) {
+          toast('今天已經打卡啦，明天再來找我 ♡');
+          return false;
+        }
+        onTime = status.onTime;
+        next.checkins.push({ day: status.day, type: onTime ? 'onTime' : 'late', at: stamp.toISOString() });
+        if (onTime) next.points++;
+      });
+      if (!saved) return;
+      if (onTime) confetti();
+      toast(onTime ? '哼哼，說到做到嘛！給妳 1 點 ♡' : '今天也報到啦，明早再來拿愛心 ♡');
+    });
+
+    $('redeemBtn').addEventListener('click', () => {
+      if (state.points < REWARD_COST) return;
+      $('confirmReward').textContent = state.reward;
+      $('confirmDialog').showModal();
+    });
+
+    $('confirmRedeem').addEventListener('click', async event => {
+      const button = event.currentTarget;
+      button.disabled = true;
+      try {
+        const saved = await changeState(next => {
+          if (next.points < REWARD_COST) {
+            $('confirmDialog').close();
+            toast('可用點數還差一點，湊到 20 點再來找我喔。');
+            return false;
+          }
+          if (next.reward !== $('confirmReward').textContent) {
+            $('confirmReward').textContent = next.reward;
+            toast('獎品剛換過囉，再看一眼就能確認。');
+            return false;
+          }
+          next.points -= REWARD_COST;
+          next.redemptions.push({ at: new Date().toISOString(), reward: next.reward });
+        });
+        if (!saved) return;
+        $('confirmDialog').close();
+        confetti();
+        toast('交換成功！嘿嘿，快去領妳的專屬驚喜 ♡');
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    $('openSettings').addEventListener('click', () => {
+      $('inputName').value = state.nickname;
+      $('inputWake').value = state.wakeTime;
+      $('inputReward').value = state.reward;
+      $('inputDesc').value = state.description;
+      $('inputNote').value = state.note;
+      $('settingsDialog').showModal();
+    });
+
+    document.querySelectorAll('[data-close]').forEach(button =>
+      button.addEventListener('click', () => $(button.dataset.close).close()));
+
+    $('settingsForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const settings = {
+        nickname: $('inputName').value.trim() || defaults.nickname,
+        wakeTime: $('inputWake').value,
+        reward: $('inputReward').value.trim() || defaults.reward,
+        description: $('inputDesc').value.trim() || defaults.description,
+        note: $('inputNote').value.trim() || defaults.note
+      };
+      if (await changeState(next => Object.assign(next, settings))) {
+        $('settingsDialog').close();
+        toast('設定收好啦，明早照新時間見 ♡');
+      }
+    });
+
+    $('inputSticker').addEventListener('change', async event => {
+      const input = event.currentTarget;
+      const file = input.files[0];
+      if (!file) return;
+      if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type) || file.size > 8_000_000) {
+        toast('請選一張 8 MB 以下的 PNG、JPEG、WebP 或 GIF。');
+        input.value = '';
+        return;
+      }
+      const url = URL.createObjectURL(file);
+      try {
+        const picture = new Image();
+        picture.src = url;
+        await picture.decode();
+        const scale = Math.min(1, 640 / picture.naturalWidth, 640 / picture.naturalHeight);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(picture.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(picture.naturalHeight * scale));
+        canvas.getContext('2d').drawImage(picture, 0, 0, canvas.width, canvas.height);
+        const sticker = canvas.toDataURL('image/webp', .84);
+        if (sticker.length >= 1000000) {
+          toast('這張還是有點大，換一張小一點的圖吧。');
+          return;
+        }
+        if (await changeState(next => { next.sticker = sticker; })) toast('封面換好啦 ♡');
+      } catch {
+        toast('這張圖打不開，挑另一張試試吧。');
+      } finally {
+        URL.revokeObjectURL(url);
+        input.value = '';
+      }
+    });
+
+    $('removeSticker').addEventListener('click', async () => {
+      if (await changeState(next => { next.sticker = ''; })) toast('酷洛米回來啦 ♡');
+    });
+
+    async function adjustPoints(delta) {
+      const saved = await changeState(next => {
+        if (next.points + delta < 0) {
+          toast('可用點數是 0，已經沒有點可以扣啦。');
+          return false;
+        }
+        next.points += delta;
+        next.adjustments.push({ at: new Date().toISOString(), delta });
+      });
+      if (saved) toast(delta > 0 ? '補好 1 點啦，早起天數照打卡紀錄算 ♡' : '已扣掉 1 點。');
+    }
+
+    $('demoAdd').addEventListener('click', () => adjustPoints(1));
+    $('demoRemove').addEventListener('click', () => adjustPoints(-1));
+
+    $('resetBtn').addEventListener('click', async () => {
+      if (!confirm('確定要清空點數、打卡和兌獎紀錄嗎？這些紀錄清掉就回不來了喔。')) return;
+      if (await changeState(next => Object.assign(next, { points: 0, checkins: [], redemptions: [], adjustments: [] }))) {
+        toast('點數和紀錄清空啦，妳的設定還在。');
+      }
+    });
+
+    $('exportBtn').addEventListener('click', () => {
+      const copy = JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), ...load() }, null, 2);
+      const url = URL.createObjectURL(new Blob([copy], { type: 'application/json' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = '早安小惡魔集點備份_' + nowInTaipei().day + '.json';
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+      toast('備份已經匯出，收好喔 ♡');
+    });
+
+    $('chooseImport').addEventListener('click', () => $('importFile').click());
+    $('importFile').addEventListener('change', async event => {
+      const input = event.currentTarget;
+      const file = input.files[0];
+      if (!file) return;
+      try {
+        if (file.size > 5_000_000) {
+          toast('這個備份檔有點大，請選 5 MB 以下的檔案。');
+          return;
+        }
+        const data = JSON.parse(await file.text());
+        if (!data || !Array.isArray(data.checkins) || !Number.isSafeInteger(data.points) || data.points < 0) {
+          toast('這份格式看起來不對，請挑從集點卡匯出的 JSON 備份。');
+          return;
+        }
+        if (!confirm('要用這份備份覆蓋目前的設定和集點紀錄嗎？')) return;
+        if (await changeState(next => Object.assign(next, sanitize(data)))) {
+          $('settingsDialog').close();
+          toast('備份找回來啦 ♡');
+        }
+      } catch {
+        toast('這份備份讀不開，請換一份 JSON 備份試試。');
+      } finally {
+        input.value = '';
+      }
+    });
+
+    function tick() {
+      if (nowInTaipei().day !== previousDay) render();
+      else updateClock();
+    }
+
+    addEventListener('storage', event => {
+      if (event.key === KEY || event.key === null) {
+        state = load();
+        render();
+      }
+    });
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
+    motion.addEventListener('change', renderStickers);
+    setInterval(tick, 1000);
+    render();
+  })();
+  </script>
+</body>
+</html>
