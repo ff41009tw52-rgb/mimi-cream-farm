@@ -3,6 +3,20 @@
 
   const homepageFeatures = Object.freeze([
     Object.freeze({
+      id: 'campus-herb-guide',
+      grades: Object.freeze([]),
+      gradeLabel: '探索天地',
+      category: 'explore',
+      subject: 'science',
+      icon: 'fas fa-seedling',
+      title: '校園香草植物圖鑑',
+      description: '用真實照片認識六種香草植物，練習觀察葉形、葉緣和枝條。',
+      url: 'herb-guide/',
+      actionLabel: '開啟植物圖鑑',
+      actionIcon: 'fas fa-book-open',
+      publishedAt: '2026-11-18T00:00:00+08:00'
+    }),
+    Object.freeze({
       id: 'class-aquarium',
       grades: Object.freeze([]),
       gradeLabel: '探索天地',
