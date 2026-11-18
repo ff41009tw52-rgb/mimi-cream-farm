@@ -57,7 +57,7 @@ if (typeof viewer.showModal === "function") {
           alt: dish.dataset.alt,
           source: dish.dataset.source,
           credit: dish.dataset.credit,
-          caption: dish.querySelector("span").textContent,
+          caption: dish.dataset.caption || dish.querySelector("span").textContent,
         });
       }
 
