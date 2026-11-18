@@ -71,9 +71,9 @@ h3 { font-size: clamp(21px, 2.4vw, 27px); font-weight: 900; line-height: 1.3; }
 .study { margin-top: 13px; padding: 10px 11px; background: #edf2e4; border-left: 3px solid #7d944f; border-radius: 0 8px 8px 0; display: grid; gap: 2px; }
 .study dt { font-size: 12px; letter-spacing: .08em; font-weight: 850; }
 .study dd { margin: 0; font-size: 15px; font-weight: 750; }
-.plant-notes { display: grid; gap: 11px; margin-top: 14px; }
-.plant-notes dt { font-weight: 800; font-size: 14px; }
-.plant-notes dd { margin: 3px 0 0; font-size: 15px; color: var(--muted); }
+.plant-dish { margin-top: 13px; font-size: 15px; }
+.plant-dish strong { display: block; font-weight: 850; }
+.plant-dish span { display: block; color: var(--muted); margin-top: 2px; }
 .sources { margin-block: 26px 38px; font-size: 14px; color: var(--muted); }
 .sources summary { cursor: pointer; font-weight: 800; width: fit-content; }
 .sources p { margin-top: 9px; }
@@ -89,6 +89,13 @@ dialog::backdrop { background: #10271fdf; }
 .dialog-top button { border: 1px solid var(--line); background: var(--mist); padding: 5px 12px; border-radius: 30px; cursor: pointer; }
 dialog img { width: auto; max-width: 100%; max-height: 68dvh; margin: auto; object-fit: contain; border-radius: 8px; }
 dialog p { padding: 8px 5px 0; font-size: 14px; }
+.viewer-photo[hidden], .viewer-controls[hidden], .viewer-status[hidden] { display: none; }
+.viewer-status { min-height: 85px; color: var(--muted); }
+.viewer-caption, .viewer-source { max-width: 55ch; }
+.viewer-controls { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 11px 5px 0; min-width: min(270px, 72vw); }
+.viewer-controls button { border: 1px solid #a3b092; background: var(--mist); border-radius: 8px; padding: 5px 12px; font-size: 14px; cursor: pointer; }
+.viewer-controls button[aria-disabled="true"] { opacity: .55; cursor: default; }
+.viewer-controls output { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
 @media (max-width: 900px) {
   .wrap { width: calc(100% - 42px); }
   .hero { min-height: 390px; }
