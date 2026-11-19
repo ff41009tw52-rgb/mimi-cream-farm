@@ -7,7 +7,7 @@ import cv2
 import numpy as np
 from PIL import Image
 
-species = ('clown', 'butterfly', 'puffer', 'shark', 'jelly', 'ray', 'octopus', 'turtle')
+species = ('clown', 'butterfly', 'puffer', 'shark', 'jelly', 'ray', 'octopus', 'turtle', 'seahorse')
 parser = argparse.ArgumentParser(description=__doc__)
 for name in species:
     parser.add_argument(f'--{name}', type=Path)
@@ -29,7 +29,8 @@ for name in species:
     ink = (pixels < 200).astype(np.uint8)
     contours, _ = cv2.findContours(ink, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     silhouette = max(contours, key=cv2.contourArea)
-    if cv2.contourArea(silhouette) < pixels.size * .19:
+    minimum_coverage = .09 if name == 'seahorse' else .19
+    if cv2.contourArea(silhouette) < pixels.size * minimum_coverage:
         raise ValueError(f'{name}: expected a closed outline')
     # Include the anti-aliased edge of the ink without tracing interior details.
     mask = np.zeros_like(ink)

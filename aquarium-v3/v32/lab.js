@@ -1,8 +1,8 @@
 import { createCollection } from '../collection.js?v=3.6.4';
-import { FISH, OCTOPUS_REVISION } from '../templates.js?v=3.6.4';
-import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js?v=3.6.0';
-import { clamp, createCreatureMesh, createStrip, creatureHeading, dorsalMix, poseCreature, poseCreatureLegacy, poseStrip, profileFor, TAU } from './fish-rig.js?v=3.6.4';
-import { loadFishImage, templateFish } from './sample-fish.js?v=3.6.4';
+import { FISH, OCTOPUS_REVISION } from '../templates.js?v=3.6.5';
+import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js?v=3.6.5';
+import { clamp, createCreatureMesh, createStrip, creatureHeading, dorsalMix, poseCreature, poseCreatureLegacy, poseStrip, profileFor, TAU } from './fish-rig.js?v=3.6.5';
+import { loadFishImage, templateFish } from './sample-fish.js?v=3.6.5';
 
 const $=id=>document.getElementById(id);
 const controls=Object.fromEntries(['speed','frequency','amplitude','bend','turn','size'].map(key=>[key,$(key)]));
@@ -61,25 +61,28 @@ function draw() {
   const record=savedImages.get(artwork.value);
   const eightArms=species.value==='octopus' && (record ? record.artworkRevision===OCTOPUS_REVISION : artwork.value!=='file');
   const fish=eightArms ? {...profile,eightArms} : profile;
+  const upright=fish.creature==='seahorse';
   $('original-title').textContent=fish.creature ? 'A. 原圖平移' : 'A. V3.1.2';
   $('original-note').textContent=fish.creature ? '保留原圖形狀，作為動作比較基準。' : '整張 PNG 移動，在折返時縮窄並翻向。';
-  $('baseline-title').textContent=fish.creature ? 'B. 上一版整列擺動' : 'B. 2D 骨架擺尾';
-  $('baseline-note').textContent=fish.creature ? '比較整排或整列圖片變形的舊動作。' : '接合處共用座標，尾部繞單一關節擺動。';
+  $('baseline-title').textContent=upright ? 'B. 身體輕晃' : fish.creature ? 'B. 上一版整列擺動' : 'B. 2D 骨架擺尾';
+  $('baseline-note').textContent=upright ? '保持直立，整個身體隨游動輕微傾斜。'
+    : fish.creature ? '比較整排或整列圖片變形的舊動作。' : '接合處共用座標，尾部繞單一關節擺動。';
   const aspect=(image.naturalHeight||image.height)/(image.naturalWidth||image.width);
   const size=Number(controls.size.value), amplitude=Number(controls.amplitude.value), bending=Number(controls.bend.value);
   const path=route;
   const legacyDirection=clamp(Math.cos(path)*5,-1,1);
   for (const [i,panel] of renderers.entries()) {
     const {width,height}=panel;
-    const fishWidth=Math.min(width*.34,height*.57)*size;
+    const fishWidth=Math.min(width*.34,height*.57/(upright ? aspect : 1))*size;
     const base={image,aspect,width:fishWidth,id:'lab-'+drawnId};
     let pose;
     if (fish.creature) {
       const mesh=fish.creature==='jelly' || fish.creature==='octopus' ? strips.vertical : strips.wave;
       pose={...base,x:width*(.5+.27*Math.sin(path)),y:height*(.53+.13*Math.cos(path)),
-        angle:creatureHeading(fish.creature,heading),dorsal:1,
+        angle:upright && i===0 ? 0 : creatureHeading(fish.creature,heading,phase),
+        dorsal:upright ? 1-dorsalMix(heading) : 1,mirrorX:upright,
         strip:i===2 ? poseCreature(strips.creature,fish,phase,aspect,0,amplitude)
-          : i===1 ? poseCreatureLegacy(mesh,fish,phase,aspect,0,amplitude) : null};
+          : i===1 && !upright ? poseCreatureLegacy(mesh,fish,phase,aspect,0,amplitude) : null};
     } else if (i===0) {
       pose={...base,x:width*(.5+.30*Math.sin(path)),y:height*(.54+Math.sin(path*1.35)*.018),angle:0,dorsal:1,
         legacyScale:Math.sign(legacyDirection||1)*(.045+.955*Math.abs(legacyDirection))};

@@ -1,4 +1,4 @@
-import { stripTopology, updatePositions } from './fish-rig.js?v=3.6.0';
+import { stripTopology, updatePositions } from './fish-rig.js?v=3.6.5';
 
 export function canvasFishRenderer(canvas) {
   const ctx=canvas.getContext('2d',{alpha:true});
@@ -26,7 +26,10 @@ export function canvasFishRenderer(canvas) {
     const height=width*aspect;
     ctx.save();
     ctx.globalAlpha=alpha;
-    if (mirrored) ctx.scale(1,-1);
+    if (mirrored) {
+      if (pose.mirrorX) ctx.scale(-1,1);
+      else ctx.scale(1,-1);
+    }
     if (!strip) {
       ctx.drawImage(image,-width/2,-height/2,width,height);
     } else if (strip.grid) {
@@ -160,7 +163,6 @@ export async function webglFishRenderer(canvas,onLost) {
     entry.rows=grid?.rows || 0;
     entry.normal=make(geometry,entry.texture);
     entry.mirror=make(geometry,entry.texture);
-    entry.mirror.scale.y=-1;
     entry.holder.addChild(entry.normal,entry.mirror);
   }
   function remove(id) {
@@ -196,6 +198,7 @@ export async function webglFishRenderer(canvas,onLost) {
       normal.alpha=pose.dorsal;
       mirror.visible=pose.dorsal<1;
       mirror.alpha=1-pose.dorsal;
+      mirror.scale.set(pose.mirrorX ? -1 : 1,pose.mirrorX ? 1 : -1);
     }
     renderer.render({container:stage});
   }

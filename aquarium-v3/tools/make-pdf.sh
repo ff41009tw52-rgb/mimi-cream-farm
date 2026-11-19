@@ -18,6 +18,6 @@ build_pdf() {
 }
 
 if [ "${1:-}" != ocean ]; then build_pdf aquarium-v3-a4 clown butterfly puffer shark; fi
-build_pdf aquarium-ocean-a4 jelly ray octopus turtle
+build_pdf aquarium-ocean-a4 jelly ray octopus turtle seahorse
 pdfunite "$templates/aquarium-v3-a4.pdf" "$templates/aquarium-ocean-a4.pdf" "$output/aquarium-all-a4.pdf"
 mv "$output/aquarium-all-a4.pdf" "$templates/aquarium-all-a4.pdf"

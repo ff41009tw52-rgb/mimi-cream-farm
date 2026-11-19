@@ -1,5 +1,5 @@
-import { clamp, createCreatureMesh, createStrip, octopusStroke, profileFor, TAU } from './fish-rig.js?v=3.6.4';
-import { OCTOPUS_REVISION } from '../templates.js?v=3.6.4';
+import { clamp, createCreatureMesh, createStrip, octopusStroke, profileFor, TAU } from './fish-rig.js?v=3.6.5';
+import { OCTOPUS_REVISION } from '../templates.js?v=3.6.5';
 
 export function randomSource(seed) {
   let state=seed || 0x2f39b7c1;

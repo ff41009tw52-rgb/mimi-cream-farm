@@ -1,6 +1,6 @@
-import { clamp, TAU } from './fish-rig.js?v=3.6.4';
-import { canvasFishRenderer } from './fish-renderers.js?v=3.6.0';
-import { startGreeting } from './school.js?v=3.6.4';
+import { clamp, TAU } from './fish-rig.js?v=3.6.5';
+import { canvasFishRenderer } from './fish-renderers.js?v=3.6.5';
+import { startGreeting } from './school.js?v=3.6.5';
 
 const ALARM_TIME=3.2;
 const FLEE_TIME=.65;

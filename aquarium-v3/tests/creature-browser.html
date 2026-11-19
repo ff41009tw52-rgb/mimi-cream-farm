@@ -1,13 +1,13 @@
 <!doctype html><html lang="zh-Hant"><meta charset="utf-8"><title>生物動畫瀏覽器驗證</title>
 <style>body{background:#123e4b;color:#fff;font:16px system-ui}button{padding:10px;margin:5px}pre{white-space:pre-wrap}#stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:#164b5b}#stage canvas{position:absolute;inset:0;width:100%;height:100%}canvas[hidden]{display:none!important}#gallery{width:1200px;height:620px;background:#164b5b}</style>
 <h1>生物動畫瀏覽器驗證</h1><p>使用合成著色模板，不寫入作品收藏。測量固定 1920 × 1080 畫布。</p>
-<button id="baseline">瀏覽器更新頻率基準</button><button id="canvas">Canvas 八種生物</button><button id="gpu">WebGL 八種生物</button><button id="run">40 隻效能測試</button><button id="low">切換低效能模式</button>
+<button id="baseline">瀏覽器更新頻率基準</button><button id="canvas">Canvas 生物展示</button><button id="gpu">WebGL 生物展示</button><button id="run">40 隻效能測試</button><button id="low">切換低效能模式</button>
 <pre id="result" role="status">準備測試圖片…</pre><canvas id="gallery"></canvas><div id="stage" hidden><canvas id="ocean"></canvas></div>
 <script type="module">
-import {SPECIES,createCreatureMesh,createStrip,poseCreature,poseStrip,TAU} from '../v32/fish-rig.js?v=3.6.0';
-import {canvasFishRenderer,webglFishRenderer} from '../v32/fish-renderers.js?v=3.6.0';
-import {templateFish} from '../v32/sample-fish.js?v=3.4.1';
-import {createOcean} from '../v32/ocean.js?v=3.6.0';
+import {SPECIES,createCreatureMesh,createStrip,poseCreature,poseStrip,TAU} from '../v32/fish-rig.js?v=3.6.5';
+import {canvasFishRenderer,webglFishRenderer} from '../v32/fish-renderers.js?v=3.6.5';
+import {templateFish} from '../v32/sample-fish.js?v=3.6.5';
+import {createOcean} from '../v32/ocean.js?v=3.6.5';
 const result=document.querySelector('#result'), stage=document.querySelector('#stage');
 const types=Object.keys(SPECIES), images=await Promise.all(types.map(t=>templateFish(t,true)));
 let renderer,raf=0,ocean,low=false,canvas=document.querySelector('#gallery'),serial=0;
@@ -22,8 +22,8 @@ async function gallery(gpu=false){
  catch(error){result.textContent='WebGL 無法啟動：'+error.message;return;}
  if(revision!==serial)return;
  renderer.resize(1200,620,1);
- const poses=types.map((type,i)=>({id:type,image:images[i],aspect:images[i].height/images[i].width,width:180,
-  x:150+(i%4)*300,y:155+Math.floor(i/4)*310,angle:0,dorsal:1,
+ const poses=types.map((type,i)=>({id:type,image:images[i],aspect:images[i].height/images[i].width,width:SPECIES[type].width*1.45,
+  x:120+(i%5)*240,y:155+Math.floor(i/5)*310,angle:0,dorsal:1,
   strip:SPECIES[type].creature ? createCreatureMesh(16,18) : createStrip(18)}));
  let start=0,count=0;
  function draw(t){if(!start)start=t;count++;
@@ -33,7 +33,7 @@ async function gallery(gpu=false){
    else poseStrip(pose.strip,'wave',profile,phase,1,0);
   }
   renderer.draw(poses);
-  if(count%60===0)result.textContent=JSON.stringify({renderer:gpu?'WebGL':'Canvas',software:renderer.software||false,animals:8,frames:count,fps:Math.round(count*1000/(t-start)),errors},null,2);
+  if(count%60===0)result.textContent=JSON.stringify({renderer:gpu?'WebGL':'Canvas',software:renderer.software||false,animals:types.length,frames:count,fps:Math.round(count*1000/(t-start)),errors},null,2);
   raf=requestAnimationFrame(draw);
  }
  raf=requestAnimationFrame(draw);
@@ -54,9 +54,9 @@ document.querySelector('#run').onclick=async()=>{
  ocean=createOcean(document.querySelector('#ocean'));
  result.textContent='載入 40 隻合成作品…';
  await Promise.all(Array.from({length:40},async(_,i)=>{
-  const texture=images[i%8],blob=await new Promise(resolve=>texture.toBlob(resolve));
+  const texture=images[i%types.length],blob=await new Promise(resolve=>texture.toBlob(resolve));
   const url=URL.createObjectURL(blob);
-  try{await ocean.add({id:'test-'+i,type:types[i%8]},url,false);}finally{URL.revokeObjectURL(url);}
+  try{await ocean.add({id:'test-'+i,type:types[i%types.length]},url,false);}finally{URL.revokeObjectURL(url);}
  }));
  // Start after textures, the first resize and renderer selection have settled.
  setTimeout(()=>{

@@ -1,9 +1,9 @@
-import { clamp, createStrip, creatureHeading, dorsalMix, poseCreature, poseCreatureLegacy, poseStrip } from './fish-rig.js?v=3.6.4';
-import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js?v=3.6.0';
-import { makeSwimmer, resizeSchool, stepSchool } from './school.js?v=3.6.4';
+import { clamp, createStrip, creatureHeading, dorsalMix, poseCreature, poseCreatureLegacy, poseStrip } from './fish-rig.js?v=3.6.5';
+import { canvasFishRenderer, webglFishRenderer } from './fish-renderers.js?v=3.6.5';
+import { makeSwimmer, resizeSchool, stepSchool } from './school.js?v=3.6.5';
 import { makeAtmosphere } from './ocean-scene.js';
-import { loadFishImage } from './sample-fish.js?v=3.6.4';
-import { createWaterInteractions } from './water-interactions.js?v=3.6.4';
+import { loadFishImage } from './sample-fish.js?v=3.6.5';
+import { createWaterInteractions } from './water-interactions.js?v=3.6.5';
 
 export function createOcean(canvas) {
   const stage=canvas.parentElement;
@@ -56,6 +56,7 @@ export function createOcean(canvas) {
     for (const [i,fish] of swimmers.entries()) {
       const pose=fish.pose;
       const {creature}=fish.profile;
+      pose.mirrorX=creature==='seahorse';
       const greeting=Math.sin(Math.PI*fish.greet/.8);
       const chosenMesh=low || reduced ? null : gpu ? fish.mesh : fish.fallbackMesh;
       if (chosenMesh) {
@@ -78,8 +79,8 @@ export function createOcean(canvas) {
         const lift=creature==='jelly' ? 16 : fish.type==='butterfly' || creature==='octopus' ? 8 : 0;
         pose.y=(fish.y+float-greeting*lift)*usedScale;
         pose.width=fish.width*usedScale*(1+(fish.type==='puffer' ? greeting*.15 : 0));
-        pose.angle=creature ? creatureHeading(creature,fish.angle) : fish.angle;
-        pose.dorsal=creature ? 1 : dorsalMix(fish.angle);
+        pose.angle=creature ? creatureHeading(creature,fish.angle,fish.phase) : fish.angle;
+        pose.dorsal=pose.mirrorX ? 1-dorsalMix(fish.angle) : creature ? 1 : dorsalMix(fish.angle);
       }
       poses.push(pose);
     }

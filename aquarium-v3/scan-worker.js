@@ -1,4 +1,4 @@
-import { detectSheet, paperFingerprint, removalVisible } from './detect.js?v=3.6.4';
+import { detectSheet, paperFingerprint, removalVisible } from './detect.js?v=3.6.5';
 
 self.onmessage = ({data:{frame, previous}}) => {
   try {

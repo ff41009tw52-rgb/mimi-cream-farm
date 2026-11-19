@@ -17,17 +17,19 @@ const originalSpecies = [
   ['puffer','河豚型',[114,130,554,309]],
   ['shark','鯊魚型',[114,170,593,231]],
 ];
-const species = [...originalSpecies,
+const publishedSpecies = [...originalSpecies,
   ['jelly','水母'],
   ['ray','魟魚'],
   ['octopus','章魚'],
   ['turtle','海龜'],
 ];
+const species = [...publishedSpecies, ['seahorse','海馬']];
 // These indices are printed on the worksheets. Keep published groups in order.
 const markerGroups = [
   ...originalSpecies.map(([type]) => ({type, revision:1})),
-  ...species.map(([type]) => ({type, revision:artworkRevision})),
+  ...publishedSpecies.map(([type]) => ({type, revision:artworkRevision})),
   {type:'octopus',revision:latestRevisions.octopus},
+  {type:'seahorse',revision:artworkRevision},
 ];
 
 function rotate(bits) {

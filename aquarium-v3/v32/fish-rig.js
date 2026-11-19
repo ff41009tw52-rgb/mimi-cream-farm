@@ -15,6 +15,7 @@ export const SPECIES = {
   ray:       {speed:47, width:151, tailHz:.63, amplitude:.16, turnRate:1.25, rise:11, float:3.6, dash:.04, habitat:[.47,.77], creature:'ray'},
   octopus:   {speed:27, width:140, tailHz:.59, amplitude:.12, turnRate:1.09, rise:9, float:4.5, dash:0, habitat:[.66,.84], creature:'octopus'},
   turtle:    {speed:39, width:128, tailHz:.66, amplitude:.17, turnRate:1.20, rise:10, float:2.2, dash:0, habitat:[.29,.69], creature:'turtle'},
+  seahorse:  {speed:29, width:64, tailHz:.95, amplitude:.16, turnRate:1.36, rise:12, float:5.8, dash:0, habitat:[.37,.73], creature:'seahorse'},
 };
 
 export function profileFor(type) { return SPECIES[type] || SPECIES.clown; }
@@ -109,7 +110,14 @@ export function poseCreature(mesh,{creature,amplitude,eightArms},phase,aspect,gr
   for (let i=0;i<uv.length;i+=2) {
     const x=uv[i]-.5, v=uv[i+1], side=x<0 ? -1 : 1, ax=Math.abs(x);
     let dx=0,dy=0;
-    if (creature==='turtle') {
+    if (creature==='seahorse') {
+      // The attached drawing has a left-facing snout and a fin on the right.
+      const fin=smoothstep(.32,.48,x)*smoothstep(.41,.47,v)*(1-smoothstep(.58,.68,v));
+      const flutter=Math.sin(phase*5-7*x);
+      const curl=smoothstep(.68,.93,v);
+      dx=strength*(.31*fin*flutter+.37*curl*Math.sin(phase-3*v));
+      dy=strength*aspect*(.16*fin*Math.cos(phase*5-7*x)-.11*curl*Math.sin(phase-3*v));
+    } else if (creature==='turtle') {
       // The broad foreflippers and small hindflippers have separate roots and strokes.
       // An elliptical exclusion keeps the shell rigid, including its outer plates.
       const outside=smoothstep(1.05,1.55,Math.hypot(x/.28,(v-.57)/.36));
@@ -178,7 +186,8 @@ export function poseCreature(mesh,{creature,amplitude,eightArms},phase,aspect,gr
   return mesh;
 }
 
-export function creatureHeading(creature,heading) {
+export function creatureHeading(creature,heading,phase=0) {
+  if (creature==='seahorse') return -.14*Math.sin(heading)+.055*Math.sin(phase);
   return creature==='turtle' ? heading+Math.PI/2 : .12*Math.sin(heading);
 }
 

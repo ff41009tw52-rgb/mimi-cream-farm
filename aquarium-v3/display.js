@@ -1,11 +1,11 @@
 import { createCollection } from './collection.js?v=3.6.4';
-import { FISH, artworkRevisionFor } from './templates.js?v=3.6.4';
+import { FISH, artworkRevisionFor } from './templates.js?v=3.6.5';
 
 const byId=id=>document.getElementById(id);
 const stage=byId('aquarium');
 const gallery=byId('gallery-dialog');
 const collection=createCollection();
-const {createOcean}=stage.dataset.engine==='v32' ? await import('./v32/ocean.js?v=3.6.4') : await import('./swim.js');
+const {createOcean}=stage.dataset.engine==='v32' ? await import('./v32/ocean.js?v=3.6.5') : await import('./swim.js');
 const ocean=createOcean(byId('water'));
 const current=new Map();
 const testFish=new Map();
@@ -97,7 +97,7 @@ if (testSelect) {
     addTestButton.disabled=clearTestButton.disabled=testSelect.disabled=true;
     status.textContent='正在載入測試生物…';
     try {
-      const {templateFish}=await import('./v32/sample-fish.js?v=3.6.4');
+      const {templateFish}=await import('./v32/sample-fish.js?v=3.6.5');
       const results=await Promise.allSettled(missing.map(async type=>{
         const canvas=await templateFish(type,true);
         const blob=await new Promise((resolve,reject)=>{

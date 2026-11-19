@@ -2,15 +2,15 @@
 <html lang="zh-Hant"><meta charset="utf-8"><title>V3 影像測試</title>
 <main>
   <h1>V3 合成影像測試</h1>
-  <button id="run">測試四種魚形</button>
+  <button id="run">測試所有生物</button>
   <pre id="results" role="status"></pre>
 </main>
 <script type="module">
-import { detectSheet } from '../detect.js?v=3.6.4';
-import { extractFish } from '../extract.js?v=3.6.4';
+import { detectSheet } from '../detect.js?v=3.6.5';
+import { extractFish } from '../extract.js?v=3.6.5';
 import { distance, project } from '../geometry.js';
-import { FISH, artworkRevisionFor, fishShape } from '../templates.js?v=3.6.4';
-import { canvas, paints, scenarios, scene, sourceSheet } from './fixtures.js?v=3.6.4';
+import { FISH, artworkRevisionFor, fishShape } from '../templates.js?v=3.6.5';
+import { canvas, paints, scenarios, scene, sourceSheet } from './fixtures.js?v=3.6.5';
 
 window.suite = async () => {
   const tests=[];
@@ -34,7 +34,8 @@ window.suite = async () => {
         octx.drawImage(bitmap,0,0);
         bitmap.close();
         test.clear=[[0,0],[w-1,0],[w-1,h-1],[0,h-1]].every(([u,v])=>octx.getImageData(u,v,1,1).data[3]===0);
-        test.color= Math.max(...paints.map(([u,v])=>{
+        const colorPoints=type==='seahorse' ? [[410,251],[428,272],[409,296],[423,312]] : paints;
+        test.color= Math.max(...colorPoints.map(([u,v])=>{
           const [sx,sy]=project(expected,[u+.5,v+.5]).map(value=>value-.5);
           const ix=Math.floor(sx), iy=Math.floor(sy);
           const dx=sx-ix, dy=sy-iy;
