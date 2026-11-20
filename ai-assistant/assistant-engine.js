@@ -336,12 +336,16 @@
     });
   };
 
+  const asksForTextbookPage = (question) =>
+    /(?:哪(?:一)?|幾|几|多少)[頁页]|(?:查|找|告訴我|提供).{0,16}[頁页][碼码]|[頁页][碼码](?:是)?多少/.test(normalizeText(question));
+
   const sourceLabel = (unit, concept) => {
-    const pages = concept.sourcePages || [];
-    const pageLabel = pages[0] === pages[1]
-      ? '第 ' + pages[0] + ' 頁'
-      : '第 ' + pages[0] + '–' + pages[1] + ' 頁';
-    return unit.title + '，課本' + pageLabel;
+    const [start, end = start] = concept.sourcePages || [];
+    if (!Number.isInteger(start) || !Number.isInteger(end) || start < 1 || end < start) return '';
+    const pageLabel = start === end
+      ? '第 ' + start + ' 頁'
+      : '第 ' + start + '–' + end + ' 頁';
+    return '《' + unit.title + '》課本' + pageLabel;
   };
 
   const gameAction = (game) => game?.recommendable && game.url
@@ -505,16 +509,19 @@
     const relatedGame = relatedId
       ? (siteKnowledge?.games || []).find((game) => game.id === relatedId && game.recommendable)
       : null;
+    const note = asksForTextbookPage(question)
+      ? sourceLabel(result.unit, result.concept) || '目前的教材資料沒有標這個概念的頁碼。'
+      : relatedGame?.url ? '想練習的話，可以直接點遊戲名稱。' : '';
     return {
       intent: 'curriculum',
       source: result.matchType === 'qa' ? 'curriculum-qa' : 'curriculum-concept',
       conceptId: result.concept.id,
       confidence: Math.min(1, result.score / 14),
-      text: result.answer + '（依據：' + sourceLabel(result.unit, result.concept) + '）',
+      text: result.answer,
       links: relatedGame?.url
         ? [{ href: relatedGame.url, label: cleanTitle(relatedGame.title) }]
         : [],
-      note: relatedGame?.url ? '想練習的話，可以直接點遊戲名稱。' : ''
+      note
     };
   };
 

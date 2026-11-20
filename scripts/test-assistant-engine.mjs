@@ -83,7 +83,17 @@ assert.doesNotMatch(missingSubjectGame.text, /\d+ 號/);
 const earthquakeTerms = answer('震源和震央有什麼不同？');
 assert.equal(earthquakeTerms.intent, 'curriculum');
 assert.equal(earthquakeTerms.conceptId, 'earthquake-report-terms');
-assert.match(earthquakeTerms.text, /第 25 頁/);
+assert.equal(earthquakeTerms.text, '震源是地下引發地震的位置；震央是震源垂直投影到地表的位置。');
+assert.equal(earthquakeTerms.note, '');
+
+const textbookWording = answer('課本說的震源和震央有什麼不同？');
+assert.equal(textbookWording.text, earthquakeTerms.text);
+assert.equal(textbookWording.note, '');
+
+const requestedPage = answer('震源和震央有什麼不同？在課本第幾頁？');
+assert.equal(requestedPage.conceptId, 'earthquake-report-terms');
+assert.equal(requestedPage.text, earthquakeTerms.text);
+assert.match(requestedPage.note, /課本第 25 頁/);
 
 const magnitude = answer('規模和震度一樣嗎？');
 assert.equal(magnitude.intent, 'curriculum');
@@ -96,6 +106,8 @@ assert.equal(flowingWater.intent, 'curriculum');
 assert.equal(flowingWater.conceptId, 'flowing-water-action');
 assert.equal(flowingWater.links?.[0]?.href, 'play.html?game=41');
 assert.match(flowingWater.links?.[0]?.label || '', /流水搬運小實驗/);
+assert.doesNotMatch(flowingWater.text, /課本第|依據/);
+assert.match(flowingWater.note, /遊戲名稱/);
 
 const siteHelp = answer('網頁畫面卡住了');
 assert.equal(siteHelp.intent, 'site_help');
