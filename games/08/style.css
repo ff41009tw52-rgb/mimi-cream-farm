@@ -1,0 +1,325 @@
+.circuit-game {
+  --ink: #202c31;
+  --muted: #5b6264;
+  --line: #e1d8c9;
+  --paper: #fffdf8;
+  --accent: #a7491e;
+  --active: #133d39;
+  width: min(100%, 1120px);
+  min-height: 100%;
+  margin: 0 auto;
+  padding: clamp(12px, 3vw, 30px);
+  color: var(--ink);
+  background: var(--paper);
+  font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  font-size: 16px;
+}
+
+.circuit-header, .circuit-modes, .circuit-toolbar, .circuit-wires, .circuit-guide {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.circuit-header {
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.circuit-header h1 {
+  margin: 0;
+  font-size: clamp(1.45rem, 5.5vw, 2.2rem);
+  line-height: 1.2;
+  color: #202f31;
+}
+
+.circuit-game button, .circuit-home {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 7px 12px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.circuit-game button:focus-visible, .circuit-home:focus-visible {
+  outline: 3px solid #005fd0;
+  outline-offset: 3px;
+}
+
+.circuit-game button:disabled { opacity: 0.55; cursor: default; }
+
+.circuit-game button[aria-pressed="true"]:not(.circuit-terminal) {
+  background: var(--active);
+  border-color: var(--active);
+  color: #fff;
+}
+
+.circuit-guide {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border-inline-start: 4px solid #d68b37;
+  border-radius: 4px 10px 10px 4px;
+  background: #fff4db;
+}
+
+.circuit-instruction {
+  flex: 1 0 min(100%, 240px);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.circuit-toolbar { margin-bottom: 10px; }
+
+.circuit-toolbar [data-tool="power"] {
+  margin-left: auto;
+  border-color: #14644e;
+  background: #14644e;
+  color: #fff;
+}
+
+.circuit-toolbar [data-tool="power"][aria-pressed="true"] {
+  border-color: #9b382c;
+  background: #9b382c;
+}
+
+.circuit-board {
+  position: relative;
+  min-width: 0;
+  min-height: 272px;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid #d7c8ae;
+  border-radius: 14px;
+  background-color: #fbf6ea;
+  background-image: radial-gradient(#d8c8ab 1px, transparent 1px);
+  background-size: 20px 20px;
+  user-select: none;
+}
+
+.circuit-board canvas, .circuit-bends, .circuit-parts {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.circuit-component {
+  position: absolute;
+  width: 138px;
+  height: 138px;
+  transform: translate(-50%, -50%) rotate(var(--part-angle));
+}
+
+.circuit-part-shape, .circuit-component button, .circuit-bend {
+  position: absolute;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.circuit-part-shape { cursor: grab; }
+
+.circuit-battery {
+  top: calc(50% - 29px);
+  left: calc(50% - 61px);
+  display: flex;
+  width: 122px;
+  height: 58px;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 4px 12px 3px;
+  border: 3px solid #43434b;
+  border-radius: 10px 8px 8px 10px;
+  background: linear-gradient(90deg, #ea9c48 0 63%, #55565f 63%);
+  box-shadow: 0 3px 5px #30303040;
+  color: #fff;
+  font-weight: 900;
+  text-shadow: 0 1px 1px #2b1c15;
+}
+
+.circuit-battery::before {
+  position: absolute;
+  top: 15px;
+  right: 100%;
+  width: 7px;
+  height: 22px;
+  border-radius: 2px 0 0 2px;
+  background: #7f8288;
+  content: '';
+}
+
+.circuit-lamp {
+  top: calc(50% - 53px);
+  left: calc(50% - 34px);
+  width: 68px;
+  height: 108px;
+}
+
+.circuit-glass {
+  position: absolute;
+  top: 0;
+  left: 2px;
+  width: 64px;
+  height: 65px;
+  border: 2px solid #7a8891;
+  border-radius: 53% 53% 42% 42%;
+  background: radial-gradient(ellipse at 32% 29%, #fff 0 13%, #e0e8eb 14% 100%);
+}
+
+.circuit-glass::after {
+  position: absolute;
+  bottom: 17px;
+  left: 18px;
+  width: 23px;
+  height: 13px;
+  border-top: 2px solid #65727d;
+  border-radius: 50%;
+  content: '';
+}
+
+.circuit-component.is-lit .circuit-glass {
+  border-color: #c98612;
+  background: radial-gradient(circle at 47% 43%, #fffcea 16%, #ffe292 55%, #f7b944 100%);
+  box-shadow: 0 0 var(--halo) rgb(245 161 16 / var(--glow));
+}
+
+.circuit-thread {
+  position: absolute;
+  top: 57px;
+  left: 15px;
+  width: 38px;
+  height: 34px;
+  border: 1px solid #586675;
+  border-radius: 4px 4px 7px 7px;
+  background: repeating-linear-gradient(-9deg, #78848c 0 2px, #ced2d7 3px 8px);
+}
+
+.circuit-tip {
+  position: absolute;
+  top: 89px;
+  left: 22px;
+  width: 24px;
+  height: 15px;
+  border-radius: 0 0 9px 9px;
+  background: #36434d;
+}
+
+.circuit-component .circuit-terminal {
+  top: calc(50% + var(--point-y));
+  left: calc(50% + var(--point-x));
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  min-height: 0;
+  transform: translate(-50%, -50%);
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #fff;
+  font-size: 14px;
+  isolation: isolate;
+}
+
+.circuit-terminal::before {
+  position: absolute;
+  z-index: -1;
+  width: 28px;
+  height: 28px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #255e4c;
+  box-shadow: 0 0 0 1px #b6c2b3;
+  content: '';
+}
+
+.circuit-terminal--pos::before { background: #a83630; }
+.circuit-terminal--neg::before { background: #2a5680; }
+
+.circuit-terminal:hover::before, .circuit-terminal[aria-pressed="true"]::before {
+  background: #f6bf45;
+  box-shadow: 0 0 0 2px #67462b;
+}
+
+.circuit-terminal:hover, .circuit-terminal[aria-pressed="true"] { color: #23222b; }
+
+.circuit-component .circuit-rotate,
+.circuit-component .circuit-remove-part {
+  top: 1px;
+  width: 32px;
+  height: 32px;
+  min-height: 0;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.circuit-component .circuit-rotate { left: 2px; }
+.circuit-component .circuit-remove-part { right: 2px; color: #a23228; }
+
+.circuit-part-label {
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #3a4748;
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.circuit-component--bulb .circuit-part-label { top: -13px; }
+
+.circuit-bend {
+  width: 24px;
+  height: 24px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  cursor: move;
+}
+
+.circuit-bend::after {
+  position: absolute;
+  inset: 5px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #2c6081;
+  box-shadow: 0 0 0 1px #2c6081;
+  content: '';
+}
+
+.circuit-board.hide-aux :is(.circuit-terminal, .circuit-bend, .circuit-rotate, .circuit-remove-part) {
+  visibility: hidden;
+}
+
+.circuit-status {
+  min-height: 1.5em;
+  margin: 10px 0;
+  line-height: 1.5;
+  color: var(--active);
+  font-weight: 700;
+}
+
+.circuit-wires button { font-size: 0.9rem; }
+
+.circuit-wires span {
+  color: #a23228;
+  font-size: 1.2rem;
+}
+
+@media (max-width: 480px) {
+  .circuit-header { gap: 5px; margin-bottom: 10px; }
+  .circuit-header h1 { font-size: 1.35rem; }
+  .circuit-toolbar { gap: 6px; }
+  .circuit-game button, .circuit-home { padding-inline: 9px; }
+  .circuit-toolbar [data-tool="power"] { margin-left: 0; }
+}
