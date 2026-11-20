@@ -13,6 +13,8 @@
     return;
   }
 
+  const INPUT_PLACEHOLDER = '輸入自然、遊戲或網站問題……';
+
   const state = {
     grade: null,
     characterKey: 'mimi',
@@ -22,6 +24,7 @@
     knowledgePromise: null,
     assistantMessageCount: 0,
     conversation: [],
+    practice: null,
     responseToken: 0,
     activeController: null
   };
@@ -142,7 +145,7 @@
     const input = makeElement('textarea');
     input.rows = 1;
     input.maxLength = 120;
-    input.placeholder = '輸入自然、遊戲或網站問題……';
+    input.placeholder = INPUT_PLACEHOLDER;
     input.setAttribute('aria-label', '輸入問題');
     const send = makeElement('button', 'assistant-send', '➤');
     send.type = 'submit';
@@ -197,6 +200,12 @@
     ui.messages.scrollTop = ui.messages.scrollHeight;
   };
 
+  const setPractice = (practice) => {
+    if (state.practice?.skipButton) state.practice.skipButton.disabled = true;
+    state.practice = practice;
+    ui.input.placeholder = practice ? '輸入這題的答案……' : INPUT_PLACEHOLDER;
+  };
+
   const makeAction = (action) => {
     if (!action) return null;
 
@@ -205,8 +214,33 @@
       button.type = 'button';
       button.addEventListener('click', () => {
         if (state.isReplying || !state.grade) return;
+        if (action.practiceTurn?.kind === 'check-quiz' && state.practice !== action.practiceTurn.exercise) return;
         button.disabled = true;
-        ask(action.question);
+        ask(action.question, null, action.practiceTurn);
+      });
+      return button;
+    }
+
+    if (action.kind === 'quiz') {
+      const button = makeElement('button', 'assistant-message__action', '考我一題');
+      button.type = 'button';
+      button.addEventListener('click', () => {
+        if (state.isReplying || !state.grade) return;
+        button.disabled = true;
+        ask('考我一題', null, action);
+      });
+      return button;
+    }
+
+    if (action.kind === 'skip-quiz') {
+      const button = makeElement('button', 'assistant-message__action', '跳過這題');
+      button.type = 'button';
+      action.exercise.skipButton = button;
+      button.addEventListener('click', () => {
+        if (state.isReplying || state.practice !== action.exercise) return;
+        setPractice(null);
+        addMessage('assistant', '已跳過這題。', null);
+        ui.input.focus();
       });
       return button;
     }
@@ -233,7 +267,7 @@
 
   const addMessage = (role, text, action, links = [], note = '') => {
     const row = makeElement('div', `assistant-message assistant-message--${role}`);
-    const displayText = role === 'assistant'
+    const displayText = role === 'assistant' && action?.kind !== 'skip-quiz'
       ? engine.stylizeCatReply(
           text,
           currentCharacter().replySuffixes,
@@ -514,7 +548,9 @@
         fallbackText: config.mockFallback
       });
     }
-    if (preset?.answer) return { text: preset.answer };
+    if (preset?.answer) {
+      return { text: preset.answer, intent: engine.classifyQuestion(question, state.grade).type };
+    }
 
     return engine.answerQuestion({
       question,
@@ -525,7 +561,26 @@
     });
   };
 
-  const respond = (question, preset) => {
+  const practiceRequest = (turn, answer) => {
+    if (turn.kind === 'quiz') {
+      return [
+        '請依據下方剛學過的內容出一道國小練習題。用繁體中文，讓學生自己用一句話作答。',
+        '只輸出一道相關題目並以問號結尾。不要附答案、選項、提示、解析或頁碼。',
+        '原問題：' + turn.topic.slice(0, 260),
+        '剛才的解答：' + turn.explanation.slice(0, 700)
+      ].join('\n');
+    }
+
+    return [
+      '請用繁體中文回饋這道國小練習題的作答。先說作答對不對或哪裡答對了，再用一到兩句解釋正確觀念。',
+      '學生沒作答或說不知道時，請直接講解。只回饋這一題，不要出新題或提供頁碼。',
+      '題目：' + turn.exercise.question.slice(0, 360),
+      '參考觀念：' + turn.exercise.explanation.slice(0, 450),
+      '學生作答：' + answer.slice(0, 800)
+    ].join('\n');
+  };
+
+  const respond = (question, preset, practiceTurn) => {
     if (state.isReplying) return;
     state.isReplying = true;
     ui.send.disabled = true;
@@ -537,10 +592,19 @@
         await state.knowledgePromise;
         if (token !== state.responseToken) return;
 
-        let reply = replyFor(question, preset);
-        if (!preset && reply?.source === 'fallback') {
+        const guard = practiceTurn?.kind === 'check-quiz' ? engine.guardQuestion(question) : null;
+        let reply = guard ? { intent: 'rephrase', text: guard.text } : null;
+        if (!practiceTurn) reply = replyFor(question, preset);
+
+        if (!guard && (practiceTurn || (!preset && reply?.source === 'fallback'))) {
           try {
-            reply = await askAi(question);
+            reply = await askAi(practiceTurn ? practiceRequest(practiceTurn, question) : question);
+            if (practiceTurn?.kind === 'quiz' && reply.intent === 'ai') {
+              const prompt = reply.text.replace(/^(?:練習題|題目)[：:]\s*/, '');
+              const end = prompt.search(/[？?]/);
+              if (end < 1) throw new Error('AI did not return a practice question.');
+              reply.text = prompt.slice(0, end + 1);
+            }
           } catch (error) {
             if (token !== state.responseToken) return;
             const failure = describeAiError(error);
@@ -550,17 +614,29 @@
               source: 'fallback',
               text: failure.text,
               note: '連線代碼：' + failure.code,
-              action: { kind: 'retry', question }
+              action: { kind: 'retry', question, practiceTurn }
             };
           }
         }
 
         if (token !== state.responseToken) return;
         typing.remove();
+
+        if (practiceTurn?.kind === 'quiz' && reply.intent === 'ai') {
+          const exercise = { question: reply.text, explanation: practiceTurn.explanation };
+          setPractice(exercise);
+          reply.action = { kind: 'skip-quiz', exercise };
+          ui.input.focus();
+        } else if (practiceTurn?.kind === 'check-quiz' && reply.intent === 'ai') {
+          setPractice(null);
+        } else if (!practiceTurn && ['curriculum', 'ai'].includes(reply.intent) && !reply.action) {
+          reply.action = { kind: 'quiz', topic: question, explanation: reply.text };
+        }
+
         addMessage('assistant', reply.text, reply.action, reply.links, reply.note);
 
         // Connection failures are UI notices, not answers for the next AI request.
-        if (reply.intent !== 'ai_error') {
+        if (reply.intent !== 'ai_error' && (!practiceTurn || reply.intent === 'ai')) {
           state.conversation.push(
             { role: 'user', text: question },
             { role: 'assistant', text: reply.text }
@@ -588,13 +664,14 @@
     }, 320);
   };
 
-  const ask = (question, preset) => {
+  const ask = (question, preset, practiceTurn = null) => {
     const text = question.trim();
     if (!text || state.isReplying) return;
+    if (preset) setPractice(null);
     addMessage('user', text);
     ui.input.value = '';
     ui.input.style.height = '';
-    respond(text, preset);
+    respond(text, preset, practiceTurn);
   };
 
   const renderQuickPrompts = () => {
@@ -616,6 +693,7 @@
     state.characterKey = characterForGrade(grade);
     state.assistantMessageCount = 0;
     state.conversation = [];
+    setPractice(null);
 
     const character = currentCharacter();
     const gradeLabel = grade === '3-4' ? '三、四年級' : grade === '5-6' ? '五、六年級' : grade + '年級';
@@ -636,6 +714,7 @@
     state.grade = null;
     state.isReplying = false;
     state.conversation = [];
+    setPractice(null);
     ui.headerAvatar.src = config.characters.mimi.avatar;
     ui.headerAvatar.alt = '橘咪咪';
     ui.headerSubtitle.textContent = config.subtitle;
@@ -656,7 +735,8 @@
   });
   ui.form.addEventListener('submit', (event) => {
     event.preventDefault();
-    ask(ui.input.value);
+    const practiceTurn = state.practice ? { kind: 'check-quiz', exercise: state.practice } : null;
+    ask(ui.input.value, null, practiceTurn);
   });
   ui.input.addEventListener('input', () => {
     ui.input.style.height = 'auto';

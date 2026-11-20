@@ -114,3 +114,55 @@ await guarded.ask('彩虹怎麼來的');
 assert.ok(guarded.lastReply().includes('請問自然科學相關問題'));
 assert.equal(guarded.byClass('assistant-message__action'), null, 'guard replies must not become network errors');
 console.log('Assistant connection tests passed: network, timeout, 429, 502, invalid payload, retry, history, guard.');
+
+const jsonReply = (reply) => new Response(JSON.stringify({ ok: true, reply }));
+const practice = await setup((count, options) => {
+  const { message, history } = JSON.parse(options.body);
+  if (count === 1) return jsonReply('陽光進入小水滴，經過折射和反射形成彩虹。');
+  if (count === 2) {
+    assert.match(message, /出一道國小練習題/);
+    assert.match(message, /彩虹怎麼來的/);
+    assert.match(message, /折射和反射形成彩虹/);
+    return jsonReply('題目：雨後如果有陽光，哪兩樣東西一起讓我們看見彩虹？\n答案：陽光和小水滴。');
+  }
+  assert.match(message, /雨後如果有陽光/);
+  assert.match(message, /學生作答：陽光和小水滴/);
+  assert(history.some((turn) => turn.text.includes('哪兩樣東西')));
+  assert(history.every((turn) => !turn.text.includes('答案：陽光和小水滴')));
+  return jsonReply('答對了！小水滴會讓陽光折射和反射，就能形成彩虹。');
+});
+await practice.ask('彩虹怎麼來的');
+const practiceAction = practice.byClass('assistant-message__action');
+assert.equal(practiceAction.textContent, '考我一題');
+assert.equal(practice.requests.length, 1, 'generates a quiz only when requested');
+practiceAction.listeners.click();
+await flush();
+assert.equal(practice.lastReply(), '雨後如果有陽光，哪兩樣東西一起讓我們看見彩虹？跳過這題');
+assert.equal(practice.byClass('assistant-compose').children[0].placeholder, '輸入這題的答案……');
+await practice.ask('陽光和小水滴');
+assert.match(practice.lastReply(), /答對了/);
+assert.equal(practice.byClass('assistant-compose').children[0].placeholder, '輸入自然、遊戲或網站問題……');
+
+const skipped = await setup((count, options) => {
+  if (count === 1) return jsonReply('陽光進入小水滴形成彩虹。');
+  if (count === 2) return new Response('{}', { status: 502 });
+  if (count === 3) {
+    assert.match(JSON.parse(options.body).message, /出一道國小練習題/);
+    return jsonReply('彩虹需要什麼光線？');
+  }
+  assert.equal(JSON.parse(options.body).message, '為什麼天空是藍色的');
+  return jsonReply('空氣中的微小粒子比較容易把藍光往各個方向散射。');
+});
+await skipped.ask('彩虹怎麼來的');
+skipped.byClass('assistant-message__action').listeners.click();
+await flush();
+assert.match(skipped.lastReply(), /再試一次/);
+let practiceBubble = skipped.byClass('assistant-messages').children.at(-1);
+find(practiceBubble, (el) => el.tagName === 'button').listeners.click();
+await flush();
+practiceBubble = skipped.byClass('assistant-messages').children.at(-1);
+find(practiceBubble, (el) => el.tagName === 'button').listeners.click();
+assert.match(skipped.lastReply(), /已跳過這題/);
+await skipped.ask('為什麼天空是藍色的');
+assert.match(skipped.lastReply(), /藍光/);
+console.log('Assistant practice tests passed: opt-in, context, no answer shown, feedback, retry, and skip.');
