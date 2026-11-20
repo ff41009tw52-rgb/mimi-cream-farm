@@ -45,6 +45,20 @@
       publishedAt: '2026-11-09T23:00:00+08:00'
     }),
     Object.freeze({
+      id: 'oppenheimer-history',
+      grades: Object.freeze([]),
+      gradeLabel: '探索天地',
+      category: 'explore',
+      subject: 'science',
+      icon: 'fas fa-atom',
+      title: '奧本海默｜生平與成就',
+      description: '走進奧本海默的生平與學術成就，閱讀歷史檔案，並與 AI 模擬的歷史人物展開對話。',
+      url: 'Oppenheimer.html',
+      actionLabel: '探索歷史人物',
+      actionIcon: 'fas fa-book-open',
+      publishedAt: '2026-08-28T00:00:00+08:00'
+    }),
+    Object.freeze({
       id: 'science-review-4a',
       grades: Object.freeze(['4']),
       gradeLabel: '四年級',
