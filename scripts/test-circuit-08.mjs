@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { evaluateCircuit } from '../games/08/circuit.js';
+import { distanceToWire, routeWire } from '../games/08/wire-route.js';
 
 const battery = (id) => ({ id, type: 'battery' });
 const bulb = (id) => ({ id, type: 'bulb' });
@@ -51,3 +52,50 @@ expectPower('opposed identical batteries connected in parallel constitute a shor
 ], [positive, negative, wire('B1', 'pos', 'B2', 'neg'), wire('B1', 'neg', 'B2', 'pos')], { L1: 0 }, true);
 
 console.log('Circuit 08 passed all 12 regression cases.');
+
+const size = { width: 700, height: 350 };
+const coordinates = ({ x, y }) => [x, y];
+function expectOrthogonal(route, start, end) {
+  assert.deepEqual(coordinates(route.points[0]), coordinates(start), 'fixed starting terminal');
+  assert.deepEqual(coordinates(route.points.at(-1)), coordinates(end), 'fixed ending terminal');
+  for (let i = 1; i < route.points.length; i += 1) {
+    assert.ok(route.points[i - 1].x === route.points[i].x || route.points[i - 1].y === route.points[i].y);
+  }
+  assert.ok(distanceToWire(route.handle, route.points) < 0.001);
+}
+
+const start = { x: 100, y: 160, dx: 1, dy: 0 };
+const end = { x: 500, y: 160, dx: -1, dy: 0 };
+const straight = routeWire(start, end, size);
+expectOrthogonal(straight, start, end);
+assert.equal(straight.axis, 'y', 'move a horizontal segment up or down');
+assert.deepEqual(straight.points.map(coordinates), [[100, 160], [500, 160]]);
+const movedHorizontal = routeWire(start, end, size, [], { axis: straight.axis, track: 235 });
+expectOrthogonal(movedHorizontal, start, end);
+assert.equal(movedHorizontal.handle.y, 235);
+assert.ok(movedHorizontal.points.length > 2);
+
+const top = { x: 260, y: 45, dx: 0, dy: 1 };
+const bottom = { x: 260, y: 290, dx: 0, dy: -1 };
+const vertical = routeWire(top, bottom, size);
+assert.equal(vertical.axis, 'x', 'move a vertical segment left or right');
+const movedVertical = routeWire(top, bottom, size, [], { axis: vertical.axis, track: 375 });
+expectOrthogonal(movedVertical, top, bottom);
+assert.equal(movedVertical.handle.x, 375);
+
+const batteryBox = { left: 100, top: 110, right: 247, bottom: 175 };
+const bulbBox = { left: 490, top: 100, right: 558, bottom: 205 };
+const positivePort = { x: 101, y: 140, dx: -1, dy: 0, box: batteryBox };
+const bulbPort = { x: 525, y: 205, dx: 0, dy: 1, box: bulbBox };
+const bent = routeWire(positivePort, bulbPort, size, [batteryBox, bulbBox]);
+expectOrthogonal(bent, positivePort, bulbPort);
+assert.equal(bent.blocked, 0, 'avoid crossing the battery casing or reversing at a contact');
+assert.ok(bent.points[1].x < positivePort.x);
+
+const stackedSize = { width: 296, height: 344 };
+const rotatedPort = { x: 148, y: 194, dx: 0.707, dy: 0.707 };
+const stackedPort = { x: 126, y: 284, dx: -1, dy: 0 };
+const stacked = routeWire(rotatedPort, stackedPort, stackedSize);
+expectOrthogonal(stacked, rotatedPort, stackedPort);
+assert.ok(stacked.points.every(({ x, y }) => x >= 0 && y >= 0 && x <= stackedSize.width && y <= stackedSize.height));
+console.log('Wire routing passed: straight and right-angle routes, dragged tracks, fixed metal terminals, and narrow-board bounds.');

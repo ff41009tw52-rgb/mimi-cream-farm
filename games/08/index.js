@@ -1,4 +1,5 @@
 import { evaluateCircuit } from './circuit.js';
+import { distanceToWire, routeWire } from './wire-route.js';
 
 const LABELS = {
   battery: '電池',
@@ -24,7 +25,7 @@ const boardState = () => ({
 
 export function mount(root, context = {}) {
   root.innerHTML = `
-    <link rel="stylesheet" href="${new URL('./style.css?v=20261120-contacts', import.meta.url).href}">
+    <link rel="stylesheet" href="${new URL('./style.css?v=20261120-right-angle', import.meta.url).href}">
     <div class="circuit-game">
       <header class="circuit-header">
         <h1>奇妙的電路實驗</h1>
@@ -47,7 +48,9 @@ export function mount(root, context = {}) {
       </div>
       <div class="circuit-board" role="group" aria-label="接線區">
         <canvas aria-hidden="true"></canvas>
-        <div class="circuit-bends"></div>
+        <div class="circuit-bends">
+          <button type="button" class="circuit-wire-handle" hidden></button>
+        </div>
         <div class="circuit-parts"></div>
       </div>
       <p class="circuit-status" role="status"></p>
@@ -57,7 +60,7 @@ export function mount(root, context = {}) {
   const find = (selector) => root.querySelector(selector);
   const board = find('.circuit-board');
   const parts = find('.circuit-parts');
-  const bends = find('.circuit-bends');
+  const handle = find('.circuit-wire-handle');
   const canvas = find('canvas');
   const ctx = canvas.getContext('2d');
   const powerButton = find('[data-tool="power"]');
@@ -74,7 +77,8 @@ export function mount(root, context = {}) {
   let showAux = true;
   let power = new Map();
   let elementById = new Map();
-  let bendById = new Map();
+  let activeWire = null;
+  const routes = new Map();
 
   const componentFor = (id) => state.components.find((component) => component.id === id);
   const endpointName = ({ compId, pointType }) => {
@@ -132,36 +136,27 @@ export function mount(root, context = {}) {
     };
   }
 
-  function wireRoute(wire, a, b) {
-    const extend = (point, length) => ({
-      x: point.x + (point.dx ?? 0) * length,
-      y: point.y + (point.dy ?? 0) * length
-    });
-    const start = extend(a, 18);
-    const end = extend(b, 18);
-    const c1 = extend(a, 50);
-    const c2 = extend(b, 50);
-    for (const control of [c1, c2]) {
-      control.x += wire.bendX * 4 / 3;
-      control.y += wire.bendY * 4 / 3;
-    }
-    for (const point of [start, end, c1, c2]) {
-      point.x = Math.max(4, Math.min(point.x, board.clientWidth - 4));
-      point.y = Math.max(4, Math.min(point.y, board.clientHeight - 4));
-    }
+  function partBox(component) {
+    const [left, right, top, bottom] = component.type === 'battery' ? [-76, 73, -30, 30] : [-34, 34, -53, 51];
+    const angle = component.rotation * Math.PI / 180;
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    const corners = [[left, top], [left, bottom], [right, top], [right, bottom]].map(([x, y]) => ({
+      x: component.x + x * cos - y * sin,
+      y: component.y + x * sin + y * cos
+    }));
     return {
-      start, end, c1, c2,
-      midX: (start.x + 3 * c1.x + 3 * c2.x + end.x) / 8,
-      midY: (start.y + 3 * c1.y + 3 * c2.y + end.y) / 8
+      left: Math.min(...corners.map(({ x }) => x)) - 2,
+      right: Math.max(...corners.map(({ x }) => x)) + 2,
+      top: Math.min(...corners.map(({ y }) => y)) - 2,
+      bottom: Math.max(...corners.map(({ y }) => y)) + 2
     };
   }
 
-  function drawWire(a, b, { start, end, c1, c2 }, temporary = false) {
+  function drawWire(points, temporary = false, highlighted = false) {
     ctx.beginPath();
-    ctx.moveTo(a.x, a.y);
-    ctx.lineTo(start.x, start.y);
-    ctx.bezierCurveTo(c1.x, c1.y, c2.x, c2.y, end.x, end.y);
-    ctx.lineTo(b.x, b.y);
+    ctx.moveTo(points[0].x, points[0].y);
+    for (const { x, y } of points.slice(1)) ctx.lineTo(x, y);
     ctx.strokeStyle = temporary ? '#a94812' : '#fff8e8';
     ctx.lineWidth = temporary ? 4 : 8;
     ctx.lineCap = 'round';
@@ -169,8 +164,8 @@ export function mount(root, context = {}) {
     ctx.setLineDash(temporary ? [6, 6] : []);
     ctx.stroke();
     if (!temporary) {
-      ctx.strokeStyle = '#38434a';
-      ctx.lineWidth = 4;
+      ctx.strokeStyle = highlighted ? '#a94812' : '#38434a';
+      ctx.lineWidth = highlighted ? 5 : 4;
       ctx.stroke();
     }
     ctx.setLineDash([]);
@@ -179,18 +174,33 @@ export function mount(root, context = {}) {
   function paint() {
     if (!board.clientWidth) return;
     ctx.clearRect(0, 0, board.clientWidth, board.clientHeight);
+    const size = { width: board.clientWidth, height: board.clientHeight };
+    const boxes = new Map(state.components.map((component) => [component.id, partBox(component)]));
+    const obstacles = [...boxes.values()];
+    const contact = (endpoint) => ({ ...pointFor(endpoint), box: boxes.get(endpoint.compId) });
+    routes.clear();
     for (const wire of state.wires) {
-      const a = pointFor(wire.start);
-      const b = pointFor(wire.end);
-      const route = wireRoute(wire, a, b);
-      drawWire(a, b, route);
-      const handle = bendById.get(wire.id);
-      handle.style.left = route.midX + 'px';
-      handle.style.top = route.midY + 'px';
+      const route = routeWire(contact(wire.start), contact(wire.end), size, obstacles, wire.adjustment);
+      routes.set(wire.id, route);
+      drawWire(route.points, false, showAux && wire.id === activeWire);
+    }
+    const activeRoute = showAux ? routes.get(activeWire) : null;
+    handle.hidden = !activeRoute;
+    if (activeRoute) {
+      handle.style.left = activeRoute.handle.x + 'px';
+      handle.style.top = activeRoute.handle.y + 'px';
+      handle.dataset.axis = activeRoute.axis;
+      const direction = activeRoute.axis === 'x' ? '左右' : '上下';
+      handle.textContent = activeRoute.axis === 'x' ? '↔' : '↕';
+      handle.title = direction + '拖曳電線';
+      handle.setAttribute('aria-label', direction + '移動電線');
+    }
+    for (const button of root.querySelectorAll('[data-select-wire]')) {
+      button.setAttribute('aria-pressed', String(button.dataset.selectWire === activeWire && showAux));
     }
     if (preview && selected) {
-      const a = pointFor(selected);
-      drawWire(a, preview, wireRoute({ bendX: 0, bendY: 18 }, a, preview), true);
+      const a = contact(selected);
+      drawWire(routeWire(a, preview, size, obstacles).points, true);
     }
     for (const component of state.components) {
       const entry = elementById.get(component.id);
@@ -209,9 +219,7 @@ export function mount(root, context = {}) {
 
   function renderParts() {
     elementById = new Map();
-    bendById = new Map();
     parts.replaceChildren();
-    bends.replaceChildren();
     for (const component of state.components) {
       const element = document.createElement('div');
       element.className = 'circuit-component circuit-component--' + component.type;
@@ -259,29 +267,25 @@ export function mount(root, context = {}) {
       elementById.set(component.id, element);
       parts.appendChild(element);
     }
-    for (const wire of state.wires) {
-      const handle = document.createElement('div');
-      handle.className = 'circuit-bend';
-      handle.dataset.bendWire = wire.id;
-      handle.title = '拖曳調整電線的彎曲';
-      handle.setAttribute('aria-hidden', 'true');
-      bends.appendChild(handle);
-      bendById.set(wire.id, handle);
-    }
 
     const wires = find('.circuit-wires');
     wires.replaceChildren();
     for (const wire of state.wires) {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.dataset.removeWire = wire.id;
-      button.textContent = endpointName(wire.start) + ' — ' + endpointName(wire.end);
-      button.setAttribute('aria-label', '拿掉電線，' + button.textContent);
-      const cross = document.createElement('span');
-      cross.setAttribute('aria-hidden', 'true');
-      cross.textContent = ' ×';
-      button.appendChild(cross);
-      wires.appendChild(button);
+      const name = endpointName(wire.start) + ' — ' + endpointName(wire.end);
+      const item = document.createElement('div');
+      item.className = 'circuit-wire-item';
+      const choose = document.createElement('button');
+      choose.type = 'button';
+      choose.dataset.selectWire = wire.id;
+      choose.textContent = name;
+      choose.setAttribute('aria-label', '調整電線，' + name);
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.dataset.removeWire = wire.id;
+      remove.textContent = '×';
+      remove.setAttribute('aria-label', '拿掉電線，' + name);
+      item.append(choose, remove);
+      wires.appendChild(item);
     }
     resizeBoard();
   }
@@ -328,6 +332,10 @@ export function mount(root, context = {}) {
     } else {
       status.textContent = '燈泡沒有發光。請檢查電線是否接成完整通路。';
     }
+    if (showAux && activeWire && !selected) {
+      const axis = routes.get(activeWire)?.axis;
+      if (axis) status.textContent += axis === 'x' ? ' 可左右拖動把手。' : ' 可上下拖動把手。';
+    }
     powerButton.textContent = state.powered ? '關閉電源' : '開啟電源';
     powerButton.setAttribute('aria-pressed', String(state.powered));
     paint();
@@ -353,6 +361,7 @@ export function mount(root, context = {}) {
     state.powered = false;
     mode = nextMode;
     state = boards[mode];
+    activeWire = null;
     selected = null;
     preview = null;
     showAux = true;
@@ -360,6 +369,7 @@ export function mount(root, context = {}) {
   }
 
   function editWiring() {
+    if (!state.wires.some(({ id }) => id === activeWire)) activeWire = null;
     selected = null;
     preview = null;
     render();
@@ -367,6 +377,7 @@ export function mount(root, context = {}) {
 
   function pick(endpoint) {
     if (!endpoint || !showAux) return;
+    activeWire = null;
     if (!selected || samePoint(selected, endpoint)) {
       selected = selected ? null : endpoint;
       updateStatus();
@@ -381,7 +392,7 @@ export function mount(root, context = {}) {
       status.textContent = '這兩個接點已經有一條電線。';
       return;
     }
-    state.wires.push({ id: 'w-' + state.nextId++, start: selected, end: endpoint, bendX: 0, bendY: 56 });
+    state.wires.push({ id: 'w-' + state.nextId++, start: selected, end: endpoint });
     editWiring();
     elementById.get(endpoint.compId)?.querySelector('[data-point-type="' + endpoint.pointType + '"]')?.focus({ preventScroll: true });
   }
@@ -397,20 +408,47 @@ export function mount(root, context = {}) {
     return { compId: target.dataset.compId, pointType: target.dataset.pointType };
   };
 
+  function selectWire(id) {
+    if (!showAux) return;
+    activeWire = id;
+    selected = null;
+    preview = null;
+    updateStatus();
+  }
+
+  function wireNear(position) {
+    let closest = null;
+    let best = 11;
+    for (const [id, { points }] of routes) {
+      const distance = distanceToWire(position, points);
+      if (distance <= best) {
+        best = distance;
+        closest = id;
+      }
+    }
+    return closest;
+  }
+
   board.addEventListener('pointerdown', (event) => {
     if (!event.isPrimary || event.button !== 0) return;
     const position = boardPoint(event);
     const terminal = endpointOf(event.target);
     const move = event.target.closest('[data-move-part]');
     const rotate = event.target.closest('[data-rotate-part]');
-    const bend = event.target.closest('[data-bend-wire]');
+    const route = routes.get(activeWire);
     if (terminal) drag = { kind: 'terminal', terminal, position };
     else if (move || rotate) {
       const component = componentFor(move?.dataset.movePart || rotate.dataset.rotatePart);
       drag = { kind: rotate ? 'rotate' : 'move', component, position, x: component.x, y: component.y };
-    } else if (bend) {
-      drag = { kind: 'bend', wire: state.wires.find(({ id }) => id === bend.dataset.bendWire), position };
-    } else return;
+    } else if (event.target.closest('.circuit-wire-handle') && route) {
+      const wire = state.wires.find(({ id }) => id === activeWire);
+      drag = { kind: 'shift-wire', axis: route.axis, track: route.track, wire, position };
+    } else {
+      const id = wireNear(position);
+      if (id) selectWire(id);
+      else if (activeWire) selectWire(null);
+      return;
+    }
     drag.pointerId = event.pointerId;
     board.setPointerCapture(event.pointerId);
   });
@@ -420,7 +458,10 @@ export function mount(root, context = {}) {
     const { x, y } = boardPoint(event);
     const dx = x - drag.position.x;
     const dy = y - drag.position.y;
-    drag.moved ||= Math.hypot(dx, dy) >= 6;
+    const distance = drag.kind === 'shift-wire'
+      ? Math.abs(drag.axis === 'x' ? dx : dy)
+      : Math.hypot(dx, dy);
+    drag.moved ||= distance >= 6;
     if (!drag.moved) return;
     if (drag.kind === 'terminal') {
       selected = drag.terminal;
@@ -431,11 +472,8 @@ export function mount(root, context = {}) {
     } else if (drag.kind === 'rotate') {
       drag.component.rotation = Math.atan2(y - drag.component.y, x - drag.component.x) * 180 / Math.PI + 90;
     } else {
-      const a = pointFor(drag.wire.start);
-      const b = pointFor(drag.wire.end);
-      const { midX, midY } = wireRoute({ bendX: 0, bendY: 0 }, a, b);
-      drag.wire.bendX = x - midX;
-      drag.wire.bendY = y - midY;
+      const { axis, track, wire } = drag;
+      wire.adjustment = { axis, track: track + (axis === 'x' ? dx : dy) };
     }
     paint();
   });
@@ -471,9 +509,12 @@ export function mount(root, context = {}) {
   root.addEventListener('click', (event) => {
     const button = event.target.closest('button');
     if (!button) return;
-    const { tool, mode: targetMode, removeWire, removePart, rotatePart } = button.dataset;
+    const { tool, mode: targetMode, selectWire: wireId, removeWire, removePart, rotatePart } = button.dataset;
     if (targetMode || button.matches('.circuit-next')) {
       switchMode(targetMode || 'free');
+    } else if (wireId) {
+      selectWire(activeWire === wireId ? null : wireId);
+      if (activeWire) handle.focus({ preventScroll: true });
     } else if (tool === 'reset') {
       state = boards[mode] = boardState();
       showAux = true;
@@ -485,6 +526,7 @@ export function mount(root, context = {}) {
       updateStatus();
     } else if (tool === 'aux') {
       showAux = !showAux;
+      activeWire = null;
       selected = null;
       preview = null;
       board.classList.toggle('hide-aux', !showAux);
@@ -515,10 +557,18 @@ export function mount(root, context = {}) {
     }
   });
   board.addEventListener('keydown', (event) => {
-    if (event.key !== 'Escape') return;
-    selected = null;
-    preview = null;
-    updateStatus();
+    if (event.key === 'Escape') {
+      selectWire(null);
+      return;
+    }
+    const route = routes.get(activeWire);
+    if (event.target !== handle || !route) return;
+    const [decrease, increase] = route.axis === 'x' ? ['ArrowLeft', 'ArrowRight'] : ['ArrowUp', 'ArrowDown'];
+    if (event.key !== decrease && event.key !== increase) return;
+    event.preventDefault();
+    const wire = state.wires.find(({ id }) => id === activeWire);
+    wire.adjustment = { axis: route.axis, track: route.track + (event.key === decrease ? -8 : 8) };
+    paint();
   });
 
   new ResizeObserver(resizeBoard).observe(board);
