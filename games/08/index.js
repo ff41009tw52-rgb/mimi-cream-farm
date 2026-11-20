@@ -10,8 +10,8 @@ const LABELS = {
 };
 // The wire ends and the centres of the tappable marks share the metal contacts.
 const POINTS = {
-  battery: { pos: [-74, 0], neg: [70, 0] },
-  bulb: { tip: [0, 50], thread: [-18, 16] }
+  battery: { pos: [-74, 0, -1, 0], neg: [70, 0, 1, 0] },
+  bulb: { tip: [0, 50, 0, 1], thread: [-18, 16, -1, 0] }
 };
 const samePoint = (a, b) => a?.compId === b?.compId && a?.pointType === b?.pointType;
 const boardState = () => ({
@@ -120,28 +120,52 @@ export function mount(root, context = {}) {
 
   function pointFor(endpoint) {
     const component = componentFor(endpoint.compId);
-    const [x, y] = POINTS[component.type][endpoint.pointType];
+    const [x, y, dx, dy] = POINTS[component.type][endpoint.pointType];
     const angle = component.rotation * Math.PI / 180;
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
     return {
-      x: component.x + x * Math.cos(angle) - y * Math.sin(angle),
-      y: component.y + x * Math.sin(angle) + y * Math.cos(angle)
+      x: component.x + x * cos - y * sin,
+      y: component.y + x * sin + y * cos,
+      dx: dx * cos - dy * sin,
+      dy: dx * sin + dy * cos
     };
   }
 
-  function wireControl(wire, a, b) {
+  function wireRoute(wire, a, b) {
+    const extend = (point, length) => ({
+      x: point.x + (point.dx ?? 0) * length,
+      y: point.y + (point.dy ?? 0) * length
+    });
+    const start = extend(a, 18);
+    const end = extend(b, 18);
+    const c1 = extend(a, 50);
+    const c2 = extend(b, 50);
+    for (const control of [c1, c2]) {
+      control.x += wire.bendX * 4 / 3;
+      control.y += wire.bendY * 4 / 3;
+    }
+    for (const point of [start, end, c1, c2]) {
+      point.x = Math.max(4, Math.min(point.x, board.clientWidth - 4));
+      point.y = Math.max(4, Math.min(point.y, board.clientHeight - 4));
+    }
     return {
-      x: (a.x + b.x) / 2 + wire.bendX,
-      y: (a.y + b.y) / 2 + wire.bendY
+      start, end, c1, c2,
+      midX: (start.x + 3 * c1.x + 3 * c2.x + end.x) / 8,
+      midY: (start.y + 3 * c1.y + 3 * c2.y + end.y) / 8
     };
   }
 
-  function drawWire(a, b, control, temporary = false) {
+  function drawWire(a, b, { start, end, c1, c2 }, temporary = false) {
     ctx.beginPath();
     ctx.moveTo(a.x, a.y);
-    ctx.quadraticCurveTo(control.x, control.y, b.x, b.y);
+    ctx.lineTo(start.x, start.y);
+    ctx.bezierCurveTo(c1.x, c1.y, c2.x, c2.y, end.x, end.y);
+    ctx.lineTo(b.x, b.y);
     ctx.strokeStyle = temporary ? '#a94812' : '#fff8e8';
     ctx.lineWidth = temporary ? 4 : 8;
     ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
     ctx.setLineDash(temporary ? [6, 6] : []);
     ctx.stroke();
     if (!temporary) {
@@ -158,15 +182,15 @@ export function mount(root, context = {}) {
     for (const wire of state.wires) {
       const a = pointFor(wire.start);
       const b = pointFor(wire.end);
-      const control = wireControl(wire, a, b);
-      drawWire(a, b, control);
+      const route = wireRoute(wire, a, b);
+      drawWire(a, b, route);
       const handle = bendById.get(wire.id);
-      handle.style.left = (a.x + 2 * control.x + b.x) / 4 + 'px';
-      handle.style.top = (a.y + 2 * control.y + b.y) / 4 + 'px';
+      handle.style.left = route.midX + 'px';
+      handle.style.top = route.midY + 'px';
     }
     if (preview && selected) {
       const a = pointFor(selected);
-      drawWire(a, preview, wireControl({ bendX: 0, bendY: 18 }, a, preview), true);
+      drawWire(a, preview, wireRoute({ bendX: 0, bendY: 18 }, a, preview), true);
     }
     for (const component of state.components) {
       const entry = elementById.get(component.id);
@@ -357,7 +381,7 @@ export function mount(root, context = {}) {
       status.textContent = '這兩個接點已經有一條電線。';
       return;
     }
-    state.wires.push({ id: 'w-' + state.nextId++, start: selected, end: endpoint, bendX: 0, bendY: 32 });
+    state.wires.push({ id: 'w-' + state.nextId++, start: selected, end: endpoint, bendX: 0, bendY: 56 });
     editWiring();
     elementById.get(endpoint.compId)?.querySelector('[data-point-type="' + endpoint.pointType + '"]')?.focus({ preventScroll: true });
   }
@@ -409,8 +433,9 @@ export function mount(root, context = {}) {
     } else {
       const a = pointFor(drag.wire.start);
       const b = pointFor(drag.wire.end);
-      drag.wire.bendX = 2 * (x - (a.x + b.x) / 2);
-      drag.wire.bendY = 2 * (y - (a.y + b.y) / 2);
+      const { midX, midY } = wireRoute({ bendX: 0, bendY: 0 }, a, b);
+      drag.wire.bendX = x - midX;
+      drag.wire.bendY = y - midY;
     }
     paint();
   });
