@@ -235,8 +235,14 @@
 }
 
 .circuit-component.is-lit .circuit-glass {
+  --glass-brightness: calc(var(--glow) * 100%);
   border-color: #c98612;
   background: radial-gradient(circle at 47% 43%, #fffcea 16%, #ffe292 55%, #f7b944 100%);
+  background: radial-gradient(circle at 47% 43%,
+    color-mix(in srgb, #c7aa78, #fffcea var(--glass-brightness)) 16%,
+    color-mix(in srgb, #ac752d, #ffe292 var(--glass-brightness)) 55%,
+    color-mix(in srgb, #845525, #f7b944 var(--glass-brightness)) 100%
+  );
   box-shadow: 0 0 var(--halo) rgb(245 161 16 / var(--glow));
 }
 

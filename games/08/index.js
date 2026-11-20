@@ -26,7 +26,7 @@ const boardState = () => ({
 export async function mount(root, context = {}) {
   const stylesheet = document.createElement('link');
   stylesheet.rel = 'stylesheet';
-  stylesheet.href = new URL('./style.css?v=20261120-mobile-board', import.meta.url).href;
+  stylesheet.href = new URL('./style.css?v=20261121-battery-brightness', import.meta.url).href;
   const stylesheetReady = new Promise((resolve, reject) => {
     stylesheet.addEventListener('load', resolve, { once: true });
     stylesheet.addEventListener('error', () => reject(new Error('電路介面樣式載入失敗')), { once: true });
