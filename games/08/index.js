@@ -26,7 +26,7 @@ const boardState = () => ({
 export async function mount(root, context = {}) {
   const stylesheet = document.createElement('link');
   stylesheet.rel = 'stylesheet';
-  stylesheet.href = new URL('./style.css?v=20261121-battery-brightness', import.meta.url).href;
+  stylesheet.href = new URL('./style.css?v=20261121-lamp-brightness', import.meta.url).href;
   const stylesheetReady = new Promise((resolve, reject) => {
     stylesheet.addEventListener('load', resolve, { once: true });
     stylesheet.addEventListener('error', () => reject(new Error('電路介面樣式載入失敗')), { once: true });
@@ -223,8 +223,12 @@ export async function mount(root, context = {}) {
       entry.style.setProperty('--part-angle', component.rotation + 'deg');
       const relativePower = state.powered ? power.get(component.id) || 0 : 0;
       entry.classList.toggle('is-lit', relativePower > 0);
-      entry.style.setProperty('--glow', relativePower ? Math.min(1, 0.25 + 0.38 * Math.sqrt(relativePower)) : 0);
-      entry.style.setProperty('--halo', relativePower ? Math.min(64, 10 + 15 * Math.sqrt(relativePower)) + 'px' : '0px');
+      const voltage = Math.sqrt(relativePower);
+      // Give dim lamps more visual contrast while preserving the single-lamp reference.
+      const glow = relativePower < 1 ? 0.12 + 0.51 * relativePower : 0.25 + 0.38 * voltage;
+      const halo = relativePower < 1 ? 6 + 19 * relativePower : 10 + 15 * voltage;
+      entry.style.setProperty('--glow', relativePower ? Math.min(1, glow) : 0);
+      entry.style.setProperty('--halo', relativePower ? Math.min(64, halo) + 'px' : '0px');
       for (const terminal of entry.querySelectorAll('[data-point-type]')) {
         terminal.setAttribute('aria-pressed', String(samePoint(selected, terminal.dataset)));
       }
