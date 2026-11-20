@@ -14,7 +14,7 @@ const POINTS = {
 };
 const samePoint = (a, b) => a?.compId === b?.compId && a?.pointType === b?.pointType;
 const boardState = () => ({
-  components: ['battery', 'bulb'].map((type) => ({ id: type + '-1', type, number: 1, rotation: 0 })),
+  components: ['battery', 'bulb'].map((type) => ({ id: type + '-1', type, number: 1, slot: type === 'battery' ? 0 : 1, rotation: 0 })),
   wires: [],
   nextId: 2,
   powered: false,
@@ -91,15 +91,18 @@ export function mount(root, context = {}) {
   function resizeBoard() {
     if (!board.clientWidth) return;
     const perRow = columns();
-    board.style.minHeight = Math.max(272, Math.ceil(state.components.length / perRow) * 150 + 44) + 'px';
+    const slotCount = Math.max(0, ...state.components.map(({ slot }) => slot + 1));
+    board.style.minHeight = Math.max(272, Math.ceil(slotCount / perRow) * 150 + 44) + 'px';
     const width = board.clientWidth;
     const height = board.clientHeight;
     const rearrange = state.columns !== undefined && state.columns !== perRow;
     state.columns = perRow;
-    for (const [i, component] of state.components.entries()) {
-      const column = i % perRow;
-      const row = Math.floor(i / perRow);
-      const initialX = mode === 'guided' ? width * (i ? 0.73 : 0.27) : width * (column + 0.5) / perRow;
+    for (const component of state.components) {
+      const column = component.slot % perRow;
+      const row = Math.floor(component.slot / perRow);
+      const initialX = mode === 'guided'
+        ? width * (component.type === 'battery' ? 0.27 : 0.73)
+        : width * (column + 0.5) / perRow;
       const initialY = row === 0 ? 130 : 105 + row * 150;
       component.x = clamp(rearrange ? initialX : (component.x ?? initialX), width);
       component.y = clamp(rearrange ? initialY : (component.y ?? initialY), height);
@@ -269,16 +272,16 @@ export function mount(root, context = {}) {
     if (guided) {
       instruction.textContent = isBreak
         ? '拿掉一條線後，燈泡熄滅了。電路中斷，沒有完整的通路。'
-        : state.sawLight && state.wires.length === 1
-          ? '再開啟電源，觀察少了一條線的燈泡。'
-          : glowing
-            ? '燈泡亮了。請在接線區下方拿掉其中一條電線，再開啟電源觀察。'
-            : state.wires.length >= 2 && litBulbIds.size
+        : glowing
+          ? '燈泡亮了。從接線區下方拿掉一條電線，看看燈泡會怎樣。'
+          : !state.powered && state.sawLight && state.wires.length === 1
+            ? '再開啟電源，觀察少了一條線的燈泡。'
+            : litBulbIds.size
               ? '接線完成。按「開啟電源」，觀察燈泡。'
               : '點兩個接點或拖曳接線。用兩條電線，把電池的兩端分別接到燈泡的底部和側邊。';
       find('.circuit-next').hidden = !isBreak;
     } else {
-      instruction.textContent = '可加電池和燈泡。點兩個接點或拖曳接線。以一顆電池接一顆燈泡為亮度基準。';
+      instruction.textContent = '點兩個接點或拖曳接線。電池和燈泡各使用相同規格，以一顆電池接一顆燈泡作為亮度基準。';
       find('.circuit-next').hidden = true;
     }
 
@@ -332,7 +335,6 @@ export function mount(root, context = {}) {
   }
 
   function editWiring() {
-    state.powered = false;
     selected = null;
     preview = null;
     render();
@@ -466,7 +468,10 @@ export function mount(root, context = {}) {
       const number = state.nextId++;
       const used = state.components.filter((component) => component.type === tool).map((component) => component.number);
       const displayNumber = [1, 2, 3, 4, 5].find((candidate) => !used.includes(candidate));
-      state.components.push({ id: tool + '-' + number, type: tool, number: displayNumber, rotation: 0 });
+      const occupied = new Set(state.components.map(({ slot }) => slot));
+      let slot = 0;
+      while (occupied.has(slot)) slot += 1;
+      state.components.push({ id: tool + '-' + number, type: tool, number: displayNumber, slot, rotation: 0 });
       editWiring();
     } else if (removeWire || removePart) {
       state.wires = state.wires.filter(({ id, start, end }) =>
