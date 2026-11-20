@@ -23,9 +23,16 @@ const boardState = () => ({
   sawLight: false
 });
 
-export function mount(root, context = {}) {
+export async function mount(root, context = {}) {
+  const stylesheet = document.createElement('link');
+  stylesheet.rel = 'stylesheet';
+  stylesheet.href = new URL('./style.css?v=20261120-right-angle', import.meta.url).href;
+  const stylesheetReady = new Promise((resolve, reject) => {
+    stylesheet.addEventListener('load', resolve, { once: true });
+    stylesheet.addEventListener('error', () => reject(new Error('電路介面樣式載入失敗')), { once: true });
+  });
+
   root.innerHTML = `
-    <link rel="stylesheet" href="${new URL('./style.css?v=20261120-right-angle', import.meta.url).href}">
     <div class="circuit-game">
       <header class="circuit-header">
         <h1>奇妙的電路實驗</h1>
@@ -56,6 +63,8 @@ export function mount(root, context = {}) {
       <p class="circuit-status" role="status"></p>
       <div class="circuit-wires" aria-label="已接的電線"></div>
     </div>`;
+  root.prepend(stylesheet);
+  await stylesheetReady;
 
   const find = (selector) => root.querySelector(selector);
   const board = find('.circuit-board');
