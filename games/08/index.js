@@ -26,7 +26,7 @@ const boardState = () => ({
 export async function mount(root, context = {}) {
   const stylesheet = document.createElement('link');
   stylesheet.rel = 'stylesheet';
-  stylesheet.href = new URL('./style.css?v=20261120-right-angle', import.meta.url).href;
+  stylesheet.href = new URL('./style.css?v=20261120-mobile-board', import.meta.url).href;
   const stylesheetReady = new Promise((resolve, reject) => {
     stylesheet.addEventListener('load', resolve, { once: true });
     stylesheet.addEventListener('error', () => reject(new Error('電路介面樣式載入失敗')), { once: true });
@@ -67,6 +67,7 @@ export async function mount(root, context = {}) {
   await stylesheetReady;
 
   const find = (selector) => root.querySelector(selector);
+  const game = find('.circuit-game');
   const board = find('.circuit-board');
   const parts = find('.circuit-parts');
   const handle = find('.circuit-wire-handle');
@@ -87,6 +88,7 @@ export async function mount(root, context = {}) {
   let power = new Map();
   let elementById = new Map();
   let activeWire = null;
+  let partScale = 1;
   const routes = new Map();
 
   const componentFor = (id) => state.components.find((component) => component.id === id);
@@ -97,27 +99,30 @@ export async function mount(root, context = {}) {
   };
 
   const clamp = (value, size, part) => {
-    const margin = Math.min(part.type === 'battery' ? 100 : 80, size / 2);
+    const graphicReach = part.type === 'battery' ? 78 : 58;
+    const margin = Math.min(Math.ceil(graphicReach * partScale) + 22, size / 2);
     return Math.max(margin, Math.min(value, size - margin));
   };
-  const columns = () => Math.max(1, Math.floor(board.clientWidth / 196));
-
   function resizeBoard() {
-    if (!board.clientWidth) return;
-    const perRow = columns();
-    const slotCount = Math.max(0, ...state.components.map(({ slot }) => slot + 1));
-    board.style.minHeight = Math.max(272, Math.ceil(slotCount / perRow) * 150 + 44) + 'px';
     const width = board.clientWidth;
+    if (!width) return;
+    partScale = Number(getComputedStyle(game).getPropertyValue('--part-scale')) || 1;
+    const columnWidth = Math.round(58 + 138 * partScale);
+    const rowHeight = Math.round(52 + 98 * partScale);
+    const perRow = Math.max(1, Math.floor(width / columnWidth));
+    const slotCount = Math.max(0, ...state.components.map(({ slot }) => slot + 1));
+    board.style.setProperty('--slot-height', (Math.ceil(slotCount / perRow) * rowHeight + 56) + 'px');
     const height = board.clientHeight;
-    const rearrange = state.columns !== undefined && state.columns !== perRow;
+    const rearrange = state.columns !== undefined && (state.columns !== perRow || state.layoutScale !== partScale);
     state.columns = perRow;
+    state.layoutScale = partScale;
     for (const component of state.components) {
       const column = component.slot % perRow;
       const row = Math.floor(component.slot / perRow);
       const initialX = mode === 'guided' && perRow > 1
         ? width * (component.type === 'battery' ? 0.27 : 0.73)
         : width * (column + 0.5) / perRow;
-      const initialY = row === 0 ? 125 : 105 + row * 150;
+      const initialY = Math.round(125 * partScale) + row * rowHeight;
       component.x = clamp(rearrange ? initialX : (component.x ?? initialX), width, component);
       component.y = clamp(rearrange ? initialY : (component.y ?? initialY), height, component);
     }
@@ -138,8 +143,8 @@ export async function mount(root, context = {}) {
     const cos = Math.cos(angle);
     const sin = Math.sin(angle);
     return {
-      x: component.x + x * cos - y * sin,
-      y: component.y + x * sin + y * cos,
+      x: component.x + (x * cos - y * sin) * partScale,
+      y: component.y + (x * sin + y * cos) * partScale,
       dx: dx * cos - dy * sin,
       dy: dx * sin + dy * cos
     };
@@ -151,8 +156,8 @@ export async function mount(root, context = {}) {
     const cos = Math.cos(angle);
     const sin = Math.sin(angle);
     const corners = [[left, top], [left, bottom], [right, top], [right, bottom]].map(([x, y]) => ({
-      x: component.x + x * cos - y * sin,
-      y: component.y + x * sin + y * cos
+      x: component.x + (x * cos - y * sin) * partScale,
+      y: component.y + (x * sin + y * cos) * partScale
     }));
     return {
       left: Math.min(...corners.map(({ x }) => x)) - 2,

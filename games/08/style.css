@@ -5,7 +5,9 @@
   --paper: #fffdf8;
   --accent: #a7491e;
   --active: #133d39;
-  width: min(100%, 1120px);
+  --part-scale: 1;
+  --board-min-height: max(370px, 54svh);
+  width: min(100%, 1440px);
   min-height: 100%;
   margin: 0 auto;
   padding: clamp(12px, 3vw, 30px);
@@ -96,7 +98,7 @@
 .circuit-board {
   position: relative;
   min-width: 0;
-  min-height: 272px;
+  min-height: max(var(--board-min-height), var(--slot-height, 0px));
   overflow: hidden;
   isolation: isolate;
   border: 1px solid #d7c8ae;
@@ -128,7 +130,10 @@
   touch-action: none;
 }
 
-.circuit-part-shape { cursor: grab; }
+.circuit-part-shape {
+  transform: scale(var(--part-scale));
+  cursor: grab;
+}
 
 .circuit-battery {
   top: calc(50% - 30px);
@@ -204,6 +209,7 @@
   left: calc(50% - 34px);
   width: 68px;
   height: 108px;
+  transform-origin: 50% 53px;
 }
 
 .circuit-glass {
@@ -257,8 +263,8 @@
 }
 
 .circuit-component .circuit-terminal {
-  top: calc(50% + var(--point-y));
-  left: calc(50% + var(--point-x));
+  top: calc(50% + var(--point-y) * var(--part-scale));
+  left: calc(50% + var(--point-x) * var(--part-scale));
   z-index: 2;
   width: 44px;
   height: 44px;
@@ -266,6 +272,7 @@
   transform: translate(-50%, -50%);
   border: 0;
   padding: 0;
+  border-radius: 50%;
   background: transparent;
   color: #fff;
   font-size: 14px;
@@ -365,4 +372,45 @@
   .circuit-toolbar { gap: 6px; }
   .circuit-game button, .circuit-home { padding-inline: 9px; }
   .circuit-toolbar [data-tool="power"] { margin-left: 0; }
+}
+
+@media (max-width: 700px), (max-height: 520px) and (pointer: coarse) {
+  .circuit-game {
+    --part-scale: 0.65;
+    --board-min-height: max(360px, 60svh);
+    padding: max(8px, env(safe-area-inset-top)) max(7px, env(safe-area-inset-right))
+      max(8px, env(safe-area-inset-bottom)) max(7px, env(safe-area-inset-left));
+  }
+
+  .circuit-header { margin-bottom: 8px; }
+
+  .circuit-guide {
+    margin-block: 7px;
+    padding: 6px 9px;
+    font-size: 0.94rem;
+  }
+
+  .circuit-instruction { line-height: 1.45; }
+
+  .circuit-toolbar {
+    gap: 5px;
+    margin-bottom: 7px;
+  }
+
+  .circuit-component .circuit-terminal { font-size: 11px; }
+  .circuit-terminal::before { width: 21px; height: 21px; }
+
+  .circuit-part-label, .circuit-component--bulb .circuit-part-label {
+    top: calc(50% - 44px);
+    font-size: 13px;
+  }
+
+  .circuit-component .circuit-rotate, .circuit-component .circuit-remove-part {
+    top: calc(50% - 52px);
+  }
+
+  .circuit-component .circuit-rotate { left: calc(50% - 54px); }
+  .circuit-component .circuit-remove-part { right: calc(50% - 54px); }
+
+  .circuit-game .circuit-wire-handle { width: 44px; height: 40px; }
 }
