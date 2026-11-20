@@ -131,32 +131,72 @@
 .circuit-part-shape { cursor: grab; }
 
 .circuit-battery {
-  top: calc(50% - 29px);
-  left: calc(50% - 61px);
+  top: calc(50% - 30px);
+  left: calc(50% - 70px);
+  width: 140px;
+  height: 60px;
+  border: 2px solid #111827;
+  border-radius: 8px;
+  background: linear-gradient(#374151, #1f2937);
+  box-shadow: 0 5px 10px #1f293745;
+}
+
+.circuit-battery-face {
+  position: absolute;
+  inset: 2px 10px;
   display: flex;
-  width: 122px;
-  height: 58px;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  padding: 4px 12px 3px;
-  border: 3px solid #43434b;
-  border-radius: 10px 8px 8px 10px;
-  background: linear-gradient(90deg, #ea9c48 0 63%, #55565f 63%);
-  box-shadow: 0 3px 5px #30303040;
+  padding: 0 8px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #fb923c, #f97316);
   color: #fff;
+  font-size: 20px;
   font-weight: 900;
-  text-shadow: 0 1px 1px #2b1c15;
+}
+
+.circuit-battery-bars {
+  width: 20px;
+  height: 16px;
+  border-radius: 2px;
+  background: repeating-linear-gradient(90deg, #b45309 0 4px, transparent 4px 8px);
+  opacity: 0.35;
+}
+
+.circuit-battery::before,
+.circuit-battery::after {
+  position: absolute;
+  content: '';
 }
 
 .circuit-battery::before {
-  position: absolute;
-  top: 15px;
+  top: 13px;
   right: 100%;
-  width: 7px;
-  height: 22px;
-  border-radius: 2px 0 0 2px;
-  background: #7f8288;
-  content: '';
+  width: 8px;
+  height: 32px;
+  border: 1px solid #4b5563;
+  border-right: 0;
+  border-radius: 3px 0 0 3px;
+  background: #9ca3af;
+}
+
+.circuit-battery-negative {
+  position: absolute;
+  top: 19px;
+  left: 100%;
+  width: 5px;
+  height: 18px;
+  border-radius: 0 2px 2px 0;
+  background: #939da5;
+}
+
+.circuit-battery::after {
+  top: 2px;
+  right: 6px;
+  left: 6px;
+  height: 12px;
+  border-radius: 4px;
+  background: #fff3;
 }
 
 .circuit-lamp {
@@ -212,7 +252,8 @@
   width: 24px;
   height: 15px;
   border-radius: 0 0 9px 9px;
-  background: #36434d;
+  border: 1px solid #36434d;
+  background: linear-gradient(#a4adb3, #5e6d77);
 }
 
 .circuit-component .circuit-terminal {

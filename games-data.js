@@ -230,7 +230,7 @@
       title: '🔌 奇妙的電路實驗',
       description: '天黑了，橘咪咪在農場倉庫找到了一些電池跟電線，她想知道怎麼做才能讓燈泡發光？一起來動手接通電路吧！',
       gameNumber: '08',
-      moduleUrl: 'games/08/index.js?v=20261120-circuit',
+      moduleUrl: 'games/08/index.js?v=20261120-contacts',
       actionLabel: '點亮燈泡',
       actionIcon: 'fas fa-lightbulb'
     },

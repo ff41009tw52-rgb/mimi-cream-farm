@@ -8,9 +8,10 @@ const LABELS = {
   tip: '底部接點',
   thread: '螺紋接點'
 };
+// The wire ends and the centres of the tappable marks share the metal contacts.
 const POINTS = {
-  battery: { pos: [-47, 0], neg: [47, 0] },
-  bulb: { tip: [0, 50], thread: [-38, 20] }
+  battery: { pos: [-74, 0], neg: [70, 0] },
+  bulb: { tip: [0, 50], thread: [-18, 16] }
 };
 const samePoint = (a, b) => a?.compId === b?.compId && a?.pointType === b?.pointType;
 const boardState = () => ({
@@ -23,7 +24,7 @@ const boardState = () => ({
 
 export function mount(root, context = {}) {
   root.innerHTML = `
-    <link rel="stylesheet" href="${new URL('./style.css', import.meta.url).href}">
+    <link rel="stylesheet" href="${new URL('./style.css?v=20261120-contacts', import.meta.url).href}">
     <div class="circuit-game">
       <header class="circuit-header">
         <h1>奇妙的電路實驗</h1>
@@ -82,11 +83,11 @@ export function mount(root, context = {}) {
     return LABELS[type] + (mode === 'free' || count > 1 ? number : '') + LABELS[pointType];
   };
 
-  const clamp = (value, size) => {
-    const margin = Math.min(80, size / 2);
+  const clamp = (value, size, part) => {
+    const margin = Math.min(part.type === 'battery' ? 100 : 80, size / 2);
     return Math.max(margin, Math.min(value, size - margin));
   };
-  const columns = () => Math.max(2, Math.floor(board.clientWidth / 150));
+  const columns = () => Math.max(1, Math.floor(board.clientWidth / 196));
 
   function resizeBoard() {
     if (!board.clientWidth) return;
@@ -100,12 +101,12 @@ export function mount(root, context = {}) {
     for (const component of state.components) {
       const column = component.slot % perRow;
       const row = Math.floor(component.slot / perRow);
-      const initialX = mode === 'guided'
+      const initialX = mode === 'guided' && perRow > 1
         ? width * (component.type === 'battery' ? 0.27 : 0.73)
         : width * (column + 0.5) / perRow;
-      const initialY = row === 0 ? 130 : 105 + row * 150;
-      component.x = clamp(rearrange ? initialX : (component.x ?? initialX), width);
-      component.y = clamp(rearrange ? initialY : (component.y ?? initialY), height);
+      const initialY = row === 0 ? 125 : 105 + row * 150;
+      component.x = clamp(rearrange ? initialX : (component.x ?? initialX), width, component);
+      component.y = clamp(rearrange ? initialY : (component.y ?? initialY), height, component);
     }
 
     const ratio = Math.min(2, window.devicePixelRatio || 1);
@@ -192,7 +193,7 @@ export function mount(root, context = {}) {
       element.className = 'circuit-component circuit-component--' + component.type;
       const title = LABELS[component.type] + (mode === 'free' ? component.number : '');
       element.innerHTML = component.type === 'battery'
-        ? '<div class="circuit-part-shape circuit-battery"><span>＋</span><span>−</span></div>'
+        ? '<div class="circuit-part-shape circuit-battery"><div class="circuit-battery-face"><span>＋</span><span class="circuit-battery-bars"></span><span>−</span></div><span class="circuit-battery-negative"></span></div>'
         : '<div class="circuit-part-shape circuit-lamp"><div class="circuit-glass"></div><div class="circuit-thread"></div><div class="circuit-tip"></div></div>';
       const shape = element.firstElementChild;
       shape.dataset.movePart = component.id;
@@ -401,8 +402,8 @@ export function mount(root, context = {}) {
       selected = drag.terminal;
       preview = { x, y };
     } else if (drag.kind === 'move') {
-      drag.component.x = clamp(drag.x + dx, board.clientWidth);
-      drag.component.y = clamp(drag.y + dy, board.clientHeight);
+      drag.component.x = clamp(drag.x + dx, board.clientWidth, drag.component);
+      drag.component.y = clamp(drag.y + dy, board.clientHeight, drag.component);
     } else if (drag.kind === 'rotate') {
       drag.component.rotation = Math.atan2(y - drag.component.y, x - drag.component.x) * 180 / Math.PI + 90;
     } else {
