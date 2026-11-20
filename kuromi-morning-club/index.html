@@ -31,6 +31,10 @@
     :focus-visible { outline: 3px solid #955bc7; outline-offset: 3px; }
     a { color: inherit; }
     .app { width: min(1050px, 100%); margin: auto; padding: 20px 26px 42px; }
+    .shared-notice { margin: 0 0 14px; padding: 12px 16px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 15px; border: 1px solid var(--line); border-radius: 14px; background: #fff8fc; font-size: 13px; line-height: 1.6; }
+    .shared-notice p { margin: 0; }
+    .shared-notice .control { min-height: 37px; }
+    .shared-actions { display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; }
     .masthead { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 19px; }
     .brand { display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; font-size: 15px; font-weight: 850; }
     .brand-icon { display: grid; width: 36px; height: 36px; flex: none; place-items: center; border: 1px solid #ffe1f1; border-radius: 11px; background: #32213f; color: #ffd8ee; font-size: 19px; }
@@ -188,6 +192,14 @@
       <a class="brand" href="#top"><span class="brand-icon" aria-hidden="true">☾</span>早安小惡魔俱樂部</a>
       <button id="openSettings" class="control settings-btn" type="button">設定時間與獎品</button>
     </header>
+
+    <aside class="shared-notice" aria-label="雙人共用版">
+      <p><strong>雙人共用簿上線啦 ♡</strong><br>舊紀錄可從這台瀏覽器匯出，再帶到共用簿。</p>
+      <div class="shared-actions">
+        <button type="button" id="quickExport" class="control">匯出舊紀錄</button>
+        <a href="https://kuromi-morning-club.ff41009tw52.chatgpt.site/">開啟雙人共用簿</a>
+      </div>
+    </aside>
 
     <main id="top">
       <section class="hero" aria-labelledby="heroTitle">
@@ -746,7 +758,7 @@
       }
     });
 
-    $('exportBtn').addEventListener('click', () => {
+    function exportBackup() {
       const copy = JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), ...load() }, null, 2);
       const url = URL.createObjectURL(new Blob([copy], { type: 'application/json' }));
       const link = document.createElement('a');
@@ -755,7 +767,10 @@
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 1500);
       toast('備份已經匯出，收好喔 ♡');
-    });
+    }
+
+    $('exportBtn').addEventListener('click', exportBackup);
+    $('quickExport').addEventListener('click', exportBackup);
 
     $('chooseImport').addEventListener('click', () => $('importFile').click());
     $('importFile').addEventListener('change', async event => {
