@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#f7f2fc">
   <meta name="description" content="酷洛米主題的早起小任務。每天準時打卡拿 1 點，集滿 20 點就能換一份專屬驚喜。">
   <meta name="robots" content="noindex, nofollow">
-  <title>早安小惡魔俱樂部 ♡</title>
+  <title>雙人共用簿｜早安小惡魔俱樂部 ♡</title>
   <style>
     :root {
       color-scheme: light;
@@ -31,10 +31,11 @@
     :focus-visible { outline: 3px solid #955bc7; outline-offset: 3px; }
     a { color: inherit; }
     .app { width: min(1050px, 100%); margin: auto; padding: 20px 26px 42px; }
-    .shared-notice { margin: 0 0 14px; padding: 12px 16px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 15px; border: 1px solid var(--line); border-radius: 14px; background: #fff8fc; font-size: 13px; line-height: 1.6; }
-    .shared-notice p { margin: 0; }
-    .shared-notice .control { min-height: 37px; }
-    .shared-actions { display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; }
+    .sync-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 7px 15px; margin-bottom: 13px; color: var(--muted); font-size: 13px; }
+    .sync-info { margin: 0; line-height: 1.6; }
+    #refreshCloud { min-height: 37px; }
+    .migration { margin: 20px 0 0; padding: 13px 17px; background: #fff6fc; border: 1px solid #e8dcef; border-radius: 14px; font-size: 13px; line-height: 1.6; }
+    .migration .control { margin-left: 5px; }
     .masthead { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 19px; }
     .brand { display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; font-size: 15px; font-weight: 850; }
     .brand-icon { display: grid; width: 36px; height: 36px; flex: none; place-items: center; border: 1px solid #ffe1f1; border-radius: 11px; background: #32213f; color: #ffd8ee; font-size: 19px; }
@@ -154,7 +155,12 @@
 
     @media (max-width: 700px) {
       .app { padding: 14px 14px 30px; }
-      .masthead { margin-bottom: 13px; }
+      .sync-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 7px 15px; margin-bottom: 13px; color: var(--muted); font-size: 13px; }
+    .sync-info { margin: 0; line-height: 1.6; }
+    #refreshCloud { min-height: 37px; }
+    .migration { margin: 20px 0 0; padding: 13px 17px; background: #fff6fc; border: 1px solid #e8dcef; border-radius: 14px; font-size: 13px; line-height: 1.6; }
+    .migration .control { margin-left: 5px; }
+    .masthead { margin-bottom: 13px; }
       .hero { min-height: 239px; padding: 15px 20px; column-gap: 5px; grid-template-columns: minmax(0, 1.22fr) minmax(0, .9fr); }
       .hero h1 { font-size: clamp(30px, 6.5vw, 43px); }
       .hero p { margin-top: 11px; font-size: 13px; line-height: 1.65; }
@@ -190,18 +196,14 @@
   <div class="app">
     <header class="masthead">
       <a class="brand" href="#top"><span class="brand-icon" aria-hidden="true">☾</span>早安小惡魔俱樂部</a>
-      <button id="openSettings" class="control settings-btn" type="button">設定時間與獎品</button>
+      <button id="openSettings" class="control settings-btn" type="button" hidden>設定與備份</button>
     </header>
 
-    <aside class="shared-notice" aria-label="雙人共用版">
-      <p><strong>雙人共用簿上線啦 ♡</strong><br>舊紀錄可從這台瀏覽器匯出，再帶到共用簿。</p>
-      <div class="shared-actions">
-        <button type="button" id="quickExport" class="control">匯出舊紀錄</button>
-        <a href="https://kuromi-morning-club.ff41009tw52.chatgpt.site/">開啟雙人共用簿</a>
-      </div>
-    </aside>
-
-    <main id="top">
+    <div class="sync-bar">
+      <p id="syncStatus" class="sync-info" role="status">正在載入你們的共用紀錄 ♡</p>
+      <button id="refreshCloud" class="control" type="button">更新紀錄</button>
+    </div>
+    <main id="top" hidden>
       <section class="hero" aria-labelledby="heroTitle">
         <div class="hero-copy">
           <h1 id="heroTitle">起床啦，<span><b id="heroName">寶貝</b>！</span></h1>
@@ -228,7 +230,7 @@
             <span id="statusBadge" class="status-pill">準備打卡</span>
           </div>
           <p id="timeHelp" class="time-help">準時起床就有一顆愛心等著妳。</p>
-          <button class="primary" id="checkinBtn" type="button" disabled>我起床啦！收下 1 點 ♡</button>
+          <button class="primary" id="checkinBtn" type="button" disabled>我起床啦！打卡領 1 點 ♡</button>
           <hr class="soft-line">
           <div class="mini-stats">
             <div class="stat"><strong id="totalOnTime">0</strong><span>累計早起天數</span></div>
@@ -278,8 +280,12 @@
       </div>
     </main>
 
+    <p class="migration" id="migration" hidden>舊版有留下點數或紀錄嗎？用原來打卡的瀏覽器<a href="https://ff41009tw52-rgb.github.io/mimi-cream-farm/kuromi-morning-club/legacy.html" target="_blank" rel="noopener noreferrer">開舊版匯出備份</a>，第一次打卡前可以帶到這裡。
+      <button type="button" id="quickImport" class="control">匯入舊紀錄</button>
+    </p>
+
     <footer class="foot">
-      <p>點數和設定存在目前的瀏覽器。換手機前，記得到設定匯出備份 ♡</p>
+      <p>打卡、點數與兌獎會同步。換手機時，開啟同一個網址就能接著用 ♡</p>
       <p>個人粉絲作品。酷洛米貼圖由
         <a href="https://giphy.com/stickers/SanrioKorea-sanrio-korea-kuromi-fYT608LmfWloq08a5n" target="_blank" rel="noopener noreferrer">Sanrio Korea</a> 與
         <a href="https://giphy.com/stickers/sanrioinc-sanrio-expressions-kuromi-vWogB2TzWRruIQzRBt" target="_blank" rel="noopener noreferrer">Sanrio</a>
@@ -300,20 +306,19 @@
         <div class="field">
           <label for="inputSticker">自訂封面貼圖（選填）</label>
           <input type="file" id="inputSticker" accept="image/png,image/jpeg,image/webp,image/gif">
-          <small>也可以用自己的照片或貼圖當封面，只存在這個瀏覽器。</small>
+          <small>可以換成兩個人都看得到的封面貼圖。</small>
           <button type="button" id="removeSticker" class="control" hidden>換回酷洛米貼圖</button>
         </div>
         <button class="primary" type="submit">存好囉 ♡</button>
       </form>
       <hr class="soft-line">
-      <p class="setting-hint" id="settingHint">點數只存在這個瀏覽器。換裝置前先存一份備份喔。手動補點適合補登，早起天數照打卡紀錄算。</p>
+      <p class="setting-hint" id="settingHint">你們都會看到同一份紀錄。手動補點適合補登，早起天數照打卡紀錄算。</p>
       <div class="setting-actions">
         <button id="demoAdd" class="control" type="button">補 1 點</button>
         <button id="demoRemove" class="control" type="button">扣 1 點</button>
         <button id="exportBtn" class="control" type="button">匯出備份</button>
         <button id="chooseImport" class="control" type="button">匯入備份</button>
         <input type="file" id="importFile" accept="application/json,.json" hidden>
-        <button id="resetBtn" class="control danger" type="button">清空紀錄</button>
       </div>
     </div>
     <p class="toast" id="settingsToast" role="status"></p>
@@ -330,13 +335,13 @@
     </div>
     <p class="toast" id="confirmToast" role="status"></p>
   </dialog>
+  <input type="file" id="quickImportFile" accept="application/json,.json" hidden>
   <p class="toast" id="toast" role="status"></p>
   <noscript><p class="noscript">請啟用 JavaScript，愛心集點卡才會動起來喔。</p></noscript>
   <script>
   (() => {
     'use strict';
 
-    const KEY = 'little-devil-morning-club-v1';
     const TZ = 'Asia/Taipei';
     const REWARD_COST = 20;
     const DAY_MS = 86400000;
@@ -372,57 +377,19 @@
       return { day: parts.year + '-' + parts.month + '-' + parts.day, hour: +parts.hour, minute: +parts.minute };
     }
 
-    function validDay(day) {
-      return typeof day === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(day) &&
-        Number.isFinite(+dateFromDay(day)) && localDay(dateFromDay(day)) === day;
-    }
-
-    function validTime(at) {
-      return typeof at === 'string' && Number.isFinite(Date.parse(at));
-    }
-
-    function sanitize(value) {
-      const data = value && typeof value === 'object' ? value : {};
-      const hadPreviousDefault = data.wakeTime === '08:00' && data.wakeTimeConfigured !== true;
-      const checkins = new Map();
-      const records = Array.isArray(data.checkins) ? data.checkins.filter(record =>
-        record && validDay(record.day) && ['onTime', 'late'].includes(record.type)).slice(-3000) : [];
-      for (const record of records) {
-        if (checkins.has(record.day)) continue;
-        checkins.set(record.day, {
-          day: record.day,
-          type: record.type,
-          at: validTime(record.at) ? record.at : record.day + 'T00:00:00+08:00'
-        });
-      }
-      return {
-        nickname: String(data.nickname || defaults.nickname).slice(0, 12),
-        wakeTime: !hadPreviousDefault && /^([01]\d|2[0-3]):[0-5]\d$/.test(data.wakeTime) ? data.wakeTime : defaults.wakeTime,
-        wakeTimeConfigured: data.wakeTimeConfigured === true,
-        reward: String(data.reward || defaults.reward).slice(0, 35),
-        description: String(data.description || defaults.description).slice(0, 100),
-        note: String(data.note || defaults.note).slice(0, 160),
-        sticker: typeof data.sticker === 'string' && data.sticker.length < 1000000 &&
-          /^data:image\/(png|jpeg|webp);base64,[a-z0-9+/]+={0,2}$/i.test(data.sticker) ? data.sticker : '',
-        points: Number.isSafeInteger(data.points) && data.points >= 0 ? data.points : 0,
-        checkins: [...checkins.values()],
-        redemptions: Array.isArray(data.redemptions) ? data.redemptions.filter(record =>
-          record && validTime(record.at)).slice(-3000).map(record =>
-          ({ at: record.at, reward: String(record.reward || '小驚喜').slice(0, 35) })) : [],
-        adjustments: Array.isArray(data.adjustments) ? data.adjustments.filter(record =>
-          record && validTime(record.at) && Number.isSafeInteger(record.delta)).slice(-3000).map(record =>
-          ({ at: record.at, delta: record.delta })) : []
-      };
-    }
-
-    function load() {
-      try { return sanitize(JSON.parse(localStorage.getItem(KEY))); }
-      catch { return sanitize(null); }
-    }
-
-    let state = load();
+    let state;
+    let revision = -1;
+    let mayImport = false;
+    let connected = false;
+    let writing = false;
+    let reading = false;
+    let clockOffset = 0;
     let toastHandle;
     let previousDay = '';
+
+    function clubNow() {
+      return new Date(Date.now() + clockOffset);
+    }
 
     function toast(message) {
       const target = $('settingsDialog').open ? $('settingsToast') : $('confirmDialog').open ? $('confirmToast') : $('toast');
@@ -433,26 +400,76 @@
       toastHandle = setTimeout(() => target.classList.remove('show'), 3200);
     }
 
-    async function changeState(change) {
-      const write = () => {
-        const next = load();
-        if (change(next) === false) {
-          state = next;
-          render();
-          return false;
-        }
-        try {
-          localStorage.setItem(KEY, JSON.stringify(next));
-        } catch {
-          toast('剛剛沒存成功，請確認瀏覽器還能儲存資料，再試一次喔。');
-          return false;
-        }
-        state = next;
-        render();
-        return true;
-      };
+    function updateSyncStatus() {
+      const available = Boolean(state);
+      $('top').hidden = !available;
+      $('openSettings').hidden = !available;
+      $('chooseImport').hidden = !mayImport;
+      $('migration').hidden = !mayImport;
+      $('quickImport').disabled = !connected || writing;
+      $('chooseImport').disabled = !connected || writing;
+      $('syncStatus').textContent = connected ? '共用紀錄已同步 ♡' :
+        (available ? '暫時離線，顯示上次同步的紀錄' : '共用紀錄還沒載入，請按「更新紀錄」重試。');
+    }
 
-      return navigator.locks ? navigator.locks.request(KEY, write) : write();
+    function accept(data) {
+      if (!data.state || data.revision < revision) return;
+      state = data.state;
+      revision = data.revision;
+      mayImport = data.canImport;
+      clockOffset = Date.parse(data.serverTime) - Date.now();
+    }
+
+    async function refresh() {
+      if (reading || writing) return;
+      reading = true;
+      $('refreshCloud').disabled = true;
+      try {
+        const response = await fetch('https://kuromi-morning-club.ff41009tw52.chatgpt.site/api/club', { credentials: 'omit', cache: 'no-store', signal: AbortSignal.timeout(12000) });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error);
+        accept(data);
+        connected = true;
+      } catch {
+        connected = false;
+      } finally {
+        reading = false;
+        $('refreshCloud').disabled = false;
+        paint();
+      }
+    }
+
+    async function changeState(action, data = {}) {
+      if (writing || !connected) return null;
+      writing = true;
+      paint();
+      try {
+        const response = await fetch('https://kuromi-morning-club.ff41009tw52.chatgpt.site/api/club', { credentials: 'omit',
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...data, action, revision }),
+          signal: AbortSignal.timeout(15000)
+        });
+        const updated = await response.json();
+        accept(updated);
+        if (!response.ok) {
+          toast(updated.error || '寫入失敗，請重新整理後再試。');
+          return null;
+        }
+        return updated;
+      } catch {
+        connected = false;
+        toast('暫時連不上共用紀錄。請按「更新紀錄」確認剛才是否已儲存。');
+        return null;
+      } finally {
+        writing = false;
+        paint();
+      }
+    }
+
+    function paint() {
+      updateSyncStatus();
+      if (state) render();
     }
 
     function confetti() {
@@ -471,7 +488,7 @@
       }
     }
 
-    function getStatus(data, date = new Date()) {
+    function getStatus(data, date = clubNow()) {
       const time = nowInTaipei(date);
       const existing = data.checkins.find(record => record.day === time.day);
       const [hour, minute] = data.wakeTime.split(':').map(Number);
@@ -487,7 +504,7 @@
       const button = $('checkinBtn');
       const help = $('timeHelp');
       badge.className = 'status-pill';
-      button.disabled = Boolean(time.existing);
+      button.disabled = Boolean(time.existing) || writing || !connected;
 
       if (time.existing?.type === 'onTime') {
         badge.classList.add('success');
@@ -501,12 +518,12 @@
         help.textContent = '今天就先放棉被一馬。明早再來找我拿愛心吧 ♡';
       } else if (time.onTime) {
         badge.textContent = '可以拿 1 點';
-        button.textContent = '我起床啦！收下 1 點 ♡';
+        button.textContent = '我起床啦！打卡領 1 點 ♡';
         help.textContent = '今天 ' + state.wakeTime + ' 截止，趁棉被還沒反悔，快來打卡 ♡';
       } else {
         badge.classList.add('late');
         badge.textContent = '今天已超時';
-        button.textContent = '我起來了，留個紀錄 ♡';
+        button.textContent = '我起來了，登記起床 ♡';
         help.textContent = '今天 ' + state.wakeTime + ' 的集點時間過啦。晚起也可以留紀錄，今天加 0 點。';
       }
     }
@@ -518,6 +535,7 @@
     }
 
     function renderStickers() {
+      if (!state) return;
       const sticker = $('customSticker');
       sticker.hidden = !state.sticker;
       if (state.sticker && sticker.getAttribute('src') !== state.sticker) sticker.src = state.sticker;
@@ -562,7 +580,7 @@
     }
 
     function render() {
-      const today = nowInTaipei().day;
+      const today = nowInTaipei(clubNow()).day;
       previousDay = today;
       const noon = dateFromDay(today);
       const hits = new Map(state.checkins.map(record => [record.day, record.type]));
@@ -597,7 +615,7 @@
           '</span><b aria-hidden="true">' + (i + 1) + '</b></li>';
       }).join('');
 
-      $('redeemBtn').disabled = !canRedeem;
+      $('redeemBtn').disabled = !canRedeem || writing || !connected;
       $('redeemBtn').textContent = canRedeem ? '我要換獎品 ♡' : '再攢一點就能換 ♡';
 
       const monday = noon.getTime() - ((noon.getUTCDay() + 6) % 7) * DAY_MS;
@@ -621,25 +639,13 @@
     }
 
     $('checkinBtn').addEventListener('click', async () => {
-      let onTime;
-      const saved = await changeState(next => {
-        const stamp = new Date();
-        const status = getStatus(next, stamp);
-        if (status.existing) {
-          toast('今天已經打卡啦，明天再來找我 ♡');
-          return false;
-        }
-        onTime = status.onTime;
-        next.checkins.push({ day: status.day, type: onTime ? 'onTime' : 'late', at: stamp.toISOString() });
-        if (onTime) next.points++;
-      });
+      const saved = await changeState('checkin');
       if (!saved) return;
-      if (onTime) confetti();
-      toast(onTime ? '哼哼，說到做到嘛！給妳 1 點 ♡' : '今天也報到啦，明早再來拿愛心 ♡');
+      if (saved.result === 'onTime') confetti();
+      toast(saved.result === 'onTime' ? '哼哼，說到做到嘛！給妳 1 點 ♡' : '今天也報到啦，明早再來拿愛心 ♡');
     });
 
     $('redeemBtn').addEventListener('click', () => {
-      if (state.points < REWARD_COST) return;
       $('confirmReward').textContent = state.reward;
       $('confirmDialog').showModal();
     });
@@ -647,28 +653,15 @@
     $('confirmRedeem').addEventListener('click', async event => {
       const button = event.currentTarget;
       button.disabled = true;
-      try {
-        const saved = await changeState(next => {
-          if (next.points < REWARD_COST) {
-            $('confirmDialog').close();
-            toast('可用點數還差一點，湊到 20 點再來找我喔。');
-            return false;
-          }
-          if (next.reward !== $('confirmReward').textContent) {
-            $('confirmReward').textContent = next.reward;
-            toast('獎品剛換過囉，再看一眼就能確認。');
-            return false;
-          }
-          next.points -= REWARD_COST;
-          next.redemptions.push({ at: new Date().toISOString(), reward: next.reward });
-        });
-        if (!saved) return;
-        $('confirmDialog').close();
-        confetti();
-        toast('交換成功！嘿嘿，快去領妳的專屬驚喜 ♡');
-      } finally {
-        button.disabled = false;
+      const saved = await changeState('redeem', { reward: $('confirmReward').textContent });
+      button.disabled = false;
+      if (!saved) {
+        $('confirmReward').textContent = state.reward;
+        return;
       }
+      $('confirmDialog').close();
+      confetti();
+      toast('交換成功！嘿嘿，快去領妳的專屬驚喜 ♡');
     });
 
     $('openSettings').addEventListener('click', () => {
@@ -693,7 +686,7 @@
         description: $('inputDesc').value.trim() || defaults.description,
         note: $('inputNote').value.trim() || defaults.note
       };
-      if (await changeState(next => Object.assign(next, settings))) {
+      if (await changeState('settings', { settings })) {
         $('settingsDialog').close();
         toast('設定收好啦，明早照新時間見 ♡');
       }
@@ -723,7 +716,7 @@
           toast('這張還是有點大，換一張小一點的圖吧。');
           return;
         }
-        if (await changeState(next => { next.sticker = sticker; })) toast('封面換好啦 ♡');
+        if (await changeState('sticker', { sticker })) toast('封面換好啦 ♡');
       } catch {
         toast('這張圖打不開，挑另一張試試吧。');
       } finally {
@@ -733,33 +726,20 @@
     });
 
     $('removeSticker').addEventListener('click', async () => {
-      if (await changeState(next => { next.sticker = ''; })) toast('酷洛米回來啦 ♡');
+      if (await changeState('sticker', { sticker: '' })) toast('酷洛米回來啦 ♡');
     });
 
     async function adjustPoints(delta) {
-      const saved = await changeState(next => {
-        if (next.points + delta < 0) {
-          toast('可用點數是 0，已經沒有點可以扣啦。');
-          return false;
-        }
-        next.points += delta;
-        next.adjustments.push({ at: new Date().toISOString(), delta });
-      });
-      if (saved) toast(delta > 0 ? '補好 1 點啦，早起天數照打卡紀錄算 ♡' : '已扣掉 1 點。');
+      if (await changeState('adjust', { delta })) {
+        toast(delta > 0 ? '補好 1 點啦，早起天數照打卡紀錄算 ♡' : '已扣掉 1 點。');
+      }
     }
 
     $('demoAdd').addEventListener('click', () => adjustPoints(1));
     $('demoRemove').addEventListener('click', () => adjustPoints(-1));
 
-    $('resetBtn').addEventListener('click', async () => {
-      if (!confirm('確定要清空點數、打卡和兌獎紀錄嗎？這些紀錄清掉就回不來了喔。')) return;
-      if (await changeState(next => Object.assign(next, { points: 0, checkins: [], redemptions: [], adjustments: [] }))) {
-        toast('點數和紀錄清空啦，妳的設定還在。');
-      }
-    });
-
-    function exportBackup() {
-      const copy = JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), ...load() }, null, 2);
+    $('exportBtn').addEventListener('click', () => {
+      const copy = JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), ...state }, null, 2);
       const url = URL.createObjectURL(new Blob([copy], { type: 'application/json' }));
       const link = document.createElement('a');
       link.href = url;
@@ -767,13 +747,11 @@
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 1500);
       toast('備份已經匯出，收好喔 ♡');
-    }
-
-    $('exportBtn').addEventListener('click', exportBackup);
-    $('quickExport').addEventListener('click', exportBackup);
+    });
 
     $('chooseImport').addEventListener('click', () => $('importFile').click());
-    $('importFile').addEventListener('change', async event => {
+    $('quickImport').addEventListener('click', () => $('quickImportFile').click());
+    async function importBackup(event) {
       const input = event.currentTarget;
       const file = input.files[0];
       if (!file) return;
@@ -787,8 +765,8 @@
           toast('這份格式看起來不對，請挑從集點卡匯出的 JSON 備份。');
           return;
         }
-        if (!confirm('要用這份備份覆蓋目前的設定和集點紀錄嗎？')) return;
-        if (await changeState(next => Object.assign(next, sanitize(data)))) {
+        if (!confirm('要把這份舊備份的紀錄和設定帶進兩人的共用簿嗎？')) return;
+        if (await changeState('import', { backup: data })) {
           $('settingsDialog').close();
           toast('備份找回來啦 ♡');
         }
@@ -797,23 +775,22 @@
       } finally {
         input.value = '';
       }
-    });
+    }
+    $('importFile').addEventListener('change', importBackup);
+    $('quickImportFile').addEventListener('change', importBackup);
 
     function tick() {
-      if (nowInTaipei().day !== previousDay) render();
+      if (!state) return;
+      if (nowInTaipei(clubNow()).day !== previousDay) render();
       else updateClock();
     }
 
-    addEventListener('storage', event => {
-      if (event.key === KEY || event.key === null) {
-        state = load();
-        render();
-      }
-    });
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
+    $('refreshCloud').addEventListener('click', refresh);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
     motion.addEventListener('change', renderStickers);
     setInterval(tick, 1000);
-    render();
+    setInterval(() => { if (!document.hidden) refresh(); }, 15000);
+    refresh();
   })();
   </script>
 </body>
