@@ -71,6 +71,7 @@
     practice.hidden = showStory;
     storyMode.setAttribute('aria-pressed', String(showStory));
     practiceMode.setAttribute('aria-pressed', String(!showStory));
+    window.gameGuide?.mode(showStory?'recipe':'sensory');
   }
 
   function resizeText(change) {
@@ -82,6 +83,7 @@
 
   function begin(focus = false) {
     const current = mission();
+    window.gameGuide?.cue('recipe','翻到「'+current.title+'」。幫我把這一頁的步驟排回去。');
     arrangement = [...current.start];
     chosen = null;
     quote = null;
@@ -148,6 +150,7 @@
     }
 
     completed = true;
+    window.gameGuide?.cue('recipe',round===missions.length-1?'三頁食譜都回到手帳裡了。今天的料理屋可以開門了！':'「'+current.title+'」這一頁修好了，下一道料理還在等。');
     drawSteps();
     for (const note of app.querySelectorAll('[data-note]')) note.disabled = true;
     find('#recipe-reset').hidden = true;

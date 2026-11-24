@@ -203,6 +203,7 @@
     airing = false;
     $('episode').textContent =
       '第 ' + (episode + 1) + ' / ' + shows.length + ' 集';
+    window.gameGuide?.cue('radio',data.ordered?'甩餅現場的畫面傳來了。請依先後把師傅的動作播給聽眾。':data.title+'已經接通，這次請描述「'+name(target)+'」。');
     $('order').textContent = name(target);
     $('table-title').textContent = data.ordered ? '聽眾的螢幕' : '聽眾的餐桌';
     document.querySelector('.order p').textContent = data.ordered
@@ -316,6 +317,7 @@
     $('playback').hidden = false;
     const axes = show().axes;
     if (passed) {
+      window.gameGuide?.cue('radio',episode===shows.length-1?'最後一通來電收線了！今天的四集節目播送完畢。':'來電的聽眾選中了！下一條線上還有人等你。');
       if (takes === 1) firstTakes++;
       $('reply').textContent =
         '「我選' +

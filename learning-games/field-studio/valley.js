@@ -127,6 +127,7 @@
     stranded = false;
     $('stage').textContent = '任務 ' + (stage + 1) + ' / 4';
     $('region').textContent = mission.name;
+    window.gameGuide?.cue('rescue',stage===0?'溪口隊正守著無線電。讀電訊，標出第一個投放點。':mission.name+'收到兩通求救。兩隊都在等物資，先留意哪架飛機能返航。');
     $('objective').textContent =
       stage === 0
         ? '讀取求救座標，在山谷數線點出落點，再派機送急救包。'
@@ -386,6 +387,7 @@
     const pending = mission.calls.map((_, i) => i).filter((i) => !done(i));
     if (!pending.length) {
       finished = true;
+      window.gameGuide?.cue('rescue',stage===3?'最後一包物資送到了，隊員和飛機全數平安。':'求救隊已回報收到物資，飛機也回到基地。');
       callIndex = null;
       say(
         '全隊收到急救包，無人機都已返航！' +
@@ -399,6 +401,7 @@
         remaining = mission.bases.findIndex((_, i) => !used.has(i));
       if (cost(remaining, target) > mission.bases[remaining][1]) {
         stranded = true;
+        window.gameGuide?.cue('rescue','還有一隊在等。回到派機前，重新分配兩架無人機。');
         revisionCount++;
         $('retry').hidden = false;
         say(
@@ -413,6 +416,7 @@
         );
       } else {
         baseIndex = remaining;
+        window.gameGuide?.cue('rescue',mission.calls[callIndex][1]+'還在線上。讀它的座標，派出剩下的飛機。');
         $('retry').hidden = false;
         say(
           name +

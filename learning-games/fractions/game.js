@@ -1,5 +1,5 @@
 import {mixed,classify,ticks,snap,pizzaCheck,railCheck,makeTasks,lengths} from './core.js';
-import { mountDelivery } from './delivery.js';
+import { mountDelivery } from './delivery.js?v=20261125-story';
 const game=document.body.dataset.game, app=document.querySelector('#app'), isPizza=game==='pizza';
 const titles=isPizza?['披薩切切樂','真分數與假分數','合成完整披薩','反向分數挑戰','混合訂單']:['建造軌道','尋找真分數','超過 1 的分數','帶分數挑戰','分數位置解謎'];
 let length='normal',difficulty='standard',tasks=[],index=0,records=[],state,review=false,original=null,scale=1;
@@ -12,6 +12,7 @@ function bind(id,fn){$(id)?.addEventListener('click',fn);}
 function speech(html,type=''){const m=$('#feedback');m.innerHTML=html;m.className='feedback '+type;}
 function warn(text){const box=document.createElement('div');box.innerHTML=text;box.querySelectorAll('[role=math]').forEach(e=>{e.replaceWith(e.getAttribute('aria-label')||e.textContent);});state.errors.push(box.textContent.replace(/\s+/g,' '));speech(text,'warn');}
 function setup(){
+ window.gameGuide?.cue(isPizza?'pizzaPractice':'rail',null);
  app.innerHTML=`<section class="card intro-layout"><div><div class="scene-preview ${game}">${isPizza?'<div style="width:100%;height:22px;background:repeating-linear-gradient(90deg,#8065bc 0 30px,#fff7e9 30px 60px)"></div>'+pizzaArt()+cat():`<svg viewBox="0 0 360 140" aria-hidden="true"><path d="M15 110h330" stroke="#b2b6cc" stroke-width="12"/><path d="M15 110h330" stroke="#fff" stroke-width="2" stroke-dasharray="8 10"/><rect x="105" y="49" width="74" height="51" rx="12" fill="#5268c9"/><rect x="161" y="23" width="49" height="77" rx="9" fill="#8a72cb"/><rect x="170" y="33" width="29" height="26" rx="4" fill="#ffeaba"/><circle cx="128" cy="103" r="13" fill="#303650"/><circle cx="191" cy="103" r="13" fill="#303650"/><path d="M262 50v60m0-60 48 15-48 15" fill="#ffd36b" stroke="#a87d2b" stroke-width="3"/></svg>`}</div><ol class="instructions">${isPizza?'<li>看訂單，選切法，再點選披薩片。</li><li>不夠時補一個；點同一片可以取消。</li><li>把小片合成整個，再送出訂單。</li>':'<li>先看每個單位要平分成幾格。</li><li>點刻度、拖火車，或按前進與後退。</li><li>確認位置，再讓火車停靠。</li>'}</ol></div><div class="setup"><fieldset><legend>練習長度</legend><div class="options" id="length-options">${[['quick','快速練習','約 5 分鐘'],['normal','一般挑戰','約 10 分鐘'],['full','完整闖關','約 15～20 分鐘']].map(([v,t,h])=>`<button data-length="${v}" aria-pressed="${length===v}">${t}<small>${h}・${lengths[v][game]} 個任務</small></button>`).join('')}</div></fieldset><fieldset><legend>難度</legend><div class="options" id="difficulty-options">${[['gentle','慢慢探索','變化題使用 2～4 等份'],['standard','一般挑戰','變化題最多 8 等份'],['advanced','進階挑戰',isPizza?'最多 10 等份與 6 個披薩':'最多 10 等份，加入非零起點']].map(([v,t,h])=>`<button data-difficulty="${v}" aria-pressed="${difficulty===v}">${t}<small>${h}</small></button>`).join('')}</div></fieldset><p class="sub">先完成共同的基本操作，再依難度變換任務。沒有倒數計時，可以慢慢試。</p><button id="start" class="primary" style="width:100%;margin-top:16px">開始遊戲</button></div></section>`;
  app.querySelectorAll('[data-length]').forEach(b=>b.onclick=()=>{length=b.dataset.length;setup();});
  app.querySelectorAll('[data-difficulty]').forEach(b=>b.onclick=()=>{difficulty=b.dataset.difficulty;setup();});
@@ -21,6 +22,7 @@ function taskTarget(q){return q.type==='build'?`每個單位分成 <strong>${q.d
 function round(){
  if(index>=tasks.length){results();return;}
  const q=tasks[index];
+ window.gameGuide?.cue(isPizza?'pizzaPractice':'rail',isPizza?'第 '+(index+1)+' 張訂單送到切餅台了。先看客人要的份量。':q.type==='build'?'工程班來電。先鋪好等距軌道，乘客才能上車。':q.type==='pair'?'這班有兩位乘客。留意兩張不同寫法的車票會停在哪裡。':'乘客上車了。讀車票，找出他應該下車的刻度。');
  state={d:0,selected:new Set(),packs:[],pizzas:1,n:(q.start||0)*q.d,kind:'',solved:false,errors:[],phase:0,first:null};
  const action=isPizza?(q.group?'選好片數後，每次合成一個完整披薩，再出餐。':q.form==='mixed'||q.form==='integer'?`每個披薩切 ${q.d} 等份，準備完整披薩與小片。`:'每個披薩大小相同。先選切法，再拿客人要的片數。'):(q.type==='build'?'0 到 1 是一個單位。先選等分數，再鋪好軌道。':`每個單位分成 ${q.d} 格。${q.type==='pair'?'先送第一位乘客，再找第二位乘客的下車位置。':'移動火車，找到車票上的位置。'}`);
  app.innerHTML=`<ol class="steps" aria-label="關卡進度">${titles.map((t,i)=>`<li class="${i+1===q.stage?'active':i+1<q.stage?'past':''}" ${i+1===q.stage?'aria-current="step"':''}>${i+1}. ${t}</li>`).join('')}</ol><div class="progressbar"><span>${review?'回顧':'任務'} ${index+1} / ${tasks.length}</span><progress max="${tasks.length}" value="${index}" aria-label="任務完成進度"></progress><span>完成 ${index}</span></div><div class="play-layout"><aside class="order">${cat(!isPizza)}<h2>${isPizza?'顧客訂單':q.type==='build'?'軌道工程單':'乘客車票'}</h2><div id="target" class="order-target">${taskTarget(q)}</div><p id="order-note">${action}</p></aside><div class="workbench"><section class="card"><h2 tabindex="-1" id="task-title">${titles[q.stage-1]}</h2><div id="workspace"></div><div id="feedback" class="feedback" role="status" aria-live="polite"></div><button id="next" class="primary next" hidden>${index===tasks.length-1?'查看成果':'下一個任務 →'}</button></section><details class="guide"><summary>操作說明</summary><p>${isPizza?'分母決定每個披薩平分成幾片；分子表示要拿幾片。合成整個後，可以按「拆回小片」重新選。更換切法會把這張訂單的披薩放回去。':'0 到 1、1 到 2 的長度一樣。每格都是一個單位分數。可點刻度或拖火車，左右方向鍵和下方按鈕也能移動。長軌道可以左右滑動。更換等分數時，火車回到軌道起點。'}</p></details></div></div>`;
@@ -29,7 +31,7 @@ function round(){
  $('#task-title').focus({preventScroll:true});
 }
 function finish(q,explanation){
- if(state.solved)return;state.solved=true;records.push({q:{...q},errors:[...state.errors]});
+ if(state.solved)return;window.gameGuide?.cue(isPizza?'pizzaPractice':'rail',isPizza?'這份點餐單完成了，把備好的披薩送到取餐口。':q.type==='build'?'第一段軌道驗收通過，乘客可以進站了。':'到站了！乘客已經下車，準備接下一張車票。');state.solved=true;records.push({q:{...q},errors:[...state.errors]});
  speech(`<span class="success-stamp">${isPizza?'出餐完成':'停靠完成'}</span>${explanation}`,'good');
  $('#next').hidden=false;app.querySelector('progress').value=index+1;app.querySelector('.progressbar span:last-child').textContent='完成 '+(index+1);
  $('#workspace').querySelectorAll('button,select').forEach(b=>b.disabled=true);
@@ -105,6 +107,7 @@ function renderRail(q){
  });
 }
 function results(){
+ window.gameGuide?.cue(isPizza?'pizzaPractice':'rail',isPizza?'這一輪訂單全都出餐了，可以打開今天的出餐紀錄。':'這班車的任務全部完成，來看今天的行程紀錄。');
  if(!review)original=[...records];
  const errors=records.filter(r=>r.errors.length),first=records.length-errors.length;
  app.innerHTML=`<section class="card"><span class="success-stamp">${review?'回顧完成':'本次任務完成'}</span><h2 style="margin-top:16px">${isPizza?'餐廳出餐紀錄':'火車行程紀錄'}</h2><div class="result-stats"><div class="stat"><strong>${records.length}</strong>完成任務</div><div class="stat"><strong>${first}</strong>第一次就完成</div><div class="stat"><strong>${errors.length}</strong>看提示後完成</div></div><h3>這次操作過的概念</h3><p>${isPizza?'等分與單位量、真分數與假分數、整數與帶分數的互換。':'等距刻度、真分數與超過 1 的位置、假分數與帶分數的同一位置。'}</p><div class="row">${errors.length?'<button class="primary" id="review">再操作需要提示的任務</button>':''}<button id="again">重新選擇挑戰</button>${review?'<button id="original">看原來的成果</button>':''}</div><details class="guide" ${errors.length?'open':''}><summary>任務紀錄與錯題回顧（${records.length}）</summary><ul class="results-list">${records.map((r,i)=>`<li><strong>${i+1}. ${titles[r.q.stage-1]}</strong><div class="equation">${r.q.type==='build'?'每個單位分成 '+r.q.d+' 格':`${amount(r.q.n,r.q.d,r.q.form)} = ${amount(r.q.n,r.q.d,r.q.form==='fraction'?'mixed':'fraction')}`}</div><div>${r.errors.length?'已修正並完成':'第一次就完成'}</div>${r.errors.map(e=>`<p class="review-errors">提示：${e}</p>`).join('')}</li>`).join('')}</ul></details><p class="sub">這份紀錄保留在本次遊戲中；重新整理頁面後會重新開始。</p></section>`;
@@ -126,6 +129,7 @@ if (isPizza) {
     deliveryButton.setAttribute('aria-pressed', String(delivery));
     practiceButton.setAttribute('aria-pressed', String(!delivery));
     if (!delivery && !app.firstElementChild) setup();
+    window.gameGuide?.mode(delivery?'delivery':'pizzaPractice');
   }
 
   deliveryButton.onclick = () => selectMode(true);

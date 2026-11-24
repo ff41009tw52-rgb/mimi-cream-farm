@@ -19,6 +19,7 @@ export function mountDelivery(root, { frac, amount, wedge }) {
 
   function begin(focus = false) {
     order = orders[round];
+    window.gameGuide?.cue('delivery','第 '+(round+1)+' 批剛出爐！這次一張切 '+order.denominator+' 片，先替一桌裝盒。');
     allocations = Array(order.denominator * 2).fill(null);
     grouped = [false, false];
     active = 0;
@@ -130,6 +131,7 @@ export function mountDelivery(root, { frac, amount, wedge }) {
     }
 
     finished = true;
+    window.gameGuide?.cue('delivery',round===orders.length-1?'最後一批也送到了。三趟外送，六桌客人都收到了自己的披薩！':'外送車出發了，兩桌的披薩都裝得下！');
     const wholeTable = grouped.indexOf(true);
     const total = order.amounts[wholeTable];
     draw('#next-delivery');

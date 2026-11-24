@@ -21,6 +21,7 @@ const KITCHEN=[
 {food:'爆米花',icon:'🍿',sense:'聽覺',prefix:'鍋裡的玉米粒加熱後，',choices:[['傳出劈哩啪啦的聲響','聽覺'],['變成一朵朵白色小花','視覺'],['摸起來很蓬鬆','觸覺'],['聞起來香噴噴的','嗅覺']],why:'「劈哩啪啦」模擬聲音，是聽覺描寫。'},
 {food:'鮮奶布丁',icon:'🍮',sense:'觸覺',prefix:'白奶油用湯匙輕輕碰布丁，',choices:[['晃動時像金黃色的果凍','視覺'],['有一股濃郁奶香','嗅覺'],['表面軟軟嫩嫩的','觸覺'],['吃起來滑順香甜','味覺']],why:'「軟軟嫩嫩」描述觸碰的感覺，屬於觸覺。'}
 ];
+const lamps=['旋轉木馬','咖啡杯','小火車月台','海盜船','碰碰車','旋轉鞦韆','摩天輪','遊樂園大門'];
 const ANGLES=[45,90,135,30,120,60,150,180];
 const PIZZA=[{n:3,d:4},{n:1,d:2},{n:5,d:4},{n:2,d:3},{n:7,d:8},{n:3,d:2},{n:5,d:6},{n:6,d:4}];
 const config={
@@ -43,6 +44,7 @@ function progress(){$('round-number').textContent='第 '+Math.min(index+1,config
 function btn(text,cls,handler){let b=el('button',cls,text);b.type='button';b.addEventListener('click',handler);return b;}
 function sectionTitle(title,subtitle){stage.append(el('h2','',title),el('p','hint',subtitle));}
 function renderCharacters(q){
+window.gameGuide?.cue('characters','第 '+(index+1)+' 張試印稿送到了。把句子讀出來，再到字盤找部件。');
 sectionTitle('空格裡缺了哪個字？',q.clue);
 const slots=el('div','slot-area'),a=el('div','slot','？'),b=el('div','slot','？');slots.append(a,el('span','plus','＋'),b);stage.append(slots);
 let left='',right='';
@@ -54,9 +56,10 @@ wrap.querySelectorAll('button').forEach(z=>z.setAttribute('aria-pressed',String(
 x.setAttribute('aria-pressed','false');wrap.append(x)});stage.append(wrap);
 }
 choices('左邊的部件', 'left',q.leftChoices);choices('右邊的部件','right',q.rightChoices);
-stage.append(btn('檢查答案','primary',()=>{if(!left||!right)return warn('請在左邊和右邊各選一個部件。');if(left===q.left&&right===q.right){preview.textContent='「'+q.char+'」可以組成詞語「'+q.word+'」';done('組字成功！'+q.why)}else warn('再讀一次句子，想想空格裡缺哪個字，再試著換一個部件。')}));
+stage.append(btn('檢查答案','primary',()=>{if(!left||!right)return warn('請在左邊和右邊各選一個部件。');if(left===q.left&&right===q.right){preview.classList.add('inked-proof');preview.textContent='「'+q.char+'」可以組成詞語「'+q.word+'」';window.gameGuide?.cue('characters','印好了！試印稿上的「'+q.word+'」終於讀得通了。');done('組字成功！'+q.why)}else warn('再讀一次句子，想想空格裡缺哪個字，再試著換一個部件。')}));
 }
 function renderKitchen(q){
+window.gameGuide?.cue('sensory','菜單等著加上「'+q.food+'」。客人想讀到'+q.sense+'。');
 sectionTitle('幫白奶油完成料理介紹','哪一句是「'+q.sense+'」描寫？');
 const order=el('div','order',q.prefix+'＿＿＿＿。');stage.append(order);
 const plate=el('div','dish'),food=el('span','food',q.icon),served=el('span','served','選一張卡，看看接在句子後面是什麼樣子。');plate.append(food,served);stage.append(plate);
@@ -65,21 +68,23 @@ stage.append(el('div','label','選一張描寫卡'));
 const wrap=el('div','choices');
 q.choices.forEach(option=>{let x=btn(option[0],'choice',()=>{if(solved)return;selection=option;served.textContent=q.prefix+option[0]+'。';wrap.querySelectorAll('button').forEach(z=>z.setAttribute('aria-pressed',String(z===x)))});
 x.setAttribute('aria-pressed','false');wrap.append(x);});stage.append(wrap);
-stage.append(btn('端出料理','primary',()=>{if(!selection)return warn('先選一張描寫卡。');if(selection[1]===q.sense)done('端出成功！'+q.why);else warn('這句是「'+selection[1]+'」描寫。再找找看，哪一句是「'+q.sense+'」描寫？');}));
+stage.append(btn('端出料理','primary',()=>{if(!selection)return warn('先選一張描寫卡。');if(selection[1]===q.sense){window.gameGuide?.cue('sensory','「'+q.food+'」的介紹寫好了，這道可以端上桌。');done('端出成功！'+q.why);}else warn('這句是「'+selection[1]+'」描寫。再找找看，哪一句是「'+q.sense+'」描寫？');}));
 }
 function svg(tag,attrs){const e=document.createElementNS('http://www.w3.org/2000/svg',tag);for(let k in attrs)e.setAttribute(k,attrs[k]);return e}
 function renderAngles(target){
-sectionTitle('轉出 '+target+'°','拖動藍線，或用＋、－按鈕調整角度。');
+window.gameGuide?.cue('angles',lamps[index]+'的燈還暗著。派工單要你把光束轉到 '+target+'°。');
+sectionTitle(lamps[index]+'・轉出 '+target+'°','拖動藍線，或用＋、－按鈕調整角度。');
 const box=el('div','angle-box'),s=svg('svg',{class:'protractor',viewBox:'0 0 360 215',role:'group','aria-label':'可操作的 0 到 180 度量角器',tabindex:'0'});
 const ox=180,oy=186,r=132;const pos=(deg,rad)=>{let a=deg*Math.PI/180;return [ox+rad*Math.cos(a),oy-rad*Math.sin(a)]};
 const arc=[];for(let deg=0;deg<=180;deg+=3){let [x,y]=pos(deg,r);arc.push((deg===0?'M':'L')+x.toFixed(2)+' '+y.toFixed(2));}
 s.append(svg('path',{d:arc.join(' '),stroke:'#9aa6de','stroke-width':2,fill:'none'}),svg('line',{x1:ox,y1:oy,x2:ox+r+12,y2:oy,stroke:'#6e7890','stroke-width':4}));
 for(let d=0;d<=180;d+=10){let [x,y]=pos(d,r),[u,v]=pos(d,r-(d%30===0?17:9));s.append(svg('line',{x1:x,y1:y,x2:u,y2:v,stroke:'#8f9cc7','stroke-width':d%30===0?2:1}));if(d%30===0){let [lx,ly]=pos(d,r-31);let t=svg('text',{x:lx,y:ly+5,'text-anchor':'middle','font-size':13,fill:'#4a5678'});t.textContent=d;s.append(t);}}
 const ray=svg('line',{x1:ox,y1:oy,x2:ox+r,y2:oy,stroke:'#475bd1','stroke-width':7,'stroke-linecap':'round'}),dot=svg('circle',{cx:ox,cy:oy,r:7,fill:'#475bd1'});
-s.append(ray,dot);box.append(s);
+const beam=svg('path',{d:'M180 186 L304 175 L304 197 Z',fill:'#f3bc49',opacity:'.58','pointer-events':'none'});
+s.append(beam,ray,dot);box.append(s);
 const read=el('div','readout');box.append(read);
 const controls=el('div','angle-controls');let current=0;
-function adjust(v){current=Math.max(0,Math.min(180,Math.round(v)));let [x,y]=pos(current,r);ray.setAttribute('x2',x);ray.setAttribute('y2',y);read.textContent='目前 '+current+'°｜'+(current===0?'零度角':current<90?'銳角':current===90?'直角':current<180?'鈍角':'平角');}
+function adjust(v){current=Math.max(0,Math.min(180,Math.round(v)));let [x,y]=pos(current,r);beam.setAttribute('transform','rotate('+(-current)+' 180 186)');ray.setAttribute('x2',x);ray.setAttribute('y2',y);read.textContent='目前 '+current+'°｜'+(current===0?'零度角':current<90?'銳角':current===90?'直角':current<180?'鈍角':'平角');}
 [-10,-1,1,10].forEach(d=>controls.append(btn((d>0?'+':'')+d+'°','',()=>{if(!solved)adjust(current+d)})));
 box.append(controls);stage.append(box);
 let dragging=false;
@@ -89,7 +94,7 @@ s.addEventListener('pointermove',e=>{if(dragging&&!solved)usePointer(e)});
 s.addEventListener('pointerup',()=>dragging=false);s.addEventListener('pointercancel',()=>dragging=false);
 s.addEventListener('keydown',e=>{if(solved)return;if(e.key==='ArrowUp'||e.key==='ArrowRight'){e.preventDefault();adjust(current+(e.shiftKey?10:1))}if(e.key==='ArrowDown'||e.key==='ArrowLeft'){e.preventDefault();adjust(current-(e.shiftKey?10:1))}});
 adjust(0);
-stage.append(btn('檢查角度','primary',()=>{const diff=Math.abs(current-target);if(diff<=3){adjust(target);done('轉動成功！這是'+(target<90?'銳角':target===90?'直角':target<180?'鈍角':'平角')+'。')}else warn('現在是 '+current+'°，再'+(current<target?'加 ':'減 ')+diff+'° 就到了。')}));
+stage.append(btn('檢查角度','primary',()=>{const diff=Math.abs(current-target);if(diff<=3){adjust(target);box.classList.add('park-lit');window.gameGuide?.cue('angles',lamps[index]+'的燈亮了！值班表上已經點亮 '+(index+1)+' / '+ANGLES.length+' 盞。');done('轉動成功！這是'+(target<90?'銳角':target===90?'直角':target<180?'鈍角':'平角')+'。')}else warn('現在是 '+current+'°，再'+(current<target?'加 ':'減 ')+diff+'° 就到了。')}));
 }
 function renderPizza(q){
 sectionTitle('客人要 '+q.n+'／'+q.d+' 個披薩','先選要平分成幾片，再點出客人要的片數。');
@@ -110,6 +115,8 @@ stage.append(tabs,pizzas,count);
 stage.append(btn('完成這份訂單','primary',()=>{if(!denominator)return warn('先選一個切法，把每個披薩平分成一樣大的小片。');if(denominator!==q.d)return warn('看看訂單的分母，每個披薩要平分成 '+q.d+' 片。');if(selected.size!==q.n)return warn('目前選了 '+selected.size+' 片，客人需要 '+q.n+' 片。');const mixed=q.n>q.d?'，也就是 1 又 '+(q.n-q.d)+'／'+q.d+' 個披薩':'';done('訂單完成！你端出了 '+q.n+'／'+q.d+' 個披薩'+mixed+'。')}));
 }
 function renderComplete(){
+const endings={characters:'最後一張試印稿印好了。八個缺字全回到句子裡了！',angles:'大門的燈也亮了！八盞燈校準完畢，今晚可以開園了。',kitchen:'八道料理的介紹都寫好了。把今天的菜單交給候位的客人吧！'};
+window.gameGuide?.cue(mode==='kitchen'?'sensory':mode,endings[mode]);
 stage.replaceChildren();const title=el('h2','','這一輪完成了！'),scoreBox=el('div','big-score');scoreBox.innerHTML='<b>'+score+'／'+config.count+'</b>題完成';stage.append(title,scoreBox,el('p','hint','想再練習，可以按「再玩一次」。'),btn('再玩一次','primary',()=>{index=0;score=0;render()}));say('所有題目都完成了。','good');$('round-number').textContent='完成';$('score').textContent=score+' 題';$('fill').style.width='100%';next.hidden=true;
 }
 function render(){
