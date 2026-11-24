@@ -1,0 +1,142 @@
+body[data-game="kitchen"] {
+  --recipe-ink: #202f29;
+  --recipe-green: #2e5947;
+  --recipe-line: #aaba9e;
+  --recipe-paper: #faf6e9;
+  background: #e7ede4;
+  color: var(--recipe-ink);
+  font-family: var(--classroom-body);
+}
+.recipe-shell [hidden] { display: none !important; }
+.recipe-shell {
+  max-width: 1190px;
+  margin: 0 auto;
+  padding: 14px clamp(12px, 3.2vw, 30px) 32px;
+}
+.recipe-header, .recipe-modes, .recipe-actions, .recipe-font {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.recipe-header { justify-content: space-between; border-bottom: 1px solid #9aad9d; }
+.recipe-header a {
+  color: #244837;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  text-underline-offset: 4px;
+  font-weight: 730;
+}
+.recipe-shell button {
+  min-height: 44px;
+  border-radius: 5px;
+  border: 1px solid #829b87;
+  background: #fffdf5;
+  color: #234534;
+  font: inherit;
+  font-weight: 670;
+  cursor: pointer;
+}
+.recipe-shell button:focus-visible { outline: 3px solid #145d97; outline-offset: 3px; }
+.recipe-shell button:disabled { cursor: default; }
+.recipe-font button { min-width: 46px; margin-bottom: 4px; }
+.recipe-font button:disabled { opacity: .54; }
+.recipe-title { padding: 10px 0 9px; }
+.recipe-title h1, .recipe-book h2, .recipe-book h3 {
+  color: #233f32;
+  font-family: var(--classroom-hand);
+  font-weight: 400;
+  letter-spacing: .02em;
+}
+.recipe-title h1 { margin: 0; font-size: clamp(1.7rem, 4.6vw, 2.8rem); line-height: 1.25; }
+.recipe-title p { margin: 4px 0 0; color: #466051; }
+.recipe-modes { margin-bottom: 10px; }
+.recipe-modes button { padding: 5px 13px; }
+.recipe-modes button[aria-pressed="true"], #recipe-check, #recipe-next {
+  color: #fffdf1;
+  background: #2d5945;
+  border-color: #2d5945;
+}
+.recipe-book {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  border: solid #405a46;
+  border-width: 1px 1px 8px;
+  border-radius: 6px;
+  background: var(--recipe-paper);
+  box-shadow: 0 5px 9px #2d493522;
+  font-size: calc(1.125rem * var(--recipe-scale, 1));
+}
+.recipe-page {
+  min-width: 0;
+  padding: clamp(14px, 3vw, 31px);
+}
+.recipe-work {
+  border-inline-start: 1px solid #b2ad93;
+  background: linear-gradient(90deg, #ddcfac76, transparent 18px);
+}
+.recipe-page-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 15px; justify-content: space-between; }
+.recipe-page-head h2 { margin: 0; font-size: 1.55em; }
+.recipe-page-head > span { color: #4d5949; font-size: .83em; }
+.recipe-book h3 { margin: 0; font-size: 1.45em; }
+.recipe-page-head + h3 { margin-top: 8px; }
+.recipe-instruction { margin: 5px 0 9px; color: #345142; line-height: 1.56; }
+.recipe-quotes { display: grid; gap: 3px; }
+.recipe-quotes button {
+  text-align: left;
+  line-height: 1.75;
+  padding: 9px 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom-color: #c7c0a7;
+  border-radius: 0;
+  font-weight: 465;
+  color: #272e24;
+}
+.recipe-quotes button[aria-pressed="true"] {
+  background: #f4dda0;
+  border-color: #9f783b;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: .18em;
+}
+.recipe-steps {
+  margin: 10px 0 14px;
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 7px;
+}
+.recipe-steps button {
+  display: flex;
+  width: 100%;
+  min-height: 50px;
+  padding: 5px 9px;
+  align-items: center;
+  gap: 10px;
+  text-align: start;
+  border-color: #9ca98b;
+  background: #edf0db;
+}
+.recipe-steps button[aria-pressed="true"] { background: #cfdfbb; outline: 2px solid #3d6441; }
+.step-marker {
+  flex: 0 0 31px;
+  line-height: 30px;
+  border: 1px solid #879875;
+  text-align: center;
+  border-radius: 3px;
+  color: #2c4b38;
+  background: #fffdf5;
+}
+.recipe-actions button { padding-inline: 13px; }
+.recipe-feedback { margin: 10px 0 0; min-height: 1.55em; line-height: 1.6; }
+.recipe-feedback[data-state="retry"] { color: #873d22; font-weight: 720; }
+.recipe-feedback[data-state="complete"] { color: #254c38; font-weight: 720; }
+#sensory-practice { font-size: calc(1.125rem * var(--recipe-scale, 1)); }
+#sensory-practice .choice, #sensory-practice .order, #sensory-practice .served { font-size: 1em; }
+#sensory-practice .task, #sensory-practice .guide { background: var(--recipe-paper); }
+@media (max-width: 680px) {
+  .recipe-book { grid-template-columns: 1fr; }
+  .recipe-work { border-inline-start: 0; border-block-start: 1px solid #b2ad93; background: none; }
+}

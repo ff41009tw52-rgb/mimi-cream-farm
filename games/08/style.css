@@ -1,3 +1,6 @@
+@import url("../../fonts/classroom/classroom.css");
+@import url("./repair.css");
+
 .circuit-game {
   --ink: #202c31;
   --muted: #5b6264;
@@ -13,7 +16,7 @@
   padding: clamp(12px, 3vw, 30px);
   color: var(--ink);
   background: var(--paper);
-  font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  font-family: var(--classroom-body);
   font-size: 16px;
 }
 

@@ -1,4 +1,5 @@
 import {mixed,classify,ticks,snap,pizzaCheck,railCheck,makeTasks,lengths} from './core.js';
+import { mountDelivery } from './delivery.js';
 const game=document.body.dataset.game, app=document.querySelector('#app'), isPizza=game==='pizza';
 const titles=isPizza?['披薩切切樂','真分數與假分數','合成完整披薩','反向分數挑戰','混合訂單']:['建造軌道','尋找真分數','超過 1 的分數','帶分數挑戰','分數位置解謎'];
 let length='normal',difficulty='standard',tasks=[],index=0,records=[],state,review=false,original=null,scale=1;
@@ -111,4 +112,24 @@ function results(){
  app.querySelector('h2').setAttribute('tabindex','-1');app.querySelector('h2').focus({preventScroll:true});window.scrollTo(0,0);
 }
 function font(delta){scale=Math.max(1,Math.min(1.6,Math.round((scale+delta)*10)/10));document.documentElement.style.setProperty('--scale',scale);$('#smaller').disabled=scale===1;$('#larger').disabled=scale===1.6;}
-bind('#smaller',()=>font(-.2));bind('#larger',()=>font(.2));font(0);setup();
+bind('#smaller',()=>font(-.2));bind('#larger',()=>font(.2));font(0);
+
+if (isPizza) {
+  const deliveryButton = $('#delivery-mode');
+  const practiceButton = $('#practice-mode');
+  const deliveryWorkspace = $('#delivery-workspace');
+  mountDelivery(deliveryWorkspace, { frac, amount, wedge });
+
+  function selectMode(delivery) {
+    deliveryWorkspace.hidden = !delivery;
+    app.hidden = delivery;
+    deliveryButton.setAttribute('aria-pressed', String(delivery));
+    practiceButton.setAttribute('aria-pressed', String(!delivery));
+    if (!delivery && !app.firstElementChild) setup();
+  }
+
+  deliveryButton.onclick = () => selectMode(true);
+  practiceButton.onclick = () => selectMode(false);
+} else {
+  setup();
+}

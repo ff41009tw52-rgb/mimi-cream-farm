@@ -53,6 +53,24 @@ expectPower('opposed identical batteries connected in parallel constitute a shor
 
 console.log('Circuit 08 passed all 12 regression cases.');
 
+const switched = [
+  wire('B1', 'pos', 'S', 'in'), wire('S', 'out', 'SA', 'in'), wire('S', 'out', 'SB', 'in'),
+  wire('SA', 'out', 'L1', 'tip'), negative,
+  wire('SB', 'out', 'L2', 'tip'), wire('L2', 'thread', 'B1', 'neg')
+];
+function expectSwitches(name, main, a, b, expected) {
+  expectPower(name, [
+    battery('B1'), bulb('L1'), bulb('L2'),
+    ...[['S', main], ['SA', a], ['SB', b]].map(([id, closed]) => ({ id, type: 'switch', closed }))
+  ], switched, expected);
+}
+expectSwitches('closed master switch supplies both parallel branches', true, true, true, { L1: 1, L2: 1 });
+expectSwitches('room A switch controls only its own branch', true, false, true, { L1: 0, L2: 1 });
+expectSwitches('room B switch controls only its own branch', true, true, false, { L1: 1, L2: 0 });
+expectSwitches('open master switch interrupts both branches', false, true, true, { L1: 0, L2: 0 });
+console.log('Campus repair passed all four switch regression cases.');
+
+
 const size = { width: 700, height: 350 };
 const coordinates = ({ x, y }) => [x, y];
 function expectOrthogonal(route, start, end) {
