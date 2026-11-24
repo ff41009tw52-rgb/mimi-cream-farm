@@ -228,9 +228,9 @@
       gradeLabel: '四年級',
       icon: 'fas fa-lightbulb',
       title: '🔌 奇妙的電路實驗',
-      description: '幫兩間教室接線，試出各自的開關與總開關。也可以進入自由實驗，比較不同的接法。',
+      description: '天黑了，橘咪咪在農場倉庫找到了一些電池跟電線，她想知道怎麼做才能讓燈泡發光？一起來動手接通電路吧！',
       gameNumber: '08',
-      moduleUrl: 'games/08/index.js?v=20261124-repair',
+      moduleUrl: 'games/08/index.js?v=20261121-lamp-brightness',
       actionLabel: '點亮燈泡',
       actionIcon: 'fas fa-lightbulb'
     },

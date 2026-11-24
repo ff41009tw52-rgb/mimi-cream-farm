@@ -1,7 +1,6 @@
 const TERMINALS = {
   battery: ['pos', 'neg'],
-  bulb: ['tip', 'thread'],
-  switch: ['in', 'out']
+  bulb: ['tip', 'thread']
 };
 
 const keyOf = ({ compId, pointType }) => compId + ':' + pointType;
@@ -51,13 +50,6 @@ export function evaluateCircuit(components, wires) {
     const start = keyOf(wire.start);
     const end = keyOf(wire.end);
     if (parents.has(start) && parents.has(end)) parents.set(net(start), net(end));
-  }
-
-  for (const component of components) {
-    if (component.type !== 'switch' || !component.closed) continue;
-    const input = terminal(component, 'in');
-    const output = terminal(component, 'out');
-    parents.set(net(input), net(output));
   }
 
   // Wires join terminals at the same voltage. Each ideal battery adds one

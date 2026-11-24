@@ -1,5 +1,4 @@
-import { evaluateCircuit } from './circuit.js?v=20261124-repair';
-import { mountRepair } from './repair.js';
+import { evaluateCircuit } from './circuit.js';
 import { distanceToWire, routeWire } from './wire-route.js';
 
 const LABELS = {
@@ -27,7 +26,7 @@ const boardState = () => ({
 export async function mount(root, context = {}) {
   const stylesheet = document.createElement('link');
   stylesheet.rel = 'stylesheet';
-  stylesheet.href = new URL('./style.css?v=20261124-repair', import.meta.url).href;
+  stylesheet.href = new URL('./style.css?v=20261121-lamp-brightness', import.meta.url).href;
   const stylesheetReady = new Promise((resolve, reject) => {
     stylesheet.addEventListener('load', resolve, { once: true });
     stylesheet.addEventListener('error', () => reject(new Error('電路介面樣式載入失敗')), { once: true });
@@ -40,12 +39,9 @@ export async function mount(root, context = {}) {
         <a class="circuit-home">回農場</a>
       </header>
       <div class="circuit-modes" role="group" aria-label="實驗模式">
-        <button type="button" data-mode="repair" aria-pressed="true">校園巡修</button>
-        <button type="button" data-mode="guided" aria-pressed="false">跟著做</button>
+        <button type="button" data-mode="guided" aria-pressed="true">跟著做</button>
         <button type="button" data-mode="free" aria-pressed="false">自由實驗</button>
       </div>
-      <div class="circuit-repair"></div>
-      <div class="circuit-experiment" hidden>
       <div class="circuit-guide">
         <p class="circuit-instruction"></p>
         <button type="button" class="circuit-next" hidden>進入自由實驗</button>
@@ -66,7 +62,6 @@ export async function mount(root, context = {}) {
       </div>
       <p class="circuit-status" role="status"></p>
       <div class="circuit-wires" aria-label="已接的電線"></div>
-      </div>
     </div>`;
   root.prepend(stylesheet);
   await stylesheetReady;
@@ -84,7 +79,7 @@ export async function mount(root, context = {}) {
   find('.circuit-home').href = context.homeUrl || new URL('../../index.html', import.meta.url).href;
 
   const boards = { guided: boardState(), free: boardState() };
-  let mode = 'repair';
+  let mode = 'guided';
   let state = boards.guided;
   let selected = null;
   let drag = null;
@@ -368,9 +363,6 @@ export async function mount(root, context = {}) {
     for (const button of root.querySelectorAll('[data-mode]')) {
       button.setAttribute('aria-pressed', String(button.dataset.mode === mode));
     }
-    find('.circuit-repair').hidden = mode !== 'repair';
-    find('.circuit-experiment').hidden = mode === 'repair';
-    if (mode === 'repair') return;
     for (const type of ['battery', 'bulb']) {
       const button = find('[data-tool="' + type + '"]');
       button.hidden = mode === 'guided';
@@ -386,7 +378,7 @@ export async function mount(root, context = {}) {
     if (nextMode === mode) return;
     state.powered = false;
     mode = nextMode;
-    state = boards[mode] || boards.guided;
+    state = boards[mode];
     activeWire = null;
     selected = null;
     preview = null;
@@ -534,7 +526,7 @@ export async function mount(root, context = {}) {
 
   root.addEventListener('click', (event) => {
     const button = event.target.closest('button');
-    if (!button || button.closest('.circuit-repair')) return;
+    if (!button) return;
     const { tool, mode: targetMode, selectWire: wireId, removeWire, removePart, rotatePart } = button.dataset;
     if (targetMode || button.matches('.circuit-next')) {
       switchMode(targetMode || 'free');
@@ -597,7 +589,6 @@ export async function mount(root, context = {}) {
     paint();
   });
 
-  mountRepair(find('.circuit-repair'));
   new ResizeObserver(resizeBoard).observe(board);
   render();
 }
