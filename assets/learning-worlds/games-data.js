@@ -4,6 +4,23 @@
   const catalogs = {
   "chinese": [
     {
+      "id": "chinese-food-radio",
+      "title": "白奶油的美食電台",
+      "grades": [
+        "4"
+      ],
+      "topic": "康軒四上｜感官描寫、動作順序",
+      "description": "把兩句描述剪成廣播，聽聽眾怎麼挑餐。每一句能排除哪一份？",
+      "icon": "播",
+      "artwork": "kitchen",
+      "cover": "learning-games/field-studio/radio.webp",
+      "url": "learning-games/food-radio.html",
+      "status": "published",
+      "publishedAt": "2026-11-25T04:30:00+08:00",
+      "order": 0,
+      "featured": true
+    },
+    {
       "id": "chinese-sensory-kitchen",
       "title": "白奶油的文字料理屋",
       "grades": ["4"],
@@ -105,6 +122,23 @@
     }
   ],
   "math": [
+    {
+      "id": "math-valley-rescue",
+      "title": "橘咪咪的山谷救援",
+      "grades": [
+        "4"
+      ],
+      "topic": "南一四上｜假分數、帶分數與數線",
+      "description": "讀求救座標派出無人機，把急救包送進山谷，還要留下足夠的電飛回基地。",
+      "icon": "救",
+      "artwork": "race",
+      "cover": "learning-games/field-studio/valley.webp",
+      "url": "learning-games/valley-rescue.html",
+      "status": "published",
+      "publishedAt": "2026-11-25T04:30:00+08:00",
+      "order": 0,
+      "featured": true
+    },
     {
       "id": "math-angle-park",
       "title": "角度遊樂園",

@@ -1,0 +1,552 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: #edf0e3;
+  color: #153c38;
+  font-family: var(--reading);
+  font-size: clamp(18px, 1.6vw, 20px);
+  line-height: 1.48;
+  background-image:
+    repeating-linear-gradient(0deg, #30524708 0 1px, transparent 1px 30px),
+    repeating-linear-gradient(90deg, #30524708 0 1px, transparent 1px 30px);
+}
+button,
+a {
+  font: inherit;
+}
+button {
+  touch-action: manipulation;
+  cursor: pointer;
+}
+button:disabled {
+  cursor: default;
+}
+button[hidden],
+[hidden] {
+  display: none !important;
+}
+button:focus-visible,
+a:focus-visible,
+#scale:focus-visible {
+  outline: 4px solid #c44f17;
+  outline-offset: 3px;
+}
+.station {
+  max-width: 1120px;
+  margin: auto;
+  padding: 0 24px 32px;
+}
+.station > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #a2b7aa;
+  font-weight: 700;
+  font-size: 0.82em;
+}
+.station > header a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  color: #245348;
+  text-decoration: none;
+}
+.station > header span {
+  font-family: var(--reading);
+  color: #31574a;
+}
+.titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0 12px;
+  gap: 14px;
+}
+.titlebar h1 {
+  font: 900 clamp(37px, 4.8vw, 62px) / 1.1 var(--valley-title);
+  letter-spacing: 0.015em;
+  margin: 0;
+}
+.titlebar h1 small {
+  font: 700 0.46em/1.3 var(--reading);
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.45em;
+  letter-spacing: 0.02em;
+}
+.titlebar p {
+  margin: 6px 0 0;
+}
+.compass {
+  font-size: 50px;
+  line-height: 1;
+  color: #b44424;
+  transform: rotate(12deg);
+}
+.mapframe {
+  border: 4px solid #234d47;
+  border-radius: 7px;
+  box-shadow: 0 5px 0 #b6c2ad;
+  overflow: hidden;
+  background: #163d3c;
+}
+.terrain {
+  position: relative;
+  height: clamp(219px, 30vh, 340px);
+  background: #397372 url(valley.webp) center 54% / cover no-repeat;
+  isolation: isolate;
+}
+.terrain:before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    0deg,
+    #0a3133ef 0%,
+    #0b36389e 21%,
+    transparent 66%
+  );
+  z-index: -1;
+}
+.map-label {
+  position: absolute;
+  top: 12px;
+  left: 13px;
+  padding: 5px 13px 6px 8px;
+  background: #123b39f2;
+  color: #fff2cc;
+  font-size: 0.83em;
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+}
+.signal {
+  color: #ffab61;
+}
+.terrain #markers,
+#scale {
+  position: absolute;
+  left: 7.5%;
+  right: 7.5%;
+}
+#markers {
+  bottom: 109px;
+  pointer-events: none;
+}
+.base-flag {
+  position: absolute;
+  transform: translateX(-50%);
+  background: #ffe4a2;
+  border: 2px solid #513e27;
+  color: #3c3327;
+  white-space: nowrap;
+  border-radius: 5px;
+  padding: 1px 7px;
+  font-weight: 800;
+  font-size: 0.79em;
+}
+.base-flag:after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  height: 18px;
+  border-left: 2px solid #fff0b5;
+}
+.base-flag.used {
+  background: #d8e0d5;
+  color: #41514a;
+}
+.base-flag.second {
+  background: #c6edef;
+}
+.delivered {
+  position: absolute;
+  bottom: 32px;
+  transform: translateX(-50%);
+  color: #fff9df;
+  background: #146149;
+  font-weight: bold;
+  font-size: 16px;
+  padding: 1px 6px;
+  border: 1px solid #e1f1ce;
+  border-radius: 4px;
+}
+#scale {
+  height: 84px;
+  bottom: 8px;
+  cursor: crosshair;
+  touch-action: manipulation;
+  user-select: none;
+}
+#ticks,
+#route {
+  pointer-events: none;
+}
+#ticks {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 25px;
+  border-top: 3px solid #fff0ca;
+}
+#ticks i {
+  display: block;
+  position: absolute;
+  height: 13px;
+  border-left: 2px solid #f8e7b9;
+  top: -5px;
+}
+#ticks i.major {
+  height: 23px;
+  border-left: 3px solid #fff7d8;
+  top: -10px;
+}
+#ticks b {
+  position: absolute;
+  top: 21px;
+  left: 0;
+  transform: translateX(-50%);
+  font: 700 clamp(16px, 1.8vw, 23px) / 1.1 var(--reading);
+  color: #fff9df;
+  white-space: nowrap;
+  text-shadow: 0 1px 4px #142d2b;
+}
+#route {
+  position: absolute;
+  top: 22px;
+  height: 8px;
+  background: repeating-linear-gradient(90deg, #ffaf55 0 8px, #723a1e 8px 10px);
+  border: 1px solid #fff4b7;
+  z-index: 1;
+}
+#pin {
+  position: absolute;
+  top: 7px;
+  width: 16px;
+  height: 16px;
+  transform: translateX(-50%) rotate(45deg);
+  background: #ffac5c;
+  border: 2px solid #291c16;
+  z-index: 2;
+  pointer-events: none;
+}
+#pin span {
+  position: absolute;
+  transform: rotate(-45deg);
+  left: -21px;
+  bottom: 12px;
+  color: #182e2a;
+  background: #ffe5a9;
+  font: 700 14px/1.3 var(--reading);
+  padding: 2px 4px;
+  white-space: nowrap;
+}
+#aircraft {
+  position: absolute;
+  top: -39px;
+  transform: translateX(-50%);
+  width: 46px;
+  height: 20px;
+  z-index: 4;
+  pointer-events: none;
+  transition: left 0.65s ease-in-out;
+  filter: drop-shadow(0 2px 2px #173027);
+}
+#aircraft i {
+  position: absolute;
+  left: 12px;
+  top: 8px;
+  width: 22px;
+  height: 10px;
+  border-radius: 45%;
+  background: #ff9d49;
+  border: 2px solid #293c36;
+}
+#aircraft b {
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  top: 6px;
+  border-top: 4px solid #213935;
+}
+#aircraft:before,
+#aircraft:after {
+  content: '';
+  position: absolute;
+  width: 17px;
+  height: 5px;
+  background: #ffefbb;
+  border: 1px solid #304a40;
+  border-radius: 50%;
+  top: 1px;
+}
+#aircraft:before {
+  left: 0;
+}
+#aircraft:after {
+  right: 0;
+}
+.map-tools {
+  background: #1b4540;
+  color: #fff4d8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 13px;
+}
+.map-tools > span {
+  font-weight: 700;
+}
+.nudge {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 0.8em;
+}
+.nudge button {
+  min-width: 44px;
+  min-height: 44px;
+  color: #163e38;
+  background: #e2ead9;
+  border: 1px solid #a0bda9;
+  font-weight: 800;
+  border-radius: 4px;
+  font-size: 21px;
+}
+.command {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin: 20px 0 15px;
+}
+.command > section {
+  min-width: 0;
+}
+.command h2 {
+  font: 800 clamp(21px, 2.1vw, 26px) / 1.2 var(--valley-title);
+  margin: 0;
+}
+.label {
+  font-size: 0.88em;
+  margin: 5px 0 8px;
+  color: #4b6254;
+}
+.choices {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.choice {
+  position: relative;
+  flex: 1 1 112px;
+  border: 2px solid #aab9a9;
+  border-radius: 4px;
+  background: #faf9eb;
+  min-height: 60px;
+  padding: 8px 10px;
+  color: #25473e;
+  text-align: left;
+  line-height: 1.32;
+}
+.choice strong,
+.choice small {
+  display: block;
+}
+.choice small {
+  margin-top: 2px;
+  font-size: 0.81em;
+}
+.choice[aria-pressed='true'] {
+  border: 2px solid #1c5648;
+  box-shadow: inset 5px 0 #2b705e;
+  background: #dae9cf;
+}
+.choice:disabled:not([aria-pressed='true']) {
+  background: #e4e4d7;
+  color: #59665b;
+}
+.frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font: 700 0.8em/1.04 var(--reading);
+  vertical-align: middle;
+  margin: 0 0.11em;
+  min-width: 1em;
+}
+.frac span:first-child {
+  border-bottom: 1.5px solid;
+  width: 100%;
+  text-align: center;
+  padding-bottom: 1px;
+}
+.frac span:last-child {
+  padding-top: 1px;
+}
+.dispatch {
+  border-top: 2px solid #879c88;
+  padding-top: 14px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  justify-content: space-between;
+}
+.report {
+  display: flex;
+  align-items: baseline;
+  gap: 11px;
+}
+.report > b {
+  flex: none;
+  color: #965124;
+  font-size: 0.8em;
+}
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.buttons button {
+  white-space: nowrap;
+  padding: 10px 17px;
+  border: 2px solid #773817;
+  background: #b74a21;
+  color: white;
+  border-radius: 4px;
+  min-height: 46px;
+  font-weight: 700;
+}
+.buttons button:disabled {
+  background: #d5d9cc;
+  color: #566359;
+  border-color: #aebba9;
+}
+.buttons #retry {
+  background: #f7f5e8;
+  color: #2a483c;
+  border-color: #9cac98;
+  font-size: 0.88em;
+}
+.log {
+  padding: 10px 14px;
+  margin-top: 12px;
+  border-left: 4px solid #237158;
+  background: #f8f8eb;
+}
+.log strong {
+  margin-right: 10px;
+}
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+@media (max-width: 700px) {
+  .station {
+    padding: 0 13px 24px;
+  }
+  .titlebar {
+    padding: 10px 0;
+  }
+  .terrain {
+    height: 214px;
+  }
+  .mapframe {
+    border-width: 3px;
+  }
+  .command {
+    gap: 12px;
+    margin: 15px 0;
+  }
+  .choices {
+    display: grid;
+    gap: 5px;
+  }
+  .command h2 {
+    font-size: 22px;
+  }
+  .label {
+    min-height: 2.9em;
+  }
+  .dispatch {
+    display: block;
+  }
+  .buttons {
+    margin-top: 10px;
+  }
+  .map-tools {
+    padding: 4px 7px;
+  }
+  .nudge {
+    gap: 5px;
+  }
+  .compass {
+    font-size: 34px;
+  }
+  .map-label {
+    top: 8px;
+    left: 8px;
+  }
+  .report {
+    display: block;
+  }
+  .report > b {
+    display: block;
+  }
+  .choice {
+    padding: 7px 9px;
+  }
+  .titlebar p {
+    font-size: 0.95em;
+  }
+  .terrain #markers,
+  #scale {
+    left: 9%;
+    right: 9%;
+  }
+  .map-tools > span {
+    font-size: 0.88em;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #aircraft {
+    transition: none;
+  }
+}
+
+.captain {
+  width: 64px;
+  height: 64px;
+  border: 4px double #486657;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: 50% 60%;
+  box-shadow: 0 2px 0 #9ba993;
+}
+#calls .choice small {
+  font-size: 1em;
+}
+#calls .frac {
+  font-size: 0.97em;
+  margin: 2px 0.2em;
+}
+.choice strong {
+  font-size: 1.02em;
+}
+@media (max-width: 700px) {
+  .captain {
+    width: 47px;
+    height: 47px;
+  }
+  .frac {
+    line-height: 1.06;
+  }
+}

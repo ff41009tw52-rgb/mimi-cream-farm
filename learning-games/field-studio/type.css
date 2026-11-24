@@ -1,0 +1,28 @@
+@font-face {
+  font-family: FieldText;
+  src: url(text.woff) format('woff');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: RadioPoster;
+  src: url(poster.woff) format('woff');
+  font-style: normal;
+  font-weight: 650 950;
+  font-display: swap;
+}
+@font-face {
+  font-family: RescueSign;
+  src: url(sign.woff) format('woff');
+  font-style: normal;
+  font-weight: 700 950;
+  font-display: swap;
+}
+:root {
+  --reading:
+    FieldText, 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans CJK TC',
+    sans-serif;
+  --radio-title: RadioPoster, 'Noto Serif TC', 'Songti TC', serif;
+  --valley-title: RescueSign, 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+}

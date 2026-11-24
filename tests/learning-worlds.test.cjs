@@ -26,8 +26,8 @@ function run(subject, data) {
 }
 const descendants = node => node.children.flatMap(n => [n, ...descendants(n)]);
 for (const [subject, count, playable] of [
-  ['chinese', 6, ['kitchen', 'characters']],
-  ['math', 8, ['fraction-rail', 'pizza', 'angles']]
+  ['chinese', 7, ['food-radio', 'kitchen', 'characters']],
+  ['math', 9, ['valley-rescue', 'fraction-rail', 'pizza', 'angles']]
 ]) {
   const {ids, buttons, navs, games} = run(subject);
   assert.equal(games.length, count);
@@ -80,4 +80,4 @@ assert.equal(descendants(future.ids['all-games']).filter(n => n.tagName === 'a')
 assert.equal(descendants(future.ids['all-games']).find(n => n.tagName === 'a').href, 'https://example.org/farm/new.html');
 const science = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 assert.doesNotMatch(science, /learning-worlds\/(?:home\.(?:js|css)|games-data\.js)/);
-console.log('PASS: 14 cards, 5 playable games, every grade, empty/reset states, navigation, assets and safe links.');
+console.log('PASS: 16 cards, 7 playable games, every grade, empty/reset states, navigation, assets and safe links.');

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#332335" />
+    <title>白奶油的美食電台｜語文故事屋</title>
+    <link rel="stylesheet" href="field-studio/type.css" />
+    <link rel="stylesheet" href="field-studio/radio.css" />
+    <script defer src="field-studio/radio.js"></script>
+  </head>
+  <body>
+    <main class="studio">
+      <header>
+        <a href="../chinese.html">‹ 語文故事屋</a><span id="episode"></span
+        ><button id="sound" aria-pressed="false">音效關</button>
+      </header>
+      <div class="booth">
+        <section class="host">
+          <div class="hero-art">
+            <h1><small>白奶油的</small>美食電台</h1>
+          </div>
+          <div class="order">
+            <span class="cue">今日指定</span><strong id="order"></strong>
+            <p>用兩句話，讓看不見指定單的聽眾挑中這一份。</p>
+          </div>
+        </section>
+        <section class="desk" aria-labelledby="desk-title">
+          <div class="desk-top">
+            <h2 id="desk-title">剪接播報稿</h2>
+            <div class="meter" aria-hidden="true"></div>
+          </div>
+          <p class="instruction">點兩張句帶放進稿子，點已選句帶可抽回。</p>
+          <div id="clips" class="clips"></div>
+          <div class="transport">
+            <div class="reels" aria-hidden="true">◉ ◉</div>
+            <strong id="slot-count">已選 0 / 2 句</strong
+            ><button id="listen" hidden>試聽</button
+            ><button id="air" class="air" disabled>播出</button>
+          </div>
+        </section>
+      </div>
+      <section class="audience" aria-labelledby="table-title">
+        <div class="table-head">
+          <h2 id="table-title">聽眾的餐桌</h2>
+          <span id="table-state"></span>
+        </div>
+        <div id="menu" class="menu"></div>
+        <div class="reply">
+          <span class="caller" aria-hidden="true">☎</span>
+          <div id="reply" role="status" aria-live="polite"></div>
+        </div>
+        <div id="playback" class="playback" hidden></div>
+        <div class="actions">
+          <button id="edit" hidden>回剪接台改稿</button
+          ><button id="next" hidden></button
+          ><button id="remix" hidden>同一集換指定單</button>
+        </div>
+      </section>
+      <noscript>請開啟 JavaScript 以操作播報台。</noscript>
+    </main>
+  </body>
+</html>

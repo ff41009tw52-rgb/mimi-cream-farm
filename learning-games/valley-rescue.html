@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#103b39" />
+    <title>橘咪咪的山谷救援｜數學遊樂城</title>
+    <link rel="stylesheet" href="field-studio/type.css" />
+    <link rel="stylesheet" href="field-studio/valley.css" />
+    <script defer src="field-studio/valley.js"></script>
+  </head>
+  <body>
+    <main class="station">
+      <header>
+        <a href="../math.html">‹ 數學遊樂城</a><span id="stage"></span>
+      </header>
+      <div class="titlebar">
+        <div>
+          <h1><small>橘咪咪的</small>山谷救援</h1>
+          <p id="objective"></p>
+        </div>
+        <img
+          class="captain"
+          src="../picture/mimi-solo.JPG"
+          alt="指揮員橘咪咪"
+        />
+      </div>
+      <section class="mapframe" aria-label="山谷飛行地圖">
+        <div class="terrain">
+          <div class="map-label">
+            <span class="signal" aria-hidden="true">◩</span><b id="region"></b>
+          </div>
+          <div id="markers" aria-hidden="true"></div>
+          <div
+            id="scale"
+            role="slider"
+            tabindex="0"
+            aria-label="在數線上標記投放位置"
+            aria-describedby="keys"
+            aria-valuemin="0"
+            aria-valuemax="4"
+            aria-valuenow="0"
+          >
+            <div id="route"></div>
+            <div id="ticks"></div>
+            <div id="pin" hidden><span>落點</span></div>
+            <div id="aircraft" hidden><i></i><b></b></div>
+          </div>
+        </div>
+        <div class="map-tools">
+          <span id="scale-note"></span>
+          <div class="nudge">
+            <button id="left" aria-label="落點左移一格">−</button
+            ><span>微調落點</span
+            ><button id="right" aria-label="落點右移一格">＋</button>
+          </div>
+        </div>
+        <span class="sr" id="keys"
+          >點刻度標記落點，或用左右方向鍵移動，Home 和 End 跳到數線兩端。</span
+        >
+      </section>
+      <div class="command">
+        <section>
+          <h2>求救電訊</h2>
+          <p class="label">選一隊送急救包。</p>
+          <div id="calls" class="choices"></div>
+        </section>
+        <section>
+          <h2>起飛基地</h2>
+          <p class="label">每架只飛一趟，一格電飛一小格。</p>
+          <div id="bases" class="choices"></div>
+        </section>
+      </div>
+      <section class="dispatch">
+        <div class="report">
+          <b>指揮台</b>
+          <div id="status" role="status" aria-live="polite"></div>
+        </div>
+        <div class="buttons">
+          <button id="fly" disabled>派機往返</button
+          ><button id="next" hidden></button
+          ><button id="retry" hidden>重新調度本關</button>
+        </div>
+      </section>
+      <div id="log" class="log" hidden></div>
+      <noscript>請開啟 JavaScript 以操作救援地圖。</noscript>
+    </main>
+  </body>
+</html>
