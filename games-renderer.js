@@ -3,6 +3,20 @@
 
   const homepageFeatures = Object.freeze([
     Object.freeze({
+      id: 'qingxi-earth-atlas',
+      grades: Object.freeze([]),
+      gradeLabel: '探索天地',
+      category: 'explore',
+      subject: 'science',
+      icon: 'fas fa-mountain',
+      title: '青溪調查隊｜大地探索圖',
+      description: '跟著青溪調查隊走訪 8 個觀測區，在河灣放流浮標、觀察兩岸的變化，再把發現記進觀察紀錄。',
+      url: 'qingxi-earth-atlas/',
+      actionLabel: '開始大地探索',
+      actionIcon: 'fas fa-compass',
+      publishedAt: '2026-11-28T00:00:00+08:00'
+    }),
+    Object.freeze({
       id: 'campus-herb-guide',
       grades: Object.freeze([]),
       gradeLabel: '探索天地',
